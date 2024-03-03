@@ -404,7 +404,7 @@ useEffect( () => {
             { button['left-menu'].map((btn, index) => (
               <LeftNav buttonName={btn} key={index} /> ))}
           </div>
-          <div style={{width: '100%'}}>
+          <div>
             <div className="container" style={{width: '620px'}}>
               <AccountContext.Provider value={store.account}>
                 <Component {...pageProps} connect={connect} />
