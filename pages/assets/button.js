@@ -15,18 +15,92 @@ const Buttons = () => {
 export default Buttons;
 
 const button = {
-    'top-menu': ['portal', 'studio', 'consensus', 'funding', 'ecosystem'],
+    'top-menu': [],
+    'left-menu': ['Feed', 'Search', 'Ecosystem', 'Reviews', 'Notifications', 'Profile', 'Funding', 'Challenge', 'Propose'],
     'nav-menu': {
-        'Home': ['Vision', 'Roadmap', 'Docs', 'FAQ', 'Blog', 'Contact'],
-        'Portal': ['Profile', 'Wallet', 'Expertise', 'Portfolio'],
-        'Studio': ['Create', 'Contribute', 'Collaborate'],
-        'Consensus': ['Propose', 'Validate', 'Challenge', 'Explore', 'Notifications'],
-        'Funding': ['Project Funding', 'Review Funding', 'Funding Proposal', 'Search Requests'],
-        'Ecosystem': ['Communities', 'Resources', 'Search', 'Trending', 'Curated', 'Favorites', 'Feed'],
+        // 'Home': ['Vision', 'Roadmap', 'Docs', 'FAQ', 'Blog', 'Contact'],
+        // 'Portal': ['Profile', 'Wallet', 'Expertise', 'Portfolio'],
+        // 'Studio': ['Create', 'Contribute', 'Collaborate'],
+        // 'Consensus': ['Propose', 'Validate', 'Challenge', 'Explore', 'Notifications'],
+        // 'Funding': ['Project Funding', 'Review Funding', 'Funding Proposal', 'Search Requests'],
+        // 'Ecosystem': ['Communities', 'Resources', 'Search', 'Trending', 'Curated', 'Favorites', 'Feed'],
         // 'Connect': ['GitHub', 'Discord', 'OpenSea', 'YouTube', 'Twitter', 'Email'],
     },
 
+    ////// LEFT MENU //////
 
+    'Feed': {
+        link: '/feed',
+        menu: 'Feed',
+        description: 'Your feed',
+        account: false,
+        working: true,
+        icon: FaScroll
+    },
+    'Search': {
+        link: '/search',
+        menu: 'Search',
+        description: 'Search for communities, projects, users, and proposals',
+        account: false,
+        working: false,
+        icon: FaSearch
+    },
+    'Ecosystem': {
+        link: '/ecosystem',
+        menu: 'Ecosystem',
+        description: 'Ecosystems',
+        account: false,
+        working: false,
+        icon: FaGlobe
+    },
+    'Reviews': {
+        link: '/reviews',
+        menu: 'Reviews',
+        description: 'Your reviews',
+        account: true,
+        working: false,
+        icon: FaRegListAlt
+    },
+    'Notifications': {
+        link: '/notifications',
+        menu: 'Notifications',
+        description: 'Your notifications',
+        account: true,
+        working: false,
+        icon: MdMail
+    },
+    'Profile': {
+        link: '/profile',
+        menu: 'Profile',
+        description: 'Your profile',
+        account: true,
+        working: false,
+        icon: FaUser
+    },
+    'Funding': {
+        link: '/funding',
+        menu: 'Funding',
+        description: 'Invest in public goods',
+        account: true,
+        working: false,
+        icon: GiTwoCoins
+    },
+    'Challenge': {
+        link: '/challenge',
+        menu: 'Challenge',
+        description: 'Challenge a review',
+        account: true,
+        working: false,
+        icon: BsFillHandThumbsDownFill
+    },
+    'Propose': {
+        link: '/propose',
+        menu: 'Propose',
+        description: 'Create a proposal',
+        account: true,
+        working: false,
+        icon: MdWork
+    },
 
 
     ////// MENUS //////
@@ -101,39 +175,39 @@ const button = {
     //     working: false,
     //     icon: FaCogs
     // },
-    'Docs': {
-        link: false,
-        url: 'https://docs.abundance.id/',
-        menu: 'Home',
-        description: 'In-depth explanation of the Protocol',
-        account: false,
-        working: true,
-        icon: FaFileAlt
-    },
-    'FAQ': {
-        link: '/faq',
-        menu: 'Home',
-        description: 'Frequently asked questions',
-        account: false,
-        working: false,
-        icon: FaQuestionCircle
-    },
-    'Blog': {
-        link: '/blog',
-        menu: 'Home',
-        description: 'Read our articles',
-        account: false,
-        working: true,
-        icon: SiSubstack
-    },
-    'Contact': {
-        link: '/contact',
-        menu: 'Home',
-        description: 'Connect with us',
-        account: false,
-        working: false,
-        icon: FaLink
-    },
+    // 'Docs': {
+    //     link: false,
+    //     url: 'https://docs.abundance.id/',
+    //     menu: 'Home',
+    //     description: 'In-depth explanation of the Protocol',
+    //     account: false,
+    //     working: true,
+    //     icon: FaFileAlt
+    // },
+    // 'FAQ': {
+    //     link: '/faq',
+    //     menu: 'Home',
+    //     description: 'Frequently asked questions',
+    //     account: false,
+    //     working: false,
+    //     icon: FaQuestionCircle
+    // },
+    // 'Blog': {
+    //     link: '/blog',
+    //     menu: 'Home',
+    //     description: 'Read our articles',
+    //     account: false,
+    //     working: true,
+    //     icon: SiSubstack
+    // },
+    // 'Contact': {
+    //     link: '/contact',
+    //     menu: 'Home',
+    //     description: 'Connect with us',
+    //     account: false,
+    //     working: false,
+    //     icon: FaLink
+    // },
 
     
 
@@ -239,28 +313,28 @@ const button = {
         working: false,
         icon: RiFileSearchFill
     },
-    'Notifications': {
-        link: '/inbox',
-        menu: 'Consensus',
-        description: 'Validation notifications',
-        account: true,
-        working: false,
-        icon: MdMail
-    },
+    // 'Notifications': {
+    //     link: '/inbox',
+    //     menu: 'Consensus',
+    //     description: 'Validation notifications',
+    //     account: true,
+    //     working: false,
+    //     icon: MdMail
+    // },
 
     
 
 
     ////// FUNDING //////
 
-    'Project Funding': {
-        link: '/project-funding',
-        menu: 'Funding',
-        description: 'Request funding for a public goods project',
-        account: true,
-        working: false,
-        icon: GiTwoCoins
-    },
+    // 'Project Funding': {
+    //     link: '/project-funding',
+    //     menu: 'Funding',
+    //     description: 'Request funding for a public goods project',
+    //     account: true,
+    //     working: false,
+    //     icon: GiTwoCoins
+    // },
     'Review Funding': {
         link: '/funding',
         menu: 'Funding',
@@ -331,22 +405,22 @@ const button = {
         working: false,
         icon: MdFavorite
     },
-    'Search': {
-        link: '/searchbar',
-        menu: 'Ecosystem',
-        description: 'Search for communities, projects, users, and proposals',
-        account: false,
-        working: false,
-        icon: FaSearch
-    },
-    'Feed': {
-        link: '/feed',
-        menu: 'Ecosystem',
-        description: 'Latest projects',
-        account: true,
-        working: true,
-        icon: FaScroll
-    },
+    // 'Search': {
+    //     link: '/searchbar',
+    //     menu: 'Ecosystem',
+    //     description: 'Search for communities, projects, users, and proposals',
+    //     account: false,
+    //     working: false,
+    //     icon: FaSearch
+    // },
+    // 'Feed': {
+    //     link: '/feed',
+    //     menu: 'Ecosystem',
+    //     description: 'Latest projects',
+    //     account: true,
+    //     working: true,
+    //     icon: FaScroll
+    // },
 
     
 

@@ -167,10 +167,10 @@ useEffect( () => {
             <div className="logo-wrapper">
               <Logo height={isSmall ? '25px' : '45px'} width={isSmall ? '25px' : '45px'}/>
             </div>
-            <TitleWrapper >
+            {/* <TitleWrapper >
               <h2 className={`nav-title${isSmall ? ' mid-frame-font' : ''}`}>Abundance Protocol</h2>
               <p className={`nav-subtitle${isSmall ? ' small-font' : ''}`}>building an economy of abundance</p>
-            </TitleWrapper>
+            </TitleWrapper> */}
           </div>
         </a>
       </Link>
@@ -215,6 +215,49 @@ useEffect( () => {
       </div>
     )
   }
+
+  const LeftNav = (props) => {
+    let btn = button[props.buttonName]
+    let btnName = props.buttonName
+    // let textSize = '15px'
+    if (btnName === 'portal' && account) {
+      btnName = store.username
+    }
+    const TopIcon = btn.icon
+    let menuState = "nav-link"
+    let accountState = !btn.account || (account && btn.account)
+    if (navMenu === btn.menu && accountState) {
+      menuState = "active-nav-link"
+    } else if (!accountState) {
+      menuState = "inactive-nav-link"
+    }
+
+    return (
+      <div style={{padding: 'auto 8px'}} onMouseEnter={() => {
+        setNavMenu(btn.menu)
+        setMenuHover({ ...menuHover, in: Date.now() })
+      }}
+      onMouseLeave={() => setMenuHover({ ...menuHover, out: Date.now() }) }>
+        <a style={{maxWidth: '260px'}}  
+        >
+          <div className={`flex-row ${menuState}`} style={{paddingRight: isMobile ? '1em' : 'unset', justifyContent: 'flex-start' }}>
+            <div className="flex-col" style={{height: '58px', alignItems: 'center', justifyContent: 'center'}}>
+              <div className="flex-row flex-middle">
+                <TopIcon className="size-25" style={{margin: '6px 12px 6px 12px'}} />
+                <div className="font-15 left-nav" style={{textAlign: 'center', fontSize: isTablet ? '12px' : '18px'}}>
+                  {btnName}
+                </div>
+              </div>
+            </div>
+          </div>
+        </a>
+      </div>
+    )
+  }
+
+
+
+
 
   const SubCat = () => {
     try {
@@ -322,7 +365,6 @@ useEffect( () => {
             sx={{
               transform: window.innerWidth <= 360 ? 'translateY(56px)' :'translateY(62px)',
               zIndex: 1,
-              background: '#1D3244dd',
               '& .MuiDrawer-paper': { width: 'fit-content',backgroundColor: 'transparent', padding: '16px', overflowX: 'hidden'}
             }}
             >
@@ -337,8 +379,8 @@ useEffect( () => {
     </div>
   ) : (
       <div>
-        <nav className="nav-bar top-layer">
-          <div className="flex-row top-nav-wrap" ref={ref}>
+        <nav className="nav-bar top-layer flex-col" style={{width: '100%', justifyContent: 'center', height: '58px'}}>
+          <div className="flex-col nav-top" ref={ref} style={{justifyContent: 'center', margin: '0 auto', width: '100%'}}>
             <div className="nav-head" style={{display: 'grid', gridAutoFlow: 'column', justifyContent: 'space-between', alignItems: 'center', gridGap: '16px'}}>
               <HomeButton />
               <Col>
@@ -354,31 +396,22 @@ useEffect( () => {
                   />
               </Col>
             </div>
-            <Space />
-          </div>
-          <div className="flex-row" style={{width: '100%', alignItems: 'flex-start' }}>
-            <div className="nav-shadow" style={{width: '100%', height: '1px', backgroundColor: ''}}>
-              <div className="flex-row flex-right"><RightCorner /></div>
-            </div>
-            <div className="nav-shadow" style={{height: 'min-content', width: 'min-content', backgroundColor: '#1D3244dd', borderRadius: '0 0 30px 30px', justifyContent: 'center'}}>
-              <SubNavBoxWrapper isHover={menuHover.in > menuHover.out} className="flex-row flex-middle">
-              <div className="sub-nav-box" onMouseEnter={() => {
-                setMenuHover({ ...menuHover, in: Date.now() })
-                }} onMouseLeave={() => {
-                setMenuHover({ ...menuHover, out: Date.now() })}}>
-                  <SubCat />
-                </div>
-              </SubNavBoxWrapper>
-            </div>
-            <div className="nav-shadow" style={{height: '1px', backgroundColor: '', width: '100%'}}>
-              <div className="flex-row flex-left"><LeftCorner /></div>
-            </div>
           </div>
         </nav>
-        <div className="container">
-          <AccountContext.Provider value={store.account}>
-            <Component {...pageProps} connect={connect} />
-          </AccountContext.Provider>
+
+        <div className='flex-row' style={{justifyContent: 'center', width: 'auto'}}>
+          <div className="flex-col" style={{width: '260px', padding: '58px 0 0 0'}}>
+            { button['left-menu'].map((btn, index) => (
+              <LeftNav buttonName={btn} key={index} /> ))}
+          </div>
+          <div>
+            <div className="container" style={{width: '620px'}}>
+              <AccountContext.Provider value={store.account}>
+                <Component {...pageProps} connect={connect} />
+              </AccountContext.Provider>
+            </div>
+          </div>
+          <div className='ght-nav-text' style={{width: '360px'}}></div>
         </div>
       </div>
   )
@@ -386,7 +419,6 @@ useEffect( () => {
 
 
 const MobileAppbar = styled(AppBar)`
-  background: #1D3244dd;
   z-index: 2;
   padding: 0 16px;
 

@@ -9,7 +9,76 @@ html, body {
     font-family: inter,sans-serif;
     margin: 0;
     padding: 0;
+    background-color: #1D3244;
 }
+
+
+@media only screen and (min-width: 1280px) {
+    .left-nav {
+        display: flex;
+    }
+    .right-nav-text {
+        display: flex;
+    }
+    .bottom-nav {
+        display: none;
+    }
+    .nav-top {
+        max-width: 1280px;
+    }
+    .cast-text {
+        max-width: 522px;
+    }
+}
+
+@media only screen and (min-width: 1024px) and (max-width: 1279px) {
+    .left-nav {
+        display: flex;
+    }
+    .right-nav-text {
+        display: none;
+    }
+    .bottom-nav {
+        display: none;
+    }
+    .nav-top {
+        max-width: auto;
+    }
+    .cast-text {
+        max-width: 522px;
+    }
+}
+
+@media only screen and (min-width: 638px) and (max-width: 1023px) {
+    .left-nav {
+        display: none;
+    }
+    .right-nav-text {
+        display: none;
+    }
+    .bottom-nav {
+        display: none;
+    }
+    .cast-text {
+        max-width: 522px;
+    }
+}
+
+@media only screen and (max-width: 637px) {
+    .left-nav {
+        display: none;
+    }
+    .right-nav-text {
+        display: none;
+    }
+    .bottom-nav {
+        display: flex;
+    }
+    .cast-text {
+        max-width: 522px;
+    }
+}
+
 
 .absolute {
     position: absolute;
@@ -1758,7 +1827,7 @@ blockquote {
 
 .top-nav-wrap {
     width: 100%;
-    background-color: #1D3244dd;
+    /* background-color: #1D3244dd; */
 }
 
 .top-nav {
@@ -1827,7 +1896,7 @@ blockquote {
 .sub-top-box {
     height: 'min-content';
     width: 'min-content';
-    background-color: '#1D3244dd' !important;
+    /* background-color: '#1D3244dd' !important; */
     border-radius: '0 0 30px 30px';
     justify-content: 'center';
 }
