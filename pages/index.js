@@ -16,7 +16,7 @@ export default function Home({apiKey}) {
   const account = useContext(AccountContext)
   // const [viewToggle, setViewToggle] = useState({record: false, source: false, media: false, science: false})
   const client = new NeynarAPIClient(apiKey);
-  const [textMax, setTextMax] = useState()
+  const [textMax, setTextMax] = useState(522)
 
   async function getFeed() {
     const base = "https://api.neynar.com/";
@@ -116,13 +116,13 @@ export default function Home({apiKey}) {
   }
 
   return (
-  <div>
+  <div style={{width: 'auto'}} ref={ref}>
     <div className="top-layer" style={{padding: '58px 0 0 0'}}>
 
     </div>
 
     {
-      (typeof userFeed !== 'undefined' && userFeed.length > 0) && (userFeed.map((cast, index) => (<div key={index} className="inner-container" style={{width: '100%', display: 'flex', flexDirection: 'row'}} ref={ref}>
+      (typeof userFeed !== 'undefined' && userFeed.length > 0) && (userFeed.map((cast, index) => (<div key={index} className="inner-container" style={{width: '100%', display: 'flex', flexDirection: 'row'}}>
         <div>
           <div>
             <div className="">
