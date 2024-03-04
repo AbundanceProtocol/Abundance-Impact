@@ -20,7 +20,7 @@ export default function Home({apiKey}) {
 
   async function getFeed() {
     const base = "https://api.neynar.com/";
-    const url3 = `${base}v2/farcaster/feed?feed_type=filter&filter_type=global_trending&with_recasts=true&with_replies=false&limit=3`;
+    const url3 = `${base}v2/farcaster/feed?feed_type=filter&filter_type=global_trending&with_recasts=true&with_replies=false&limit=1`;
     const response3 = await fetch(url3, {
       headers: {
         accept: "application/json",

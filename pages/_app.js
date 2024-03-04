@@ -46,7 +46,7 @@ function App({ Component, pageProps }) {
   `;
 
   useEffect(() => {
-    console.log('route', router.route)
+    // console.log('route', router.route)
     useStore.setState({ router })
   }, [router])
 
@@ -184,7 +184,6 @@ useEffect( () => {
   const TopNav = (props) => {
     let btn = button[props.buttonName]
     let btnName = props.buttonName
-    // let textSize = '15px'
     if (btnName === 'portal' && account) {
       btnName = store.username
     }
@@ -223,14 +222,13 @@ useEffect( () => {
   const LeftNav = (props) => {
     let btn = button[props.buttonName]
     let btnName = props.buttonName
-    // let textSize = '15px'
     if (btnName === 'portal' && account) {
       btnName = store.username
     }
     const TopIcon = btn.icon
     let menuState = "nav-link"
     let accountState = !btn.account || (account && btn.account)
-    if (navMenu === btn.menu && accountState) {
+    if ((router.route === btn.link) && accountState) {
       menuState = "active-nav-link"
     } else if (!accountState) {
       menuState = "inactive-nav-link"
@@ -242,19 +240,21 @@ useEffect( () => {
         setMenuHover({ ...menuHover, in: Date.now() })
       }}
       onMouseLeave={() => setMenuHover({ ...menuHover, out: Date.now() }) }>
-        <a style={{maxWidth: '260px'}}  
+        <Link href={(btn.link && btn.working) ? btn.link : router.route}>
+          <a style={{maxWidth: '260px'}}  
         >
-          <div className={`flex-row ${menuState}`} style={{paddingRight: isMobile ? '1em' : 'unset', justifyContent: 'flex-start' }}>
-            <div className="flex-col" style={{height: '58px', alignItems: 'center', justifyContent: 'center'}}>
-              <div className="flex-row flex-middle">
-                <TopIcon className="size-25" style={{margin: '6px 12px 6px 12px'}} />
-                <div className="font-15 left-nav" style={{textAlign: 'center', fontSize: isTablet ? '12px' : '18px'}}>
-                  {btnName}
+            <div className={`flex-row ${menuState}`} style={{paddingRight: isMobile ? '1em' : 'unset', justifyContent: 'flex-start'}}>
+              <div className="flex-col" style={{height: '58px', alignItems: 'center', justifyContent: 'center'}}>
+                <div className="flex-row flex-middle btn-hvr" style={{padding: '2px 0 2px 0', borderRadius: '16px'}}>
+                  <TopIcon className="size-25" style={{margin: '6px 12px 6px 12px'}} />
+                  <div className="font-15 left-nav" style={{textAlign: 'center', fontSize: isTablet ? '12px' : '18px', padding: '0 24px 0 0'}}>
+                    {btnName}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </a>
+          </a>
+        </Link>
       </div>
     )
   }
@@ -262,14 +262,13 @@ useEffect( () => {
   const BottomNav = (props) => {
     let btn = button[props.buttonName]
     let btnName = props.buttonName
-    // let textSize = '15px'
     if (btnName === 'portal' && account) {
       btnName = store.username
     }
     const TopIcon = btn.icon
     let menuState = "nav-link"
     let accountState = !btn.account || (account && btn.account)
-    if (navMenu === btn.menu && accountState) {
+    if ((router.route === btn.link) && accountState) {
       menuState = "active-nav-link"
     } else if (!accountState) {
       menuState = "inactive-nav-link"
@@ -281,19 +280,21 @@ useEffect( () => {
         setMenuHover({ ...menuHover, in: Date.now() })
       }}
       onMouseLeave={() => setMenuHover({ ...menuHover, out: Date.now() }) }>
-        <a style={{width: 'auto'}}  
-        >
-          <div className={`flex-row ${menuState}`} style={{padding: isMobile ? '2px' : 'unset', width: 'auto' }}>
-            <div className="flex-col" style={{height: '58px', alignItems: 'center', justifyContent: 'center'}}>
-              <div className="flex-row flex-middle">
-                <TopIcon className="size-25" style={{margin: '6px 12px 6px 12px'}} />
-                <div className="font-15 left-nav" style={{textAlign: 'center', fontSize: isTablet ? '12px' : '18px'}}>
-                  {btnName}
+        <Link href={(btn.link && btn.working) ? btn.link : router.route}>
+          <a style={{width: 'auto'}}  
+          >
+            <div className={`flex-row ${menuState}`} style={{padding: isMobile ? '2px' : 'unset', width: 'auto' }}>
+              <div className="flex-col" style={{height: '58px', alignItems: 'center', justifyContent: 'center'}}>
+                <div className="flex-row flex-middle">
+                  <TopIcon className="size-25" style={{margin: '6px 12px 6px 12px'}} />
+                  <div className="font-15 left-nav" style={{textAlign: 'center', fontSize: isTablet ? '12px' : '18px'}}>
+                    {btnName}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </a>
+          </a>
+        </Link>
       </div>
     )
   }
@@ -386,7 +387,6 @@ useEffect( () => {
             <NavbarHeader>
               <div className="navbar-header">
                 <HomeButton />
-                
                 <Box className="navbar-header-end" sx={{display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', alignItems: 'center', justifyContent: 'space-between'}}>
                   <ConnectButton 
                     account={store.account}

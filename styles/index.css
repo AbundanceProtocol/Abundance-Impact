@@ -105,7 +105,7 @@ html, body {
         justify-content: center;
     }
     .top-right {
-        width: 600px;
+        width: 620px;
     }
     .left-nav {
         display: none;
@@ -565,6 +565,10 @@ blockquote {
 .ftr-lnk:hover {
   color: #600;
   text-decoration: underline;
+}
+
+.btn-hvr:hover {
+  background-color: #ddeeff11;
 }
 
 .connect-solid {

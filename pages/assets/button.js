@@ -1,12 +1,13 @@
-import { FaSearch, FaCode, FaUser, FaLightbulb, FaKey, FaLockOpen, FaGlobe, FaPen, FaCoins, FaLink, FaAddressCard, FaWallet, FaAward, FaQuestionCircle, FaMap, FaCogs, FaFileAlt, FaGithub, FaMediumM, FaYoutube, FaTwitter, FaAt, FaDiscord, FaFolderOpen, FaTasks, FaScroll, FaSearchDollar, FaHandshake, FaRegListAlt, FaToolbox } from 'react-icons/fa';
+import { FaSearch, FaCode, FaUser, FaLightbulb, FaKey, FaLockOpen, FaGlobe, FaPen, FaCoins, FaLink, FaAddressCard, FaWallet, FaAward, FaQuestionCircle, FaMap, FaCogs, FaFileAlt, FaGithub, FaMediumM, FaYoutube, FaTwitter, FaAt, FaDiscord, FaFolderOpen, FaTasks, FaScroll, FaSearchDollar, FaHandshake, FaRegListAlt, FaToolbox, FaFlag } from 'react-icons/fa';
 import { AiFillHome } from "react-icons/ai";
 import OpenSeaIcon from './OpenSeaIcon';
 import { GiTwoCoins, GiReceiveMoney } from 'react-icons/gi'
 import { BsBarChartFill, BsFillDiagram3Fill, BsFillHandThumbsDownFill, BsListColumnsReverse } from 'react-icons/bs'
 import { MdCastConnected, MdNotifications, MdFavorite, MdFilterFrames, MdMail, MdWork, MdRequestPage } from 'react-icons/md'
 import { RiTeamFill, RiFileSearchFill } from 'react-icons/ri'
+import { TiFlag } from "react-icons/ti";
 import { HiBadgeCheck, HiThumbDown, HiUserGroup, HiViewGridAdd } from 'react-icons/hi'
-import { IoReader } from 'react-icons/io5'
+import { IoReader, IoNotifications } from 'react-icons/io5'
 import { SiSubstack } from 'react-icons/si'
 
 const Buttons = () => {
@@ -32,7 +33,7 @@ const button = {
     ////// LEFT MENU //////
 
     'Feed': {
-        link: '/feed',
+        link: '/',
         menu: 'Feed',
         description: 'Your feed',
         account: false,
@@ -44,7 +45,7 @@ const button = {
         menu: 'Search',
         description: 'Search for communities, projects, users, and proposals',
         account: false,
-        working: false,
+        working: true,
         icon: FaSearch
     },
     'Ecosystem': {
@@ -69,7 +70,7 @@ const button = {
         description: 'Your notifications',
         account: true,
         working: false,
-        icon: MdMail
+        icon: IoNotifications
     },
     'Profile': {
         link: '/profile',
@@ -93,7 +94,7 @@ const button = {
         description: 'Challenge a review',
         account: true,
         working: false,
-        icon: BsFillHandThumbsDownFill
+        icon: TiFlag
     },
     'Propose': {
         link: '/propose',
@@ -139,14 +140,14 @@ const button = {
         working: true,
         icon: FaCoins
     },
-    'ecosystem': {
-        link: '/explore',
-        menu: 'Ecosystem',
-        description: 'Explore the ecosystem, your communities, and resources',
-        account: false,
-        working: true,
-        icon: FaGlobe
-    },
+    // 'ecosystem': {
+    //     link: '/explore',
+    //     menu: 'Ecosystem',
+    //     description: 'Explore the ecosystem, your communities, and resources',
+    //     account: false,
+    //     working: false,
+    //     icon: FaGlobe
+    // },
 
 
 
@@ -215,14 +216,14 @@ const button = {
 
     ////// PORTAL //////
 
-    'Profile': {
-        link: '/profile',
-        menu: 'Portal',
-        description: 'Update your PFP and bio',
-        account: true,
-        working: true,
-        icon: FaAddressCard
-    },
+    // 'Profile': {
+    //     link: '/profile',
+    //     menu: 'Portal',
+    //     description: 'Update your PFP and bio',
+    //     account: true,
+    //     working: true,
+    //     icon: FaAddressCard
+    // },
     'Wallet': {
         link: '/wallet',
         menu: 'Portal',
@@ -299,14 +300,14 @@ const button = {
         working: false,
         icon: FaRegListAlt
     },
-    'Challenge': {
-        link: '/challenge',
-        menu: 'Consensus',
-        description: 'Challenge a proposal',
-        account: true,
-        working: false,
-        icon: BsFillHandThumbsDownFill
-    },
+    // 'Challenge': {
+    //     link: '/challenge',
+    //     menu: 'Consensus',
+    //     description: 'Challenge a proposal',
+    //     account: true,
+    //     working: false,
+    //     icon: BsFillHandThumbsDownFill
+    // },
     'Explore': {
         link: '/explore-proposals',
         menu: 'Consensus',
