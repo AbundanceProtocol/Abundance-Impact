@@ -1,4 +1,5 @@
 import { FaSearch, FaCode, FaUser, FaLightbulb, FaKey, FaLockOpen, FaGlobe, FaPen, FaCoins, FaLink, FaAddressCard, FaWallet, FaAward, FaQuestionCircle, FaMap, FaCogs, FaFileAlt, FaGithub, FaMediumM, FaYoutube, FaTwitter, FaAt, FaDiscord, FaFolderOpen, FaTasks, FaScroll, FaSearchDollar, FaHandshake, FaRegListAlt, FaToolbox } from 'react-icons/fa';
+import { AiFillHome } from "react-icons/ai";
 import OpenSeaIcon from './OpenSeaIcon';
 import { GiTwoCoins, GiReceiveMoney } from 'react-icons/gi'
 import { BsBarChartFill, BsFillDiagram3Fill, BsFillHandThumbsDownFill, BsListColumnsReverse } from 'react-icons/bs'
@@ -16,7 +17,8 @@ export default Buttons;
 
 const button = {
     'top-menu': [],
-    'left-menu': ['Feed', 'Search', 'Ecosystem', 'Reviews', 'Notifications', 'Profile', 'Funding', 'Challenge', 'Propose'],
+    'side-menu': ['Feed', 'Search', 'Ecosystem', 'Reviews', 'Notifications', 'Profile', 'Funding', 'Challenge', 'Propose'],
+    'bottom-nav': ['Feed', 'Search', 'Ecosystem', 'Reviews', 'Notifications'],
     'nav-menu': {
         // 'Home': ['Vision', 'Roadmap', 'Docs', 'FAQ', 'Blog', 'Contact'],
         // 'Portal': ['Profile', 'Wallet', 'Expertise', 'Portfolio'],
@@ -35,7 +37,7 @@ const button = {
         description: 'Your feed',
         account: false,
         working: true,
-        icon: FaScroll
+        icon: AiFillHome
     },
     'Search': {
         link: '/search',

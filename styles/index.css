@@ -8,13 +8,24 @@
 html, body {
     font-family: inter,sans-serif;
     margin: 0;
+    height: 100%;
     padding: 0;
     background-color: #1D3244;
 }
 
 
 @media only screen and (min-width: 1280px) {
+    .top-left {
+        width: 260px;
+    }
+    .top-right {
+        width: 1020px;
+    }
     .left-nav {
+        display: flex;
+    }
+    .left-container {
+        width: 260px;
         display: flex;
     }
     .right-nav-text {
@@ -29,10 +40,26 @@ html, body {
     .cast-text {
         max-width: 522px;
     }
+    .cast-area {
+        width: 620px;
+    }
+    .bottom-menu {
+        display: none;
+    }
 }
 
-@media only screen and (min-width: 1024px) and (max-width: 1279px) {
+@media only screen and (min-width: 1024px) and (max-width: 1279.999px) {
+    .top-left {
+        width: 260px;
+    }
+    .top-right {
+        width: 620px;
+    }
     .left-nav {
+        display: flex;
+    }
+    .left-container {
+        width: 260px;
         display: flex;
     }
     .right-nav-text {
@@ -47,11 +74,45 @@ html, body {
     .cast-text {
         max-width: 522px;
     }
+    .cast-area {
+        width: 620px;
+    }
+    .bottom-menu {
+        display: none;
+    }
 }
 
-@media only screen and (min-width: 638px) and (max-width: 1023px) {
+@media only screen and (min-width: 680px) and (max-width: 1023.999px) {
+    .cast-area {
+        width: 620px;
+    }
+}
+
+@media only screen and (max-width: 679.999px) {
+    .cast-area {
+        width: auto;
+    }
+}
+
+@media only screen and (min-width: 638px) and (max-width: 1023.999px) {
+    .top-logo {
+        justify-content: center !important;
+    }
+    .top-left {
+        width: 50px;
+        margin: 0 10px 0 0;
+        align-items: center;
+        justify-content: center;
+    }
+    .top-right {
+        width: 600px;
+    }
     .left-nav {
         display: none;
+    }
+    .left-container {
+        width: 60px;
+        display: flex;
     }
     .right-nav-text {
         display: none;
@@ -62,10 +123,19 @@ html, body {
     .cast-text {
         max-width: 522px;
     }
+    .bottom-menu {
+        display: none;
+    }
 }
 
-@media only screen and (max-width: 637px) {
+@media only screen and (max-width: 637.999px) {
+    .top-logo {
+        justify-content: center !important;
+    }
     .left-nav {
+        display: none;
+    }
+    .left-container {
         display: none;
     }
     .right-nav-text {
@@ -76,6 +146,9 @@ html, body {
     }
     .cast-text {
         max-width: 522px;
+    }
+    .bottom-menu {
+        display: flex;
     }
 }
 

@@ -22,6 +22,8 @@ function App({ Component, pageProps }) {
   const auth = useAuth();
   const { isMobile, isTablet } = useMatchBreakpoints();
   const ref = useRef(null)
+  const ref1 = useRef(null)
+  const [bottomNavSize, setBottomNavSize] = useState(ref1?.current?.offsetWidth)
   const [navSize, setNavSize] = useState(1060)
   const router = useRouter()
   const [navWidth, setNavWidth] = useState((ref?.current?.offsetWidth - 1312)/2 - 167)
@@ -50,6 +52,7 @@ function App({ Component, pageProps }) {
 
   useEffect(() => {
     let menuLink = targetLink()
+    setBottomNavSize(ref1?.current?.offsetWidth)
     setNavSize(ref?.current?.offsetWidth - 60)
     setLinkTarget(menuLink)
     setNavMenu(button[menuLink].menu)
@@ -61,6 +64,7 @@ function App({ Component, pageProps }) {
   
   function handleNavResize() {
     setNavWidth((ref?.current?.offsetWidth - 1312)/2 - 167)
+    setBottomNavSize(ref1?.current?.offsetWidth)
   }
 
   const onAccount = useCallback(() => {
@@ -163,7 +167,7 @@ useEffect( () => {
         }} onMouseLeave={() => {
           // setMenuHover({ ...menuHover, out: Date.now() })
         }}>
-          <div className="grid-col centered">
+          <div className="grid-col centered top-logo">
             <div className="logo-wrapper">
               <Logo height={isSmall ? '25px' : '45px'} width={isSmall ? '25px' : '45px'}/>
             </div>
@@ -233,7 +237,7 @@ useEffect( () => {
     }
 
     return (
-      <div style={{padding: 'auto 8px'}} onMouseEnter={() => {
+      <div className="left-container" style={{padding: 'auto 8px'}} onMouseEnter={() => {
         setNavMenu(btn.menu)
         setMenuHover({ ...menuHover, in: Date.now() })
       }}
@@ -255,7 +259,44 @@ useEffect( () => {
     )
   }
 
+  const BottomNav = (props) => {
+    let btn = button[props.buttonName]
+    let btnName = props.buttonName
+    // let textSize = '15px'
+    if (btnName === 'portal' && account) {
+      btnName = store.username
+    }
+    const TopIcon = btn.icon
+    let menuState = "nav-link"
+    let accountState = !btn.account || (account && btn.account)
+    if (navMenu === btn.menu && accountState) {
+      menuState = "active-nav-link"
+    } else if (!accountState) {
+      menuState = "inactive-nav-link"
+    }
 
+    return (
+      <div className="flex-row here" style={{padding: 'auto 8px', width: 'auto', justifyContent: 'center', alignItems: 'center'}} onMouseEnter={() => {
+        setNavMenu(btn.menu)
+        setMenuHover({ ...menuHover, in: Date.now() })
+      }}
+      onMouseLeave={() => setMenuHover({ ...menuHover, out: Date.now() }) }>
+        <a style={{width: 'auto'}}  
+        >
+          <div className={`flex-row ${menuState}`} style={{padding: isMobile ? '2px' : 'unset', width: 'auto' }}>
+            <div className="flex-col" style={{height: '58px', alignItems: 'center', justifyContent: 'center'}}>
+              <div className="flex-row flex-middle">
+                <TopIcon className="size-25" style={{margin: '6px 12px 6px 12px'}} />
+                <div className="font-15 left-nav" style={{textAlign: 'center', fontSize: isTablet ? '12px' : '18px'}}>
+                  {btnName}
+                </div>
+              </div>
+            </div>
+          </div>
+        </a>
+      </div>
+    )
+  }
 
 
 
@@ -338,10 +379,10 @@ useEffect( () => {
   }
 
   return isMobile ? (
-    <div>
-        <React.Fragment key="top">
-        <MobileAppbar className='top-layer' position="fixed" elevation={0} sx={{paddingRight: 0}}>
-      <nav className="nav-bar-mobile">
+    <div ref={ref1}>
+      <React.Fragment key="top">
+        <MobileAppbar className='top-layer' position="fixed" elevation={0} sx={{paddingRight: 0}} style={{backgroundColor: '#2D4254'}}>
+          <nav className="nav-bar-mobile">
             <NavbarHeader>
               <div className="navbar-header">
                 <HomeButton />
@@ -376,14 +417,22 @@ useEffect( () => {
           <Component {...pageProps} connect={connect} />
         </AccountContext.Provider>
       </div>
+      <div className='bottom-menu flex-row' style={{position: 'fixed', bottom: 0, backgroundColor: '#1D3244cc', height: '70px', width: `auto`, borderRadius: '0px', padding: '0', border: '0px solid #678', boxSizing: 'border-box'}}>
+        <div className='flex-row' style={{position: 'relative', width: `${bottomNavSize}px`, justifyContent: 'space-between', padding: '0 10px'}}>
+        { button['bottom-nav'].map((btn, index) => (
+              <BottomNav buttonName={btn} key={index} /> ))}
+        </div>
+        </div>
     </div>
   ) : (
-      <div>
+      <div className='flex-col' style={{display: 'flex', minHeight: '100%'}}>
         <nav className="nav-bar top-layer flex-col" style={{width: '100%', justifyContent: 'center', height: '58px'}}>
           <div className="flex-col nav-top" ref={ref} style={{justifyContent: 'center', margin: '0 auto', width: '100%'}}>
-            <div className="nav-head" style={{display: 'grid', gridAutoFlow: 'column', justifyContent: 'space-between', alignItems: 'center', gridGap: '16px'}}>
-              <HomeButton />
-              <Col>
+            <div className="flex-row" style={{justifyContent: 'center', alignItems: 'center'}}>
+              <div className='top-left'>
+                <HomeButton />
+              </div>
+              <Col className='top-right'>
                 <TopNavWrapper>
                     { button['top-menu'].map((btn, index) => (
                       <TopNav buttonName={btn} key={index} /> ))}
@@ -400,19 +449,29 @@ useEffect( () => {
         </nav>
 
         <div className='flex-row' style={{justifyContent: 'center', width: 'auto'}}>
-          <div className="flex-col" style={{width: '260px', padding: '58px 0 0 0'}}>
-            { button['left-menu'].map((btn, index) => (
+          <div className="flex-col" style={{padding: '58px 0 0 0'}}>
+            { button['side-menu'].map((btn, index) => (
               <LeftNav buttonName={btn} key={index} /> ))}
           </div>
           <div>
-            <div className="container" style={{width: '620px'}}>
+            <div className="container cast-area">
               <AccountContext.Provider value={store.account}>
                 <Component {...pageProps} connect={connect} />
               </AccountContext.Provider>
             </div>
           </div>
-          <div className='ght-nav-text' style={{width: '360px'}}></div>
+          <div className='right-nav-text' style={{width: '400px'}}>
+            <div>
+              <div style={{margin: '62px 0px 12px 20px', backgroundColor: '#ffffff22', height: '150px', width: '380px', borderRadius: '20px', padding: '12px', border: '0px solid #678'}}>&nbsp;</div>
+            </div>
+          </div>
         </div>
+        {/* <div className='bottom-menu' style={{position: 'fixed', bottom: 0, backgroundColor: '#1D324499', height: '50px', width: '100%', borderRadius: '0px', padding: '12px', border: '0px solid #678'}}>
+          <div style={{position: 'relative', width: 'auto'}}>
+            { button['bottom-nav'].map((btn, index) => (
+              <BottomNav buttonName={btn} key={index} /> ))}
+          </div>
+        </div> */}
       </div>
   )
 }
