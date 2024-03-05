@@ -22,8 +22,7 @@ function App({ Component, pageProps }) {
   const auth = useAuth();
   const { isMobile, isTablet } = useMatchBreakpoints();
   const ref = useRef(null)
-  const ref1 = useRef(null)
-  const [bottomNavSize, setBottomNavSize] = useState(ref1?.current?.offsetWidth)
+  const [bottomNavSize, setBottomNavSize] = useState(ref?.current?.offsetWidth)
   const [navSize, setNavSize] = useState(1060)
   const router = useRouter()
   const [navWidth, setNavWidth] = useState((ref?.current?.offsetWidth - 1312)/2 - 167)
@@ -52,7 +51,7 @@ function App({ Component, pageProps }) {
 
   useEffect(() => {
     let menuLink = targetLink()
-    setBottomNavSize(ref1?.current?.offsetWidth)
+    setBottomNavSize(ref?.current?.offsetWidth)
     setNavSize(ref?.current?.offsetWidth - 60)
     setLinkTarget(menuLink)
     setNavMenu(button[menuLink].menu)
@@ -64,7 +63,7 @@ function App({ Component, pageProps }) {
   
   function handleNavResize() {
     setNavWidth((ref?.current?.offsetWidth - 1312)/2 - 167)
-    setBottomNavSize(ref1?.current?.offsetWidth)
+    setBottomNavSize(ref?.current?.offsetWidth)
   }
 
   const onAccount = useCallback(() => {
@@ -285,7 +284,7 @@ useEffect( () => {
           >
             <div className={`flex-row ${menuState}`} style={{padding: isMobile ? '2px' : 'unset', width: 'auto' }}>
               <div className="flex-col" style={{height: '58px', alignItems: 'center', justifyContent: 'center'}}>
-                <div className="flex-row flex-middle">
+                <div className="flex-row btn-hvr flex-middle" style={{padding: '6px 2px', borderRadius: '12px'}}>
                   <TopIcon className="size-25" style={{margin: '6px 12px 6px 12px'}} />
                   <div className="font-15 left-nav" style={{textAlign: 'center', fontSize: isTablet ? '12px' : '18px'}}>
                     {btnName}
@@ -380,7 +379,7 @@ useEffect( () => {
   }
 
   return isMobile ? (
-    <div ref={ref1}>
+    <div ref={ref} style={{position: 'absolute', display: 'flex', minHeight: '100%', height: '100%', width: '100%'}}>
       <React.Fragment key="top">
         <MobileAppbar className='top-layer' position="fixed" elevation={0} sx={{paddingRight: 0}} style={{backgroundColor: '#2D4254'}}>
           <nav className="nav-bar-mobile">
@@ -413,19 +412,19 @@ useEffect( () => {
           </Drawer>
         </React.Fragment>
       <div className="container">
-        <AccountContext.Provider value={store.account}>
+        <AccountContext.Provider value={{...store.account, ref}}>
           <Component {...pageProps} connect={connect} />
         </AccountContext.Provider>
       </div>
-      <div className='bottom-menu flex-row' style={{position: 'fixed', bottom: 0, backgroundColor: '#1D3244cc', height: '70px', width: `auto`, borderRadius: '0px', padding: '0', border: '0px solid #678', boxSizing: 'border-box'}}>
-        <div className='flex-row' style={{position: 'relative', width: `${bottomNavSize}px`, justifyContent: 'space-between', padding: '0 10px'}}>
+      <div className='bottom-menu flex-row' style={{position: 'fixed', bottom: 0, backgroundColor: '#1D3244cc', height: '56px', width: `100%`, borderRadius: '0px', padding: '0', border: '0px solid #678', boxSizing: 'border-box'}}>
+        <div className='flex-row' style={{position: 'relative', width: '100%', justifyContent: 'space-between', padding: '0 10px'}}>
         { button['bottom-nav'].map((btn, index) => (
               <BottomNav buttonName={btn} key={index} /> ))}
         </div>
         </div>
     </div>
   ) : (
-      <div className='flex-col' style={{display: 'flex', minHeight: '100%'}}>
+      <div ref={ref} className='flex-col' style={{position: 'absolute', display: 'flex', minHeight: '100%', height: '100%', width: '100%'}}>
         <nav className="nav-bar top-layer flex-col" style={{width: '100%', justifyContent: 'center', height: '58px'}}>
           <div className="flex-col nav-top" ref={ref} style={{justifyContent: 'center', margin: '0 auto', width: '100%'}}>
             <div className="flex-row" style={{justifyContent: 'center', alignItems: 'center'}}>
@@ -455,7 +454,7 @@ useEffect( () => {
           </div>
           <div>
             <div className="container cast-area">
-              <AccountContext.Provider value={store.account}>
+              <AccountContext.Provider value={{...store.account, ref}}>
                 <Component {...pageProps} connect={connect} />
               </AccountContext.Provider>
             </div>

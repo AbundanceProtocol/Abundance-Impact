@@ -93,11 +93,11 @@ export default function Home({apiKey}) {
   }, [])
 
   function handleTextResize() {
-    if (typeof ref?.current?.offsetWidth !== 'undefined') {
-      if (ref?.current?.offsetWidth == 620) {
+    if (typeof account.ref?.current?.offsetWidth !== 'undefined') {
+      if (account.ref?.current?.offsetWidth == 620) {
         setTextMax(522)
       } else {
-        setTextMax(ref?.current?.offsetWidth - 102)
+        setTextMax(account.ref?.current?.offsetWidth - 102)
       }
     } else {
       setTextMax(522)
