@@ -595,6 +595,47 @@ blockquote {
   background-color: #ddeeff11;
 }
 
+.srch-select {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+    padding: 6px 12px;
+    color: #fff;
+    margin: 2px 5px;
+    font-weight: 600;
+    background-color: #38b;
+    cursor: pointer;
+}
+
+.srch-select-btn {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+    padding: 6px 12px;
+    color: #000;
+    margin: 2px 5px;
+    font-weight: 600;
+    background-color: #89a;
+    cursor: pointer;
+}
+
+.srch-btn {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+    padding: 6px 12px;
+    color: #eee;
+    margin: 2px 5px;
+    font-weight: 600;
+    background-color: #ffffff33;
+    cursor: pointer;
+}
+
+.srch-select-btn:hover, .srch-btn:hover, .srch-select:hover {
+    color: #eee;
+    background-color: #169;
+}
+
 .connect-solid {
     height: 30px;
     width: 50%;
@@ -1711,7 +1752,7 @@ blockquote {
     color: #aaa;
     /* min-width: 87px; */
     display: flex;
-    cursor: pointer;
+    cursor: default;
     justify-content: center;
 }
 

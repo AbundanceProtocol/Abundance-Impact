@@ -7,16 +7,25 @@ import { AccountContext } from '../context'
 import { Circles } from './assets'
 import useMatchBreakpoints from '../hooks/useMatchBreakpoints'
 import { NeynarAPIClient } from "@neynar/nodejs-sdk";
+import { FaSearch } from 'react-icons/fa';
 
 export default function Home({apiKey}) {
   const ref = useRef(null)
-  const [ userFeed, setUserFeed] = useState([])
+  const [ userFeed, setUserFeed ] = useState([])
+  const initialState = { search: '' }
+	const [userSearch, setUserSearch] = useState(initialState)
+  const searchButtons = ['Ecosystem', 'Channels', 'Proposals', 'Users', 'Casts']
+  const [ searchSelect, setSearchSelect ] = useState('Ecosystem')
   const { isMobile } = useMatchBreakpoints();
   // const [vidSize, setVidSize] = useState({w: 1220 + 'px', h: 1220/16*9 + 'px'})
   const account = useContext(AccountContext)
   // const [viewToggle, setViewToggle] = useState({record: false, source: false, media: false, science: false})
   const client = new NeynarAPIClient(apiKey);
   const [textMax, setTextMax] = useState(522)
+
+	function onChange(e) {
+		setUserSearch( () => ({ ...userSearch, [e.target.name]: e.target.value }) )
+	}
 
   async function getFeed() {
     const base = "https://api.neynar.com/";
@@ -104,6 +113,10 @@ export default function Home({apiKey}) {
     }
   }
 
+  const searchOption = (e) => {
+    setSearchSelect(e.target.getAttribute('name'))
+  }
+
   const LineBreak = () => {
     return (
       <div style={{padding: '50px 0 0 0'}}>
@@ -112,12 +125,31 @@ export default function Home({apiKey}) {
     )
   }
 
+  const SearchOptionButton = (props) => {
+    const btn = props.buttonName
+    return (
+      <div className={(searchSelect == btn) ? 'srch-select' : 'srch-btn'} onClick={searchOption} name={btn}>{btn}</div>
+    )
+  }
+
+
   return (
-  <div style={{width: 'auto'}} ref={ref}>
+  <div className='flex-col' style={{width: 'auto'}} ref={ref}>
     <div className="top-layer" style={{padding: '58px 0 0 0'}}>
 
     </div>
-
+    <div style={{padding: '12px 20px', backgroundColor: '#ffffff11', borderRadius: '10px', border: '1px solid #888', marginBottom: '16px'}}>
+    <div className="top-layer flex-row" style={{padding: '10px 0 10px 0', alignItems: 'center', justifyContent: 'space-between', margin: '0', borderBottom: '1px solid #888'}}>
+      { searchButtons.map((btn, index) => (
+        <SearchOptionButton buttonName={btn} key={index} /> ))}
+    </div>
+    <div>
+    <div className="flex-row" style={{padding: '10px 0 0 0'}}>
+        <input onChange={onChange} name='search' placeholder={`Search ${searchSelect}`} value={userSearch.search} className='srch-btn' style={{width: '100%', backgroundColor: '#234'}} />
+        <div className='srch-select-btn' style={{padding: '12px 14px 9px 14px'}}><FaSearch /></div>
+      </div>
+      </div>
+    </div>
     {
       (typeof userFeed !== 'undefined' && userFeed.length > 0) && (userFeed.map((cast, index) => (<div key={index} className="inner-container" style={{width: '100%', display: 'flex', flexDirection: 'row'}}>
         <div>
