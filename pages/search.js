@@ -38,7 +38,7 @@ export default function Home({apiKey}) {
       },
     });
 
-    // const channels = await response.json();
+    const channels = await response.json();
     // if (typeof channels !== 'undefined') {
     //   for (let i = 0; i < channels.channels.length; i++) {
     //     // const base = "https://api.neynar.com/";
@@ -50,10 +50,15 @@ export default function Home({apiKey}) {
     //         api_key: apiKey,
     //       },
     //     });
-    //     const channelInfo = await channelData.json();
+    //     const getChannel = await channelData.json();
+    //     const channelQuery = `${base}v2/farcaster/channel?id=${getChannel}`;
+    //     const channelData = await fetch(channelQuery, {
+    //       headers: {
+    //         accept: "application/json",
+    //         api_key: apiKey,
+    //       },
+    //     });
     //     console.log(channelInfo)
-    //     console.log(channelInfo.users.length)
-    //     console.log(channels.channels[i].id)
     //     const channelImg = channel.channel.image_url
     //     const channelName = channel.channel.name
     //     feed1.casts[i].channelImg = channelImg
@@ -168,7 +173,6 @@ export default function Home({apiKey}) {
                           <a className="fc-lnk" title="" href={`https://warpcast.com/~/channel/${channel.id}`}>
                             <div className="flex-row" style={{alignItems: 'center'}}>
                               <span className="name-font">{channel.name}</span>
-
                             </div>
                           </a>
                         </span>
