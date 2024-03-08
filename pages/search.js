@@ -14,8 +14,9 @@ export default function Home({apiKey}) {
   const [ userFeed, setUserFeed ] = useState([])
   const initialState = { search: '' }
 	const [userSearch, setUserSearch] = useState(initialState)
-  const searchButtons = ['Ecosystem', 'Channels', 'Proposals', 'Users', 'Casts']
-  const [ searchSelect, setSearchSelect ] = useState('Ecosystem')
+  const searchButtons = ['Ecosystems', 'Channels', 'Proposals', 'Users', 'Casts']
+  const [ searchSelect, setSearchSelect ] = useState('Ecosystems')
+  const [ searchResults, setSearchResults ] = useState({kind: 'ecosystems', data: []})
   const { isMobile } = useMatchBreakpoints();
   // const [vidSize, setVidSize] = useState({w: 1220 + 'px', h: 1220/16*9 + 'px'})
   const account = useContext(AccountContext)
@@ -27,43 +28,41 @@ export default function Home({apiKey}) {
 		setUserSearch( () => ({ ...userSearch, [e.target.name]: e.target.value }) )
 	}
 
-  async function getFeed() {
+  async function getChannels(name) {
     const base = "https://api.neynar.com/";
-    const url3 = `${base}v2/farcaster/feed?feed_type=filter&filter_type=global_trending&with_recasts=true&with_replies=false&limit=1`;
-    const response3 = await fetch(url3, {
+    const url = `${base}v2/farcaster/channel/search?q=${name}`;
+    const response = await fetch(url, {
       headers: {
         accept: "application/json",
         api_key: apiKey,
       },
     });
-    const feed1 = await response3.json();
 
-    if (typeof feed1 !== 'undefined') {
-      for (let i = 0; i < feed1.casts.length; i++) {
-        if (feed1.casts[i].parent_url !== null) {
-          const isChannel = feed1.casts[i].parent_url.slice(0,31)
-          if (isChannel == 'https://warpcast.com/~/channel/') {
-            const base = "https://api.neynar.com/";
-            const getChannel = feed1.casts[i].parent_url.slice(31)
-            const channelQuery = `${base}v2/farcaster/channel?id=${getChannel}`;
-            const channelData = await fetch(channelQuery, {
-              headers: {
-                accept: "application/json",
-                api_key: apiKey,
-              },
-            });
-            const channel = await channelData.json();
-            const channelImg = channel.channel.image_url
-            const channelName = channel.channel.name
-            feed1.casts[i].channelImg = channelImg
-            feed1.casts[i].channelName = channelName
-          }
-        }
-      }
-      setUserFeed(feed1.casts)
-    } else {
-      setUserFeed(feed1.casts)
-    }
+    // const channels = await response.json();
+    // if (typeof channels !== 'undefined') {
+    //   for (let i = 0; i < channels.channels.length; i++) {
+    //     // const base = "https://api.neynar.com/";
+    //     const channelId = channels.channels[i].id
+    //     const channelQuery = `${base}v2/farcaster/channel/followers?id=${channelId}`;
+    //     const channelData = await fetch(channelQuery, {
+    //       headers: {
+    //         accept: "application/json",
+    //         api_key: apiKey,
+    //       },
+    //     });
+    //     const channelInfo = await channelData.json();
+    //     console.log(channelInfo)
+    //     console.log(channelInfo.users.length)
+    //     console.log(channels.channels[i].id)
+    //     const channelImg = channel.channel.image_url
+    //     const channelName = channel.channel.name
+    //     feed1.casts[i].channelImg = channelImg
+    //     feed1.casts[i].channelName = channelName
+    //   }
+    // }
+
+    // console.log(channels)
+    setSearchResults({kind: 'channels', data: channels})
   }
 
   const timePassed = (timestamp) => {
@@ -93,7 +92,6 @@ export default function Home({apiKey}) {
   }
   
   useEffect(() => {
-    getFeed()
     setTextMax(522)
     handleTextResize()
     window.addEventListener("resize", handleTextResize);
@@ -117,14 +115,6 @@ export default function Home({apiKey}) {
     setSearchSelect(e.target.getAttribute('name'))
   }
 
-  const LineBreak = () => {
-    return (
-      <div style={{padding: '50px 0 0 0'}}>
-        <p style={{fontSize: 0}}>&nbsp;</p>
-      </div>
-    )
-  }
-
   const SearchOptionButton = (props) => {
     const btn = props.buttonName
     return (
@@ -132,125 +122,76 @@ export default function Home({apiKey}) {
     )
   }
 
+  function routeSearch() {
+    // console.log(searchSelect)
+    // console.log(userSearch.search)
+    if (searchSelect == 'Channels') {
+      getChannels(userSearch.search)
+    }
+  }
 
   return (
   <div className='flex-col' style={{width: 'auto'}} ref={ref}>
     <div className="top-layer" style={{padding: '58px 0 0 0'}}>
-
     </div>
     <div style={{padding: '12px 20px', backgroundColor: '#ffffff11', borderRadius: '10px', border: '1px solid #888', marginBottom: '16px'}}>
-    <div className="top-layer flex-row" style={{padding: '10px 0 10px 0', alignItems: 'center', justifyContent: 'space-between', margin: '0', borderBottom: '1px solid #888'}}>
-      { searchButtons.map((btn, index) => (
-        <SearchOptionButton buttonName={btn} key={index} /> ))}
-    </div>
-    <div>
-    <div className="flex-row" style={{padding: '10px 0 0 0'}}>
-        <input onChange={onChange} name='search' placeholder={`Search ${searchSelect}`} value={userSearch.search} className='srch-btn' style={{width: '100%', backgroundColor: '#234'}} />
-        <div className='srch-select-btn' style={{padding: '12px 14px 9px 14px'}}><FaSearch /></div>
+      <div className="top-layer flex-row" style={{padding: '10px 0 10px 0', alignItems: 'center', justifyContent: 'space-between', margin: '0', borderBottom: '1px solid #888'}}>
+        { searchButtons.map((btn, index) => (
+          <SearchOptionButton buttonName={btn} key={index} /> ))}
       </div>
-      </div>
+      <div>
+        <div className="flex-row" style={{padding: '10px 0 0 0'}}>
+            <input onChange={onChange} name='search' placeholder={`Search ${searchSelect}`} value={userSearch.search} className='srch-btn' style={{width: '100%', backgroundColor: '#234'}} />
+            <div className='srch-select-btn' onClick={routeSearch} style={{padding: '12px 14px 9px 14px'}}><FaSearch /></div>
+          </div>
+        </div>
     </div>
+
+
+
     {
-      (typeof userFeed !== 'undefined' && userFeed.length > 0) && (userFeed.map((cast, index) => (<div key={index} className="inner-container" style={{width: '100%', display: 'flex', flexDirection: 'row'}}>
+      (searchResults.kind == 'channels' && searchResults.data.channels.length > 0) && (searchResults.data.channels.map((channel, index) => (<div key={index} className="inner-container flex-row" style={{width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
         <div>
           <div>
             <div className="">
-              <div className="" style={{left: '38px', height: '22px'}}>
-            </div>
-            <div className="" style={{left: '38px', top: '22px'}}>
-            </div>
-            <div className="">
-              <div className="flex-row">
-                <span className="" datastate="closed" style={{margin: '0 10px 0 0'}}>
-                  <a className="" title="" href={`https://warpcast.com/${cast.author.username}`}>
-                    <img loading="lazy" src={cast.author.pfp_url} className="" alt={`${cast.author.display_name} avatar`} style={{width: '48px', height: '48px', maxWidth: '48px', maxHeight: '48px', borderRadius: '24px', border: '1px solid #000'}} />
-                  </a>
-                </span>
-                <div className="flex-col" style={{width: 'auto', gap: '0.5rem', alignItems: 'flex-start'}}>
-                  <div className="flex-row" style={{width: '100%', justifyContent: 'space-between', height: '20px', alignItems: 'flex-start'}}>
-                    <div className="flex-row" style={{alignItems: 'center', gap: '0.25rem'}}>
-                      <span className="" data-state="closed">
-                        <a className="fc-lnk" title="" href={`https://warpcast.com/${cast.author.username}`}>
-                          <div className="flex-row" style={{alignItems: 'center'}}>
-                            <span className="name-font">{cast.author.display_name}</span>
-                            <div className="" style={{margin: '0 0 0 3px'}}>
-                              {(cast.author.active_status == 'active') && (<ActiveUser />)}
-                            </div>
-                          </div>
-                        </a>
-                      </span>
-                      <span className="user-font" datastate="closed">
-                        <a className="fc-lnk" title="" href={`https://warpcast.com/${cast.author.username}`}>@{cast.author.username}</a>
-                      </span>
-                      <div className="">·</div>
-                      <a className="fc-lnk" title="Navigate to cast" href={`https://warpcast.com/${cast.author.username}/${cast.hash.slice(0,10)}`}>
-                        <div className="user-font">{timePassed(cast.timestamp)}</div>
-                      </a>
-                    </div>
-                    <div className="">
-                      <Kebab />
-                    </div>
-                  </div>
-                  <div className="">
-                    <div style={{wordWrap: 'break-word', maxWidth: `${textMax}px`}}>{cast.text}</div>
-                    {(cast.embeds.length > 0 && 1 == 2) &&
-                    (<div className="">
-                      <div className="">
-                        <img loading="lazy" src={cast.embeds.url} className="" alt="Cast image embed" style={{aspectRatio: '0.75 / 1'}} />
-                      </div>
-                    </div>)}
-                  </div>
-                  {(typeof cast.channelName !== 'undefined') && (
-                    <div className="flex-row" style={{border: '1px solid #666', padding: '2px 4px', borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'flex-start'}}>
+              <div className="">
+                <div className="flex-row">
+                  <span className="" datastate="closed" style={{margin: '0 10px 0 0'}}>
+                    <a className="" title="" href={`https://warpcast.com/~/channel/${channel.id}`}>
+                      <img loading="lazy" src={channel.image_url} className="" alt="" style={{width: '48px', height: '48px', maxWidth: '48px', maxHeight: '48px', borderRadius: '24px', border: '1px solid #000'}} />
+                    </a>
+                  </span>
+                  <div className="flex-col" style={{width: 'auto', gap: '0.5rem', alignItems: 'flex-start'}}>
+                    <div className="flex-row" style={{width: '100%', justifyContent: 'space-between', height: '20px', alignItems: 'flex-start'}}>
                       <div className="flex-row" style={{alignItems: 'center', gap: '0.25rem'}}>
-                        <img loading="lazy" src={cast.channelImg} className="" alt="Channel image" style={{width: '17px', height: '17px', minWidth: '17px', minHeight: '17px', borderRadius: '3px'}} />
-                        <span className="channel-font">{cast.channelName}
+                        <span className="" data-state="closed">
+                          <a className="fc-lnk" title="" href={`https://warpcast.com/~/channel/${channel.id}`}>
+                            <div className="flex-row" style={{alignItems: 'center'}}>
+                              <span className="name-font">{channel.name}</span>
+
+                            </div>
+                          </a>
+                        </span>
+                        <span className="user-font" datastate="closed">
+                          <a className="fc-lnk" title="" href={`https://warpcast.com/~/channel/${channel.id}`}>/{channel.id}</a>
                         </span>
                       </div>
                     </div>
-                  )}
-                  <div className="flex-row" style={{width: '100%', justifyContent: 'space-evenly'}}>
-                    <div className="flex-row" style={{flex: 1}}>
-                      <div className="">
-                        <Message />
-                      </div>
-                      <span className="" style={{padding: '0 0 0 5px'}}>{cast.replies.count}</span>
+                    <div className="">
+                      <div style={{wordWrap: 'break-word', maxWidth: `${textMax}px`}}>{channel.description}</div>
                     </div>
-                    <div className="" style={{flex: 1}}>
-                      <span>
-                        <div className="flex-row">
-                          <div className="">
-                            <Recast />
-                          </div>
-                          <span className="" style={{padding: '0 0 0 5px'}}>{cast.reactions.recasts.length}</span>
-                        </div>
-                      </span>
-                    </div>
-                    <div className="flex-row" style={{flex: 1}}>
-                      <div className="">
-                        <Like />
-                      </div>
-                      <span className="" style={{padding: '0 0 0 5px'}}>{cast.reactions.likes.length}</span>
-                    </div>
-                    <div className="" style={{flex: 1}}>
-                      <div className="flex-row">
-                        <div className="">
-                          <Warp />
-                        </div>
-                        <span className="hidden" style={{padding: '0 0 0 5px', visibility: 'hidden'}}>0</span>
-                      </div>
-                    </div>
-                  </div>
-
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div> 
+        </div>
+        <div className="flex-col">
+          <div className='srch-select' name='follow'>Follow</div>
+          <div className='srch-select' name='review'>Review</div>
+        </div>
       </div>)))
     }
-
   </div>
   )
 }
