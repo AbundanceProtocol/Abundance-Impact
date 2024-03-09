@@ -12,11 +12,14 @@ export default function Home({apiKey}) {
   const ref = useRef(null)
   const [ userFeed, setUserFeed] = useState([])
   const { isMobile } = useMatchBreakpoints();
+  // const contanierDiv = useRef(null)
+  // const contentDiv = useRef(null)
+  const [ feedWidth, setFeedWidth ] = useState()
   // const [vidSize, setVidSize] = useState({w: 1220 + 'px', h: 1220/16*9 + 'px'})
   const account = useContext(AccountContext)
   // const [viewToggle, setViewToggle] = useState({record: false, source: false, media: false, science: false})
   const client = new NeynarAPIClient(apiKey);
-  const [textMax, setTextMax] = useState(522)
+  const [textMax, setTextMax] = useState('522px')
 
   async function getFeed() {
     const base = "https://api.neynar.com/";
@@ -85,48 +88,64 @@ export default function Home({apiKey}) {
   
   useEffect(() => {
     getFeed()
-    setTextMax(522)
+    if (account.ref1?.current?.offsetWidth) {
+      if (account.ref1?.current?.offsetWidth > 680) {
+        setTextMax(`522px`)
+      }
+      else if (account.ref1?.current?.offsetWidth >= 640 && account.ref1?.current?.offsetWidth <= 680) {
+        setTextMax(`${account.ref1?.current?.offsetWidth - 160}px`)
+      }
+      else {
+        setTextMax(`${account.ref1?.current?.offsetWidth - 100}px`)
+      }
+    }
+    else {
+      setTextMax(`522px`)
+    }
+
     handleTextResize()
     window.addEventListener("resize", handleTextResize);
-    return () => window.removeEventListener("resize", handleTextResize);
+    return () => {
+      window.removeEventListener("resize", handleTextResize);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+
   function handleTextResize() {
-    if (typeof account.ref?.current?.offsetWidth !== 'undefined') {
-      if (account.ref?.current?.offsetWidth == 620) {
-        setTextMax(522)
-      } else {
-        setTextMax(account.ref?.current?.offsetWidth - 102)
+    if (account.ref1?.current?.offsetWidth) {
+      if (account.ref1?.current?.offsetWidth > 680) {
+        setTextMax(`522px`)
       }
-    } else {
-      setTextMax(522)
+      else if (account.ref1?.current?.offsetWidth >= 640 && account.ref1?.current?.offsetWidth <= 680) {
+        setTextMax(`${account.ref1?.current?.offsetWidth - 160}px`)
+      }
+      else {
+        setTextMax(`${account.ref1?.current?.offsetWidth - 100}px`)
+      }
+    }
+    else {
+      setTextMax(`522px`)
     }
   }
 
-  const LineBreak = () => {
-    return (
-      <div style={{padding: '50px 0 0 0'}}>
-        <p style={{fontSize: 0}}>&nbsp;</p>
-      </div>
-    )
-  }
-
   return (
-  <div style={{width: 'auto'}} ref={ref}>
+  <div name='feed' style={{width: 'auto'}} ref={ref}>
     <div className="top-layer" style={{padding: '58px 0 0 0'}}>
 
     </div>
 
     {
       (typeof userFeed !== 'undefined' && userFeed.length > 0) && (userFeed.map((cast, index) => (<div key={index} className="inner-container" style={{width: '100%', display: 'flex', flexDirection: 'row'}}>
+        {/* {console.log(textMax)} */}
+        {/* {console.log(feedWidth)} */}
         <div>
           <div>
             <div className="">
-              <div className="" style={{left: '38px', height: '22px'}}>
+              {/* <div className="" style={{left: '38px', height: '22px'}}>
             </div>
             <div className="" style={{left: '38px', top: '22px'}}>
-            </div>
+            </div> */}
             <div className="">
               <div className="flex-row">
                 <span className="" datastate="closed" style={{margin: '0 10px 0 0'}}>
@@ -160,7 +179,7 @@ export default function Home({apiKey}) {
                     </div>
                   </div>
                   <div className="">
-                    <div style={{wordWrap: 'break-word', maxWidth: `${textMax}px`}}>{cast.text}</div>
+                    <div style={{wordWrap: 'break-word', maxWidth: `100%`, width: textMax}}>{cast.text}</div>
                     {(cast.embeds.length > 0 && 1 == 2) &&
                     (<div className="">
                       <div className="">

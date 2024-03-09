@@ -138,6 +138,9 @@ html, body {
     .bottom-menu {
         display: none;
     }
+    .cast-area {
+        width: 620px;
+    }
     /* .desktop {
         display: flex;
     }
@@ -167,6 +170,9 @@ html, body {
     }
     .bottom-menu {
         display: flex;
+    }
+    .cast-area {
+        width: 100%;
     }
     /* .desktop {
         display: none;

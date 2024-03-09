@@ -9,19 +9,22 @@ import Button from '@mui/material/Button';
 import Drawer from '@mui/material/Drawer';
 import { HiChevronUp as CollapseIcon, HiMenu } from 'react-icons/hi';
 import { FaPen } from 'react-icons/fa';
-import { AccountContext } from '../context.js'
+import { AccountContext } from '../context'
 import useStore from '../utils/store'
 import useMatchBreakpoints from '../hooks/useMatchBreakpoints';
 import useAuth from '../hooks/useAuth';
 import {Logo, LeftCorner, RightCorner, Space } from './assets'
 import { button } from './assets/button';
 import ConnectButton from '../components/ConnectButton';
+import { IoIosWarning } from "react-icons/io"
 
-function App({ Component, pageProps }) {
+export default function App({ Component, pageProps }) {
+  const clientId = process.env.NEXT_PUBLIC_NEYNAR_CLIENT_ID
   const store = useStore()
   const auth = useAuth();
   const { isMobile, isTablet } = useMatchBreakpoints();
   const ref = useRef(null)
+  const ref1 = useRef(null)
   const [bottomNavSize, setBottomNavSize] = useState(ref?.current?.offsetWidth)
   const [navSize, setNavSize] = useState(1060)
   const router = useRouter()
@@ -45,7 +48,6 @@ function App({ Component, pageProps }) {
   `;
 
   useEffect(() => {
-    // console.log('route', router.route)
     useStore.setState({ router })
   }, [router])
 
@@ -57,7 +59,9 @@ function App({ Component, pageProps }) {
     setNavMenu(button[menuLink].menu)
     handleNavResize()
     window.addEventListener("resize", handleNavResize);
-    return () => window.removeEventListener("resize", handleNavResize);
+    return () => {
+      window.removeEventListener("resize", handleNavResize);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
   
@@ -274,7 +278,7 @@ useEffect( () => {
     }
 
     return (
-      <div className="flex-row here" style={{padding: 'auto 8px', width: 'auto', justifyContent: 'center', alignItems: 'center'}} onMouseEnter={() => {
+      <div className="flex-row" style={{padding: 'auto 8px', width: 'auto', justifyContent: 'center', alignItems: 'center'}} onMouseEnter={() => {
         setNavMenu(btn.menu)
         setMenuHover({ ...menuHover, in: Date.now() })
       }}
@@ -387,12 +391,12 @@ useEffect( () => {
               <div className="navbar-header">
                 <HomeButton />
                 <Box className="navbar-header-end" sx={{display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', alignItems: 'center', justifyContent: 'space-between'}}>
-                  <ConnectButton 
+                  {/* <ConnectButton 
                     account={store.account}
                     isMobile={isMobile}
                     onConnect={connect}
                     onDisconnect={disconnect}
-                    />
+                    /> */}
                   <MenuButton onClick={toggleDrawer()}>
                     {mobileMenuOpen ? <CollapseIcon/> : <HiMenu />}
                   </MenuButton>
@@ -411,12 +415,12 @@ useEffect( () => {
             <MobileNavMenu />
           </Drawer>
         </React.Fragment>
-      <div className="container">
-        <AccountContext.Provider value={{...store.account, ref}}>
+      <div className="container cast-area" style={{width: '100%'}}>
+        <AccountContext.Provider value={{...store.account, ref1}}>
           <Component {...pageProps} connect={connect} />
         </AccountContext.Provider>
       </div>
-      <div className='bottom-menu flex-row' style={{position: 'fixed', bottom: 0, backgroundColor: '#1D3244cc', height: '56px', width: `100%`, borderRadius: '0px', padding: '0', border: '0px solid #678', boxSizing: 'border-box'}}>
+      <div ref={ref1} className='bottom-menu flex-row' style={{position: 'fixed', bottom: 0, backgroundColor: '#1D3244cc', height: '56px', width: `100%`, borderRadius: '0px', padding: '0', border: '0px solid #678', boxSizing: 'border-box'}}>
         <div className='flex-row' style={{position: 'relative', width: '100%', justifyContent: 'space-between', padding: '0 10px'}}>
         { button['bottom-nav'].map((btn, index) => (
               <BottomNav buttonName={btn} key={index} /> ))}
@@ -425,8 +429,8 @@ useEffect( () => {
     </div>
   ) : (
       <div ref={ref} className='flex-col' style={{position: 'absolute', display: 'flex', minHeight: '100%', height: '100%', width: '100%'}}>
-        <nav className="nav-bar top-layer flex-col" style={{width: '100%', justifyContent: 'center', height: '58px'}}>
-          <div className="flex-col nav-top" ref={ref} style={{justifyContent: 'center', margin: '0 auto', width: '100%'}}>
+        <nav ref={ref1} className="nav-bar top-layer flex-col" style={{width: '100%', justifyContent: 'center', height: '58px'}}>
+          <div className="flex-col nav-top" style={{justifyContent: 'center', margin: '0 auto', width: '100%'}}>
             <div className="flex-row" style={{justifyContent: 'center', alignItems: 'center'}}>
               <div className='top-left'>
                 <HomeButton />
@@ -436,12 +440,12 @@ useEffect( () => {
                     { button['top-menu'].map((btn, index) => (
                       <TopNav buttonName={btn} key={index} /> ))}
                   </TopNavWrapper>
-                  <ConnectButton 
+                  {/* <ConnectButton 
                     account={account}
                     isMobile={isMobile}
                     onConnect={connect}
                     onDisconnect={disconnect}
-                  />
+                  /> */}
               </Col>
             </div>
           </div>
@@ -454,14 +458,14 @@ useEffect( () => {
           </div>
           <div>
             <div className="container cast-area">
-              <AccountContext.Provider value={{...store.account, ref}}>
+              <AccountContext.Provider value={{...store.account, ref1}}>
                 <Component {...pageProps} connect={connect} />
               </AccountContext.Provider>
             </div>
           </div>
           <div className='right-nav-text' style={{width: '400px'}}>
             <div>
-              <div style={{margin: '62px 0px 12px 20px', backgroundColor: '#ffffff22', height: '150px', width: '380px', borderRadius: '20px', padding: '12px', border: '0px solid #678'}}>&nbsp;</div>
+              <div style={{margin: '62px 0px 12px 20px', backgroundColor: '#ffffff22', width: '380px', borderRadius: '20px', padding: '32px', border: '0px solid #678', color: '#fff', fontWeight: '700', alignItems:' center', fontSize: '20px'}}><IoIosWarning size={40} color={'#fbb'} /><p style={{paddingTop: '10px'}}>NOTICE: the Abundance Protocol&apos;s Impact App is currently in an early development stage </p></div>
             </div>
           </div>
         </div>
@@ -483,8 +487,6 @@ const MobileAppbar = styled(AppBar)`
   @media(max-width: 360px) {
     padding: 0 16px 0 8px;
   }
-
-
 `;
 
 const NavbarHeader = styled.div`
@@ -493,7 +495,6 @@ const NavbarHeader = styled.div`
   align-items: baseline;
   background: transparent;
   
-
   .navbar-header {
     display: grid;
     grid-auto-flow: column;
@@ -548,8 +549,6 @@ const MenuButton = styled(Button)`
   }
 `;
 
-
-
 const TopNavWrapper = styled.div`
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -569,8 +568,6 @@ const TopNavWrapper = styled.div`
   }
 `;
 
-
-
 const TitleWrapper = styled.div`
   padding: 15px;
 
@@ -584,8 +581,6 @@ const TitleWrapper = styled.div`
       font-size: 10px;
     }
   }
-
-  
 `;
 
 const SubNavBoxWrapper = styled.div`
@@ -640,5 +635,3 @@ const SubNavBoxWrapper = styled.div`
   }
 
 `;
-
-export default App;
