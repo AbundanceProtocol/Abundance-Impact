@@ -16,15 +16,18 @@ import useAuth from '../hooks/useAuth';
 import {Logo, LeftCorner, RightCorner, Space } from './assets'
 import { button } from './assets/button';
 import ConnectButton from '../components/ConnectButton';
+import NeynarSigninButton from '../components/Signin';
 import { IoIosWarning } from "react-icons/io"
+// import { AccountProvider } from '../context';
 
 export default function App({ Component, pageProps }) {
-  const clientId = process.env.NEXT_PUBLIC_NEYNAR_CLIENT_ID
+  // const clientId = process.env.NEXT_PUBLIC_NEYNAR_CLIENT_ID
   const store = useStore()
   const auth = useAuth();
   const { isMobile, isTablet } = useMatchBreakpoints();
   const ref = useRef(null)
   const ref1 = useRef(null)
+  const [isSignedIn, setIsSignedIn] = useState(false)
   const [bottomNavSize, setBottomNavSize] = useState(ref?.current?.offsetWidth)
   const [navSize, setNavSize] = useState(1060)
   const router = useRouter()
@@ -54,6 +57,9 @@ export default function App({ Component, pageProps }) {
   useEffect(() => {
     let menuLink = targetLink()
     setBottomNavSize(ref?.current?.offsetWidth)
+
+    console.log(isSignedIn)
+
     setNavSize(ref?.current?.offsetWidth - 60)
     setLinkTarget(menuLink)
     setNavMenu(button[menuLink].menu)
@@ -70,6 +76,19 @@ export default function App({ Component, pageProps }) {
     setBottomNavSize(ref?.current?.offsetWidth)
   }
 
+  const handleSignIn = async (data) => {
+    // console.log(data)
+    // console.log(store.isAuth)
+    setIsSignedIn(true)
+  };
+
+  const handleLogOut = () => {
+    store.setFid(null)
+    store.setIsAuth(false)
+    store.setSigner(null)
+    setIsSignedIn(false)
+  };
+
   const onAccount = useCallback(() => {
     store.setAccount(auth.account)
     store.setUsername(auth.username)
@@ -81,11 +100,11 @@ export default function App({ Component, pageProps }) {
     onAccount()
   }, [onAccount])
 
-useEffect( () => {
-  if (menuHover.in <= menuHover.out && typeof linkTarget !== 'object') {
-    setNavMenu(button[linkTarget].menu)
-  }
-}, [linkTarget, menuHover.in, menuHover.out])
+  useEffect( () => {
+    if (menuHover.in <= menuHover.out && typeof linkTarget !== 'object') {
+      setNavMenu(button[linkTarget].menu)
+    }
+  }, [linkTarget, menuHover.in, menuHover.out])
 
   function handleResize() {
     setNavSize(ref?.current?.offsetWidth - 60)
@@ -160,6 +179,11 @@ useEffect( () => {
     );
   }
 
+  const LogOut = () => {
+    return (
+      <div className='srch-select-btn' onClick={handleLogOut}>Log out</div>
+    )
+  }
   const HomeButton = () => {
     const isSmall = isMobile || isTablet;
     return (
@@ -302,8 +326,6 @@ useEffect( () => {
     )
   }
 
-
-
   const SubCat = () => {
     try {
       let subButtons = button['nav-menu'][navMenu]
@@ -390,7 +412,8 @@ useEffect( () => {
             <NavbarHeader>
               <div className="navbar-header">
                 <HomeButton />
-                <Box className="navbar-header-end" sx={{display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', alignItems: 'center', justifyContent: 'space-between'}}>
+                <Box className="navbar-header-end flex-row" sx={{alignItems: 'center', justifyContent: 'space-between'}}>
+                {isSignedIn ? (<LogOut />) : (<NeynarSigninButton onSignInSuccess={handleSignIn} />)}
                   {/* <ConnectButton 
                     account={store.account}
                     isMobile={isMobile}
@@ -440,6 +463,9 @@ useEffect( () => {
                     { button['top-menu'].map((btn, index) => (
                       <TopNav buttonName={btn} key={index} /> ))}
                   </TopNavWrapper>
+                  {isSignedIn ? (<LogOut />) : (<NeynarSigninButton onSignInSuccess={handleSignIn} />)}
+                  {/* {isSignedIn ? (<LogOut />) : (<LogOut />)} */}
+                  
                   {/* <ConnectButton 
                     account={account}
                     isMobile={isMobile}

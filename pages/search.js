@@ -8,6 +8,7 @@ import { Circles } from './assets'
 import useMatchBreakpoints from '../hooks/useMatchBreakpoints'
 import { NeynarAPIClient } from "@neynar/nodejs-sdk";
 import { FaSearch } from 'react-icons/fa';
+import useStore from '../utils/store'
 
 export default function Home({apiKey}) {
   const ref = useRef(null)
@@ -23,13 +24,17 @@ export default function Home({apiKey}) {
   // const [viewToggle, setViewToggle] = useState({record: false, source: false, media: false, science: false})
   const client = new NeynarAPIClient(apiKey);
   const [textMax, setTextMax] = useState(522)
+  const store = useStore()
 
 	function onChange(e) {
 		setUserSearch( () => ({ ...userSearch, [e.target.name]: e.target.value }) )
 	}
 
   async function getUsers(name) {
-    const fid = 9326
+    let fid = 3
+    if (store.isAuth) {
+      fid = store.fid
+    }
     const base = "https://api.neynar.com/";
     const url = `${base}v2/farcaster/user/search?q=${name}&viewer_fid=${fid}`;
     const response = await fetch(url, {
@@ -157,8 +162,14 @@ export default function Home({apiKey}) {
 
   const SearchOptionButton = (props) => {
     const btn = props.buttonName
-    return (
+    let isSearchable = true
+    if (props.buttonName == 'Users' && !store.isAuth) {
+      isSearchable = false
+    }
+    return isSearchable ? (
       <div className={(searchSelect == btn) ? 'srch-select' : 'srch-btn'} onClick={searchOption} name={btn}>{btn}</div>
+    ) : (
+      <div className={(searchSelect == btn) ? 'x-srch-select' : 'x-srch-btn'} name={btn} disabled>{btn}</div>
     )
   }
 
@@ -168,14 +179,14 @@ export default function Home({apiKey}) {
     if (searchSelect == 'Channels') {
       getChannels(userSearch.search)
     }
-    else if (searchSelect == 'Users') {
+    else if (searchSelect == 'Users' && store.isAuto) {
       getUsers(userSearch.search)
     }
   }
 
   return (
   <div className='flex-col' style={{width: 'auto'}} ref={ref}>
-    <div className="top-layer" style={{padding: '58px 0 0 0'}}>
+    <div className="" style={{padding: '58px 0 0 0'}}>
     </div>
     <div style={{padding: '12px 20px', backgroundColor: '#ffffff11', borderRadius: '10px', border: '1px solid #888', marginBottom: '16px'}}>
       <div className="top-layer flex-row" style={{padding: '10px 0 10px 0', alignItems: 'center', justifyContent: 'space-between', margin: '0', borderBottom: '1px solid #888'}}>
@@ -232,9 +243,6 @@ export default function Home({apiKey}) {
         </div>
       </div>)))
     }
-
-
-
 
 
 
@@ -305,13 +313,6 @@ export default function Home({apiKey}) {
         </div>
       </div>)))
     }
-
-
-
-
-
-
-
   </div>
   )
 }
