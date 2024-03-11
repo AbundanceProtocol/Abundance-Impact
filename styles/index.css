@@ -650,6 +650,20 @@ blockquote {
     cursor: pointer;
 }
 
+.logout-btn {
+    border: 1px solid #ccc;
+    border-radius: 14px;
+    font-size: 16px;
+    padding: 6px 12px;
+    color: #000;
+    margin: 2px 5px;
+    font-weight: 600;
+    background-color: #89a;
+    cursor: pointer;
+    width: 110px;
+    text-align: center;
+}
+
 .srch-select-btn {
     border: 1px solid #ccc;
     border-radius: 8px;
@@ -686,7 +700,7 @@ blockquote {
     cursor: default;
 }
 
-.srch-select-btn:hover, .srch-btn:hover, .srch-select:hover {
+.logout-btn:hover, .srch-select-btn:hover, .srch-btn:hover, .srch-select:hover {
     color: #eee;
     background-color: #169;
 }

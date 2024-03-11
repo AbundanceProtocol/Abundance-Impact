@@ -1,10 +1,8 @@
 import { useContext, useState, useRef, useEffect } from 'react'
 import { ethers } from 'ethers'
 import { Swords, CoinBag, CoinStack, Waste, AbundanceStar, FeedbackLoop, Like, Recast, Message, Kebab, Warp, ActiveUser } from './assets'
-import ReactPlayer from "react-player"
 import Link from 'next/link'
 import { AccountContext } from '../context'
-import { Circles } from './assets'
 import useMatchBreakpoints from '../hooks/useMatchBreakpoints'
 import { NeynarAPIClient } from "@neynar/nodejs-sdk";
 
@@ -12,12 +10,8 @@ export default function Home({apiKey}) {
   const ref = useRef(null)
   const [ userFeed, setUserFeed] = useState([])
   const { isMobile } = useMatchBreakpoints();
-  // const contanierDiv = useRef(null)
-  // const contentDiv = useRef(null)
   const [ feedWidth, setFeedWidth ] = useState()
-  // const [vidSize, setVidSize] = useState({w: 1220 + 'px', h: 1220/16*9 + 'px'})
   const account = useContext(AccountContext)
-  // const [viewToggle, setViewToggle] = useState({record: false, source: false, media: false, science: false})
   const client = new NeynarAPIClient(apiKey);
   const [textMax, setTextMax] = useState('522px')
 

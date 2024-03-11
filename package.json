@@ -22,6 +22,7 @@
     "@openzeppelin/contracts": "^4.5.0",
     "@walletconnect/web3-provider": "^1.7.5",
     "autoprefixer": "^10.4.17",
+    "axios": "^1.6.7",
     "buffer": "^6.0.3",
     "chai": "^4.3.6",
     "css-loader": "^6.10.0",
@@ -59,5 +60,8 @@
     "eslint-config-next": "12.1.0",
     "urql": "^2.2.2",
     "web3modal": "^1.9.5"
+  },
+  "resolutions": {
+    "concat-stream": "0.0.0"
   }
 }

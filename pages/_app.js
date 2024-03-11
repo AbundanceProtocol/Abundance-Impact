@@ -13,21 +13,20 @@ import { AccountContext } from '../context'
 import useStore from '../utils/store'
 import useMatchBreakpoints from '../hooks/useMatchBreakpoints';
 import useAuth from '../hooks/useAuth';
-import {Logo, LeftCorner, RightCorner, Space } from './assets'
+import {Logo } from './assets'
 import { button } from './assets/button';
-import ConnectButton from '../components/ConnectButton';
+// import ConnectButton from '../components/ConnectButton';
 import NeynarSigninButton from '../components/Signin';
 import { IoIosWarning } from "react-icons/io"
-// import { AccountProvider } from '../context';
+import axios from 'axios';
 
 export default function App({ Component, pageProps }) {
-  // const clientId = process.env.NEXT_PUBLIC_NEYNAR_CLIENT_ID
   const store = useStore()
   const auth = useAuth();
   const { isMobile, isTablet } = useMatchBreakpoints();
   const ref = useRef(null)
   const ref1 = useRef(null)
-  const [isSignedIn, setIsSignedIn] = useState(false)
+  const [isSignedIn, setIsSignedIn] = useState()
   const [bottomNavSize, setBottomNavSize] = useState(ref?.current?.offsetWidth)
   const [navSize, setNavSize] = useState(1060)
   const router = useRouter()
@@ -58,7 +57,9 @@ export default function App({ Component, pageProps }) {
     let menuLink = targetLink()
     setBottomNavSize(ref?.current?.offsetWidth)
 
-    console.log(isSignedIn)
+    // const storedData = useStore
+    console.log(store.isAuth)
+
 
     setNavSize(ref?.current?.offsetWidth - 60)
     setLinkTarget(menuLink)
@@ -70,6 +71,14 @@ export default function App({ Component, pageProps }) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  useEffect(() => {
+    console.log(store.userDisplayNameFC)
+    if (store.isAuth)
+      setIsSignedIn(true)
+    else
+      setIsSignedIn(false)
+  }, [store.isAuth])
   
   function handleNavResize() {
     setNavWidth((ref?.current?.offsetWidth - 1312)/2 - 167)
@@ -77,8 +86,8 @@ export default function App({ Component, pageProps }) {
   }
 
   const handleSignIn = async (data) => {
-    // console.log(data)
-    // console.log(store.isAuth)
+    console.log(data)
+    console.log(store.isAuth)
     setIsSignedIn(true)
   };
 
@@ -86,8 +95,57 @@ export default function App({ Component, pageProps }) {
     store.setFid(null)
     store.setIsAuth(false)
     store.setSigner(null)
+
+    store.setUsernameFC(null)
+    store.setSrcUrlFC(null)
+    store.setUserDisplayNameFC(null)
+    store.setUserActiveFC(false)
+    store.setUserBioFC(null)
+    store.setUserFollowersFC(null)
+    store.setUserFollowingFC(null)
+    store.setUserEthVerAddresses([])
+    store.setUserSolVerAddresses([])
     setIsSignedIn(false)
   };
+
+  useEffect(() => {
+    // console.log(store.fid, store.isAuth, store.signer_uuid);
+    if (store.isAuth) {
+      setUserProfile(store.fid)
+      // setIsSignedIn(true)
+    }
+    else {
+      setIsSignedIn(false)
+    }
+  }, [store.fid, store.isAuth, store.signer_uuid]);
+
+  async function setUserProfile(fid) {
+    try {
+      const response = await axios.get('/api/getUserProfile', {
+        params: {
+          fid: fid,
+        }
+      })
+      const user = response.data.userProfile[0]
+      store.setUsernameFC(user.username)
+      store.setSrcUrlFC(user.pfl_url)
+      store.setUserDisplayNameFC(user.display_name)
+      store.setUserActiveFC(user.active_status)
+      store.setUserBioFC(user.profile.bio.text)
+      store.setUserFollowersFC(user.follower_count)
+      store.setUserFollowingFC(user.following_count)
+      let verEthAddresses = []
+      for (let address in user.verified_addresses.eth_addresses) 
+        verEthAddresses.push(address)
+      store.setUserEthVerAddresses(verEthAddresses)
+      let verSolAddresses = []
+      for (let address in user.verified_addresses.sol_addresses) 
+        verSolAddresses.push(address)
+      store.setUserSolVerAddresses(verSolAddresses)
+    } catch (error) {
+      console.error('Error submitting data:', error)
+    }
+  }
 
   const onAccount = useCallback(() => {
     store.setAccount(auth.account)
@@ -181,7 +239,7 @@ export default function App({ Component, pageProps }) {
 
   const LogOut = () => {
     return (
-      <div className='srch-select-btn' onClick={handleLogOut}>Log out</div>
+      <div className='logout-btn' onClick={handleLogOut}>Log out</div>
     )
   }
   const HomeButton = () => {
@@ -460,9 +518,10 @@ export default function App({ Component, pageProps }) {
               </div>
               <Col className='top-right'>
                 <TopNavWrapper>
-                    { button['top-menu'].map((btn, index) => (
-                      <TopNav buttonName={btn} key={index} /> ))}
+                    {/* { button['top-menu'].map((btn, index) => (
+                      <TopNav buttonName={btn} key={index} /> ))} */}
                   </TopNavWrapper>
+                  {/* <div className='srch-select-btn' onClick={currentState}>Test Button</div> */}
                   {isSignedIn ? (<LogOut />) : (<NeynarSigninButton onSignInSuccess={handleSignIn} />)}
                   {/* {isSignedIn ? (<LogOut />) : (<LogOut />)} */}
                   
@@ -491,7 +550,7 @@ export default function App({ Component, pageProps }) {
           </div>
           <div className='right-nav-text' style={{width: '400px'}}>
             <div>
-              <div style={{margin: '62px 0px 12px 20px', backgroundColor: '#ffffff22', width: '380px', borderRadius: '20px', padding: '32px', border: '0px solid #678', color: '#fff', fontWeight: '700', alignItems:' center', fontSize: '20px'}}><IoIosWarning size={40} color={'#fbb'} /><p style={{paddingTop: '10px'}}>NOTICE: the Abundance Protocol&apos;s Impact App is currently in an early development stage </p></div>
+              <div style={{margin: '58px 0px 12px 20px', backgroundColor: '#ffffff22', width: '380px', borderRadius: '20px', padding: '32px', border: '0px solid #678', color: '#fff', fontWeight: '700', alignItems:' center', fontSize: '20px'}}><IoIosWarning size={40} color={'#fbb'} /><p style={{paddingTop: '10px'}}>NOTICE: the Abundance Protocol&apos;s Impact App is currently in an early development stage </p></div>
             </div>
           </div>
         </div>

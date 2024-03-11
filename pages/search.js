@@ -1,121 +1,87 @@
 import { useContext, useState, useRef, useEffect } from 'react'
 import { ethers } from 'ethers'
-import { Swords, CoinBag, CoinStack, Waste, AbundanceStar, FeedbackLoop, Like, Recast, Message, Kebab, Warp, ActiveUser } from './assets'
-import ReactPlayer from "react-player"
+import { Like, Recast, Message, Kebab, Warp, ActiveUser } from './assets'
 import Link from 'next/link'
 import { AccountContext } from '../context'
-import { Circles } from './assets'
 import useMatchBreakpoints from '../hooks/useMatchBreakpoints'
-import { NeynarAPIClient } from "@neynar/nodejs-sdk";
+// import { NeynarAPIClient } from "@neynar/nodejs-sdk";
 import { FaSearch } from 'react-icons/fa';
 import useStore from '../utils/store'
+import axios from 'axios';
 
-export default function Home({apiKey}) {
+export default function Home() {
   const ref = useRef(null)
-  const [ userFeed, setUserFeed ] = useState([])
+  // const [ userFeed, setUserFeed ] = useState([])
   const initialState = { search: '' }
 	const [userSearch, setUserSearch] = useState(initialState)
   const searchButtons = ['Ecosystems', 'Channels', 'Proposals', 'Users']
   const [ searchSelect, setSearchSelect ] = useState('Ecosystems')
   const [ searchResults, setSearchResults ] = useState({kind: 'ecosystems', data: []})
   const { isMobile } = useMatchBreakpoints();
-  // const [vidSize, setVidSize] = useState({w: 1220 + 'px', h: 1220/16*9 + 'px'})
   const account = useContext(AccountContext)
-  // const [viewToggle, setViewToggle] = useState({record: false, source: false, media: false, science: false})
-  const client = new NeynarAPIClient(apiKey);
-  const [textMax, setTextMax] = useState(522)
+  // const client = new NeynarAPIClient(apiKey);
+  const [textMax, setTextMax] = useState('522px')
+  const [textChMax, setTextChMax] = useState('430px')
   const store = useStore()
 
 	function onChange(e) {
 		setUserSearch( () => ({ ...userSearch, [e.target.name]: e.target.value }) )
 	}
 
+  const searchOption = (e) => {
+    setSearchSelect(e.target.getAttribute('name'))
+  }
+
+  function routeSearch() {
+    console.log(store.isAuth, userSearch.search)
+    if (searchSelect == 'Channels') {
+      getChannels(userSearch.search)
+    }
+    else if (searchSelect == 'Users' && store.isAuth) {
+      getUsers(userSearch.search)
+    }
+  }
+
   async function getUsers(name) {
     let fid = 3
     if (store.isAuth) {
       fid = store.fid
     }
-    const base = "https://api.neynar.com/";
-    const url = `${base}v2/farcaster/user/search?q=${name}&viewer_fid=${fid}`;
-    const response = await fetch(url, {
-      headers: {
-        accept: "application/json",
-        api_key: apiKey,
-      },
-    });
-    const users = await response.json();
-    setSearchResults({kind: 'users', data: users})
-  }
 
+    try {
+      const response = await axios.get('/api/getUsers', {
+        params: {
+          fid: fid,
+          name: name,
+        }
+      })
+      const users = response.data.users
+      setSearchResults({kind: 'users', data: users})
+    } catch (error) {
+      console.error('Error submitting data:', error)
+    }
+  }
 
   async function getChannels(name) {
-    const base = "https://api.neynar.com/";
-    const url = `${base}v2/farcaster/channel/search?q=${name}`;
-    const response = await fetch(url, {
-      headers: {
-        accept: "application/json",
-        api_key: apiKey,
-      },
-    });
-
-    const channels = await response.json();
-    // if (typeof channels !== 'undefined') {
-    //   for (let i = 0; i < channels.channels.length; i++) {
-    //     // const base = "https://api.neynar.com/";
-    //     const channelId = channels.channels[i].id
-    //     const channelQuery = `${base}v2/farcaster/channel/followers?id=${channelId}`;
-    //     const channelData = await fetch(channelQuery, {
-    //       headers: {
-    //         accept: "application/json",
-    //         api_key: apiKey,
-    //       },
-    //     });
-    //     const getChannel = await channelData.json();
-    //     const channelQuery = `${base}v2/farcaster/channel?id=${getChannel}`;
-    //     const channelData = await fetch(channelQuery, {
-    //       headers: {
-    //         accept: "application/json",
-    //         api_key: apiKey,
-    //       },
-    //     });
-    //     console.log(channelInfo)
-    //     const channelImg = channel.channel.image_url
-    //     const channelName = channel.channel.name
-    //     feed1.casts[i].channelImg = channelImg
-    //     feed1.casts[i].channelName = channelName
-    //   }
-    // }
-
-    // console.log(channels)
-    setSearchResults({kind: 'channels', data: channels})
+    try {
+      const response = await axios.get('/api/getChannels', {
+        params: {
+          name: name,
+        }
+      })
+      const channels = response.data.channels.channels
+      setSearchResults({kind: 'channels', data: channels})
+    } catch (error) {
+      console.error('Error submitting data:', error)
+    }
   }
 
-  // const timePassed = (timestamp) => {
-  //   const currentTime = new Date();
-  //   const pastTime = new Date(timestamp);
-  //   const timeDifference = currentTime - pastTime;
-    
-  //   const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
-  //   if (days > 0) {
-  //     const stamp = `${days}d`
-  //     return stamp
-  //   } else {
-  //     const hours = Math.floor(timeDifference / (1000 * 60 * 60));
-  //     if (hours > 0) {
-  //       const stamp = `${hours}h`
-  //       return stamp
-  //     } else {
-  //       const minutes = Math.floor(timeDifference / (1000 * 60));
-  //       if (minutes > 0) {
-  //         const stamp = `${minutes}m`
-  //         return stamp
-  //       } else {
-  //         return `now`
-  //       }
-  //     }
-  //   }
-  // }
-  
+  useEffect(() => {
+    if (!store.isAuth) {
+      setSearchSelect('Ecosystems')
+    }
+  }, [store.isAuth])
+
   useEffect(() => {
     if (account.ref1?.current?.offsetWidth) {
       if (account.ref1?.current?.offsetWidth > 680) {
@@ -144,20 +110,21 @@ export default function Home({apiKey}) {
     if (account.ref1?.current?.offsetWidth) {
       if (account.ref1?.current?.offsetWidth > 680) {
         setTextMax(`522px`)
+        setTextChMax(`430px`)
       }
       else if (account.ref1?.current?.offsetWidth >= 640 && account.ref1?.current?.offsetWidth <= 680) {
         setTextMax(`${account.ref1?.current?.offsetWidth - 160}px`)
+        setTextChMax(`${account.ref1?.current?.offsetWidth - 190}px`)
       }
       else {
         setTextMax(`${account.ref1?.current?.offsetWidth - 100}px`)
+        setTextChMax(`${account.ref1?.current?.offsetWidth - 130}px`)
       }
     }
     else {
       setTextMax(`522px`)
+      setTextChMax(`430px`)
     }
-  }
-  const searchOption = (e) => {
-    setSearchSelect(e.target.getAttribute('name'))
   }
 
   const SearchOptionButton = (props) => {
@@ -171,17 +138,6 @@ export default function Home({apiKey}) {
     ) : (
       <div className={(searchSelect == btn) ? 'x-srch-select' : 'x-srch-btn'} name={btn} disabled>{btn}</div>
     )
-  }
-
-  function routeSearch() {
-    // console.log(searchSelect)
-    // console.log(userSearch.search)
-    if (searchSelect == 'Channels') {
-      getChannels(userSearch.search)
-    }
-    else if (searchSelect == 'Users' && store.isAuto) {
-      getUsers(userSearch.search)
-    }
   }
 
   return (
@@ -202,7 +158,7 @@ export default function Home({apiKey}) {
     </div>
 
     {
-      (searchResults.kind == 'channels' && searchResults.data.channels.length > 0) && (searchResults.data.channels.map((channel, index) => (<div key={index} className="inner-container flex-row" style={{width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
+      (searchResults.kind == 'channels' && searchResults.data.length > 0) && (searchResults.data.map((channel, index) => (<div key={index} className="inner-container flex-row" style={{width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
         <div>
           <div>
             <div className="">
@@ -229,7 +185,7 @@ export default function Home({apiKey}) {
                       </div>
                     </div>
                     <div className="">
-                      <div style={{wordWrap: 'break-word', maxWidth: `${textMax}px`}}>{channel.description}</div>
+                      <div style={{wordWrap: 'break-word', maxWidth: textChMax}}>{channel.description}</div>
                     </div>
                   </div>
                 </div>
@@ -244,11 +200,8 @@ export default function Home({apiKey}) {
       </div>)))
     }
 
-
-
-
     {
-      (searchResults.kind == 'users' && searchResults.data.result.users.length > 0) && (searchResults.data.result.users.map((user, index) => (<div key={index} className="inner-container flex-row" style={{width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
+      (searchResults.kind == 'users' && searchResults.data.length > 0) && (searchResults.data.map((user, index) => (<div key={index} className="inner-container flex-row" style={{width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
         <div style={{width: '100%'}}>
           <div>
             <div>
@@ -282,7 +235,7 @@ export default function Home({apiKey}) {
                       </div>
                     </div>
                     <div className="">
-                      <div style={{wordWrap: 'break-word', maxWidth: `${textMax}px`}}>{user.profile.bio.text}</div>
+                      <div style={{wordWrap: 'break-word', maxWidth: textChMax}}>{user.profile.bio.text}</div>
                     </div>
                     <div className="flex-row" style={{width: '100%', justifyContent: 'space-evenly'}}>
                       <div className="flex-row" style={{flex: 1}}>
@@ -315,13 +268,4 @@ export default function Home({apiKey}) {
     }
   </div>
   )
-}
-
-
-export async function getStaticProps() {
-  return {
-    props: {
-      apiKey: process.env.NEYNAR_API_KEY,
-    },
-  };
 }

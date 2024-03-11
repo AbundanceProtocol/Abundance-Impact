@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 
 const Dotenv = require('dotenv-webpack');
+require('dotenv').config();
 
 module.exports = {
   reactStrictMode: true,
