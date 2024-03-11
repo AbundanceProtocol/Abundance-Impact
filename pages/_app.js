@@ -315,7 +315,7 @@ export default function App({ Component, pageProps }) {
     let accountState = !btn.account || (account && btn.account)
     if ((router.route === btn.link) && accountState) {
       menuState = "active-nav-link"
-    } else if (!accountState) {
+    } else if (!accountState || !btn.working) {
       menuState = "inactive-nav-link"
     }
 

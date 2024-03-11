@@ -123,122 +123,122 @@ const button = {
 
     // ////// MENUS //////
 
-    // 'portal': {
-    //     link: '/portal',
-    //     menu: 'Portal',
-    //     description: 'Your activity hub',
-    //     account: true,
-    //     working: true,
-    //     icon: FaUser
+    'portal': {
+        link: '/portal',
+        menu: 'Portal',
+        description: 'Your activity hub',
+        account: true,
+        working: true,
+        icon: FaUser
+    },
+    'studio': {
+        link: '/create',
+        menu: 'Studio',
+        description: 'Create. Contribute. Collaborate',
+        account: true,
+        working: true,
+        icon: FaPen
+    },
+    'consensus': {
+        link: '/consensus',
+        menu: 'Consensus',
+        description: 'Proof-of-Impact Consensus Validation',
+        account: true,
+        working: true,
+        icon: FaHandshake
+    },
+    'funding': {
+        link: '/fund',
+        menu: 'Funding',
+        description: 'Give and get funding',
+        account: true,
+        working: true,
+        icon: FaCoins
+    },
+    // 'ecosystem': {
+    //     link: '/explore',
+    //     menu: 'Ecosystem',
+    //     description: 'Explore the ecosystem, your communities, and resources',
+    //     account: false,
+    //     working: false,
+    //     icon: FaGlobe
     // },
-    // 'studio': {
-    //     link: '/create',
-    //     menu: 'Studio',
-    //     description: 'Create. Contribute. Collaborate',
-    //     account: true,
-    //     working: true,
-    //     icon: FaPen
-    // },
-    // 'consensus': {
-    //     link: '/consensus',
-    //     menu: 'Consensus',
-    //     description: 'Proof-of-Impact Consensus Validation',
-    //     account: true,
-    //     working: true,
-    //     icon: FaHandshake
-    // },
-    // 'funding': {
-    //     link: '/fund',
-    //     menu: 'Funding',
-    //     description: 'Give and get funding',
-    //     account: true,
-    //     working: true,
-    //     icon: FaCoins
-    // },
-    // // 'ecosystem': {
-    // //     link: '/explore',
-    // //     menu: 'Ecosystem',
-    // //     description: 'Explore the ecosystem, your communities, and resources',
-    // //     account: false,
-    // //     working: false,
-    // //     icon: FaGlobe
-    // // },
 
 
 
 
-    // ////// HOME //////
+    ////// HOME //////
 
-    // 'Vision': {
-    //     link: '/',
+    'Vision': {
+        link: '/',
+        menu: 'Home',
+        description: 'The Abundance Protocol vision for a decentralized economy',
+        account: false,
+        working: true,
+        icon: FaLightbulb
+    },
+    'Roadmap': {
+        link: '/roadmap',
+        menu: 'Home',
+        description: "The Protocol's Master Plan",
+        account: false,
+        working: true,
+        icon: FaMap
+    },
+    // 'Mechanism': {
+    //     link: '/mechanism',
     //     menu: 'Home',
-    //     description: 'The Abundance Protocol vision for a decentralized economy',
+    //     description: 'How it all works',
+    //     account: false,
+    //     working: false,
+    //     icon: FaCogs
+    // },
+    // 'Docs': {
+    //     link: false,
+    //     url: 'https://docs.abundance.id/',
+    //     menu: 'Home',
+    //     description: 'In-depth explanation of the Protocol',
     //     account: false,
     //     working: true,
-    //     icon: FaLightbulb
+    //     icon: FaFileAlt
     // },
-    // 'Roadmap': {
-    //     link: '/roadmap',
+    // 'FAQ': {
+    //     link: '/faq',
     //     menu: 'Home',
-    //     description: "The Protocol's Master Plan",
+    //     description: 'Frequently asked questions',
+    //     account: false,
+    //     working: false,
+    //     icon: FaQuestionCircle
+    // },
+    // 'Blog': {
+    //     link: '/blog',
+    //     menu: 'Home',
+    //     description: 'Read our articles',
     //     account: false,
     //     working: true,
-    //     icon: FaMap
+    //     icon: SiSubstack
     // },
-    // // 'Mechanism': {
-    // //     link: '/mechanism',
-    // //     menu: 'Home',
-    // //     description: 'How it all works',
-    // //     account: false,
-    // //     working: false,
-    // //     icon: FaCogs
-    // // },
-    // // 'Docs': {
-    // //     link: false,
-    // //     url: 'https://docs.abundance.id/',
-    // //     menu: 'Home',
-    // //     description: 'In-depth explanation of the Protocol',
-    // //     account: false,
-    // //     working: true,
-    // //     icon: FaFileAlt
-    // // },
-    // // 'FAQ': {
-    // //     link: '/faq',
-    // //     menu: 'Home',
-    // //     description: 'Frequently asked questions',
-    // //     account: false,
-    // //     working: false,
-    // //     icon: FaQuestionCircle
-    // // },
-    // // 'Blog': {
-    // //     link: '/blog',
-    // //     menu: 'Home',
-    // //     description: 'Read our articles',
-    // //     account: false,
-    // //     working: true,
-    // //     icon: SiSubstack
-    // // },
-    // // 'Contact': {
-    // //     link: '/contact',
-    // //     menu: 'Home',
-    // //     description: 'Connect with us',
-    // //     account: false,
-    // //     working: false,
-    // //     icon: FaLink
-    // // },
+    // 'Contact': {
+    //     link: '/contact',
+    //     menu: 'Home',
+    //     description: 'Connect with us',
+    //     account: false,
+    //     working: false,
+    //     icon: FaLink
+    // },
 
     
 
-    // ////// PORTAL //////
+    ////// PORTAL //////
 
-    // // 'Profile': {
-    // //     link: '/profile',
-    // //     menu: 'Portal',
-    // //     description: 'Update your PFP and bio',
-    // //     account: true,
-    // //     working: true,
-    // //     icon: FaAddressCard
-    // // },
+    // 'Profile': {
+    //     link: '/profile',
+    //     menu: 'Portal',
+    //     description: 'Update your PFP and bio',
+    //     account: true,
+    //     working: true,
+    //     icon: FaAddressCard
+    // },
     // 'Wallet': {
     //     link: '/wallet',
     //     menu: 'Portal',
@@ -267,7 +267,7 @@ const button = {
     
 
 
-    // ////// STUDIO //////
+    ////// STUDIO //////
 
     // 'Create': {
     //     link: '/create-post',
@@ -297,7 +297,7 @@ const button = {
     
 
 
-    // ////// CONSENSUS //////
+    ////// CONSENSUS //////
 
     // 'Propose': {
     //     link: '/init-review',
@@ -315,14 +315,14 @@ const button = {
     //     working: false,
     //     icon: FaRegListAlt
     // },
-    // // 'Challenge': {
-    // //     link: '/challenge',
-    // //     menu: 'Consensus',
-    // //     description: 'Challenge a proposal',
-    // //     account: true,
-    // //     working: false,
-    // //     icon: BsFillHandThumbsDownFill
-    // // },
+    // 'Challenge': {
+    //     link: '/challenge',
+    //     menu: 'Consensus',
+    //     description: 'Challenge a proposal',
+    //     account: true,
+    //     working: false,
+    //     icon: BsFillHandThumbsDownFill
+    // },
     // 'Explore': {
     //     link: '/explore-proposals',
     //     menu: 'Consensus',
@@ -331,28 +331,28 @@ const button = {
     //     working: false,
     //     icon: RiFileSearchFill
     // },
-    // // 'Notifications': {
-    // //     link: '/inbox',
-    // //     menu: 'Consensus',
-    // //     description: 'Validation notifications',
-    // //     account: true,
-    // //     working: false,
-    // //     icon: MdMail
-    // // },
+    // 'Notifications': {
+    //     link: '/inbox',
+    //     menu: 'Consensus',
+    //     description: 'Validation notifications',
+    //     account: true,
+    //     working: false,
+    //     icon: MdMail
+    // },
 
     
 
 
-    // ////// FUNDING //////
+    ////// FUNDING //////
 
-    // // 'Project Funding': {
-    // //     link: '/project-funding',
-    // //     menu: 'Funding',
-    // //     description: 'Request funding for a public goods project',
-    // //     account: true,
-    // //     working: false,
-    // //     icon: GiTwoCoins
-    // // },
+    // 'Project Funding': {
+    //     link: '/project-funding',
+    //     menu: 'Funding',
+    //     description: 'Request funding for a public goods project',
+    //     account: true,
+    //     working: false,
+    //     icon: GiTwoCoins
+    // },
     // 'Review Funding': {
     //     link: '/funding',
     //     menu: 'Funding',
@@ -381,7 +381,7 @@ const button = {
     
 
 
-    // ////// ECOSYSTEM //////
+    ////// ECOSYSTEM //////
     
     // 'Communities': {
     //     link: '/communities',
@@ -423,82 +423,82 @@ const button = {
     //     working: false,
     //     icon: MdFavorite
     // },
-    // // 'Search': {
-    // //     link: '/searchbar',
-    // //     menu: 'Ecosystem',
-    // //     description: 'Search for communities, projects, users, and proposals',
-    // //     account: false,
-    // //     working: false,
-    // //     icon: FaSearch
-    // // },
-    // // 'Feed': {
-    // //     link: '/feed',
-    // //     menu: 'Ecosystem',
-    // //     description: 'Latest projects',
-    // //     account: true,
-    // //     working: true,
-    // //     icon: FaScroll
-    // // },
+    // 'Search': {
+    //     link: '/searchbar',
+    //     menu: 'Ecosystem',
+    //     description: 'Search for communities, projects, users, and proposals',
+    //     account: false,
+    //     working: false,
+    //     icon: FaSearch
+    // },
+    // 'Feed': {
+    //     link: '/feed',
+    //     menu: 'Ecosystem',
+    //     description: 'Latest projects',
+    //     account: true,
+    //     working: true,
+    //     icon: FaScroll
+    // },
 
     
 
 
-    // // LINKS
+    // LINKS
 
-    // // 'GitHub': {
-    // //     link: false,
-    // //     url: 'https://github.com/AbundanceProtocol/abundance-protocol',
-    // //     menu: 'Connect',
-    // //     description: 'Help us develop the protocol on GitHub',
-    // //     account: false,
-    // //     working: true,
-    // //     icon: FaGithub
-    // // },
-    // // 'Discord': {
-    // //     link: false,
-    // //     url: 'https://discord.com/invite/sHcV7g3nqu',
-    // //     menu: 'Connect',
-    // //     description: 'Join our Discord community',
-    // //     account: false,
-    // //     working: true,
-    // //     icon: FaDiscord
-    // // },
-    // // 'OpenSea': {
-    // //     link: false,
-    // //     url: 'https://opensea.io/web4',
-    // //     menu: 'Connect',
-    // //     description: "Get our project's NFTs",
-    // //     account: false,
-    // //     working: true,
-    // //     icon: OpenSeaIcon
-    // // },
-    // // 'YouTube': {
-    // //     link: false,
-    // //     url: 'https://www.youtube.com/@AbundanceProtocol/',
-    // //     menu: 'Connect',
-    // //     description: 'Subscribe to our channel',
-    // //     account: false,
-    // //     working: true,
-    // //     icon: FaYoutube
-    // // },
-    // // 'Twitter': {
-    // //     link: false,
-    // //     url: 'https://twitter.com/Abundance_DAO',
-    // //     menu: 'Connect',
-    // //     description: 'Follow us on Twitter',
-    // //     account: false,
-    // //     working: true,
-    // //     icon: FaTwitter
-    // // },
-    // // 'Email': {
-    // //     link: false,
-    // //     url: 'mailto:info@abundance.id',
-    // //     menu: 'Connect',
-    // //     description: 'Contact us',
-    // //     account: false,
-    // //     working: true,
-    // //     icon: FaAt
-    // // },
+    // 'GitHub': {
+    //     link: false,
+    //     url: 'https://github.com/AbundanceProtocol/abundance-protocol',
+    //     menu: 'Connect',
+    //     description: 'Help us develop the protocol on GitHub',
+    //     account: false,
+    //     working: true,
+    //     icon: FaGithub
+    // },
+    // 'Discord': {
+    //     link: false,
+    //     url: 'https://discord.com/invite/sHcV7g3nqu',
+    //     menu: 'Connect',
+    //     description: 'Join our Discord community',
+    //     account: false,
+    //     working: true,
+    //     icon: FaDiscord
+    // },
+    // 'OpenSea': {
+    //     link: false,
+    //     url: 'https://opensea.io/web4',
+    //     menu: 'Connect',
+    //     description: "Get our project's NFTs",
+    //     account: false,
+    //     working: true,
+    //     icon: OpenSeaIcon
+    // },
+    // 'YouTube': {
+    //     link: false,
+    //     url: 'https://www.youtube.com/@AbundanceProtocol/',
+    //     menu: 'Connect',
+    //     description: 'Subscribe to our channel',
+    //     account: false,
+    //     working: true,
+    //     icon: FaYoutube
+    // },
+    // 'Twitter': {
+    //     link: false,
+    //     url: 'https://twitter.com/Abundance_DAO',
+    //     menu: 'Connect',
+    //     description: 'Follow us on Twitter',
+    //     account: false,
+    //     working: true,
+    //     icon: FaTwitter
+    // },
+    // 'Email': {
+    //     link: false,
+    //     url: 'mailto:info@abundance.id',
+    //     menu: 'Connect',
+    //     description: 'Contact us',
+    //     account: false,
+    //     working: true,
+    //     icon: FaAt
+    // },
   }
 
 export { button }
