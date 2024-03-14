@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { AccountContext } from '../context'
 import useMatchBreakpoints from '../hooks/useMatchBreakpoints'
 import { NeynarAPIClient } from "@neynar/nodejs-sdk";
+import axios from 'axios';
+import { FaRegStar } from "react-icons/fa"
 
 export default function Home({apiKey}) {
   const ref = useRef(null)
@@ -16,41 +18,12 @@ export default function Home({apiKey}) {
   const [textMax, setTextMax] = useState('522px')
 
   async function getFeed() {
-    const base = "https://api.neynar.com/";
-    const url3 = `${base}v2/farcaster/feed?feed_type=filter&filter_type=global_trending&with_recasts=true&with_replies=false&limit=3`;
-    const response3 = await fetch(url3, {
-      headers: {
-        accept: "application/json",
-        api_key: apiKey,
-      },
-    });
-    const feed1 = await response3.json();
-
-    if (typeof feed1 !== 'undefined') {
-      for (let i = 0; i < feed1.casts.length; i++) {
-        if (feed1.casts[i].parent_url !== null) {
-          const isChannel = feed1.casts[i].parent_url.slice(0,31)
-          if (isChannel == 'https://warpcast.com/~/channel/') {
-            const base = "https://api.neynar.com/";
-            const getChannel = feed1.casts[i].parent_url.slice(31)
-            const channelQuery = `${base}v2/farcaster/channel?id=${getChannel}`;
-            const channelData = await fetch(channelQuery, {
-              headers: {
-                accept: "application/json",
-                api_key: apiKey,
-              },
-            });
-            const channel = await channelData.json();
-            const channelImg = channel.channel.image_url
-            const channelName = channel.channel.name
-            feed1.casts[i].channelImg = channelImg
-            feed1.casts[i].channelName = channelName
-          }
-        }
-      }
-      setUserFeed(feed1.casts)
-    } else {
-      setUserFeed(feed1.casts)
+    try {
+      const response = await axios.get('/api/getFeed')
+      const feed = response.data.feed
+      setUserFeed(feed)
+    } catch (error) {
+      console.error('Error submitting data:', error)
     }
   }
 
@@ -126,103 +99,92 @@ export default function Home({apiKey}) {
   return (
   <div name='feed' style={{width: 'auto'}} ref={ref}>
     <div className="top-layer" style={{padding: '58px 0 0 0'}}>
-
     </div>
-
     {
       (typeof userFeed !== 'undefined' && userFeed.length > 0) && (userFeed.map((cast, index) => (<div key={index} className="inner-container" style={{width: '100%', display: 'flex', flexDirection: 'row'}}>
-        {/* {console.log(textMax)} */}
-        {/* {console.log(feedWidth)} */}
         <div>
           <div>
             <div className="">
-              {/* <div className="" style={{left: '38px', height: '22px'}}>
-            </div>
-            <div className="" style={{left: '38px', top: '22px'}}>
-            </div> */}
-            <div className="">
-              <div className="flex-row">
-                <span className="" datastate="closed" style={{margin: '0 10px 0 0'}}>
-                  <a className="" title="" href={`https://warpcast.com/${cast.author.username}`}>
-                    <img loading="lazy" src={cast.author.pfp_url} className="" alt={`${cast.author.display_name} avatar`} style={{width: '48px', height: '48px', maxWidth: '48px', maxHeight: '48px', borderRadius: '24px', border: '1px solid #000'}} />
-                  </a>
-                </span>
-                <div className="flex-col" style={{width: 'auto', gap: '0.5rem', alignItems: 'flex-start'}}>
-                  <div className="flex-row" style={{width: '100%', justifyContent: 'space-between', height: '20px', alignItems: 'flex-start'}}>
-                    <div className="flex-row" style={{alignItems: 'center', gap: '0.25rem'}}>
-                      <span className="" data-state="closed">
-                        <a className="fc-lnk" title="" href={`https://warpcast.com/${cast.author.username}`}>
-                          <div className="flex-row" style={{alignItems: 'center'}}>
-                            <span className="name-font">{cast.author.display_name}</span>
-                            <div className="" style={{margin: '0 0 0 3px'}}>
-                              {(cast.author.active_status == 'active') && (<ActiveUser />)}
+              <div className="">
+                <div className="flex-row">
+                  <span className="" datastate="closed" style={{margin: '0 10px 0 0'}}>
+                    <a className="" title="" href={`https://warpcast.com/${cast.author.username}`}>
+                      <img loading="lazy" src={cast.author.pfp_url} className="" alt={`${cast.author.display_name} avatar`} style={{width: '48px', height: '48px', maxWidth: '48px', maxHeight: '48px', borderRadius: '24px', border: '1px solid #000'}} />
+                    </a>
+                  </span>
+                  <div className="flex-col" style={{width: 'auto', gap: '0.5rem', alignItems: 'flex-start'}}>
+                    <div className="flex-row" style={{width: '100%', justifyContent: 'space-between', height: '20px', alignItems: 'flex-start'}}>
+                      <div className="flex-row" style={{alignItems: 'center', gap: '0.25rem'}}>
+                        <span className="" data-state="closed">
+                          <a className="fc-lnk" title="" href={`https://warpcast.com/${cast.author.username}`}>
+                            <div className="flex-row" style={{alignItems: 'center'}}>
+                              <span className="name-font">{cast.author.display_name}</span>
+                              <div className="" style={{margin: '0 0 0 3px'}}>
+                                {(cast.author.active_status == 'active') && (<ActiveUser />)}
+                              </div>
                             </div>
-                          </div>
+                          </a>
+                        </span>
+                        <span className="user-font" datastate="closed">
+                          <a className="fc-lnk" title="" href={`https://warpcast.com/${cast.author.username}`}>@{cast.author.username}</a>
+                        </span>
+                        <div className="">·</div>
+                        <a className="fc-lnk" title="Navigate to cast" href={`https://warpcast.com/${cast.author.username}/${cast.hash.slice(0,10)}`}>
+                          <div className="user-font">{timePassed(cast.timestamp)}</div>
                         </a>
-                      </span>
-                      <span className="user-font" datastate="closed">
-                        <a className="fc-lnk" title="" href={`https://warpcast.com/${cast.author.username}`}>@{cast.author.username}</a>
-                      </span>
-                      <div className="">·</div>
-                      <a className="fc-lnk" title="Navigate to cast" href={`https://warpcast.com/${cast.author.username}/${cast.hash.slice(0,10)}`}>
-                        <div className="user-font">{timePassed(cast.timestamp)}</div>
-                      </a>
+                      </div>
+                      <div className="">
+                        <Kebab />
+                      </div>
                     </div>
                     <div className="">
-                      <Kebab />
+                      <div style={{wordWrap: 'break-word', maxWidth: `100%`, width: textMax}}>{cast.text}</div>
+                      {(cast.embeds.length > 0 && 1 == 2) &&
+                      (<div className="">
+                        <div className="">
+                          <img loading="lazy" src={cast.embeds.url} className="" alt="Cast image embed" style={{aspectRatio: '0.75 / 1'}} />
+                        </div>
+                      </div>)}
                     </div>
-                  </div>
-                  <div className="">
-                    <div style={{wordWrap: 'break-word', maxWidth: `100%`, width: textMax}}>{cast.text}</div>
-                    {(cast.embeds.length > 0 && 1 == 2) &&
-                    (<div className="">
-                      <div className="">
-                        <img loading="lazy" src={cast.embeds.url} className="" alt="Cast image embed" style={{aspectRatio: '0.75 / 1'}} />
+                    {(typeof cast.channelName !== 'undefined') && (
+                      <div className="flex-row" style={{border: '1px solid #666', padding: '2px 4px', borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'flex-start'}}>
+                        <div className="flex-row" style={{alignItems: 'center', gap: '0.25rem'}}>
+                          <img loading="lazy" src={cast.channelImg} className="" alt="Channel image" style={{width: '17px', height: '17px', minWidth: '17px', minHeight: '17px', borderRadius: '3px'}} />
+                          <span className="channel-font">{cast.channelName}
+                          </span>
+                        </div>
                       </div>
-                    </div>)}
-                  </div>
-                  {(typeof cast.channelName !== 'undefined') && (
-                    <div className="flex-row" style={{border: '1px solid #666', padding: '2px 4px', borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'flex-start'}}>
-                      <div className="flex-row" style={{alignItems: 'center', gap: '0.25rem'}}>
-                        <img loading="lazy" src={cast.channelImg} className="" alt="Channel image" style={{width: '17px', height: '17px', minWidth: '17px', minHeight: '17px', borderRadius: '3px'}} />
-                        <span className="channel-font">{cast.channelName}
+                    )}
+                    <div className="flex-row" style={{width: '100%', justifyContent: 'space-evenly'}}>
+                      <div className="flex-row" style={{flex: 1}}>
+                        <div className="">
+                          <Message />
+                        </div>
+                        <span className="" style={{padding: '0 0 0 5px'}}>{cast.replies.count}</span>
+                      </div>
+                      <div className="" style={{flex: 1}}>
+                        <span>
+                          <div className="flex-row">
+                            <div className="">
+                              <Recast />
+                            </div>
+                            <span className="" style={{padding: '0 0 0 5px'}}>{cast.reactions.recasts.length}</span>
+                          </div>
                         </span>
                       </div>
-                    </div>
-                  )}
-                  <div className="flex-row" style={{width: '100%', justifyContent: 'space-evenly'}}>
-                    <div className="flex-row" style={{flex: 1}}>
-                      <div className="">
-                        <Message />
-                      </div>
-                      <span className="" style={{padding: '0 0 0 5px'}}>{cast.replies.count}</span>
-                    </div>
-                    <div className="" style={{flex: 1}}>
-                      <span>
-                        <div className="flex-row">
-                          <div className="">
-                            <Recast />
-                          </div>
-                          <span className="" style={{padding: '0 0 0 5px'}}>{cast.reactions.recasts.length}</span>
-                        </div>
-                      </span>
-                    </div>
-                    <div className="flex-row" style={{flex: 1}}>
-                      <div className="">
-                        <Like />
-                      </div>
-                      <span className="" style={{padding: '0 0 0 5px'}}>{cast.reactions.likes.length}</span>
-                    </div>
-                    <div className="" style={{flex: 1}}>
-                      <div className="flex-row">
+                      <div className="flex-row" style={{flex: 1}}>
                         <div className="">
-                          <Warp />
+                          <Like />
                         </div>
-                        <span className="hidden" style={{padding: '0 0 0 5px', visibility: 'hidden'}}>0</span>
+                        <span className="" style={{padding: '0 0 0 5px'}}>{cast.reactions.likes.length}</span>
+                      </div>
+                      <div className="flex-row" style={{flex: 1}}>
+                        <div className="" style={{padding: '2px 0 0 0px'}}>
+                          <FaRegStar />
+                        </div>
+                        <span style={{padding: '0 0 0 5px'}}>{cast.impact && (`${cast.impact}`)}</span>
                       </div>
                     </div>
-                  </div>
-
                   </div>
                 </div>
               </div>
@@ -231,7 +193,6 @@ export default function Home({apiKey}) {
         </div> 
       </div>)))
     }
-
   </div>
   )
 }

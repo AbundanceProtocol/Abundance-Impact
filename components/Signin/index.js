@@ -9,7 +9,7 @@ const NeynarSigninButton = ({ onSignInSuccess }) => {
         await onSignInSuccess(data);
         store.setFid(data.fid)
         store.setIsAuth(data.is_authenticated)
-        store.setSigner(data.signer_uuid)
+        store.setSignerUuid(data.signer_uuid)
         // console.log(store.fid, store.isAuth, store.signer_uuid)
       } catch (error) {
         console.error('Sign-in failed:', error);

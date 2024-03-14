@@ -18,12 +18,13 @@ export default function Home() {
   const [ searchSelect, setSearchSelect ] = useState('Ecosystems')
   const [ searchResults, setSearchResults ] = useState({kind: 'ecosystems', data: []})
   const { isMobile } = useMatchBreakpoints();
-  const account = useContext(AccountContext)
+  // const account = useContext(AccountContext)
+  const { ref1, LoginPopup } = useContext(AccountContext)
   // const client = new NeynarAPIClient(apiKey);
   const [textMax, setTextMax] = useState('522px')
   const [textChMax, setTextChMax] = useState('430px')
   const store = useStore()
-
+  // console.log(account)
 	function onChange(e) {
 		setUserSearch( () => ({ ...userSearch, [e.target.name]: e.target.value }) )
 	}
@@ -33,7 +34,7 @@ export default function Home() {
   }
 
   function routeSearch() {
-    console.log(store.isAuth, userSearch.search)
+    // console.log(store.isAuth, userSearch.search)
     if (searchSelect == 'Channels') {
       getChannels(userSearch.search)
     }
@@ -56,6 +57,7 @@ export default function Home() {
         }
       })
       const users = response.data.users
+      // console.log(users)
       setSearchResults({kind: 'users', data: users})
     } catch (error) {
       console.error('Error submitting data:', error)
@@ -76,6 +78,31 @@ export default function Home() {
     }
   }
 
+  async function followUser(fid) {
+    console.log('follow')
+    // try {
+    //   const signer = store.signer_uuid
+
+    //   // console.log(fid)
+    //   // console.log(signer)
+    //   // console.log(store.signer_uuid)
+    //   const response = await axios.post('/api/postFollowUser', {       
+    //     fid: fid,
+    //     signer: signer,
+    //   })
+    //   const followed = response
+    //   console.log(followed.status === 200)
+    //   if (followed.status === 200) {
+
+    //   } else {
+
+    //   }
+    //   // setSearchResults({kind: 'channels', data: channels})
+    // } catch (error) {
+    //   console.error('Error submitting data:', error)
+    // }
+  }
+
   useEffect(() => {
     if (!store.isAuth) {
       setSearchSelect('Ecosystems')
@@ -83,15 +110,15 @@ export default function Home() {
   }, [store.isAuth])
 
   useEffect(() => {
-    if (account.ref1?.current?.offsetWidth) {
-      if (account.ref1?.current?.offsetWidth > 680) {
+    if (ref1?.current?.offsetWidth) {
+      if (ref1?.current?.offsetWidth > 680) {
         setTextMax(`522px`)
       }
-      else if (account.ref1?.current?.offsetWidth >= 640 && account.ref1?.current?.offsetWidth <= 680) {
-        setTextMax(`${account.ref1?.current?.offsetWidth - 160}px`)
+      else if (ref1?.current?.offsetWidth >= 640 && ref1?.current?.offsetWidth <= 680) {
+        setTextMax(`${ref1?.current?.offsetWidth - 160}px`)
       }
       else {
-        setTextMax(`${account.ref1?.current?.offsetWidth - 100}px`)
+        setTextMax(`${ref1?.current?.offsetWidth - 100}px`)
       }
     }
     else {
@@ -107,18 +134,18 @@ export default function Home() {
   }, [])
 
   function handleTextResize() {
-    if (account.ref1?.current?.offsetWidth) {
-      if (account.ref1?.current?.offsetWidth > 680) {
+    if (ref1?.current?.offsetWidth) {
+      if (ref1?.current?.offsetWidth > 680) {
         setTextMax(`522px`)
         setTextChMax(`430px`)
       }
-      else if (account.ref1?.current?.offsetWidth >= 640 && account.ref1?.current?.offsetWidth <= 680) {
-        setTextMax(`${account.ref1?.current?.offsetWidth - 160}px`)
-        setTextChMax(`${account.ref1?.current?.offsetWidth - 190}px`)
+      else if (ref1?.current?.offsetWidth >= 640 && ref1?.current?.offsetWidth <= 680) {
+        setTextMax(`${ref1?.current?.offsetWidth - 160}px`)
+        setTextChMax(`${ref1?.current?.offsetWidth - 190}px`)
       }
       else {
-        setTextMax(`${account.ref1?.current?.offsetWidth - 100}px`)
-        setTextChMax(`${account.ref1?.current?.offsetWidth - 130}px`)
+        setTextMax(`${ref1?.current?.offsetWidth - 100}px`)
+        setTextChMax(`${ref1?.current?.offsetWidth - 130}px`)
       }
     }
     else {
@@ -193,10 +220,16 @@ export default function Home() {
             </div>
           </div>
         </div>
+        {store.isAuth ? (
         <div className="flex-col">
-          <div className='srch-select' name='follow'>Follow</div>
-          <div className='srch-select' name='review'>Review</div>
-        </div>
+            <div className='srch-select' name='follow'>Follow</div>
+            <div className='srch-select' name='review'>Review</div>
+        </div>) : (
+        <div className="flex-col">
+          <div className='locked-btn' onClick={LoginPopup}>Follow</div>
+          <div className='locked-btn' onClick={LoginPopup}>Review</div>
+        </div>)
+        }
       </div>)))
     }
 
@@ -261,9 +294,19 @@ export default function Home() {
             </div>
           </div>
         </div>
+
+        {store.isAuth ? (
         <div className="flex-col">
+            <div className='srch-select' onClick={() => followUser(user.fid)} name='follow'>Follow</div>
+        </div>) : (
+        <div className="flex-col">
+          <div className='locked-btn' onClick={LoginPopup}>Follow</div>
+        </div>)
+        }
+
+        {/* <div className="flex-col">
           <div className='srch-select' name='follow'>Follow</div>
-        </div>
+        </div> */}
       </div>)))
     }
   </div>

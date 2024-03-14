@@ -36,7 +36,7 @@ const useStore = create(persist((set, get) => {
         setRef: (ref) => set({ ref }),
         setFid: (fid) => set({ fid }),
         setIsAuth: (isAuth) => set({ isAuth }),
-        setSigner: (signer_uuid) => set({ signer_uuid }),
+        setSignerUuid: (signerUuid) => set({ signer_uuid: signerUuid }),
       
         setUsernameFC: (usernameFC) => set({ usernameFC }),
         setSrcUrlFC: (srcUrlFC) => set({ srcUrlFC }),
@@ -47,6 +47,11 @@ const useStore = create(persist((set, get) => {
         setUserFollowingFC: (userFollowingFC) => set({ userFollowingFC }),
         setUserEthVerAddresses: (userEthVerAddresses) => set({ userEthVerAddresses }),
         setUserSolVerAddresses: (userSolVerAddresses) => set({ userSolVerAddresses }),
+
+        // Getters
+        getFid: () => get().fid,
+        getIsAuth: () => get().isAuth,
+        getSignerUuid: () => get().signer_uuid,
     }
     }), {
         name: 'impact-app-persisted-store',

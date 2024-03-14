@@ -12,6 +12,9 @@ export default async function handler(req, res) {
         },
       });
       const users = await response.json();
+
+      //  need api to check if profile is following users  //
+
       res.status(200).json({ users: users.result.users });
     } catch (error) {
       console.error('Error handling GET request:', error);

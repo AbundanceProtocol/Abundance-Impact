@@ -36,9 +36,11 @@ export default function App({ Component, pageProps }) {
   const [navMenu, setNavMenu] = useState('Home')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [menuHover, setMenuHover] = useState( {in: Date.now(), out: Date.now() } )
+  const [showNotification, setShowNotification] = useState(false)
+
   const Col = styled.div`
     display: grid;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: 1fr auto auto; 
     align-items: center;
     justify-content: space-between;
     grid-gap: 32px;
@@ -58,7 +60,7 @@ export default function App({ Component, pageProps }) {
     setBottomNavSize(ref?.current?.offsetWidth)
 
     // const storedData = useStore
-    console.log(store.isAuth)
+    // console.log(store.isAuth)
 
 
     setNavSize(ref?.current?.offsetWidth - 60)
@@ -73,7 +75,7 @@ export default function App({ Component, pageProps }) {
   }, [])
 
   useEffect(() => {
-    console.log(store.userDisplayNameFC)
+    // console.log(store.signer_uuid)
     if (store.isAuth)
       setIsSignedIn(true)
     else
@@ -86,15 +88,16 @@ export default function App({ Component, pageProps }) {
   }
 
   const handleSignIn = async (data) => {
-    console.log(data)
-    console.log(store.isAuth)
+    // console.log(data)
+    // console.log(store.isAuth)
     setIsSignedIn(true)
+    setShowNotification(false)
   };
 
   const handleLogOut = () => {
     store.setFid(null)
     store.setIsAuth(false)
-    store.setSigner(null)
+    store.setSignerUuid(null)
 
     store.setUsernameFC(null)
     store.setSrcUrlFC(null)
@@ -127,6 +130,8 @@ export default function App({ Component, pageProps }) {
         }
       })
       const user = response.data.userProfile[0]
+      // console.log(user)
+      // console.log(response)
       store.setUsernameFC(user.username)
       store.setSrcUrlFC(user.pfl_url)
       store.setUserDisplayNameFC(user.display_name)
@@ -304,6 +309,33 @@ export default function App({ Component, pageProps }) {
     )
   }
 
+
+  const closeNotification = () => {
+    setShowNotification(false)
+  }
+
+  const LoginPopup = () => {
+    // console.log(store)
+    setShowNotification(true)
+  }
+
+  const LogNotification = () => {
+    return (
+      <>
+        <div className="overlay" onClick={closeNotification}></div>
+        <div id="notificationContainer" style={{borderRadius: '16px', backgroundColor: '#cdd'}}>
+          <div className='flex-col' id="notificationContent" style={{alignItems: 'center', justifyContent: 'center'}}>
+            <div style={{fontSize: '20px', maxWidth: '280px', fontWeight: '500'}}>You&apos;ll need to connect to Farcaster for that</div>
+            <div className='flex-row' style={{width: '100%', alignItems: 'center', justifyContent: 'center', marginTop: '16px', gap: '10px'}}>
+              <NeynarSigninButton onSignInSuccess={handleSignIn} />
+              <div className='cncl-btn' onClick={closeNotification}>Cancel</div>
+            </div>
+          </div>
+        </div>
+      </>
+    )
+  }
+
   const LeftNav = (props) => {
     let btn = button[props.buttonName]
     let btnName = props.buttonName
@@ -414,7 +446,6 @@ export default function App({ Component, pageProps }) {
     await auth.connect()
   }
 
-
   async function disconnect() {
     auth.disconnect();
     store.setAccount(null)
@@ -471,7 +502,7 @@ export default function App({ Component, pageProps }) {
               <div className="navbar-header">
                 <HomeButton />
                 <Box className="navbar-header-end flex-row" sx={{alignItems: 'center', justifyContent: 'space-between'}}>
-                {isSignedIn ? (<LogOut />) : (<NeynarSigninButton onSignInSuccess={handleSignIn} />)}
+                {/* {isSignedIn ? (<LogOut />) : (<NeynarSigninButton onSignInSuccess={handleSignIn} />)} */}
                   {/* <ConnectButton 
                     account={store.account}
                     isMobile={isMobile}
@@ -497,7 +528,7 @@ export default function App({ Component, pageProps }) {
           </Drawer>
         </React.Fragment>
       <div className="container cast-area" style={{width: '100%'}}>
-        <AccountContext.Provider value={{...store.account, ref1}}>
+        <AccountContext.Provider value={{...store.account, ref1, LoginPopup}}>
           <Component {...pageProps} connect={connect} />
         </AccountContext.Provider>
       </div>
@@ -506,61 +537,55 @@ export default function App({ Component, pageProps }) {
         { button['bottom-nav'].map((btn, index) => (
               <BottomNav buttonName={btn} key={index} /> ))}
         </div>
-        </div>
+      </div>
+      {showNotification && (<LogNotification />)}
     </div>
   ) : (
-      <div ref={ref} className='flex-col' style={{position: 'absolute', display: 'flex', minHeight: '100%', height: '100%', width: '100%'}}>
-        <nav ref={ref1} className="nav-bar top-layer flex-col" style={{width: '100%', justifyContent: 'center', height: '58px'}}>
-          <div className="flex-col nav-top" style={{justifyContent: 'center', margin: '0 auto', width: '100%'}}>
-            <div className="flex-row" style={{justifyContent: 'center', alignItems: 'center'}}>
-              <div className='top-left'>
-                <HomeButton />
-              </div>
-              <Col className='top-right'>
-                <TopNavWrapper>
-                    {/* { button['top-menu'].map((btn, index) => (
-                      <TopNav buttonName={btn} key={index} /> ))} */}
-                  </TopNavWrapper>
-                  {/* <div className='srch-select-btn' onClick={currentState}>Test Button</div> */}
-                  {isSignedIn ? (<LogOut />) : (<NeynarSigninButton onSignInSuccess={handleSignIn} />)}
-                  {/* {isSignedIn ? (<LogOut />) : (<LogOut />)} */}
-                  
-                  {/* <ConnectButton 
-                    account={account}
-                    isMobile={isMobile}
-                    onConnect={connect}
-                    onDisconnect={disconnect}
-                  /> */}
-              </Col>
+    <div ref={ref} className='flex-col' style={{position: 'absolute', display: 'flex', minHeight: '100%', height: '100%', width: '100%'}}>
+      <nav ref={ref1} className="nav-bar top-layer flex-col" style={{width: '100%', justifyContent: 'center', height: '58px'}}>
+        <div className="flex-col nav-top" style={{justifyContent: 'center', margin: '0 auto', width: '100%'}}>
+          <div className="flex-row" style={{justifyContent: 'center', alignItems: 'center'}}>
+            <div className='top-left'>
+              <HomeButton />
             </div>
-          </div>
-        </nav>
-
-        <div className='flex-row' style={{justifyContent: 'center', width: 'auto'}}>
-          <div className="flex-col" style={{padding: '58px 0 0 0'}}>
-            { button['side-menu'].map((btn, index) => (
-              <LeftNav buttonName={btn} key={index} /> ))}
-          </div>
-          <div>
-            <div className="container cast-area">
-              <AccountContext.Provider value={{...store.account, ref1}}>
-                <Component {...pageProps} connect={connect} />
-              </AccountContext.Provider>
-            </div>
-          </div>
-          <div className='right-nav-text' style={{width: '400px'}}>
-            <div>
-              <div style={{margin: '58px 0px 12px 20px', backgroundColor: '#ffffff22', width: '380px', borderRadius: '20px', padding: '32px', border: '0px solid #678', color: '#fff', fontWeight: '700', alignItems:' center', fontSize: '20px'}}><IoIosWarning size={40} color={'#fbb'} /><p style={{paddingTop: '10px'}}>NOTICE: the Abundance Protocol&apos;s Impact App is currently in an early development stage </p></div>
-            </div>
+            <Col className='top-right'>
+            <TopNavWrapper>
+              {/* { button['top-menu'].map((btn, index) => (
+                    <TopNav buttonName={btn} key={index} /> ))} */}
+            </TopNavWrapper>
+            {/* <div id="showNotificationBtn" className='srch-select-btn' onClick={LoginPopup}>Test Button</div> */}
+            {/* {(isSignedIn || showNotification) ? (<LogOut />) : (<NeynarSigninButton onSignInSuccess={handleSignIn} />)} */}
+            {/* {isSignedIn ? (<LogOut />) : (<LogOut />)} */}
+            {/* <ConnectButton 
+              account={account}
+              isMobile={isMobile}
+              onConnect={connect}
+              onDisconnect={disconnect}
+              /> */}
+            </Col>
           </div>
         </div>
-        {/* <div className='bottom-menu' style={{position: 'fixed', bottom: 0, backgroundColor: '#1D324499', height: '50px', width: '100%', borderRadius: '0px', padding: '12px', border: '0px solid #678'}}>
-          <div style={{position: 'relative', width: 'auto'}}>
-            { button['bottom-nav'].map((btn, index) => (
-              <BottomNav buttonName={btn} key={index} /> ))}
+      </nav>
+      <div className='flex-row' style={{justifyContent: 'center', width: 'auto'}}>
+        <div className="flex-col" style={{padding: '58px 0 0 0'}}>
+          { button['side-menu'].map((btn, index) => (
+            <LeftNav buttonName={btn} key={index} /> ))}
+        </div>
+        <div>
+          <div className="container cast-area">
+            <AccountContext.Provider value={{...store.account, ref1, LoginPopup}}>
+              <Component {...pageProps} connect={connect} />
+            </AccountContext.Provider>
           </div>
-        </div> */}
+        </div>
+        <div className='right-nav-text' style={{width: '400px'}}>
+          <div>
+            <div style={{margin: '58px 0px 12px 20px', backgroundColor: '#334455ee', width: '380px', borderRadius: '20px', padding: '32px', border: '0px solid #678', color: '#fff', fontWeight: '700', alignItems:' center', fontSize: '20px'}}><IoIosWarning size={40} color={'#fbb'} /><p style={{paddingTop: '10px'}}>NOTICE: the Abundance Protocol&apos;s Impact App is currently in an early development stage </p></div>
+          </div>
+        </div>
       </div>
+      {showNotification && (<LogNotification />)}
+    </div>
   )
 }
 
