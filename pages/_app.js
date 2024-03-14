@@ -18,6 +18,8 @@ import { button } from './assets/button';
 // import ConnectButton from '../components/ConnectButton';
 import NeynarSigninButton from '../components/Signin';
 import { IoIosWarning } from "react-icons/io"
+import { FaLock } from "react-icons/fa";
+
 import axios from 'axios';
 
 export default function App({ Component, pageProps }) {
@@ -296,7 +298,7 @@ export default function App({ Component, pageProps }) {
         >
           <div className={menuState} style={{paddingRight: isMobile ? '1em' : 'unset' }}>
             <div className="flex-col flex-middle" style={{height: '87px'}}>
-              <div className="flex-col flex-middle">
+              <div className="flex-col flex-middle" style={{position: 'relative'}}>
                 <TopIcon className="size-25" />
                 <div className="font-15 mar-t-6" style={{textAlign: 'center', fontSize: isTablet ? '12px' : '15px'}}>
                   {btnName}
@@ -347,9 +349,12 @@ export default function App({ Component, pageProps }) {
     let accountState = !btn.account || (account && btn.account)
     if ((router.route === btn.link) && accountState) {
       menuState = "active-nav-link"
-    } else if (!accountState || !btn.working) {
+    } else if (!btn.working) {
       menuState = "inactive-nav-link"
     }
+    let unlockedState = 'btn-hvr'
+    if (btn.account && !store.isAuth || !btn.working)
+      unlockedState = 'lock-btn-hvr'
 
     return (
       <div className="left-container" style={{padding: 'auto 8px'}} onMouseEnter={() => {
@@ -362,10 +367,36 @@ export default function App({ Component, pageProps }) {
         >
             <div className={`flex-row ${menuState}`} style={{paddingRight: isMobile ? '1em' : 'unset', justifyContent: 'flex-start'}}>
               <div className="flex-col" style={{height: '58px', alignItems: 'center', justifyContent: 'center'}}>
-                <div className="flex-row flex-middle btn-hvr" style={{padding: '2px 0 2px 0', borderRadius: '16px'}}>
+                <div className={`flex-row flex-middle ${unlockedState}`} style={{padding: '2px 0 2px 0', borderRadius: '16px'}}>
                   <TopIcon className="size-25" style={{margin: '6px 12px 6px 12px'}} />
-                  <div className="font-15 left-nav" style={{textAlign: 'center', fontSize: isTablet ? '12px' : '18px', padding: '0 24px 0 0'}}>
+                  <div className="font-15 left-nav mid-layer" style={{textAlign: 'center', fontSize: isTablet ? '12px' : '18px', padding: '0 24px 0 0'}}>
                     {btnName}
+                  </div>
+                  <div style={{position: 'relative', fontSize: '0', width: '0', height: '100%'}}>
+
+                    {btn.working ? (<>
+                      {(btn.account && !store.isAuth) && (<div className='top-layer' style={{position: 'absolute', top: 0, left: 0, transform: 'translate(-100%, -50%)' }}>
+                        <FaLock size={8} color='#999' />
+                      </div>)}</>
+                      ) : (
+                      <div className='top-layer' style={{position: 'absolute', top: 0, left: 0, transform: 'translate(-70%, -50%)' }}>
+                        <div className='soon-btn'>SOON</div>
+                      </div>
+                    )}
+
+
+
+                    {/* {(btn.account && !store.isAuth) && (
+                    <div className='top-layer' style={{position: 'absolute', top: 0, left: 0, transform: 'translate(-100%, -50%)' }}>
+                      {btn.working ? (
+                      <FaLock size={8} color='#999' />
+                      ) : (
+                      <div style={{fontSize: '7px', border: '1px solid #ccc', padding: '2px 3px', borderRadius: '3px', backgroundColor: '#00333399'}}>SOON</div>
+                      )}
+                    </div>
+                    )} */}
+
+
                   </div>
                 </div>
               </div>
@@ -457,9 +488,7 @@ export default function App({ Component, pageProps }) {
     }, 100)
   }
 
-  const toggleDrawer =
-  () =>
-  (e) => {
+  const toggleDrawer = () => (e) => {
     if (
       e.type === 'keydown' &&
       (e.key === 'Tab' ||
@@ -535,7 +564,7 @@ export default function App({ Component, pageProps }) {
       <div ref={ref1} className='bottom-menu flex-row' style={{position: 'fixed', bottom: 0, backgroundColor: '#1D3244cc', height: '56px', width: `100%`, borderRadius: '0px', padding: '0', border: '0px solid #678', boxSizing: 'border-box'}}>
         <div className='flex-row' style={{position: 'relative', width: '100%', justifyContent: 'space-between', padding: '0 10px'}}>
         { button['bottom-nav'].map((btn, index) => (
-              <BottomNav buttonName={btn} key={index} /> ))}
+          <BottomNav buttonName={btn} key={index} /> ))}
         </div>
       </div>
       {showNotification && (<LogNotification />)}
@@ -553,6 +582,7 @@ export default function App({ Component, pageProps }) {
               {/* { button['top-menu'].map((btn, index) => (
                     <TopNav buttonName={btn} key={index} /> ))} */}
             </TopNavWrapper>
+            {/* //// test buttons //// */}
             {/* <div id="showNotificationBtn" className='srch-select-btn' onClick={LoginPopup}>Test Button</div> */}
             {/* {(isSignedIn || showNotification) ? (<LogOut />) : (<NeynarSigninButton onSignInSuccess={handleSignIn} />)} */}
             {/* {isSignedIn ? (<LogOut />) : (<LogOut />)} */}

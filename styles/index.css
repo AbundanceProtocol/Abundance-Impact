@@ -690,6 +690,14 @@ blockquote {
   text-decoration: underline;
 }
 
+.lock-btn-hvr {
+    background-color: #ddeeff11;
+}
+
+.lock-btn-hvr:hover {
+    background-color: #eeeeff11;
+}
+
 .btn-hvr:hover {
   background-color: #ddeeff11;
 }
@@ -1875,6 +1883,16 @@ blockquote {
 
 .active-nav-link:hover {
     color: #e5e189;
+}
+
+.soon-btn {
+    font-size: 7px;
+    border: 1px solid #999;
+    padding: 2px 3px;
+    border-radius: 4px;
+    background-color: #00222266;
+    font-weight: 400;
+    color: #eee;
 }
 
 .nav-link {
