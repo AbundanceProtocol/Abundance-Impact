@@ -249,6 +249,7 @@ export default function App({ Component, pageProps }) {
       <div className='logout-btn' onClick={handleLogOut}>Log out</div>
     )
   }
+
   const HomeButton = () => {
     const isSmall = isMobile || isTablet;
     return (
@@ -311,7 +312,6 @@ export default function App({ Component, pageProps }) {
     )
   }
 
-
   const closeNotification = () => {
     setShowNotification(false)
   }
@@ -355,7 +355,6 @@ export default function App({ Component, pageProps }) {
     let unlockedState = 'btn-hvr'
     if (btn.account && !store.isAuth || !btn.working)
       unlockedState = 'lock-btn-hvr'
-
     return (
       <div className="left-container" style={{padding: 'auto 8px'}} onMouseEnter={() => {
         setNavMenu(btn.menu)
@@ -418,7 +417,7 @@ export default function App({ Component, pageProps }) {
     let accountState = !btn.account || (account && btn.account)
     if ((router.route === btn.link) && accountState) {
       menuState = "active-nav-link"
-    } else if (!accountState) {
+    } else if (!btn.working) {
       menuState = "inactive-nav-link"
     }
 
@@ -433,12 +432,24 @@ export default function App({ Component, pageProps }) {
           >
             <div className={`flex-row ${menuState}`} style={{padding: isMobile ? '2px' : 'unset', width: 'auto' }}>
               <div className="flex-col" style={{height: '58px', alignItems: 'center', justifyContent: 'center'}}>
+
+                {btn.working? (
                 <div className="flex-row btn-hvr flex-middle" style={{padding: '6px 2px', borderRadius: '12px'}}>
                   <TopIcon className="size-25" style={{margin: '6px 12px 6px 12px'}} />
                   <div className="font-15 left-nav" style={{textAlign: 'center', fontSize: isTablet ? '12px' : '18px'}}>
                     {btnName}
                   </div>
                 </div>
+                ) : (
+                <div className="flex-row btn-hvr lock-btn-hvr flex-middle" style={{padding: '6px 2px', borderRadius: '12px', position: 'relative'}}>
+                  <TopIcon className="size-25" style={{margin: '6px 12px 6px 12px'}} />
+                  <div className='top-layer' style={{position: 'absolute', top: 0, right: 0, transform: 'translate(30%, -50%)' }}>
+                        <div className='soon-btn'>SOON</div>
+                      </div>
+                </div>
+                )}
+
+
               </div>
             </div>
           </a>
@@ -483,7 +494,7 @@ export default function App({ Component, pageProps }) {
 
     setAccount(null)
     setTimeout(() => {
-      console.log('rerouting')
+      // console.log('rerouting')
       router.push('/')
     }, 100)
   }
@@ -522,29 +533,30 @@ export default function App({ Component, pageProps }) {
     )
   }
 
-  return isMobile ? (
-    <div ref={ref} style={{position: 'absolute', display: 'flex', minHeight: '100%', height: '100%', width: '100%'}}>
-      <React.Fragment key="top">
-        <MobileAppbar className='top-layer' position="fixed" elevation={0} sx={{paddingRight: 0}} style={{backgroundColor: '#2D4254'}}>
-          <nav className="nav-bar-mobile">
-            <NavbarHeader>
-              <div className="navbar-header">
-                <HomeButton />
-                <Box className="navbar-header-end flex-row" sx={{alignItems: 'center', justifyContent: 'space-between'}}>
-                {/* {isSignedIn ? (<LogOut />) : (<NeynarSigninButton onSignInSuccess={handleSignIn} />)} */}
-                  {/* <ConnectButton 
-                    account={store.account}
-                    isMobile={isMobile}
-                    onConnect={connect}
-                    onDisconnect={disconnect}
-                    /> */}
-                  <MenuButton onClick={toggleDrawer()}>
-                    {mobileMenuOpen ? <CollapseIcon/> : <HiMenu />}
-                  </MenuButton>
-                </Box>
-              </div>
-            </NavbarHeader>
-          </nav>
+  return (
+    <div ref={ref} className='flex-col' style={{position: 'absolute', display: 'flex', minHeight: '100%', height: '100%', width: '100%', overflowX: 'hidden'}}>
+      {isMobile ? (
+        <React.Fragment key="top">
+          <MobileAppbar className='top-layer' position="fixed" elevation={0} sx={{paddingRight: 0}} style={{backgroundColor: '#2D4254'}}>
+            <nav className="nav-bar-mobile">
+              <NavbarHeader>
+                <div className="navbar-header">
+                  <HomeButton />
+                  <Box className="navbar-header-end flex-row" sx={{alignItems: 'center', justifyContent: 'space-between'}}>
+                  {/* {isSignedIn ? (<LogOut />) : (<NeynarSigninButton onSignInSuccess={handleSignIn} />)} */}
+                    {/* <ConnectButton 
+                      account={store.account}
+                      isMobile={isMobile}
+                      onConnect={connect}
+                      onDisconnect={disconnect}
+                      /> */}
+                    <MenuButton onClick={toggleDrawer()}>
+                      {mobileMenuOpen ? <CollapseIcon/> : <HiMenu />}
+                    </MenuButton>
+                  </Box>
+                </div>
+              </NavbarHeader>
+            </nav>
           </MobileAppbar> 
           <Drawer className='top-layer' elevation={0} anchor="top" variant="temporary" open={mobileMenuOpen} onClose={toggleDrawer()}  
             sx={{
@@ -556,53 +568,40 @@ export default function App({ Component, pageProps }) {
             <MobileNavMenu />
           </Drawer>
         </React.Fragment>
-      <div className="container cast-area" style={{width: '100%'}}>
-        <AccountContext.Provider value={{...store.account, ref1, LoginPopup}}>
-          <Component {...pageProps} connect={connect} />
-        </AccountContext.Provider>
-      </div>
-      <div ref={ref1} className='bottom-menu flex-row' style={{position: 'fixed', bottom: 0, backgroundColor: '#1D3244cc', height: '56px', width: `100%`, borderRadius: '0px', padding: '0', border: '0px solid #678', boxSizing: 'border-box'}}>
-        <div className='flex-row' style={{position: 'relative', width: '100%', justifyContent: 'space-between', padding: '0 10px'}}>
-        { button['bottom-nav'].map((btn, index) => (
-          <BottomNav buttonName={btn} key={index} /> ))}
-        </div>
-      </div>
-      {showNotification && (<LogNotification />)}
-    </div>
-  ) : (
-    <div ref={ref} className='flex-col' style={{position: 'absolute', display: 'flex', minHeight: '100%', height: '100%', width: '100%'}}>
-      <nav ref={ref1} className="nav-bar top-layer flex-col" style={{width: '100%', justifyContent: 'center', height: '58px'}}>
-        <div className="flex-col nav-top" style={{justifyContent: 'center', margin: '0 auto', width: '100%'}}>
-          <div className="flex-row" style={{justifyContent: 'center', alignItems: 'center'}}>
-            <div className='top-left'>
-              <HomeButton />
+      ) : (
+        <nav ref={ref1} className="nav-bar top-layer flex-col" style={{width: '100%', justifyContent: 'center', height: '58px'}}>
+          <div className="flex-col nav-top" style={{justifyContent: 'center', margin: '0 auto', width: '100%'}}>
+            <div className="flex-row" style={{justifyContent: 'center', alignItems: 'center'}}>
+              <div className='top-left'>
+                <HomeButton />
+              </div>
+              <Col className='top-right'>
+              <TopNavWrapper>
+                {/* { button['top-menu'].map((btn, index) => (
+                      <TopNav buttonName={btn} key={index} /> ))} */}
+              </TopNavWrapper>
+              {/* //// test buttons //// */}
+              {/* <div id="showNotificationBtn" className='srch-select-btn' onClick={LoginPopup}>Test Button</div> */}
+              {/* {(isSignedIn || showNotification) ? (<LogOut />) : (<NeynarSigninButton onSignInSuccess={handleSignIn} />)} */}
+              {/* {isSignedIn ? (<LogOut />) : (<LogOut />)} */}
+              {/* <ConnectButton 
+                account={account}
+                isMobile={isMobile}
+                onConnect={connect}
+                onDisconnect={disconnect}
+                /> */}
+              </Col>
             </div>
-            <Col className='top-right'>
-            <TopNavWrapper>
-              {/* { button['top-menu'].map((btn, index) => (
-                    <TopNav buttonName={btn} key={index} /> ))} */}
-            </TopNavWrapper>
-            {/* //// test buttons //// */}
-            {/* <div id="showNotificationBtn" className='srch-select-btn' onClick={LoginPopup}>Test Button</div> */}
-            {/* {(isSignedIn || showNotification) ? (<LogOut />) : (<NeynarSigninButton onSignInSuccess={handleSignIn} />)} */}
-            {/* {isSignedIn ? (<LogOut />) : (<LogOut />)} */}
-            {/* <ConnectButton 
-              account={account}
-              isMobile={isMobile}
-              onConnect={connect}
-              onDisconnect={disconnect}
-              /> */}
-            </Col>
           </div>
-        </div>
-      </nav>
+        </nav>
+      )}
       <div className='flex-row' style={{justifyContent: 'center', width: 'auto'}}>
         <div className="flex-col" style={{padding: '58px 0 0 0'}}>
           { button['side-menu'].map((btn, index) => (
             <LeftNav buttonName={btn} key={index} /> ))}
         </div>
         <div>
-          <div className="container cast-area">
+          <div className="container cast-area" style={isMobile ? {} : {width: '100%'}}>
             <AccountContext.Provider value={{...store.account, ref1, LoginPopup}}>
               <Component {...pageProps} connect={connect} />
             </AccountContext.Provider>
@@ -614,7 +613,19 @@ export default function App({ Component, pageProps }) {
           </div>
         </div>
       </div>
-      {showNotification && (<LogNotification />)}
+      {isMobile ? (
+        <div ref={ref1} className='flex-row' style={{position: 'fixed', bottom: 0, backgroundColor: '#1D3244cc', height: '56px', width: `100%`, borderRadius: '0px', padding: '0', border: '0px solid #678', boxSizing: 'border-box'}}>
+          <div className='flex-row' style={{position: 'relative', width: '100%', justifyContent: 'space-between', padding: '0 10px'}}>
+          { button['bottom-nav'].map((btn, index) => (
+            <BottomNav buttonName={btn} key={index} /> ))}
+          </div>
+        </div>
+      ) : (
+        <div ref={ref1} className='flex-row' style={{position: 'fixed', bottom: 0, backgroundColor: '#000000ff', height: '0px', width: `100%`, borderRadius: '0px', padding: '0', border: '0px solid #678', boxSizing: 'border-box'}}></div>
+      )}
+      <div>
+        {showNotification && (<LogNotification />)}
+      </div>
     </div>
   )
 }

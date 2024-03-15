@@ -18,11 +18,11 @@ export default Buttons;
 
 const button = {
     'top-menu': ['main', 'user'],
-    'side-menu': ['Feed', 'Search', 'Ecosystem', 'Reviews', 'Notifications', 'Profile', 'Funding', 'Challenge', 'Propose'],
+    'side-menu': ['Feed', 'Search', 'Ecosystem', 'Reviews', 'Notifications', 'Profile', 'Funding', 'Challenge', 'Propose', 'Cast'],
     'bottom-nav': ['Feed', 'Search', 'Ecosystem', 'Reviews', 'Notifications'],
     'nav-menu': {
         'main': ['Feed', 'Search', 'Ecosystem'],
-        'user': ['Profile', 'Reviews', 'Notifications', 'Funding', 'Challenge', 'Propose'],
+        'user': ['Profile', 'Reviews', 'Notifications', 'Funding', 'Challenge', 'Propose', 'Cast'],
     },
 
     ////// TOP MENU //////
@@ -119,7 +119,14 @@ const button = {
         working: false,
         icon: MdWork
     },
-
+    'Cast': {
+        link: '/cast',
+        menu: 'Cast',
+        description: 'Create a cast',
+        account: true,
+        working: false,
+        icon: FaPen
+    },
 
     // ////// MENUS //////
 

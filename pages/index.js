@@ -14,9 +14,9 @@ export default function Home({apiKey}) {
   const { isMobile } = useMatchBreakpoints();
   const [ feedWidth, setFeedWidth ] = useState()
   const account = useContext(AccountContext)
+  const [ screenWidth, setScreenWidth ] = useState(undefined)
   const client = new NeynarAPIClient(apiKey);
   const [textMax, setTextMax] = useState('522px')
-
   async function getFeed() {
     try {
       const response = await axios.get('/api/getFeed')
@@ -52,52 +52,41 @@ export default function Home({apiKey}) {
       }
     }
   }
-  
+
   useEffect(() => {
-    getFeed()
-    if (account.ref1?.current?.offsetWidth) {
-      if (account.ref1?.current?.offsetWidth > 680) {
+    if (screenWidth) {
+      if (screenWidth > 680) {
         setTextMax(`522px`)
       }
-      else if (account.ref1?.current?.offsetWidth >= 640 && account.ref1?.current?.offsetWidth <= 680) {
-        setTextMax(`${account.ref1?.current?.offsetWidth - 160}px`)
+      else if (screenWidth >= 635 && screenWidth <= 680) {
+        setTextMax(`${screenWidth - 160}px`)
       }
       else {
-        setTextMax(`${account.ref1?.current?.offsetWidth - 100}px`)
+        setTextMax(`${screenWidth - 110}px`)
       }
     }
     else {
-      setTextMax(`522px`)
+      setTextMax(`100%`)
     }
+  }, [screenWidth])
 
-    handleTextResize()
-    window.addEventListener("resize", handleTextResize);
+  useEffect(() => {
+    getFeed()
+    const handleResize = () => {
+      setScreenWidth(window.innerWidth)
+    }
+    handleResize()
+    window.addEventListener('resize', handleResize);
+    
     return () => {
-      window.removeEventListener("resize", handleTextResize);
+      window.removeEventListener('resize', handleResize);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-
-
-  function handleTextResize() {
-    if (account.ref1?.current?.offsetWidth) {
-      if (account.ref1?.current?.offsetWidth > 680) {
-        setTextMax(`522px`)
-      }
-      else if (account.ref1?.current?.offsetWidth >= 640 && account.ref1?.current?.offsetWidth <= 680) {
-        setTextMax(`${account.ref1?.current?.offsetWidth - 160}px`)
-      }
-      else {
-        setTextMax(`${account.ref1?.current?.offsetWidth - 100}px`)
-      }
-    }
-    else {
-      setTextMax(`522px`)
-    }
-  }
-
+  
+  
   return (
-  <div name='feed' style={{width: 'auto'}} ref={ref}>
+  <div name='feed' style={{width: 'auto', maxWidth: '620px'}} ref={ref}>
     <div className="top-layer" style={{padding: '58px 0 0 0'}}>
     </div>
     {

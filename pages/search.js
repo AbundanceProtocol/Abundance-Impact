@@ -5,26 +5,26 @@ import Link from 'next/link'
 import { AccountContext } from '../context'
 import useMatchBreakpoints from '../hooks/useMatchBreakpoints'
 // import { NeynarAPIClient } from "@neynar/nodejs-sdk";
-import { FaSearch } from 'react-icons/fa';
+import { FaSearch, FaLock } from 'react-icons/fa';
 import useStore from '../utils/store'
 import axios from 'axios';
 
 export default function Home() {
   const ref = useRef(null)
-  // const [ userFeed, setUserFeed ] = useState([])
   const initialState = { search: '' }
 	const [userSearch, setUserSearch] = useState(initialState)
   const searchButtons = ['Ecosystems', 'Channels', 'Proposals', 'Users']
-  const [ searchSelect, setSearchSelect ] = useState('Ecosystems')
+  const [ searchSelect, setSearchSelect ] = useState('Channels')
   const [ searchResults, setSearchResults ] = useState({kind: 'ecosystems', data: []})
   const { isMobile } = useMatchBreakpoints();
-  // const account = useContext(AccountContext)
-  const { ref1, LoginPopup } = useContext(AccountContext)
+  const account = useContext(AccountContext)
+  const [ screenWidth, setScreenWidth ] = useState(undefined)
+
   // const client = new NeynarAPIClient(apiKey);
-  const [textMax, setTextMax] = useState('522px')
+  const [textMax, setTextMax] = useState('430px')
   const [textChMax, setTextChMax] = useState('430px')
+  const [ feedMax, setFeedMax ] = useState('620px')
   const store = useStore()
-  // console.log(account)
 	function onChange(e) {
 		setUserSearch( () => ({ ...userSearch, [e.target.name]: e.target.value }) )
 	}
@@ -104,79 +104,82 @@ export default function Home() {
   }
 
   useEffect(() => {
-    if (!store.isAuth) {
+    if (!store.isAuth && searchSelect == 'Users') {
       setSearchSelect('Ecosystems')
     }
   }, [store.isAuth])
 
   useEffect(() => {
-    if (ref1?.current?.offsetWidth) {
-      if (ref1?.current?.offsetWidth > 680) {
-        setTextMax(`522px`)
+    if (screenWidth) {
+      if (screenWidth > 680) {
+        setTextMax(`430px`)
+        setFeedMax('620px')
       }
-      else if (ref1?.current?.offsetWidth >= 640 && ref1?.current?.offsetWidth <= 680) {
-        setTextMax(`${ref1?.current?.offsetWidth - 160}px`)
+      else if (screenWidth >= 635 && screenWidth <= 680) {
+        setTextMax(`390px`)
+        setFeedMax('580px')
       }
       else {
-        setTextMax(`${ref1?.current?.offsetWidth - 100}px`)
+        setTextMax(`${screenWidth - 190}px`)
+        setFeedMax(`${screenWidth}px`)
       }
     }
     else {
-      setTextMax(`522px`)
+      setTextMax(`100%`)
+      setFeedMax(`100%`)
     }
+  }, [screenWidth])
 
-    handleTextResize()
-    window.addEventListener("resize", handleTextResize);
+  useEffect(() => {
+    const handleResize = () => {
+      setScreenWidth(window.innerWidth)
+    }
+    handleResize()
+    window.addEventListener('resize', handleResize);
+    
     return () => {
-      window.removeEventListener("resize", handleTextResize);
+      window.removeEventListener('resize', handleResize);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  function handleTextResize() {
-    if (ref1?.current?.offsetWidth) {
-      if (ref1?.current?.offsetWidth > 680) {
-        setTextMax(`522px`)
-        setTextChMax(`430px`)
-      }
-      else if (ref1?.current?.offsetWidth >= 640 && ref1?.current?.offsetWidth <= 680) {
-        setTextMax(`${ref1?.current?.offsetWidth - 160}px`)
-        setTextChMax(`${ref1?.current?.offsetWidth - 190}px`)
-      }
-      else {
-        setTextMax(`${ref1?.current?.offsetWidth - 100}px`)
-        setTextChMax(`${ref1?.current?.offsetWidth - 130}px`)
-      }
-    }
-    else {
-      setTextMax(`522px`)
-      setTextChMax(`430px`)
-    }
-  }
-
   const SearchOptionButton = (props) => {
     const btn = props.buttonName
     let isSearchable = true
+    let comingSoon = false
     if (props.buttonName == 'Users' && !store.isAuth) {
       isSearchable = false
     }
-    return isSearchable ? (
-      <div className={(searchSelect == btn) ? 'srch-select' : 'srch-btn'} onClick={searchOption} name={btn}>{btn}</div>
+    if (props.buttonName == 'Ecosystems' || props.buttonName == 'Proposals') {
+      comingSoon = true
+    }
+
+    return isSearchable ? (<>{comingSoon ? (<div className='flex-row' style={{position: 'relative'}}><div className={(searchSelect == btn) ? 'active-nav-link btn-hvr lock-btn-hvr' : 'nav-link btn-hvr lock-btn-hvr'} onClick={searchOption} name={btn} style={{fontWeight: '600', padding: '5px 14px', borderRadius: '14px', fontSize: isMobile ? '12px' : '15px'}}>{btn}</div>
+      <div className='top-layer' style={{position: 'absolute', top: 0, right: 0, transform: 'translate(20%, -50%)' }}>
+        <div className='soon-btn'>SOON</div>
+      </div>
+    </div>) : (
+      <div className={(searchSelect == btn) ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'} onClick={searchOption} name={btn} style={{fontWeight: '600', padding: '5px 14px', borderRadius: '14px', fontSize: isMobile ? '12px' : '15px'}}>{btn}</div>)}</>
     ) : (
-      <div className={(searchSelect == btn) ? 'x-srch-select' : 'x-srch-btn'} name={btn} disabled>{btn}</div>
+      <div className='flex-row' style={{position: 'relative'}}>
+        <div className='lock-btn-hvr' name={btn} style={{color: '#bbb', fontWeight: '600', padding: '5px 14px', borderRadius: '14px', cursor: 'pointer', fontSize: isMobile ? '12px' : '15px'}} onClick={account.LoginPopup}>{btn}</div>
+        <div className='top-layer' style={{position: 'absolute', top: 0, right: 0, transform: 'translate(-20%, -50%)' }}>
+          <FaLock size={8} color='#999' />
+        </div>
+      </div>
     )
   }
 
   return (
-  <div className='flex-col' style={{width: 'auto'}} ref={ref}>
+  <div className='flex-col' style={{width: 'auto', position: 'relative'}} ref={ref}>
     <div className="" style={{padding: '58px 0 0 0'}}>
     </div>
-    <div style={{padding: '12px 20px', backgroundColor: '#ffffff11', borderRadius: '10px', border: '1px solid #888', marginBottom: '16px'}}>
+    <div style={{padding: '12px 20px', backgroundColor: '#66666611', borderRadius: '10px', border: '1px solid #888', marginBottom: '16px', width: feedMax}}>
       <div className="top-layer flex-row" style={{padding: '10px 0 10px 0', alignItems: 'center', justifyContent: 'space-between', margin: '0', borderBottom: '1px solid #888'}}>
         { searchButtons.map((btn, index) => (
           <SearchOptionButton buttonName={btn} key={index} /> ))}
       </div>
-      <div>
+      <div sytle={{}}>
         <div className="flex-row" style={{padding: '10px 0 0 0'}}>
             <input onChange={onChange} name='search' placeholder={`Search ${searchSelect}`} value={userSearch.search} className='srch-btn' style={{width: '100%', backgroundColor: '#234'}} />
             <div className='srch-select-btn' onClick={routeSearch} style={{padding: '12px 14px 9px 14px'}}><FaSearch /></div>
@@ -185,7 +188,7 @@ export default function Home() {
     </div>
 
     {
-      (searchResults.kind == 'channels' && searchResults.data.length > 0) && (searchResults.data.map((channel, index) => (<div key={index} className="inner-container flex-row" style={{width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
+      (searchResults.kind == 'channels' && searchResults.data.length > 0) && (searchResults.data.map((channel, index) => (<div key={index} className="inner-container flex-row" style={{width: feedMax, display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
         <div>
           <div>
             <div className="">
@@ -212,7 +215,7 @@ export default function Home() {
                       </div>
                     </div>
                     <div className="">
-                      <div style={{wordWrap: 'break-word', maxWidth: textChMax}}>{channel.description}</div>
+                      <div style={{wordWrap: 'break-word', maxWidth: textMax, width: '100%'}}>{channel.description}</div>
                     </div>
                   </div>
                 </div>
@@ -220,16 +223,25 @@ export default function Home() {
             </div>
           </div>
         </div>
+        <div className="flex-col">
         {store.isAuth ? (
-        <div className="flex-col">
-            <div className='srch-select' name='follow'>Follow</div>
-            <div className='srch-select' name='review'>Review</div>
-        </div>) : (
-        <div className="flex-col">
-          <div className='locked-btn' onClick={LoginPopup}>Follow</div>
-          <div className='locked-btn' onClick={LoginPopup}>Review</div>
-        </div>)
-        }
+          <div className='srch-select' name='follow' style={{display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '8px'}}>Follow</div>
+        ) : (
+          <div className='flex-row' style={{position: 'relative', marginBottom: '8px'}}>
+            <div className='locked-btn' onClick={account.LoginPopup} style={{width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>Follow</div>
+            <div className='top-layer' style={{position: 'absolute', top: 0, right: 0, transform: 'translate(-50%, -50%)' }}>
+              <FaLock size={8} color='#999' />
+            </div>
+          </div>
+        )}
+          <div className='flex-row' style={{position: 'relative'}}>
+            <div className='locked-btn'>Review</div>
+            <div className='top-layer' style={{position: 'absolute', top: 0, right: 0, transform: 'translate(20%, -50%)' }}>
+              <div className='soon-btn'>SOON</div>
+            </div>
+          </div>
+        </div>
+        
       </div>)))
     }
 
@@ -268,7 +280,7 @@ export default function Home() {
                       </div>
                     </div>
                     <div className="">
-                      <div style={{wordWrap: 'break-word', maxWidth: textChMax}}>{user.profile.bio.text}</div>
+                      <div style={{wordWrap: 'break-word', maxWidth: textMax}}>{user.profile.bio.text}</div>
                     </div>
                     <div className="flex-row" style={{width: '100%', justifyContent: 'space-evenly'}}>
                       <div className="flex-row" style={{flex: 1}}>
@@ -300,7 +312,7 @@ export default function Home() {
             <div className='srch-select' onClick={() => followUser(user.fid)} name='follow'>Follow</div>
         </div>) : (
         <div className="flex-col">
-          <div className='locked-btn' onClick={LoginPopup}>Follow</div>
+          <div className='locked-btn' onClick={account.LoginPopup}>Follow</div>
         </div>)
         }
 
