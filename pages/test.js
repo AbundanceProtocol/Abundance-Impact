@@ -220,10 +220,12 @@ export async function getServerSideProps(context) {
   const { metadata1, metadata2 } = context.query;
   const sanitizedMetadata1 = encodeURIComponent(metadata1)
   const sanitizedMetadata2 = encodeURIComponent(metadata2)
+  const cleaneddMetadata1 = decodeURIComponent(sanitizedMetadata1)
+  const cleanedMetadata2 = decodeURIComponent(sanitizedMetadata2)
   return {
     props: {
-      metadata1: sanitizedMetadata1 || 'Link 1', // Default to empty string if metadata1 is not provided
-      metadata2: sanitizedMetadata2 || 'Link 2'  // Default to empty string if metadata2 is not provided
+      metadata1: cleaneddMetadata1 || 'Link 1', // Default to empty string if metadata1 is not provided
+      metadata2: cleanedMetadata2 || 'Link 2'  // Default to empty string if metadata2 is not provided
     }
   };
 }
