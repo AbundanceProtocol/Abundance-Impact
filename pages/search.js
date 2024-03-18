@@ -99,6 +99,7 @@ export default function Search() {
         if (followed.status === 200) {
           let updatedSearchResults = { ...searchResults }
           updatedSearchResults.data[index].following = 0
+          updatedSearchResults.data[index].follower_count--
           setSearchResults(updatedSearchResults)
         } else {
           let updatedSearchResults = { ...searchResults }
@@ -121,6 +122,7 @@ export default function Search() {
         if (followed.status === 200) {
           let updatedSearchResults = { ...searchResults }
           updatedSearchResults.data[index].following = 1
+          updatedSearchResults.data[index].follower_count++
           setSearchResults(updatedSearchResults)
         } else {
           let updatedSearchResults = { ...searchResults }
@@ -285,6 +287,13 @@ export default function Search() {
     }
   }, [screenWidth])
 
+  const handleKeyDown = (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      routeSearch();
+    }
+  }
+
   useEffect(() => {
     const handleResize = () => {
       setScreenWidth(window.innerWidth)
@@ -336,7 +345,7 @@ export default function Search() {
       </div>
       <div sytle={{}}>
         <div className="flex-row" style={{padding: '10px 0 0 0'}}>
-            <input onChange={onChange} name='search' placeholder={`Search ${searchSelect}`} value={userSearch.search} className='srch-btn' style={{width: '100%', backgroundColor: '#234'}} />
+            <input onChange={onChange} name='search' placeholder={`Search ${searchSelect}`} value={userSearch.search} className='srch-btn' style={{width: '100%', backgroundColor: '#234'}} onKeyDown={handleKeyDown} />
             <div className='srch-select-btn' onClick={routeSearch} style={{padding: '12px 14px 9px 14px'}}><FaSearch /></div>
           </div>
         </div>
