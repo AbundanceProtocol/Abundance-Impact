@@ -5,10 +5,6 @@ export default async function handler(req, res) {
     try {
       const { fid, signer } = req.body;
       console.log(fid, signer)
-      // console.log(typeof fid)
-
-      // console.log(store.signer_uuid)
-      // console.log(typeof fid)
       const base = "https://api.neynar.com/";
       const url = `${base}v2/farcaster/user/follow`;
       const response = await fetch(url, {

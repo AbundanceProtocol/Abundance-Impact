@@ -55,7 +55,7 @@
   },
   "devDependencies": {
     "@graphprotocol/graph-cli": "^0.32.0",
-    "@netlify/plugin-nextjs": "^4.7.1",
+    "@netlify/plugin-nextjs": "^4.41.3",
     "eslint": "8.11.0",
     "eslint-config-next": "12.1.0",
     "urql": "^2.2.2",

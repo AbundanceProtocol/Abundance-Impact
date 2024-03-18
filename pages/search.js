@@ -90,8 +90,10 @@ export default function Search() {
       try {
         const signer = store.signer_uuid
         const response = await axios.delete('/api/deleteFollowUser', {       
-          fid: fid,
-          signer: signer,
+          params: {
+            fid: fid,
+            signer: signer,
+          }
         })
         const followed = response
         if (followed.status === 200) {
