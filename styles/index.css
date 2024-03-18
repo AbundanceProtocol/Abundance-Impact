@@ -710,8 +710,68 @@ blockquote {
     color: #fff;
     margin: 2px 5px;
     font-weight: 600;
+    width: 80px;
+    height: 34px;
+    justify-content: center;
     background-color: #38b;
     cursor: pointer;
+}
+
+.follow-select {
+    border: 2px solid #38b;
+    border-radius: 8px;
+    font-size: 16px;
+    padding: 6px 12px;
+    color: #fff;
+    margin: 2px 5px;
+    font-weight: 600;
+    width: 80px;
+    height: 34px;
+    justify-content: center;
+    background-color: #38b;
+    cursor: pointer;
+}
+
+.follow-locked {
+    border: 2px solid #666;
+    border-radius: 8px;
+    font-size: 16px;
+    padding: 6px 12px;
+    color: #666;
+    margin: 2px 5px;
+    font-weight: 600;
+    width: 80px;
+    height: 34px;
+    justify-content: center;
+    background-color: #ccc;
+    cursor: pointer;
+}
+
+.follow-select:hover {
+    border: 2px solid #38b;
+    color: #fff;
+    background-color: #169;
+}
+
+.unfollow-select {
+    border: 2px solid #27a;
+    border-radius: 8px;
+    font-size: 14px;
+    padding: 7px 8px;
+    color: #27a;
+    margin: 2px 5px;
+    font-weight: 700;
+    width: 80px;
+    height: 34px;
+    justify-content: center;
+    background-color: transparent;
+    cursor: pointer;
+}
+
+.unfollow-select:hover {
+    border: 2px solid #169;
+    color: #169;
+    background-color: #eee;
 }
 
 .x-srch-select {

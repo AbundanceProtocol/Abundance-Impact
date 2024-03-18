@@ -8,8 +8,9 @@ import useMatchBreakpoints from '../hooks/useMatchBreakpoints'
 import { FaSearch, FaLock } from 'react-icons/fa';
 import useStore from '../utils/store'
 import axios from 'axios';
+import { AiOutlineLoading3Quarters as Loading } from "react-icons/ai";
 
-export default function Home() {
+export default function Search() {
   const ref = useRef(null)
   const initialState = { search: '' }
 	const [userSearch, setUserSearch] = useState(initialState)
@@ -57,7 +58,7 @@ export default function Home() {
         }
       })
       const users = response.data.users
-      // console.log(users)
+      console.log(users)
       setSearchResults({kind: 'users', data: users})
     } catch (error) {
       console.error('Error submitting data:', error)
@@ -78,8 +79,21 @@ export default function Home() {
     }
   }
 
-  async function followUser(fid) {
-    console.log('follow')
+
+  async function unfollowUser(fid, index) {
+    console.log('follow', fid, index)
+    const updatedSearchResults = { ...searchResults }
+    updatedSearchResults.data[index].following = 0
+    setSearchResults(updatedSearchResults)
+  }
+
+  async function followUser(fid, index) {
+
+    
+    console.log('follow', fid, index)
+    const updatedSearchResults = { ...searchResults }
+    updatedSearchResults.data[index].following = 1
+    setSearchResults(updatedSearchResults)
     // try {
     //   const signer = store.signer_uuid
 
@@ -284,18 +298,18 @@ export default function Home() {
                     </div>
                     <div className="flex-row" style={{width: '100%', justifyContent: 'space-evenly'}}>
                       <div className="flex-row" style={{flex: 1}}>
-                        <div className="">
+                        {/* <div className="">
                           <Message />
-                        </div>
-                        <span className="" style={{padding: '0 0 0 5px'}}>{user.follower_count}</span>
+                        </div> */}
+                        <span className="" style={{padding: '0 0 0 5px'}}>Followed: {user.follower_count}</span>
                       </div>
                       <div className="" style={{flex: 1}}>
                         <span>
                           <div className="flex-row">
-                            <div className="">
+                            {/* <div className="">
                               <Recast />
-                            </div>
-                            <span className="" style={{padding: '0 0 0 5px'}}>{user.following_count}</span>
+                            </div> */}
+                            <span className="" style={{padding: '0 0 0 5px'}}>Following: {user.following_count}</span>
                           </div>
                         </span>
                       </div>
@@ -308,12 +322,21 @@ export default function Home() {
         </div>
 
         {store.isAuth ? (
-        <div className="flex-col">
-            <div className='srch-select' onClick={() => followUser(user.fid)} name='follow'>Follow</div>
-        </div>) : (
-        <div className="flex-col">
-          <div className='locked-btn' onClick={account.LoginPopup}>Follow</div>
-        </div>)
+            <div className="flex-col">
+              {(user.following == 1) ? (
+                <div className='unfollow-select' onClick={() => unfollowUser(user.fid, index)} name='follow'>Unfollow</div>
+              ) : (
+                <div className='follow-select' onClick={() => followUser(user.fid, index)} name='follow'>Follow</div>
+              )}
+            </div>
+          ) : (
+            <div className="flex-row" style={{position: 'relative'}}>
+              <div className='follow-locked' onClick={account.LoginPopup}>Follow</div>
+              <div className='top-layer' style={{position: 'absolute', top: 0, right: 0, transform: 'translate(-50%, -50%)' }}>
+              <FaLock size={8} color='#666' />
+            </div>
+            </div>
+          )
         }
 
         {/* <div className="flex-col">

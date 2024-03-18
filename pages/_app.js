@@ -19,7 +19,6 @@ import { button } from './assets/button';
 import NeynarSigninButton from '../components/Signin';
 import { IoIosWarning } from "react-icons/io"
 import { FaLock } from "react-icons/fa";
-
 import axios from 'axios';
 
 export default function App({ Component, pageProps }) {
@@ -316,8 +315,7 @@ export default function App({ Component, pageProps }) {
     setShowNotification(false)
   }
 
-  const LoginPopup = () => {
-    // console.log(store)
+  const LoginPopup = async () => {
     setShowNotification(true)
   }
 
@@ -581,8 +579,8 @@ export default function App({ Component, pageProps }) {
                       <TopNav buttonName={btn} key={index} /> ))} */}
               </TopNavWrapper>
               {/* //// test buttons //// */}
-              {/* <div id="showNotificationBtn" className='srch-select-btn' onClick={LoginPopup}>Test Button</div> */}
-              {/* {(isSignedIn || showNotification) ? (<LogOut />) : (<NeynarSigninButton onSignInSuccess={handleSignIn} />)} */}
+              {/* <div id="showNotificationBtn" className='srch-select-btn' onClick={LoginPopup}>Test Button</div>
+              {(isSignedIn || showNotification) ? (<LogOut />) : (<NeynarSigninButton onSignInSuccess={handleSignIn} />)} */}
               {/* {isSignedIn ? (<LogOut />) : (<LogOut />)} */}
               {/* <ConnectButton 
                 account={account}

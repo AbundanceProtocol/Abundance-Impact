@@ -1,27 +1,61 @@
+import Head from 'next/head';
 import { useContext, useState, useRef, useEffect } from 'react'
 import { ethers } from 'ethers'
 import { Swords, CoinBag, CoinStack, Waste, AbundanceStar, FeedbackLoop, Like, Recast, Message, Kebab, Warp, ActiveUser } from './assets'
 import Link from 'next/link'
 import { AccountContext } from '../context'
 import useMatchBreakpoints from '../hooks/useMatchBreakpoints'
-import { NeynarAPIClient } from "@neynar/nodejs-sdk";
+// import { NeynarAPIClient } from "@neynar/nodejs-sdk";
+import useStore from '../utils/store'
 import axios from 'axios';
 import { FaRegStar } from "react-icons/fa"
 
-export default function Home({apiKey}) {
+export default function Home() {
   const ref = useRef(null)
   const [ userFeed, setUserFeed] = useState([])
   const { isMobile } = useMatchBreakpoints();
   const [ feedWidth, setFeedWidth ] = useState()
   const account = useContext(AccountContext)
   const [ screenWidth, setScreenWidth ] = useState(undefined)
-  const client = new NeynarAPIClient(apiKey);
+  // const client = new NeynarAPIClient(apiKey);
+  const store = useStore()
   const [textMax, setTextMax] = useState('522px')
+
   async function getFeed() {
     try {
       const response = await axios.get('/api/getFeed')
       const feed = response.data.feed
+      console.log(feed)
       setUserFeed(feed)
+    } catch (error) {
+      console.error('Error submitting data:', error)
+    }
+  }
+
+
+  async function postRecast(hash) {
+    try {
+      const response = await axios.post('/api/postRecastReaction', {       
+        hash: hash,
+        signer: store.signer_uuid,
+      })
+      // const users = response.data.users
+      console.log(response)
+      // setSearchResults({kind: 'users', data: users})
+    } catch (error) {
+      console.error('Error submitting data:', error)
+    }
+  }
+
+  async function postLike(hash) {
+    try {
+      const response = await axios.post('/api/postLikeReaction', {       
+        hash: hash,
+        signer: store.signer_uuid,
+      })
+      console.log(response)
+      // console.log(users)
+      // setSearchResults({kind: 'users', data: users})
     } catch (error) {
       console.error('Error submitting data:', error)
     }
@@ -87,6 +121,10 @@ export default function Home({apiKey}) {
   
   return (
   <div name='feed' style={{width: 'auto', maxWidth: '620px'}} ref={ref}>
+    <Head>
+      <title>Impact | Abundance Protocol | Feed </title>
+      <meta name="description" content={`Building the global superalignment layer`} />
+    </Head>
     <div className="top-layer" style={{padding: '58px 0 0 0'}}>
     </div>
     {
@@ -153,7 +191,7 @@ export default function Home({apiKey}) {
                       </div>
                       <div className="" style={{flex: 1}}>
                         <span>
-                          <div className="flex-row">
+                          <div className="flex-row" onClick={() => postRecast(cast.hash)}>
                             <div className="">
                               <Recast />
                             </div>
@@ -161,7 +199,7 @@ export default function Home({apiKey}) {
                           </div>
                         </span>
                       </div>
-                      <div className="flex-row" style={{flex: 1}}>
+                      <div className="flex-row" style={{flex: 1}} onClick={() => postLike(cast.hash)}>
                         <div className="">
                           <Like />
                         </div>
