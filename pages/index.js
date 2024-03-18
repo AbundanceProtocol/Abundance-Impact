@@ -20,6 +20,7 @@ export default function Home() {
   // const client = new NeynarAPIClient(apiKey);
   const store = useStore()
   const [textMax, setTextMax] = useState('522px')
+  const [feedMax, setFeedMax ] = useState('620px')
 
   async function getFeed() {
     try {
@@ -91,16 +92,20 @@ export default function Home() {
     if (screenWidth) {
       if (screenWidth > 680) {
         setTextMax(`522px`)
+        setFeedMax('620px')
       }
       else if (screenWidth >= 635 && screenWidth <= 680) {
         setTextMax(`${screenWidth - 160}px`)
+        setFeedMax('580px')
       }
       else {
         setTextMax(`${screenWidth - 110}px`)
+        setFeedMax(`${screenWidth}px`)
       }
     }
     else {
       setTextMax(`100%`)
+      setFeedMax(`100%`)
     }
   }, [screenWidth])
 
@@ -125,7 +130,7 @@ export default function Home() {
       <title>Impact | Abundance Protocol | Feed </title>
       <meta name="description" content={`Building the global superalignment layer`} />
     </Head>
-    <div className="top-layer" style={{padding: '58px 0 0 0'}}>
+    <div className="top-layer" style={{padding: '58px 0 0 0', width: feedMax}}>
     </div>
     {
       (typeof userFeed !== 'undefined' && userFeed.length > 0) && (userFeed.map((cast, index) => (<div key={index} className="inner-container" style={{width: '100%', display: 'flex', flexDirection: 'row'}}>
@@ -183,29 +188,29 @@ export default function Home() {
                       </div>
                     )}
                     <div className="flex-row" style={{width: '100%', justifyContent: 'space-evenly'}}>
-                      <div className="flex-row" style={{flex: 1}}>
+                      <div className="flex-row" style={{flex: 1, padding: '3px'}}>
                         <div className="">
                           <Message />
                         </div>
                         <span className="" style={{padding: '0 0 0 5px'}}>{cast.replies.count}</span>
                       </div>
-                      <div className="" style={{flex: 1}}>
-                        <span>
-                          <div className="flex-row" onClick={() => postRecast(cast.hash)}>
-                            <div className="">
-                              <Recast />
-                            </div>
-                            <span className="" style={{padding: '0 0 0 5px'}}>{cast.reactions.recasts.length}</span>
+                      <div className="flex-row" style={{flex: 1}}>
+                        <div className='flex-row recast-btn' onClick={() => postRecast(cast.hash)}>
+                          <div className="">
+                            <Recast />
                           </div>
-                        </span>
-                      </div>
-                      <div className="flex-row" style={{flex: 1}} onClick={() => postLike(cast.hash)}>
-                        <div className="">
-                          <Like />
+                          <span className="" style={{padding: '0 0 0 5px'}}>{cast.reactions.recasts.length}</span>
                         </div>
-                        <span className="" style={{padding: '0 0 0 5px'}}>{cast.reactions.likes.length}</span>
                       </div>
                       <div className="flex-row" style={{flex: 1}}>
+                        <div className='flex-row like-btn' onClick={() => postLike(cast.hash)}>
+                          <div className="">
+                            <Like />
+                          </div>
+                          <span className="" style={{padding: '0 0 0 5px'}}>{cast.reactions.likes.length}</span>
+                        </div>
+                      </div>
+                      <div className="flex-row" style={{flex: 1, padding: '3px'}}>
                         <div className="" style={{padding: '2px 0 0 0px'}}>
                           <FaRegStar />
                         </div>

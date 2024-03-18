@@ -349,6 +349,10 @@ html, body {
     animation: rotateAnimation 3s linear infinite;
 }
 
+.rotation {
+    animation: rotatetionAnimation 3s linear infinite;
+    transform-origin: 51% 45%;
+}
 
 @keyframes circle1 {
     0%{left: 0px; top: 150px; background-color: rgb(178, 214, 19)}
@@ -432,6 +436,15 @@ html, body {
     }
 }
 
+
+@keyframes rotatetionAnimation {
+    from {
+        transform: rotate(0deg); /* Start rotation from 0 degrees */
+    }
+    to {
+        transform: rotate(360deg); /* End rotation at 360 degrees */
+    }
+}
 
 .cr-opacity {
     opacity: .25;
@@ -800,6 +813,32 @@ blockquote {
     text-align: center;
 }
 
+.like-btn {
+    border: 0px solid #222;
+    padding: 3px 5px;
+    border-radius: 8px;
+    cursor: pointer;
+    background-color: transparent;
+}
+
+.like-btn:hover {
+    background-color: #ffdddd66;
+    color: #933;
+}
+
+.recast-btn {
+    border: 0px solid #222;
+    padding: 3px 5px;
+    border-radius: 8px;
+    cursor: pointer;
+    background-color: transparent;
+}
+
+.recast-btn:hover {
+    background-color: #ddffdd44;
+    color: #393;
+}
+
 .srch-select-btn {
     border: 1px solid #ccc;
     border-radius: 8px;
@@ -839,6 +878,18 @@ blockquote {
 .logout-btn:hover, .srch-select-btn:hover, .srch-btn:hover, .srch-select:hover {
     color: #eee;
     background-color: #169;
+}
+
+.fid-btn {
+    font-size: 9px;
+    font-weight: 600;
+    border: 1px solid #999;
+    padding: 1px 4px;
+    margin-top: 2px;
+    border-radius: 3px;
+    background-color: #eee;
+    color: #333;
+    font-family: inter,sans-serif;
 }
 
 .connect-solid {

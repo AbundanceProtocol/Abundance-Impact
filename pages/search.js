@@ -1,10 +1,10 @@
 import { useContext, useState, useRef, useEffect } from 'react'
-import { ethers } from 'ethers'
-import { Like, Recast, Message, Kebab, Warp, ActiveUser } from './assets'
-import Link from 'next/link'
+// import { ethers } from 'ethers'
+import { ActiveUser } from './assets'
+// import { Like, Recast, Message, Kebab, Warp } from './assets'
+// import Link from 'next/link'
 import { AccountContext } from '../context'
 import useMatchBreakpoints from '../hooks/useMatchBreakpoints'
-// import { NeynarAPIClient } from "@neynar/nodejs-sdk";
 import { FaSearch, FaLock } from 'react-icons/fa';
 import useStore from '../utils/store'
 import axios from 'axios';
@@ -21,10 +21,8 @@ export default function Search() {
   const account = useContext(AccountContext)
   const [ screenWidth, setScreenWidth ] = useState(undefined)
 
-  // const client = new NeynarAPIClient(apiKey);
   const [textMax, setTextMax] = useState('430px')
-  const [textChMax, setTextChMax] = useState('430px')
-  const [ feedMax, setFeedMax ] = useState('620px')
+  const [feedMax, setFeedMax ] = useState('620px')
   const store = useStore()
 	function onChange(e) {
 		setUserSearch( () => ({ ...userSearch, [e.target.name]: e.target.value }) )
@@ -42,6 +40,12 @@ export default function Search() {
     else if (searchSelect == 'Users' && store.isAuth) {
       getUsers(userSearch.search)
     }
+    // else if (searchSelect == 'Ecosystems') {
+    //   getEcosystems(userSearch.search)
+    // }
+    // else if (searchSelect == 'Proposals') {
+    //   getProposals(userSearch.search)
+    // }
   }
 
   async function getUsers(name) {
@@ -79,42 +83,177 @@ export default function Search() {
     }
   }
 
+  const UserData = () => {
+    const [loading, setLoading] = useState(Array(searchResults.data.length).fill(false));
 
-  async function unfollowUser(fid, index) {
-    console.log('follow', fid, index)
-    const updatedSearchResults = { ...searchResults }
-    updatedSearchResults.data[index].following = 0
-    setSearchResults(updatedSearchResults)
-  }
+    async function postUnfollowUser(fid, index) {
+      try {
+        const signer = store.signer_uuid
+        const response = await axios.delete('/api/deleteFollowUser', {       
+          fid: fid,
+          signer: signer,
+        })
+        const followed = response
+        if (followed.status === 200) {
+          let updatedSearchResults = { ...searchResults }
+          updatedSearchResults.data[index].following = 0
+          setSearchResults(updatedSearchResults)
+        } else {
+          let updatedSearchResults = { ...searchResults }
+          updatedSearchResults.data[index].following = 1
+          setSearchResults(updatedSearchResults)
+        }
+      } catch (error) {
+        console.error('Error submitting data:', error)
+      }
+    }
 
-  async function followUser(fid, index) {
+    async function postFollowUser(fid, index) {
+      try {
+        const signer = store.signer_uuid
+        const response = await axios.post('/api/postFollowUser', {       
+          fid: fid,
+          signer: signer,
+        })
+        const followed = response
+        if (followed.status === 200) {
+          let updatedSearchResults = { ...searchResults }
+          updatedSearchResults.data[index].following = 1
+          setSearchResults(updatedSearchResults)
+        } else {
+          let updatedSearchResults = { ...searchResults }
+          updatedSearchResults.data[index].following = 0
+          setSearchResults(updatedSearchResults)
+        }
+      } catch (error) {
+        console.error('Error submitting data:', error)
+      }
+    }
 
+    const followUser = async (fid, index) => {
+      try {
+        setLoading(prevLoading => {
+          const updatedLoading = [...prevLoading];
+          updatedLoading[index] = true;
+          return updatedLoading;
+        });
+
+        await postFollowUser(fid, index);
     
-    console.log('follow', fid, index)
-    const updatedSearchResults = { ...searchResults }
-    updatedSearchResults.data[index].following = 1
-    setSearchResults(updatedSearchResults)
-    // try {
-    //   const signer = store.signer_uuid
+      } catch (error) {
+        console.error('Error following user:', error);
 
-    //   // console.log(fid)
-    //   // console.log(signer)
-    //   // console.log(store.signer_uuid)
-    //   const response = await axios.post('/api/postFollowUser', {       
-    //     fid: fid,
-    //     signer: signer,
-    //   })
-    //   const followed = response
-    //   console.log(followed.status === 200)
-    //   if (followed.status === 200) {
+      } finally {
+        setLoading(prevLoading => {
+          const updatedLoading = [...prevLoading];
+          updatedLoading[index] = false;
+          return updatedLoading;
+        });
+      }
+    };
+  
+    const unfollowUser = async (fid, index) => {
+      try {
+        setLoading(prevLoading => {
+          const updatedLoading = [...prevLoading];
+          updatedLoading[index] = true;
+          return updatedLoading;
+        });
 
-    //   } else {
+        await postUnfollowUser(fid, index);
+  
+      } catch (error) {
+        console.error('Error unfollowing user:', error);
+      } finally {
+        setLoading(prevLoading => {
+          const updatedLoading = [...prevLoading];
+          updatedLoading[index] = false;
+          return updatedLoading;
+        });
+      }
+    };
 
-    //   }
-    //   // setSearchResults({kind: 'channels', data: channels})
-    // } catch (error) {
-    //   console.error('Error submitting data:', error)
-    // }
+   return (
+    searchResults.data.map((user, index) => (<div key={index} className="inner-container flex-row" style={{width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
+        <div style={{width: '100%'}}>
+          <div>
+            <div>
+              <div>
+                <div className="flex-row">
+                  <span className="" datastate="closed" style={{margin: '0 10px 0 0'}}>
+                    <a className="" title="" href={`https://warpcast.com/${user.username}`}>
+                      <img loading="lazy" src={user.pfp_url} className="" alt={`${user.display_name} avatar`} style={{width: '48px', height: '48px', maxWidth: '48px', maxHeight: '48px', borderRadius: '24px', border: '1px solid #000'}} />
+                    </a>
+                  </span>
+                  <div className="flex-col" style={{width: '100%', gap: '0.5rem', alignItems: 'flex-start'}}>
+                    <div className="flex-row" style={{width: '100%', justifyContent: 'space-between', height: '20px', alignItems: 'flex-start'}}>
+                      <div className="flex-row" style={{alignItems: 'center', gap: '0.25rem'}}>
+                        <span className="" data-state="closed">
+                          <a className="fc-lnk" title="" href={`https://warpcast.com/${user.username}`}>
+                            <div className="flex-row" style={{alignItems: 'center'}}>
+                              <span className="name-font">{user.display_name}</span>
+                              <div className="" style={{margin: '0 0 0 3px'}}>
+                                {(user.active_status == 'active') && (<ActiveUser />)}
+                              </div>
+                            </div>
+                          </a>
+                        </span>
+                        <span className="user-font" datastate="closed">
+                          <a className="fc-lnk" title="" href={`https://warpcast.com/${user.username}`}>@{user.username}</a>
+                        </span>
+                        <div className="">·</div>
+                        <a className="fc-lnk" title="Navigate to cast" href={`https://warpcast.com/${user.username}`}>
+                          <div className="fid-btn">fid: {user.fid}</div>
+                        </a>
+                      </div>
+                    </div>
+                    <div className="">
+                      <div style={{wordWrap: 'break-word', maxWidth: textMax}}>{user.profile.bio.text}</div>
+                    </div>
+                    <div className="flex-row" style={{width: '100%', justifyContent: 'space-evenly'}}>
+                      <div className="" style={{flex: 1}}>
+                        <div className="flex-row">
+                          <span className="" style={{padding: '0 0 0 0px', fontSize: '12px', fontWeight: '600'}}>Following: {user.following_count}</span>
+                        </div>
+                      </div>
+                      <div className="flex-row" style={{flex: 2}}>
+                        <span className="" style={{padding: '0 0 0 5px', fontSize: '12px', fontWeight: '600'}}>Followed: {user.follower_count}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {store.isAuth ? (
+          <div className="flex-row">
+            {(user.following == 1) ? (
+              <div className='flex-row' style={{position: 'relative'}}>
+                <div className='unfollow-select' onClick={() => unfollowUser(user.fid, index)} name='unfollow' style={{color: loading[index] ? 'transparent' : '#27a'}}>Unfollow</div>
+                <div className='top-layer rotation' style={{position: 'absolute', top: '7px', left: '34px', visibility: loading[index] ? 'visible': 'hidden' }}>
+                  <Loading size={24} color='#27a' />
+                </div>
+              </div>
+            ) : (
+              <div className='flex-row' style={{position: 'relative'}}>
+              <div className='follow-select' onClick={() => followUser(user.fid, index)} name='follow' style={{color: loading[index] ? 'transparent' : '#fff'}}>Follow</div>
+              <div className='top-layer rotation' style={{position: 'absolute', top: '7px', left: '34px', visibility: loading[index] ? 'visible': 'hidden' }}>
+                <Loading size={24} color='#fff' />
+              </div>
+            </div>
+            )}
+          </div>
+        ) : (
+          <div className="flex-row" style={{position: 'relative'}}>
+            <div className='follow-locked' onClick={account.LoginPopup}>Follow</div>
+            <div className='top-layer' style={{position: 'absolute', top: 0, right: 0, transform: 'translate(-50%, -50%)' }}>
+              <FaLock size={8} color='#666' />
+            </div>
+          </div>
+        )
+      }
+    </div>)))
   }
 
   useEffect(() => {
@@ -200,7 +339,6 @@ export default function Search() {
           </div>
         </div>
     </div>
-
     {
       (searchResults.kind == 'channels' && searchResults.data.length > 0) && (searchResults.data.map((channel, index) => (<div key={index} className="inner-container flex-row" style={{width: feedMax, display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
         <div>
@@ -259,91 +397,7 @@ export default function Search() {
       </div>)))
     }
 
-    {
-      (searchResults.kind == 'users' && searchResults.data.length > 0) && (searchResults.data.map((user, index) => (<div key={index} className="inner-container flex-row" style={{width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
-        <div style={{width: '100%'}}>
-          <div>
-            <div>
-              <div>
-                <div className="flex-row">
-                  <span className="" datastate="closed" style={{margin: '0 10px 0 0'}}>
-                    <a className="" title="" href={`https://warpcast.com/${user.username}`}>
-                      <img loading="lazy" src={user.pfp_url} className="" alt={`${user.display_name} avatar`} style={{width: '48px', height: '48px', maxWidth: '48px', maxHeight: '48px', borderRadius: '24px', border: '1px solid #000'}} />
-                    </a>
-                  </span>
-                  <div className="flex-col" style={{width: '100%', gap: '0.5rem', alignItems: 'flex-start'}}>
-                    <div className="flex-row" style={{width: '100%', justifyContent: 'space-between', height: '20px', alignItems: 'flex-start'}}>
-                      <div className="flex-row" style={{alignItems: 'center', gap: '0.25rem'}}>
-                        <span className="" data-state="closed">
-                          <a className="fc-lnk" title="" href={`https://warpcast.com/${user.username}`}>
-                            <div className="flex-row" style={{alignItems: 'center'}}>
-                              <span className="name-font">{user.display_name}</span>
-                              <div className="" style={{margin: '0 0 0 3px'}}>
-                                {(user.active_status == 'active') && (<ActiveUser />)}
-                              </div>
-                            </div>
-                          </a>
-                        </span>
-                        <span className="user-font" datastate="closed">
-                          <a className="fc-lnk" title="" href={`https://warpcast.com/${user.username}`}>@{user.username}</a>
-                        </span>
-                        <div className="">·</div>
-                        <a className="fc-lnk" title="Navigate to cast" href={`https://warpcast.com/${user.username}`}>
-                          <div className="user-font">fid: {user.fid}</div>
-                        </a>
-                      </div>
-                    </div>
-                    <div className="">
-                      <div style={{wordWrap: 'break-word', maxWidth: textMax}}>{user.profile.bio.text}</div>
-                    </div>
-                    <div className="flex-row" style={{width: '100%', justifyContent: 'space-evenly'}}>
-                      <div className="flex-row" style={{flex: 1}}>
-                        {/* <div className="">
-                          <Message />
-                        </div> */}
-                        <span className="" style={{padding: '0 0 0 5px'}}>Followed: {user.follower_count}</span>
-                      </div>
-                      <div className="" style={{flex: 1}}>
-                        <span>
-                          <div className="flex-row">
-                            {/* <div className="">
-                              <Recast />
-                            </div> */}
-                            <span className="" style={{padding: '0 0 0 5px'}}>Following: {user.following_count}</span>
-                          </div>
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {store.isAuth ? (
-            <div className="flex-col">
-              {(user.following == 1) ? (
-                <div className='unfollow-select' onClick={() => unfollowUser(user.fid, index)} name='follow'>Unfollow</div>
-              ) : (
-                <div className='follow-select' onClick={() => followUser(user.fid, index)} name='follow'>Follow</div>
-              )}
-            </div>
-          ) : (
-            <div className="flex-row" style={{position: 'relative'}}>
-              <div className='follow-locked' onClick={account.LoginPopup}>Follow</div>
-              <div className='top-layer' style={{position: 'absolute', top: 0, right: 0, transform: 'translate(-50%, -50%)' }}>
-              <FaLock size={8} color='#666' />
-            </div>
-            </div>
-          )
-        }
-
-        {/* <div className="flex-col">
-          <div className='srch-select' name='follow'>Follow</div>
-        </div> */}
-      </div>)))
-    }
+    { (searchResults.kind == 'users' && searchResults.data.length > 0) && <UserData/> }
   </div>
   )
 }
