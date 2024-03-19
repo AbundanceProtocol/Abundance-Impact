@@ -9,6 +9,7 @@ import useMatchBreakpoints from '../hooks/useMatchBreakpoints'
 import useStore from '../utils/store'
 import axios from 'axios';
 import { FaRegStar } from "react-icons/fa"
+import mql from '@microlink/mql';
 
 export default function Home() {
   const ref = useRef(null)
@@ -26,8 +27,25 @@ export default function Home() {
     try {
       const response = await axios.get('/api/getFeed')
       const feed = response.data.feed
-      console.log(feed)
       setUserFeed(feed)
+      const imageRegex = /\.(jpg|png|jpeg)$/i;
+      for (let i = 0; i < feed.length; i++) {
+        if (!feed[i].frames) {
+          // console.log('frame', i, feed[i].frames.length)
+          if (feed[i].embeds) {
+            for (let j = 0; j < feed[i].embeds.length; j++) {
+              if (imageRegex.test(feed[i].embeds[j].url)) {
+                feed[i].embeds[j].type = 'img'
+              } else {
+                const { data } = await mql(feed[i].embeds[j].url)
+                feed[i].embeds[j].type = 'url'
+              }
+            }
+          }
+        }
+      }
+      console.log(feed)
+      setUserFeed([...feed])
     } catch (error) {
       console.error('Error submitting data:', error)
     }
@@ -40,9 +58,7 @@ export default function Home() {
         hash: hash,
         signer: store.signer_uuid,
       })
-      // const users = response.data.users
       console.log(response)
-      // setSearchResults({kind: 'users', data: users})
     } catch (error) {
       console.error('Error submitting data:', error)
     }
@@ -55,8 +71,6 @@ export default function Home() {
         signer: store.signer_uuid,
       })
       console.log(response)
-      // console.log(users)
-      // setSearchResults({kind: 'users', data: users})
     } catch (error) {
       console.error('Error submitting data:', error)
     }
@@ -122,8 +136,7 @@ export default function Home() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-  
-  
+
   return (
   <div name='feed' style={{width: 'auto', maxWidth: '620px'}} ref={ref}>
     <Head>
@@ -171,12 +184,13 @@ export default function Home() {
                     </div>
                     <div className="">
                       <div style={{wordWrap: 'break-word', maxWidth: `100%`, width: textMax}}>{cast.text}</div>
-                      {(cast.embeds.length > 0 && 1 == 2) &&
-                      (<div className="">
+                      {(cast.embeds.length > 0) && (cast.embeds.map((embed, subindex) => (
+                      <div className='flex-col' style={{alignItems: 'center'}}>{(embed.type && embed.type == 'img') && (<div key={`${index}-${subindex}`} className="">
                         <div className="">
-                          <img loading="lazy" src={cast.embeds.url} className="" alt="Cast image embed" style={{aspectRatio: '0.75 / 1'}} />
+                          <img loading="lazy" src={embed.url} className="" alt="Cast image embed" style={{aspectRatio: '0.75 / 1', maxWidth: textMax, maxHeight: '500px'}} />
                         </div>
-                      </div>)}
+                      </div>)}</div>
+                      )))}
                     </div>
                     {(typeof cast.channelName !== 'undefined') && (
                       <div className="flex-row" style={{border: '1px solid #666', padding: '2px 4px', borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'flex-start'}}>
@@ -229,11 +243,3 @@ export default function Home() {
   )
 }
 
-
-export async function getStaticProps() {
-  return {
-    props: {
-      apiKey: process.env.NEYNAR_API_KEY,
-    },
-  };
-}
