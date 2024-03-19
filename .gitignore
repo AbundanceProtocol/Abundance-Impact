@@ -6,6 +6,7 @@
 .pnp.js
 
 # testing
+/pages/archive
 /coverage
 temp.js
 pages/temp.js

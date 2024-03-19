@@ -60,10 +60,6 @@ export default function App({ Component, pageProps }) {
     let menuLink = targetLink()
     setBottomNavSize(ref?.current?.offsetWidth)
 
-    // const storedData = useStore
-    // console.log(store.isAuth)
-
-
     setNavSize(ref?.current?.offsetWidth - 60)
     setLinkTarget(menuLink)
     setNavMenu(button[menuLink].menu)
@@ -599,7 +595,7 @@ export default function App({ Component, pageProps }) {
             <LeftNav buttonName={btn} key={index} /> ))}
         </div>
         <div>
-          <div className="container cast-area" style={isMobile ? {} : {width: '100%'}}>
+          <div className="container cast-area" style={isMobile ? {} : {width: isMobile? '100%' : '620px'}}>
             <AccountContext.Provider value={{...store.account, ref1, LoginPopup}}>
               <Component {...pageProps} connect={connect} />
             </AccountContext.Provider>

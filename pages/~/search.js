@@ -1,12 +1,12 @@
 import { useContext, useState, useRef, useEffect } from 'react'
 // import { ethers } from 'ethers'
-import { ActiveUser } from './assets'
+import { ActiveUser } from '../assets'
 // import { Like, Recast, Message, Kebab, Warp } from './assets'
 // import Link from 'next/link'
-import { AccountContext } from '../context'
-import useMatchBreakpoints from '../hooks/useMatchBreakpoints'
+import { AccountContext } from '../../context'
+import useMatchBreakpoints from '../../hooks/useMatchBreakpoints'
 import { FaSearch, FaLock } from 'react-icons/fa';
-import useStore from '../utils/store'
+import useStore from '../../utils/store'
 import axios from 'axios';
 import { AiOutlineLoading3Quarters as Loading } from "react-icons/ai";
 

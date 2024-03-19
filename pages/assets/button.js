@@ -56,7 +56,7 @@ const button = {
         icon: AiFillHome
     },
     'Search': {
-        link: '/search',
+        link: '/~/search',
         menu: 'Search',
         description: 'Search for communities, projects, users, and proposals',
         account: false,
@@ -64,7 +64,7 @@ const button = {
         icon: FaSearch
     },
     'Ecosystem': {
-        link: '/ecosystem',
+        link: '/~/ecosystems',
         menu: 'Ecosystem',
         description: 'Ecosystems',
         account: false,
@@ -72,7 +72,7 @@ const button = {
         icon: FaGlobe
     },
     'Reviews': {
-        link: '/reviews',
+        link: '/~/reviews',
         menu: 'Reviews',
         description: 'Your reviews',
         account: true,
@@ -80,7 +80,7 @@ const button = {
         icon: FaRegListAlt
     },
     'Notifications': {
-        link: '/notifications',
+        link: '/~/notifications',
         menu: 'Notifications',
         description: 'Your notifications',
         account: true,
@@ -88,7 +88,7 @@ const button = {
         icon: IoNotifications
     },
     'Profile': {
-        link: '/profile',
+        link: '/~/profile',
         menu: 'Profile',
         description: 'Your profile',
         account: true,
@@ -96,7 +96,7 @@ const button = {
         icon: FaUser
     },
     'Funding': {
-        link: '/funding',
+        link: '/~/funding',
         menu: 'Funding',
         description: 'Invest in public goods',
         account: true,
@@ -104,7 +104,7 @@ const button = {
         icon: GiTwoCoins
     },
     'Challenge': {
-        link: '/challenge',
+        link: '/~/challenge',
         menu: 'Challenge',
         description: 'Challenge a review',
         account: true,
@@ -112,7 +112,7 @@ const button = {
         icon: TiFlag
     },
     'Propose': {
-        link: '/propose',
+        link: '/~/propose',
         menu: 'Propose',
         description: 'Create a proposal',
         account: true,
@@ -120,52 +120,13 @@ const button = {
         icon: MdWork
     },
     'Cast': {
-        link: '/cast',
+        link: '/~/cast',
         menu: 'Cast',
         description: 'Create a cast',
         account: true,
         working: false,
         icon: FaPen
     },
-
-    // ////// MENUS //////
-
-    // 'portal': {
-    //     link: '/portal',
-    //     menu: 'Portal',
-    //     description: 'Your activity hub',
-    //     account: true,
-    //     working: true,
-    //     icon: FaUser
-    // },
-    // 'studio': {
-    //     link: '/create',
-    //     menu: 'Studio',
-    //     description: 'Create. Contribute. Collaborate',
-    //     account: true,
-    //     working: true,
-    //     icon: FaPen
-    // },
-    // 'consensus': {
-    //     link: '/consensus',
-    //     menu: 'Consensus',
-    //     description: 'Proof-of-Impact Consensus Validation',
-    //     account: true,
-    //     working: true,
-    //     icon: FaHandshake
-    // },
-    // 'funding': {
-    //     link: '/fund',
-    //     menu: 'Funding',
-    //     description: 'Give and get funding',
-    //     account: true,
-    //     working: true,
-    //     icon: FaCoins
-    // },
-
-
-
-
 
     ////// HOME //////
 
