@@ -14,10 +14,6 @@ html, body {
     background-color: #1D3244;
 }
 
-::-webkit-scrollbar {
-    width: 10px;
-}
-  
 ::-webkit-scrollbar-track {
     background: #1D3244;
 }
@@ -25,6 +21,17 @@ html, body {
 ::-webkit-scrollbar-thumb {
     background: #688;
     border-radius: 5px;
+}
+
+@media only screen and (min-width: 680px) {
+    ::-webkit-scrollbar {
+        width: 10px;
+    }
+}
+@media only screen and (max-width: 679.999px) {
+    ::-webkit-scrollbar {
+        width: 0px;
+    }
 }
 
 
@@ -509,19 +516,17 @@ blockquote {
     margin-left: 0px;
 }
 
-#notificationContainer {
+.popupConainer {
     position: fixed;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -100%);
-    background-color: #fff;
-    padding: 20px;
+    transform: translate(-50%, -50%);
     box-shadow: 0 0 10px 2px rgba(0, 0, 0, 0.5);
     z-index: 2147483647;
     display: flex;
     flex-direction: column;
     align-items: center;
-    border: 2px solid #355
+    border: 0px solid #355
   }
   
   #notificationContent {
@@ -542,6 +547,17 @@ blockquote {
     z-index: 2147483645;
   }
 
+  .popup {
+    z-index: 2147483647;
+    /* /* position: fixed !important; */
+    left: 0 !important;
+    top: 0 !important;
+    transform: translate(50% 50%) !important;
+    display: flex !important;
+  justify-content: center !important; /* Center horizontally */
+  align-items: center !important; /* Center vertically */
+  height: 100vh !important;
+  }
 
 
 

@@ -18,10 +18,12 @@ export default function Home() {
   const [ feedWidth, setFeedWidth ] = useState()
   const account = useContext(AccountContext)
   const [ screenWidth, setScreenWidth ] = useState(undefined)
+  const [ screenHeight, setScreenHeight ] = useState(undefined)
   // const client = new NeynarAPIClient(apiKey);
   const store = useStore()
   const [textMax, setTextMax] = useState('522px')
   const [feedMax, setFeedMax ] = useState('620px')
+  const [showPopup, setShowPopup] = useState({open: false, url: null})
 
   async function getFeed() {
     try {
@@ -37,7 +39,7 @@ export default function Home() {
               if (imageRegex.test(feed[i].embeds[j].url)) {
                 feed[i].embeds[j].type = 'img'
               } else {
-                const { data } = await mql(feed[i].embeds[j].url)
+                // const { data } = await mql(feed[i].embeds[j].url)
                 feed[i].embeds[j].type = 'url'
               }
             }
@@ -123,10 +125,22 @@ export default function Home() {
     }
   }, [screenWidth])
 
+  function closeImagePopup() {
+    setShowPopup({open: false, url: null})
+  }
+
+  function openImagePopup(embed) {
+    let newPopup = { ...showPopup }
+    newPopup.open = true
+    newPopup.url = embed.url
+    setShowPopup(newPopup)
+  }
+
   useEffect(() => {
     getFeed()
     const handleResize = () => {
       setScreenWidth(window.innerWidth)
+      setScreenHeight(window.innerHeight)
     }
     handleResize()
     window.addEventListener('resize', handleResize);
@@ -136,6 +150,15 @@ export default function Home() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  const ExpandImg = ({embed}) => {
+    return (
+      <>
+        <div className="overlay" onClick={closeImagePopup}></div>
+        <img loading="lazy" src={embed.showPopup.url} className='popupConainer' alt="Cast image embed" style={{aspectRatio: 'auto', maxWidth: screenWidth, maxHeight: screenHeight, cursor: 'pointer', position: 'fixed'}} onClick={closeImagePopup} />
+      </>
+    )
+  }
 
   return (
   <div name='feed' style={{width: 'auto', maxWidth: '620px'}} ref={ref}>
@@ -185,11 +208,24 @@ export default function Home() {
                     <div className="">
                       <div style={{wordWrap: 'break-word', maxWidth: `100%`, width: textMax}}>{cast.text}</div>
                       {(cast.embeds.length > 0) && (cast.embeds.map((embed, subindex) => (
-                      <div className='flex-col' style={{alignItems: 'center'}}>{(embed.type && embed.type == 'img') && (<div key={`${index}-${subindex}`} className="">
-                        <div className="">
-                          <img loading="lazy" src={embed.url} className="" alt="Cast image embed" style={{aspectRatio: '0.75 / 1', maxWidth: textMax, maxHeight: '500px'}} />
-                        </div>
-                      </div>)}</div>
+                      <div className='flex-col' style={{alignItems: 'center'}}>
+                        {(embed.type && embed.type == 'img') && (
+                          <div className="" key={`${index}-${subindex}`}>
+                            <div className="flex-col" style={{position: 'relative'}}>
+                              <img 
+                                loading="lazy" 
+                                src={embed.url} 
+                                alt="Cast image embed" 
+                                style={{aspectRatio: '0.75 / 1', 
+                                  maxWidth: textMax, 
+                                  maxHeight: '500px', 
+                                  cursor: 'pointer', 
+                                  position: 'relative'}} 
+                                onClick={() => {openImagePopup(embed)}} />
+                            </div>
+                          </div>
+                        )}
+                      </div>
                       )))}
                     </div>
                     {(typeof cast.channelName !== 'undefined') && (
@@ -239,6 +275,10 @@ export default function Home() {
         </div> 
       </div>)))
     }
+
+    <div>
+      {showPopup.open && (<ExpandImg embed={{showPopup}} />)}
+    </div>
   </div>
   )
 }
