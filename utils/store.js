@@ -29,6 +29,10 @@ const useStore = create(persist((set, get) => {
         userEthVerAddresses: [],
         userSolVerAddresses: [],
 
+        userData: null,
+        castData: null,
+        proposalData: null,
+
         // Setters
         setAccount: (account) => set({ account }),
         setUsername: (username) => set({ username }),
@@ -47,6 +51,10 @@ const useStore = create(persist((set, get) => {
         setUserFollowingFC: (userFollowingFC) => set({ userFollowingFC }),
         setUserEthVerAddresses: (userEthVerAddresses) => set({ userEthVerAddresses }),
         setUserSolVerAddresses: (userSolVerAddresses) => set({ userSolVerAddresses }),
+
+        setUserData: (userData) => set({ userData }),
+        setCastData: (castData) => set({ castData }),
+        setProposalData: (proposalData) => set({ proposalData }),
 
         // Getters
         getFid: () => get().fid,
@@ -71,6 +79,9 @@ const useStore = create(persist((set, get) => {
         userFollowingFC: state.userFollowingFC,
         userEthVerAddresses: state.userEthVerAddresses,
         userSolVerAddresses: state.userSolVerAddresses,
+        userData: state.userData,
+        castData: state.castData,
+        proposalData: state.proposalData
         }),
         onRehydrate: (state) => {
           // This callback is called when the store is rehydrated

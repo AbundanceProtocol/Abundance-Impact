@@ -775,6 +775,26 @@ blockquote {
     cursor: pointer;
 }
 
+.follow-select-drk {
+    border: 2px solid #38b;
+    border-radius: 8px;
+    font-size: 16px;
+    padding: 6px 12px;
+    color: #244;
+    margin: 2px 5px;
+    font-weight: 600;
+    width: 80px;
+    height: 34px;
+    justify-content: center;
+    background-color: #38b;
+    cursor: pointer;
+}
+
+.follow-select-drk:hover {
+    border: 2px solid #cdd;
+    color: #169;
+    background-color: #cdd;
+}
 .follow-locked {
     border: 2px solid #666;
     border-radius: 8px;
@@ -816,6 +836,28 @@ blockquote {
     color: #169;
     background-color: #eee;
 }
+
+.unfollow-select-drk {
+    border: 2px solid #dee;
+    border-radius: 8px;
+    font-size: 14px;
+    padding: 7px 8px;
+    color: #dee;
+    margin: 2px 5px;
+    font-weight: 700;
+    width: 80px;
+    height: 34px;
+    justify-content: center;
+    background-color: transparent;
+    cursor: pointer;
+}
+
+.unfollow-select-drk:hover {
+    border: 2px solid #cdd;
+    color: #cdd;
+    background-color: #222;
+}
+
 
 .x-srch-select {
     border: 1px solid #ccc;

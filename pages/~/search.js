@@ -9,6 +9,7 @@ import { FaSearch, FaLock } from 'react-icons/fa';
 import useStore from '../../utils/store'
 import axios from 'axios';
 import { AiOutlineLoading3Quarters as Loading } from "react-icons/ai";
+import { useRouter } from 'next/router';
 
 export default function Search() {
   const ref = useRef(null)
@@ -20,10 +21,11 @@ export default function Search() {
   const { isMobile } = useMatchBreakpoints();
   const account = useContext(AccountContext)
   const [ screenWidth, setScreenWidth ] = useState(undefined)
-
+  const router = useRouter()
   const [textMax, setTextMax] = useState('430px')
   const [feedMax, setFeedMax ] = useState('620px')
   const store = useStore()
+
 	function onChange(e) {
 		setUserSearch( () => ({ ...userSearch, [e.target.name]: e.target.value }) )
 	}
@@ -127,6 +129,7 @@ export default function Search() {
         } else {
           let updatedSearchResults = { ...searchResults }
           updatedSearchResults.data[index].following = 0
+          updatedSearchResults.data[index].follower_count--
           setSearchResults(updatedSearchResults)
         }
       } catch (error) {
@@ -193,7 +196,7 @@ export default function Search() {
                     <div className="flex-row" style={{width: '100%', justifyContent: 'space-between', height: '20px', alignItems: 'flex-start'}}>
                       <div className="flex-row" style={{alignItems: 'center', gap: '0.25rem'}}>
                         <span className="" data-state="closed">
-                          <a className="fc-lnk" title="" href={`https://warpcast.com/${user.username}`}>
+                          <a className="fc-lnk" title="" style={{cursor: 'pointer'}} onClick={() => {goToUserProfile(user)}}>
                             <div className="flex-row" style={{alignItems: 'center'}}>
                               <span className="name-font">{user.display_name}</span>
                               <div className="" style={{margin: '0 0 0 3px'}}>
@@ -307,6 +310,13 @@ export default function Search() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  const goToUserProfile = async (author) => {
+    const username = author.username
+    await store.setUserData(author)
+    console.log(author, store.userData)
+    router.push(`/${username}`)
+  }
+
   const SearchOptionButton = (props) => {
     const btn = props.buttonName
     let isSearchable = true
@@ -343,7 +353,7 @@ export default function Search() {
         { searchButtons.map((btn, index) => (
           <SearchOptionButton buttonName={btn} key={index} /> ))}
       </div>
-      <div sytle={{}}>
+      <div>
         <div className="flex-row" style={{padding: '10px 0 0 0'}}>
             <input onChange={onChange} name='search' placeholder={`Search ${searchSelect}`} value={userSearch.search} className='srch-btn' style={{width: '100%', backgroundColor: '#234'}} onKeyDown={handleKeyDown} />
             <div className='srch-select-btn' onClick={routeSearch} style={{padding: '12px 14px 9px 14px'}}><FaSearch /></div>

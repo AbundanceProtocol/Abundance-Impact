@@ -10,6 +10,7 @@ import useStore from '../utils/store'
 import axios from 'axios';
 import { FaRegStar } from "react-icons/fa"
 import mql from '@microlink/mql';
+import { useRouter } from 'next/router';
 
 export default function Home() {
   const ref = useRef(null)
@@ -24,6 +25,7 @@ export default function Home() {
   const [textMax, setTextMax] = useState('522px')
   const [feedMax, setFeedMax ] = useState('620px')
   const [showPopup, setShowPopup] = useState({open: false, url: null})
+  const router = useRouter()
 
   async function getFeed() {
     try {
@@ -155,9 +157,16 @@ export default function Home() {
     return (
       <>
         <div className="overlay" onClick={closeImagePopup}></div>
-        <img loading="lazy" src={embed.showPopup.url} className='popupConainer' alt="Cast image embed" style={{aspectRatio: 'auto', maxWidth: screenWidth, maxHeight: screenHeight, cursor: 'pointer', position: 'fixed'}} onClick={closeImagePopup} />
+        <img loading="lazy" src={embed.showPopup.url} className='popupConainer' alt="Cast image embed" style={{aspectRatio: 'auto', maxWidth: screenWidth, maxHeight: screenHeight, cursor: 'pointer', position: 'fixed', borderRadius: '12px'}} onClick={closeImagePopup} />
       </>
     )
+  }
+
+  const goToUserProfile = async (author) => {
+    const username = author.username
+    await store.setUserData(author)
+    console.log(author, store.userData)
+    router.push(`/${username}`)
   }
 
   return (
@@ -184,7 +193,7 @@ export default function Home() {
                     <div className="flex-row" style={{width: '100%', justifyContent: 'space-between', height: '20px', alignItems: 'flex-start'}}>
                       <div className="flex-row" style={{alignItems: 'center', gap: '0.25rem'}}>
                         <span className="" data-state="closed">
-                          <a className="fc-lnk" title="" href={`https://warpcast.com/${cast.author.username}`}>
+                          <a className="fc-lnk" title="" style={{cursor: 'pointer'}} onClick={() => {goToUserProfile(cast.author)}}>
                             <div className="flex-row" style={{alignItems: 'center'}}>
                               <span className="name-font">{cast.author.display_name}</span>
                               <div className="" style={{margin: '0 0 0 3px'}}>
@@ -220,7 +229,8 @@ export default function Home() {
                                   maxWidth: textMax, 
                                   maxHeight: '500px', 
                                   cursor: 'pointer', 
-                                  position: 'relative'}} 
+                                  position: 'relative',
+                                  borderRadius: '8px'}} 
                                 onClick={() => {openImagePopup(embed)}} />
                             </div>
                           </div>

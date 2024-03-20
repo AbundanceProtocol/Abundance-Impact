@@ -422,11 +422,9 @@ export default function App({ Component, pageProps }) {
       }}
       onMouseLeave={() => setMenuHover({ ...menuHover, out: Date.now() }) }>
         <Link href={(btn.link && btn.working) ? btn.link : router.route}>
-          <a style={{width: 'auto'}}  
-          >
+          <a style={{width: 'auto'}}>
             <div className={`flex-row ${menuState}`} style={{padding: isMobile ? '2px' : 'unset', width: 'auto' }}>
               <div className="flex-col" style={{height: '58px', alignItems: 'center', justifyContent: 'center'}}>
-
                 {btn.working? (
                 <div className="flex-row btn-hvr flex-middle" style={{padding: '6px 2px', borderRadius: '12px'}}>
                   <TopIcon className="size-25" style={{margin: '6px 12px 6px 12px'}} />
@@ -438,12 +436,10 @@ export default function App({ Component, pageProps }) {
                 <div className="flex-row btn-hvr lock-btn-hvr flex-middle" style={{padding: '6px 2px', borderRadius: '12px', position: 'relative'}}>
                   <TopIcon className="size-25" style={{margin: '6px 12px 6px 12px'}} />
                   <div className='top-layer' style={{position: 'absolute', top: 0, right: 0, transform: 'translate(30%, -50%)' }}>
-                        <div className='soon-btn'>SOON</div>
-                      </div>
+                    <div className='soon-btn'>SOON</div>
+                  </div>
                 </div>
                 )}
-
-
               </div>
             </div>
           </a>
