@@ -1,0 +1,279 @@
+[
+    {
+        "object": "proposal",
+        "hash": "0xb75f76828b52a270d641ae3f64bccdf22b652ccd",
+        "sender_address": "0x6b0bda3f2ffed5efc83fa8c024acff1dd45793f1",
+        "timestamp": "2024-03-20T00:13:37.000Z",
+        "data": [
+            {
+                "project_hash": "0x16c6236732a7d60808d46950b5091a6bf7ffa5cd",
+                "proposal_hash": "0xff876365b1c538526bf505e63f79f6aeca3e9eb9",
+                "expected_reward": [
+                    {
+                        "channel": "0x16c6236732a7d60808d46950b5091a6bf7ffa5cd",
+                        "reward": 849
+                    },
+                    {
+                        "channel": "0x91031dcfdea024b4d51e775486111d2b2a715871",
+                        "reward": 3266
+                    },
+                    {
+                        "channel": "0x182327170fc284caaa5b1bc3e3878233f529d741",
+                        "reward": 234
+                    }
+                ],
+                "initial_validators": [[
+                    {
+                        "validator":  "0x849151d7d0bf1f34b70d5cad5149d28cc2308bf1",
+                        "expertise": 32
+                    },
+                    {
+                        "validator":  "0x849151d7d0bf1f34b70d5cad5149d28cc2308bf1",
+                        "expertise": 32
+                    },
+                    {
+                        "validator":  "0xe73f9c181b571cac2bf3173634d04a9921b7ffcf",
+                        "expertise": 3
+                    },
+                    {
+                        "validator":  "0x6e0d9c6dd8a08509bb625caa35dc61a991406f62",
+                        "expertise": 241
+                    },
+                    {
+                        "validator":  "0x06326cc23ab018a596dcdb6fc4ae705081c29134",
+                        "expertise": 15
+                    },
+                    {
+                        "validator":  "0x51f5b7c8041e048c3780bb5314a42df0209c2dc2",
+                        "expertise": 14
+                    },
+                    {
+                        "validator":  "0x06326cc23ab018a596dcdb6fc4ae705081c29134",
+                        "expertise": 42
+                    }
+                ]]
+            }
+        ]
+    },
+    {
+        "object": "proposal",
+        "hash": "0xb75f76828b52a270d641ae3f64bccdf22b652ccd",
+        "sender_address": "0x6b0bda3f2ffed5efc83fa8c024acff1dd45793f1",
+        "timestamp": "2024-03-20T00:13:37.000Z",
+        "data": [
+            {
+                "project_hash": "0x16c6236732a7d60808d46950b5091a6bf7ffa5cd",
+                "proposal_hash": "0xff876365b1c538526bf505e63f79f6aeca3e9eb9",
+                "expected_reward": [
+                    {
+                        "channel": "0x16c6236732a7d60808d46950b5091a6bf7ffa5cd",
+                        "reward": 849
+                    },
+                    {
+                        "channel": "0x91031dcfdea024b4d51e775486111d2b2a715871",
+                        "reward": 3266
+                    },
+                    {
+                        "channel": "0x182327170fc284caaa5b1bc3e3878233f529d741",
+                        "reward": 234
+                    }
+                ],
+                "initial_validators": [
+                    [
+                        {
+                            "validator": "0x849151d7d0bf1f34b70d5cad5149d28cc2308bf1",
+                            "expertise": 32
+                        },
+                        {
+                            "validator": "0x849151d7d0bf1f34b70d5cad5149d28cc2308bf1",
+                            "expertise": 32
+                        },
+                        {
+                            "validator": "0xe73f9c181b571cac2bf3173634d04a9921b7ffcf",
+                            "expertise": 3
+                        },
+                        {
+                            "validator": "0x6e0d9c6dd8a08509bb625caa35dc61a991406f62",
+                            "expertise": 241
+                        },
+                        {
+                            "validator": "0x06326cc23ab018a596dcdb6fc4ae705081c29134",
+                            "expertise": 15
+                        },
+                        {
+                            "validator": "0x51f5b7c8041e048c3780bb5314a42df0209c2dc2",
+                            "expertise": 14
+                        },
+                        {
+                            "validator": "0x06326cc23ab018a596dcdb6fc4ae705081c29134",
+                            "expertise": 42
+                        }
+                    ]
+                ]
+            }
+        ]
+    },
+    {
+        "object": "proposal",
+        "hash": "0x5c4a2343a680bdc3b5ed72c13979ecaeab5cf99c",
+        "sender_address": "0x2f031b1a96f41c9ff418ff8706f6707df09536a2",
+        "timestamp": "2023-09-12T15:24:03.000Z",
+        "data": [
+            {
+                "project_hash": "0xf03691abde300f47dbde49669d6a037a0569a5c7",
+                "proposal_hash": "0x04a76dfe47bcb1812432a14b18e1f6f62838930d",
+                "expected_reward": [
+                    {
+                        "channel": "0xf03691abde300f47dbde49669d6a037a0569a5c7",
+                        "reward": 911
+                    },
+                    {
+                        "channel": "0x2e89f360a02b40a4db2e2d98b17bb76b7c3d5258",
+                        "reward": 598
+                    },
+                    {
+                        "channel": "0xb7e3944e3142e733bbfe00d4a4397d2f3a88a24f",
+                        "reward": 3399
+                    }
+                ],
+                "initial_validators": [
+                    [
+                        {
+                            "validator": "0xd6be65b29d60fca622ea5d1c5cd832fc83d2fe9e",
+                            "expertise": 57
+                        },
+                        {
+                            "validator": "0x93a75b91793eb7a2f6d6a91225f415db347154fd",
+                            "expertise": 143
+                        },
+                        {
+                            "validator": "0x93a75b91793eb7a2f6d6a91225f415db347154fd",
+                            "expertise": 69
+                        },
+                        {
+                            "validator": "0xc7a0541390385c09b37c0b7bf19ffce717400d47",
+                            "expertise": 231
+                        },
+                        {
+                            "validator": "0xc7a0541390385c09b37c0b7bf19ffce717400d47",
+                            "expertise": 126
+                        }
+                    ]
+                ]
+            }
+        ]
+    },
+    {
+        "object": "proposal",
+        "hash": "0x41a3ef1e58935ab51b891d2402f1b7a205c4d78f",
+        "sender_address": "0x7e97af98eab3fc61e0e3841cb9c44df3bfa1f23d",
+        "timestamp": "2024-03-20T00:13:37.000Z",
+        "data": [
+            {
+                "project_hash": "0x60d2e1b05dd7d0713c1b45b8f36d4e30d5f7689d",
+                "proposal_hash": "0x49804aef720d0b708439f5d5932df73cc4dfae84",
+                "expected_reward": [
+                    {
+                        "channel": "0xb675ed3bd0a6e259c9bb6dc8f261e7ad1fc88d07",
+                        "reward": 1901
+                    },
+                    {
+                        "channel": "0x8453a73dc27652b905b1a682b70875e55f63af89",
+                        "reward": 403
+                    },
+                    {
+                        "channel": "0x2d2c30c6e2d2456b378eb72e6b8aa382eb8f2707",
+                        "reward": 5502
+                    }
+                ],
+                "initial_validators": [
+                    {
+                        "validator": "0xb86de0e48c90732f0aee55be67f4e309f5a8324e",
+                        "expertise": 92
+                    },
+                    {
+                        "validator": "0xe307575f5c38eb40814abf90d328dd24f2e37246",
+                        "expertise": 166
+                    },
+                    {
+                        "validator": "0x6c5f62de7a65db29952aa75dabf6c8e499c230d3",
+                        "expertise": 157
+                    },
+                    {
+                        "validator": "0xb86de0e48c90732f0aee55be67f4e309f5a8324e",
+                        "expertise": 85
+                    },
+                    {
+                        "validator": "0x1d73289ee692a64a30e444de4cf60b08ff0c6de4",
+                        "expertise": 201
+                    },
+                    {
+                        "validator": "0x0733b4593b7cbe820c1ab9c2a00872cf29d2f3d9",
+                        "expertise": 33
+                    },
+                    {
+                        "validator": "0x8453a73dc27652b905b1a682b70875e55f63af89",
+                        "expertise": 193
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "object": "proposal",
+        "hash": "0x09bfaa55ad5da828d5b7da1606de861b98a0e375",
+        "sender_address": "0x303a78725a1624b9f10d9b3edbc48a5a891a4b6e",
+        "timestamp": "2024-03-20T00:13:37.000Z",
+        "data": [
+            {
+                "project_hash": "0xfca51eb05078cb0a9193c43fe8e002a5a4a681a5",
+                "proposal_hash": "0x7c8101eb10e071c04279c9e04f615dd216c7b2cc",
+                "expected_reward": [
+                    {
+                        "channel": "0x69ff80fc49930b844dc31d4657df9a2df4c7912f",
+                        "reward": 22
+                    },
+                    {
+                        "channel": "0x5a768bb141c4ecf58d50d9e826e3e0d1c8b6c18e",
+                        "reward": 705
+                    },
+                    {
+                        "channel": "0xfca51eb05078cb0a9193c43fe8e002a5a4a681a5",
+                        "reward": 887
+                    }
+                ],
+                "initial_validators": [
+                    {
+                        "validator": "0xfca51eb05078cb0a9193c43fe8e002a5a4a681a5",
+                        "expertise": 158
+                    },
+                    {
+                        "validator": "0x1b8f9c4f1865ddc10a9b9b007e23b9da299bb9f9",
+                        "expertise": 204
+                    },
+                    {
+                        "validator": "0xb40176aa7a5a6e5b579eb30e78da83cf7d36ee13",
+                        "expertise": 54
+                    },
+                    {
+                        "validator": "0x3e9e6f8711711fe0b72fbd5b042d8047f30074a3",
+                        "expertise": 36
+                    },
+                    {
+                        "validator": "0x303a78725a1624b9f10d9b3edbc48a5a891a4b6e",
+                        "expertise": 208
+                    },
+                    {
+                        "validator": "0x8453a73dc27652b905b1a682b70875e55f63af89",
+                        "expertise": 199
+                    },
+                    {
+                        "validator": "0xd12ec1cd0eaf24d7e419d8af39f42442d2605c3b",
+                        "expertise": 81
+                    }
+                ]
+            }
+        ]
+    }
+]
+

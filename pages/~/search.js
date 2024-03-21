@@ -15,7 +15,7 @@ export default function Search() {
   const ref = useRef(null)
   const initialState = { search: '' }
 	const [userSearch, setUserSearch] = useState(initialState)
-  const searchButtons = ['Ecosystems', 'Channels', 'Proposals', 'Users']
+  const searchButtons = ['Ecosystems', 'Channels', 'Proposals', 'Projects', 'Users']
   const [ searchSelect, setSearchSelect ] = useState('Channels')
   const [ searchResults, setSearchResults ] = useState({kind: 'ecosystems', data: []})
   const { isMobile } = useMatchBreakpoints();
@@ -324,7 +324,7 @@ export default function Search() {
     if (props.buttonName == 'Users' && !store.isAuth) {
       isSearchable = false
     }
-    if (props.buttonName == 'Ecosystems' || props.buttonName == 'Proposals') {
+    if (props.buttonName == 'Ecosystems' || props.buttonName == 'Proposals' || props.buttonName == 'Projects') {
       comingSoon = true
     }
 

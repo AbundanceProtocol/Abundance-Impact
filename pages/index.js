@@ -162,7 +162,9 @@ export default function Home() {
     )
   }
 
-  const goToUserProfile = async (author) => {
+  const goToUserProfile = async (event, author) => {
+    console.log('passed')
+    event.preventDefault()
     const username = author.username
     await store.setUserData(author)
     console.log(author, store.userData)
@@ -193,7 +195,7 @@ export default function Home() {
                     <div className="flex-row" style={{width: '100%', justifyContent: 'space-between', height: '20px', alignItems: 'flex-start'}}>
                       <div className="flex-row" style={{alignItems: 'center', gap: '0.25rem'}}>
                         <span className="" data-state="closed">
-                          <a className="fc-lnk" title="" style={{cursor: 'pointer'}} onClick={() => {goToUserProfile(cast.author)}}>
+                          <a href={`/${cast.author.username}`} className="fc-lnk" title={cast.author.display_name} style={{cursor: 'pointer'}} onClick={() => {goToUserProfile(event, cast.author)}}>
                             <div className="flex-row" style={{alignItems: 'center'}}>
                               <span className="name-font">{cast.author.display_name}</span>
                               <div className="" style={{margin: '0 0 0 3px'}}>
@@ -203,7 +205,7 @@ export default function Home() {
                           </a>
                         </span>
                         <span className="user-font" datastate="closed">
-                          <a className="fc-lnk" title="" href={`https://warpcast.com/${cast.author.username}`}>@{cast.author.username}</a>
+                          <a href={`/${cast.author.username}`} className="fc-lnk" title={cast.author.display_name} onClick={() => {goToUserProfile(event, cast.author)}}>@{cast.author.username}</a>
                         </span>
                         <div className="">·</div>
                         <a className="fc-lnk" title="Navigate to cast" href={`https://warpcast.com/${cast.author.username}/${cast.hash.slice(0,10)}`}>

@@ -761,6 +761,7 @@ blockquote {
 }
 
 .follow-select {
+    /* border: 2px solid #32b439; */
     border: 2px solid #38b;
     border-radius: 8px;
     font-size: 16px;
@@ -2056,6 +2057,47 @@ blockquote {
     padding: 0 24px 0 8px;
 }
 
+
+/* ////     LIGHT BUTTONS     //// */
+
+.nav-link-lt {
+    color: #222;
+    background-color: #55555522;
+    display: flex;
+    cursor: pointer;
+    justify-content: center;
+}
+
+.nav-link-lt:hover {
+    color: #777;
+}
+
+.active-nav-link-lt {
+    color: #c33;
+    display: flex;
+    cursor: pointer;
+    justify-content: center;
+}
+
+.active-nav-link-lt:hover {
+    color: #e55;
+}
+
+.lock-btn-hvr-lt {
+    background-color: #22222222;
+}
+
+.lock-btn-hvr-lt:hover {
+    background-color: #33333333;
+}
+
+.btn-hvr-lt:hover {
+  background-color: #11111111;
+}
+
+
+
+
 .active-nav-link {
     color: #ddd425;
     /* min-width: 87px; */
@@ -2086,6 +2128,10 @@ blockquote {
     justify-content: center;
 }
 
+.nav-link:hover {
+    color: #fff;
+}
+
 .inactive-nav-link {
     color: #aaa;
     /* min-width: 87px; */
@@ -2096,10 +2142,6 @@ blockquote {
 
 .inactive-nav-link:hover {
     color: #aaa;
-}
-
-.nav-link:hover {
-    color: #fff;
 }
 
 .nav-block {
