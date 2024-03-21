@@ -358,9 +358,9 @@ export default function App({ Component, pageProps }) {
         <Link href={(btn.link && btn.working) ? btn.link : router.route}>
           <a style={{maxWidth: '260px'}}  
         >
-            <div className={`flex-row ${menuState}`} style={{paddingRight: isMobile ? '1em' : 'unset', justifyContent: 'flex-start'}}>
+            <div className={`flex-row`} style={{paddingRight: isMobile ? '1em' : 'unset', justifyContent: 'flex-start'}}>
               <div className="flex-col" style={{height: '58px', alignItems: 'center', justifyContent: 'center'}}>
-                <div className={`flex-row flex-middle ${unlockedState}`} style={{padding: '2px 0 2px 0', borderRadius: '16px'}}>
+                <div className={`flex-row flex-middle ${menuState} ${unlockedState}`} style={{padding: '2px 0 2px 0', borderRadius: '16px'}}>
                   <TopIcon className="size-25" style={{margin: '6px 12px 6px 12px'}} />
                   <div className="font-15 left-nav mid-layer" style={{textAlign: 'center', fontSize: isTablet ? '12px' : '18px', padding: '0 24px 0 0'}}>
                     {btnName}

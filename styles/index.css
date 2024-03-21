@@ -2099,8 +2099,8 @@ blockquote {
 
 
 .active-nav-link {
+    background-color: #ddeeff11;
     color: #ddd425;
-    /* min-width: 87px; */
     display: flex;
     cursor: pointer;
     justify-content: center;

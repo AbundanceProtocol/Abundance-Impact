@@ -18,7 +18,7 @@ export default function UserPage() {
   const [screenWidth, setScreenWidth ] = useState(undefined)
   const [feedMax, setFeedMax ] = useState('620px')
   const userButtons = ['Casts', 'Channels', 'Media', 'Proposals']
-  const [ searchSelect, setSearchSelect ] = useState('Casts')
+  const [searchSelect, setSearchSelect ] = useState('Casts')
   const { isMobile } = useMatchBreakpoints();
 
   useEffect(() => {

@@ -14,25 +14,27 @@ import { useRouter } from 'next/router';
 
 export default function Home() {
   const ref = useRef(null)
-  const [ userFeed, setUserFeed] = useState([])
+  const [userFeed, setUserFeed] = useState([])
   const { isMobile } = useMatchBreakpoints();
-  const [ feedWidth, setFeedWidth ] = useState()
+  const [feedWidth, setFeedWidth] = useState()
   const account = useContext(AccountContext)
-  const [ screenWidth, setScreenWidth ] = useState(undefined)
-  const [ screenHeight, setScreenHeight ] = useState(undefined)
+  const [screenWidth, setScreenWidth] = useState(undefined)
+  const [screenHeight, setScreenHeight] = useState(undefined)
   // const client = new NeynarAPIClient(apiKey);
   const store = useStore()
   const [textMax, setTextMax] = useState('522px')
   const [feedMax, setFeedMax ] = useState('620px')
   const [showPopup, setShowPopup] = useState({open: false, url: null})
   const router = useRouter()
+  const userButtons = ['Trending', 'Following', 'Projects', 'AI']
+  const [searchSelect, setSearchSelect ] = useState('Trending')
 
   async function getFeed() {
     try {
       const response = await axios.get('/api/getFeed')
       const feed = response.data.feed
       setUserFeed(feed)
-      const imageRegex = /\.(jpg|png|jpeg)$/i;
+      const imageRegex = /\.(jpg|gif|png|jpeg)$/i;
       for (let i = 0; i < feed.length; i++) {
         if (!feed[i].frames) {
           // console.log('frame', i, feed[i].frames.length)
@@ -171,6 +173,38 @@ export default function Home() {
     router.push(`/${username}`)
   }
 
+  const searchOption = (e) => {
+    setSearchSelect(e.target.getAttribute('name'))
+  }
+
+  const SearchOptionButton = (props) => {
+    const btn = props.buttonName
+    let isSearchable = true
+    let comingSoon = false
+    if (props.buttonName == 'Users' && !store.isAuth) {
+      isSearchable = false
+    }
+    if (props.buttonName == 'Following' || props.buttonName == 'Projects' || props.buttonName == 'AI') {
+      comingSoon = true
+    }
+
+    return isSearchable ? (<>{comingSoon ? (<div className='flex-row' style={{position: 'relative'}}><div className={(searchSelect == btn) ? 'active-nav-link btn-hvr lock-btn-hvr' : 'nav-link btn-hvr lock-btn-hvr'} onClick={searchOption} name={btn} style={{fontWeight: '600', padding: '5px 14px', borderRadius: '14px', fontSize: isMobile ? '12px' : '15px'}}>{btn}</div>
+      <div className='top-layer' style={{position: 'absolute', top: 0, right: 0, transform: 'translate(20%, -50%)' }}>
+        <div className='soon-btn'>SOON</div>
+      </div>
+    </div>) : (
+      <div className={(searchSelect == btn) ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'} onClick={searchOption} name={btn} style={{fontWeight: '600', padding: '5px 14px', borderRadius: '14px', fontSize: isMobile ? '12px' : '15px'}}>{btn}</div>)}</>
+    ) : (
+      <div className='flex-row' style={{position: 'relative'}}>
+        <div className='lock-btn-hvr' name={btn} style={{color: '#bbb', fontWeight: '600', padding: '5px 14px', borderRadius: '14px', cursor: 'pointer', fontSize: isMobile ? '12px' : '15px'}} onClick={account.LoginPopup}>{btn}</div>
+        <div className='top-layer' style={{position: 'absolute', top: 0, right: 0, transform: 'translate(-20%, -50%)' }}>
+          <FaLock size={8} color='#999' />
+        </div>
+      </div>
+    )
+  }
+
+
   return (
   <div name='feed' style={{width: 'auto', maxWidth: '620px'}} ref={ref}>
     <Head>
@@ -178,6 +212,10 @@ export default function Home() {
       <meta name="description" content={`Building the global superalignment layer`} />
     </Head>
     <div className="top-layer" style={{padding: '58px 0 0 0', width: feedMax}}>
+    </div>
+    <div className="top-layer flex-row" style={{padding: '10px 0 10px 0', alignItems: 'center', justifyContent: 'space-between', margin: '0', borderBottom: '0px solid #888'}}>
+      { userButtons.map((btn, index) => (
+          <SearchOptionButton buttonName={btn} key={index} /> ))}
     </div>
     {
       (typeof userFeed !== 'undefined' && userFeed.length > 0) && (userFeed.map((cast, index) => (<div key={index} className="inner-container" style={{width: '100%', display: 'flex', flexDirection: 'row'}}>
