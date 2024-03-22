@@ -200,33 +200,37 @@ export default function UserPage() {
             </div>
           </div>
         </div>
-        {store.isAuth ? (
-          <div className="flex-row">
-            {(user.following == 1) ? (
-              <div className='flex-row' style={{position: 'relative'}}>
-                <div className='unfollow-select-drk' onClick={unfollowUser} name='unfollow' style={{color: loading ? 'transparent' : '#dee'}}>Unfollow</div>
-                <div className='top-layer rotation' style={{position: 'absolute', top: '7px', left: '34px', visibility: loading ? 'visible': 'hidden' }}>
-                  <Loading size={24} color='#dee' />
+        {(store.userProfile && store.userProfile.username !== user.username) && (
+          <>
+            {store.isAuth ? (
+              <div className="flex-row">
+                {(user.following == 1) ? (
+                  <div className='flex-row' style={{position: 'relative'}}>
+                    <div className='unfollow-select-drk' onClick={unfollowUser} name='unfollow' style={{color: loading ? 'transparent' : '#dee'}}>Unfollow</div>
+                    <div className='top-layer rotation' style={{position: 'absolute', top: '7px', left: '34px', visibility: loading ? 'visible': 'hidden' }}>
+                      <Loading size={24} color='#dee' />
+                    </div>
+                  </div>
+                ) : (
+                  <div className='flex-row' style={{position: 'relative'}}>
+                    <div className='follow-select' onClick={followUser} name='follow' style={{color: loading ? 'transparent' : '#fff'}}>Follow</div>
+                    <div className='top-layer rotation' style={{position: 'absolute', top: '7px', left: '34px', visibility: loading ? 'visible': 'hidden' }}>
+                      <Loading size={24} color='#fff' />
+                    </div>
+                  </div>
+                )}
+              </div>
+              ) : (
+              <div className="flex-row" style={{position: 'relative'}}>
+                <div className='follow-locked' onClick={account.LoginPopup}>Follow</div>
+                <div className='top-layer' style={{position: 'absolute', top: 0, right: 0, transform: 'translate(-50%, -50%)' }}>
+                  <FaLock size={8} color='#666' />
                 </div>
               </div>
-            ) : (
-              <div className='flex-row' style={{position: 'relative'}}>
-              <div className='follow-select' onClick={followUser} name='follow' style={{color: loading ? 'transparent' : '#fff'}}>Follow</div>
-              <div className='top-layer rotation' style={{position: 'absolute', top: '7px', left: '34px', visibility: loading ? 'visible': 'hidden' }}>
-                <Loading size={24} color='#fff' />
-              </div>
-            </div>
-            )}
-          </div>
-        ) : (
-          <div className="flex-row" style={{position: 'relative'}}>
-            <div className='follow-locked' onClick={account.LoginPopup}>Follow</div>
-            <div className='top-layer' style={{position: 'absolute', top: 0, right: 0, transform: 'translate(-50%, -50%)' }}>
-              <FaLock size={8} color='#666' />
-            </div>
-          </div>
-        )
-      }
+              )
+            }
+          </>
+        )}
     </div>)
   }
 

@@ -89,10 +89,10 @@ const button = {
     },
     'Profile': {
         link: '/~/profile',
-        menu: 'Profile',
+        menu: 'user',
         description: 'Your profile',
         account: true,
-        working: false,
+        working: true,
         icon: FaUser
     },
     'Funding': {

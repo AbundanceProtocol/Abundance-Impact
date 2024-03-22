@@ -28,6 +28,7 @@ const useStore = create(persist((set, get) => {
         userFollowingFC: null,
         userEthVerAddresses: [],
         userSolVerAddresses: [],
+        userProfile: null,
 
         userData: null,
         castData: null,
@@ -51,6 +52,7 @@ const useStore = create(persist((set, get) => {
         setUserFollowingFC: (userFollowingFC) => set({ userFollowingFC }),
         setUserEthVerAddresses: (userEthVerAddresses) => set({ userEthVerAddresses }),
         setUserSolVerAddresses: (userSolVerAddresses) => set({ userSolVerAddresses }),
+        setUserProfile: (userProfile) => set({ userProfile }),
 
         setUserData: (userData) => set({ userData }),
         setCastData: (castData) => set({ castData }),
@@ -79,6 +81,7 @@ const useStore = create(persist((set, get) => {
         userFollowingFC: state.userFollowingFC,
         userEthVerAddresses: state.userEthVerAddresses,
         userSolVerAddresses: state.userSolVerAddresses,
+        userProfile: state.userProfile,
         userData: state.userData,
         castData: state.castData,
         proposalData: state.proposalData

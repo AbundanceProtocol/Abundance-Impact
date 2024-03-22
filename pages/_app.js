@@ -129,8 +129,9 @@ export default function App({ Component, pageProps }) {
       const user = response.data.userProfile[0]
       // console.log(user)
       // console.log(response)
+      store.setUserProfile(user)
       store.setUsernameFC(user.username)
-      store.setSrcUrlFC(user.pfl_url)
+      store.setSrcUrlFC(user.pfp_url)
       store.setUserDisplayNameFC(user.display_name)
       store.setUserActiveFC(user.active_status)
       store.setUserBioFC(user.profile.bio.text)
@@ -335,12 +336,12 @@ export default function App({ Component, pageProps }) {
   const LeftNav = (props) => {
     let btn = button[props.buttonName]
     let btnName = props.buttonName
-    if (btnName === 'portal' && account) {
-      btnName = store.username
-    }
+    // if (btnName === 'portal' && account) {
+    //   btnName = store.username
+    // }
     const TopIcon = btn.icon
     let menuState = "nav-link"
-    let accountState = !btn.account || (account && btn.account)
+    let accountState = !btn.account || (store.isAuth && btn.account)
     if ((router.route === btn.link) && accountState) {
       menuState = "active-nav-link"
     } else if (!btn.working) {
@@ -349,15 +350,17 @@ export default function App({ Component, pageProps }) {
     let unlockedState = 'btn-hvr'
     if (btn.account && !store.isAuth || !btn.working)
       unlockedState = 'lock-btn-hvr'
+
+      
     return (
       <div className="left-container" style={{padding: 'auto 8px'}} onMouseEnter={() => {
         setNavMenu(btn.menu)
         setMenuHover({ ...menuHover, in: Date.now() })
       }}
       onMouseLeave={() => setMenuHover({ ...menuHover, out: Date.now() }) }>
+        {/* need correct Link functionality when button is locked */}
         <Link href={(btn.link && btn.working) ? btn.link : router.route}>
-          <a style={{maxWidth: '260px'}}  
-        >
+          <a style={{maxWidth: '260px'}}>
             <div className={`flex-row`} style={{paddingRight: isMobile ? '1em' : 'unset', justifyContent: 'flex-start'}}>
               <div className="flex-col" style={{height: '58px', alignItems: 'center', justifyContent: 'center'}}>
                 <div className={`flex-row flex-middle ${menuState} ${unlockedState}`} style={{padding: '2px 0 2px 0', borderRadius: '16px'}}>
@@ -366,7 +369,6 @@ export default function App({ Component, pageProps }) {
                     {btnName}
                   </div>
                   <div style={{position: 'relative', fontSize: '0', width: '0', height: '100%'}}>
-
                     {btn.working ? (<>
                       {(btn.account && !store.isAuth) && (<div className='top-layer' style={{position: 'absolute', top: 0, left: 0, transform: 'translate(-100%, -50%)' }}>
                         <FaLock size={8} color='#999' />
@@ -376,20 +378,6 @@ export default function App({ Component, pageProps }) {
                         <div className='soon-btn'>SOON</div>
                       </div>
                     )}
-
-
-
-                    {/* {(btn.account && !store.isAuth) && (
-                    <div className='top-layer' style={{position: 'absolute', top: 0, left: 0, transform: 'translate(-100%, -50%)' }}>
-                      {btn.working ? (
-                      <FaLock size={8} color='#999' />
-                      ) : (
-                      <div style={{fontSize: '7px', border: '1px solid #ccc', padding: '2px 3px', borderRadius: '3px', backgroundColor: '#00333399'}}>SOON</div>
-                      )}
-                    </div>
-                    )} */}
-
-
                   </div>
                 </div>
               </div>
@@ -571,8 +559,8 @@ export default function App({ Component, pageProps }) {
                       <TopNav buttonName={btn} key={index} /> ))} */}
               </TopNavWrapper>
               {/* //// test buttons //// */}
-              {/* <div id="showNotificationBtn" className='srch-select-btn' onClick={LoginPopup}>Test Button</div>
-              {(isSignedIn || showNotification) ? (<LogOut />) : (<NeynarSigninButton onSignInSuccess={handleSignIn} />)} */}
+              {/* {/* <div id="showNotificationBtn" className='srch-select-btn' onClick={LoginPopup}>Test Button</div> */}
+              {/* {(isSignedIn || showNotification) ? (<LogOut />) : (<NeynarSigninButton onSignInSuccess={handleSignIn} />)} */}
               {/* {isSignedIn ? (<LogOut />) : (<LogOut />)} */}
               {/* <ConnectButton 
                 account={account}

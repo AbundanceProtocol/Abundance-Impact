@@ -8,12 +8,15 @@ import useMatchBreakpoints from '../hooks/useMatchBreakpoints'
 // import { NeynarAPIClient } from "@neynar/nodejs-sdk";
 import useStore from '../utils/store'
 import axios from 'axios';
-import { FaRegStar } from "react-icons/fa"
+import { FaSearch, FaLock, FaRegStar } from "react-icons/fa"
+import { AiOutlineLoading3Quarters as Loading } from "react-icons/ai";
 import mql from '@microlink/mql';
 import { useRouter } from 'next/router';
 
 export default function Home() {
   const ref = useRef(null)
+  const likeRefs = useRef([])
+  const recastRefs = useRef([])
   const [userFeed, setUserFeed] = useState([])
   const { isMobile } = useMatchBreakpoints();
   const [feedWidth, setFeedWidth] = useState()
@@ -28,6 +31,9 @@ export default function Home() {
   const router = useRouter()
   const userButtons = ['Trending', 'Following', 'Projects', 'AI']
   const [searchSelect, setSearchSelect ] = useState('Trending')
+  const initialState = { text: '' }
+	const [castData, setCastData] = useState(initialState)
+  const [loading, setLoading] = useState(false);
 
   async function getFeed() {
     try {
@@ -58,25 +64,43 @@ export default function Home() {
   }
 
 
-  async function postRecast(hash) {
+  async function postRecast(hash, index) {
+    console.log(userFeed[index].reactions.recasts.length)
+
+    // need to update recasts counter
+    recastRefs.current[index].style.color = '#3b3'
     try {
       const response = await axios.post('/api/postRecastReaction', {       
         hash: hash,
         signer: store.signer_uuid,
       })
-      console.log(response)
+      if (response.status !== 200) {
+        recastRefs.current[index].style.color = '#000'
+
+        // need to revert recasts counter
+      }
+      console.log(response.status)
     } catch (error) {
       console.error('Error submitting data:', error)
     }
   }
 
-  async function postLike(hash) {
+  async function postLike(hash, index) {
+    console.log(userFeed[index].reactions.likes.length)
+
+    // need to update likes counter
+    likeRefs.current[index].style.color = '#b33'
     try {
       const response = await axios.post('/api/postLikeReaction', {       
         hash: hash,
         signer: store.signer_uuid,
       })
-      console.log(response)
+      if (response.status !== 200) {
+        likeRefs.current[index].style.color = '#000'
+
+        // need to revert likes counter
+      }
+      console.log(response.status)
     } catch (error) {
       console.error('Error submitting data:', error)
     }
@@ -188,7 +212,7 @@ export default function Home() {
       comingSoon = true
     }
 
-    return isSearchable ? (<>{comingSoon ? (<div className='flex-row' style={{position: 'relative'}}><div className={(searchSelect == btn) ? 'active-nav-link btn-hvr lock-btn-hvr' : 'nav-link btn-hvr lock-btn-hvr'} onClick={searchOption} name={btn} style={{fontWeight: '600', padding: '5px 14px', borderRadius: '14px', fontSize: isMobile ? '12px' : '15px'}}>{btn}</div>
+    return isSearchable ? (<>{comingSoon ? (<div className='flex-row' style={{position: 'relative'}}><div className={(searchSelect == btn) ? 'active-nav-link btn-hvr lock-btn-hvr' : 'nav-link btn-hvr lock-btn-hvr inactive-nav-link'} onClick={searchOption} name={btn} style={{fontWeight: '600', padding: '5px 14px', borderRadius: '14px', fontSize: isMobile ? '12px' : '15px'}}>{btn}</div>
       <div className='top-layer' style={{position: 'absolute', top: 0, right: 0, transform: 'translate(20%, -50%)' }}>
         <div className='soon-btn'>SOON</div>
       </div>
@@ -204,6 +228,38 @@ export default function Home() {
     )
   }
 
+	function onChange(e) {
+		setCastData( () => ({ ...castData, [e.target.name]: e.target.value }) )
+	}
+
+  function routeCast() {
+    console.log(castData.text.length)
+    // console.log(store.isAuth, userSearch.search)
+    // if (searchSelect == 'Channels') {
+    //   getChannels(userSearch.search)
+    // }
+    // else if (searchSelect == 'Users' && store.isAuth) {
+    //   getUsers(userSearch.search)
+    // }
+    // else if (searchSelect == 'Ecosystems') {
+    //   getEcosystems(userSearch.search)
+    // }
+    // else if (searchSelect == 'Proposals') {
+    //   getProposals(userSearch.search)
+    // }
+  }
+  const [textboxRows, setTextboxRows] = useState(1)
+  const expandBox = () => {
+    if (textboxRows == 1)
+      setTextboxRows(4)
+  }
+
+  const shrinkBox = () => {
+    console.log(castData.text)
+    if (textboxRows > 1 && castData.text.length < 40) {
+      setTextboxRows(1)
+    }
+  }
 
   return (
   <div name='feed' style={{width: 'auto', maxWidth: '620px'}} ref={ref}>
@@ -211,11 +267,61 @@ export default function Home() {
       <title>Impact | Abundance Protocol | Feed </title>
       <meta name="description" content={`Building the global superalignment layer`} />
     </Head>
-    <div className="top-layer" style={{padding: '58px 0 0 0', width: feedMax}}>
+    <div style={{padding: '58px 0 0 0', width: feedMax}}>
+    </div>
+    <div className="top-layer">
+      <div className="flex-row" style={{padding: '0px 0 0 0'}}>
+        {store.isAuth && (
+          <a className="" title="" href={`/${store.userProfile.username}`} onClick={() => {goToUserProfile(event, store.userProfile)}}>
+            <img loading="lazy" src={store.srcUrlFC} className="" alt={`${store.userDisplayNameFC} avatar`} style={{width: '40px', height: '40px', maxWidth: '48px', maxHeight: '48px', borderRadius: '24px', border: '1px solid #ddd', margin: '6px 0 2px 0'}} />
+          </a>
+        )}
+        <textarea onChange={onChange} 
+          name='text' 
+          rows={textboxRows}
+          placeholder={`Start typing a new cast here...`} 
+          value={castData.text} 
+          className='textbox' 
+          onFocus={expandBox}
+          onBlur={shrinkBox}
+          style={{}} />
+
+          {store.isAuth ? (
+            <div className="flex-row">
+              {(castData.text.length > 0) ? (
+                <div className='flex-row' style={{position: 'relative'}}>
+                  <div className='unfollow-select-drk cast-btn' onClick={routeCast} name='unfollow' style={{color: loading ? 'transparent' : '#dee', height: 'auto'}}>Cast</div>
+                  <div className='top-layer rotation' style={{position: 'absolute', top: '7px', left: '34px', visibility: loading ? 'visible': 'hidden' }}>
+                    <Loading size={24} color='#dee' />
+                  </div>
+                </div>
+              ) : (
+                <div className='flex-row' style={{position: 'relative'}}>
+                  <div className='follow-select cast-btn' onClick={routeCast} name='follow' style={{color: loading ? 'transparent' : '#fff', height: 'auto'}}>Cast</div>
+                  <div className='top-layer rotation' style={{position: 'absolute', top: '7px', left: '34px', visibility: loading ? 'visible': 'hidden'}}>
+                    <Loading size={24} color='#fff' />
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="flex-row" style={{position: 'relative'}}>
+              <div className='follow-locked cast-btn' onClick={account.LoginPopup} style={{height: 'auto'}}>Cast</div>
+              <div className='top-layer' style={{position: 'absolute', top: 0, right: 0, transform: 'translate(-50%, -50%)' }}>
+                <FaLock size={8} color='#eee' />
+              </div>
+            </div>
+          )
+        }
+
+        {/* <div className='srch-select-btn' 
+          onClick={routeCast} 
+          style={{padding: '12px 14px 9px 14px'}}><FaSearch /></div> */}
+      </div>
     </div>
     <div className="top-layer flex-row" style={{padding: '10px 0 10px 0', alignItems: 'center', justifyContent: 'space-between', margin: '0', borderBottom: '0px solid #888'}}>
       { userButtons.map((btn, index) => (
-          <SearchOptionButton buttonName={btn} key={index} /> ))}
+        <SearchOptionButton buttonName={btn} key={index} /> ))}
     </div>
     {
       (typeof userFeed !== 'undefined' && userFeed.length > 0) && (userFeed.map((cast, index) => (<div key={index} className="inner-container" style={{width: '100%', display: 'flex', flexDirection: 'row'}}>
@@ -268,6 +374,7 @@ export default function Home() {
                                 style={{aspectRatio: '0.75 / 1', 
                                   maxWidth: textMax, 
                                   maxHeight: '500px', 
+                                  paddingTop: '10px', 
                                   cursor: 'pointer', 
                                   position: 'relative',
                                   borderRadius: '8px'}} 
@@ -295,7 +402,7 @@ export default function Home() {
                         <span className="" style={{padding: '0 0 0 5px'}}>{cast.replies.count}</span>
                       </div>
                       <div className="flex-row" style={{flex: 1}}>
-                        <div className='flex-row recast-btn' onClick={() => postRecast(cast.hash)}>
+                        <div ref={el => (recastRefs.current[index] = el)} className='flex-row recast-btn' onClick={() => postRecast(cast.hash, index, cast.reactions.recasts.length)}>
                           <div className="">
                             <Recast />
                           </div>
@@ -303,7 +410,7 @@ export default function Home() {
                         </div>
                       </div>
                       <div className="flex-row" style={{flex: 1}}>
-                        <div className='flex-row like-btn' onClick={() => postLike(cast.hash)}>
+                        <div ref={el => (likeRefs.current[index] = el)} className='flex-row like-btn' onClick={() => postLike(cast.hash, index, cast.reactions.likes.length)}>
                           <div className="">
                             <Like />
                           </div>

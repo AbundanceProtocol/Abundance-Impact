@@ -529,6 +529,21 @@ blockquote {
     border: 0px solid #355
   }
   
+  #notificationContainer {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -100%);
+    background-color: #fff;
+    padding: 20px;
+    box-shadow: 0 0 10px 2px rgba(0, 0, 0, 0.5);
+    z-index: 2147483647;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 2px solid #355
+  }
+
   #notificationContent {
     text-align: center;
   }
@@ -796,6 +811,7 @@ blockquote {
     color: #169;
     background-color: #cdd;
 }
+
 .follow-locked {
     border: 2px solid #666;
     border-radius: 8px;
@@ -858,6 +874,13 @@ blockquote {
     color: #cdd;
     background-color: #222;
 }
+
+.cast-btn {
+    width: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
 
 
 .x-srch-select {
@@ -1184,7 +1207,30 @@ blockquote {
 }
 
 .col-ccc {
-    color: rgb(204, 204, 204);
+    color: #cccccc;
+}
+
+.textbox {
+    width: 100%;
+    resize: none;
+    font-family: inter, sans-serif;
+    font-size: 18px;
+    padding: 12px;
+    background-color: #334455f1;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    color: #eee;
+    margin: 2px 5px;
+    font-weight: 500;
+  }
+
+.textbox::placeholder {
+    color: #bbb;
+    font-weight: 500;
+}
+
+.textbox:focus {
+    background-color: #456;
 }
 
 .input-desc {

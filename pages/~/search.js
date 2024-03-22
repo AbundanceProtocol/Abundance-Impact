@@ -237,15 +237,30 @@ export default function Search() {
           <div className="flex-row">
             {(user.following == 1) ? (
               <div className='flex-row' style={{position: 'relative'}}>
-                <div className='unfollow-select' onClick={() => unfollowUser(user.fid, index)} name='unfollow' style={{color: loading[index] ? 'transparent' : '#27a'}}>Unfollow</div>
-                <div className='top-layer rotation' style={{position: 'absolute', top: '7px', left: '34px', visibility: loading[index] ? 'visible': 'hidden' }}>
+                <div className='unfollow-select' 
+                  onClick={() => unfollowUser(user.fid, index)} 
+                  name='unfollow' 
+                  style={{color: loading[index] ? 'transparent' : '#27a'}}>Unfollow</div>
+                <div className='top-layer rotation' 
+                  style={{
+                    position: 'absolute', 
+                    top: '7px', 
+                    left: '34px', 
+                    visibility: loading[index] ? 'visible': 'hidden' }}>
                   <Loading size={24} color='#27a' />
                 </div>
               </div>
             ) : (
               <div className='flex-row' style={{position: 'relative'}}>
-              <div className='follow-select' onClick={() => followUser(user.fid, index)} name='follow' style={{color: loading[index] ? 'transparent' : '#fff'}}>Follow</div>
-              <div className='top-layer rotation' style={{position: 'absolute', top: '7px', left: '34px', visibility: loading[index] ? 'visible': 'hidden' }}>
+              <div className='follow-select' 
+                onClick={() => followUser(user.fid, index)} 
+                name='follow' 
+                style={{color: loading[index] ? 'transparent' : '#fff'}}>Follow</div>
+              <div className='top-layer rotation' 
+                style={{position: 'absolute', 
+                  top: '7px', 
+                  left: '34px', 
+                  visibility: loading[index] ? 'visible': 'hidden' }}>
                 <Loading size={24} color='#fff' />
               </div>
             </div>
@@ -328,7 +343,7 @@ export default function Search() {
       comingSoon = true
     }
 
-    return isSearchable ? (<>{comingSoon ? (<div className='flex-row' style={{position: 'relative'}}><div className={(searchSelect == btn) ? 'active-nav-link btn-hvr lock-btn-hvr' : 'nav-link btn-hvr lock-btn-hvr'} onClick={searchOption} name={btn} style={{fontWeight: '600', padding: '5px 14px', borderRadius: '14px', fontSize: isMobile ? '12px' : '15px'}}>{btn}</div>
+    return isSearchable ? (<>{comingSoon ? (<div className='flex-row' style={{position: 'relative'}}><div className={(searchSelect == btn) ? 'active-nav-link btn-hvr lock-btn-hvr' : 'nav-link btn-hvr lock-btn-hvr inactive-nav-link'} onClick={searchOption} name={btn} style={{fontWeight: '600', padding: '5px 14px', borderRadius: '14px', fontSize: isMobile ? '12px' : '15px'}}>{btn}</div>
       <div className='top-layer' style={{position: 'absolute', top: 0, right: 0, transform: 'translate(20%, -50%)' }}>
         <div className='soon-btn'>SOON</div>
       </div>
@@ -355,10 +370,18 @@ export default function Search() {
       </div>
       <div>
         <div className="flex-row" style={{padding: '10px 0 0 0'}}>
-            <input onChange={onChange} name='search' placeholder={`Search ${searchSelect}`} value={userSearch.search} className='srch-btn' style={{width: '100%', backgroundColor: '#234'}} onKeyDown={handleKeyDown} />
-            <div className='srch-select-btn' onClick={routeSearch} style={{padding: '12px 14px 9px 14px'}}><FaSearch /></div>
-          </div>
+          <input onChange={onChange} 
+            name='search' 
+            placeholder={`Search ${searchSelect}`} 
+            value={userSearch.search} 
+            className='srch-btn' 
+            style={{width: '100%', backgroundColor: '#234'}} 
+            onKeyDown={handleKeyDown} />
+          <div className='srch-select-btn' 
+            onClick={routeSearch} 
+            style={{padding: '12px 14px 9px 14px'}}><FaSearch /></div>
         </div>
+      </div>
     </div>
     {
       (searchResults.kind == 'channels' && searchResults.data.length > 0) && (searchResults.data.map((channel, index) => (<div key={index} className="inner-container flex-row" style={{width: feedMax, display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
