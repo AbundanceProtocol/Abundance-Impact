@@ -31,9 +31,10 @@ export default function Home() {
   const router = useRouter()
   const userButtons = ['Trending', 'Following', 'Projects', 'AI']
   const [searchSelect, setSearchSelect ] = useState('Trending')
-  const initialState = { text: '' }
+  const initialState = { fid: null, signer: null, urls: [], channel: null, parentUrl: null, text: '' }
 	const [castData, setCastData] = useState(initialState)
   const [loading, setLoading] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
 
   async function getFeed() {
     try {
@@ -58,6 +59,29 @@ export default function Home() {
       }
       console.log(feed)
       setUserFeed([...feed])
+    } catch (error) {
+      console.error('Error submitting data:', error)
+    }
+  }
+
+  async function postCast(castData) {
+    console.log(castData)
+    try {
+      const response = await axios.post('/api/postCast', {       
+        fid: castData.fid,
+        signer: castData.signer,
+        urls: castData.urls,
+        // channel: castData.channel,
+        channel: 'impact', // temp for testing
+        parentUrl: castData.parentUrl, // cast hash or parent URL
+        castText: castData.text,
+      })
+      if (response.status !== 200) {
+        console.log(response)
+
+        // need to revert recasts counter
+      }
+      console.log(response.status)
     } catch (error) {
       console.error('Error submitting data:', error)
     }
@@ -234,6 +258,13 @@ export default function Home() {
 
   function routeCast() {
     console.log(castData.text.length)
+    if (store.isAuth && store.signer_uuid && castData.text.length > 0 && castData.text.length <= 320) {
+      let updatedCastData = { ...castData }
+      updatedCastData.fid = store.fid
+      updatedCastData.signer = store.signer_uuid
+      setCastData(updatedCastData)
+      postCast(castData)
+    }
     // console.log(store.isAuth, userSearch.search)
     // if (searchSelect == 'Channels') {
     //   getChannels(userSearch.search)
@@ -250,13 +281,16 @@ export default function Home() {
   }
   const [textboxRows, setTextboxRows] = useState(1)
   const expandBox = () => {
-    if (textboxRows == 1)
+    if (textboxRows == 1) {
+      setIsFocused(true)
       setTextboxRows(4)
+    }
   }
 
   const shrinkBox = () => {
     console.log(castData.text)
     if (textboxRows > 1 && castData.text.length < 40) {
+      setIsFocused(false)
       setTextboxRows(1)
     }
   }
@@ -270,10 +304,10 @@ export default function Home() {
     <div style={{padding: '58px 0 0 0', width: feedMax}}>
     </div>
     <div className="top-layer">
-      <div className="flex-row" style={{padding: '0px 0 0 0'}}>
+      <div className="flex-row" style={{padding: '0', marginBottom: '10px'}}>
         {store.isAuth && (
           <a className="" title="" href={`/${store.userProfile.username}`} onClick={() => {goToUserProfile(event, store.userProfile)}}>
-            <img loading="lazy" src={store.srcUrlFC} className="" alt={`${store.userDisplayNameFC} avatar`} style={{width: '40px', height: '40px', maxWidth: '48px', maxHeight: '48px', borderRadius: '24px', border: '1px solid #ddd', margin: '6px 0 2px 0'}} />
+            <img loading="lazy" src={store.srcUrlFC} className="" alt={`${store.userDisplayNameFC} avatar`} style={{width: '40px', height: '40px', maxWidth: '48px', maxHeight: '48px', borderRadius: '24px', border: '1px solid #abc', margin: '6px 0 2px 0'}} />
           </a>
         )}
         <textarea onChange={onChange} 
@@ -284,20 +318,20 @@ export default function Home() {
           className='textbox' 
           onFocus={expandBox}
           onBlur={shrinkBox}
-          style={{}} />
+          style={{height: isFocused ? '120px' : '48px'}} />
 
           {store.isAuth ? (
             <div className="flex-row">
-              {(castData.text.length > 0) ? (
-                <div className='flex-row' style={{position: 'relative'}}>
-                  <div className='unfollow-select-drk cast-btn' onClick={routeCast} name='unfollow' style={{color: loading ? 'transparent' : '#dee', height: 'auto'}}>Cast</div>
+              {(castData.text.length > 320) ? (
+                <div className='flex-row unfollow-select-drk' style={{position: 'relative', height: 'auto', width: '60px', marginRight: '0'}}>
+                  <div className=' cast-btn' onClick={routeCast} name='unfollow' style={{color: loading ? 'transparent' : '#dee', height: 'auto', textAlign: 'center'}}>Long cast</div>
                   <div className='top-layer rotation' style={{position: 'absolute', top: '7px', left: '34px', visibility: loading ? 'visible': 'hidden' }}>
                     <Loading size={24} color='#dee' />
                   </div>
                 </div>
               ) : (
-                <div className='flex-row' style={{position: 'relative'}}>
-                  <div className='follow-select cast-btn' onClick={routeCast} name='follow' style={{color: loading ? 'transparent' : '#fff', height: 'auto'}}>Cast</div>
+                <div className='flex-row follow-select' style={{position: 'relative', height: 'auto', width: '60px', marginRight: '0'}}>
+                  <div className='cast-btn' onClick={routeCast} name='follow' style={{color: loading ? 'transparent' : '#fff', height: 'auto'}}>Cast</div>
                   <div className='top-layer rotation' style={{position: 'absolute', top: '7px', left: '34px', visibility: loading ? 'visible': 'hidden'}}>
                     <Loading size={24} color='#fff' />
                   </div>
@@ -305,9 +339,9 @@ export default function Home() {
               )}
             </div>
           ) : (
-            <div className="flex-row" style={{position: 'relative'}}>
-              <div className='follow-locked cast-btn' onClick={account.LoginPopup} style={{height: 'auto'}}>Cast</div>
-              <div className='top-layer' style={{position: 'absolute', top: 0, right: 0, transform: 'translate(-50%, -50%)' }}>
+            <div className="flex-row follow-locked" style={{position: 'relative', height: 'auto', width: '60px', marginRight: '0'}}>
+              <div className='cast-btn' onClick={account.LoginPopup} style={{height: 'auto'}}>Cast</div>
+              <div className='top-layer' style={{position: 'absolute', top: 0, right: 0, transform: 'translate(40%, -60%)' }}>
                 <FaLock size={8} color='#eee' />
               </div>
             </div>
@@ -374,7 +408,7 @@ export default function Home() {
                                 style={{aspectRatio: '0.75 / 1', 
                                   maxWidth: textMax, 
                                   maxHeight: '500px', 
-                                  paddingTop: '10px', 
+                                  marginTop: '10px', 
                                   cursor: 'pointer', 
                                   position: 'relative',
                                   borderRadius: '8px'}} 

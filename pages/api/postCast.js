@@ -4,43 +4,40 @@ export default async function handler(req, res) {
   if (req.method === 'POST') {
     try {
       const { fid, signer, urls, channel, parentUrl, castText } = req.body;
-      console.log( fid, signer, urls, channel, parentUrl, castText )
-      // console.log(typeof fid)
+      // console.log( fid, signer, urls, channel, parentUrl, castText )
 
       const base = "https://api.neynar.com/";
       const url = `${base}v2/farcaster/cast`;
-      const requestBody = {
-        embeds: [],
-        headers: {
-          accept: "application/json",
-          api_key: apiKey,
-          'content-type': 'application/json',
-        },
-        body: JSON.stringify({
-          signer_uuid: signer,
-          text: castText
-        })
+
+      let body = {
+        signer_uuid: signer,
+        text: castText,
       };
+
       if (parentUrl) {
-        requestBody.parent = parentUrl;
+        body.replyTo = parentUrl;
       }
       if (channel) {
-        requestBody.channel_id = channel;
+        body.channel_id = channel;
       }
       if (urls) {
         for (let url in urls) 
-        requestBody.embeds.push({url})
+        body.embeds.push({url})
       }
+
       const response = await fetch(url, {
         method: 'POST',
-        headers: requestBody.headers,
-        body: JSON.stringify(requestBody)
+        headers: {
+          'Content-Type': 'application/json',
+          'api_key': apiKey,
+        },
+        body: JSON.stringify(body),
       });
 
       const cast = await response.json();
       console.log(cast)
 
-      res.status(200).json({ success: true, message: `Cast created successfully`});
+      res.status(200).json({ success: true, message: `Cast created successfully`, hash: response.cast.hash});
     } catch (error) {
       console.error('Error handling GET request:', error);
       res.status(500).json({ error: 'Internal Server Error' });
