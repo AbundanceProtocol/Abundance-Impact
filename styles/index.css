@@ -870,6 +870,10 @@ blockquote {
     cursor: pointer;
 }
 
+.flash-success {
+    background-color: #0c0;
+}
+
 .unfollow-select-drk:hover {
     border: 2px solid #cdd;
     color: #cdd;

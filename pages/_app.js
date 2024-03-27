@@ -20,6 +20,20 @@ import NeynarSigninButton from '../components/Signin';
 import { IoIosWarning } from "react-icons/io"
 import { FaLock } from "react-icons/fa";
 import axios from 'axios';
+import Head from 'next/head';
+
+const generateMetadata = (url) => {
+  // Logic to generate metadata based on the URL
+  // Example:
+  // const title = fetchTitle(url);
+  // const description = fetchDescription(url);
+  // return { title, description };
+  return {
+    title: 'Default Title',
+    description: 'Default Description',
+  };
+};
+
 
 export default function App({ Component, pageProps }) {
   const store = useStore()
@@ -53,8 +67,21 @@ export default function App({ Component, pageProps }) {
   `;
 
   useEffect(() => {
-    useStore.setState({ router })
+    const handleRouteChange = (url) => {
+      const { title, description } = generateMetadata(url);
+      document.title = title;
+      document.querySelector('meta[name="description"]').setAttribute('content', description);
+      useStore.setState({ router })
+    }
+    router.events.on('routeChangeComplete', handleRouteChange);
+
+    return () => {
+      router.events.off('routeChangeComplete', handleRouteChange);
+    };
   }, [router])
+
+  const { title, description } = generateMetadata(router.asPath);
+
 
   useEffect(() => {
     let menuLink = targetLink()
@@ -205,7 +232,7 @@ export default function App({ Component, pageProps }) {
     }
 
     return isMobile ? (
-      <Link href={(btn.link && btn.working) ? btn.link : router.route}>
+      <Link href={(btn.link && btn.working) ? btn.link : router.route} legacyBehavior>
         <a className={topBox} style={{borderRadius: '18px', padding: '16px 8px'}} {...attributes} onClick={() => {
           setLinkTarget(props.buttonName)
           if (btn.link && btn.working) {
@@ -227,7 +254,7 @@ export default function App({ Component, pageProps }) {
       <Link href={(btn.link && btn.working) ? btn.link : router.route}>
         <a className={topBox}  {...attributes} onClick={() => {
           setLinkTarget(props.buttonName)
-          }}>
+          }} legacyBehavior>
           <div className="sub-cat-box" style={{margin: btnHover ? '8px 0' : '0 10px 0 0', minWidth: btnHover ? '50px' : '15px'}}>
             <Icon className={iconClass} iconsize={btnHover ? isTablet ? '25' : '30' : '15'} style={{height: btnHover ? '30px' : '15px', width: btnHover ? '30px' : '15px'}} />
           </div>
@@ -249,7 +276,7 @@ export default function App({ Component, pageProps }) {
   const HomeButton = () => {
     const isSmall = isMobile || isTablet;
     return (
-      <Link href="/">
+      <Link href="/" legacyBehavior>
         <a className={navMenu === "Home" ? "nav-home-button-active" : "nav-home-button"} onMouseEnter={() => {
           setNavMenu('Home')
           setMenuHover({ ...menuHover, in: Date.now() })
@@ -312,6 +339,24 @@ export default function App({ Component, pageProps }) {
     setShowNotification(false)
   }
 
+  const testButton = async () => {
+    // console.log('test')
+    try {
+      const response = await axios.get('/api/getIPFS', {
+        params: {
+          hash: 'QmQpfVfn78d4hLHmDG8cehbBQoXPp8kppuWZHWo5yy44qy',
+        }
+      })
+      console.log(response.data?.username, response.data?.text)
+
+    } catch (error) {
+      console.error('Error submitting data:', error)
+    }
+
+
+  }
+
+
   const LoginPopup = async () => {
     setShowNotification(true)
   }
@@ -359,8 +404,9 @@ export default function App({ Component, pageProps }) {
       }}
       onMouseLeave={() => setMenuHover({ ...menuHover, out: Date.now() }) }>
         {/* need correct Link functionality when button is locked */}
-        <Link href={(btn.link && btn.working) ? btn.link : router.route}>
-          <a style={{maxWidth: '260px'}}>
+        {/* investigate hydration problem */}
+        <Link href={(btn.link && btn.working) ? btn.link : router.route} style={{maxWidth: '260px'}} legacyBehavior>
+          {/* <a style={{maxWidth: '260px'}}> */}
             <div className={`flex-row`} style={{paddingRight: isMobile ? '1em' : 'unset', justifyContent: 'flex-start'}}>
               <div className="flex-col" style={{height: '58px', alignItems: 'center', justifyContent: 'center'}}>
                 <div className={`flex-row flex-middle ${menuState} ${unlockedState}`} style={{padding: '2px 0 2px 0', borderRadius: '16px'}}>
@@ -382,7 +428,7 @@ export default function App({ Component, pageProps }) {
                 </div>
               </div>
             </div>
-          </a>
+          {/* </a> */}
         </Link>
       </div>
     )
@@ -409,7 +455,7 @@ export default function App({ Component, pageProps }) {
         setMenuHover({ ...menuHover, in: Date.now() })
       }}
       onMouseLeave={() => setMenuHover({ ...menuHover, out: Date.now() }) }>
-        <Link href={(btn.link && btn.working) ? btn.link : router.route}>
+        <Link href={(btn.link && btn.working) ? btn.link : router.route} legacyBehavior>
           <a style={{width: 'auto'}}>
             <div className={`flex-row ${menuState}`} style={{padding: isMobile ? '2px' : 'unset', width: 'auto' }}>
               <div className="flex-col" style={{height: '58px', alignItems: 'center', justifyContent: 'center'}}>
@@ -513,6 +559,12 @@ export default function App({ Component, pageProps }) {
 
   return (
     <div ref={ref} className='flex-col' style={{position: 'absolute', display: 'flex', minHeight: '100%', height: '100%', width: '100%', overflowX: 'hidden'}}>
+      <Head>
+        {/* Set default metadata */}
+        <title>{title}</title>
+        <meta name="description" content={description} />
+        {/* Add other default meta tags as needed */}
+      </Head>
       {isMobile ? (
         <React.Fragment key="top">
           <MobileAppbar className='top-layer' position="fixed" elevation={0} sx={{paddingRight: 0}} style={{backgroundColor: '#2D4254'}}>
@@ -559,7 +611,7 @@ export default function App({ Component, pageProps }) {
                       <TopNav buttonName={btn} key={index} /> ))} */}
               </TopNavWrapper>
               {/* //// test buttons //// */}
-              {/* {/* <div id="showNotificationBtn" className='srch-select-btn' onClick={LoginPopup}>Test Button</div> */}
+               {/* <div id="showNotificationBtn" className='srch-select-btn' onClick={testButton}>Test Button</div>  */}
               {/* {(isSignedIn || showNotification) ? (<LogOut />) : (<NeynarSigninButton onSignInSuccess={handleSignIn} />)} */}
               {/* {isSignedIn ? (<LogOut />) : (<LogOut />)} */}
               {/* <ConnectButton 

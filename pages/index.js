@@ -1,7 +1,7 @@
 import Head from 'next/head';
 import { useContext, useState, useRef, useEffect } from 'react'
-import { ethers } from 'ethers'
-import { Swords, CoinBag, CoinStack, Waste, AbundanceStar, FeedbackLoop, Like, Recast, Message, Kebab, Warp, ActiveUser } from './assets'
+// import { ethers } from 'ethers'
+import { Like, Recast, Message, Kebab, ActiveUser } from './assets'
 import Link from 'next/link'
 import { AccountContext } from '../context'
 import useMatchBreakpoints from '../hooks/useMatchBreakpoints'
@@ -14,6 +14,7 @@ import mql from '@microlink/mql';
 import { useRouter } from 'next/router';
 
 export default function Home() {
+  const baseURL = process.env.NOD_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
   const ref = useRef(null)
   const likeRefs = useRef([])
   const recastRefs = useRef([])
@@ -35,6 +36,8 @@ export default function Home() {
 	const [castData, setCastData] = useState(initialState)
   const [loading, setLoading] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
+  const [isLogged, setIsLogged] = useState(false)
+  const [success, setSuccess] = useState(false)
 
   async function getFeed() {
     try {
@@ -80,6 +83,13 @@ export default function Home() {
         console.log(response)
 
         // need to revert recasts counter
+      } else {
+        clearCastText()
+        shrinkBox()
+        setSuccess(true);
+        setTimeout(() => {
+          setSuccess(false);
+        }, 2000);
       }
       console.log(response.status)
     } catch (error) {
@@ -189,6 +199,12 @@ export default function Home() {
   }
 
   useEffect(() => {
+    setIsLogged(store.isAuth)
+  }, [store.isAuth])
+
+  useEffect(() => {
+    setIsLogged(store.isAuth)
+
     getFeed()
     const handleResize = () => {
       setScreenWidth(window.innerWidth)
@@ -252,19 +268,52 @@ export default function Home() {
     )
   }
 
+  function clearCastText() {
+    setCastData({ ...castData, text: '', parentUrl: null });
+  }
+
 	function onChange(e) {
 		setCastData( () => ({ ...castData, [e.target.name]: e.target.value }) )
 	}
 
-  function routeCast() {
+  async function routeCast() {
     console.log(castData.text.length)
     if (store.isAuth && store.signer_uuid && castData.text.length > 0 && castData.text.length <= 320) {
-      let updatedCastData = { ...castData }
-      updatedCastData.fid = store.fid
-      updatedCastData.signer = store.signer_uuid
-      setCastData(updatedCastData)
-      postCast(castData)
+      try {
+        let updatedCastData = { ...castData }
+        updatedCastData.fid = store.fid
+        updatedCastData.signer = store.signer_uuid
+        setCastData(updatedCastData)
+        postCast(castData)
+      } catch (error) {
+        console.error('Error submitting data:', error)
+      }
     }
+    else if (store.isAuth && store.signer_uuid && castData.text.length > 320) {
+      try {
+        // const castContent = { username: store.username, text: castData.text }
+        // const jsonData = JSON.stringify(userData, null, 2)
+        const username = store.usernameFC
+        const ipfsData = await axios.post('/api/postToIPFS', { username: username, text: castData.text, fid: store.fid })
+        const longcastHash = ipfsData.data.ipfsHash
+        let updatedCastData = { ...castData }
+        updatedCastData.fid = store.fid
+        updatedCastData.signer = store.signer_uuid
+        const longcastFrame = `${baseURL}/${username}/articles/${longcastHash}`
+        updatedCastData.text = longcastFrame
+        // setCastData(updatedCastData)
+        console.log(longcastFrame)
+        postCast(castData)
+        console.log(longcastHash)
+      } catch (error) {
+        console.error('Error submitting data:', error)
+      }
+    } else {
+      return
+    }
+
+
+
     // console.log(store.isAuth, userSearch.search)
     // if (searchSelect == 'Channels') {
     //   getChannels(userSearch.search)
@@ -298,14 +347,14 @@ export default function Home() {
   return (
   <div name='feed' style={{width: 'auto', maxWidth: '620px'}} ref={ref}>
     <Head>
-      <title>Impact | Abundance Protocol | Feed </title>
+      <title>Feed | Impact App </title>
       <meta name="description" content={`Building the global superalignment layer`} />
     </Head>
     <div style={{padding: '58px 0 0 0', width: feedMax}}>
     </div>
     <div className="top-layer">
       <div className="flex-row" style={{padding: '0', marginBottom: '10px'}}>
-        {store.isAuth && (
+        {isLogged && (
           <a className="" title="" href={`/${store.userProfile.username}`} onClick={() => {goToUserProfile(event, store.userProfile)}}>
             <img loading="lazy" src={store.srcUrlFC} className="" alt={`${store.userDisplayNameFC} avatar`} style={{width: '40px', height: '40px', maxWidth: '48px', maxHeight: '48px', borderRadius: '24px', border: '1px solid #abc', margin: '6px 0 2px 0'}} />
           </a>
@@ -320,17 +369,17 @@ export default function Home() {
           onBlur={shrinkBox}
           style={{height: isFocused ? '120px' : '48px'}} />
 
-          {store.isAuth ? (
+          {isLogged ? (
             <div className="flex-row">
               {(castData.text.length > 320) ? (
-                <div className='flex-row unfollow-select-drk' style={{position: 'relative', height: 'auto', width: '60px', marginRight: '0'}}>
+                <div className={`flex-row unfollow-select-drk ${success ? 'flash-success' : ''}`} style={{position: 'relative', height: 'auto', width: '60px', marginRight: '0'}}>
                   <div className=' cast-btn' onClick={routeCast} name='unfollow' style={{color: loading ? 'transparent' : '#dee', height: 'auto', textAlign: 'center'}}>Long cast</div>
                   <div className='top-layer rotation' style={{position: 'absolute', top: '7px', left: '34px', visibility: loading ? 'visible': 'hidden' }}>
                     <Loading size={24} color='#dee' />
                   </div>
                 </div>
               ) : (
-                <div className='flex-row follow-select' style={{position: 'relative', height: 'auto', width: '60px', marginRight: '0'}}>
+                <div className={`flex-row follow-select ${success ? 'flash-success' : ''}`} style={{position: 'relative', height: 'auto', width: '60px', marginRight: '0'}}>
                   <div className='cast-btn' onClick={routeCast} name='follow' style={{color: loading ? 'transparent' : '#fff', height: 'auto'}}>Cast</div>
                   <div className='top-layer rotation' style={{position: 'absolute', top: '7px', left: '34px', visibility: loading ? 'visible': 'hidden'}}>
                     <Loading size={24} color='#fff' />
@@ -377,7 +426,7 @@ export default function Home() {
                             <div className="flex-row" style={{alignItems: 'center'}}>
                               <span className="name-font">{cast.author.display_name}</span>
                               <div className="" style={{margin: '0 0 0 3px'}}>
-                                {(cast.author.active_status == 'active') && (<ActiveUser />)}
+                                {(cast.author.power_badge) && (<ActiveUser />)}
                               </div>
                             </div>
                           </a>
