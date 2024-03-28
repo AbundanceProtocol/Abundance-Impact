@@ -8,7 +8,7 @@ import { FaLock, FaRegStar } from "react-icons/fa"
 import { BsPatchCheckFill as Verified } from "react-icons/bs";
 import { BiSolidErrorAlt as Rejected } from "react-icons/bi";
 
-const baseURL = process.env.NOD_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
+const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 
 export default function ArticlePage({articleData, username, articleHash, totalPages}) {
   const router = useRouter();

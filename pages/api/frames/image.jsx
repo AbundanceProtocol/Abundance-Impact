@@ -3,7 +3,7 @@ import satori from "satori";
 import path from 'path'
 import fs from 'fs';
 
-const baseURL = process.env.NOD_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
+const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 
 export default async function handler(req, res) {
   // console.log('api/frames/image 15:', req.query)

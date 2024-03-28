@@ -14,7 +14,7 @@ import mql from '@microlink/mql';
 import { useRouter } from 'next/router';
 
 export default function Home() {
-  const baseURL = process.env.NOD_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
+  const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
   const ref = useRef(null)
   const likeRefs = useRef([])
   const recastRefs = useRef([])
