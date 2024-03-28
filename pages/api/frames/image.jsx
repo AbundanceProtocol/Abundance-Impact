@@ -28,7 +28,7 @@ export default async function handler(req, res) {
         const sliceFrom = (300 * page) + 0;
         const sliceTo = (300 * page) + 300;
         let beforeText = '';
-        const totalPages = Math.cell(articleData.text.length / 300)
+        const totalPages = Math.ceil(articleData.text.length / 300)
         console.log(page, page !== 0)
         console.log(articleData.text.length)
         if (page !== 0) {

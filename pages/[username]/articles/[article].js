@@ -321,7 +321,7 @@ export async function getServerSideProps(context) {
     if (contentType && contentType.includes('application/json')) {
       articleData = await response.json();
       if (articleData.text) {
-        totalPages = Math.cell(articleData.text.length / 300)
+        totalPages = Math.ceil(articleData.text.length / 300)
       }
     }
 
