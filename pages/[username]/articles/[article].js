@@ -329,7 +329,7 @@ export async function getServerSideProps(context) {
     console.error('Error submitting data:', error)
     return null
   }
-
+  console.log(articleData, username, articleHash, totalPages)
   return {
     props: {
       articleData, username, articleHash, totalPages
