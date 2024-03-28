@@ -54,7 +54,6 @@ export default async function handler(req, res) {
         width: '100%',
         height: '100%',
         backgroundColor: '#16101f',
-        border: '1px solid grey',
         padding: 30,
         display: 'flex',
         flexDirection: 'column',

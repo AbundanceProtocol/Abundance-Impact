@@ -1,3 +1,4 @@
+import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useRef, useContext, useEffect, useState } from 'react';
 import useStore from '../utils/store';
@@ -7,9 +8,18 @@ import { AiOutlineLoading3Quarters as Loading } from "react-icons/ai";
 import useMatchBreakpoints from '../hooks/useMatchBreakpoints'; 
 import axios from 'axios';
 
-export default function UserPage() {
+export default function UserPage({username}) {
   const router = useRouter();
-  const { username } = router.query;
+  // const { username } = router.query;
+  const noUser = {
+    username: 'none',
+    display_name: 'No user found',
+    power_badge: false,
+    fid: '-',
+    profile: { bio: { text: 'No user bio found'}},
+    following_count: '-',
+    follower_count: '-',
+  }
   const store = useStore()
   const [user, setUser] = useState(null)
   const account = useContext(AccountContext)
@@ -22,16 +32,46 @@ export default function UserPage() {
   const { isMobile } = useMatchBreakpoints();
 
   useEffect(() => {
-    console.log(`Username: ${username}`);
-    if (store.userData) {
+    if (store.userData && store.userData.username == username) {
       setUser(store.userData)
+    } else {
+      getUserProfile(username)
     }
   }, []);
 
-  // useEffect(() => {
-  //   if (user && username == user.username)
-  //   console.log(user)
-  // }, [user]);
+  async function getUserProfile(name) {
+    let fid = 3
+    if (store.isAuth) {
+      fid = store.fid
+    }
+    if (fid && name) {
+      try {
+        const response = await axios.get('/api/getUsers', {
+          params: {
+            fid: fid,
+            name: name,
+          }
+        })
+        const users = response.data.users
+        console.log(users)
+        const selectUser = users.find(user => user.username == name)
+        console.log(selectUser)
+        if (selectUser) {
+          console.log('user set')
+          setUser(selectUser)
+        } else {
+          console.log('no user set')
+          setUser(noUser)
+        }
+      } catch (error) {
+        console.error('Error submitting data:', error)
+        setUser(noUser)
+      }
+    }
+    else {
+      console.log(fid, name)
+    }
+  }
 
   useEffect(() => {
     if (screenWidth) {
@@ -167,7 +207,7 @@ export default function UserPage() {
                             <div className="flex-row" style={{alignItems: 'center'}}>
                               <span className="name-font" style={{color: '#cdd', fontSize: '18px'}}>{user.display_name}</span>
                               <div className="" style={{margin: '0 0 0 3px'}}>
-                                {(user.active_status == 'active') && (<ActiveUser />)}
+                                {(user.power_badge) && (<ActiveUser />)}
                               </div>
                             </div>
                           </a>
@@ -186,12 +226,16 @@ export default function UserPage() {
                     </div>
                     <div className="flex-row" style={{width: '100%', justifyContent: 'space-evenly'}}>
                       <div className="" style={{flex: 1}}>
-                        <div className="flex-row">
-                          <span className="" style={{padding: '0 0 0 0px', fontSize: '12px', fontWeight: '600', color: '#cdd'}}>{user.following_count} following</span>
+                        <div className="flex-row" style={{padding: '0 0 0 5px', fontSize: '12px', color: '#cdd', gap: '0.25rem'}}>
+                          <div style={{fontWeight: '700'}}>{user.following_count}</div>
+                          <div style={{fontWeight: '400'}}>following</div>
                         </div>
                       </div>
                       <div className="flex-row" style={{flex: 2}}>
-                        <span className="" style={{padding: '0 0 0 5px', fontSize: '12px', fontWeight: '600', color: '#cdd'}}>{user.follower_count} followed</span>
+                        <div className="flex-row" style={{padding: '0 0 0 5px', fontSize: '12px', color: '#cdd', gap: '0.25rem'}}>
+                          <div style={{fontWeight: '700'}}>{user.follower_count}</div>
+                          <div style={{fontWeight: '400'}}>followed</div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -200,7 +244,7 @@ export default function UserPage() {
             </div>
           </div>
         </div>
-        {(store.userProfile && store.userProfile.username !== user.username) && (
+        {(store.userProfile && store.userProfile.username !== user.username && user.fid !== '-') && (
           <>
             {store.isAuth ? (
               <div className="flex-row">
@@ -269,13 +313,31 @@ export default function UserPage() {
 
   return (
     <div className='flex-col' style={{width: 'auto', position: 'relative'}} ref={ref}>
+      <Head>
+        <title>@{username}&apos;s Profile  | Impact App </title>
+        <meta name="description" content={`Building the global superalignment layer`} />
+
+      </Head>
       <div className="" style={{padding: '58px 0 0 0'}}>
       </div>
-      { (user && username == user.username) && <UserData/> }
+      { ((user && username == user.username) || (user && user.fid == '-')) && <UserData/> }
       <div className="top-layer flex-row" style={{padding: '10px 0 10px 0', alignItems: 'center', justifyContent: 'space-between', margin: '0', borderBottom: '1px solid #888'}}>
         { userButtons.map((btn, index) => (
           <SearchOptionButton buttonName={btn} key={index} /> ))}
       </div>
     </div>
   );
+}
+
+
+export async function getServerSideProps(context) {
+  // Fetch dynamic parameters from the context object
+  const { params } = context;
+  const { username } = params;
+
+  return {
+    props: {
+      username
+    },
+  };
 }

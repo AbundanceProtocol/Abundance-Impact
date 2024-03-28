@@ -1,4 +1,0 @@
-# netlify.toml
-
-[build]
-  included_files = ["node_modules/sharp/**/*"]

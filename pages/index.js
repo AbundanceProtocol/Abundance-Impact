@@ -228,6 +228,16 @@ export default function Home() {
     )
   }
 
+  const goToCast = async (event, cast) => {
+    console.log('passed')
+    event.preventDefault()
+    const username = cast.author.username
+    const castHash = cast.hash
+    await store.setCastData(cast)
+    console.log(username, store.userData)
+    router.push(`/${username}/casts/${castHash}`)
+  }
+
   const goToUserProfile = async (event, author) => {
     console.log('passed')
     event.preventDefault()
@@ -414,7 +424,7 @@ export default function Home() {
               <div className="">
                 <div className="flex-row">
                   <span className="" datastate="closed" style={{margin: '0 10px 0 0'}}>
-                    <a className="" title="" href={`https://warpcast.com/${cast.author.username}`}>
+                    <a className="" title="" href={`/${cast.author.username}`} onClick={() => {goToUserProfile(event, cast.author)}}>
                       <img loading="lazy" src={cast.author.pfp_url} className="" alt={`${cast.author.display_name} avatar`} style={{width: '48px', height: '48px', maxWidth: '48px', maxHeight: '48px', borderRadius: '24px', border: '1px solid #000'}} />
                     </a>
                   </span>
@@ -435,7 +445,7 @@ export default function Home() {
                           <a href={`/${cast.author.username}`} className="fc-lnk" title={cast.author.display_name} onClick={() => {goToUserProfile(event, cast.author)}}>@{cast.author.username}</a>
                         </span>
                         <div className="">·</div>
-                        <a className="fc-lnk" title="Navigate to cast" href={`https://warpcast.com/${cast.author.username}/${cast.hash.slice(0,10)}`}>
+                        <a href={`/${cast.author.username}/casts/${cast.hash}`} className="fc-lnk" title="Navigate to cast" onClick={() => {goToCast(event, cast)}}>
                           <div className="user-font">{timePassed(cast.timestamp)}</div>
                         </a>
                       </div>
@@ -444,7 +454,7 @@ export default function Home() {
                       </div>
                     </div>
                     <div className="">
-                      <div style={{wordWrap: 'break-word', maxWidth: `100%`, width: textMax}}>{cast.text}</div>
+                      <div style={{wordWrap: 'break-word', maxWidth: `100%`, width: textMax, whiteSpace: 'pre-line'}}>{cast.text}</div>
                       {(cast.embeds.length > 0) && (cast.embeds.map((embed, subindex) => (
                       <div className='flex-col' style={{alignItems: 'center'}}>
                         {(embed.type && embed.type == 'img') && (

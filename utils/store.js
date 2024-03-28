@@ -82,9 +82,6 @@ const useStore = create(persist((set, get) => {
         userEthVerAddresses: state.userEthVerAddresses,
         userSolVerAddresses: state.userSolVerAddresses,
         userProfile: state.userProfile,
-        userData: state.userData,
-        castData: state.castData,
-        proposalData: state.proposalData
         }),
         onRehydrate: (state) => {
           // This callback is called when the store is rehydrated
