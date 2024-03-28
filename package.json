@@ -45,7 +45,7 @@
     "isomorphic-unfetch": "^4.0.2",
     "key-did-provider-ed25519": "^2.0.0",
     "key-did-resolver": "^2.0.4",
-    "next": "^13.0.0",
+    "next": "13.4.19",
     "postcss": "^8.4.35",
     "postcss-loader": "^8.1.1",
     "react": "^18.2.0",
@@ -62,7 +62,7 @@
   },
   "devDependencies": {
     "@graphprotocol/graph-cli": "^0.32.0",
-    "@netlify/plugin-nextjs": "^4.41.3",
+    "@netlify/plugin-nextjs": "4.41.1",
     "eslint": "8.11.0",
     "eslint-config-next": "12.1.0",
     "urql": "^2.2.2",
