@@ -1,7 +1,8 @@
-import sharp from 'sharp';
 import satori from "satori";
 import path from 'path'
 import fs from 'fs';
+import { promisify } from 'util';
+import svg2img from 'svg2img';
 
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 
@@ -78,10 +79,9 @@ export default async function handler(req, res) {
         }]
       });
 
-    // Convert SVG to PNG using Sharp
-    const pngBuffer = await sharp(Buffer.from(svg))
-      .toFormat('png')
-      .toBuffer();
+    const svgBuffer = Buffer.from(svg);
+    const convertSvgToPng = promisify(svg2img);
+    const pngBuffer = await convertSvgToPng(svgBuffer, { format: 'png', width: 600, height: 400 });
 
     // Set the content type to PNG and send the response
     res.setHeader('Content-Type', 'image/png');
