@@ -68,7 +68,6 @@ export default function Home() {
   }
 
   async function postCast(castData) {
-    console.log(castData)
     if (castData.fid && castData.signer && castData.text) {
       try {
         const response = await axios.post('/api/postCast', {       
@@ -82,12 +81,8 @@ export default function Home() {
         })
         if (response.status !== 200) {
           console.log(response)
-          console.log('failed')
-
           // need to revert recasts counter
         } else {
-          console.log('worked')
-
           clearCastText()
           shrinkBox()
           setSuccess(true);
@@ -307,11 +302,8 @@ export default function Home() {
     }
     else if (store.isAuth && store.signer_uuid && castData.text.length > 320) {
       try {
-        // const castContent = { username: store.username, text: castData.text }
-        // const jsonData = JSON.stringify(userData, null, 2)
         const username = store.usernameFC
         const ipfsData = await axios.post('/api/postToIPFS', { username: username, text: castData.text, fid: store.fid })
-
         const longcastHash = ipfsData.data.ipfsHash
         let updatedCastData = { ...castData }
         updatedCastData.fid = store.fid
@@ -328,23 +320,8 @@ export default function Home() {
     } else {
       return
     }
-
-
-
-    // console.log(store.isAuth, userSearch.search)
-    // if (searchSelect == 'Channels') {
-    //   getChannels(userSearch.search)
-    // }
-    // else if (searchSelect == 'Users' && store.isAuth) {
-    //   getUsers(userSearch.search)
-    // }
-    // else if (searchSelect == 'Ecosystems') {
-    //   getEcosystems(userSearch.search)
-    // }
-    // else if (searchSelect == 'Proposals') {
-    //   getProposals(userSearch.search)
-    // }
   }
+  
   const [textboxRows, setTextboxRows] = useState(1)
   const expandBox = () => {
     if (textboxRows == 1) {
