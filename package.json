@@ -46,6 +46,7 @@
     "key-did-provider-ed25519": "^2.0.0",
     "key-did-resolver": "^2.0.4",
     "next": "13.4.19",
+    "node-cache": "^5.1.2",
     "postcss": "^8.4.35",
     "postcss-loader": "^8.1.1",
     "react": "^18.2.0",

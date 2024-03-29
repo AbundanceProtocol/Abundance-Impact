@@ -20,12 +20,12 @@ export default async function handler(req, res) {
       const totalPages = Number(req.query.total);
 
       const imageUrl = `${baseURL}/api/frames/image?id=${articleHash}&page=${page}`;
-      let button1 = `<meta name="fc:frame:button:1" content="Refresh">
+      let button1 = `<meta name="fc:frame:button:1" content="Restart">
       <meta name="fc:frame:button:1:action" content="post">
-      <meta name="fc:frame:button:1:target" content="${baseURL}/api/frames/page?id=${articleHash}&page=${page}&user=${username}&total=${totalPages}" />`
+      <meta name="fc:frame:button:1:target" content="${baseURL}/api/frames/page?id=${articleHash}&page=0&user=${username}&total=${totalPages}" />`
 
       let button2 = `
-      <meta name="fc:frame:button:2" content='To Longcast' />
+      <meta name="fc:frame:button:2" content='Longcast' />
       <meta name="fc:frame:button:2:action" content="link" />
       <meta name="fc:frame:button:2:target" content="${baseURL}/${username}/articles/${articleHash}" />`
 

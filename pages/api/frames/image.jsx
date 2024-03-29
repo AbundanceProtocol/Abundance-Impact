@@ -3,8 +3,11 @@ import path from 'path'
 import fs from 'fs';
 import { promisify } from 'util';
 import svg2img from 'svg2img';
+import fetch from 'isomorphic-unfetch';
+import NodeCache from 'node-cache';
 
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
+const cache = new NodeCache({ stdTTL: 60 });
 
 export default async function handler(req, res) {
   // console.log('api/frames/image 15:', req.query)
@@ -15,41 +18,45 @@ export default async function handler(req, res) {
     const fontPath = path.join(process.cwd(), 'public', 'Inter-SemiBold.ttf');
     const fontData = fs.readFileSync(fontPath);
     const articleHash = req.query.id;
-    let articleData = '';
-    const response = await fetch(`${baseURL}/api/getIPFS?hash=${articleHash}`);
-    const contentType = response.headers.get('content-type');
+    let articleData = cache.get(articleHash);
+
     const page = Number(req.query.page);
     let threadText = '';
     let pageCount = '[/]'
     let username = ''
 
-    if (contentType && contentType.includes('application/json')) {
-      articleData = await response.json();
-      if (articleData) {
-        const sliceFrom = (300 * page) + 0;
-        const sliceTo = (300 * page) + 300;
-        let beforeText = '';
-        const totalPages = Math.ceil(articleData.text.length / 300)
-        console.log(page, page !== 0)
-        console.log(articleData.text.length)
-        if (page !== 0) {
-          beforeText = '...'
-        }
-        let afterText = '...';
-        if (page+1 == totalPages) {
-          afterText = '';
-        }
-        pageCount = ` [${Number(page)+1}/${totalPages}]`
-        threadText = beforeText + articleData.text.slice(sliceFrom, sliceTo) + afterText + pageCount
-      }
-      if (articleData.username) {
-        username = '@' + articleData.username
+    if (!articleData) {
+      const response = await fetch(`${baseURL}/api/getIPFS?hash=${articleHash}`);
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        articleData = await response.json();
+        cache.set(articleHash, articleData);
       }
     }
-    // console.log('text 50:', threadText)
 
+    if (articleData) {
+      const sliceFrom = (300 * page) + 0;
+      const sliceTo = (300 * page) + 300;
+      let beforeText = '';
+      const totalPages = Math.ceil(articleData.text.length / 300)
+      console.log(page, page !== 0)
+      console.log(articleData.text.length)
+      if (page !== 0) {
+        beforeText = '...'
+      }
+      let afterText = '...';
+      if (page+1 == totalPages) {
+        afterText = '';
+      }
+      pageCount = ` [${Number(page)+1}/${totalPages}]`
+      threadText = beforeText + articleData.text.slice(sliceFrom, sliceTo) + afterText + pageCount
+    }
+    
+    if (articleData.username) {
+      username = '@' + articleData.username
+    }
+    
     const svg = await satori(
-
       <div style={{
         width: '100%',
         height: '100%',
@@ -76,7 +83,8 @@ export default async function handler(req, res) {
           style: 'normal', 
           weight: 600
         }]
-      });
+      }
+    );
 
     const svgBuffer = Buffer.from(svg);
     const convertSvgToPng = promisify(svg2img);
