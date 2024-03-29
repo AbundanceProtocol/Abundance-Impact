@@ -309,6 +309,7 @@ export default function Home() {
         updatedCastData.signer = store.signer_uuid
         const longcastFrame = `${baseURL}/${username}/articles/${longcastHash}`
         updatedCastData.text = longcastFrame
+        updatedCastData.urls.push(longcastFrame)
         setCastData(updatedCastData)
         console.log(longcastFrame)
         await postCast(updatedCastData)
