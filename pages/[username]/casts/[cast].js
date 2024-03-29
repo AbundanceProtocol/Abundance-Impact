@@ -26,11 +26,14 @@ export default function CastPage({username, castHash}) {
     follower_count: '-',
   }
   const [screenWidth, setScreenWidth] = useState(undefined)
+  const [screenHeight, setScreenHeight] = useState(undefined)
   const [user, setUser] = useState(initialUser)
   const store = useStore()
   const [textMax, setTextMax] = useState('522px')
   const [feedMax, setFeedMax ] = useState('620px')
   const [longcastLoaded, setLongcastLoaded] = useState(false)
+  const [showPopup, setShowPopup] = useState({open: false, url: null})
+
   let noCast = {
     author: user,
     hash: '-',
@@ -49,6 +52,7 @@ export default function CastPage({username, castHash}) {
 
     const handleResize = () => {
       setScreenWidth(window.innerWidth)
+      setScreenHeight(window.innerHeight)
     }
     handleResize()
     window.addEventListener('resize', handleResize);
@@ -262,6 +266,26 @@ export default function CastPage({username, castHash}) {
     router.push(`/${username}`)
   }
 
+  function closeImagePopup() {
+    setShowPopup({open: false, url: null})
+  }
+
+  function openImagePopup(embed) {
+    let newPopup = { ...showPopup }
+    newPopup.open = true
+    newPopup.url = embed.url
+    setShowPopup(newPopup)
+  }
+
+  const ExpandImg = ({embed}) => {
+    return (
+      <>
+        <div className="overlay" onClick={closeImagePopup}></div>
+        <img loading="lazy" src={embed.showPopup.url} className='popupConainer' alt="Cast image embed" style={{aspectRatio: 'auto', maxWidth: screenWidth, maxHeight: screenHeight, cursor: 'pointer', position: 'fixed', borderRadius: '12px'}} onClick={closeImagePopup} />
+      </>
+    )
+  }
+
   const Article = () => {
 
     function shortenAddress(input) {
@@ -323,7 +347,7 @@ export default function CastPage({username, castHash}) {
                                 loading="lazy" 
                                 src={embed.url} 
                                 alt="Cast image embed" 
-                                style={{aspectRatio: '0.75 / 1', 
+                                style={{
                                   maxWidth: textMax, 
                                   maxHeight: '500px', 
                                   marginTop: '10px', 
@@ -397,7 +421,9 @@ export default function CastPage({username, castHash}) {
       <div className="" style={{padding: '58px 0 0 0'}}>
       </div>
       { (cast) && <Article/> }
-
+      <div>
+        {showPopup.open && (<ExpandImg embed={{showPopup}} />)}
+      </div>
     </div>
   );
 }

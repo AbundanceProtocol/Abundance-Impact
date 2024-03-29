@@ -447,7 +447,7 @@ export default function Home() {
                                 loading="lazy" 
                                 src={embed.url} 
                                 alt="Cast image embed" 
-                                style={{aspectRatio: '0.75 / 1', 
+                                style={{
                                   maxWidth: textMax, 
                                   maxHeight: '500px', 
                                   marginTop: '10px', 

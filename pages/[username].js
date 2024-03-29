@@ -187,6 +187,17 @@ export default function UserPage({username}) {
       }
     };
 
+    const formatNum = (num) => {
+      const number = Number(num)
+      let formattedNumber = number
+      if (number > 1000000) {
+        formattedNumber = (number / 1000000).toFixed(1) + 'M'
+      } else if (number > 1000) {
+        formattedNumber = (number / 1000).toFixed(1) + 'K'
+      }
+      return formattedNumber
+    }
+
    return (
     <div className="inner-container flex-row" style={{width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'space-between', backgroundColor: '#66666633'}}>
         <div style={{width: '100%'}}>
@@ -226,15 +237,21 @@ export default function UserPage({username}) {
                     </div>
                     <div className="flex-row" style={{width: '100%', justifyContent: 'space-evenly'}}>
                       <div className="" style={{flex: 1}}>
-                        <div className="flex-row" style={{padding: '0 0 0 5px', fontSize: '12px', color: '#cdd', gap: '0.25rem'}}>
-                          <div style={{fontWeight: '700'}}>{user.following_count}</div>
+                        <div className="flex-row" style={{padding: '0 0 0 5px', fontSize: '12px', color: '#cdd', gap: '0.25rem', alignItems: 'center', cursor: 'default'}}>
+                          <div style={{fontWeight: '700', fontSize: '13px'}} title={user.following_count}>{formatNum(user.following_count)}</div>
                           <div style={{fontWeight: '400'}}>following</div>
                         </div>
                       </div>
-                      <div className="flex-row" style={{flex: 2}}>
-                        <div className="flex-row" style={{padding: '0 0 0 5px', fontSize: '12px', color: '#cdd', gap: '0.25rem'}}>
-                          <div style={{fontWeight: '700'}}>{user.follower_count}</div>
+                      <div className="flex-row" style={{flex: 1}}>
+                        <div className="flex-row" style={{padding: '0 0 0 5px', fontSize: '12px', color: '#cdd', gap: '0.25rem', alignItems: 'center', cursor: 'default'}}>
+                          <div style={{fontWeight: '700', fontSize: '13px'}} title={user.follower_count}>{formatNum(user.follower_count)}</div>
                           <div style={{fontWeight: '400'}}>followed</div>
+                        </div>
+                      </div>
+                      <div className="flex-row" style={{flex: 1}}>
+                        <div className="flex-row" style={{padding: '0 0 0 5px', fontSize: '12px', color: '#cdd', gap: '0.25rem', alignItems: 'center'}}>
+                          <div className='soon-btn'>SOON</div>
+                          <div style={{fontWeight: '400'}}>impact</div>
                         </div>
                       </div>
                     </div>
