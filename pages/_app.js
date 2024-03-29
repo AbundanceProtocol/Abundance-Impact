@@ -37,7 +37,8 @@ export default function App({ Component, pageProps }) {
   const [navMenu, setNavMenu] = useState('Home')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [menuHover, setMenuHover] = useState( {in: Date.now(), out: Date.now() } )
-  const [showNotification, setShowNotification] = useState(false)
+  const [showLogin, setShowLogin] = useState(false)
+  const [showLogout, setShowLogout] = useState(false)
 
   const Col = styled.div`
     display: grid;
@@ -84,7 +85,7 @@ export default function App({ Component, pageProps }) {
     // console.log(data)
     // console.log(store.isAuth)
     setIsSignedIn(true)
-    setShowNotification(false)
+    setShowLogin(false)
   };
 
   const handleLogOut = () => {
@@ -102,6 +103,7 @@ export default function App({ Component, pageProps }) {
     store.setUserEthVerAddresses([])
     store.setUserSolVerAddresses([])
     setIsSignedIn(false)
+    setShowLogout(false)
   };
 
   useEffect(() => {
@@ -304,8 +306,12 @@ export default function App({ Component, pageProps }) {
     )
   }
 
-  const closeNotification = () => {
-    setShowNotification(false)
+  const closeLogin = () => {
+    setShowLogin(false)
+  }
+
+  const closeLogout = () => {
+    setShowLogout(false)
   }
 
   const testButton = async () => {
@@ -325,21 +331,41 @@ export default function App({ Component, pageProps }) {
 
   }
 
-
   const LoginPopup = async () => {
-    setShowNotification(true)
+    setShowLogin(true)
   }
 
-  const LogNotification = () => {
+  const LogoutPopup = async () => {
+    setShowLogout(true)
+  }
+
+  const LoginNotification = () => {
     return (
       <>
-        <div className="overlay" onClick={closeNotification}></div>
+        <div className="overlay" onClick={closeLogin}></div>
         <div id="notificationContainer" style={{borderRadius: '16px', backgroundColor: '#cdd'}}>
           <div className='flex-col' id="notificationContent" style={{alignItems: 'center', justifyContent: 'center'}}>
             <div style={{fontSize: '20px', maxWidth: '280px', fontWeight: '500'}}>You&apos;ll need to connect to Farcaster for that</div>
             <div className='flex-row' style={{width: '100%', alignItems: 'center', justifyContent: 'center', marginTop: '16px', gap: '10px'}}>
               <NeynarSigninButton onSignInSuccess={handleSignIn} />
-              <div className='cncl-btn' onClick={closeNotification}>Cancel</div>
+              <div className='cncl-btn' onClick={closeLogin}>Cancel</div>
+            </div>
+          </div>
+        </div>
+      </>
+    )
+  }
+
+  const LogoutNotification = () => {
+    return (
+      <>
+        <div className="overlay" onClick={closeLogout}></div>
+        <div id="notificationContainer" style={{borderRadius: '16px', backgroundColor: '#cdd'}}>
+          <div className='flex-col' id="notificationContent" style={{alignItems: 'center', justifyContent: 'center'}}>
+            <div style={{fontSize: '20px', maxWidth: '280px', fontWeight: '500'}}>Are you sure you want to logout of the Impact App?</div>
+            <div className='flex-row' style={{width: '100%', alignItems: 'center', justifyContent: 'center', marginTop: '16px', gap: '10px'}}>
+              <div className='out-btn' onClick={handleLogOut}>Log out</div>
+              <div className='cncl-btn' onClick={closeLogout}>Cancel</div>
             </div>
           </div>
         </div>
@@ -574,8 +600,8 @@ export default function App({ Component, pageProps }) {
                       <TopNav buttonName={btn} key={index} /> ))} */}
               </TopNavWrapper>
               {/* //// test buttons //// */}
-               {/* <div id="showNotificationBtn" className='srch-select-btn' onClick={testButton}>Test Button</div>  */}
-              {/* {(isSignedIn || showNotification) ? (<LogOut />) : (<NeynarSigninButton onSignInSuccess={handleSignIn} />)} */}
+               {/* <div id="showLoginBtn" className='srch-select-btn' onClick={testButton}>Test Button</div>  */}
+              {/* {(isSignedIn || showLogin) ? (<LogOut />) : (<NeynarSigninButton onSignInSuccess={handleSignIn} />)} */}
               {/* {isSignedIn ? (<LogOut />) : (<LogOut />)} */}
               {/* <ConnectButton 
                 account={account}
@@ -595,7 +621,7 @@ export default function App({ Component, pageProps }) {
         </div>
         <div>
           <div className="container cast-area" style={isMobile ? {} : {width: isMobile? '100%' : '620px'}}>
-            <AccountContext.Provider value={{...store.account, ref1, LoginPopup}}>
+            <AccountContext.Provider value={{...store.account, ref1, LoginPopup, LogoutPopup}}>
               <Component {...pageProps} connect={connect} />
             </AccountContext.Provider>
           </div>
@@ -617,7 +643,10 @@ export default function App({ Component, pageProps }) {
         <div ref={ref1} className='flex-row' style={{position: 'fixed', bottom: 0, backgroundColor: '#000000ff', height: '0px', width: `100%`, borderRadius: '0px', padding: '0', border: '0px solid #678', boxSizing: 'border-box'}}></div>
       )}
       <div>
-        {showNotification && (<LogNotification />)}
+        {showLogin && (<LoginNotification />)}
+      </div>
+      <div>
+        {showLogout && (<LogoutNotification />)}
       </div>
     </div>
   )

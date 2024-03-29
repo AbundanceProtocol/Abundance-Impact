@@ -224,6 +224,27 @@ html, body {
     border: 2px solid #8aa;
 }
 
+.out-btn {
+    background-color: #990000 !important;
+    font-weight: 600;
+    color: #eee;
+    align-items: center;
+    justify-content: center;
+    height: 38px !important;
+    width: 130px !important;
+    padding: 7px;
+    min-width: 80px !important;
+    border: 2px solid #770000;
+    border-radius: 12px;
+    cursor: pointer;
+}
+
+.out-btn:hover {
+    background-color: #660000 !important;
+    color: #ccc;
+    border: 2px solid #440000;
+}
+
 .locked-btn {
     background-color: #ccc;
     font-weight: 600;
