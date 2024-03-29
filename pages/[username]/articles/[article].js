@@ -281,16 +281,16 @@ export default function ArticlePage({articleData, username, articleHash, totalPa
           <meta name="description" content={`Building the global superalignment layer`} />
           <meta name="viewport" content="width=device-width"/>
           <meta property="og:title" content="Longcast" />
-          <meta property='og:image' content={`${baseURL}/images/LongcastFrame.jpg`} />
+          <meta property='og:image' content={`${baseURL}/api/frames/image?id=${articleHash}&page=0`} />
           <meta property="fc:frame" content="vNext" />
-          <meta property="fc:frame:image" content={`${baseURL}/images/LongcastFrame.jpg`} />
+          <meta property="fc:frame:image" content={`${baseURL}/api/frames/image?id=${articleHash}&page=0`} />
           
-          <meta property="fc:frame:button:1" content={`@${username} Longcast`} />
+          <meta property="fc:frame:button:1" content='Longcast' />
           <meta property="fc:frame:button:1:action" content="link" />
           <meta property="fc:frame:button:1:target" content={`${baseURL}/${username}/articles/${articleHash}`} />
-          <meta property="fc:frame:button:2" content={`Read Longcast`} />
+          <meta property="fc:frame:button:2" content={`Next Page [2/${totalPages}]`} />
           <meta property="fc:frame:button:2:action" content="post" />
-          <meta property="fc:frame:button:2:target" content={`${baseURL}/api/frames/page?id=${articleHash}&page=0&user=${username}&total=${totalPages}`} />
+          <meta property="fc:frame:button:2:target" content={`${baseURL}/api/frames/page?id=${articleHash}&page=1&user=${username}&total=${totalPages}`} />
         </Head>
       )}
 
