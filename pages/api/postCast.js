@@ -21,10 +21,11 @@ export default async function handler(req, res) {
           body.channel_id = channel;
         }
         if (urls) {
-          for (let url in urls) 
-          body.embeds.push({url})
+          urls.forEach(url => {
+            body.embeds.push({ url });
+          });
         }
-  
+        
         const response = await fetch(url, {
           method: 'POST',
           headers: {
