@@ -315,9 +315,9 @@ export default function CastPage({username, castHash}) {
                     <div className="">
                       <div style={{wordWrap: 'break-word', maxWidth: `100%`, width: textMax, whiteSpace: 'pre-line'}}>{cast.text}</div>
                       {(cast.embeds && cast.embeds.length > 0) && (cast.embeds.map((embed, index) => (
-                      <div className='flex-col' style={{alignItems: 'center'}}>
+                      <div key={index} className='flex-col' style={{alignItems: 'center'}}>
                         {(embed.type && embed.type == 'img') && (
-                          <div className="" key={index}>
+                          <div className="">
                             <div className="flex-col" style={{position: 'relative'}}>
                               <img 
                                 loading="lazy" 

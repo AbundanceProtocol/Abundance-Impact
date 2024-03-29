@@ -68,10 +68,9 @@ export default function Home() {
   }
 
   async function postCast(castData) {
-    if (castData.fid && castData.signer && castData.text) {
+    if (castData.signer && castData.text) {
       try {
         const response = await axios.post('/api/postCast', {       
-          fid: castData.fid,
           signer: castData.signer,
           urls: castData.urls,
           // channel: castData.channel,
@@ -321,7 +320,7 @@ export default function Home() {
       return
     }
   }
-  
+
   const [textboxRows, setTextboxRows] = useState(1)
   const expandBox = () => {
     if (textboxRows == 1) {
