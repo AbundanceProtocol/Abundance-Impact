@@ -4,8 +4,7 @@ export default async function handler(req, res) {
   if (req.method === 'POST') {
     try {
       const { fid, signer, urls, channel, parentUrl, castText } = req.body;
-      // console.log( fid, signer, urls, channel, parentUrl, castText )
-
+      console.log( fid, signer, urls, channel, parentUrl, castText )
       const base = "https://api.neynar.com/";
       const url = `${base}v2/farcaster/cast`;
 
@@ -37,7 +36,7 @@ export default async function handler(req, res) {
       const cast = await response.json();
       console.log(cast)
 
-      res.status(200).json({ success: true, message: `Cast created successfully`, hash: response.cast.hash});
+      res.status(200).json({ success: true, message: `Cast created successfully`, hash: cast.hash});
     } catch (error) {
       console.error('Error handling GET request:', error);
       res.status(500).json({ error: 'Internal Server Error' });

@@ -69,31 +69,36 @@ export default function Home() {
 
   async function postCast(castData) {
     console.log(castData)
-    try {
-      const response = await axios.post('/api/postCast', {       
-        fid: castData.fid,
-        signer: castData.signer,
-        urls: castData.urls,
-        // channel: castData.channel,
-        channel: 'impact', // temp for testing
-        parentUrl: castData.parentUrl, // cast hash or parent URL
-        castText: castData.text,
-      })
-      if (response.status !== 200) {
-        console.log(response)
+    if (castData.fid && castData.signer && castData.text) {
+      try {
+        const response = await axios.post('/api/postCast', {       
+          fid: castData.fid,
+          signer: castData.signer,
+          urls: castData.urls,
+          // channel: castData.channel,
+          channel: 'impact', // temp for testing
+          parentUrl: castData.parentUrl, // cast hash or parent URL
+          castText: castData.text,
+        })
+        if (response.status !== 200) {
+          console.log(response)
+          console.log('failed')
 
-        // need to revert recasts counter
-      } else {
-        clearCastText()
-        shrinkBox()
-        setSuccess(true);
-        setTimeout(() => {
-          setSuccess(false);
-        }, 2000);
+          // need to revert recasts counter
+        } else {
+          console.log('worked')
+
+          clearCastText()
+          shrinkBox()
+          setSuccess(true);
+          setTimeout(() => {
+            setSuccess(false);
+          }, 2000);
+        }
+        console.log(response.status)
+      } catch (error) {
+        console.error('Error submitting data:', error)
       }
-      console.log(response.status)
-    } catch (error) {
-      console.error('Error submitting data:', error)
     }
   }
 
@@ -289,6 +294,7 @@ export default function Home() {
   async function routeCast() {
     console.log(castData.text.length)
     if (store.isAuth && store.signer_uuid && castData.text.length > 0 && castData.text.length <= 320) {
+      console.log(store.isAuth, store.signer_uuid, castData.text)
       try {
         let updatedCastData = { ...castData }
         updatedCastData.fid = store.fid
@@ -305,15 +311,16 @@ export default function Home() {
         // const jsonData = JSON.stringify(userData, null, 2)
         const username = store.usernameFC
         const ipfsData = await axios.post('/api/postToIPFS', { username: username, text: castData.text, fid: store.fid })
+
         const longcastHash = ipfsData.data.ipfsHash
         let updatedCastData = { ...castData }
         updatedCastData.fid = store.fid
         updatedCastData.signer = store.signer_uuid
         const longcastFrame = `${baseURL}/${username}/articles/${longcastHash}`
         updatedCastData.text = longcastFrame
-        // setCastData(updatedCastData)
+        setCastData(updatedCastData)
         console.log(longcastFrame)
-        postCast(castData)
+        await postCast(updatedCastData)
         console.log(longcastHash)
       } catch (error) {
         console.error('Error submitting data:', error)
