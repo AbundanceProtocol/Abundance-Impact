@@ -29,6 +29,7 @@ export default function CastPage({username, castHash}) {
   const [user, setUser] = useState(initialUser)
   const store = useStore()
   const [textMax, setTextMax] = useState('522px')
+  const [feedMax, setFeedMax ] = useState('620px')
   const [longcastLoaded, setLongcastLoaded] = useState(false)
   let noCast = {
     author: user,
@@ -390,7 +391,7 @@ export default function CastPage({username, castHash}) {
   return (
     <div className='flex-col' style={{width: 'auto', position: 'relative'}} ref={ref}>
       <Head>
-        <title>@{username} Cast | Impact App </title>
+        <title>@{username} cast | Impact App </title>
         <meta name="description" content={`Building the global superalignment layer`} />
       </Head>
       <div className="" style={{padding: '58px 0 0 0'}}>

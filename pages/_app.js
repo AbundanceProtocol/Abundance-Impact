@@ -20,20 +20,6 @@ import NeynarSigninButton from '../components/Signin';
 import { IoIosWarning } from "react-icons/io"
 import { FaLock } from "react-icons/fa";
 import axios from 'axios';
-import Head from 'next/head';
-
-const generateMetadata = (url) => {
-  // Logic to generate metadata based on the URL
-  // Example:
-  // const title = fetchTitle(url);
-  // const description = fetchDescription(url);
-  // return { title, description };
-  return {
-    title: 'Default Title',
-    description: 'Default Description',
-  };
-};
-
 
 export default function App({ Component, pageProps }) {
   const store = useStore()
@@ -65,23 +51,6 @@ export default function App({ Component, pageProps }) {
       grid-gap: ${navWidth}px;
     }
   `;
-
-  useEffect(() => {
-    const handleRouteChange = (url) => {
-      const { title, description } = generateMetadata(url);
-      document.title = title;
-      document.querySelector('meta[name="description"]').setAttribute('content', description);
-      useStore.setState({ router })
-    }
-    router.events.on('routeChangeComplete', handleRouteChange);
-
-    return () => {
-      router.events.off('routeChangeComplete', handleRouteChange);
-    };
-  }, [router])
-
-  const { title, description } = generateMetadata(router.asPath);
-
 
   useEffect(() => {
     let menuLink = targetLink()
@@ -559,12 +528,6 @@ export default function App({ Component, pageProps }) {
 
   return (
     <div ref={ref} className='flex-col' style={{position: 'absolute', display: 'flex', minHeight: '100%', height: '100%', width: '100%', overflowX: 'hidden'}}>
-      <Head>
-        {/* Set default metadata */}
-        <title>{title}</title>
-        <meta name="description" content={description} />
-        {/* Add other default meta tags as needed */}
-      </Head>
       {isMobile ? (
         <React.Fragment key="top">
           <MobileAppbar className='top-layer' position="fixed" elevation={0} sx={{paddingRight: 0}} style={{backgroundColor: '#2D4254'}}>
