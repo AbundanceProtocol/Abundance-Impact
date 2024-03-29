@@ -20,12 +20,17 @@ export default async function handler(req, res) {
         if (channel) {
           body.channel_id = channel;
         }
+
+        if (!body.embeds) {
+          body.embeds = [];
+        }
+        
         if (urls) {
           urls.forEach(url => {
             body.embeds.push({ url });
           });
         }
-        
+
         const response = await fetch(url, {
           method: 'POST',
           headers: {
