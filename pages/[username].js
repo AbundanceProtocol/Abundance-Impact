@@ -58,9 +58,7 @@ export default function UserPage({username}) {
     if (!userFeed) {
       try {
         const response = await axios.get('/api/getUserCasts', {
-          params: {
-            fid,
-          }
+          params: { fid }
         })
         const feed = response.data.feed
         console.log(response.data.feed)
@@ -86,14 +84,10 @@ export default function UserPage({username}) {
           }
         })
         const users = response.data.users
-        console.log(users)
         const selectUser = users.find(user => user.username == name)
-        console.log(selectUser)
         if (selectUser) {
-          console.log('user set')
           setUser(selectUser)
         } else {
-          console.log('no user set')
           setUser(noUser)
         }
       } catch (error) {
