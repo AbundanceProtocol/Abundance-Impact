@@ -332,7 +332,7 @@ export default function UserPage({username}) {
     if (props.buttonName == 'Users' && !store.isAuth) {
       isSearchable = false
     }
-    if (props.buttonName == 'Casts' || props.buttonName == 'Channels' || props.buttonName == 'Media' || props.buttonName == 'Proposals') {
+    if (props.buttonName == 'Channels' || props.buttonName == 'Media' || props.buttonName == 'Proposals') {
       comingSoon = true
     }
 

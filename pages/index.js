@@ -27,7 +27,7 @@ export default function Home() {
   const [feedMax, setFeedMax ] = useState('620px')
   const [showPopup, setShowPopup] = useState({open: false, url: null})
   const router = useRouter()
-  const userButtons = ['Trending', 'Following', 'Projects', 'AI']
+  const userButtons = ['Home', 'Trending', 'Projects', 'AI']
   const [searchSelect, setSearchSelect ] = useState('Trending')
   const initialState = { fid: null, signer: null, urls: [], channel: null, parentUrl: null, text: '' }
 	const [castData, setCastData] = useState(initialState)
@@ -37,29 +37,24 @@ export default function Home() {
   const [success, setSuccess] = useState(false)
   const [textboxRows, setTextboxRows] = useState(1)
 
+  async function isImage(url) {
+    try {
+      const response = await fetch(url, { method: 'HEAD' });
+      const contentType = response.headers.get('Content-Type');
+      return contentType && contentType.startsWith('image/');
+    } catch (error) {
+      console.error('Error fetching URL:', error);
+      return false;
+    }
+  }
+
   async function getTrendingFeed() {
     try {
       const response = await axios.get('/api/getFeed')
       const feed = response.data.feed
       setUserFeed(feed)
-      const imageRegex = /\.(jpg|gif|png|jpeg)$/i;
-      for (let i = 0; i < feed.length; i++) {
-        if (!feed[i].frames) {
-          // console.log('frame', i, feed[i].frames.length)
-          if (feed[i].embeds) {
-            for (let j = 0; j < feed[i].embeds.length; j++) {
-              if (imageRegex.test(feed[i].embeds[j].url)) {
-                feed[i].embeds[j].type = 'img'
-              } else {
-                // const { data } = await mql(feed[i].embeds[j].url)
-                feed[i].embeds[j].type = 'url'
-              }
-            }
-          }
-        }
-      }
-      console.log(feed)
-      setUserFeed([...feed])
+      const updatedFeed = await setEmbeds(feed)
+      setUserFeed([...updatedFeed])
     } catch (error) {
       console.error('Error submitting data:', error)
     }
@@ -153,9 +148,30 @@ export default function Home() {
   function feedRouter() {
     if (searchSelect == 'Trending') {
       getTrendingFeed()
-    } else if (searchSelect == 'Following' && store.fid) {
+    } else if (searchSelect == 'Home' && store.fid) {
       getUserFeed(store.fid, false)
     }
+  }
+
+  async function setEmbeds(feed) {
+    if (feed) {
+      for (let i = 0; i < feed.length; i++) {
+        if (!feed[i].frames) {
+          if (feed[i].embeds) {
+            for (let j = 0; j < feed[i].embeds.length; j++) {
+              const url = feed[i].embeds[j].url
+              const isImg = await isImage(url)
+              if (isImg) {
+                feed[i].embeds[j].type = 'img'
+              } else {
+                feed[i].embeds[j].type = 'url'
+              }
+            }
+          }
+        }
+      }
+    }
+    return feed
   }
 
   async function getUserFeed(fid, recasts) {
@@ -166,8 +182,9 @@ export default function Home() {
           params: { fid, recasts }
         })
         const feed = response.data.feed
-        console.log(response.data.feed)
-        setUserFeed(feed)
+        await setUserFeed(feed)
+        const updatedFeed = await setEmbeds(feed)
+        setUserFeed([...updatedFeed])
       } catch (error) {
         console.error('Error submitting data:', error)
       }
@@ -198,7 +215,7 @@ export default function Home() {
     const btn = props.buttonName
     let isSearchable = true
     let comingSoon = false
-    if (props.buttonName == 'Following' && !store.isAuth) {
+    if (props.buttonName == 'Home' && !store.isAuth) {
       isSearchable = false
     }
     if (props.buttonName == 'Projects' || props.buttonName == 'AI') {
@@ -232,7 +249,7 @@ export default function Home() {
   async function routeCast() {
     console.log(castData.text.length)
     if (store.isAuth && store.signer_uuid && castData.text.length > 0 && castData.text.length <= 320) {
-      console.log(store.isAuth, store.signer_uuid, castData.text)
+      console.log(store.isAuth, castData.text)
       try {
         let updatedCastData = { ...castData }
         updatedCastData.fid = store.fid
@@ -284,7 +301,7 @@ export default function Home() {
   return (
   <div name='feed' style={{width: 'auto', maxWidth: '620px'}} ref={ref}>
     <Head>
-      <title>Feed | Impact App </title>
+      <title>Impact App | Abundance Protocol</title>
       <meta name="description" content={`Building the global superalignment layer`} />
     </Head>
     <div style={{padding: '58px 0 0 0', width: feedMax}}>

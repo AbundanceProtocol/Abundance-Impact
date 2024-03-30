@@ -7,6 +7,7 @@ import { AiOutlineLoading3Quarters as Loading } from "react-icons/ai";
 import useMatchBreakpoints from '../../hooks/useMatchBreakpoints';
 import axios from 'axios';
 import Cast from '../../components/Cast'
+import { FaLock } from "react-icons/fa";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -176,10 +177,10 @@ export default function ProfilePage() {
     const btn = props.buttonName
     let isSearchable = true
     let comingSoon = false
-    if (props.buttonName == 'Users' && !store.isAuth) {
+    if (props.buttonName == 'Casts' && !store.isAuth) {
       isSearchable = false
     }
-    if (props.buttonName == 'Casts' || props.buttonName == 'Channels' || props.buttonName == 'Media' || props.buttonName == 'Proposals') {
+    if (props.buttonName == 'Channels' || props.buttonName == 'Media' || props.buttonName == 'Proposals') {
       comingSoon = true
     }
 

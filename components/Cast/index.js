@@ -130,7 +130,7 @@ export default function Cast({ cast, index, openImagePopup }) {
   }
 
   return (
-    <div key={index} className="inner-container" style={{width: '100%', display: 'flex', flexDirection: 'row'}}>
+    <div className="inner-container" style={{width: '100%', display: 'flex', flexDirection: 'row'}}>
       <div className="flex-row">
         <span className="" datastate="closed" style={{margin: '0 10px 0 0'}}>
           <a className="" title="" href={`/${cast.author.username}`} onClick={() => {goToUserProfile(event, cast.author)}}>

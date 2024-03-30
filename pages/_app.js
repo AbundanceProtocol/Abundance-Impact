@@ -104,6 +104,9 @@ export default function App({ Component, pageProps }) {
     store.setUserSolVerAddresses([])
     setIsSignedIn(false)
     setShowLogout(false)
+    if (router.route == '/~/profile') {
+      router.push(`/`)
+    }
   };
 
   useEffect(() => {
