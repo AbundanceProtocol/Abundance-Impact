@@ -54,9 +54,9 @@ const useStore = create(persist((set, get) => {
         setUserSolVerAddresses: (userSolVerAddresses) => set({ userSolVerAddresses }),
         setUserProfile: (userProfile) => set({ userProfile }),
 
-        setUserData: (userData) => set({ userData }),
-        setCastData: (castData) => set({ castData }),
-        setProposalData: (proposalData) => set({ proposalData }),
+        setUserData: (userData) => set({ userData: userData }),
+        setCastData: (castData) => set({ castData: castData }),
+        setProposalData: (proposalData) => set({ proposalData: proposalData }),
 
         // Getters
         getFid: () => get().fid,

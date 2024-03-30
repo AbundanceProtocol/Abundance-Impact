@@ -7,6 +7,8 @@ import { ActiveUser } from './assets';
 import { AiOutlineLoading3Quarters as Loading } from "react-icons/ai";
 import useMatchBreakpoints from '../hooks/useMatchBreakpoints'; 
 import axios from 'axios';
+import { FaSearch, FaLock, FaRegStar } from "react-icons/fa"
+import Cast from '../components/Cast'
 
 export default function UserPage({username}) {
   const router = useRouter();
@@ -30,14 +32,45 @@ export default function UserPage({username}) {
   const userButtons = ['Casts', 'Channels', 'Media', 'Proposals']
   const [searchSelect, setSearchSelect ] = useState('Casts')
   const { isMobile } = useMatchBreakpoints();
+  const [userFeed, setUserFeed] = useState(null)
 
   useEffect(() => {
-    if (store.userData && store.userData.username == username) {
-      setUser(store.userData)
-    } else {
-      getUserProfile(username)
+    const handleResize = () => {
+      setScreenWidth(window.innerWidth)
     }
+    handleResize()
+    window.addEventListener('resize', handleResize);
+    
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (user && user.fid !== '-') {
+      getUserCasts(user.fid)
+    }
+  }, [user])
+
+  async function getUserCasts(fid) {
+    console.log(fid, userFeed)
+    if (!userFeed) {
+      try {
+        const response = await axios.get('/api/getUserCasts', {
+          params: {
+            fid,
+          }
+        })
+        const feed = response.data.feed
+        console.log(response.data.feed)
+        setUserFeed(feed)
+      } catch (error) {
+        console.error('Error submitting data:', error)
+      }
+    }
+  }
+
 
   async function getUserProfile(name) {
     let fid = 3
@@ -74,6 +107,18 @@ export default function UserPage({username}) {
   }
 
   useEffect(() => {
+    console.log(store.userData)
+    if (store.userData && store.userData.username == username) {
+      setUserFeed(null)
+      setUser(store.userData)
+    } else {
+      setUserFeed(null)
+      getUserProfile(username)
+    }
+  }, [router])
+
+
+  useEffect(() => {
     if (screenWidth) {
       if (screenWidth > 680) {
         setTextMax(`430px`)
@@ -93,19 +138,6 @@ export default function UserPage({username}) {
       setFeedMax(`100%`)
     }
   }, [screenWidth])
-
-  useEffect(() => {
-    const handleResize = () => {
-      setScreenWidth(window.innerWidth)
-    }
-    handleResize()
-    window.addEventListener('resize', handleResize);
-    
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
 
   const UserData = () => {
     const [loading, setLoading] = useState(false);
@@ -267,14 +299,14 @@ export default function UserPage({username}) {
               <div className="flex-row">
                 {(user.following == 1) ? (
                   <div className='flex-row' style={{position: 'relative'}}>
-                    <div className='unfollow-select-drk' onClick={unfollowUser} name='unfollow' style={{color: loading ? 'transparent' : '#dee'}}>Unfollow</div>
+                    <div className='unfollow-select-drk' onClick={unfollowUser} name='unfollow' style={{color: loading ? 'transparent' : '#dee', textAlign: 'center'}}>Unfollow</div>
                     <div className='top-layer rotation' style={{position: 'absolute', top: '7px', left: '34px', visibility: loading ? 'visible': 'hidden' }}>
                       <Loading size={24} color='#dee' />
                     </div>
                   </div>
                 ) : (
                   <div className='flex-row' style={{position: 'relative'}}>
-                    <div className='follow-select' onClick={followUser} name='follow' style={{color: loading ? 'transparent' : '#fff'}}>Follow</div>
+                    <div className='follow-select' onClick={followUser} name='follow' style={{color: loading ? 'transparent' : '#fff', textAlign: 'center'}}>Follow</div>
                     <div className='top-layer rotation' style={{position: 'absolute', top: '7px', left: '34px', visibility: loading ? 'visible': 'hidden' }}>
                       <Loading size={24} color='#fff' />
                     </div>
@@ -283,7 +315,7 @@ export default function UserPage({username}) {
               </div>
               ) : (
               <div className="flex-row" style={{position: 'relative'}}>
-                <div className='follow-locked' onClick={account.LoginPopup}>Follow</div>
+                <div className='follow-locked' onClick={account.LoginPopup} style={{textAlign: 'center'}}>Follow</div>
                 <div className='top-layer' style={{position: 'absolute', top: 0, right: 0, transform: 'translate(-50%, -50%)' }}>
                   <FaLock size={8} color='#666' />
                 </div>
@@ -327,7 +359,6 @@ export default function UserPage({username}) {
   }
 
 
-
   return (
     <div className='flex-col' style={{width: 'auto', position: 'relative'}} ref={ref}>
       <Head>
@@ -341,6 +372,9 @@ export default function UserPage({username}) {
       <div className="top-layer flex-row" style={{padding: '10px 0 10px 0', alignItems: 'center', justifyContent: 'space-between', margin: '0', borderBottom: '1px solid #888'}}>
         { userButtons.map((btn, index) => (
           <SearchOptionButton buttonName={btn} key={index} /> ))}
+      </div>
+      <div style={{margin: '0 0 30px 0'}}>
+        {userFeed && userFeed.map((cast, index) => (<Cast cast={cast} key={index} index={index} />))}
       </div>
     </div>
   );

@@ -240,7 +240,7 @@ export default function Search() {
                 <div className='unfollow-select' 
                   onClick={() => unfollowUser(user.fid, index)} 
                   name='unfollow' 
-                  style={{color: loading[index] ? 'transparent' : '#27a'}}>Unfollow</div>
+                  style={{color: loading[index] ? 'transparent' : '#27a', textAlign: 'center'}}>Unfollow</div>
                 <div className='top-layer rotation' 
                   style={{
                     position: 'absolute', 
@@ -255,7 +255,7 @@ export default function Search() {
               <div className='follow-select' 
                 onClick={() => followUser(user.fid, index)} 
                 name='follow' 
-                style={{color: loading[index] ? 'transparent' : '#fff'}}>Follow</div>
+                style={{color: loading[index] ? 'transparent' : '#fff', textAlign: 'center'}}>Follow</div>
               <div className='top-layer rotation' 
                 style={{position: 'absolute', 
                   top: '7px', 
@@ -268,7 +268,7 @@ export default function Search() {
           </div>
         ) : (
           <div className="flex-row" style={{position: 'relative'}}>
-            <div className='follow-locked' onClick={account.LoginPopup}>Follow</div>
+            <div className='follow-locked' onClick={account.LoginPopup} style={{textAlign: 'center'}}>Follow</div>
             <div className='top-layer' style={{position: 'absolute', top: 0, right: 0, transform: 'translate(-50%, -50%)' }}>
               <FaLock size={8} color='#666' />
             </div>
@@ -421,10 +421,10 @@ export default function Search() {
         </div>
         <div className="flex-col">
         {store.isAuth ? (
-          <div className='srch-select' name='follow' style={{display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '8px'}}>Follow</div>
+          <div className='srch-select' name='follow' style={{display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '8px', textAlign: 'center'}}>Follow</div>
         ) : (
           <div className='flex-row' style={{position: 'relative', marginBottom: '8px'}}>
-            <div className='locked-btn' onClick={account.LoginPopup} style={{width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>Follow</div>
+            <div className='locked-btn' onClick={account.LoginPopup} style={{width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', textAlign: 'center'}}>Follow</div>
             <div className='top-layer' style={{position: 'absolute', top: 0, right: 0, transform: 'translate(-50%, -50%)' }}>
               <FaLock size={8} color='#999' />
             </div>

@@ -6,6 +6,7 @@ import { ActiveUser } from '../assets';
 import { AiOutlineLoading3Quarters as Loading } from "react-icons/ai";
 import useMatchBreakpoints from '../../hooks/useMatchBreakpoints';
 import axios from 'axios';
+import Cast from '../../components/Cast'
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -19,6 +20,7 @@ export default function ProfilePage() {
   const userButtons = ['Casts', 'Channels', 'Media', 'Proposals']
   const [searchSelect, setSearchSelect ] = useState('Casts')
   const { isMobile } = useMatchBreakpoints();
+  const [userFeed, setUserFeed] = useState(null)
 
   useEffect(() => {
     if (store.userProfile) {
@@ -26,10 +28,29 @@ export default function ProfilePage() {
     }
   }, []);
 
-  // useEffect(() => {
-  //   if (user && username == user.username)
-  //   console.log(user)
-  // }, [user]);
+  useEffect(() => {
+    if (user && user.fid !== '-') {
+      getUserFeed(user.fid, false)
+    }
+  }, [user])
+
+  async function getUserFeed(fid, recasts) {
+    if (!userFeed) {
+      try {
+        const response = await axios.get('/api/getUserCasts', {
+          params: {
+            fid,
+            recasts
+          }
+        })
+        const feed = response.data.feed
+        console.log(response.data.feed)
+        setUserFeed(feed)
+      } catch (error) {
+        console.error('Error submitting data:', error)
+      }
+    }
+  }
 
   useEffect(() => {
     if (screenWidth) {
@@ -79,11 +100,6 @@ export default function ProfilePage() {
       return formattedNumber
     }
 
-    // const LogOut = () => {
-    //   return (
-    //     <div className='logout-btn' onClick={LogOut.handleLogOut}>Log out</div>
-    //   )
-    // }
 
    return (
     <div className="inner-container flex-row" style={{width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'space-between', backgroundColor: '#66666633'}}>
@@ -193,6 +209,9 @@ export default function ProfilePage() {
       <div className="top-layer flex-row" style={{padding: '10px 0 10px 0', alignItems: 'center', justifyContent: 'space-between', margin: '0', borderBottom: '1px solid #888'}}>
         { userButtons.map((btn, index) => (
           <SearchOptionButton buttonName={btn} key={index} /> ))}
+      </div>
+      <div style={{margin: '0 0 30px 0'}}>
+        {userFeed && userFeed.map((cast, index) => (<Cast cast={cast} key={index} index={index} />))}
       </div>
     </div>
   );
