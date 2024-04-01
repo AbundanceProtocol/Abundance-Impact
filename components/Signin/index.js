@@ -7,6 +7,7 @@ const NeynarSigninButton = ({ onSignInSuccess }) => {
     async (data) => {
       try {
         await onSignInSuccess(data);
+        store.setUserProfile(data)
         store.setFid(data.fid)
         store.setIsAuth(data.is_authenticated)
         store.setSignerUuid(data.signer_uuid)

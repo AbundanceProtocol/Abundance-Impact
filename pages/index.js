@@ -1,89 +1,80 @@
 import Head from 'next/head';
-import { useContext, useState, useRef, useEffect } from 'react'
-import { ethers } from 'ethers'
-import { Swords, CoinBag, CoinStack, Waste, AbundanceStar, FeedbackLoop, Like, Recast, Message, Kebab, Warp, ActiveUser } from './assets'
+import React, { useContext, useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { AccountContext } from '../context'
 import useMatchBreakpoints from '../hooks/useMatchBreakpoints'
-// import { NeynarAPIClient } from "@neynar/nodejs-sdk";
 import useStore from '../utils/store'
 import axios from 'axios';
-import { FaRegStar } from "react-icons/fa"
+import { FaSearch, FaLock, FaRegStar } from "react-icons/fa"
+import { AiOutlineLoading3Quarters as Loading } from "react-icons/ai";
+import mql from '@microlink/mql';
+import { useRouter } from 'next/router';
+import Cast from '../components/Cast'
+import { setEmbeds } from '../utils/utils';
 
 export default function Home() {
+  const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
   const ref = useRef(null)
-  const [ userFeed, setUserFeed] = useState([])
+  const likeRefs = useRef([])
+  const recastRefs = useRef([])
+  const [userFeed, setUserFeed] = useState([])
   const { isMobile } = useMatchBreakpoints();
-  const [ feedWidth, setFeedWidth ] = useState()
+  const [feedWidth, setFeedWidth] = useState()
   const account = useContext(AccountContext)
-  const [ screenWidth, setScreenWidth ] = useState(undefined)
-  // const client = new NeynarAPIClient(apiKey);
+  const [screenWidth, setScreenWidth] = useState(undefined)
+  const [screenHeight, setScreenHeight] = useState(undefined)
   const store = useStore()
   const [textMax, setTextMax] = useState('522px')
   const [feedMax, setFeedMax ] = useState('620px')
+  const [showPopup, setShowPopup] = useState({open: false, url: null})
+  const router = useRouter()
+  const userButtons = ['Home', 'Trending', 'Projects', 'AI']
+  const [searchSelect, setSearchSelect ] = useState('Trending')
+  const initialState = { fid: null, signer: null, urls: [], channel: null, parentUrl: null, text: '' }
+	const [castData, setCastData] = useState(initialState)
+  const [loading, setLoading] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
+  const [isLogged, setIsLogged] = useState(false)
+  const [success, setSuccess] = useState(false)
+  const [textboxRows, setTextboxRows] = useState(1)
 
-  async function getFeed() {
+  async function getTrendingFeed() {
     try {
       const response = await axios.get('/api/getFeed')
       const feed = response.data.feed
-      console.log(feed)
       setUserFeed(feed)
+      const updatedFeed = await setEmbeds(feed)
+      setUserFeed([...updatedFeed])
     } catch (error) {
       console.error('Error submitting data:', error)
     }
   }
 
-
-  async function postRecast(hash) {
-    try {
-      const response = await axios.post('/api/postRecastReaction', {       
-        hash: hash,
-        signer: store.signer_uuid,
-      })
-      // const users = response.data.users
-      console.log(response)
-      // setSearchResults({kind: 'users', data: users})
-    } catch (error) {
-      console.error('Error submitting data:', error)
-    }
-  }
-
-  async function postLike(hash) {
-    try {
-      const response = await axios.post('/api/postLikeReaction', {       
-        hash: hash,
-        signer: store.signer_uuid,
-      })
-      console.log(response)
-      // console.log(users)
-      // setSearchResults({kind: 'users', data: users})
-    } catch (error) {
-      console.error('Error submitting data:', error)
-    }
-  }
-
-  const timePassed = (timestamp) => {
-    const currentTime = new Date();
-    const pastTime = new Date(timestamp);
-    const timeDifference = currentTime - pastTime;
-    
-    const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
-    if (days > 0) {
-      const stamp = `${days}d`
-      return stamp
-    } else {
-      const hours = Math.floor(timeDifference / (1000 * 60 * 60));
-      if (hours > 0) {
-        const stamp = `${hours}h`
-        return stamp
-      } else {
-        const minutes = Math.floor(timeDifference / (1000 * 60));
-        if (minutes > 0) {
-          const stamp = `${minutes}m`
-          return stamp
+  async function postCast(castData) {
+    if (castData.signer && castData.text) {
+      try {
+        const response = await axios.post('/api/postCast', {       
+          signer: castData.signer,
+          urls: castData.urls,
+          // channel: castData.channel,
+          channel: 'impact', // temp for testing
+          parentUrl: castData.parentUrl, // cast hash or parent URL
+          castText: castData.text,
+        })
+        if (response.status !== 200) {
+          console.log(response)
+          // need to revert recasts counter
         } else {
-          return `now`
+          clearCastText()
+          shrinkBox()
+          setSuccess(true);
+          setTimeout(() => {
+            setSuccess(false);
+          }, 2000);
         }
+        console.log(response.status)
+      } catch (error) {
+        console.error('Error submitting data:', error)
       }
     }
   }
@@ -109,10 +100,27 @@ export default function Home() {
     }
   }, [screenWidth])
 
+  function closeImagePopup() {
+    setShowPopup({open: false, url: null})
+  }
+
+  function openImagePopup(embed) {
+    let newPopup = { ...showPopup }
+    newPopup.open = true
+    newPopup.url = embed.url
+    setShowPopup(newPopup)
+  }
+
   useEffect(() => {
-    getFeed()
+    setIsLogged(store.isAuth)
+  }, [store.isAuth])
+
+  useEffect(() => {
+    setIsLogged(store.isAuth)
+
     const handleResize = () => {
       setScreenWidth(window.innerWidth)
+      setScreenHeight(window.innerHeight)
     }
     handleResize()
     window.addEventListener('resize', handleResize);
@@ -122,118 +130,208 @@ export default function Home() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-  
-  
+
+  useEffect(() => {
+    feedRouter()
+  }, [router, searchSelect])
+
+  function feedRouter() {
+    if (searchSelect == 'Trending') {
+      getTrendingFeed()
+    } else if (searchSelect == 'Home' && store.fid) {
+      getUserFeed(store.fid, false)
+    }
+  }
+
+  async function getUserFeed(fid, recasts) {
+    console.log(fid)
+    if (store.fid) {
+      try {
+        const response = await axios.get('/api/getUserFeed', {
+          params: { fid, recasts }
+        })
+        const feed = response.data.feed
+        await setUserFeed(feed)
+        const updatedFeed = await setEmbeds(feed)
+        setUserFeed([...updatedFeed])
+      } catch (error) {
+        console.error('Error submitting data:', error)
+      }
+    }
+  }
+
+  const ExpandImg = ({embed}) => {
+    return (
+      <>
+        <div className="overlay" onClick={closeImagePopup}></div>
+        <img loading="lazy" src={embed.showPopup.url} className='popupConainer' alt="Cast image embed" style={{aspectRatio: 'auto', maxWidth: screenWidth, maxHeight: screenHeight, cursor: 'pointer', position: 'fixed', borderRadius: '12px'}} onClick={closeImagePopup} />
+      </>
+    )
+  }
+
+  const goToUserProfile = async (event, author) => {
+    event.preventDefault()
+    const username = author.username
+    await store.setUserData(author)
+    router.push(`/${username}`)
+  }
+
+  const searchOption = (e) => {
+    setSearchSelect(e.target.getAttribute('name'))
+  }
+
+  const SearchOptionButton = (props) => {
+    const btn = props.buttonName
+    let isSearchable = true
+    let comingSoon = false
+    if (props.buttonName == 'Home' && !store.isAuth) {
+      isSearchable = false
+    }
+    if (props.buttonName == 'Projects' || props.buttonName == 'AI') {
+      comingSoon = true
+    }
+
+    return isSearchable ? (<>{comingSoon ? (<div className='flex-row' style={{position: 'relative'}}><div className={(searchSelect == btn) ? 'active-nav-link btn-hvr lock-btn-hvr' : 'nav-link btn-hvr lock-btn-hvr inactive-nav-link'} onClick={searchOption} name={btn} style={{fontWeight: '600', padding: '5px 14px', borderRadius: '14px', fontSize: isMobile ? '12px' : '15px'}}>{btn}</div>
+      <div className='top-layer' style={{position: 'absolute', top: 0, right: 0, transform: 'translate(20%, -50%)' }}>
+        <div className='soon-btn'>SOON</div>
+      </div>
+    </div>) : (
+      <div className={(searchSelect == btn) ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'} onClick={searchOption} name={btn} style={{fontWeight: '600', padding: '5px 14px', borderRadius: '14px', fontSize: isMobile ? '12px' : '15px'}}>{btn}</div>)}</>
+    ) : (
+      <div className='flex-row' style={{position: 'relative'}}>
+        <div className='lock-btn-hvr' name={btn} style={{color: '#bbb', fontWeight: '600', padding: '5px 14px', borderRadius: '14px', cursor: 'pointer', fontSize: isMobile ? '12px' : '15px'}} onClick={account.LoginPopup}>{btn}</div>
+        <div className='top-layer' style={{position: 'absolute', top: 0, right: 0, transform: 'translate(-20%, -50%)' }}>
+          <FaLock size={8} color='#999' />
+        </div>
+      </div>
+    )
+  }
+
+  function clearCastText() {
+    setCastData({ ...castData, text: '', parentUrl: null });
+  }
+
+	function onChange(e) {
+		setCastData( () => ({ ...castData, [e.target.name]: e.target.value }) )
+	}
+
+  async function routeCast() {
+    console.log(castData.text.length)
+    if (store.isAuth && store.signer_uuid && castData.text.length > 0 && castData.text.length <= 320) {
+      console.log(store.isAuth, castData.text)
+      try {
+        let updatedCastData = { ...castData }
+        updatedCastData.fid = store.fid
+        updatedCastData.signer = store.signer_uuid
+        setCastData(updatedCastData)
+        postCast(castData)
+      } catch (error) {
+        console.error('Error submitting data:', error)
+      }
+    }
+    else if (store.isAuth && store.signer_uuid && castData.text.length > 320) {
+      try {
+        const username = store.usernameFC
+        const ipfsData = await axios.post('/api/postToIPFS', { username: username, text: castData.text, fid: store.fid })
+        const longcastHash = ipfsData.data.ipfsHash
+        let updatedCastData = { ...castData }
+        updatedCastData.fid = store.fid
+        updatedCastData.signer = store.signer_uuid
+        const longcastFrame = `${baseURL}/${username}/articles/${longcastHash}`
+        updatedCastData.text = longcastFrame
+        updatedCastData.urls.push(longcastFrame)
+        setCastData(updatedCastData)
+        console.log(longcastFrame)
+        await postCast(updatedCastData)
+        console.log(longcastHash)
+      } catch (error) {
+        console.error('Error submitting data:', error)
+      }
+    } else {
+      return
+    }
+  }
+
+  const expandBox = () => {
+    if (textboxRows == 1) {
+      setIsFocused(true)
+      setTextboxRows(4)
+    }
+  }
+
+  const shrinkBox = () => {
+    console.log(castData.text)
+    if (textboxRows > 1 && castData.text.length < 40) {
+      setIsFocused(false)
+      setTextboxRows(1)
+    }
+  }
+
   return (
   <div name='feed' style={{width: 'auto', maxWidth: '620px'}} ref={ref}>
     <Head>
-      <title>Impact | Abundance Protocol | Feed </title>
+      <title>Impact App | Abundance Protocol</title>
       <meta name="description" content={`Building the global superalignment layer`} />
     </Head>
-    <div className="top-layer" style={{padding: '58px 0 0 0', width: feedMax}}>
+    <div style={{padding: '58px 0 0 0', width: feedMax}}>
     </div>
-    {
-      (typeof userFeed !== 'undefined' && userFeed.length > 0) && (userFeed.map((cast, index) => (<div key={index} className="inner-container" style={{width: '100%', display: 'flex', flexDirection: 'row'}}>
-        <div>
-          <div>
-            <div className="">
-              <div className="">
-                <div className="flex-row">
-                  <span className="" datastate="closed" style={{margin: '0 10px 0 0'}}>
-                    <a className="" title="" href={`https://warpcast.com/${cast.author.username}`}>
-                      <img loading="lazy" src={cast.author.pfp_url} className="" alt={`${cast.author.display_name} avatar`} style={{width: '48px', height: '48px', maxWidth: '48px', maxHeight: '48px', borderRadius: '24px', border: '1px solid #000'}} />
-                    </a>
-                  </span>
-                  <div className="flex-col" style={{width: 'auto', gap: '0.5rem', alignItems: 'flex-start'}}>
-                    <div className="flex-row" style={{width: '100%', justifyContent: 'space-between', height: '20px', alignItems: 'flex-start'}}>
-                      <div className="flex-row" style={{alignItems: 'center', gap: '0.25rem'}}>
-                        <span className="" data-state="closed">
-                          <a className="fc-lnk" title="" href={`https://warpcast.com/${cast.author.username}`}>
-                            <div className="flex-row" style={{alignItems: 'center'}}>
-                              <span className="name-font">{cast.author.display_name}</span>
-                              <div className="" style={{margin: '0 0 0 3px'}}>
-                                {(cast.author.active_status == 'active') && (<ActiveUser />)}
-                              </div>
-                            </div>
-                          </a>
-                        </span>
-                        <span className="user-font" datastate="closed">
-                          <a className="fc-lnk" title="" href={`https://warpcast.com/${cast.author.username}`}>@{cast.author.username}</a>
-                        </span>
-                        <div className="">·</div>
-                        <a className="fc-lnk" title="Navigate to cast" href={`https://warpcast.com/${cast.author.username}/${cast.hash.slice(0,10)}`}>
-                          <div className="user-font">{timePassed(cast.timestamp)}</div>
-                        </a>
-                      </div>
-                      <div className="">
-                        <Kebab />
-                      </div>
-                    </div>
-                    <div className="">
-                      <div style={{wordWrap: 'break-word', maxWidth: `100%`, width: textMax}}>{cast.text}</div>
-                      {(cast.embeds.length > 0 && 1 == 2) &&
-                      (<div className="">
-                        <div className="">
-                          <img loading="lazy" src={cast.embeds.url} className="" alt="Cast image embed" style={{aspectRatio: '0.75 / 1'}} />
-                        </div>
-                      </div>)}
-                    </div>
-                    {(typeof cast.channelName !== 'undefined') && (
-                      <div className="flex-row" style={{border: '1px solid #666', padding: '2px 4px', borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'flex-start'}}>
-                        <div className="flex-row" style={{alignItems: 'center', gap: '0.25rem'}}>
-                          <img loading="lazy" src={cast.channelImg} className="" alt="Channel image" style={{width: '17px', height: '17px', minWidth: '17px', minHeight: '17px', borderRadius: '3px'}} />
-                          <span className="channel-font">{cast.channelName}
-                          </span>
-                        </div>
-                      </div>
-                    )}
-                    <div className="flex-row" style={{width: '100%', justifyContent: 'space-evenly'}}>
-                      <div className="flex-row" style={{flex: 1, padding: '3px'}}>
-                        <div className="">
-                          <Message />
-                        </div>
-                        <span className="" style={{padding: '0 0 0 5px'}}>{cast.replies.count}</span>
-                      </div>
-                      <div className="flex-row" style={{flex: 1}}>
-                        <div className='flex-row recast-btn' onClick={() => postRecast(cast.hash)}>
-                          <div className="">
-                            <Recast />
-                          </div>
-                          <span className="" style={{padding: '0 0 0 5px'}}>{cast.reactions.recasts.length}</span>
-                        </div>
-                      </div>
-                      <div className="flex-row" style={{flex: 1}}>
-                        <div className='flex-row like-btn' onClick={() => postLike(cast.hash)}>
-                          <div className="">
-                            <Like />
-                          </div>
-                          <span className="" style={{padding: '0 0 0 5px'}}>{cast.reactions.likes.length}</span>
-                        </div>
-                      </div>
-                      <div className="flex-row" style={{flex: 1, padding: '3px'}}>
-                        <div className="" style={{padding: '2px 0 0 0px'}}>
-                          <FaRegStar />
-                        </div>
-                        <span style={{padding: '0 0 0 5px'}}>{cast.impact && (`${cast.impact}`)}</span>
-                      </div>
-                    </div>
+    <div className="top-layer">
+      <div className="flex-row" style={{padding: '0', marginBottom: '10px'}}>
+        {isLogged && (
+          <a className="" title="" href={`/${store.userProfile.username}`} onClick={() => {goToUserProfile(event, store.userProfile)}}>
+            <img loading="lazy" src={store.srcUrlFC} className="" alt={`${store.userDisplayNameFC} avatar`} style={{width: '40px', height: '40px', maxWidth: '48px', maxHeight: '48px', borderRadius: '24px', border: '1px solid #abc', margin: '6px 0 2px 0'}} />
+          </a>
+        )}
+        <textarea onChange={onChange} 
+          name='text' 
+          rows={textboxRows}
+          placeholder={`Start typing a new cast here...`} 
+          value={castData.text} 
+          className='textbox' 
+          onFocus={expandBox}
+          onBlur={shrinkBox}
+          style={{height: isFocused ? '120px' : '48px'}} />
+
+          {isLogged ? (
+            <div className="flex-row">
+              {(castData.text.length > 320) ? (
+                <div className={`flex-row unfollow-select-drk ${success ? 'flash-success' : ''}`} style={{position: 'relative', height: 'auto', width: '60px', marginRight: '0'}}>
+                  <div className=' cast-btn' onClick={routeCast} name='unfollow' style={{color: loading ? 'transparent' : '#dee', height: 'auto', textAlign: 'center'}}>Long cast</div>
+                  <div className='top-layer rotation' style={{position: 'absolute', top: '7px', left: '34px', visibility: loading ? 'visible': 'hidden' }}>
+                    <Loading size={24} color='#dee' />
                   </div>
                 </div>
+              ) : (
+                <div className={`flex-row follow-select ${success ? 'flash-success' : ''}`} style={{position: 'relative', height: 'auto', width: '60px', marginRight: '0'}}>
+                  <div className='cast-btn' onClick={routeCast} name='follow' style={{color: loading ? 'transparent' : '#fff', height: 'auto'}}>Cast</div>
+                  <div className='top-layer rotation' style={{position: 'absolute', top: '7px', left: '34px', visibility: loading ? 'visible': 'hidden'}}>
+                    <Loading size={24} color='#fff' />
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="flex-row follow-locked" style={{position: 'relative', height: 'auto', width: '60px', marginRight: '0'}}>
+              <div className='cast-btn' onClick={account.LoginPopup} style={{height: 'auto'}}>Cast</div>
+              <div className='top-layer' style={{position: 'absolute', top: 0, right: 0, transform: 'translate(40%, -60%)' }}>
+                <FaLock size={8} color='#eee' />
               </div>
             </div>
-          </div>
-        </div> 
-      </div>)))
-    }
+          )
+        }
+      </div>
+    </div>
+    <div className="top-layer flex-row" style={{padding: '10px 0 10px 0', alignItems: 'center', justifyContent: 'space-between', margin: '0', borderBottom: '0px solid #888'}}>
+      { userButtons.map((btn, index) => (
+        <SearchOptionButton buttonName={btn} key={index} /> ))}
+    </div>
+    <div style={{margin: '0 0 30px 0'}}>
+      {userFeed && userFeed.map((cast, index) => (<Cast cast={cast} key={index} index={index} openImagePopup={openImagePopup} />))}
+    </div>
+    <div>
+      {showPopup.open && (<ExpandImg embed={{showPopup}} />)}
+    </div>
   </div>
   )
 }
 
-
-export async function getStaticProps() {
-  return {
-    props: {
-      apiKey: process.env.NEYNAR_API_KEY,
-    },
-  };
-}

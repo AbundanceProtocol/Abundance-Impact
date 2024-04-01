@@ -3,7 +3,7 @@ export default async function handler(req, res) {
   if (req.method === 'GET') {
     try {
       const base = "https://api.neynar.com/";
-      const url = `${base}v2/farcaster/feed?feed_type=filter&filter_type=global_trending&with_recasts=true&with_replies=false&limit=3`;
+      const url = `${base}v2/farcaster/feed?feed_type=filter&filter_type=global_trending&with_recasts=true&with_replies=false&limit=4`;
       const response = await fetch(url, {
         headers: {
           accept: "application/json",

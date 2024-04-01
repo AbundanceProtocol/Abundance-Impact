@@ -1,29 +1,31 @@
 import { useContext, useState, useRef, useEffect } from 'react'
 // import { ethers } from 'ethers'
-import { ActiveUser } from './assets'
+import { ActiveUser } from '../assets'
 // import { Like, Recast, Message, Kebab, Warp } from './assets'
 // import Link from 'next/link'
-import { AccountContext } from '../context'
-import useMatchBreakpoints from '../hooks/useMatchBreakpoints'
+import { AccountContext } from '../../context'
+import useMatchBreakpoints from '../../hooks/useMatchBreakpoints'
 import { FaSearch, FaLock } from 'react-icons/fa';
-import useStore from '../utils/store'
+import useStore from '../../utils/store'
 import axios from 'axios';
 import { AiOutlineLoading3Quarters as Loading } from "react-icons/ai";
+import { useRouter } from 'next/router';
 
 export default function Search() {
   const ref = useRef(null)
   const initialState = { search: '' }
 	const [userSearch, setUserSearch] = useState(initialState)
-  const searchButtons = ['Ecosystems', 'Channels', 'Proposals', 'Users']
+  const searchButtons = ['Ecosystems', 'Channels', 'Proposals', 'Projects', 'Users']
   const [ searchSelect, setSearchSelect ] = useState('Channels')
   const [ searchResults, setSearchResults ] = useState({kind: 'ecosystems', data: []})
   const { isMobile } = useMatchBreakpoints();
   const account = useContext(AccountContext)
   const [ screenWidth, setScreenWidth ] = useState(undefined)
-
+  const router = useRouter()
   const [textMax, setTextMax] = useState('430px')
   const [feedMax, setFeedMax ] = useState('620px')
   const store = useStore()
+
 	function onChange(e) {
 		setUserSearch( () => ({ ...userSearch, [e.target.name]: e.target.value }) )
 	}
@@ -90,13 +92,16 @@ export default function Search() {
       try {
         const signer = store.signer_uuid
         const response = await axios.delete('/api/deleteFollowUser', {       
-          fid: fid,
-          signer: signer,
+          params: {
+            fid: fid,
+            signer: signer,
+          }
         })
         const followed = response
         if (followed.status === 200) {
           let updatedSearchResults = { ...searchResults }
           updatedSearchResults.data[index].following = 0
+          updatedSearchResults.data[index].follower_count--
           setSearchResults(updatedSearchResults)
         } else {
           let updatedSearchResults = { ...searchResults }
@@ -119,10 +124,12 @@ export default function Search() {
         if (followed.status === 200) {
           let updatedSearchResults = { ...searchResults }
           updatedSearchResults.data[index].following = 1
+          updatedSearchResults.data[index].follower_count++
           setSearchResults(updatedSearchResults)
         } else {
           let updatedSearchResults = { ...searchResults }
           updatedSearchResults.data[index].following = 0
+          updatedSearchResults.data[index].follower_count--
           setSearchResults(updatedSearchResults)
         }
       } catch (error) {
@@ -189,7 +196,7 @@ export default function Search() {
                     <div className="flex-row" style={{width: '100%', justifyContent: 'space-between', height: '20px', alignItems: 'flex-start'}}>
                       <div className="flex-row" style={{alignItems: 'center', gap: '0.25rem'}}>
                         <span className="" data-state="closed">
-                          <a className="fc-lnk" title="" href={`https://warpcast.com/${user.username}`}>
+                          <a className="fc-lnk" title="" style={{cursor: 'pointer'}} onClick={() => {goToUserProfile(user)}}>
                             <div className="flex-row" style={{alignItems: 'center'}}>
                               <span className="name-font">{user.display_name}</span>
                               <div className="" style={{margin: '0 0 0 3px'}}>
@@ -230,15 +237,30 @@ export default function Search() {
           <div className="flex-row">
             {(user.following == 1) ? (
               <div className='flex-row' style={{position: 'relative'}}>
-                <div className='unfollow-select' onClick={() => unfollowUser(user.fid, index)} name='unfollow' style={{color: loading[index] ? 'transparent' : '#27a'}}>Unfollow</div>
-                <div className='top-layer rotation' style={{position: 'absolute', top: '7px', left: '34px', visibility: loading[index] ? 'visible': 'hidden' }}>
+                <div className='unfollow-select' 
+                  onClick={() => unfollowUser(user.fid, index)} 
+                  name='unfollow' 
+                  style={{color: loading[index] ? 'transparent' : '#27a', textAlign: 'center'}}>Unfollow</div>
+                <div className='top-layer rotation' 
+                  style={{
+                    position: 'absolute', 
+                    top: '7px', 
+                    left: '34px', 
+                    visibility: loading[index] ? 'visible': 'hidden' }}>
                   <Loading size={24} color='#27a' />
                 </div>
               </div>
             ) : (
               <div className='flex-row' style={{position: 'relative'}}>
-              <div className='follow-select' onClick={() => followUser(user.fid, index)} name='follow' style={{color: loading[index] ? 'transparent' : '#fff'}}>Follow</div>
-              <div className='top-layer rotation' style={{position: 'absolute', top: '7px', left: '34px', visibility: loading[index] ? 'visible': 'hidden' }}>
+              <div className='follow-select' 
+                onClick={() => followUser(user.fid, index)} 
+                name='follow' 
+                style={{color: loading[index] ? 'transparent' : '#fff', textAlign: 'center'}}>Follow</div>
+              <div className='top-layer rotation' 
+                style={{position: 'absolute', 
+                  top: '7px', 
+                  left: '34px', 
+                  visibility: loading[index] ? 'visible': 'hidden' }}>
                 <Loading size={24} color='#fff' />
               </div>
             </div>
@@ -246,7 +268,7 @@ export default function Search() {
           </div>
         ) : (
           <div className="flex-row" style={{position: 'relative'}}>
-            <div className='follow-locked' onClick={account.LoginPopup}>Follow</div>
+            <div className='follow-locked' onClick={account.LoginPopup} style={{textAlign: 'center'}}>Follow</div>
             <div className='top-layer' style={{position: 'absolute', top: 0, right: 0, transform: 'translate(-50%, -50%)' }}>
               <FaLock size={8} color='#666' />
             </div>
@@ -283,6 +305,13 @@ export default function Search() {
     }
   }, [screenWidth])
 
+  const handleKeyDown = (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      routeSearch();
+    }
+  }
+
   useEffect(() => {
     const handleResize = () => {
       setScreenWidth(window.innerWidth)
@@ -296,6 +325,13 @@ export default function Search() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  const goToUserProfile = async (author) => {
+    const username = author.username
+    await store.setUserData(author)
+    console.log(author, store.userData)
+    router.push(`/${username}`)
+  }
+
   const SearchOptionButton = (props) => {
     const btn = props.buttonName
     let isSearchable = true
@@ -303,11 +339,11 @@ export default function Search() {
     if (props.buttonName == 'Users' && !store.isAuth) {
       isSearchable = false
     }
-    if (props.buttonName == 'Ecosystems' || props.buttonName == 'Proposals') {
+    if (props.buttonName == 'Ecosystems' || props.buttonName == 'Proposals' || props.buttonName == 'Projects') {
       comingSoon = true
     }
 
-    return isSearchable ? (<>{comingSoon ? (<div className='flex-row' style={{position: 'relative'}}><div className={(searchSelect == btn) ? 'active-nav-link btn-hvr lock-btn-hvr' : 'nav-link btn-hvr lock-btn-hvr'} onClick={searchOption} name={btn} style={{fontWeight: '600', padding: '5px 14px', borderRadius: '14px', fontSize: isMobile ? '12px' : '15px'}}>{btn}</div>
+    return isSearchable ? (<>{comingSoon ? (<div className='flex-row' style={{position: 'relative'}}><div className={(searchSelect == btn) ? 'active-nav-link btn-hvr lock-btn-hvr' : 'nav-link btn-hvr lock-btn-hvr inactive-nav-link'} onClick={searchOption} name={btn} style={{fontWeight: '600', padding: '5px 14px', borderRadius: '14px', fontSize: isMobile ? '12px' : '15px'}}>{btn}</div>
       <div className='top-layer' style={{position: 'absolute', top: 0, right: 0, transform: 'translate(20%, -50%)' }}>
         <div className='soon-btn'>SOON</div>
       </div>
@@ -332,12 +368,20 @@ export default function Search() {
         { searchButtons.map((btn, index) => (
           <SearchOptionButton buttonName={btn} key={index} /> ))}
       </div>
-      <div sytle={{}}>
+      <div>
         <div className="flex-row" style={{padding: '10px 0 0 0'}}>
-            <input onChange={onChange} name='search' placeholder={`Search ${searchSelect}`} value={userSearch.search} className='srch-btn' style={{width: '100%', backgroundColor: '#234'}} />
-            <div className='srch-select-btn' onClick={routeSearch} style={{padding: '12px 14px 9px 14px'}}><FaSearch /></div>
-          </div>
+          <input onChange={onChange} 
+            name='search' 
+            placeholder={`Search ${searchSelect}`} 
+            value={userSearch.search} 
+            className='srch-btn' 
+            style={{width: '100%', backgroundColor: '#234'}} 
+            onKeyDown={handleKeyDown} />
+          <div className='srch-select-btn' 
+            onClick={routeSearch} 
+            style={{padding: '12px 14px 9px 14px'}}><FaSearch /></div>
         </div>
+      </div>
     </div>
     {
       (searchResults.kind == 'channels' && searchResults.data.length > 0) && (searchResults.data.map((channel, index) => (<div key={index} className="inner-container flex-row" style={{width: feedMax, display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
@@ -377,10 +421,10 @@ export default function Search() {
         </div>
         <div className="flex-col">
         {store.isAuth ? (
-          <div className='srch-select' name='follow' style={{display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '8px'}}>Follow</div>
+          <div className='srch-select' name='follow' style={{display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '8px', textAlign: 'center'}}>Follow</div>
         ) : (
           <div className='flex-row' style={{position: 'relative', marginBottom: '8px'}}>
-            <div className='locked-btn' onClick={account.LoginPopup} style={{width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>Follow</div>
+            <div className='locked-btn' onClick={account.LoginPopup} style={{width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', textAlign: 'center'}}>Follow</div>
             <div className='top-layer' style={{position: 'absolute', top: 0, right: 0, transform: 'translate(-50%, -50%)' }}>
               <FaLock size={8} color='#999' />
             </div>

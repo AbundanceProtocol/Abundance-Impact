@@ -3,7 +3,8 @@ export default async function handler(req, res) {
  
   if (req.method === 'DELETE') {
     try {
-      const { fid, signer } = req.body;
+      const { fid, signer } = req.query;
+      console.log(fid, signer)
       const base = "https://api.neynar.com/";
       const url = `${base}v2/farcaster/user/follow`;
       const response = await fetch(url, {

@@ -37,7 +37,8 @@ export default function App({ Component, pageProps }) {
   const [navMenu, setNavMenu] = useState('Home')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [menuHover, setMenuHover] = useState( {in: Date.now(), out: Date.now() } )
-  const [showNotification, setShowNotification] = useState(false)
+  const [showLogin, setShowLogin] = useState(false)
+  const [showLogout, setShowLogout] = useState(false)
 
   const Col = styled.div`
     display: grid;
@@ -53,16 +54,8 @@ export default function App({ Component, pageProps }) {
   `;
 
   useEffect(() => {
-    useStore.setState({ router })
-  }, [router])
-
-  useEffect(() => {
     let menuLink = targetLink()
     setBottomNavSize(ref?.current?.offsetWidth)
-
-    // const storedData = useStore
-    // console.log(store.isAuth)
-
 
     setNavSize(ref?.current?.offsetWidth - 60)
     setLinkTarget(menuLink)
@@ -92,7 +85,7 @@ export default function App({ Component, pageProps }) {
     // console.log(data)
     // console.log(store.isAuth)
     setIsSignedIn(true)
-    setShowNotification(false)
+    setShowLogin(false)
   };
 
   const handleLogOut = () => {
@@ -110,6 +103,10 @@ export default function App({ Component, pageProps }) {
     store.setUserEthVerAddresses([])
     store.setUserSolVerAddresses([])
     setIsSignedIn(false)
+    setShowLogout(false)
+    if (router.route == '/~/profile') {
+      router.push(`/`)
+    }
   };
 
   useEffect(() => {
@@ -133,8 +130,9 @@ export default function App({ Component, pageProps }) {
       const user = response.data.userProfile[0]
       // console.log(user)
       // console.log(response)
+      store.setUserProfile(user)
       store.setUsernameFC(user.username)
-      store.setSrcUrlFC(user.pfl_url)
+      store.setSrcUrlFC(user.pfp_url)
       store.setUserDisplayNameFC(user.display_name)
       store.setUserActiveFC(user.active_status)
       store.setUserBioFC(user.profile.bio.text)
@@ -208,7 +206,7 @@ export default function App({ Component, pageProps }) {
     }
 
     return isMobile ? (
-      <Link href={(btn.link && btn.working) ? btn.link : router.route}>
+      <Link href={(btn.link && btn.working) ? btn.link : router.route} legacyBehavior>
         <a className={topBox} style={{borderRadius: '18px', padding: '16px 8px'}} {...attributes} onClick={() => {
           setLinkTarget(props.buttonName)
           if (btn.link && btn.working) {
@@ -230,7 +228,7 @@ export default function App({ Component, pageProps }) {
       <Link href={(btn.link && btn.working) ? btn.link : router.route}>
         <a className={topBox}  {...attributes} onClick={() => {
           setLinkTarget(props.buttonName)
-          }}>
+          }} legacyBehavior>
           <div className="sub-cat-box" style={{margin: btnHover ? '8px 0' : '0 10px 0 0', minWidth: btnHover ? '50px' : '15px'}}>
             <Icon className={iconClass} iconsize={btnHover ? isTablet ? '25' : '30' : '15'} style={{height: btnHover ? '30px' : '15px', width: btnHover ? '30px' : '15px'}} />
           </div>
@@ -252,7 +250,7 @@ export default function App({ Component, pageProps }) {
   const HomeButton = () => {
     const isSmall = isMobile || isTablet;
     return (
-      <Link href="/">
+      <Link href="/" legacyBehavior>
         <a className={navMenu === "Home" ? "nav-home-button-active" : "nav-home-button"} onMouseEnter={() => {
           setNavMenu('Home')
           setMenuHover({ ...menuHover, in: Date.now() })
@@ -311,24 +309,66 @@ export default function App({ Component, pageProps }) {
     )
   }
 
-  const closeNotification = () => {
-    setShowNotification(false)
+  const closeLogin = () => {
+    setShowLogin(false)
+  }
+
+  const closeLogout = () => {
+    setShowLogout(false)
+  }
+
+  const testButton = async () => {
+    // console.log('test')
+    try {
+      const response = await axios.get('/api/getIPFS', {
+        params: {
+          hash: 'QmQpfVfn78d4hLHmDG8cehbBQoXPp8kppuWZHWo5yy44qy',
+        }
+      })
+      console.log(response.data?.username, response.data?.text)
+
+    } catch (error) {
+      console.error('Error submitting data:', error)
+    }
+
+
   }
 
   const LoginPopup = async () => {
-    setShowNotification(true)
+    setShowLogin(true)
   }
 
-  const LogNotification = () => {
+  const LogoutPopup = async () => {
+    setShowLogout(true)
+  }
+
+  const LoginNotification = () => {
     return (
       <>
-        <div className="overlay" onClick={closeNotification}></div>
+        <div className="overlay" onClick={closeLogin}></div>
         <div id="notificationContainer" style={{borderRadius: '16px', backgroundColor: '#cdd'}}>
           <div className='flex-col' id="notificationContent" style={{alignItems: 'center', justifyContent: 'center'}}>
             <div style={{fontSize: '20px', maxWidth: '280px', fontWeight: '500'}}>You&apos;ll need to connect to Farcaster for that</div>
             <div className='flex-row' style={{width: '100%', alignItems: 'center', justifyContent: 'center', marginTop: '16px', gap: '10px'}}>
               <NeynarSigninButton onSignInSuccess={handleSignIn} />
-              <div className='cncl-btn' onClick={closeNotification}>Cancel</div>
+              <div className='cncl-btn' onClick={closeLogin}>Cancel</div>
+            </div>
+          </div>
+        </div>
+      </>
+    )
+  }
+
+  const LogoutNotification = () => {
+    return (
+      <>
+        <div className="overlay" onClick={closeLogout}></div>
+        <div id="notificationContainer" style={{borderRadius: '16px', backgroundColor: '#cdd'}}>
+          <div className='flex-col' id="notificationContent" style={{alignItems: 'center', justifyContent: 'center'}}>
+            <div style={{fontSize: '20px', maxWidth: '280px', fontWeight: '500'}}>Are you sure you want to logout of the Impact App?</div>
+            <div className='flex-row' style={{width: '100%', alignItems: 'center', justifyContent: 'center', marginTop: '16px', gap: '10px'}}>
+              <div className='out-btn' onClick={handleLogOut}>Log out</div>
+              <div className='cncl-btn' onClick={closeLogout}>Cancel</div>
             </div>
           </div>
         </div>
@@ -339,12 +379,12 @@ export default function App({ Component, pageProps }) {
   const LeftNav = (props) => {
     let btn = button[props.buttonName]
     let btnName = props.buttonName
-    if (btnName === 'portal' && account) {
-      btnName = store.username
-    }
+    // if (btnName === 'portal' && account) {
+    //   btnName = store.username
+    // }
     const TopIcon = btn.icon
     let menuState = "nav-link"
-    let accountState = !btn.account || (account && btn.account)
+    let accountState = !btn.account || (store.isAuth && btn.account)
     if ((router.route === btn.link) && accountState) {
       menuState = "active-nav-link"
     } else if (!btn.working) {
@@ -353,24 +393,26 @@ export default function App({ Component, pageProps }) {
     let unlockedState = 'btn-hvr'
     if (btn.account && !store.isAuth || !btn.working)
       unlockedState = 'lock-btn-hvr'
+
+      
     return (
       <div className="left-container" style={{padding: 'auto 8px'}} onMouseEnter={() => {
         setNavMenu(btn.menu)
         setMenuHover({ ...menuHover, in: Date.now() })
       }}
       onMouseLeave={() => setMenuHover({ ...menuHover, out: Date.now() }) }>
-        <Link href={(btn.link && btn.working) ? btn.link : router.route}>
-          <a style={{maxWidth: '260px'}}  
-        >
-            <div className={`flex-row ${menuState}`} style={{paddingRight: isMobile ? '1em' : 'unset', justifyContent: 'flex-start'}}>
+        {/* need correct Link functionality when button is locked */}
+        {/* investigate hydration problem */}
+        <Link href={(btn.link && btn.working) ? btn.link : router.route} style={{maxWidth: '260px'}} legacyBehavior>
+          {/* <a style={{maxWidth: '260px'}}> */}
+            <div className={`flex-row`} style={{paddingRight: isMobile ? '1em' : 'unset', justifyContent: 'flex-start'}}>
               <div className="flex-col" style={{height: '58px', alignItems: 'center', justifyContent: 'center'}}>
-                <div className={`flex-row flex-middle ${unlockedState}`} style={{padding: '2px 0 2px 0', borderRadius: '16px'}}>
+                <div className={`flex-row flex-middle ${menuState} ${unlockedState}`} style={{padding: '2px 0 2px 0', borderRadius: '16px'}}>
                   <TopIcon className="size-25" style={{margin: '6px 12px 6px 12px'}} />
                   <div className="font-15 left-nav mid-layer" style={{textAlign: 'center', fontSize: isTablet ? '12px' : '18px', padding: '0 24px 0 0'}}>
                     {btnName}
                   </div>
                   <div style={{position: 'relative', fontSize: '0', width: '0', height: '100%'}}>
-
                     {btn.working ? (<>
                       {(btn.account && !store.isAuth) && (<div className='top-layer' style={{position: 'absolute', top: 0, left: 0, transform: 'translate(-100%, -50%)' }}>
                         <FaLock size={8} color='#999' />
@@ -380,25 +422,11 @@ export default function App({ Component, pageProps }) {
                         <div className='soon-btn'>SOON</div>
                       </div>
                     )}
-
-
-
-                    {/* {(btn.account && !store.isAuth) && (
-                    <div className='top-layer' style={{position: 'absolute', top: 0, left: 0, transform: 'translate(-100%, -50%)' }}>
-                      {btn.working ? (
-                      <FaLock size={8} color='#999' />
-                      ) : (
-                      <div style={{fontSize: '7px', border: '1px solid #ccc', padding: '2px 3px', borderRadius: '3px', backgroundColor: '#00333399'}}>SOON</div>
-                      )}
-                    </div>
-                    )} */}
-
-
                   </div>
                 </div>
               </div>
             </div>
-          </a>
+          {/* </a> */}
         </Link>
       </div>
     )
@@ -425,12 +453,10 @@ export default function App({ Component, pageProps }) {
         setMenuHover({ ...menuHover, in: Date.now() })
       }}
       onMouseLeave={() => setMenuHover({ ...menuHover, out: Date.now() }) }>
-        <Link href={(btn.link && btn.working) ? btn.link : router.route}>
-          <a style={{width: 'auto'}}  
-          >
+        <Link href={(btn.link && btn.working) ? btn.link : router.route} legacyBehavior>
+          <a style={{width: 'auto'}}>
             <div className={`flex-row ${menuState}`} style={{padding: isMobile ? '2px' : 'unset', width: 'auto' }}>
               <div className="flex-col" style={{height: '58px', alignItems: 'center', justifyContent: 'center'}}>
-
                 {btn.working? (
                 <div className="flex-row btn-hvr flex-middle" style={{padding: '6px 2px', borderRadius: '12px'}}>
                   <TopIcon className="size-25" style={{margin: '6px 12px 6px 12px'}} />
@@ -442,12 +468,10 @@ export default function App({ Component, pageProps }) {
                 <div className="flex-row btn-hvr lock-btn-hvr flex-middle" style={{padding: '6px 2px', borderRadius: '12px', position: 'relative'}}>
                   <TopIcon className="size-25" style={{margin: '6px 12px 6px 12px'}} />
                   <div className='top-layer' style={{position: 'absolute', top: 0, right: 0, transform: 'translate(30%, -50%)' }}>
-                        <div className='soon-btn'>SOON</div>
-                      </div>
+                    <div className='soon-btn'>SOON</div>
+                  </div>
                 </div>
                 )}
-
-
               </div>
             </div>
           </a>
@@ -579,8 +603,8 @@ export default function App({ Component, pageProps }) {
                       <TopNav buttonName={btn} key={index} /> ))} */}
               </TopNavWrapper>
               {/* //// test buttons //// */}
-              {/* <div id="showNotificationBtn" className='srch-select-btn' onClick={LoginPopup}>Test Button</div>
-              {(isSignedIn || showNotification) ? (<LogOut />) : (<NeynarSigninButton onSignInSuccess={handleSignIn} />)} */}
+               {/* <div id="showLoginBtn" className='srch-select-btn' onClick={testButton}>Test Button</div>  */}
+              {/* {(isSignedIn || showLogin) ? (<LogOut />) : (<NeynarSigninButton onSignInSuccess={handleSignIn} />)} */}
               {/* {isSignedIn ? (<LogOut />) : (<LogOut />)} */}
               {/* <ConnectButton 
                 account={account}
@@ -599,8 +623,8 @@ export default function App({ Component, pageProps }) {
             <LeftNav buttonName={btn} key={index} /> ))}
         </div>
         <div>
-          <div className="container cast-area" style={isMobile ? {} : {width: '100%'}}>
-            <AccountContext.Provider value={{...store.account, ref1, LoginPopup}}>
+          <div className="container cast-area" style={isMobile ? {} : {width: isMobile? '100%' : '620px'}}>
+            <AccountContext.Provider value={{...store.account, ref1, LoginPopup, LogoutPopup}}>
               <Component {...pageProps} connect={connect} />
             </AccountContext.Provider>
           </div>
@@ -622,7 +646,10 @@ export default function App({ Component, pageProps }) {
         <div ref={ref1} className='flex-row' style={{position: 'fixed', bottom: 0, backgroundColor: '#000000ff', height: '0px', width: `100%`, borderRadius: '0px', padding: '0', border: '0px solid #678', boxSizing: 'border-box'}}></div>
       )}
       <div>
-        {showNotification && (<LogNotification />)}
+        {showLogin && (<LoginNotification />)}
+      </div>
+      <div>
+        {showLogout && (<LogoutNotification />)}
       </div>
     </div>
   )

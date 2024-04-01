@@ -1,25 +1,25 @@
 export default async function handler(req, res) {
   const apiKey = process.env.NEYNAR_API_KEY
- 
-  if (req.method === 'POST') {
+  const { fid, recasts } = req.query;
+  if (req.method === 'GET' && fid) {
+    let castBool = false
+    if (!recasts) {
+      castBool = false
+    } else {
+      castBool = recasts
+    }
     try {
-      const { fid, signer } = req.body;
-      console.log(fid, signer)
       const base = "https://api.neynar.com/";
-      const url = `${base}v2/farcaster/user/follow`;
+      const url = `${base}v2/farcaster/feed/following?fid=${fid}&with_recasts=${castBool}&limit=5`;
       const response = await fetch(url, {
-        method: 'POST',
         headers: {
           accept: "application/json",
           api_key: apiKey,
-          'content-type': 'application/json',
         },
-        body: JSON.stringify({signer_uuid: signer, target_fids: [fid]})
       });
-      const following = await response.json();
-      console.log(following)
+      const feed = await response.json();
 
-      res.status(200).json({ success: true, message: `User ${fid} successfully followed` });
+      res.status(200).json({ feed: feed.casts });
     } catch (error) {
       console.error('Error handling GET request:', error);
       res.status(500).json({ error: 'Internal Server Error' });

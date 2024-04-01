@@ -5,12 +5,33 @@
     border: 0; 
 }
 
+
 html, body {
     font-family: inter,sans-serif;
     margin: 0;
     height: 100%;
     padding: 0;
     background-color: #1D3244;
+}
+
+::-webkit-scrollbar-track {
+    background: #1D3244;
+}
+  
+::-webkit-scrollbar-thumb {
+    background: #688;
+    border-radius: 5px;
+}
+
+@media only screen and (min-width: 680px) {
+    ::-webkit-scrollbar {
+        width: 10px;
+    }
+}
+@media only screen and (max-width: 679.999px) {
+    ::-webkit-scrollbar {
+        width: 0px;
+    }
 }
 
 
@@ -201,6 +222,27 @@ html, body {
     background-color: #bcc !important;
     color: #466;
     border: 2px solid #8aa;
+}
+
+.out-btn {
+    background-color: #990000 !important;
+    font-weight: 600;
+    color: #eee;
+    align-items: center;
+    justify-content: center;
+    height: 38px !important;
+    width: 130px !important;
+    padding: 7px;
+    min-width: 80px !important;
+    border: 2px solid #770000;
+    border-radius: 12px;
+    cursor: pointer;
+}
+
+.out-btn:hover {
+    background-color: #660000 !important;
+    color: #ccc;
+    border: 2px solid #440000;
 }
 
 .locked-btn {
@@ -495,7 +537,20 @@ blockquote {
     margin-left: 0px;
 }
 
-#notificationContainer {
+.popupConainer {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 10px 2px rgba(0, 0, 0, 0.5);
+    z-index: 2147483647;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 0px solid #355
+  }
+  
+  #notificationContainer {
     position: fixed;
     top: 50%;
     left: 50%;
@@ -509,7 +564,7 @@ blockquote {
     align-items: center;
     border: 2px solid #355
   }
-  
+
   #notificationContent {
     text-align: center;
   }
@@ -528,6 +583,17 @@ blockquote {
     z-index: 2147483645;
   }
 
+  .popup {
+    z-index: 2147483647;
+    /* /* position: fixed !important; */
+    left: 0 !important;
+    top: 0 !important;
+    transform: translate(50% 50%) !important;
+    display: flex !important;
+  justify-content: center !important; /* Center horizontally */
+  align-items: center !important; /* Center vertically */
+  height: 100vh !important;
+  }
 
 
 
@@ -730,12 +796,13 @@ blockquote {
     cursor: pointer;
 }
 
-.follow-select {
+
+.follow-select-drk {
     border: 2px solid #38b;
     border-radius: 8px;
     font-size: 16px;
     padding: 6px 12px;
-    color: #fff;
+    color: #244;
     margin: 2px 5px;
     font-weight: 600;
     width: 80px;
@@ -743,6 +810,12 @@ blockquote {
     justify-content: center;
     background-color: #38b;
     cursor: pointer;
+}
+
+.follow-select-drk:hover {
+    border: 2px solid #cdd;
+    color: #169;
+    background-color: #cdd;
 }
 
 .follow-locked {
@@ -757,6 +830,22 @@ blockquote {
     height: 34px;
     justify-content: center;
     background-color: #ccc;
+    cursor: pointer;
+}
+
+.follow-select {
+    /* border: 2px solid #32b439; */
+    border: 2px solid #38b;
+    border-radius: 8px;
+    font-size: 16px;
+    padding: 6px 12px;
+    color: #fff;
+    margin: 2px 5px;
+    font-weight: 600;
+    width: 80px;
+    height: 34px;
+    justify-content: center;
+    background-color: #38b;
     cursor: pointer;
 }
 
@@ -786,6 +875,39 @@ blockquote {
     color: #169;
     background-color: #eee;
 }
+
+.unfollow-select-drk {
+    border: 2px solid #dee;
+    border-radius: 8px;
+    font-size: 14px;
+    padding: 7px 8px;
+    color: #dee;
+    margin: 2px 5px;
+    font-weight: 700;
+    width: 80px;
+    height: 34px;
+    justify-content: center;
+    background-color: transparent;
+    cursor: pointer;
+}
+
+.flash-success {
+    background-color: #0c0;
+}
+
+.unfollow-select-drk:hover {
+    border: 2px solid #cdd;
+    color: #cdd;
+    background-color: #222;
+}
+
+.cast-btn {
+    width: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
 
 .x-srch-select {
     border: 1px solid #ccc;
@@ -1111,7 +1233,36 @@ blockquote {
 }
 
 .col-ccc {
-    color: rgb(204, 204, 204);
+    color: #cccccc;
+}
+
+.textbox {
+    width: 100%;
+    resize: none;
+    font-family: inter, sans-serif;
+    font-size: 18px;
+    padding: 12px;
+    background-color: #334455f1;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    color: #eee;
+    margin: 2px 5px;
+    font-weight: 500;
+    transition: height 0.3s ease;
+    height: 48px;
+  }
+
+  .textbox-long {
+    height: 120px;
+  }
+
+.textbox::placeholder {
+    color: #bbb;
+    font-weight: 500;
+}
+
+.textbox:focus {
+    background-color: #456;
 }
 
 .input-desc {
@@ -1984,9 +2135,50 @@ blockquote {
     padding: 0 24px 0 8px;
 }
 
+
+/* ////     LIGHT BUTTONS     //// */
+
+.nav-link-lt {
+    color: #222;
+    background-color: #55555522;
+    display: flex;
+    cursor: pointer;
+    justify-content: center;
+}
+
+.nav-link-lt:hover {
+    color: #777;
+}
+
+.active-nav-link-lt {
+    color: #c33;
+    display: flex;
+    cursor: pointer;
+    justify-content: center;
+}
+
+.active-nav-link-lt:hover {
+    color: #e55;
+}
+
+.lock-btn-hvr-lt {
+    background-color: #22222222;
+}
+
+.lock-btn-hvr-lt:hover {
+    background-color: #33333333;
+}
+
+.btn-hvr-lt:hover {
+  background-color: #11111111;
+}
+
+
+
+
 .active-nav-link {
+    background-color: #ddeeff11;
     color: #ddd425;
-    /* min-width: 87px; */
     display: flex;
     cursor: pointer;
     justify-content: center;
@@ -2014,6 +2206,10 @@ blockquote {
     justify-content: center;
 }
 
+.nav-link:hover {
+    color: #fff;
+}
+
 .inactive-nav-link {
     color: #aaa;
     /* min-width: 87px; */
@@ -2024,10 +2220,6 @@ blockquote {
 
 .inactive-nav-link:hover {
     color: #aaa;
-}
-
-.nav-link:hover {
-    color: #fff;
 }
 
 .nav-block {
