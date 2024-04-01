@@ -29,7 +29,7 @@ export default function Home() {
   const [showPopup, setShowPopup] = useState({open: false, url: null})
   const router = useRouter()
   const userButtons = ['Home', 'Trending', 'Projects', 'AI']
-  const [searchSelect, setSearchSelect ] = useState('Trending')
+  const [searchSelect, setSearchSelect ] = useState(null)
   const initialState = { fid: null, signer: null, urls: [], channel: null, parentUrl: null, text: '' }
 	const [castData, setCastData] = useState(initialState)
   const [loading, setLoading] = useState(false);
@@ -45,6 +45,7 @@ export default function Home() {
       setUserFeed(feed)
       const updatedFeed = await setEmbeds(feed)
       setUserFeed([...updatedFeed])
+      console.log(updatedFeed)
     } catch (error) {
       console.error('Error submitting data:', error)
     }
@@ -117,6 +118,11 @@ export default function Home() {
 
   useEffect(() => {
     setIsLogged(store.isAuth)
+    if (store.isAuth) {
+      setSearchSelect('Home')
+    } else {
+      setSearchSelect('Trending')
+    }
 
     const handleResize = () => {
       setScreenWidth(window.innerWidth)
@@ -133,7 +139,7 @@ export default function Home() {
 
   useEffect(() => {
     feedRouter()
-  }, [router, searchSelect])
+  }, [searchSelect])
 
   function feedRouter() {
     if (searchSelect == 'Trending') {

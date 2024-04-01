@@ -379,9 +379,6 @@ export default function App({ Component, pageProps }) {
   const LeftNav = (props) => {
     let btn = button[props.buttonName]
     let btnName = props.buttonName
-    // if (btnName === 'portal' && account) {
-    //   btnName = store.username
-    // }
     const TopIcon = btn.icon
     let menuState = "nav-link"
     let accountState = !btn.account || (store.isAuth && btn.account)
@@ -393,7 +390,6 @@ export default function App({ Component, pageProps }) {
     let unlockedState = 'btn-hvr'
     if (btn.account && !store.isAuth || !btn.working)
       unlockedState = 'lock-btn-hvr'
-
       
     return (
       <div className="left-container" style={{padding: 'auto 8px'}} onMouseEnter={() => {
@@ -401,32 +397,28 @@ export default function App({ Component, pageProps }) {
         setMenuHover({ ...menuHover, in: Date.now() })
       }}
       onMouseLeave={() => setMenuHover({ ...menuHover, out: Date.now() }) }>
-        {/* need correct Link functionality when button is locked */}
-        {/* investigate hydration problem */}
-        <Link href={(btn.link && btn.working) ? btn.link : router.route} style={{maxWidth: '260px'}} legacyBehavior>
-          {/* <a style={{maxWidth: '260px'}}> */}
-            <div className={`flex-row`} style={{paddingRight: isMobile ? '1em' : 'unset', justifyContent: 'flex-start'}}>
-              <div className="flex-col" style={{height: '58px', alignItems: 'center', justifyContent: 'center'}}>
-                <div className={`flex-row flex-middle ${menuState} ${unlockedState}`} style={{padding: '2px 0 2px 0', borderRadius: '16px'}}>
-                  <TopIcon className="size-25" style={{margin: '6px 12px 6px 12px'}} />
-                  <div className="font-15 left-nav mid-layer" style={{textAlign: 'center', fontSize: isTablet ? '12px' : '18px', padding: '0 24px 0 0'}}>
-                    {btnName}
-                  </div>
-                  <div style={{position: 'relative', fontSize: '0', width: '0', height: '100%'}}>
-                    {btn.working ? (<>
-                      {(btn.account && !store.isAuth) && (<div className='top-layer' style={{position: 'absolute', top: 0, left: 0, transform: 'translate(-100%, -50%)' }}>
-                        <FaLock size={8} color='#999' />
-                      </div>)}</>
-                      ) : (
-                      <div className='top-layer' style={{position: 'absolute', top: 0, left: 0, transform: 'translate(-70%, -50%)' }}>
-                        <div className='soon-btn'>SOON</div>
-                      </div>
-                    )}
-                  </div>
+        <Link href={(btn.link && btn.working && !(!store.isAuth && btn.account)) ? btn.link : '#'} style={{maxWidth: '260px'}}>
+          <div className={`flex-row`} style={{paddingRight: isMobile ? '1em' : 'unset', justifyContent: 'flex-start'}} onClick={() => {(!store.isAuth && btn.account) && LoginPopup()}}>
+            <div className="flex-col" style={{height: '58px', alignItems: 'center', justifyContent: 'center'}}>
+              <div className={`flex-row flex-middle ${menuState} ${unlockedState}`} style={{padding: '2px 0 2px 0', borderRadius: '16px'}}>
+                <TopIcon className="size-25" style={{margin: '6px 12px 6px 12px'}} />
+                <div className="font-15 left-nav mid-layer" style={{textAlign: 'center', fontSize: isTablet ? '12px' : '18px', padding: '0 24px 0 0'}}>
+                  {btnName}
+                </div>
+                <div style={{position: 'relative', fontSize: '0', width: '0', height: '100%'}}>
+                  {btn.working ? (<>
+                    {(btn.account && !store.isAuth) && (<div className='top-layer' style={{position: 'absolute', top: 0, left: 0, transform: 'translate(-100%, -50%)' }}>
+                      <FaLock size={8} color='#999' />
+                    </div>)}</>
+                    ) : (
+                    <div className='top-layer' style={{position: 'absolute', top: 0, left: 0, transform: 'translate(-70%, -50%)' }}>
+                      <div className='soon-btn'>SOON</div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
-          {/* </a> */}
+          </div>
         </Link>
       </div>
     )
@@ -453,28 +445,26 @@ export default function App({ Component, pageProps }) {
         setMenuHover({ ...menuHover, in: Date.now() })
       }}
       onMouseLeave={() => setMenuHover({ ...menuHover, out: Date.now() }) }>
-        <Link href={(btn.link && btn.working) ? btn.link : router.route} legacyBehavior>
-          <a style={{width: 'auto'}}>
-            <div className={`flex-row ${menuState}`} style={{padding: isMobile ? '2px' : 'unset', width: 'auto' }}>
-              <div className="flex-col" style={{height: '58px', alignItems: 'center', justifyContent: 'center'}}>
-                {btn.working? (
-                <div className="flex-row btn-hvr flex-middle" style={{padding: '6px 2px', borderRadius: '12px'}}>
-                  <TopIcon className="size-25" style={{margin: '6px 12px 6px 12px'}} />
-                  <div className="font-15 left-nav" style={{textAlign: 'center', fontSize: isTablet ? '12px' : '18px'}}>
-                    {btnName}
-                  </div>
+        <Link href={(btn.link && btn.working && !(!store.isAuth && btn.account)) ? btn.link : '#'} style={{width: 'auto'}}>
+          <div className={`flex-row ${menuState}`} style={{padding: isMobile ? '2px' : 'unset', width: 'auto' }} onClick={() => {(!store.isAuth && btn.account) && LoginPopup()}}>
+            <div className="flex-col" style={{height: '58px', alignItems: 'center', justifyContent: 'center'}}>
+              {btn.working? (
+              <div className="flex-row btn-hvr flex-middle" style={{padding: '6px 2px', borderRadius: '12px'}}>
+                <TopIcon className="size-25" style={{margin: '6px 12px 6px 12px'}} />
+                <div className="font-15 left-nav" style={{textAlign: 'center', fontSize: isTablet ? '12px' : '18px'}}>
+                  {btnName}
                 </div>
-                ) : (
-                <div className="flex-row btn-hvr lock-btn-hvr flex-middle" style={{padding: '6px 2px', borderRadius: '12px', position: 'relative'}}>
-                  <TopIcon className="size-25" style={{margin: '6px 12px 6px 12px'}} />
-                  <div className='top-layer' style={{position: 'absolute', top: 0, right: 0, transform: 'translate(30%, -50%)' }}>
-                    <div className='soon-btn'>SOON</div>
-                  </div>
-                </div>
-                )}
               </div>
+              ) : (
+              <div className="flex-row btn-hvr lock-btn-hvr flex-middle" style={{padding: '6px 2px', borderRadius: '12px', position: 'relative'}}>
+                <TopIcon className="size-25" style={{margin: '6px 12px 6px 12px'}} />
+                <div className='top-layer' style={{position: 'absolute', top: 0, right: 0, transform: 'translate(30%, -50%)' }}>
+                  <div className='soon-btn'>SOON</div>
+                </div>
+              </div>
+              )}
             </div>
-          </a>
+          </div>
         </Link>
       </div>
     )
