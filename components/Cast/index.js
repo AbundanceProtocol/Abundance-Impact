@@ -4,6 +4,7 @@ import useStore from '../../utils/store';
 import { Like, Recast, Message, Kebab, ActiveUser } from '../../pages/assets'
 import { FaSearch, FaLock, FaRegStar } from "react-icons/fa"
 import axios from 'axios';
+import { timePassed } from '../../utils/utils';
 
 export default function Cast({ cast, index, openImagePopup }) {
   const store = useStore()
@@ -65,32 +66,6 @@ export default function Cast({ cast, index, openImagePopup }) {
     const username = author.username
     await store.setUserData(author);
     router.push(`/${username}`)
-  }
-
-  const timePassed = (timestamp) => {
-    const currentTime = new Date();
-    const pastTime = new Date(timestamp);
-    const timeDifference = currentTime - pastTime;
-    
-    const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
-    if (days > 0) {
-      const stamp = `${days}d`
-      return stamp
-    } else {
-      const hours = Math.floor(timeDifference / (1000 * 60 * 60));
-      if (hours > 0) {
-        const stamp = `${hours}h`
-        return stamp
-      } else {
-        const minutes = Math.floor(timeDifference / (1000 * 60));
-        if (minutes > 0) {
-          const stamp = `${minutes}m`
-          return stamp
-        } else {
-          return `now`
-        }
-      }
-    }
   }
 
   async function postRecast(hash, index) {

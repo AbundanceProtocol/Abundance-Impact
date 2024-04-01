@@ -10,6 +10,7 @@ import { AiOutlineLoading3Quarters as Loading } from "react-icons/ai";
 import mql from '@microlink/mql';
 import { useRouter } from 'next/router';
 import Cast from '../components/Cast'
+import { setEmbeds } from '../utils/utils';
 
 export default function Home() {
   const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
@@ -36,18 +37,6 @@ export default function Home() {
   const [isLogged, setIsLogged] = useState(false)
   const [success, setSuccess] = useState(false)
   const [textboxRows, setTextboxRows] = useState(1)
-
-  async function isImage(url) {
-    try {
-      const response = await fetch(url, { method: 'HEAD' });
-      const contentType = response.headers.get('Content-Type');
-      // console.log(contentType)
-      return contentType && contentType.startsWith('image/');
-    } catch (error) {
-      console.error('Error fetching URL:', error);
-      return false;
-    }
-  }
 
   async function getTrendingFeed() {
     try {
@@ -152,27 +141,6 @@ export default function Home() {
     } else if (searchSelect == 'Home' && store.fid) {
       getUserFeed(store.fid, false)
     }
-  }
-
-  async function setEmbeds(feed) {
-    if (feed) {
-      for (let i = 0; i < feed.length; i++) {
-        if (!feed[i].frames) {
-          if (feed[i].embeds) {
-            for (let j = 0; j < feed[i].embeds.length; j++) {
-              const url = feed[i].embeds[j].url
-              const isImg = await isImage(url)
-              if (isImg) {
-                feed[i].embeds[j].type = 'img'
-              } else {
-                feed[i].embeds[j].type = 'url'
-              }
-            }
-          }
-        }
-      }
-    }
-    return feed
   }
 
   async function getUserFeed(fid, recasts) {

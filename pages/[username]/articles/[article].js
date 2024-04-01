@@ -7,6 +7,7 @@ import { Like, Recast, Message, Kebab, ActiveUser } from '../../assets'
 import { FaLock, FaRegStar } from "react-icons/fa"
 import { BsPatchCheckFill as Verified } from "react-icons/bs";
 import { BiSolidErrorAlt as Rejected } from "react-icons/bi";
+import { shortenAddress, timePassed } from '../../../utils/utils';
 
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 
@@ -81,32 +82,6 @@ export default function ArticlePage({articleData, username, articleHash, totalPa
     }
   }
 
-  const timePassed = (timestamp) => {
-    const currentTime = new Date();
-    const pastTime = new Date(timestamp);
-    const timeDifference = currentTime - pastTime;
-    
-    const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
-    if (days > 0) {
-      const stamp = `${days}d`
-      return stamp
-    } else {
-      const hours = Math.floor(timeDifference / (1000 * 60 * 60));
-      if (hours > 0) {
-        const stamp = `${hours}h`
-        return stamp
-      } else {
-        const minutes = Math.floor(timeDifference / (1000 * 60));
-        if (minutes > 0) {
-          const stamp = `${minutes}m`
-          return stamp
-        } else {
-          return `now`
-        }
-      }
-    }
-  }
-
   useEffect(() => {
     console.log(articleContent.username, username)
     console.log(verifiedAuthor)
@@ -122,14 +97,6 @@ export default function ArticlePage({articleData, username, articleHash, totalPa
   }
 
   const Article = () => {
-
-    function shortenAddress(input) {
-      if (input.length <= 8) {
-        return input;
-      } else {
-        return input.substring(0, 4) + '...' + input.substring(input.length - 4);
-      }
-    }
     
     return (articleContent) && (
     <div className="inner-container flex-col" style={{width: '100%'}}>

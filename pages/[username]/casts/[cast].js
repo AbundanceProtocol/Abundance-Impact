@@ -204,7 +204,7 @@ export default function CastPage({username, castHash}) {
   return (
     <div className='flex-col' style={{width: 'auto', position: 'relative'}} ref={ref}>
       <Head>
-        <title>@{username} cast | Impact App </title>
+        <title>@{String(username)} cast | Impact App </title>
         <meta name="description" content={`Building the global superalignment layer`} />
       </Head>
       <div className="" style={{padding: '58px 0 0 0'}}>

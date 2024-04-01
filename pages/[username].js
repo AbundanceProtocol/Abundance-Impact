@@ -9,6 +9,7 @@ import useMatchBreakpoints from '../hooks/useMatchBreakpoints';
 import axios from 'axios';
 import { FaSearch, FaLock, FaRegStar } from "react-icons/fa"
 import Cast from '../components/Cast'
+import { setEmbeds, formatNum } from '../utils/utils';
 
 export default function UserPage({username}) {
   const router = useRouter();
@@ -61,14 +62,17 @@ export default function UserPage({username}) {
           params: { fid }
         })
         const feed = response.data.feed
-        console.log(response.data.feed)
-        setUserFeed(feed)
+        await setUserFeed(feed)
+        const updatedFeed = await setEmbeds(feed)
+        setUserFeed([...updatedFeed])
+
+        // console.log(response.data.feed)
+        // setUserFeed(feed)
       } catch (error) {
         console.error('Error submitting data:', error)
       }
     }
   }
-
 
   async function getUserProfile(name) {
     let fid = 3
@@ -212,17 +216,6 @@ export default function UserPage({username}) {
         setLoading(false)
       }
     };
-
-    const formatNum = (num) => {
-      const number = Number(num)
-      let formattedNumber = number
-      if (number > 1000000) {
-        formattedNumber = (number / 1000000).toFixed(1) + 'M'
-      } else if (number > 1000) {
-        formattedNumber = (number / 1000).toFixed(1) + 'K'
-      }
-      return formattedNumber
-    }
 
    return (
     <div className="inner-container flex-row" style={{width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'space-between', backgroundColor: '#66666633'}}>
