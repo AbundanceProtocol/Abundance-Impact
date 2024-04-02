@@ -10,30 +10,25 @@ export function shortenAddress(input) {
 }
   
 
-// time passed in days, hours, or minutes
+// time passed in months, days, hours, or minutes
 export function timePassed(timestamp) {
   const currentTime = new Date();
   const pastTime = new Date(timestamp);
   const timeDifference = currentTime - pastTime;
-  
+  const months = Math.floor(timeDifference / (1000 * 60 * 60 * 24 * 30));
   const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
-  if (days > 0) {
-    const stamp = `${days}d`
-    return stamp
+  const hours = Math.floor(timeDifference / (1000 * 60 * 60));
+  const minutes = Math.floor(timeDifference / (1000 * 60));
+  if (months > 1) {
+    return `${months}mo`
+  } else if (days > 0) {
+    return `${days}d`
+  } else if (hours > 0) {
+    return `${hours}h`
+  } else if (minutes > 0) {
+    return `${minutes}m`
   } else {
-    const hours = Math.floor(timeDifference / (1000 * 60 * 60));
-    if (hours > 0) {
-      const stamp = `${hours}h`
-      return stamp
-    } else {
-      const minutes = Math.floor(timeDifference / (1000 * 60));
-      if (minutes > 0) {
-        const stamp = `${minutes}m`
-        return stamp
-      } else {
-        return `now`
-      }
-    }
+    return 'now'
   }
 }
 

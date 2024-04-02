@@ -35,7 +35,7 @@ html, body {
 }
 
 
-@media only screen and (min-width: 1280px) {
+@media only screen and (min-width: 1380px) {
     .top-left {
         width: 260px;
     }
@@ -75,7 +75,7 @@ html, body {
     } */
 }
 
-@media only screen and (min-width: 1024px) and (max-width: 1279.999px) {
+@media only screen and (min-width: 1024px) and (max-width: 1379.999px) {
     .top-left {
         width: 260px;
     }

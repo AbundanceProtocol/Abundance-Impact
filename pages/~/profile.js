@@ -17,11 +17,13 @@ export default function ProfilePage() {
   const ref = useRef(null)
   const [textMax, setTextMax] = useState('430px')
   const [screenWidth, setScreenWidth ] = useState(undefined)
+  const [screenHeight, setScreenHeight] = useState(undefined)
   const [feedMax, setFeedMax ] = useState('620px')
   const userButtons = ['Casts', 'Channels', 'Media', 'Proposals']
   const [searchSelect, setSearchSelect ] = useState('Casts')
   const { isMobile } = useMatchBreakpoints();
   const [userFeed, setUserFeed] = useState(null)
+  const [showPopup, setShowPopup] = useState({open: false, url: null})
 
   useEffect(() => {
     if (store.userProfile) {
@@ -73,10 +75,34 @@ export default function ProfilePage() {
       setFeedMax(`100%`)
     }
   }, [screenWidth])
+  
+  function closeImagePopup() {
+    setShowPopup({open: false, url: null})
+  }
+  function closeImagePopup() {
+    setShowPopup({open: false, url: null})
+  }
+
+  function openImagePopup(embed) {
+    let newPopup = { ...showPopup }
+    newPopup.open = true
+    newPopup.url = embed.url
+    setShowPopup(newPopup)
+  }
+
+  const ExpandImg = ({embed}) => {
+    return (
+      <>
+        <div className="overlay" onClick={closeImagePopup}></div>
+        <img loading="lazy" src={embed.showPopup.url} className='popupConainer' alt="Cast image embed" style={{aspectRatio: 'auto', maxWidth: screenWidth, maxHeight: screenHeight, cursor: 'pointer', position: 'fixed', borderRadius: '12px'}} onClick={closeImagePopup} />
+      </>
+    )
+  }
 
   useEffect(() => {
     const handleResize = () => {
       setScreenWidth(window.innerWidth)
+      setScreenHeight(window.innerHeight)
     }
     handleResize()
     window.addEventListener('resize', handleResize);
@@ -212,7 +238,10 @@ export default function ProfilePage() {
           <SearchOptionButton buttonName={btn} key={index} /> ))}
       </div>
       <div style={{margin: '0 0 30px 0'}}>
-        {userFeed && userFeed.map((cast, index) => (<Cast cast={cast} key={index} index={index} />))}
+        {userFeed && userFeed.map((cast, index) => (<Cast cast={cast} key={index} index={index} openImagePopup={openImagePopup} />))}
+      </div>
+      <div>
+        {showPopup.open && (<ExpandImg embed={{showPopup}} />)}
       </div>
     </div>
   );
