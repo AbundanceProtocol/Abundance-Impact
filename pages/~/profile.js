@@ -2,12 +2,13 @@ import { useRouter } from 'next/router';
 import { useRef, useContext, useEffect, useState } from 'react';
 import useStore from '../../utils/store';
 import { AccountContext } from '../../context';
-import { ActiveUser } from '../assets';
+import { ActiveUser, Degen } from '../assets';
 import { AiOutlineLoading3Quarters as Loading } from "react-icons/ai";
 import useMatchBreakpoints from '../../hooks/useMatchBreakpoints';
 import axios from 'axios';
 import Cast from '../../components/Cast'
 import { FaLock } from "react-icons/fa";
+import { setEmbeds, formatNum } from '../../utils/utils';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -24,6 +25,7 @@ export default function ProfilePage() {
   const { isMobile } = useMatchBreakpoints();
   const [userFeed, setUserFeed] = useState(null)
   const [showPopup, setShowPopup] = useState({open: false, url: null})
+  const [userTips, setUserTips] = useState(null)
 
   useEffect(() => {
     if (store.userProfile) {
@@ -34,6 +36,7 @@ export default function ProfilePage() {
   useEffect(() => {
     if (user && user.fid !== '-') {
       getUserFeed(user.fid, false)
+      getUserDailyTips(user.fid)
     }
   }, [user])
 
@@ -49,6 +52,26 @@ export default function ProfilePage() {
         const feed = response.data.feed
         console.log(response.data.feed)
         setUserFeed(feed)
+      } catch (error) {
+        console.error('Error submitting data:', error)
+      }
+    }
+  }
+
+  async function getUserDailyTips(fid) {
+    // console.log(fid, userFeed)
+    if (user) {
+      try {
+        const response = await axios.get('/api/getUserDailyTips', {
+          params: { fid }
+        })
+        const tips = response.data.tips
+        if (tips) {
+          setUserTips(tips)
+        }
+        console.log(tips)
+        // console.log(response.data.feed)
+        // setUserFeed(feed)
       } catch (error) {
         console.error('Error submitting data:', error)
       }
@@ -116,18 +139,6 @@ export default function ProfilePage() {
   const UserData = () => {
     const [loading, setLoading] = useState(false);
 
-    const formatNum = (num) => {
-      const number = Number(num)
-      let formattedNumber = number
-      if (number > 1000000) {
-        formattedNumber = (number / 1000000).toFixed(1) + 'M'
-      } else if (number > 1000) {
-        formattedNumber = (number / 1000).toFixed(1) + 'K'
-      }
-      return formattedNumber
-    }
-
-
    return (
     <div className="inner-container flex-row" style={{width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'space-between', backgroundColor: '#66666633'}}>
         <div style={{width: '100%'}}>
@@ -191,7 +202,20 @@ export default function ProfilePage() {
             </div>
           </div>
         </div>
-        {store.isAuth ? (<div className='out-btn' style={{height: 'max-content', textAlign: 'center'}} onClick={account.LogoutPopup}>Log out</div>) : (<div className='logout-btn' style={{height: 'max-content', textAlign: 'center'}} onClick={account.LoginPopup}>Login</div>)}
+        <div className='flex-col' style={{gap: '0.5rem'}}>
+          
+          {store.isAuth ? (<div className='out-btn' style={{height: 'max-content', textAlign: 'center'}} onClick={account.LogoutPopup}>Log out</div>) : (<div className='logout-btn' style={{height: 'max-content', textAlign: 'center'}} onClick={account.LoginPopup}>Login</div>)}
+
+          {userTips && (
+          <div className='flex-row' style={{position: 'relative', justifyContent: 'flex-end'}}>
+            <div className='tip-select-drk flex-row' name='unfollow' style={{color: loading ? 'transparent' : '#dee', textAlign: 'center', justifyContent: 'center', gap: '0.25rem'}}><div>{formatNum(userTips)}</div><Degen /></div>
+            <div className='top-layer rotation' style={{position: 'absolute', top: '7px', left: '34px', visibility: loading ? 'visible': 'hidden' }}>
+              <Loading size={24} color='#dee' />
+            </div>
+          </div>
+          )}
+        </div>
+
     </div>)
   }
 

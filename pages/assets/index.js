@@ -30,6 +30,7 @@ import Message from './Message';
 import Kebab from './Kebab';
 import ActiveUser from './ActiveUser';
 import Warp from './Warp';
+import Degen from './Degen';
 
 const Spaces = () => {
   return <div className="flex-s" />
@@ -68,5 +69,6 @@ export {
   Message,
   Kebab,
   ActiveUser,
-  Warp
+  Warp,
+  Degen
 }

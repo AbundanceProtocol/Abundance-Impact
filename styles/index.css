@@ -891,6 +891,21 @@ blockquote {
     cursor: pointer;
 }
 
+.tip-select-drk {
+    border: 2px solid #dee;
+    border-radius: 8px;
+    font-size: 14px;
+    padding: 7px 8px;
+    color: #dee;
+    margin: 2px 5px;
+    font-weight: 700;
+    width: 80px;
+    height: 34px;
+    justify-content: center;
+    background-color: transparent;
+    cursor: pointer;
+}
+
 .flash-success {
     background-color: #0c0;
 }
@@ -2197,6 +2212,33 @@ blockquote {
     font-weight: 400;
     color: #eee;
 }
+
+.spinner {
+    display: inline-block;
+    width: 21px;
+    height: 21px;
+    border: 4px solid #ccc;
+    border-top-color: transparent;
+    border-radius: 50%;
+    -webkit-animation: spin 1s linear infinite;
+    animation: spin 1s linear infinite;
+    /* position: absolute; */
+    top: Calc(50% - 20px);
+    left: Calc(50% - 20px);
+}
+
+@keyframes spin {
+    0% {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg)
+    }
+
+    to {
+        -webkit-transform: rotate(1turn);
+        transform: rotate(1turn)
+    }
+}
+
 
 .nav-link {
     color: #e6e6e6;

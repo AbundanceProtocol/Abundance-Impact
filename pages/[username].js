@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import { useRef, useContext, useEffect, useState } from 'react';
 import useStore from '../utils/store';
 import { AccountContext } from '../context';
-import { ActiveUser } from './assets';
+import { ActiveUser, Degen } from './assets';
 import { AiOutlineLoading3Quarters as Loading } from "react-icons/ai";
 import useMatchBreakpoints from '../hooks/useMatchBreakpoints'; 
 import axios from 'axios';
@@ -36,6 +36,7 @@ export default function UserPage({username}) {
   const { isMobile } = useMatchBreakpoints();
   const [userFeed, setUserFeed] = useState(null)
   const [showPopup, setShowPopup] = useState({open: false, url: null})
+  const [userTips, setUserTips] = useState(null)
 
   useEffect(() => {
     const handleResize = () => {
@@ -54,8 +55,29 @@ export default function UserPage({username}) {
   useEffect(() => {
     if (user && user.fid !== '-') {
       getUserCasts(user.fid)
+      getUserDailyTips(user.fid)
     }
   }, [user])
+
+  async function getUserDailyTips(fid) {
+    // console.log(fid, userFeed)
+    if (user) {
+      try {
+        const response = await axios.get('/api/getUserDailyTips', {
+          params: { fid }
+        })
+        const tips = response.data.tips
+        if (tips) {
+          setUserTips(tips)
+        }
+        console.log(tips)
+        // console.log(response.data.feed)
+        // setUserFeed(feed)
+      } catch (error) {
+        console.error('Error submitting data:', error)
+      }
+    }
+  }
 
   async function getUserCasts(fid) {
     console.log(fid, userFeed)
@@ -283,6 +305,7 @@ export default function UserPage({username}) {
             </div>
           </div>
         </div>
+        <div className='flex-col' style={{gap: '0.5rem'}}>
         {(store.userProfile && store.userProfile.username !== user.username && user.fid !== '-') && (
           <>
             {store.isAuth ? (
@@ -312,8 +335,17 @@ export default function UserPage({username}) {
               </div>
               )
             }
-          </>
+          </>          
         )}
+        {userTips && (
+        <div className='flex-row' style={{position: 'relative'}}>
+          <div className='tip-select-drk flex-row' name='unfollow' style={{color: loading ? 'transparent' : '#dee', textAlign: 'center', justifyContent: 'center', gap: '0.25rem'}}><div>{formatNum(userTips)}</div><Degen /></div>
+          <div className='top-layer rotation' style={{position: 'absolute', top: '7px', left: '34px', visibility: loading ? 'visible': 'hidden' }}>
+            <Loading size={24} color='#dee' />
+          </div>
+        </div>
+        )}
+      </div>
     </div>)
   }
 

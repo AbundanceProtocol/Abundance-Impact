@@ -1,12 +1,27 @@
 import axios from 'axios';
 
 // shorten a hash address
-export function shortenAddress(input) {
-  if (input.length <= 8) {
-    return input;
+export function shortenAddress(input, long) {
+  let address = input
+  let shortenedAddress = ''
+  if (long) {
+    const parts = input.split(':');
+    address = parts[2].substring(2);
+  } 
+  if (address.length <= 8) {
+    return address
   } else {
-    return input.substring(0, 4) + '...' + input.substring(input.length - 4);
+    shortenedAddress = `${address.substring(0, 4)}...${address.substring(address.length - 4)}`;
+    return shortenedAddress;
   }
+
+  // } else {
+  //   if (input.length <= 8) {
+  //     return input;
+  //   } else {
+  //     return input.substring(0, 4) + '...' + input.substring(input.length - 4);
+  //   }
+  // }
 }
   
 
