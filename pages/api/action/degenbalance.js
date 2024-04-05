@@ -1,4 +1,5 @@
 import { getSSLHubRpcClient, Message } from "@farcaster/hub-nodejs";
+import axios from 'axios';
 
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 const HubURL = process.env.NEYNAR_HUB
@@ -36,7 +37,11 @@ export default async function handler(req, res) {
 
       let remaningAllowance = Number(totalAllowance) - Number(usedAllowance)
       console.log(remaningAllowance)
-      res.status(200).send({message: 'Balance:', remaningAllowance});
+
+      const jsonResponse = { message: 'Balance', remainingAllowance };
+      res.setHeader('Content-Type', 'application/json');
+
+      res.status(200).json(jsonResponse);
 
     } catch (error) {
         console.error(error);
