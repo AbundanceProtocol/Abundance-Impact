@@ -8,7 +8,6 @@ const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_
 export default function ArticlePage({params}) {
   const router = useRouter();
   const ref = useRef(null)
-  const initialState = { text: null, author: null, date: null, fid: null }
 
   const Article = () => {
     
@@ -22,7 +21,7 @@ export default function ArticlePage({params}) {
             
 
         <Head>
-          <title>@{username} Balance | Impact App </title>
+          <title>Balance | Impact App </title>
           <meta name="description" content={`Building the global superalignment layer`} />
           <meta name="viewport" content="width=device-width"/>
           <meta property="og:title" content="Longcast" />
