@@ -25,11 +25,11 @@ export default function ArticlePage({params}) {
           <meta name="description" content={`Building the global superalignment layer`} />
           <meta name="viewport" content="width=device-width"/>
           <meta property="og:title" content="Longcast" />
-          <meta property='og:image' content={`${baseURL}/api/frames/image?id=${articleHash}&page=0`} />
+          <meta property='og:image' content={`${baseURL}/api/frames/image?id=1&page=0`} />
           <meta property="fc:frame" content="vNext" />
 
           
-          <meta property="fc:frame:button:1" content={`Next Page [2/${totalPages}]`} />
+          <meta property="fc:frame:button:1" content={`Check Balance`} />
           <meta property="fc:frame:button:1:action" content="post" />
           <meta property="fc:frame:button:1:target" content={`${baseURL}/api/action/degenbalance`} />
         </Head>
