@@ -55,15 +55,15 @@ export default function UserPage({username}) {
   useEffect(() => {
     if (user && user.fid !== '-') {
       getUserCasts(user.fid)
-      getUserDailyTips(user.fid)
+      getUserTipsReceived(user.fid)
     }
   }, [user])
 
-  async function getUserDailyTips(fid) {
+  async function getUserTipsReceived(fid) {
     // console.log(fid, userFeed)
     if (user) {
       try {
-        const response = await axios.get('/api/getUserDailyTips', {
+        const response = await axios.get('/api/degen/getUserTipsReceived', {
           params: { fid }
         })
         const tips = response.data.tips

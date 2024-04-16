@@ -231,7 +231,7 @@ html, body {
     align-items: center;
     justify-content: center;
     height: 38px !important;
-    width: 130px !important;
+    width: 100px !important;
     padding: 7px;
     min-width: 80px !important;
     border: 2px solid #770000;
@@ -239,7 +239,22 @@ html, body {
     cursor: pointer;
 }
 
-.out-btn:hover {
+.mini-out-btn {
+    background-color: #990000 !important;
+    font-weight: 600;
+    color: #eee;
+    align-items: center;
+    justify-content: center;
+    height: 38px !important;
+    width: 40px !important;
+    padding: 6px;
+    min-width: 40px !important;
+    border: 2px solid #770000;
+    border-radius: 12px;
+    cursor: pointer;
+}
+
+.mini-out-btn:hover, .out-btn:hover {
     background-color: #660000 !important;
     color: #ccc;
     border: 2px solid #440000;
@@ -910,6 +925,14 @@ blockquote {
     background-color: #0c0;
 }
 
+.flash-fail {
+    color: #c00 !important;
+}
+
+.flash-fail:hover {
+    background-color: #ffdddd44;
+}
+
 .unfollow-select-drk:hover {
     border: 2px solid #cdd;
     color: #cdd;
@@ -963,6 +986,15 @@ blockquote {
     color: #933;
 }
 
+.impact-arrow {
+    border: 0px solid #345;
+    padding: 3px 5px 0 5px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: #345;
+    background-color: transparent;
+}
+
 .recast-btn {
     border: 0px solid #222;
     padding: 3px 5px;
@@ -971,7 +1003,7 @@ blockquote {
     background-color: transparent;
 }
 
-.recast-btn:hover {
+.impact-arrow:hover, .recast-btn:hover {
     background-color: #ddffdd44;
     color: #393;
 }
@@ -2088,6 +2120,22 @@ blockquote {
     height: calc(100vh / 1.5);
     justify-items: start;
 }
+
+.selection-btn {
+    cursor: pointer;
+    padding: 5px 6px;
+    white-space: nowrap;
+    border-radius: 4px;
+    width: 100%;
+    justify-content: flex-start;
+    align-items: flex-start;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+
+
+
 
 
 .nav-shadow {

@@ -18,11 +18,15 @@ export default Buttons;
 
 const button = {
     'top-menu': ['main', 'user'],
-    'side-menu': ['Feed', 'Search', 'Ecosystem', 'Reviews', 'Notifications', 'Profile', 'Funding', 'Challenge', 'Propose', 'Cast'],
-    'bottom-nav': ['Feed', 'Search', 'Ecosystem', 'Reviews', 'Notifications'],
+    'side-menu': ['Impact', 'Studio'],
+    // 'side-menu': ['Impact', 'Search', 'Ecosystem', 'Reviews', 'Notifications', 'Studio', 'Funding', 'Challenge', 'Propose', 'Cast'],
+    'bottom-nav': ['Impact', 'Studio'],
+    // 'bottom-nav': ['Impact', 'Search', 'Ecosystem', 'Reviews', 'Notifications'],
     'nav-menu': {
-        'main': ['Feed', 'Search', 'Ecosystem'],
-        'user': ['Profile', 'Reviews', 'Notifications', 'Funding', 'Challenge', 'Propose', 'Cast'],
+        'main': ['Impact'],
+        'user': ['Studio'],
+        // 'main': ['Impact', 'Search', 'Ecosystem'],
+        // 'user': ['Studio', 'Reviews', 'Notifications', 'Funding', 'Challenge', 'Propose', 'Cast'],
     },
 
     ////// TOP MENU //////
@@ -47,7 +51,7 @@ const button = {
 
     ////// LEFT MENU //////
 
-    'Feed': {
+    'Impact': {
         link: '/',
         menu: 'Home',
         description: 'Your feed',
@@ -87,8 +91,8 @@ const button = {
         working: false,
         icon: IoNotifications
     },
-    'Profile': {
-        link: '/~/profile',
+    'Studio': {
+        link: '/~/studio',
         menu: 'user',
         description: 'Your profile',
         account: true,

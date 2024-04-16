@@ -95,11 +95,77 @@ export async function setEmbeds(feed) {
 // format follower count
 export function formatNum(num) {
   const number = Number(num)
-  let formattedNumber = number
-  if (number > 1000000) {
-    formattedNumber = (number / 1000000).toFixed(1) + 'M'
-  } else if (number > 1000) {
-    formattedNumber = (number / 1000).toFixed(1) + 'K'
+  if (isNaN(number)) {
+    return '-'
+  } else {
+    let formattedNumber = number
+    if (number > 1000000) {
+      formattedNumber = (number / 1000000).toFixed(1) + 'M'
+    } else if (number > 1000) {
+      formattedNumber = (number / 1000).toFixed(1) + 'K'
+    }
+    return formattedNumber
   }
-  return formattedNumber
+}
+
+
+export function getCurrentDateUTC() {
+  const now = new Date();
+  return new Date(Date.UTC(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    now.getHours(),
+    now.getMinutes(),
+    now.getSeconds(),
+    now.getMilliseconds()
+  ));
+};
+
+
+export function isYesterday(previous, current) {
+
+  const currentYear = current.getUTCFullYear();
+  const currentMonth = current.getUTCMonth();
+  const currentDay = current.getUTCDate();
+  
+  // Clone the date stored in store.userUpdateTime
+  const storedDate = new Date(previous);
+  const storedYear = storedDate.getUTCFullYear();
+  const storedMonth = storedDate.getUTCMonth();
+  const storedDay = storedDate.getUTCDate();
+  
+  const isPreviousYesterday = storedYear === currentYear && storedMonth === currentMonth && storedDay === currentDay - 1;
+
+  if (isPreviousYesterday) {
+    return true
+  } else {
+    return false
+  }
+}
+
+
+export function getTimeRange(time) {
+
+  let timeRange = null
+  if (time === '24hr') {
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    timeRange = { $gte: twentyFourHoursAgo };
+  } else if (time === '3days') {
+    const sevenDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
+    timeRange = { $gte: sevenDaysAgo };
+  } else if (time === '7days') {
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    timeRange = { $gte: sevenDaysAgo };
+  } else if (time === '30days') {
+    const lastMonthStart = new Date();
+    lastMonthStart.setMonth(lastMonthStart.getMonth() - 1);
+    lastMonthStart.setDate(1);
+    lastMonthStart.setHours(0, 0, 0, 0);
+    const lastMonthEnd = new Date();
+    lastMonthEnd.setDate(0);
+    lastMonthEnd.setHours(23, 59, 59, 999);
+    timeRange = { $gte: lastMonthStart, $lte: lastMonthEnd };
+  }
+  return timeRange
 }

@@ -318,18 +318,111 @@ export default function App({ Component, pageProps }) {
   }
 
   const testButton = async () => {
-    // console.log('test')
-    try {
-      const response = await axios.get('/api/getIPFS', {
-        params: {
-          hash: 'QmQpfVfn78d4hLHmDG8cehbBQoXPp8kppuWZHWo5yy44qy',
-        }
-      })
-      console.log(response.data?.username, response.data?.text)
 
+
+    const fid = await store.fid
+
+
+    try {
+      const response = await axios.get('/api/curation/getTopPicks'
+      )
+      let casts = []
+      if (response && response.data && response.data.casts.length > 0) {
+        casts = response.data.casts
+        console.log(response.data.casts)
+      }
+
+      let displayedCasts = []
+
+      if (casts) {
+        casts.forEach(cast => {
+          let newCast = {
+            author: {
+              fid: cast.author_fid,
+              pfp_url: cast.author_pfp,
+              username: '...',
+              display_name: '...',
+              power_badge: false,
+            },
+            hash: cast.cast_hash,
+            timestamp: cast.createdAt,
+            text: cast.cast_text,
+            embeds: [],
+            mentioned_profiles: [],
+            replies: {
+              count: 0
+            },
+            reactions: {
+              recasts: [],
+              likes: []
+            }
+          }
+
+          displayedCasts.push(newCast)
+        });
+      }
+
+      console.log(displayedCasts)
+      // const castHashes = response.data.casts
+      const castHashes = casts.map(obj => obj.cast_hash)
+      console.log(castHashes)
+
+      // Convert the array into a single string separated by ','
+
+      const castString = castHashes.join(',');
+      console.log(castString)
+
+
+      const populateResponse = await axios.get('/api/curation/getCastsByHash', {
+        params: { fid, castString }
+      })
+
+      console.log(populateResponse)
+      // const feed = response.data.feed
+      // await setUserFeed(feed)
+      // const updatedFeed = await setEmbeds(feed)
+      // console.log(updatedFeed)
+      // setUserFeed([...updatedFeed])
     } catch (error) {
       console.error('Error submitting data:', error)
     }
+
+
+
+
+    // try {
+    //   const response = await axios.post('/api/curation/check', {fid: fid })
+    //   console.log('Post created:', response);
+    //   console.log('Post created:', response.data.impact_allowance);
+    //   // console.log('Post created:', response.data);
+    //   return response;
+    // } catch (error) {
+    //   console.error('Error creating post:', error);
+    // }
+
+    // try {
+    //   const response = await axios.get('/api/curation/getCastsByImpact')
+    //   console.log(response)
+    // } catch (error) {
+    //   console.error('Error creating post:', error);
+    // }
+    
+    
+    // try {
+    //   const fid = await store.fid
+    //   console.log(fid)
+    //   const response = await axios.get('/api/curation/getLatestUserCast', {
+    //     params: {
+    //       fid: fid,
+    //     }
+    //   })
+    //   const castHash = response.data.hash
+    //   console.log(castHash)
+    //   // console.log('Post created:', response.data);
+    //   return response;
+    // } catch (error) {
+    //   console.error('Error creating post:', error);
+    // }
 
 
   }
@@ -614,7 +707,7 @@ export default function App({ Component, pageProps }) {
         </div>
         <div>
           <div className="container cast-area" style={isMobile ? {} : {width: isMobile? '100%' : '620px'}}>
-            <AccountContext.Provider value={{...store.account, ref1, LoginPopup, LogoutPopup}}>
+            <AccountContext.Provider value={{...store.account, ref1, LoginPopup, LogoutPopup }}>
               <Component {...pageProps} connect={connect} />
             </AccountContext.Provider>
           </div>
