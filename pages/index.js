@@ -489,7 +489,7 @@ export default function Home() {
           fid: cast.author.fid,
           cast: cast.hash,
           tip: castTip,
-          coin: '$test'
+          coin: '$degen'
         }
         newDistribution.push(castDistribution)
         const curators = cast.impact_points
@@ -505,7 +505,7 @@ export default function Home() {
             cast: 'temp',
             points: points,
             // tip: curatorTip,
-            coin: '$test'
+            coin: '$degen'
           }
           newCurators.push(curatorDistribution)
         })
@@ -1016,7 +1016,7 @@ export default function Home() {
     }
 
     // const array1 = [
-    //   { cast: "temp", coin: "$test", fid: 9326, points: 22 }
+    //   { cast: "temp", coin: "$degen", fid: 9326, points: 22 }
     // ];
   
     // const array2 = [
