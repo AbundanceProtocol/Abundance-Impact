@@ -18,14 +18,9 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
   const likeRefs = useRef([])
   const recastRefs = useRef([])
   const [userFid, setuserFid] = useState(null)
-  // const [points, setPoints] = useState(0)
-  // const [quality, setQuality] = useState(0)
-  // const [qualityAbs, setQualityAbs] = useState(0)
   const [fail, setFail] = useState(false)
-  // const [cast, setCast] = useState(null)
   const userRemainingImpact = useStore(state => state.userRemainingImpact);
   const userRemainingQuality = useStore(state => state.userRemainingQuality);
-
   const handleClick = (embed) => {
     openImagePopup(embed); 
   };
@@ -68,7 +63,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
         let castBalanceQ = qualityResponse.data.castBalanceQ
         const updatedCast = {...cast, impact_balance: castTotalI, quality_absolute: castAbsoluteQ, quality_balance: castBalanceQ}
         updateCast(index, updatedCast)
-
+        
         // setPoints(castTotalI)
         // setQuality(castBalanceQ)
         // setQualityAbs(castAbsoluteQ)
@@ -188,6 +183,64 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // useEffect(() => {
+  //   console.log('updated')
+  //   console.log(cast.impact_balance)
+
+  // }, [router])
+
+  async function isImage(url) {
+    try {
+      const response = await fetch(url, { method: 'HEAD' });
+      if (response.ok) {
+        const contentType = response.headers.get('Content-Type');
+        // console.log(contentType)
+        return contentType && contentType.startsWith('image/');
+      }
+      return false;
+    } catch (error) {
+      console.error('Error checking image URL:', error);
+      return false;
+    }
+  }
+
+  async function checkImageUrls(cast) {
+    const { embeds } = cast;
+  
+    if (embeds && embeds.length > 0) {
+      const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
+        const isImageResult = await isImage(embed.url);
+        return {
+          ...embed,
+          type: isImageResult ? 'image' : 'other'
+        };
+      }));
+      
+      return {
+        ...cast,
+        embeds: updatedEmbeds
+      };
+    }
+    
+    return cast; // Return original cast object if embeds array is empty or undefined
+  }
+
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const castReturn = await checkImageUrls(cast);
+  //       setCast(castReturn)
+  //       // console.log(cast);
+  //     } catch (error) {
+  //       console.error('Error fetching image URLs:', error);
+  //     }
+  //   };
+
+  //   fetchData();
+  // }, []);
+
+
 
   const goToCast = async (event, cast) => {
     event.preventDefault()
@@ -316,8 +369,9 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
               {/* {cast.text} */}
               </div>
             {(cast.embeds.length > 0) && (cast.embeds.map((embed, subindex) => (
+              
             <div className='flex-col' style={{alignItems: 'center'}}>
-              {(embed.type && embed.type == 'img') && (
+              {(embed.type && embed.type == 'image') && (
                 <div className="" key={`${index}-${subindex}`}>
                   <div className="flex-col" style={{position: 'relative'}}>
                     <img 

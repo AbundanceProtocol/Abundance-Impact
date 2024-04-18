@@ -9,7 +9,7 @@ import axios from 'axios';
 import Cast from '../../components/Cast'
 import DashboardBtn from '../../components/Panels/DashboardBtn'
 import { FaLock, FaPowerOff } from "react-icons/fa";
-import { setEmbeds, formatNum, getCurrentDateUTC, isYesterday } from '../../utils/utils';
+import { formatNum, getCurrentDateUTC, isYesterday, checkImageUrls } from '../../utils/utils';
 import { FaRegStar } from 'react-icons/fa';
 import { IoDiamondOutline as Diamond } from "react-icons/io5";
 // import { MdOutlineRefresh } from "react-icons/md";
@@ -37,37 +37,77 @@ export default function ProfilePage() {
   const userTotalQuality = useStore(state => state.userTotalQuality);
   const userRemainingImpact = useStore(state => state.userRemainingImpact);
   const userRemainingQuality = useStore(state => state.userRemainingQuality);
+  const [feedRouterScheduled, setFeedRouterScheduled] = useState(false);
 
   useEffect(() => {
     if (store.userProfile) {
       setUser(store.userProfile)
     }
-    if (store.fid && store.fid !== '-') {
-      getUserFeed(store.fid, false)
-      // getUserTipsReceived(user.fid)
-      getUserAllowance(store.fid)
-      const currentDate = getCurrentDateUTC()
-      if (store && store.userUpdateTime && isYesterday(store.userUpdateTime, currentDate)) {
-        console.log('1')
-        getCurationAllowance(store.fid)
-      }
+    // if (store.fid && store.fid !== '-') {
+    //   console.log('4')
 
-    }
+    //   getUserFeed(store.fid, false)
+    //   // getUserTipsReceived(user.fid)
+    //   getUserAllowance(store.fid)
+    //   const currentDate = getCurrentDateUTC()
+    //   if (store && store.userUpdateTime && isYesterday(store.userUpdateTime, currentDate)) {
+    //     console.log('1')
+    //     getCurationAllowance(store.fid)
+    //   }
+
+    // }
   }, []);
 
-  useEffect(() => {
-    if (user && user.fid && user.fid !== '-') {
-      getUserFeed(user.fid, false)
-      // getUserTipsReceived(user.fid)
-      getUserAllowance(user.fid)
-      const currentDate = getCurrentDateUTC()
-      if (store && store.userUpdateTime && isYesterday(store.userUpdateTime, currentDate)) {
-        console.log('1')
-        getCurationAllowance(user.fid)
-      }
+  // useEffect(() => {
+  //   if (user && user.fid && user.fid !== '-') {
+  //     console.log('1')
+  //     getUserFeed(user.fid, false)
+  //     // getUserTipsReceived(user.fid)
+  //     getUserAllowance(user.fid)
+  //     const currentDate = getCurrentDateUTC()
+  //     if (store && store.userUpdateTime && isYesterday(store.userUpdateTime, currentDate)) {
+  //       console.log('1')
+  //       getCurationAllowance(user.fid)
+  //     }
+  //   }
+  // }, [user])
 
+  useEffect(() => {
+    if (feedRouterScheduled) {
+      if (user && user.fid && user.fid !== '-') {
+        console.log('2')
+
+        getUserFeed(user.fid, false)
+        // getUserTipsReceived(user.fid)
+        getUserAllowance(user.fid)
+        const currentDate = getCurrentDateUTC()
+        if (store && store.userUpdateTime && isYesterday(store.userUpdateTime, currentDate)) {
+          console.log('1')
+          getCurationAllowance(user.fid)
+        }
+      }
+      setFeedRouterScheduled(false);
+    } else {
+      const timeoutId = setTimeout(() => {
+        if (user && user.fid && user.fid !== '-') {
+          console.log('3')
+
+          getUserFeed(user.fid, false)
+          // getUserTipsReceived(user.fid)
+          getUserAllowance(user.fid)
+          const currentDate = getCurrentDateUTC()
+          if (store && store.userUpdateTime && isYesterday(store.userUpdateTime, currentDate)) {
+            console.log('1')
+            getCurationAllowance(user.fid)
+          }
+        }
+        setFeedRouterScheduled(false);
+      }, 300);
+  
+      return () => clearTimeout(timeoutId);
     }
-  }, [user])
+  }, [user, feedRouterScheduled]);
+
 
   async function refresh() {
     

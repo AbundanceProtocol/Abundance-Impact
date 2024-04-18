@@ -49,24 +49,24 @@ export function timePassed(timestamp) {
 
 
 // check if url is an image
-export async function isImage(url) {
-  if (url) {
-    try {
-      const response = await axios.get('/api/getHeader', {
-        params: { url }
-      })
-      if (response.data) {
-        return response.data
-      } else {
-        return false
-      }
-    } catch (error) {
-      return false
-    }
-  } else {
-    return false
-  }
-}
+// export async function isImage(url) {
+//   if (url) {
+//     try {
+//       const response = await axios.get('/api/getHeader', {
+//         params: { url }
+//       })
+//       if (response.data) {
+//         return response.data
+//       } else {
+//         return false
+//       }
+//     } catch (error) {
+//       return false
+//     }
+//   } else {
+//     return false
+//   }
+// }
 
 
 // add 'img' or 'url' label to embeds
@@ -168,4 +168,41 @@ export function getTimeRange(time) {
     timeRange = { $gte: lastMonthStart, $lte: lastMonthEnd };
   }
   return timeRange
+}
+
+
+async function isImage(url) {
+  try {
+    const response = await fetch(url, { method: 'HEAD' });
+    if (response.ok) {
+      const contentType = response.headers.get('Content-Type');
+      // console.log(contentType)
+      return contentType && contentType.startsWith('image/');
+    }
+    return false;
+  } catch (error) {
+    console.error('Error checking image URL:', error);
+    return false;
+  }
+}
+
+export async function checkImageUrls(cast) {
+  const { embeds } = cast;
+
+  if (embeds && embeds.length > 0) {
+    const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
+      const isImageResult = await isImage(embed.url);
+      return {
+        ...embed,
+        type: isImageResult ? 'image' : 'other'
+      };
+    }));
+    
+    return {
+      ...cast,
+      embeds: updatedEmbeds
+    };
+  }
+  
+  return cast; // Return original cast object if embeds array is empty or undefined
 }

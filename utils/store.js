@@ -44,6 +44,47 @@ const useStore = create(persist((set, get) => {
 
         userTipPercent: 50,
 
+        resetStore: () => {set({
+            router: null,
+            deviceSize: {
+                width: null,
+                height: null
+            },
+            isMobile: false,
+            account: null,
+            username: null,
+            ref: null,
+    
+            fid: null,
+            isAuth: false,
+            signer_uuid: null,
+    
+            usernameFC: null,
+            srcUrlFC: null,
+            userDisplayNameFC: null,
+            userActiveFC: false,
+            userBioFC: null,
+            userFollowersFC: null,
+            userFollowingFC: null,
+            userEthVerAddresses: [],
+            userSolVerAddresses: [],
+            userProfile: null,
+    
+            userData: null,
+            castData: null,
+            proposalData: null,
+    
+            userTipsReceived: [],
+            userTotalImpact: null,
+            userTotalQuality: null,
+            userRemainingImpact: null,
+            userRemainingQuality: null,
+            userRemainingTips: [],
+            userUpdateTime: null,
+    
+            userTipPercent: 50,
+        })},
+
         // Setters
         setAccount: (account) => set({ account }),
         setUsername: (username) => set({ username }),

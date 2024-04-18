@@ -320,72 +320,72 @@ export default function App({ Component, pageProps }) {
   const testButton = async () => {
 
 
-    const fid = await store.fid
+    // const fid = await store.fid
 
 
-    try {
-      const response = await axios.get('/api/curation/getTopPicks'
-      )
-      let casts = []
-      if (response && response.data && response.data.casts.length > 0) {
-        casts = response.data.casts
-        console.log(response.data.casts)
-      }
+    // try {
+    //   const response = await axios.get('/api/curation/getTopPicks'
+    //   )
+    //   let casts = []
+    //   if (response && response.data && response.data.casts.length > 0) {
+    //     casts = response.data.casts
+    //     console.log(response.data.casts)
+    //   }
 
-      let displayedCasts = []
+    //   let displayedCasts = []
 
-      if (casts) {
-        casts.forEach(cast => {
-          let newCast = {
-            author: {
-              fid: cast.author_fid,
-              pfp_url: cast.author_pfp,
-              username: '...',
-              display_name: '...',
-              power_badge: false,
-            },
-            hash: cast.cast_hash,
-            timestamp: cast.createdAt,
-            text: cast.cast_text,
-            embeds: [],
-            mentioned_profiles: [],
-            replies: {
-              count: 0
-            },
-            reactions: {
-              recasts: [],
-              likes: []
-            }
-          }
+    //   if (casts) {
+    //     casts.forEach(cast => {
+    //       let newCast = {
+    //         author: {
+    //           fid: cast.author_fid,
+    //           pfp_url: cast.author_pfp,
+    //           username: '...',
+    //           display_name: '...',
+    //           power_badge: false,
+    //         },
+    //         hash: cast.cast_hash,
+    //         timestamp: cast.createdAt,
+    //         text: cast.cast_text,
+    //         embeds: [],
+    //         mentioned_profiles: [],
+    //         replies: {
+    //           count: 0
+    //         },
+    //         reactions: {
+    //           recasts: [],
+    //           likes: []
+    //         }
+    //       }
 
-          displayedCasts.push(newCast)
-        });
-      }
+    //       displayedCasts.push(newCast)
+    //     });
+    //   }
 
-      console.log(displayedCasts)
-      // const castHashes = response.data.casts
-      const castHashes = casts.map(obj => obj.cast_hash)
-      console.log(castHashes)
+    //   console.log(displayedCasts)
+    //   // const castHashes = response.data.casts
+    //   const castHashes = casts.map(obj => obj.cast_hash)
+    //   console.log(castHashes)
 
-      // Convert the array into a single string separated by ','
+    //   // Convert the array into a single string separated by ','
 
-      const castString = castHashes.join(',');
-      console.log(castString)
+    //   const castString = castHashes.join(',');
+    //   console.log(castString)
 
 
-      const populateResponse = await axios.get('/api/curation/getCastsByHash', {
-        params: { fid, castString }
-      })
+    //   const populateResponse = await axios.get('/api/curation/getCastsByHash', {
+    //     params: { fid, castString }
+    //   })
 
-      console.log(populateResponse)
-      // const feed = response.data.feed
-      // await setUserFeed(feed)
-      // const updatedFeed = await setEmbeds(feed)
-      // console.log(updatedFeed)
-      // setUserFeed([...updatedFeed])
-    } catch (error) {
-      console.error('Error submitting data:', error)
-    }
+    //   console.log(populateResponse)
+    //   // const feed = response.data.feed
+    //   // await setUserFeed(feed)
+    //   // const updatedFeed = await setEmbeds(feed)
+    //   // console.log(updatedFeed)
+    //   // setUserFeed([...updatedFeed])
+    // } catch (error) {
+    //   console.error('Error submitting data:', error)
+    // }
 
 
 

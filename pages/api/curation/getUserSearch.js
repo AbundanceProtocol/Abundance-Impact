@@ -90,6 +90,14 @@ export default async function handler(req, res) {
     
           returnedCasts.sort((a, b) => b.impact_total - a.impact_total);
     
+          returnedCasts = returnedCasts.reduce((acc, current) => {
+            const existingItem = acc.find(item => item._id === current._id);
+            if (!existingItem) {
+              acc.push(current);
+            }
+            return acc;
+          }, [])
+
           returnedCasts = shuffleArray(returnedCasts);
     
           returnedCasts = returnedCasts.slice(0, limit);

@@ -10,7 +10,7 @@ import { AiOutlineLoading3Quarters as Loading } from "react-icons/ai";
 import mql from '@microlink/mql';
 import { useRouter } from 'next/router';
 import Cast from '../components/Cast'
-import { setEmbeds, formatNum, getTimeRange } from '../utils/utils';
+import { formatNum, getTimeRange, checkImageUrls } from '../utils/utils';
 import { IoShuffleOutline as Shuffle, IoPeople, IoPeopleOutline } from "react-icons/io5";
 import { BsClock } from "react-icons/bs";
 import { GoTag } from "react-icons/go";
@@ -104,18 +104,18 @@ export default function Home() {
   const [tipDistribution, setTipDistribution] = useState({curators: [], creators: [], totalTip: null, totalPoints: null})
   const [totalTip, setTotalTip] = useState(0)
 
-  async function getTrendingFeed() {
-    try {
-      const response = await axios.get('/api/getFeed')
-      const feed = response.data.feed
-      setUserFeed(feed)
-      const updatedFeed = await setEmbeds(feed)
-      setUserFeed([...updatedFeed])
-      console.log(updatedFeed)
-    } catch (error) {
-      console.error('Error submitting data:', error)
-    }
-  }
+  // async function getTrendingFeed() {
+  //   try {
+  //     const response = await axios.get('/api/getFeed')
+  //     const feed = response.data.feed
+  //     setUserFeed(feed)
+  //     const updatedFeed = await setEmbeds(feed)
+  //     setUserFeed([...updatedFeed])
+  //     console.log(updatedFeed)
+  //   } catch (error) {
+  //     console.error('Error submitting data:', error)
+  //   }
+  // }
 
   function btnText(type) {
     if (type == 'tags' && (userQuery[type] == 'all' || userQuery[type].length == 0)) {
@@ -454,10 +454,10 @@ export default function Home() {
 
   function determineDistribution(ulfilteredCasts, tip) {
     // console.log(tip)
-    console.log(ulfilteredCasts)
+    // console.log(ulfilteredCasts)
 
     function filterObjects(castArray, filterFid) {
-      console.log(castArray, filterFid)
+      // console.log(castArray, filterFid)
       return castArray.filter(obj => {
         // Check if author.fid is not equal to filterFid
         if (obj.author.fid != filterFid) {
@@ -565,14 +565,29 @@ export default function Home() {
     }
 
     const casts = await getSearch(timeRange, tags, channel, curator, text, shuffle)
+    let filteredCasts
     let sortedCasts
 
     if (casts) {
-      sortedCasts = casts.sort((a, b) => b.impact_total - a.impact_total);
+
+      // console.log(casts)
+      filteredCasts = await casts.reduce((acc, current) => {
+        const existingItem = acc.find(item => item._id === current._id);
+        if (!existingItem) {
+          acc.push(current);
+        }
+        return acc;
+      }, [])
+      // console.log(filteredCasts)
+
+      sortedCasts = filteredCasts.sort((a, b) => b.impact_total - a.impact_total);
+      // console.log(sortedCasts)
+
     }
 
 
     let displayedCasts = await populateCast(sortedCasts)
+    // setUserFeed(displayedCasts)
 
     // console.log(displayedCasts)
     let castString
@@ -601,7 +616,7 @@ export default function Home() {
 
     if (populateResponse) {
       populatedCasts = populateResponse.data.casts
-      setUserFeed(populatedCasts)
+      // setUserFeed(populatedCasts)
     }
 
     for (let i = 0; i < populatedCasts.length; i++) {
@@ -617,26 +632,41 @@ export default function Home() {
     }
 
     setUserFeed(displayedCasts)
-  }
 
 
-  async function getUserFeed(fid, recasts) {
-    console.log(fid)
-    if (store.fid) {
-      try {
-        const response = await axios.get('/api/getUserFeed', {
-          params: { fid, recasts }
-        })
-        const feed = response.data.feed
-        await setUserFeed(feed)
-        const updatedFeed = await setEmbeds(feed)
-        console.log(updatedFeed)
-        setUserFeed([...updatedFeed])
-      } catch (error) {
-        console.error('Error submitting data:', error)
-      }
+    async function checkImageUrlsForCasts(casts) {
+      // Map over each cast and apply checkImageUrls function
+      const updatedCasts = await Promise.all(casts.map(async (cast) => {
+        return await checkImageUrls(cast);
+      }));
+    
+      return updatedCasts;
     }
+    
+    // Usage
+    const updatedCasts = await checkImageUrlsForCasts(displayedCasts);
+    setUserFeed(updatedCasts);
+
   }
+
+
+  // async function getUserFeed(fid, recasts) {
+  //   console.log(fid)
+  //   if (store.fid) {
+  //     try {
+  //       const response = await axios.get('/api/getUserFeed', {
+  //         params: { fid, recasts }
+  //       })
+  //       const feed = response.data.feed
+  //       await setUserFeed(feed)
+  //       const updatedFeed = await setEmbeds(feed)
+  //       console.log(updatedFeed)
+  //       setUserFeed([...updatedFeed])
+  //     } catch (error) {
+  //       console.error('Error submitting data:', error)
+  //     }
+  //   }
+  // }
 
   const ExpandImg = ({embed}) => {
     return (
