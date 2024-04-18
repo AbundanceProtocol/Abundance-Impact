@@ -42,6 +42,17 @@ export default function ProfilePage() {
     if (store.userProfile) {
       setUser(store.userProfile)
     }
+    if (store.fid && store.fid !== '-') {
+      getUserFeed(store.fid, false)
+      // getUserTipsReceived(user.fid)
+      getUserAllowance(store.fid)
+      const currentDate = getCurrentDateUTC()
+      if (store && store.userUpdateTime && isYesterday(store.userUpdateTime, currentDate)) {
+        console.log('1')
+        getCurationAllowance(store.fid)
+      }
+
+    }
   }, []);
 
   useEffect(() => {

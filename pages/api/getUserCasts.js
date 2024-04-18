@@ -4,7 +4,7 @@ export default async function handler(req, res) {
   if (req.method === 'GET' && fid) {
     try {
       const base = "https://api.neynar.com/";
-      const url = `${base}v2/farcaster/feed/user/${fid}/replies_and_recasts?limit=5`;
+      const url = `${base}v2/farcaster/feed/user/${fid}/replies_and_recasts?limit=15`;
       const response = await fetch(url, {
         headers: {
           accept: "application/json",
