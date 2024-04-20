@@ -33,7 +33,6 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
   }
 
   async function boostQuality(cast, qualityAmount) {
-
     const fid = store.fid
     const castHash = cast.hash
     // console.log(fid, castHash, qualityAmount)
@@ -55,7 +54,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
     if (fid && fid !== '-' && qualityAmount && castHash && userRemainingQuality > 0 && (cast.impact_balance || cast.impact_balance == 0)  &&  !(cast.impact_balance == 0 && qualityAmount < 0)) {
       qualityResponse = await postQuality(fid, castHash, qualityAmount)
       console.log(qualityResponse)
-      if (qualityResponse && qualityResponse.data) {
+      if (qualityResponse && qualityResponse.data && qualityResponse.status == 201) {
         let userBalance = qualityResponse.data.userBalance
         let addedPoints = qualityResponse.data.addedPoints
         let castAbsoluteQ = qualityResponse.data.castAbsoluteQ
@@ -78,12 +77,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
   }
 
 
-
-
-
   async function boostImpact(cast, impactAmount) {
-    // console.log(cast)
-    // console.log(cast.hash, cast.text, cast.author.fid, cast.author.pfp_url, cast.author.power_badge, cast.author.verifications[0], cast.author.username, cast.author.display_name)
     let channel = null
     if (cast.parent_url) {
       const isChannel = cast.parent_url.slice(0,31)
@@ -91,7 +85,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
         channel = cast.parent_url
       }
     }
-    const amount = 1
+    // const amount = 1
     const fid = store.fid
     const castContext = {
       author_fid: cast.author.fid,
@@ -120,7 +114,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
     if (fid && fid !== '-' && impactAmount && castContext && userRemainingImpact > 0) {
       impactResponse = await postImpact(fid, castContext, impactAmount)
       // console.log(impactResponse)
-      if (impactResponse && impactResponse.data) {
+      if (impactResponse && impactResponse.data && impactResponse.status == 201) {
         let returnedBalance = impactResponse.data.balance
         let currentImpact = cast.impact_balance || 0
         let addedPoints = impactResponse.data.points
