@@ -644,8 +644,86 @@ export default function Home() {
     }
     
     // Usage
-    const updatedCasts = await checkImageUrlsForCasts(displayedCasts);
-    setUserFeed(updatedCasts);
+    const castsWithImages = await checkImageUrlsForCasts(displayedCasts);
+    setUserFeed(castsWithImages);
+
+
+    async function getSubcast(hash) {
+      if (hash) {
+        try {
+          const response = await axios.get('/api/getCastByHash', {
+            params: {
+              hash
+            }
+          })
+          const castData = response.data.cast.cast
+          if (castData) {
+            console.log(castData)
+            return castData
+          } else {
+            return null
+          }
+        } catch (error) {
+          console.error('Error submitting data:', error)
+          return null
+        }
+      }
+    }
+
+    async function populateSubcasts(cast) {
+      const { embeds } = cast;
+      // console.log(embeds)
+
+      if (embeds && embeds.length > 0) {
+        const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
+          // console.log(embed)
+          if (embed.type == 'subcast') {
+            // console.log(embed.cast_id.hash)
+            const subcastData = await getSubcast(embed.cast_id.hash)
+            const checkImages = await checkImageUrls(subcastData)
+            // console.log(checkImages)
+            return {
+              ...embed,
+              subcast: checkImages
+            };
+          } else {
+            return {
+              ...embed
+            }
+          }
+        }));
+        return {
+          ...cast,
+          embeds: updatedEmbeds
+        };
+      }
+      
+      return cast; // Return original cast object if embeds array is empty or undefined
+    }
+
+    async function checkSubcasts(casts) {
+      // Map over each cast and apply checkImageUrls function
+      const updatedCasts = await Promise.all(casts.map(async (cast) => {
+        return await populateSubcasts(cast);
+      }));
+    
+      return updatedCasts;
+    }
+
+
+    const castsWithSubcasts = await checkSubcasts(castsWithImages)
+    console.log(castsWithSubcasts)
+    setUserFeed(castsWithSubcasts);
+
+    // updatedCasts.forEach(cast => {
+    //   if (cast.embeds && cast.embeds.length > 0) {
+    //     cast.embeds.forEach(embed => {
+    //       if (embed.type == 'subcast') {
+
+    //       }
+    //     })
+    //   }
+    // })
 
   }
 

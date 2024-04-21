@@ -1,11 +1,12 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import useStore from '../../utils/store';
-import { Like, Recast, Message, Kebab, ActiveUser } from '../../pages/assets'
+import { Like, LikeOn, Recast, Message, Kebab, ActiveUser } from '../../pages/assets'
 import { FaSearch, FaLock, FaRegStar, FaStar, FaArrowUp, FaArrowDown } from "react-icons/fa"
 import axios from 'axios';
 import { timePassed } from '../../utils/utils';
 import CastText from './Text'
+import Subcast from './Subcast';
 import { IoDiamondOutline as Diamond } from "react-icons/io5";
 import { ImArrowUp, ImArrowDown  } from "react-icons/im";
 
@@ -56,7 +57,6 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
       console.log(qualityResponse)
       if (qualityResponse && qualityResponse.data && qualityResponse.status == 201) {
         let userBalance = qualityResponse.data.userBalance
-        let addedPoints = qualityResponse.data.addedPoints
         let castAbsoluteQ = qualityResponse.data.castAbsoluteQ
         let castTotalI = qualityResponse.data.castTotalI
         let castBalanceQ = qualityResponse.data.castBalanceQ
@@ -109,7 +109,6 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
       }
     }
 
-
     let impactResponse
     if (fid && fid !== '-' && impactAmount && castContext && userRemainingImpact > 0) {
       impactResponse = await postImpact(fid, castContext, impactAmount)
@@ -132,13 +131,6 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
     // console.log(impactResponse)
   }
 
-  
-  // useEffect(() => {
-  //   setCast(castData)
-
-  //   console.log('here')
-    
-  // }, [castData])
 
   useEffect(() => {
     if (screenWidth) {
@@ -177,63 +169,6 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-
-  // useEffect(() => {
-  //   console.log('updated')
-  //   console.log(cast.impact_balance)
-
-  // }, [router])
-
-  async function isImage(url) {
-    try {
-      const response = await fetch(url, { method: 'HEAD' });
-      if (response.ok) {
-        const contentType = response.headers.get('Content-Type');
-        // console.log(contentType)
-        return contentType && contentType.startsWith('image/');
-      }
-      return false;
-    } catch (error) {
-      console.error('Error checking image URL:', error);
-      return false;
-    }
-  }
-
-  async function checkImageUrls(cast) {
-    const { embeds } = cast;
-  
-    if (embeds && embeds.length > 0) {
-      const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
-        const isImageResult = await isImage(embed.url);
-        return {
-          ...embed,
-          type: isImageResult ? 'image' : 'other'
-        };
-      }));
-      
-      return {
-        ...cast,
-        embeds: updatedEmbeds
-      };
-    }
-    
-    return cast; // Return original cast object if embeds array is empty or undefined
-  }
-
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const castReturn = await checkImageUrls(cast);
-  //       setCast(castReturn)
-  //       // console.log(cast);
-  //     } catch (error) {
-  //       console.error('Error fetching image URLs:', error);
-  //     }
-  //   };
-
-  //   fetchData();
-  // }, []);
-
 
 
   const goToCast = async (event, cast) => {
@@ -359,13 +294,13 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
           </div>
           <div className="">
             <div style={{wordWrap: 'break-word', maxWidth: `100%`, width: textMax, whiteSpace: 'pre-line'}}>
-              <CastText text={cast.text} embeds={cast.embeds} mentions={cast.mentioned_profiles} />
-              {/* {cast.text} */}
+              {/* <CastText text={cast.text} embeds={cast.embeds} mentions={cast.mentioned_profiles} /> */}
+              {cast.text}
               </div>
             {(cast.embeds.length > 0) && (cast.embeds.map((embed, subindex) => (
               
             <div className='flex-col' style={{alignItems: 'center'}}>
-              {(embed.type && embed.type == 'image') && (
+              {(embed && embed.type && embed.type == 'image') && (
                 <div className="" key={`${index}-${subindex}`}>
                   <div className="flex-col" style={{position: 'relative'}}>
                     <img 
@@ -381,6 +316,11 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
                         borderRadius: '8px'}} 
                         onClick={() => {handleClick(embed)}} />
                   </div>
+                </div>
+              )}
+              {(embed && embed.type && embed.type == 'subcast') && (
+                <div className="" key={`${index}-${subindex}`}>
+                  <Subcast cast={embed.subcast} key={subindex} index={subindex} />
                 </div>
               )}
             </div>
@@ -406,7 +346,8 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
             <div className="flex-row" style={{flex: 1}}>
               <div
                 ref={el => (recastRefs.current[index] = el)} 
-                className='flex-row recast-btn'
+                className='flex-row recast-btn' 
+                style={{color: cast.viewer_context?.recasted ? '#3b3' : ''}}
                 onClick={() => postRecast(cast.hash, index, cast.reactions.recasts.length)}
                 >
                 <div className="">
@@ -418,11 +359,12 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
             <div className="flex-row" style={{flex: 4}}>
               <div 
                 ref={el => (likeRefs.current[index] = el)} 
-                className='flex-row like-btn'
+                className='flex-row like-btn' 
+                style={{color: cast.viewer_context?.liked ? '#b33' : ''}}
                 onClick={() => postLike(cast.hash, index, cast.reactions.likes.length)}
                 >
                 <div className="">
-                  <Like />
+                  {cast.viewer_context?.liked ? <LikeOn /> : <Like />}
                 </div>
                 <span className="" style={{padding: '0 0 0 5px'}}>{cast.reactions.likes.length}</span>
               </div>
@@ -431,7 +373,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
               <div className={`impact-arrow ${fail ? 'flash-fail' : ''}`} style={{padding: '0px 1px 0 0px'}} onClick={() => {boostQuality(cast, 1)}}>
                 <ImArrowUp />
               </div>
-{/* {console.log(cast.quality_balance)} */}
+
               <span className={`flex-row ${fail ? 'flash-fail' : ''}`} style={{padding: '0 0 0 5px', userSelect: 'none', gap: '0.15rem'}}>
                 <div>{cast.quality_balance || 0}</div>
               {(cast.quality_absolute && cast.quality_absolute !== 0 && cast.quality_absolute != Math.abs(cast.quality_balance)) ? (<div style={{color: '#666', fontSize: '13px', padding: '2px 0 0 0'}}>{`(${cast.quality_absolute})`}</div>) : ''}

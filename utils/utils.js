@@ -192,9 +192,10 @@ export async function checkImageUrls(cast) {
   if (embeds && embeds.length > 0) {
     const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
       const isImageResult = await isImage(embed.url);
+      const isSubcast = typeof embed.cast_id !== 'undefined'
       return {
         ...embed,
-        type: isImageResult ? 'image' : 'other'
+        type: isImageResult ? 'image' : isSubcast ? 'subcast' : 'other'
       };
     }));
     
