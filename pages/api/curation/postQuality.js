@@ -3,6 +3,7 @@ import User from '../../../models/User';
 import Impact from '../../../models/Impact';
 import Cast from '../../../models/Cast';
 import Quality from '../../../models/Quality';
+import Allowlist from '../../../models/Allowlist';
 import { getCurrentDateUTC } from '../../../utils/utils'; 
 const apiKey = process.env.NEYNAR_API_KEY
 
@@ -150,6 +151,23 @@ export default async function handler(req, res) {
               // console.log('5')
 
               const powerBadge = userProfile.power_badge
+              let allowList = false
+              if (!powerBadge) {
+                async function getUser(fid) {
+                  try {
+                    const allowListUser = await Allowlist.findOne({ fid }).exec();
+                    if (allowListUser) {
+                      return true
+                    } else {
+                      return false
+                    }
+                  } catch (error) {
+                    console.error("Error getting data:", error);
+                    return false
+                  }
+                }
+                allowList = await getUser(fid)
+              }
               const pfp = userProfile.pfp_url
               const username = userProfile.username
               const displayName = userProfile.display_name
@@ -160,7 +178,7 @@ export default async function handler(req, res) {
                 wallet = userProfile.verified_addresses?.sol_addresses[0]
               }
               
-              if (powerBadge === true) {
+              if (powerBadge === true || allowList === true) {
                 // console.log('6')
 
                 user = await User.create({
