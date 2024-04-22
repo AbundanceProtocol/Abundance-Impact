@@ -15,7 +15,6 @@ import { IoShuffleOutline as Shuffle, IoPeople, IoPeopleOutline } from "react-ic
 import { BsClock } from "react-icons/bs";
 import { GoTag } from "react-icons/go";
 import { AiOutlineBars } from "react-icons/ai";
-import { isEqual } from 'lodash';
 
 export default function Home() {
   const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
@@ -103,19 +102,7 @@ export default function Home() {
   const [selectedChannels, setSelectedChannels] = useState([])
   const [tipDistribution, setTipDistribution] = useState({curators: [], creators: [], totalTip: null, totalPoints: null})
   const [totalTip, setTotalTip] = useState(0)
-
-  // async function getTrendingFeed() {
-  //   try {
-  //     const response = await axios.get('/api/getFeed')
-  //     const feed = response.data.feed
-  //     setUserFeed(feed)
-  //     const updatedFeed = await setEmbeds(feed)
-  //     setUserFeed([...updatedFeed])
-  //     console.log(updatedFeed)
-  //   } catch (error) {
-  //     console.error('Error submitting data:', error)
-  //   }
-  // }
+  const [modal, setModal] = useState({on: false, success: false, text: ''})
 
   function btnText(type) {
     if (type == 'tags' && (userQuery[type] == 'all' || userQuery[type].length == 0)) {
@@ -169,7 +156,6 @@ export default function Home() {
               tags: [...prevUserQuery.tags, selection]
             };
           } else {
-            // If the curator is found, remove it from the array
             return {
               ...prevUserQuery,
               tags: prevUserQuery.tags.filter(item => item !== selection)
@@ -178,14 +164,6 @@ export default function Home() {
         });
       }
 
-
-
-
-
-      // setUserQuery(prevState => ({
-      //   ...prevState, 
-      //   [type]: selection 
-      // }));
     } else {
       setIsSelected(type)
     }
@@ -386,90 +364,45 @@ export default function Home() {
 
 
   async function getUserAllowance(fid) {
-    // console.log(fid, userFeed)
     if (isLogged && !userAllowance && fid) {
-      // let totalAllowance = 0
       let remaningAllowance = 0
-      // let usedAllowance = 0
-
-      //// UPDATE WITH BETTER REMAINING ALLOWANCE DATA ////
       try {
         const responseTotal = await axios.get('/api/degen/getUserAllowance', {
           params: {
             fid: fid,
           }
         })
-
         if (responseTotal?.data) {
-          // console.log(responseTotal.data.total)
-          // totalAllowance = await responseTotal.data.total
           remaningAllowance = await responseTotal.data.remaining
         }
-
-        // const responseUsed = await axios.get('/api/degen/getUsedTips', {
-        //   params: {
-        //     fid: fid,
-        //   }
-        // })
-
-        // if (responseUsed?.data) {
-        //   console.log(responseUsed.data.tips)
-        //   usedAllowance = await responseUsed.data.tips
-        // }
-
-        // let remaningAllowance = Number(totalAllowance) - Number(usedAllowance)
         console.log(remaningAllowance)
         setTotalTip(remaningAllowance * userTipPercent / 100)
         if (!isNaN(remaningAllowance)) {
-          // console.log(remaningAllowance)
           setUserAllowance(remaningAllowance)
           setTipValue(remaningAllowance)
         } else {
-          // console.log(0)
           setUserAllowance(0)
         }
       } catch (error) {
         console.error('Error creating post:', error);
         setUserAllowance(0)
       }
-
-      // try {
-      //   const response = await axios.get('/api/degen/getUserTipsReceived', {
-      //     params: { fid }
-      //   })
-      //   const tips = response.data.tips
-      //   if (tips) {
-      //     setUserTips(tips)
-      //   }
-      //   console.log(tips)
-      //   // console.log(response.data.feed)
-      //   // setUserFeed(feed)
-      // } catch (error) {
-      //   console.error('Error submitting data:', error)
-      // }
-
     }
   }
 
 
   function determineDistribution(ulfilteredCasts, tip) {
-    // console.log(tip)
-    // console.log(ulfilteredCasts)
 
     function filterObjects(castArray, filterFid) {
-      // console.log(castArray, filterFid)
       return castArray.filter(obj => {
-        // Check if author.fid is not equal to filterFid
         if (obj.author.fid != filterFid) {
-          // If not, filter out the items from impact_points where curator_fid is not equal to filterFid
           obj.impact_points = obj.impact_points.filter(point => point.curator_fid != filterFid);
-          return true; // Return true to keep the object in the filtered array
+          return true; 
         }
-        return false; // Return false to exclude the object from the filtered array
+        return false;
       });
     }
   
-  // Call the filter function with the desired filterFid
   let casts = filterObjects(ulfilteredCasts, store.fid);
   
   console.log(casts);
@@ -512,12 +445,8 @@ export default function Home() {
       })
 
 
-
-
       const tempCasts = newCurators.filter(obj => obj.cast === 'temp');
-      // console.log(newCurators)
-      // console.log(tempCasts)
-      // Sort tempCasts by fid
+
       tempCasts.sort((a, b) => a.fid - b.fid);
       // console.log(tempCasts)
   
@@ -532,10 +461,6 @@ export default function Home() {
         return acc;
       }, []);
   
-      // console.log(combinedCasts)
-  
-      // console.log(newDistribution)
-      // console.log(combinedCasts)
       setTipDistribution({curators: combinedCasts, creators: newDistribution, totalPoints: totalBalanceImpact, totalTip: Math.round(tip)})
     }
 
@@ -579,17 +504,14 @@ export default function Home() {
         return acc;
       }, [])
       // console.log(filteredCasts)
-
       sortedCasts = filteredCasts.sort((a, b) => b.impact_total - a.impact_total);
       // console.log(sortedCasts)
 
     }
 
-
     let displayedCasts = await populateCast(sortedCasts)
     // setUserFeed(displayedCasts)
 
-    // console.log(displayedCasts)
     let castString
 
     if (sortedCasts) {
@@ -710,47 +632,30 @@ export default function Home() {
       return updatedCasts;
     }
 
-
     const castsWithSubcasts = await checkSubcasts(castsWithImages)
     console.log(castsWithSubcasts)
     setUserFeed(castsWithSubcasts);
 
-    // updatedCasts.forEach(cast => {
-    //   if (cast.embeds && cast.embeds.length > 0) {
-    //     cast.embeds.forEach(embed => {
-    //       if (embed.type == 'subcast') {
-
-    //       }
-    //     })
-    //   }
-    // })
-
   }
-
-
-  // async function getUserFeed(fid, recasts) {
-  //   console.log(fid)
-  //   if (store.fid) {
-  //     try {
-  //       const response = await axios.get('/api/getUserFeed', {
-  //         params: { fid, recasts }
-  //       })
-  //       const feed = response.data.feed
-  //       await setUserFeed(feed)
-  //       const updatedFeed = await setEmbeds(feed)
-  //       console.log(updatedFeed)
-  //       setUserFeed([...updatedFeed])
-  //     } catch (error) {
-  //       console.error('Error submitting data:', error)
-  //     }
-  //   }
-  // }
 
   const ExpandImg = ({embed}) => {
     return (
       <>
         <div className="overlay" onClick={closeImagePopup}></div>
         <img loading="lazy" src={embed.showPopup.url} className='popupConainer' alt="Cast image embed" style={{aspectRatio: 'auto', maxWidth: screenWidth, maxHeight: screenHeight, cursor: 'pointer', position: 'fixed', borderRadius: '12px'}} onClick={closeImagePopup} />
+      </>
+    )
+  }
+
+  const Modal = () => {
+    return (
+      <>
+        {/* <div className="overlay" onClick={closeImagePopup}></div> */}
+        <div className="modalConainer" style={{borderRadius: '10px', backgroundColor: modal.success ? '#9e9' : '#e99'}}>
+          <div className='flex-col' id="notificationContent" style={{alignItems: 'center', justifyContent: 'center'}}>
+            <div style={{fontSize: '20px', width: '380px', maxWidth: '380px', fontWeight: '400', height: 'auto', padding: '6px', fontSize: '16px'}}>{modal.text}</div>
+          </div>
+        </div>
       </>
     )
   }
@@ -766,7 +671,6 @@ export default function Home() {
     setSearchSelect(event.target.getAttribute('name'))
     updateSearch(qType, event.target.getAttribute('name'))
   }
-
 
 
   const HorizontalScale = () => {
@@ -810,45 +714,6 @@ export default function Home() {
       </div>
     );
   };
-
-
-  const SearchOptionButton = (props) => {
-    let btnSize = props.size
-    let index = props.key
-    let qType = props.queryType
-    let fontSize = '15px'
-    let btnPadding = '14px'
-    if (btnSize == 'small') {
-      fontSize = '13px'
-      btnPadding = '10px'
-    }
-    // console.log(btnSize)
-    const btn = props.buttonName
-    let isSearchable = true
-    let comingSoon = false
-    if (props.buttonName == 'Home' && !store.isAuth) {
-      isSearchable = false
-    }
-    if (props.buttonName == 'Projects' || props.buttonName == 'AI') {
-      comingSoon = true
-    }
-
-    return isSearchable ? (<div key={`${qType}-${index}`}>{comingSoon ? (<div className='flex-row' style={{position: 'relative'}}><div className={(search[qType] == btn) ? 'active-nav-link btn-hvr lock-btn-hvr' : 'nav-link btn-hvr lock-btn-hvr inactive-nav-link'} onClick={() => {searchOption(event, qType)}}
-     name={btn} style={{fontWeight: '600', padding: `5px ${btnPadding}`, borderRadius: '14px', fontSize: isMobile ? '12px' : `${fontSize}`}}>{btn}</div>
-      <div className='top-layer' style={{position: 'absolute', top: 0, right: 0, transform: 'translate(20%, -50%)' }}>
-        <div className='soon-btn'>SOON</div>
-      </div>
-    </div>) : (
-      <div className={(search[qType] == btn) ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'} onClick={() => {searchOption(event, qType)}} name={btn} style={{fontWeight: '600', padding: `5px ${btnPadding}`, borderRadius: '14px', fontSize: isMobile ? '12px' : `${fontSize}`}}>{btn}</div>)}</div>
-    ) : (
-      <div className='flex-row' style={{position: 'relative'}}>
-        <div className='lock-btn-hvr' name={btn} style={{color: '#bbb', fontWeight: '600', padding: `5px ${btnPadding}`, borderRadius: '14px', cursor: 'pointer', fontSize: isMobile ? '12px' : `${fontSize}`}} onClick={account.LoginPopup}>{btn}</div>
-        <div className='top-layer' style={{position: 'absolute', top: 0, right: 0, transform: 'translate(-20%, -50%)' }}>
-          <FaLock size={8} color='#999' />
-        </div>
-      </div>
-    )
-  }
 
   function clearCastText() {
     setCastData({ ...castData, text: '', parentUrl: null });
@@ -1034,23 +899,8 @@ export default function Home() {
     }
   }
 
+
   async function updateData() {
-
-    // const tempCasts = tipDistribution.filter(obj => obj.cast === 'temp');
-
-    // // Sort tempCasts by fid
-    // tempCasts.sort((a, b) => a.fid - b.fid);
-
-    // // Combine objects with the same fid by adding up the tip
-    // const combinedCasts = tempCasts.reduce((acc, curr) => {
-    //   const existingCast = acc.find(obj => obj.fid === curr.fid);
-    //   if (existingCast) {
-    //     existingCast.tip += curr.tip;
-    //   } else {
-    //     acc.push(curr);
-    //   }
-    //   return acc;
-    // }, []);
 
     console.log(tipDistribution)
 
@@ -1093,14 +943,7 @@ export default function Home() {
       returnedCurators = await getCuratorsByFid(fidSet)
     }
 
-    // const array1 = [
-    //   { cast: "temp", coin: "$degen", fid: 9326, points: 22 }
-    // ];
-  
-    // const array2 = [
-    //     { fid: "9326", set_cast_hash: "0x6f41bb654a8cd756f8d256ccfb0c47727d67e529", _id: "661c29c8cc61c292372bce0a" }
-    // ];
-  
+   
     // Map to create a lookup table for faster access
     const lookupTable = returnedCurators.reduce((acc, obj) => {
         acc[obj.fid] = obj;
@@ -1139,25 +982,24 @@ export default function Home() {
         const response = await axios.post('/api/curation/postMultipleTips', {       
           signer: store.signer_uuid,
           fid: store.fid,
-          // urls: castData.urls,
-          // channel: castData.channel,
-          // channel: 'impact', // temp for testing
-          // parentUrl: castData.parentUrl, // cast hash or parent URL
-          // castText: castData.text,
           data: combinedLists
         })
         if (response.status !== 200) {
           console.log(response)
+          setModal({on: true, success: false, text: 'Tipping all casts failed'});
+          setTimeout(() => {
+            setModal({on: false, success: false, text: ''});
+          }, 2500);
           // need to revert recasts counter
         } else {
           console.log(response)
-
-          // clearCastText()
-          // shrinkBox()
-          // setSuccess(true);
-          // setTimeout(() => {
-          //   setSuccess(false);
-          // }, 2000);
+          if (response?.data?.tip) {
+            setUserAllowance(userAllowance - response.data.tip)
+          }
+          setModal({on: true, success: true, text: response.data.message});
+          setTimeout(() => {
+            setModal({on: false, success: false, text: ''});
+          }, 2500);
         }
         console.log(response.status)
       } catch (error) {
@@ -1170,13 +1012,6 @@ export default function Home() {
 
   }
 
-  // useEffect(() => {
-  //   console.log(selectedChannels)
-  // }, [selectedChannels])
-
-  // useEffect(() => {
-  //   console.log(selectedCurators)
-  // }, [selectedCurators])
 
   return (
   <div name='feed' style={{width: 'auto', maxWidth: '620px'}} ref={ref}>
@@ -1374,6 +1209,9 @@ export default function Home() {
     </div>
     <div>
       {showPopup.open && (<ExpandImg embed={{showPopup}} />)}
+    </div>
+    <div>
+      {modal.on && <Modal />}
     </div>
   </div>
   )

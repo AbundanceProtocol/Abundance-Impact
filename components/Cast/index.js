@@ -235,6 +235,11 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
       if (response.status !== 200) {
         likeRefs.current[index].style.color = '#000'
         // need to revert likes counter
+      } else if (response.status == 200) {
+        const { viewer_context } = cast
+        const updatedLike = {...viewer_context, liked: true}
+        const updatedCast = {...cast, viewer_context: updatedLike}
+        updateCast(index, updatedCast)
       }
       console.log(response.status)
     } catch (error) {

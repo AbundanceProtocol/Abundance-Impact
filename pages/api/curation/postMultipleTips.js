@@ -16,7 +16,7 @@ export default async function handler(req, res) {
   async function sendRequests(data, signer, apiKey) {
     const base = "https://api.neynar.com/";
     const url = `${base}v2/farcaster/cast`;
-
+    let tipCounter = 0;
     for (const cast of data) {
       const castText = cast.text;
       const parentUrl = cast.cast;
@@ -54,6 +54,7 @@ export default async function handler(req, res) {
             amount: cast.tip
           }],
         });
+        tipCounter += Number(cast.tip)
 
       } catch (error) {
         console.error(`Error occurred while sending request for ${castText}:`, error);
@@ -61,13 +62,14 @@ export default async function handler(req, res) {
 
       await new Promise(resolve => setTimeout(resolve, 500));
     }
+    return tipCounter
   }
 
 
 
   try {
-    await sendRequests(data, signer, apiKey);
-    res.status(200).json({ message: 'Requests sent successfully' });
+    const remainingTip = await sendRequests(data, signer, apiKey);
+    res.status(200).json({ message: 'All casts tipped successfully', tip: remainingTip });
   } catch (error) {
     console.error('Error sending requests:', error);
     res.status(500).json({ error: 'Internal Server Error' });
