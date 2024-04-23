@@ -25,11 +25,13 @@ import Waste from './Waste';
 import AbundanceStar from './AbundanceStar';
 import FeedbackLoop from './FeedbackLoop';
 import Like from './Like';
+import LikeOn from './LikeOn';
 import Recast from './Recast';
 import Message from './Message';
 import Kebab from './Kebab';
 import ActiveUser from './ActiveUser';
 import Warp from './Warp';
+import Degen from './Degen';
 
 const Spaces = () => {
   return <div className="flex-s" />
@@ -64,9 +66,11 @@ export {
   AbundanceStar,
   FeedbackLoop,
   Like,
+  LikeOn,
   Recast,
   Message,
   Kebab,
   ActiveUser,
-  Warp
+  Warp,
+  Degen
 }

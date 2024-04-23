@@ -35,7 +35,7 @@ html, body {
 }
 
 
-@media only screen and (min-width: 1280px) {
+@media only screen and (min-width: 1380px) {
     .top-left {
         width: 260px;
     }
@@ -75,7 +75,7 @@ html, body {
     } */
 }
 
-@media only screen and (min-width: 1024px) and (max-width: 1279.999px) {
+@media only screen and (min-width: 1024px) and (max-width: 1379.999px) {
     .top-left {
         width: 260px;
     }
@@ -231,7 +231,7 @@ html, body {
     align-items: center;
     justify-content: center;
     height: 38px !important;
-    width: 130px !important;
+    width: 100px !important;
     padding: 7px;
     min-width: 80px !important;
     border: 2px solid #770000;
@@ -239,7 +239,22 @@ html, body {
     cursor: pointer;
 }
 
-.out-btn:hover {
+.mini-out-btn {
+    background-color: #990000 !important;
+    font-weight: 600;
+    color: #eee;
+    align-items: center;
+    justify-content: center;
+    height: 38px !important;
+    width: 40px !important;
+    padding: 6px;
+    min-width: 40px !important;
+    border: 2px solid #770000;
+    border-radius: 12px;
+    cursor: pointer;
+}
+
+.mini-out-btn:hover, .out-btn:hover {
     background-color: #660000 !important;
     color: #ccc;
     border: 2px solid #440000;
@@ -537,6 +552,19 @@ blockquote {
     margin-left: 0px;
 }
 
+.modalConainer {
+    position: fixed;
+    top: 40px;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 10px 2px rgba(0, 0, 0, 0.5);
+    z-index: 2147483647;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 0px solid #355
+  }
+
 .popupConainer {
     position: fixed;
     top: 50%;
@@ -580,6 +608,16 @@ blockquote {
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.5); /* Adjust the transparency as needed */
+    z-index: 2147483645;
+  }
+
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #3b3; /* Adjust the transparency as needed */
     z-index: 2147483645;
   }
 
@@ -891,8 +929,31 @@ blockquote {
     cursor: pointer;
 }
 
+.tip-select-drk {
+    border: 2px solid #dee;
+    border-radius: 8px;
+    font-size: 14px;
+    padding: 7px 8px;
+    color: #dee;
+    margin: 2px 5px;
+    font-weight: 700;
+    width: 80px;
+    height: 34px;
+    justify-content: center;
+    background-color: transparent;
+    cursor: pointer;
+}
+
 .flash-success {
     background-color: #0c0;
+}
+
+.flash-fail {
+    color: #c00 !important;
+}
+
+.flash-fail:hover {
+    background-color: #ffdddd44;
 }
 
 .unfollow-select-drk:hover {
@@ -948,6 +1009,15 @@ blockquote {
     color: #933;
 }
 
+.impact-arrow {
+    border: 0px solid #345;
+    padding: 3px 5px 0 5px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: #345;
+    background-color: transparent;
+}
+
 .recast-btn {
     border: 0px solid #222;
     padding: 3px 5px;
@@ -956,7 +1026,7 @@ blockquote {
     background-color: transparent;
 }
 
-.recast-btn:hover {
+.impact-arrow:hover, .recast-btn:hover {
     background-color: #ddffdd44;
     color: #393;
 }
@@ -2074,6 +2144,22 @@ blockquote {
     justify-items: start;
 }
 
+.selection-btn {
+    cursor: pointer;
+    padding: 5px 6px;
+    white-space: nowrap;
+    border-radius: 4px;
+    width: 100%;
+    justify-content: flex-start;
+    align-items: flex-start;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+
+
+
+
 
 .nav-shadow {
     /* box-shadow: 0 2px 5px 0 rgb(0 0 0 / 16%), 0 2px 10px 0 rgb(0 0 0 / 12%); */
@@ -2197,6 +2283,33 @@ blockquote {
     font-weight: 400;
     color: #eee;
 }
+
+.spinner {
+    display: inline-block;
+    width: 21px;
+    height: 21px;
+    border: 4px solid #ccc;
+    border-top-color: transparent;
+    border-radius: 50%;
+    -webkit-animation: spin 1s linear infinite;
+    animation: spin 1s linear infinite;
+    /* position: absolute; */
+    top: Calc(50% - 20px);
+    left: Calc(50% - 20px);
+}
+
+@keyframes spin {
+    0% {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg)
+    }
+
+    to {
+        -webkit-transform: rotate(1turn);
+        transform: rotate(1turn)
+    }
+}
+
 
 .nav-link {
     color: #e6e6e6;

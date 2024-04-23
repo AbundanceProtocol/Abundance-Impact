@@ -34,6 +34,57 @@ const useStore = create(persist((set, get) => {
         castData: null,
         proposalData: null,
 
+        userTipsReceived: [],
+        userTotalImpact: null,
+        userTotalQuality: null,
+        userRemainingImpact: null,
+        userRemainingQuality: null,
+        userRemainingTips: [],
+        userUpdateTime: null,
+
+        userTipPercent: 50,
+
+        resetStore: () => {set({
+            router: null,
+            deviceSize: {
+                width: null,
+                height: null
+            },
+            isMobile: false,
+            account: null,
+            username: null,
+            ref: null,
+    
+            fid: null,
+            isAuth: false,
+            signer_uuid: null,
+    
+            usernameFC: null,
+            srcUrlFC: null,
+            userDisplayNameFC: null,
+            userActiveFC: false,
+            userBioFC: null,
+            userFollowersFC: null,
+            userFollowingFC: null,
+            userEthVerAddresses: [],
+            userSolVerAddresses: [],
+            userProfile: null,
+    
+            userData: null,
+            castData: null,
+            proposalData: null,
+    
+            userTipsReceived: [],
+            userTotalImpact: null,
+            userTotalQuality: null,
+            userRemainingImpact: null,
+            userRemainingQuality: null,
+            userRemainingTips: [],
+            userUpdateTime: null,
+    
+            userTipPercent: 50,
+        })},
+
         // Setters
         setAccount: (account) => set({ account }),
         setUsername: (username) => set({ username }),
@@ -57,6 +108,16 @@ const useStore = create(persist((set, get) => {
         setUserData: (userData) => set({ userData: userData }),
         setCastData: (castData) => set({ castData: castData }),
         setProposalData: (proposalData) => set({ proposalData: proposalData }),
+
+        setUserTipsReceived: (userTipsReceived) => set({ userTipsReceived }),
+        setUserTotalImpact: (userTotalImpact) => set({ userTotalImpact }),
+        setUserTotalQuality: (userTotalQuality) => set({ userTotalQuality }),
+        setUserRemainingImpact: (userRemainingImpact) => set({ userRemainingImpact }),
+        setUserRemainingQuality: (userRemainingQuality) => set({ userRemainingQuality }),
+        setUserRemainingTips: (userRemainingTips) => set({ userRemainingTips }),
+        setUserUpdateTime: (userUpdateTime) => set({ userUpdateTime }),
+
+        setUserTipPercent: (userTipPercent) => set({ userTipPercent }),
 
         // Getters
         getFid: () => get().fid,
