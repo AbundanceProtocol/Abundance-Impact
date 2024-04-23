@@ -322,7 +322,7 @@ export default function Home() {
     const { shuffle, time, tags, channels, curators } = userQuery
     const timeRange = getTimeRange(time)
     console.log(userQuery)
-    getUserSearch(timeRange, null, channels, curators, null, shuffle)
+    getUserSearch(timeRange, tags, channels, curators, null, shuffle)
   }
 
   async function populateCast(casts) {

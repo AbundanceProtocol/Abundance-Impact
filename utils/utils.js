@@ -149,23 +149,13 @@ export function getTimeRange(time) {
 
   let timeRange = null
   if (time === '24hr') {
-    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    timeRange = { $gte: twentyFourHoursAgo };
+    timeRange = new Date(Date.now() - 24 * 60 * 60 * 1000);
   } else if (time === '3days') {
-    const sevenDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
-    timeRange = { $gte: sevenDaysAgo };
+    timeRange = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
   } else if (time === '7days') {
-    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-    timeRange = { $gte: sevenDaysAgo };
+    timeRange = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
   } else if (time === '30days') {
-    const lastMonthStart = new Date();
-    lastMonthStart.setMonth(lastMonthStart.getMonth() - 1);
-    lastMonthStart.setDate(1);
-    lastMonthStart.setHours(0, 0, 0, 0);
-    const lastMonthEnd = new Date();
-    lastMonthEnd.setDate(0);
-    lastMonthEnd.setHours(23, 59, 59, 999);
-    timeRange = { $gte: lastMonthStart, $lte: lastMonthEnd };
+    timeRange = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
   }
   return timeRange
 }

@@ -12,26 +12,53 @@ export default async function handler(req, res) {
 
     let query = {};
 
-    // if (req.query.curators && req.query.curators.length > 0) {
-    //   query.impact_points = { $in: req.query.curators };
+
+
+    async function getCuratorIds(fids) {
+      try {
+        await connectToDatabase();
+        const impacts = await Impact.find({ curator_fid: { $in: fids } });
+        const impactIds = impacts.map(impact => impact._id);
+        return impactIds
+      } catch (error) {
+        console.error("Error while fetching casts:", error);
+        return null
+      }   
+    }
+
+    if (req.query.time) {
+      query.createdAt = { $gte: req.query.time } ;
+    }
+    
+    if (req.query['curator[]'] && req.query['curator[]'].length > 0) {
+      console.log('37', typeof req.query['curator[]'])
+      let curatorFids
+      if (typeof req.query['curator[]'] === 'string') {
+        curatorFids = [parseInt(req.query['curator[]'])];
+      } else if (Array.isArray(req.query['curator[]']) && req.query['curator[]'].length > 0) {
+          curatorFids = req.query['curator[]'].map(fid => parseInt(fid));
+      }
+
+      let impactIds
+      if (curatorFids) {
+        impactIds = await getCuratorIds(curatorFids)
+      }
+      if (impactIds) {
+        query['impact_points'] = { $in: impactIds }
+      }
+    }
+
+    // if (req.query['tags[]'] && req.query['tags[]'].length > 0) {
+    //   query.cast_tags = { $in: [req.query['tags[]']] };
     // }
 
-    if (req.query.timeRange) {
-      query.createdAt = req.query.timeRange;
-    }
+    // if (req.query['channel[]'] && req.query['channel[]'].length > 0) {
+    //   query.cast_channel = { $in: [req.query['channel[]']] };
+    // }
 
-    if (req.query.tags) {
-      query.cast_tags = { $in: req.query.tags };
-    }
-
-    if (req.query.channel) {
-      query.cast_channel = { $in: req.query.channel };
-    }
-
-    if (req.query.text) {
-      query.cast_text = { $regex: req.query.text, $options: 'i' }; // Case-insensitive search
-    }
-
+    // if (req.query.text) {
+    //   query.cast_text = { $regex: req.query.text, $options: 'i' }; // Case-insensitive search
+    // }
 
     function shuffleArray(array) {
       for (let i = array.length - 1; i > 0; i--) {
@@ -46,7 +73,7 @@ export default async function handler(req, res) {
         await connectToDatabase();
     
         let totalCount;
-        let returnedCasts;
+        let returnedCasts = []
     
         if (!shuffle) {
           totalCount = await Cast.countDocuments(query);
@@ -57,7 +84,7 @@ export default async function handler(req, res) {
             .skip((page - 1) * limit)
             .limit(limit)
             .exec();
-
+          // console.log('63', returnedCasts)
           } else {
 
           totalCount = await Cast.countDocuments(query);
@@ -103,17 +130,20 @@ export default async function handler(req, res) {
           returnedCasts = returnedCasts.slice(0, limit);
         }
     
-        if (returnedCasts.length > 10) {
+        if (returnedCasts && returnedCasts.length > 10) {
           returnedCasts = returnedCasts.slice(0, 10);
         }
     
+        // console.log('113', returnedCasts)
+        if (!returnedCasts) {
+          returnedCasts = []
+        }
         return { casts: returnedCasts, totalCount };
       } catch (err) {
         console.error(err);
         return null;
       }
     }
-
     const { casts, totalCount } = await fetchCasts(query, req.query.shuffle === 'true');
     // console.log(casts)
     res.status(200).json({
