@@ -15,6 +15,7 @@ import { IoShuffleOutline as Shuffle, IoPeople, IoPeopleOutline } from "react-ic
 import { BsClock } from "react-icons/bs";
 import { GoTag } from "react-icons/go";
 import { AiOutlineBars } from "react-icons/ai";
+import Spinner from '../components/Spinner';
 
 export default function Home() {
   const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
@@ -415,7 +416,11 @@ export default function Home() {
     let newCurators = []
     if (casts && tip) {
       casts.forEach(cast => {
-        let castTip = Math.floor((cast.impact_balance  - cast.quality_balance) / totalBalanceImpact * 0.92 * tip)
+        let ratio = 1
+        if (cast.impact_points && cast.impact_points.length > 0) {
+          ratio =  0.92
+        }
+        let castTip = Math.floor((cast.impact_balance  - cast.quality_balance) / totalBalanceImpact * ratio * tip)
         // console.log(castTip)
         let castDistribution = null
         castDistribution = {
@@ -900,7 +905,7 @@ export default function Home() {
   }
 
 
-  async function updateData() {
+  async function postMultiTip() {
 
     console.log(tipDistribution)
 
@@ -959,10 +964,10 @@ export default function Home() {
           fid: obj.fid,
           cast: matchingObj.set_cast_hash,
           coin: obj.coin,
-          tip: Math.floor(obj.points / tipDistribution.totalPoints * tipDistribution.totalTip * 0.08) // Example calculation for tip based on points
+          tip: Math.floor(obj.points / tipDistribution.totalPoints * tipDistribution.totalTip * 0.08)
         };
       } else {
-        return null; // Or handle case where fid doesn't match in array2
+        return null;
       }
     }).filter(obj => obj !== null);
     
@@ -978,6 +983,7 @@ export default function Home() {
 
 
     if (combinedLists && combinedLists.length > 0 && store.signer_uuid) {
+      setLoading(true)
       try {
         const response = await axios.post('/api/curation/postMultipleTips', {       
           signer: store.signer_uuid,
@@ -985,6 +991,7 @@ export default function Home() {
           data: combinedLists
         })
         if (response.status !== 200) {
+          setLoading(false)
           console.log(response)
           setModal({on: true, success: false, text: 'Tipping all casts failed'});
           setTimeout(() => {
@@ -992,6 +999,7 @@ export default function Home() {
           }, 2500);
           // need to revert recasts counter
         } else {
+          setLoading(false)
           console.log(response)
           if (response?.data?.tip) {
             setUserAllowance(userAllowance - response.data.tip)
@@ -1006,10 +1014,6 @@ export default function Home() {
         console.error('Error submitting data:', error)
       }
     }
-
-
-
-
   }
 
 
@@ -1034,14 +1038,22 @@ export default function Home() {
           {isLogged ? (
             <div className="flex-row">
               {(
-                <div className={`flex-row follow-select ${success ? 'flash-success' : ''}`} style={{position: 'relative', height: 'auto', width: '120px', marginRight: '0'}}>
-                  <div className='cast-btn'
-                  //  onClick={routeCast} 
-                  onClick={updateData}
-                   name='follow' style={{color: loading ? 'transparent' : '#fff', height: 'auto', width: '100px'}}>Tip to all</div>
-                  <div className='top-layer rotation' style={{position: 'absolute', top: '7px', left: '34px', visibility: loading ? 'visible': 'hidden'}}>
-                    <Loading size={24} color='#fff' />
-                  </div>
+                <div className={`flex-row ${(loading || totalTip == 0) ? 'follow-locked' : 'follow-select'} ${modal.success ? 'flash-success' : ''}`} style={{position: 'relative', height: 'auto', width: '120px', marginRight: '0', cursor: (loading || totalTip == 0) ? 'default' : 'pointer'}}>
+                  {(loading || totalTip == 0) ? (
+                    <div className='flex-row' style={{height: '100%', alignItems: 'center'}}>
+                      <Spinner size={21} color={'#999'} />
+                    </div>
+                  ) : (
+                    <div className='cast-btn'
+                    //  onClick={routeCast} 
+                    onClick={() => { if (totalTip !== 0) {
+                      postMultiTip()
+                    }
+                    }}
+                     name='follow' style={{color: loading ? 'transparent' : '#fff', height: 'auto', width: '100px'}}>Tip to all</div>
+                  )
+
+                  }
                 </div>
               )}
             </div>
@@ -1080,7 +1092,7 @@ export default function Home() {
           </div>
         </div>
         {(isSelected == 'time') && (
-          <div style={{position: 'absolute'}} onMouseEnter={() => {handleSelection('time')}} onMouseLeave={() => {handleSelection('none')}}>
+          <div className='top-layer' style={{position: 'absolute'}} onMouseEnter={() => {handleSelection('time')}} onMouseLeave={() => {handleSelection('none')}}>
             <div className='flex-col' style={{gap: '0.25rem', padding: '6px 6px', borderRadius: '10px', backgroundColor: '#1D3244dd', border: '1px solid #abc', width: 'auto', marginTop: '10px', alignItems: 'flex-start'}}>
               <div className={`selection-btn ${userQuery['time'] == '24hr' ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}} onClick={() => {handleSelect('time', '24hr')}}>{'24 hours'}</div>
               <span className={`selection-btn ${userQuery['time'] == '3days' ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}} onClick={() => {handleSelect('time', '3days')}}>{'3 days'}</span>
@@ -1099,7 +1111,7 @@ export default function Home() {
           </div>
         </div>
         {(isSelected == 'tags') && (
-          <div style={{position: 'absolute', right: '0'}} onMouseEnter={() => {handleSelection('tags')}} onMouseLeave={() => {handleSelection('none')}}>
+          <div className=' top-layer' style={{position: 'absolute', right: '0'}} onMouseEnter={() => {handleSelection('tags')}} onMouseLeave={() => {handleSelection('none')}}>
             <div className='flex-col' style={{gap: '0.25rem', padding: '6px 6px', borderRadius: '10px', backgroundColor: '#1D3244dd', border: '1px solid #abc', width: 'auto', marginTop: '10px', alignItems: 'flex-start'}}>
               <div className={`selection-btn ${(userQuery['tags'] == 'all' || userQuery['tags'].length == 0) ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}} onClick={() => {handleSelect('tags', 'all')}}>{'All tags'}</div>
               <span className={`selection-btn ${userQuery['tags'].includes('art') ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}} onClick={() => {handleSelect('tags', 'art')}}>{'Art'}</span>
@@ -1118,7 +1130,7 @@ export default function Home() {
           </div>
         </div>
         {(isSelected == 'channels') && (
-          <div style={{position: 'absolute', right: isMobile ? '-95px' : '-110px', width: textMax, margin: 'auto'}} onMouseEnter={() => {handleSelection('channels')}} onMouseLeave={() => {handleSelection('none')}}>
+          <div className='top-layer' style={{position: 'absolute', right: isMobile ? '-95px' : '-110px', width: textMax, margin: 'auto'}} onMouseEnter={() => {handleSelection('channels')}} onMouseLeave={() => {handleSelection('none')}}>
             <div className='flex-col' style={{gap: '0.25rem', padding: '6px 6px', borderRadius: '10px', backgroundColor: '#1D3244dd', border: '1px solid #abc', width: 'auto', marginTop: '10px', alignItems: 'flex-start'}}>
               <div className={`selection-btn ${(userQuery['channels'] == 'all' || userQuery['channels'].length == 0) ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}}>
                 <input onChange={onChannelChange} 
@@ -1129,7 +1141,7 @@ export default function Home() {
                   style={{width: '100%', backgroundColor: '#234'}} 
                   onKeyDown={channelKeyDown} />
               </div>
-              <div className='flex-row' style={{gap: '0.5rem', padding: '0px 6px', flexWrap: 'wrap'}}>
+              <div className='flex-row top-layer' style={{gap: '0.5rem', padding: '0px 6px', flexWrap: 'wrap'}}>
                 {channels && (
                   channels.map((channel, index) => (
                     <div key={index} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addChannel(channel)}}>
@@ -1165,7 +1177,7 @@ export default function Home() {
           </div>
         </div>
         {(isSelected == 'curators') && (
-          <div style={{position: 'absolute', right: isMobile ? '5px' : '30px', width: textMax, margin: 'auto'}} onMouseEnter={() => {handleSelection('curators')}} onMouseLeave={() => {handleSelection('none')}}>
+          <div className='top-layer' style={{position: 'absolute', right: isMobile ? '5px' : '30px', width: textMax, margin: 'auto'}} onMouseEnter={() => {handleSelection('curators')}} onMouseLeave={() => {handleSelection('none')}}>
             <div className='flex-col' style={{gap: '0.25rem', padding: '6px 6px', borderRadius: '10px', backgroundColor: '#1D3244dd', border: '1px solid #abc', width: 'auto', marginTop: '10px', alignItems: 'flex-start'}}>
               <div className={`selection-btn ${(userQuery['curators'] == 'all' || userQuery['curators'].length == 0) ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}}>
                 <input onChange={onCuratorSearch} 
