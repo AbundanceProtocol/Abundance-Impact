@@ -9,11 +9,15 @@ import axios from 'axios';
 import Cast from '../../components/Cast'
 import DashboardBtn from '../../components/Panels/DashboardBtn'
 import { FaLock, FaPowerOff } from "react-icons/fa";
-import { formatNum, getCurrentDateUTC, isYesterday, checkImageUrls } from '../../utils/utils';
+import { formatNum, getCurrentDateUTC, getTimeRange, isYesterday, checkImageUrls } from '../../utils/utils';
 import { FaRegStar } from 'react-icons/fa';
 import { IoDiamondOutline as Diamond } from "react-icons/io5";
 // import { MdOutlineRefresh } from "react-icons/md";
 import { HiRefresh } from "react-icons/hi";
+import { IoShuffleOutline as Shuffle, IoPeopleOutline } from "react-icons/io5";
+import { BsClock } from "react-icons/bs";
+import { GoTag } from "react-icons/go";
+import { AiOutlineBars } from "react-icons/ai";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -25,7 +29,7 @@ export default function ProfilePage() {
   const [screenWidth, setScreenWidth ] = useState(undefined)
   const [screenHeight, setScreenHeight] = useState(undefined)
   const [feedMax, setFeedMax ] = useState('620px')
-  const userButtons = ['Casts', 'Channels', 'Media', 'Proposals']
+  const userButtons = ['Curation', 'Casts', 'Casts + Replies']
   const [searchSelect, setSearchSelect ] = useState('Casts')
   const { isMobile } = useMatchBreakpoints();
   const [userFeed, setUserFeed] = useState(null)
@@ -38,10 +42,63 @@ export default function ProfilePage() {
   const userRemainingImpact = useStore(state => state.userRemainingImpact);
   const userRemainingQuality = useStore(state => state.userRemainingQuality);
   const [feedRouterScheduled, setFeedRouterScheduled] = useState(false);
+  const [userRouterScheduled, setUserRouterScheduled] = useState(false);
+  const [isSelected, setIsSelected] = useState('none')
+  const [userSearch, setUserSearch] = useState({ search: '' })
+  const [selectedChannels, setSelectedChannels] = useState([])
+  const [channels, setChannels] = useState([])
+  const initialQuery = {shuffle: true, time: '3days', tags: [], channels: [], curators: []}
+  const [userQuery, setUserQuery] = useState(initialQuery)
+  const queryOptions = {
+    tags: [
+      {
+        text: 'All tags',
+        value: []
+      },
+      {
+        text: 'Art',
+        value: 'art'
+      },
+      {
+        text: 'Dev',
+        value: 'dev'
+      },        
+      {
+        text: 'Content',
+        value: 'content'
+      },
+      {
+        text: 'Vibes',
+        value: 'vibes'
+      },
+    ],
+    time: [
+      {
+        text: '24 hours',
+        value: '24hr'
+      },
+      {
+        text: '3 days',
+        value: '3days'
+      },
+      {
+        text: '7 days',
+        value: '7days'
+      },        
+      {
+        text: '30 days',
+        value: '30days'
+      },
+    ]
+  }
 
   useEffect(() => {
     if (store.userProfile) {
       setUser(store.userProfile)
+      setUserQuery({
+        ...userQuery,
+        curators: [store.fid]
+      })
     }
     // if (store.fid && store.fid !== '-') {
     //   console.log('4')
@@ -73,11 +130,11 @@ export default function ProfilePage() {
   // }, [user])
 
   useEffect(() => {
-    if (feedRouterScheduled) {
+    if (userRouterScheduled) {
       if (user && user.fid && user.fid !== '-') {
         console.log('2')
+        feedRouter()
 
-        getUserFeed(user.fid, false)
         // getUserTipsReceived(user.fid)
         getUserAllowance(user.fid)
         const currentDate = getCurrentDateUTC()
@@ -86,13 +143,13 @@ export default function ProfilePage() {
           getCurationAllowance(user.fid)
         }
       }
-      setFeedRouterScheduled(false);
+      setUserRouterScheduled(false);
     } else {
       const timeoutId = setTimeout(() => {
         if (user && user.fid && user.fid !== '-') {
           console.log('3')
+          feedRouter()
 
-          getUserFeed(user.fid, false)
           // getUserTipsReceived(user.fid)
           getUserAllowance(user.fid)
           const currentDate = getCurrentDateUTC()
@@ -101,20 +158,261 @@ export default function ProfilePage() {
             getCurationAllowance(user.fid)
           }
         }
+        setUserRouterScheduled(false);
+      }, 300);
+  
+      return () => clearTimeout(timeoutId);
+    }
+  }, [user, userRouterScheduled]);
+
+
+  // async function refresh() {
+    
+  // }
+
+
+  async function populateCast(casts) {
+    let displayedCasts = []
+    
+    if (casts) {
+      casts.forEach(cast => {
+        let newCast = {
+          author: {
+            fid: cast.author_fid,
+            pfp_url: cast.author_pfp,
+            username: cast.author_username,
+            display_name: cast.author_display_name,
+            power_badge: false,
+          },
+          hash: cast.cast_hash,
+          timestamp: cast.createdAt,
+          text: cast.cast_text,
+          impact_points: cast.impact_points,
+          embeds: [],
+          mentioned_profiles: [],
+          replies: {
+            count: 0
+          },
+          reactions: {
+            recasts: [],
+            likes: []
+          },
+          impact_balance: cast.impact_total,
+          quality_absolute: cast.quality_absolute,
+          quality_balance: cast.quality_balance
+        }
+
+        displayedCasts.push(newCast)
+      });
+    }
+    return displayedCasts
+  }
+
+  useEffect(() => {
+    if (feedRouterScheduled) {
+      feedRouter();
+      setFeedRouterScheduled(false);
+    } else {
+      const timeoutId = setTimeout(() => {
+        feedRouter();
         setFeedRouterScheduled(false);
       }, 300);
   
       return () => clearTimeout(timeoutId);
     }
-  }, [user, feedRouterScheduled]);
+  }, [searchSelect, userQuery, feedRouterScheduled])
 
-
-  async function refresh() {
-    
+  function feedRouter() {
+    console.log(searchSelect)
+    if (user && searchSelect == 'Casts') {
+      getLatestUserCasts(user.fid)
+    } else if (searchSelect == 'Casts + Replies') {
+      getUserFeed(user.fid, false)
+    } else if (searchSelect == 'Curation') {
+      const { shuffle, time, tags, channels, curators } = userQuery
+      const timeRange = getTimeRange(time)
+      console.log(userQuery)
+      getUserSearch(timeRange, tags, channels, curators, null, shuffle)
+    }
   }
 
+  
+  async function getUserSearch(time, tags, channel, curator, text, shuffle) {
+    const fid = await store.fid
+
+    const timeRange = getTimeRange(time)
+
+    async function getSearch() {
+      try {
+        const response = await axios.get('/api/curation/getUserSearch', {
+          params: { time, tags, channel, curator, text, shuffle }
+        })
+        let casts = []
+        if (response && response.data && response.data.casts.length > 0) {
+          casts = response.data.casts
+        }
+        // console.log(casts)
+
+        return casts
+      } catch (error) {
+        console.error('Error submitting data:', error)
+        return null
+      }
+    }
+
+    const casts = await getSearch(timeRange, tags, channel, curator, text, shuffle)
+    let filteredCasts
+    let sortedCasts
+
+    if (casts) {
+
+      // console.log(casts)
+      filteredCasts = await casts.reduce((acc, current) => {
+        const existingItem = acc.find(item => item._id === current._id);
+        if (!existingItem) {
+          acc.push(current);
+        }
+        return acc;
+      }, [])
+      // console.log(filteredCasts)
+      sortedCasts = filteredCasts.sort((a, b) => b.impact_total - a.impact_total);
+      // console.log(sortedCasts)
+
+    }
+
+    let displayedCasts = await populateCast(sortedCasts)
+    // setUserFeed(displayedCasts)
+
+    let castString
+
+    if (sortedCasts) {
+      const castHashes = sortedCasts.map(obj => obj.cast_hash)
+      castString = castHashes.join(',');
+    }
+
+
+    async function populateCasts(fid, castString) {
+      try {
+        const response = await axios.get('/api/curation/getCastsByHash', {
+          params: { fid, castString }
+        })
+        return response
+      } catch (error) {
+        console.error('Error submitting data:', error)
+        return null
+      }
+    }
+
+    const populateResponse = await populateCasts(fid, castString)
+
+    let populatedCasts = []
+
+    if (populateResponse) {
+      populatedCasts = populateResponse.data.casts
+      // setUserFeed(populatedCasts)
+    }
+
+    for (let i = 0; i < populatedCasts.length; i++) {
+      const obj2 = populatedCasts[i]
+      let obj1 = displayedCasts.find(cast => cast.hash === obj2.hash)
+      if (obj1) {
+        Object.keys(obj2).forEach(key => {
+          obj1[key] = obj2[key]
+        })
+      } else {
+        displayedCasts.push({...obj2})
+      }
+    }
+
+    setUserFeed(displayedCasts)
+
+
+    async function checkImageUrlsForCasts(casts) {
+      // Map over each cast and apply checkImageUrls function
+      const updatedCasts = await Promise.all(casts.map(async (cast) => {
+        return await checkImageUrls(cast);
+      }));
+    
+      return updatedCasts;
+    }
+    
+    // Usage
+    const castsWithImages = await checkImageUrlsForCasts(displayedCasts);
+    setUserFeed(castsWithImages);
+
+
+    async function getSubcast(hash) {
+      if (hash) {
+        try {
+          const response = await axios.get('/api/getCastByHash', {
+            params: {
+              hash
+            }
+          })
+          const castData = response.data.cast.cast
+          if (castData) {
+            console.log(castData)
+            return castData
+          } else {
+            return null
+          }
+        } catch (error) {
+          console.error('Error submitting data:', error)
+          return null
+        }
+      }
+    }
+
+    async function populateSubcasts(cast) {
+      const { embeds } = cast;
+      // console.log(embeds)
+
+      if (embeds && embeds.length > 0) {
+        const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
+          // console.log(embed)
+          if (embed.type == 'subcast') {
+            // console.log(embed.cast_id.hash)
+            const subcastData = await getSubcast(embed.cast_id.hash)
+            const checkImages = await checkImageUrls(subcastData)
+            // console.log(checkImages)
+            return {
+              ...embed,
+              subcast: checkImages
+            };
+          } else {
+            return {
+              ...embed
+            }
+          }
+        }));
+        return {
+          ...cast,
+          embeds: updatedEmbeds
+        };
+      }
+      
+      return cast; // Return original cast object if embeds array is empty or undefined
+    }
+
+    async function checkSubcasts(casts) {
+      // Map over each cast and apply checkImageUrls function
+      const updatedCasts = await Promise.all(casts.map(async (cast) => {
+        return await populateSubcasts(cast);
+      }));
+    
+      return updatedCasts;
+    }
+
+    const castsWithSubcasts = await checkSubcasts(castsWithImages)
+    console.log(castsWithSubcasts)
+    setUserFeed(castsWithSubcasts);
+
+  }
+
+
+
   async function getUserFeed(fid, recasts) {
-    if (!userFeed) {
+    // if (!userFeed) {
       try {
         const response = await axios.get('/api/getUserCasts', {
           params: {
@@ -128,8 +426,27 @@ export default function ProfilePage() {
       } catch (error) {
         console.error('Error submitting data:', error)
       }
-    }
+    // }
   }
+
+  async function getLatestUserCasts(fid) {
+    // if (!userFeed) {
+      try {
+        const response = await axios.get('/api/getLatestUserCasts', {
+          params: {
+            fid
+          }
+        })
+        // console.log(response)
+        const feed = response.data.feed
+        console.log(response.data.feed)
+        setUserFeed(feed)
+      } catch (error) {
+        console.error('Error submitting data:', error)
+      }
+    // }
+  }
+
 
   async function getUserAllowance(fid) {
     // console.log(fid, userFeed)
@@ -280,6 +597,138 @@ export default function ProfilePage() {
     )
   }
 
+
+  const handleSelect = async (type, selection) => {
+    console.log(type)
+    if (type == 'shuffle') {
+      setUserQuery(prevState => ({
+        ...prevState, 
+        [type]: !userQuery[type] 
+      }));
+      setIsSelected('none')
+    } else if (type == 'time') {
+      setUserQuery(prevState => ({
+        ...prevState, 
+        [type]: selection 
+      }));
+      setIsSelected('none')
+    } else if (type == 'tags') {
+      if (selection == 'all') {
+        setUserQuery(prevState => ({
+          ...prevState, 
+          [type]: [] 
+        }));
+      } else {
+        setUserQuery(prevUserQuery => {
+          const tagIndex = prevUserQuery.tags.indexOf(selection);
+          if (tagIndex === -1) {
+            return {
+              ...prevUserQuery,
+              tags: [...prevUserQuery.tags, selection]
+            };
+          } else {
+            return {
+              ...prevUserQuery,
+              tags: prevUserQuery.tags.filter(item => item !== selection)
+            };
+          }
+        });
+      }
+
+    } else {
+      setIsSelected(type)
+    }
+
+    if (type !== 'tags') {
+      setTimeout(() => {
+        setIsSelected('none')
+      }, 300);
+    }
+  }
+
+  const handleSelection = (type, selection) => {
+    if (type == 'shuffle') {
+      setIsSelected('none')
+    } else {
+      setIsSelected(type)
+    }
+  }
+  
+  function btnText(type) {
+    if (type == 'tags' && (userQuery[type] == 'all' || userQuery[type].length == 0)) {
+      return 'All tags'
+    } else if (type == 'tags' && (userQuery[type].length > 1)) {
+      return 'Tags'
+    } else if (type == 'tags') {
+      const options = queryOptions[type];
+      const option = options.find(option => option.value === userQuery.tags[0]);
+      return option ? option.text : '';
+    } else {
+      const options = queryOptions[type];
+      const option = options.find(option => option.value === userQuery[type]);
+      return option ? option.text : '';
+    }
+  }
+
+  function onChannelChange(e) {
+		setUserSearch( () => ({ ...userSearch, [e.target.name]: e.target.value }) )
+	}
+
+  async function getChannels(name) {
+    console.log(name)
+    try {
+      const response = await axios.get('/api/getChannels', {
+        params: {
+          name: name,
+        }
+      })
+      if (response) {
+        const channels = response.data.channels.channels
+        console.log(channels)
+        setChannels(channels)
+      }
+    } catch (error) {
+      console.error('Error submitting data:', error)
+    }
+  }
+
+  const channelKeyDown = (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      getChannels(userSearch.search)
+    }
+  }
+
+  
+  function addChannel(channel) {
+    console.log(channel)
+    setUserQuery(prevUserQuery => {
+    const channelIndex = prevUserQuery.channels.indexOf(channel.url);
+    if (channelIndex === -1) {
+      return {
+        ...prevUserQuery,
+        channels: [...prevUserQuery.channels, channel.url]
+      };
+    } else {
+      // If the curator is found, remove it from the array
+      return {
+        ...prevUserQuery,
+        channels: prevUserQuery.channels.filter(item => item !== channel.url)
+        };
+      }
+    });
+
+    const isChannelSelected = selectedChannels.some((c) => c.url === channel.url);
+
+    if (isChannelSelected) {
+      // If the curator is already selected, remove it from the state
+      setSelectedChannels(selectedChannels.filter((c) => c.url !== channel.url));
+    } else {
+      // If the curator is not selected, add it to the state
+      setSelectedChannels([...selectedChannels, channel]);
+    }
+  }
+
   useEffect(() => {
     const handleResize = () => {
       setScreenWidth(window.innerWidth)
@@ -395,9 +844,9 @@ export default function ProfilePage() {
     if (props.buttonName == 'Casts' && !store.isAuth) {
       isSearchable = false
     }
-    if (props.buttonName == 'Channels' || props.buttonName == 'Media' || props.buttonName == 'Proposals') {
-      comingSoon = true
-    }
+    // if (props.buttonName == 'Channels' || props.buttonName == 'Media' || props.buttonName == 'Proposals') {
+    //   comingSoon = true
+    // }
 
     return isSearchable ? (<>{comingSoon ? (<div className='flex-row' style={{position: 'relative'}}><div className={(searchSelect == btn) ? 'active-nav-link btn-hvr lock-btn-hvr' : 'nav-link btn-hvr lock-btn-hvr'} onClick={searchOption} name={btn} style={{fontWeight: '600', padding: '5px 14px', borderRadius: '14px', fontSize: isMobile ? '12px' : '15px'}}>{btn}</div>
       <div className='top-layer' style={{position: 'absolute', top: 0, right: 0, transform: 'translate(20%, -50%)' }}>
@@ -427,10 +876,194 @@ export default function ProfilePage() {
       <div className="" style={{padding: '58px 0 0 0'}}>
       </div>
       { (store.isAuth && user) && <UserData/> }
-      <div className="top-layer flex-row" style={{padding: '10px 0 10px 0', alignItems: 'center', justifyContent: 'space-between', margin: '0', borderBottom: '1px solid #888'}}>
+      <div className="top-layer flex-row" style={{padding: '10px 0 10px 0', alignItems: 'center', justifyContent: 'space-evenly', margin: '0', borderBottom: '1px solid #888'}}>
         { userButtons.map((btn, index) => (
           <SearchOptionButton buttonName={btn} key={index} /> ))}
       </div>
+
+
+
+
+
+
+
+
+
+
+      {searchSelect == 'Curation' && (
+
+      <div className='flex-row' style={{justifyContent: 'space-between', marginTop: '15px', marginBottom: '30px'}}>
+        <div className='flex-row' style={{gap: '0.5rem'}}>
+          <div className="flex-row" style={{border: '1px solid #abc', padding: '2px 6px 2px 6px', borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'center', marginLeft: '4px'}} onClick={() => {handleSelection('picks')}}>
+            <div className="flex-row" style={{alignItems: 'center', gap: '0.3rem'}}>
+              <span className="channel-font" style={{color: '#eee'}}>Top Picks</span>
+            </div>
+          </div>
+
+          <div className={`flex-row ${userQuery['shuffle'] ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{border: '1px solid #abc', padding: '2px 6px 2px 6px', borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'flex-start'}} onClick={() => {handleSelect('shuffle')}}>
+            <div className={`flex-row`} style={{alignItems: 'center', gap: '0.3rem'}}>
+              <Shuffle size={22} />
+            </div>
+          </div>
+        </div>
+
+        <div style={{position: 'relative'}}>
+          <div className={`flex-row ${!isMobile ? 'active-nav-link btn-hvr' : ''}`} style={{border: '1px solid #abc', padding: `2px 6px 2px 6px`, borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'center', borderBottom: (isSelected == 'time') ? '2px solid #ddd425' : '1px solid #abc', height: '28px'}} onMouseEnter={() => {handleSelection('time')}} onMouseLeave={() => {handleSelection('none')}}>
+            <div className="flex-row" style={{alignItems: 'center', gap: isMobile ? '0' : '0.3rem', selection: 'none'}}>
+              <BsClock size={15} color='#eee' />
+              <span className={`${!isMobile ? 'selection-btn' : ''}`} style={{cursor: 'pointer', padding: '0'}}>{!isMobile && btnText('time')}</span>
+            </div>
+          </div>
+          {(isSelected == 'time') && (
+            <div className='top-layer' style={{position: 'absolute'}} onMouseEnter={() => {handleSelection('time')}} onMouseLeave={() => {handleSelection('none')}}>
+              <div className='flex-col' style={{gap: '0.25rem', padding: '6px 6px', borderRadius: '10px', backgroundColor: '#1D3244dd', border: '1px solid #abc', width: 'auto', marginTop: '10px', alignItems: 'flex-start'}}>
+                <div className={`selection-btn ${userQuery['time'] == '24hr' ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}} onClick={() => {handleSelect('time', '24hr')}}>{'24 hours'}</div>
+                <span className={`selection-btn ${userQuery['time'] == '3days' ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}} onClick={() => {handleSelect('time', '3days')}}>{'3 days'}</span>
+                <span className={`selection-btn ${userQuery['time'] == '7days' ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}} onClick={() => {handleSelect('time', '7days')}}>{'7 days'}</span>
+                <span className={`selection-btn ${userQuery['time'] == '30days' ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}} onClick={() => {handleSelect('time', '30days')}}>{'30 days'}</span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div style={{position: 'relative'}}>
+          <div className={`flex-row ${!isMobile ? 'active-nav-link btn-hvr' : ''}`} style={{border: '1px solid #abc', padding: `2px 6px 2px 6px`, borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'center', borderBottom: (isSelected == 'tags') ? '2px solid #ddd425' : '1px solid #abc', height: '28px'}} onMouseEnter={() => {handleSelection('tags')}} onMouseLeave={() => {handleSelection('none')}}>
+            <div className="flex-row" style={{alignItems: 'center', gap: isMobile ? '0' : '0.3rem', selection: 'none'}}>
+              <GoTag size={23} color='#eee' />
+              <span className={`${!isMobile ? 'selection-btn' : ''}`} style={{cursor: 'pointer', padding: '0'}}>{!isMobile && btnText('tags')}</span>
+            </div>
+          </div>
+          {(isSelected == 'tags') && (
+            <div className=' top-layer' style={{position: 'absolute', right: '0'}} onMouseEnter={() => {handleSelection('tags')}} onMouseLeave={() => {handleSelection('none')}}>
+              <div className='flex-col' style={{gap: '0.25rem', padding: '6px 6px', borderRadius: '10px', backgroundColor: '#1D3244dd', border: '1px solid #abc', width: 'auto', marginTop: '10px', alignItems: 'flex-start'}}>
+                <div className={`selection-btn ${(userQuery['tags'] == 'all' || userQuery['tags'].length == 0) ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}} onClick={() => {handleSelect('tags', 'all')}}>{'All tags'}</div>
+                <span className={`selection-btn ${userQuery['tags'].includes('art') ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}} onClick={() => {handleSelect('tags', 'art')}}>{'Art'}</span>
+                <span className={`selection-btn ${userQuery['tags'].includes('dev') ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}} onClick={() => {handleSelect('tags', 'dev')}}>{'Dev'}</span>
+                <span className={`selection-btn ${userQuery['tags'].includes('vibes') ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}} onClick={() => {handleSelect('tags', 'vibes')}}>{'Vibes'}</span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div style={{position: 'relative'}}>
+          <div className={`flex-row ${!isMobile ? 'active-nav-link btn-hvr' : ''}`} style={{border: '1px solid #abc', padding: `2px 6px 2px 6px`, borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'center', borderBottom: (isSelected == 'channels') ? '2px solid #ddd425' : '1px solid #abc', height: '28px', marginRight: '4px'}} onMouseEnter={() => {handleSelection('channels')}} onMouseLeave={() => {handleSelection('none')}}>
+            <div className="flex-row" style={{alignItems: 'center', gap: isMobile ? '0' : '0.3rem', selection: 'none'}}>
+              <AiOutlineBars size={15} color='#eee' />
+              <span className={`${!isMobile ? 'selection-btn' : ''}`} style={{cursor: 'pointer', padding: '0', color: userQuery['channels'].length == 0 ? '#aaa' : ''}}>{isMobile ? '' : userQuery['channels'].length == 0 ? 'All channels' : 'Channels'}</span>
+            </div>
+          </div>
+
+        </div>
+
+
+
+        {(isSelected == 'channels') && (
+            <div className='' style={{position: 'absolute', width: '100%', margin: 'auto', marginTop: '28px'}} onMouseEnter={() => {handleSelection('channels')}} onMouseLeave={() => {handleSelection('none')}}>
+              <div className='top-layer flex-col' style={{gap: '0.25rem', padding: '6px 6px', borderRadius: '10px', backgroundColor: '#1D3244dd', border: '1px solid #abc', width: 'auto', marginTop: '10px', alignItems: 'flex-start'}}>
+                <div className={`selection-btn ${(userQuery['channels'] == 'all' || userQuery['channels'].length == 0) ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}}>
+                  <input onChange={onChannelChange} 
+                    name='search' 
+                    placeholder={`Search channels`} 
+                    value={userSearch.search} 
+                      className='srch-btn' 
+                    style={{width: '100%', backgroundColor: '#234'}} 
+                    onKeyDown={channelKeyDown} />
+                </div>
+                <div className='flex-row top-layer' style={{gap: '0.5rem', padding: '0px 6px', flexWrap: 'wrap'}}>
+                  {channels && (
+                    channels.map((channel, index) => (
+                      <div key={index} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addChannel(channel)}}>
+                        <img loading="lazy" src={channel.image_url} className="" alt={channel.name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
+                        <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>{channel.name}</div>
+                        <div style={{fontWeight: '400', fontSize: '10px', color: '#ccc'}}>{formatNum(channel.follower_count)}</div>
+                      </div>
+                    )
+                  ))}
+                </div>
+
+                {(selectedChannels && selectedChannels.length > 0) && (<div className='flex-row' style={{gap: '0.5rem', padding: '10px 6px 6px 6px', flexWrap: 'wrap', borderTop: '1px solid #888', width: '100%', alignItems: 'center'}}>
+                  <div style={{color: '#ddd', fontWeight: '600', fontSize: '13px', padding: '0 0 3px 6px'}}>Selected:</div>
+                  {(
+                    selectedChannels.map((channel, index) => (
+                      <div key={index} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addChannel(channel)}}>
+                        <img loading="lazy" src={channel.image_url} className="" alt={channel.name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
+                        <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>{channel.name}</div>
+                      </div>
+                    )
+                  ))}
+                </div>)}
+              </div>
+            </div>
+          )}
+
+        {/* <div style={{position: 'relative'}}>
+          <div className={`flex-row ${!isMobile ? 'active-nav-link btn-hvr' : ''}`} style={{border: '1px solid #abc', padding: `2px 6px 2px 6px`, borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'center', borderBottom: (isSelected == 'curators') ? '2px solid #ddd425' : '1px solid #abc', height: '28px'}} onMouseEnter={() => {handleSelection('curators')}} onMouseLeave={() => {handleSelection('none')}}>
+            <div className="flex-row" style={{alignItems: 'center', gap: isMobile ? '0' : '0.3rem', selection: 'none'}}>
+              <IoPeopleOutline size={15} color='#eee' />
+              <span className={`${!isMobile ? 'selection-btn' : ''}`} style={{cursor: 'pointer', padding: '0', color: userQuery['curators'].length == 0 ? '#aaa' : ''}}>{isMobile ? '' : userQuery['curators'].length == 0 ? 'All curators' : 'Curators'}</span>
+            </div>
+          </div>
+          {(isSelected == 'curators') && (
+            <div className='top-layer' style={{position: 'absolute', right: isMobile ? '5px' : '30px', width: textMax, margin: 'auto'}} onMouseEnter={() => {handleSelection('curators')}} onMouseLeave={() => {handleSelection('none')}}>
+              <div className='flex-col' style={{gap: '0.25rem', padding: '6px 6px', borderRadius: '10px', backgroundColor: '#1D3244dd', border: '1px solid #abc', width: 'auto', marginTop: '10px', alignItems: 'flex-start'}}>
+                <div className={`selection-btn ${(userQuery['curators'] == 'all' || userQuery['curators'].length == 0) ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}}>
+                  <input onChange={onCuratorSearch} 
+                    name='search' 
+                    placeholder={`Search curators`} 
+                    value={userSearch.search} 
+                      className='srch-btn' 
+                    style={{width: '100%', backgroundColor: '#234'}} 
+                    onKeyDown={curatorKeyDown} />
+                </div>
+                <div className='flex-row' style={{gap: '0.5rem', padding: '0px 6px', flexWrap: 'wrap'}}>
+                  {curators && (
+                    curators.map((curator, index) => (
+                      <div key={index} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addCurator(curator)}}>
+                        <img loading="lazy" src={curator.pfp} className="" alt={curator.display_name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
+                        <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>@{curator.username}</div>
+                      </div>
+                    )
+                  ))}
+                </div>
+
+                {(selectedCurators && selectedCurators.length > 0) && (<div className='flex-row' style={{gap: '0.5rem', padding: '10px 6px 6px 6px', flexWrap: 'wrap', borderTop: '1px solid #888', width: '100%', alignItems: 'center'}}>
+                  <div style={{color: '#ddd', fontWeight: '600', fontSize: '13px', padding: '0 0 3px 6px'}}>Selected:</div>
+                  {(
+                    selectedCurators.map((curator, index) => (
+                      <div key={index} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addCurator(curator)}}>
+                        <img loading="lazy" src={curator.pfp} className="" alt={curator.display_name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
+                        <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>@{curator.username}</div>
+                      </div>
+                    )
+                  ))}
+                </div>)}
+              </div>
+            </div>
+          )}
+        </div> */}
+
+      </div>
+      )}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       <div style={{margin: '0 0 30px 0'}}>
         {userFeed && userFeed.map((cast, index) => (<Cast cast={cast} key={index} index={index} updateCast={updateCast} openImagePopup={openImagePopup} />))}
       </div>
