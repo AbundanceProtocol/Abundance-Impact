@@ -30,7 +30,7 @@ export default function ProfilePage() {
   const [screenHeight, setScreenHeight] = useState(undefined)
   const [feedMax, setFeedMax ] = useState('620px')
   const userButtons = ['Curation', 'Casts', 'Casts + Replies']
-  const [searchSelect, setSearchSelect ] = useState('Casts')
+  const [searchSelect, setSearchSelect ] = useState('Curation')
   const { isMobile } = useMatchBreakpoints();
   const [userFeed, setUserFeed] = useState(null)
   const [showPopup, setShowPopup] = useState({open: false, url: null})
