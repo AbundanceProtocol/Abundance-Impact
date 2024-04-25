@@ -1228,7 +1228,7 @@ export default function Home() {
 
     </div>
 
-    <div style={{margin: '0 0 30px 0'}}>
+    <div style={{margin: '0 0 70px 0'}}>
       {userFeed && userFeed.map((cast, index) => (<Cast cast={cast} key={index} index={index} updateCast={updateCast} openImagePopup={openImagePopup} />))}
     </div>
     <div>

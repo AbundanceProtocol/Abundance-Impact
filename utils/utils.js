@@ -149,12 +149,19 @@ async function isImage(url) {
     if (response.ok) {
       const contentType = response.headers.get('Content-Type');
       console.log(contentType)
-      return contentType && contentType.startsWith('image/');
+      if (contentType && contentType.startsWith('image/')) {
+        return 'image'
+      } else if (contentType && contentType == 'application/x-mpegURL') {
+        return 'video'
+      } else {
+        return 'other';
+      }
+    } else {
+      return 'other';
     }
-    return false;
   } catch (error) {
     console.error('Error checking image URL:', error);
-    return false;
+    return 'other';
   }
 }
 
@@ -163,11 +170,11 @@ export async function checkImageUrls(cast) {
 
   if (embeds && embeds.length > 0) {
     const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
-      const isImageResult = await isImage(embed.url);
+      const imageResult = await isImage(embed.url);
       const isSubcast = typeof embed.cast_id !== 'undefined'
       return {
         ...embed,
-        type: isImageResult ? 'image' : isSubcast ? 'subcast' : 'other'
+        type: isSubcast ? 'subcast' : imageResult
       };
     }));
     

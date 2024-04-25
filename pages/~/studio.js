@@ -106,6 +106,7 @@ export default function ProfilePage() {
     }
     if (user && user.fid && user.fid !== '-') {
       getUserAllowance(user.fid)
+      getCurationAllowance(user.fid)
     }
   }, []);
 
@@ -705,9 +706,9 @@ export default function ProfilePage() {
                     </a>
                   </span>
                   <div className="flex-col" style={{width: '100%', gap: '1rem', alignItems: 'flex-start'}}>
-                    <div className="flex-row" style={{width: '100%', justifyContent: 'space-between', height: '20px', alignItems: 'flex-start'}}>
-                      <div className="flex-row" style={{alignItems: 'center', gap: '0.25rem'}}>
-                        <span className="" data-state="closed">
+                    <div className="flex-row" style={{width: '100%', justifyContent: 'space-between', height: '', alignItems: 'flex-start'}}>
+                      <div className="flex-row" style={{alignItems: 'center', gap: '0.25rem', flexWrap: 'wrap'}}>
+                        <span className="">
                           <a className="fc-lnk" title="" href={`https://warpcast.com/${user.username}`}>
                             <div className="flex-row" style={{alignItems: 'center'}}>
                               <span className="name-font" style={{color: '#cdd', fontSize: '18px'}}>{user.display_name}</span>
@@ -717,7 +718,7 @@ export default function ProfilePage() {
                             </div>
                           </a>
                         </span>
-                        <span className="user-font" datastate="closed">
+                        <span className="user-font">
                           <a className="fc-lnk" title="" href={`https://warpcast.com/${user.username}`} style={{color: '#cdd'}}>@{user.username}</a>
                         </span>
                         <div className="">·</div>
@@ -742,12 +743,6 @@ export default function ProfilePage() {
                           <div style={{fontWeight: '400'}}>followed</div>
                         </div>
                       </div>
-                      {/* <div className="flex-row" style={{flex: 1}}>
-                        <div className="flex-row" style={{padding: '0 0 0 5px', fontSize: '12px', color: '#cdd', gap: '0.25rem', alignItems: 'center'}}>
-                          <div className='soon-btn'>SOON</div>
-                          <div style={{fontWeight: '400'}}>impact</div>
-                        </div>
-                      </div> */}
                     </div>
                   </div>
                 </div>
@@ -824,14 +819,6 @@ export default function ProfilePage() {
         { userButtons.map((btn, index) => (
           <SearchOptionButton buttonName={btn} key={index} /> ))}
       </div>
-
-
-
-
-
-
-
-
 
 
       {searchSelect == 'Curation' && (
@@ -941,75 +928,12 @@ export default function ProfilePage() {
             </div>
           )}
 
-        {/* <div style={{position: 'relative'}}>
-          <div className={`flex-row ${!isMobile ? 'active-nav-link btn-hvr' : ''}`} style={{border: '1px solid #abc', padding: `2px 6px 2px 6px`, borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'center', borderBottom: (isSelected == 'curators') ? '2px solid #ddd425' : '1px solid #abc', height: '28px'}} onMouseEnter={() => {handleSelection('curators')}} onMouseLeave={() => {handleSelection('none')}}>
-            <div className="flex-row" style={{alignItems: 'center', gap: isMobile ? '0' : '0.3rem', selection: 'none'}}>
-              <IoPeopleOutline size={15} color='#eee' />
-              <span className={`${!isMobile ? 'selection-btn' : ''}`} style={{cursor: 'pointer', padding: '0', color: userQuery['curators'].length == 0 ? '#aaa' : ''}}>{isMobile ? '' : userQuery['curators'].length == 0 ? 'All curators' : 'Curators'}</span>
-            </div>
-          </div>
-          {(isSelected == 'curators') && (
-            <div className='top-layer' style={{position: 'absolute', right: isMobile ? '5px' : '30px', width: textMax, margin: 'auto'}} onMouseEnter={() => {handleSelection('curators')}} onMouseLeave={() => {handleSelection('none')}}>
-              <div className='flex-col' style={{gap: '0.25rem', padding: '6px 6px', borderRadius: '10px', backgroundColor: '#1D3244dd', border: '1px solid #abc', width: 'auto', marginTop: '10px', alignItems: 'flex-start'}}>
-                <div className={`selection-btn ${(userQuery['curators'] == 'all' || userQuery['curators'].length == 0) ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}}>
-                  <input onChange={onCuratorSearch} 
-                    name='search' 
-                    placeholder={`Search curators`} 
-                    value={userSearch.search} 
-                      className='srch-btn' 
-                    style={{width: '100%', backgroundColor: '#234'}} 
-                    onKeyDown={curatorKeyDown} />
-                </div>
-                <div className='flex-row' style={{gap: '0.5rem', padding: '0px 6px', flexWrap: 'wrap'}}>
-                  {curators && (
-                    curators.map((curator, index) => (
-                      <div key={index} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addCurator(curator)}}>
-                        <img loading="lazy" src={curator.pfp} className="" alt={curator.display_name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
-                        <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>@{curator.username}</div>
-                      </div>
-                    )
-                  ))}
-                </div>
-
-                {(selectedCurators && selectedCurators.length > 0) && (<div className='flex-row' style={{gap: '0.5rem', padding: '10px 6px 6px 6px', flexWrap: 'wrap', borderTop: '1px solid #888', width: '100%', alignItems: 'center'}}>
-                  <div style={{color: '#ddd', fontWeight: '600', fontSize: '13px', padding: '0 0 3px 6px'}}>Selected:</div>
-                  {(
-                    selectedCurators.map((curator, index) => (
-                      <div key={index} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addCurator(curator)}}>
-                        <img loading="lazy" src={curator.pfp} className="" alt={curator.display_name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
-                        <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>@{curator.username}</div>
-                      </div>
-                    )
-                  ))}
-                </div>)}
-              </div>
-            </div>
-          )}
-        </div> */}
-
       </div>
       )}
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      <div style={{margin: '0 0 30px 0'}}>
+      <div style={{margin: '0 0 70px 0'}}>
         {userFeed && userFeed.map((cast, index) => (<Cast cast={cast} key={index} index={index} updateCast={updateCast} openImagePopup={openImagePopup} />))}
       </div>
       <div>

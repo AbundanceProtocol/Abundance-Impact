@@ -17,14 +17,15 @@ const Buttons = () => {
 export default Buttons;
 
 const button = {
-    'top-menu': ['main', 'user'],
+    // 'top-menu': ['main', 'user'],
+    'top-menu': ['main'],
     'side-menu': ['Impact', 'Studio'],
     // 'side-menu': ['Impact', 'Search', 'Ecosystem', 'Reviews', 'Notifications', 'Studio', 'Funding', 'Challenge', 'Propose', 'Cast'],
     'bottom-nav': ['Impact', 'Studio'],
     // 'bottom-nav': ['Impact', 'Search', 'Ecosystem', 'Reviews', 'Notifications'],
     'nav-menu': {
-        'main': ['Impact'],
-        'user': ['Studio'],
+        'main': ['Impact', 'Studio'],
+        // 'user': ['Studio'],
         // 'main': ['Impact', 'Search', 'Ecosystem'],
         // 'user': ['Studio', 'Reviews', 'Notifications', 'Funding', 'Challenge', 'Propose', 'Cast'],
     },
@@ -93,8 +94,8 @@ const button = {
     },
     'Studio': {
         link: '/~/studio',
-        menu: 'user',
-        description: 'Your profile',
+        menu: 'main',
+        description: 'Your curation studio',
         account: true,
         working: true,
         icon: FaUser

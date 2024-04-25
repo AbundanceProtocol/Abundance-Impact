@@ -9,6 +9,7 @@ import CastText from './Text'
 import Subcast from './Subcast';
 import { IoDiamondOutline as Diamond } from "react-icons/io5";
 import { ImArrowUp, ImArrowDown  } from "react-icons/im";
+import VideoPlayer from '../VideoPlayer';
 
 export default function Cast({ cast, index, updateCast, openImagePopup }) {
   const store = useStore()
@@ -273,7 +274,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
         </div>
         <div className="flex-col" style={{width: 'auto', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.5rem'}}>
         <div className="flex-col" style={{gap: '0.5rem'}}>
-          <div className="flex-row" style={{width: '100%', justifyContent: 'space-between', height: '20px', alignItems: 'flex-start', flexWrap: 'wrap'}}>
+          <div className="flex-row" style={{width: '100%', justifyContent: 'space-between', height: '', alignItems: 'flex-start', flexWrap: 'wrap'}}>
             <div className="flex-row" style={{alignItems: 'center', gap: '0.25rem', flexWrap: 'wrap', userSelect: 'none'}}>
               <span className="">
                 <a href={`/${cast.author.username}`} className="fc-lnk" title={cast.author.display_name} style={{cursor: 'pointer'}} onClick={() => {goToUserProfile(event, cast.author)}}>
@@ -293,9 +294,9 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
                 <div className="user-font">{timePassed(cast.timestamp)}</div>
               </a>
             </div>
-            <div className="">
+            {/* <div className="">
               <Kebab />
-            </div>
+            </div> */}
           </div>
           <div className="">
             <div style={{wordWrap: 'break-word', maxWidth: `100%`, width: textMax, whiteSpace: 'pre-line'}}>
@@ -326,6 +327,11 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
               {(embed && embed.type && embed.type == 'subcast') && (
                 <div className="" key={`${index}-${subindex}`}>
                   <Subcast cast={embed.subcast} key={subindex} index={subindex} />
+                </div>
+              )}
+              {(embed && embed.type && embed.type == 'video') && (
+                <div className="" key={`${index}-${subindex}`}>
+                  <VideoPlayer width={textMax} src={embed.url} />
                 </div>
               )}
             </div>
