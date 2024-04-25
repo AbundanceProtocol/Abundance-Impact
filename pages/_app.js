@@ -27,7 +27,7 @@ export default function App({ Component, pageProps }) {
   const { isMobile, isTablet } = useMatchBreakpoints();
   const ref = useRef(null)
   const ref1 = useRef(null)
-  const [isSignedIn, setIsSignedIn] = useState()
+  const [isLogged, setIsLogged] = useState()
   const [bottomNavSize, setBottomNavSize] = useState(ref?.current?.offsetWidth)
   const [navSize, setNavSize] = useState(1060)
   const router = useRouter()
@@ -71,9 +71,9 @@ export default function App({ Component, pageProps }) {
   useEffect(() => {
     // console.log(store.signer_uuid)
     if (store.isAuth)
-      setIsSignedIn(true)
+      setIsLogged(true)
     else
-      setIsSignedIn(false)
+      setIsLogged(false)
   }, [store.isAuth])
   
   function handleNavResize() {
@@ -84,7 +84,7 @@ export default function App({ Component, pageProps }) {
   const handleSignIn = async (data) => {
     // console.log(data)
     // console.log(store.isAuth)
-    setIsSignedIn(true)
+    setIsLogged(true)
     setShowLogin(false)
   };
 
@@ -102,7 +102,7 @@ export default function App({ Component, pageProps }) {
     store.setUserFollowingFC(null)
     store.setUserEthVerAddresses([])
     store.setUserSolVerAddresses([])
-    setIsSignedIn(false)
+    setIsLogged(false)
     setShowLogout(false)
     if (router.route == '/~/profile') {
       router.push(`/`)
@@ -113,10 +113,10 @@ export default function App({ Component, pageProps }) {
     // console.log(store.fid, store.isAuth, store.signer_uuid);
     if (store.isAuth) {
       setUserProfile(store.fid)
-      // setIsSignedIn(true)
+      setIsLogged(true)
     }
     else {
-      setIsSignedIn(false)
+      setIsLogged(false)
     }
   }, [store.fid, store.isAuth, store.signer_uuid]);
 
@@ -319,9 +319,6 @@ export default function App({ Component, pageProps }) {
 
   const testButton = async () => {
 
-
-
-
   }
 
   const LoginPopup = async () => {
@@ -366,50 +363,83 @@ export default function App({ Component, pageProps }) {
     )
   }
 
-  const LeftNav = (props) => {
-    let btn = button[props.buttonName]
-    let btnName = props.buttonName
-    const TopIcon = btn.icon
+  const LeftNav = ({buttonName}) => {
+    let { account, icon, link, working } = button[buttonName]
+    const TopIcon = icon
     let menuState = "nav-link"
-    let accountState = !btn.account || (store.isAuth && btn.account)
-    if ((router.route === btn.link) && accountState) {
+    let accountState = !account || (store.isAuth && account)
+    if ((router.route === link) && accountState) {
       menuState = "active-nav-link"
-    } else if (!btn.working) {
+    } else if (!working) {
       menuState = "inactive-nav-link"
     }
     let unlockedState = 'btn-hvr'
-    if (btn.account && !store.isAuth || !btn.working)
+    if (account && !store.isAuth || !working) {
       unlockedState = 'lock-btn-hvr'
-      
-    return (
-      <div className="left-container" style={{padding: 'auto 8px'}} onMouseEnter={() => {
-        setNavMenu(btn.menu)
-        setMenuHover({ ...menuHover, in: Date.now() })
-      }}
-      onMouseLeave={() => setMenuHover({ ...menuHover, out: Date.now() }) }>
-        <Link href={(btn.link && btn.working && !(!store.isAuth && btn.account)) ? btn.link : '#'} style={{maxWidth: '260px'}}>
-          <div className={`flex-row`} style={{paddingRight: isMobile ? '1em' : 'unset', justifyContent: 'flex-start'}} onClick={() => {(!store.isAuth && btn.account) && LoginPopup()}}>
+    }
+
+    const Working = () => {
+      return (
+        <Link href={link} style={{maxWidth: '260px'}}>
+          <div className={`flex-row`} style={{paddingRight: isMobile ? '1em' : 'unset', justifyContent: 'flex-start'}}>
             <div className="flex-col" style={{height: '58px', alignItems: 'center', justifyContent: 'center'}}>
-              <div className={`flex-row flex-middle ${menuState} ${unlockedState}`} style={{padding: '2px 0 2px 0', borderRadius: '16px'}}>
+              <div className={`flex-row flex-middle ${menuState} btn-hvr`} style={{padding: '2px 0 2px 0', borderRadius: '16px'}}>
                 <TopIcon className="size-25" style={{margin: '6px 12px 6px 12px'}} />
                 <div className="font-15 left-nav mid-layer" style={{textAlign: 'center', fontSize: isTablet ? '12px' : '18px', padding: '0 24px 0 0'}}>
-                  {btnName}
+                  {buttonName}
                 </div>
                 <div style={{position: 'relative', fontSize: '0', width: '0', height: '100%'}}>
-                  {btn.working ? (<>
-                    {(btn.account && !store.isAuth) && (<div className='top-layer' style={{position: 'absolute', top: 0, left: 0, transform: 'translate(-100%, -50%)' }}>
-                      <FaLock size={8} color='#999' />
-                    </div>)}</>
-                    ) : (
-                    <div className='top-layer' style={{position: 'absolute', top: 0, left: 0, transform: 'translate(-70%, -50%)' }}>
-                      <div className='soon-btn'>SOON</div>
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
           </div>
         </Link>
+      )
+    }
+
+    const Locked = () => {
+      return (
+        <div className={`flex-row`} style={{paddingRight: isMobile ? '1em' : 'unset', justifyContent: 'flex-start', maxWidth: '260px'}} onClick={LoginPopup}>
+          <div className="flex-col" style={{height: '58px', alignItems: 'center', justifyContent: 'center'}}>
+            <div className={`flex-row flex-middle ${menuState} lock-btn-hvr`} style={{padding: '2px 0 2px 0', borderRadius: '16px'}}>
+              <TopIcon className="size-25" style={{margin: '6px 12px 6px 12px'}} />
+              <div className="font-15 left-nav mid-layer" style={{textAlign: 'center', fontSize: isTablet ? '12px' : '18px', padding: '0 24px 0 0'}}>
+                {buttonName}
+              </div>
+              <div style={{position: 'relative', fontSize: '0', width: '0', height: '100%'}}>
+                <div className='top-layer' style={{position: 'absolute', top: 0, left: 0, transform: 'translate(-100%, -50%)' }}>
+                  <FaLock size={8} color='#999' />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    const Soon = () => {
+      return (
+        <div className={`flex-row`} style={{paddingRight: isMobile ? '1em' : 'unset', justifyContent: 'flex-start', maxWidth: '260px'}}>
+          <div className="flex-col" style={{height: '58px', alignItems: 'center', justifyContent: 'center'}}>
+            <div className={`flex-row flex-middle inactive-nav-link lock-btn-hvr`} style={{padding: '2px 0 2px 0', borderRadius: '16px'}}>
+              <TopIcon className="size-25" style={{margin: '6px 12px 6px 12px'}} />
+              <div className="font-15 left-nav mid-layer" style={{textAlign: 'center', fontSize: isTablet ? '12px' : '18px', padding: '0 24px 0 0'}}>
+                {buttonName}
+              </div>
+              <div style={{position: 'relative', fontSize: '0', width: '0', height: '100%'}}>
+                <div className='top-layer' style={{position: 'absolute', top: 0, left: 0, transform: 'translate(-70%, -50%)' }}>
+                  <div className='soon-btn'>SOON</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    return (
+      <div className="left-container" style={{padding: 'auto 8px'}}>
+        {!working ? (<Soon />) : (isLogged || !account) ? (<Working />) : (<Locked />)}
       </div>
     )
   }
@@ -430,15 +460,17 @@ export default function App({ Component, pageProps }) {
     }
 
     return (
-      <div className="flex-row" style={{padding: 'auto 8px', width: 'auto', justifyContent: 'center', alignItems: 'center'}} onMouseEnter={() => {
-        setNavMenu(btn.menu)
-        setMenuHover({ ...menuHover, in: Date.now() })
-      }}
-      onMouseLeave={() => setMenuHover({ ...menuHover, out: Date.now() }) }>
+      <div className="flex-row" style={{padding: 'auto 8px', width: 'auto', justifyContent: 'center', alignItems: 'center'}}
+      //  onMouseEnter={() => {
+      //   setNavMenu(btn.menu)
+      //   setMenuHover({ ...menuHover, in: Date.now() })
+      // }}
+      // onMouseLeave={() => setMenuHover({ ...menuHover, out: Date.now() }) }
+      >
         <Link href={(btn.link && btn.working && !(!store.isAuth && btn.account)) ? btn.link : '#'} style={{width: 'auto'}}>
           <div className={`flex-row ${menuState}`} style={{padding: isMobile ? '2px' : 'unset', width: 'auto' }} onClick={() => {(!store.isAuth && btn.account) && LoginPopup()}}>
             <div className="flex-col" style={{height: '58px', alignItems: 'center', justifyContent: 'center'}}>
-              {btn.working? (
+              {btn.working ? (
               <div className="flex-row btn-hvr flex-middle" style={{padding: '6px 2px', borderRadius: '12px'}}>
                 <TopIcon className="size-25" style={{margin: '6px 12px 6px 12px'}} />
                 <div className="font-15 left-nav" style={{textAlign: 'center', fontSize: isTablet ? '12px' : '18px'}}>
@@ -545,7 +577,7 @@ export default function App({ Component, pageProps }) {
                 <div className="navbar-header">
                   <HomeButton />
                   <Box className="navbar-header-end flex-row" sx={{alignItems: 'center', justifyContent: 'space-between'}}>
-                  {/* {isSignedIn ? (<LogOut />) : (<NeynarSigninButton onSignInSuccess={handleSignIn} />)} */}
+                  {/* {isLogged ? (<LogOut />) : (<NeynarSigninButton onSignInSuccess={handleSignIn} />)} */}
                     {/* <ConnectButton 
                       account={store.account}
                       isMobile={isMobile}
@@ -578,14 +610,14 @@ export default function App({ Component, pageProps }) {
                 <HomeButton />
               </div>
               <Col className='top-right'>
-              <TopNavWrapper>
+              {/* <TopNavWrapper> */}
                 {/* { button['top-menu'].map((btn, index) => (
                       <TopNav buttonName={btn} key={index} /> ))} */}
-              </TopNavWrapper>
+              {/* </TopNavWrapper> */}
               {/* //// test buttons //// */}
                {/* <div id="showLoginBtn" className='srch-select-btn' onClick={testButton}>Test Button</div>  */}
-              {/* {(isSignedIn || showLogin) ? (<LogOut />) : (<NeynarSigninButton onSignInSuccess={handleSignIn} />)} */}
-              {/* {isSignedIn ? (<LogOut />) : (<LogOut />)} */}
+              {/* {(isLogged || showLogin) ? (<LogOut />) : (<NeynarSigninButton onSignInSuccess={handleSignIn} />)} */}
+              {/* {isLogged ? (<LogOut />) : (<LogOut />)} */}
               {/* <ConnectButton 
                 account={account}
                 isMobile={isMobile}
@@ -601,6 +633,8 @@ export default function App({ Component, pageProps }) {
         <div className="flex-col" style={{padding: '58px 0 0 0'}}>
           { button['side-menu'].map((btn, index) => (
             <LeftNav buttonName={btn} key={index} /> ))}
+          {/* { button['side-menu'].map((btn, index) => (
+            <LeftMenu btn={btn} index={index} key={index} LoginPopup={LoginPopup} /> ))} */}
         </div>
         <div>
           <div className="container cast-area" style={isMobile ? {} : {width: isMobile? '100%' : '620px'}}>
