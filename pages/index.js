@@ -76,6 +76,10 @@ export default function Home() {
         text: '30 days',
         value: '30days'
       },
+      {
+        text: 'All',
+        value: 'all'
+      },
     ]
   }
 
@@ -104,6 +108,7 @@ export default function Home() {
   const [tipDistribution, setTipDistribution] = useState({curators: [], creators: [], totalTip: null, totalPoints: null})
   const [totalTip, setTotalTip] = useState(0)
   const [modal, setModal] = useState({on: false, success: false, text: ''})
+  const [initValue, setInitValue] = useState(50)
 
   function btnText(type) {
     if (type == 'tags' && (userQuery[type] == 'all' || userQuery[type].length == 0)) {
@@ -672,25 +677,22 @@ export default function Home() {
     router.push(`/${username}`)
   }
 
-  const searchOption = (event, qType) => {
-    setSearchSelect(event.target.getAttribute('name'))
-    updateSearch(qType, event.target.getAttribute('name'))
-  }
-
+  // const searchOption = (event, qType) => {
+  //   setSearchSelect(event.target.getAttribute('name'))
+  //   updateSearch(qType, event.target.getAttribute('name'))
+  // }
 
   const HorizontalScale = () => {
-    const [value, setValue] = useState(userTipPercent);
+    const [value, setValue] = useState(initValue);
     const [allowance, setAllowance] = useState(() => {
       return userAllowance;
     });
-  
     useEffect(() => {
       setAllowance(userAllowance);
     }, [userAllowance]);
   
     const handleChange = (event) => {
-      const newValue = parseInt(event.target.value);
-      setValue(newValue);
+      setValue(parseInt(event.target.value));
     };
     
     const tip = Math.round(allowance * value / 100);
@@ -698,6 +700,7 @@ export default function Home() {
     const handleMouseLeave = () => {
       store.setUserTipPercent(value);
       setTotalTip(tip)
+      setInitValue(value)
     };
   
     return (
@@ -1098,6 +1101,7 @@ export default function Home() {
               <span className={`selection-btn ${userQuery['time'] == '3days' ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}} onClick={() => {handleSelect('time', '3days')}}>{'3 days'}</span>
               <span className={`selection-btn ${userQuery['time'] == '7days' ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}} onClick={() => {handleSelect('time', '7days')}}>{'7 days'}</span>
               <span className={`selection-btn ${userQuery['time'] == '30days' ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}} onClick={() => {handleSelect('time', '30days')}}>{'30 days'}</span>
+              <span className={`selection-btn ${userQuery['time'] == 'all' ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}} onClick={() => {handleSelect('time', 'all')}}>{'All'}</span>
             </div>
           </div>
         )}

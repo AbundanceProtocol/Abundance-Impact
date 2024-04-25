@@ -48,27 +48,6 @@ export function timePassed(timestamp) {
 }
 
 
-// check if url is an image
-// export async function isImage(url) {
-//   if (url) {
-//     try {
-//       const response = await axios.get('/api/getHeader', {
-//         params: { url }
-//       })
-//       if (response.data) {
-//         return response.data
-//       } else {
-//         return false
-//       }
-//     } catch (error) {
-//       return false
-//     }
-//   } else {
-//     return false
-//   }
-// }
-
-
 // add 'img' or 'url' label to embeds
 export async function setEmbeds(feed) {
   if (feed) {
@@ -156,17 +135,20 @@ export function getTimeRange(time) {
     timeRange = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
   } else if (time === '30days') {
     timeRange = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  } else if (time === 'all') {
+    timeRange = null
   }
   return timeRange
 }
 
 
 async function isImage(url) {
+  console.log(url)
   try {
     const response = await fetch(url, { method: 'HEAD' });
     if (response.ok) {
       const contentType = response.headers.get('Content-Type');
-      // console.log(contentType)
+      console.log(contentType)
       return contentType && contentType.startsWith('image/');
     }
     return false;

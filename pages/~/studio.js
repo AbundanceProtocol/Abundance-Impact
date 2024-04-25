@@ -89,6 +89,10 @@ export default function ProfilePage() {
         text: '30 days',
         value: '30days'
       },
+      {
+        text: 'All',
+        value: 'all'
+      },
     ]
   }
 
@@ -100,34 +104,10 @@ export default function ProfilePage() {
         curators: [store.fid]
       })
     }
-    // if (store.fid && store.fid !== '-') {
-    //   console.log('4')
-
-    //   getUserFeed(store.fid, false)
-    //   // getUserTipsReceived(user.fid)
-    //   getUserAllowance(store.fid)
-    //   const currentDate = getCurrentDateUTC()
-    //   if (store && store.userUpdateTime && isYesterday(store.userUpdateTime, currentDate)) {
-    //     console.log('1')
-    //     getCurationAllowance(store.fid)
-    //   }
-
-    // }
+    if (user && user.fid && user.fid !== '-') {
+      getUserAllowance(user.fid)
+    }
   }, []);
-
-  // useEffect(() => {
-  //   if (user && user.fid && user.fid !== '-') {
-  //     console.log('1')
-  //     getUserFeed(user.fid, false)
-  //     // getUserTipsReceived(user.fid)
-  //     getUserAllowance(user.fid)
-  //     const currentDate = getCurrentDateUTC()
-  //     if (store && store.userUpdateTime && isYesterday(store.userUpdateTime, currentDate)) {
-  //       console.log('1')
-  //       getCurationAllowance(user.fid)
-  //     }
-  //   }
-  // }, [user])
 
   useEffect(() => {
     if (userRouterScheduled) {
@@ -135,7 +115,6 @@ export default function ProfilePage() {
         console.log('2')
         feedRouter()
 
-        // getUserTipsReceived(user.fid)
         getUserAllowance(user.fid)
         const currentDate = getCurrentDateUTC()
         if (store && store.userUpdateTime && isYesterday(store.userUpdateTime, currentDate)) {
@@ -150,7 +129,6 @@ export default function ProfilePage() {
           console.log('3')
           feedRouter()
 
-          // getUserTipsReceived(user.fid)
           getUserAllowance(user.fid)
           const currentDate = getCurrentDateUTC()
           if (store && store.userUpdateTime && isYesterday(store.userUpdateTime, currentDate)) {
@@ -164,11 +142,6 @@ export default function ProfilePage() {
       return () => clearTimeout(timeoutId);
     }
   }, [user, userRouterScheduled]);
-
-
-  // async function refresh() {
-    
-  // }
 
 
   async function populateCast(casts) {
@@ -468,18 +441,6 @@ export default function ProfilePage() {
           remaningAllowance = await responseTotal.data.remaining
         }
 
-        // const responseUsed = await axios.get('/api/degen/getUsedTips', {
-        //   params: {
-        //     fid: fid,
-        //   }
-        // })
-
-        // if (responseUsed?.data) {
-        //   console.log(responseUsed.data.tips)
-        //   usedAllowance = await responseUsed.data.tips
-        // }
-
-        // let remaningAllowance = Number(totalAllowance) - Number(usedAllowance)
         console.log(remaningAllowance)
         if (!isNaN(remaningAllowance)) {
           console.log(remaningAllowance)
@@ -492,23 +453,6 @@ export default function ProfilePage() {
         console.error('Error creating post:', error);
         setUserAllowance(0)
       }
-
-      // try {
-      //   const response = await axios.get('/api/degen/getUserTipsReceived', {
-      //     params: { fid }
-      //   })
-      //   const tips = response.data.tips
-      //   if (tips) {
-      //     setUserTips(tips)
-      //   }
-      //   console.log(tips)
-      //   // console.log(response.data.feed)
-      //   // setUserFeed(feed)
-      // } catch (error) {
-      //   console.error('Error submitting data:', error)
-      // }
-
-
 
     }
   }
@@ -921,6 +865,7 @@ export default function ProfilePage() {
                 <span className={`selection-btn ${userQuery['time'] == '3days' ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}} onClick={() => {handleSelect('time', '3days')}}>{'3 days'}</span>
                 <span className={`selection-btn ${userQuery['time'] == '7days' ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}} onClick={() => {handleSelect('time', '7days')}}>{'7 days'}</span>
                 <span className={`selection-btn ${userQuery['time'] == '30days' ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}} onClick={() => {handleSelect('time', '30days')}}>{'30 days'}</span>
+                <span className={`selection-btn ${userQuery['time'] == 'all' ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}} onClick={() => {handleSelect('time', 'all')}}>{'All'}</span>
               </div>
             </div>
           )}
