@@ -16,7 +16,6 @@ const VideoPlayer = ({ src, width }) => {
       video.src = src;
     }
 
-    // Cleanup
     return () => {
       if (hlsRef.current) {
         hlsRef.current.destroy();

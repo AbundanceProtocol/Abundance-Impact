@@ -10,7 +10,7 @@ import { AiOutlineLoading3Quarters as Loading } from "react-icons/ai";
 import mql from '@microlink/mql';
 import { useRouter } from 'next/router';
 import Cast from '../components/Cast'
-import { formatNum, getTimeRange, checkImageUrls } from '../utils/utils';
+import { formatNum, getTimeRange, checkEmbedType } from '../utils/utils';
 import { IoShuffleOutline as Shuffle, IoPeople, IoPeopleOutline } from "react-icons/io5";
 import { BsClock } from "react-icons/bs";
 import { GoTag } from "react-icons/go";
@@ -566,17 +566,17 @@ export default function Home() {
     setUserFeed(displayedCasts)
 
 
-    async function checkImageUrlsForCasts(casts) {
-      // Map over each cast and apply checkImageUrls function
+    async function checkEmbedTypeForCasts(casts) {
+      // Map over each cast and apply checkEmbedType function
       const updatedCasts = await Promise.all(casts.map(async (cast) => {
-        return await checkImageUrls(cast);
+        return await checkEmbedType(cast);
       }));
     
       return updatedCasts;
     }
     
     // Usage
-    const castsWithImages = await checkImageUrlsForCasts(displayedCasts);
+    const castsWithImages = await checkEmbedTypeForCasts(displayedCasts);
     setUserFeed(castsWithImages);
 
 
@@ -604,16 +604,11 @@ export default function Home() {
 
     async function populateSubcasts(cast) {
       const { embeds } = cast;
-      // console.log(embeds)
-
       if (embeds && embeds.length > 0) {
         const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
-          // console.log(embed)
           if (embed.type == 'subcast') {
-            // console.log(embed.cast_id.hash)
             const subcastData = await getSubcast(embed.cast_id.hash)
-            const checkImages = await checkImageUrls(subcastData)
-            // console.log(checkImages)
+            const checkImages = await checkEmbedType(subcastData)
             return {
               ...embed,
               subcast: checkImages
@@ -630,11 +625,57 @@ export default function Home() {
         };
       }
       
-      return cast; // Return original cast object if embeds array is empty or undefined
+      return cast;
+    }
+    
+    async function populateEmbeds(cast) {
+      const { embeds } = cast
+      // console.log(embeds)
+      if (embeds && embeds.length > 0) {
+        const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
+          // console.log(embed.type)
+          if (embed && embed.url && embed.type == 'html') {
+            // console.log(embed)
+            const metaData = await axios.get('/api/getMetaTags', {
+              params: {
+                url: embed.url,
+              }
+            })
+            if (metaData && metaData.data) {
+              return {
+                ...embed,
+                metadata: metaData.data
+              };
+            } else {
+              return {
+                ...embed
+              }
+            }
+
+          } else {
+            return {
+              ...embed
+            }
+          }
+        }));
+        return {
+          ...cast,
+          embeds: updatedEmbeds
+        };
+      }
+      
+      return cast;
+    }
+
+    async function checkEmbeds(casts) {
+      const updatedCasts = await Promise.all(casts.map(async (cast) => {
+        return await populateEmbeds(cast);
+      }));
+    
+      return updatedCasts;
     }
 
     async function checkSubcasts(casts) {
-      // Map over each cast and apply checkImageUrls function
       const updatedCasts = await Promise.all(casts.map(async (cast) => {
         return await populateSubcasts(cast);
       }));
@@ -645,6 +686,11 @@ export default function Home() {
     const castsWithSubcasts = await checkSubcasts(castsWithImages)
     console.log(castsWithSubcasts)
     setUserFeed(castsWithSubcasts);
+
+
+    const castsWithEmbeds = await checkEmbeds(castsWithSubcasts)
+    console.log(castsWithEmbeds)
+    setUserFeed(castsWithEmbeds);
 
   }
 
@@ -660,7 +706,6 @@ export default function Home() {
   const Modal = () => {
     return (
       <>
-        {/* <div className="overlay" onClick={closeImagePopup}></div> */}
         <div className="modalConainer" style={{borderRadius: '10px', backgroundColor: modal.success ? '#9e9' : '#e99'}}>
           <div className='flex-col' id="notificationContent" style={{alignItems: 'center', justifyContent: 'center'}}>
             <div style={{fontSize: '20px', width: '380px', maxWidth: '380px', fontWeight: '400', height: 'auto', padding: '6px', fontSize: '16px'}}>{modal.text}</div>
@@ -676,11 +721,6 @@ export default function Home() {
     await store.setUserData(author)
     router.push(`/${username}`)
   }
-
-  // const searchOption = (event, qType) => {
-  //   setSearchSelect(event.target.getAttribute('name'))
-  //   updateSearch(qType, event.target.getAttribute('name'))
-  // }
 
   const HorizontalScale = () => {
     const [value, setValue] = useState(initValue);
@@ -980,7 +1020,7 @@ export default function Home() {
     console.log(combinedLists)
 
     combinedLists.forEach(cast => {
-      cast.text = `${cast.tip} ${cast.coin}`
+      cast.text = `${cast.tip} ${cast.coin} via /impact`
     })
     console.log(combinedLists)
 

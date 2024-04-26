@@ -143,16 +143,21 @@ export function getTimeRange(time) {
 
 
 async function isImage(url) {
-  console.log(url)
+  // console.log(url)
   try {
     const response = await fetch(url, { method: 'HEAD' });
+    console.log(url)
+
     if (response.ok) {
       const contentType = response.headers.get('Content-Type');
-      console.log(contentType)
+      console.log(contentType, url)
       if (contentType && contentType.startsWith('image/')) {
         return 'image'
       } else if (contentType && contentType == 'application/x-mpegURL') {
         return 'video'
+      } else if (contentType && contentType.startsWith('text/html')) {
+        console.log(contentType)
+        return 'html'
       } else {
         return 'other';
       }
@@ -165,16 +170,42 @@ async function isImage(url) {
   }
 }
 
-export async function checkImageUrls(cast) {
+async function getEmbeds(url) {
+  // console.log(url)
+  try {
+    const embedType = await axios.get('/api/getEmbeds', {
+      params: { url }
+    })
+    // console.log(embedType)
+    // console.log(embedType.data)
+    if (embedType && embedType.data) {
+      return embedType.data.embed
+    } else {
+      return 'other'
+    }
+  } catch (error) {
+    console.error('Error handling GET request:', error);
+    return 'other'
+  }
+}
+
+
+export async function checkEmbedType(cast) {
   const { embeds } = cast;
 
   if (embeds && embeds.length > 0) {
     const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
-      const imageResult = await isImage(embed.url);
+
+      // console.log(embed)
+      // const imageResult = await isImage(embed.url);
+      const embedType = await getEmbeds(embed.url)
+
+      // console.log(embedType)
+      // console.log(embedType.data.embed)
       const isSubcast = typeof embed.cast_id !== 'undefined'
       return {
         ...embed,
-        type: isSubcast ? 'subcast' : imageResult
+        type: isSubcast ? 'subcast' : embedType
       };
     }));
     

@@ -9,7 +9,7 @@ import axios from 'axios';
 import Cast from '../../components/Cast'
 import DashboardBtn from '../../components/Panels/DashboardBtn'
 import { FaLock, FaPowerOff } from "react-icons/fa";
-import { formatNum, getCurrentDateUTC, getTimeRange, isYesterday, checkImageUrls } from '../../utils/utils';
+import { formatNum, getCurrentDateUTC, getTimeRange, isYesterday, checkEmbedType } from '../../utils/utils';
 import { FaRegStar } from 'react-icons/fa';
 import { IoDiamondOutline as Diamond } from "react-icons/io5";
 // import { MdOutlineRefresh } from "react-icons/md";
@@ -197,7 +197,7 @@ export default function ProfilePage() {
   }, [searchSelect, userQuery, feedRouterScheduled])
 
   function feedRouter() {
-    console.log(searchSelect)
+    // console.log(searchSelect)
     if (user && searchSelect == 'Casts') {
       getLatestUserCasts(user.fid)
     } else if (searchSelect == 'Casts + Replies') {
@@ -205,7 +205,7 @@ export default function ProfilePage() {
     } else if (searchSelect == 'Curation') {
       const { shuffle, time, tags, channels, curators } = userQuery
       const timeRange = getTimeRange(time)
-      console.log(userQuery)
+      // console.log(userQuery)
       getUserSearch(timeRange, tags, channels, curators, null, shuffle)
     }
   }
@@ -301,17 +301,17 @@ export default function ProfilePage() {
     setUserFeed(displayedCasts)
 
 
-    async function checkImageUrlsForCasts(casts) {
-      // Map over each cast and apply checkImageUrls function
+    async function checkEmbedTypeForCasts(casts) {
+      // Map over each cast and apply checkEmbedType function
       const updatedCasts = await Promise.all(casts.map(async (cast) => {
-        return await checkImageUrls(cast);
+        return await checkEmbedType(cast);
       }));
     
       return updatedCasts;
     }
     
     // Usage
-    const castsWithImages = await checkImageUrlsForCasts(displayedCasts);
+    const castsWithImages = await checkEmbedTypeForCasts(displayedCasts);
     setUserFeed(castsWithImages);
 
 
@@ -347,7 +347,7 @@ export default function ProfilePage() {
           if (embed.type == 'subcast') {
             // console.log(embed.cast_id.hash)
             const subcastData = await getSubcast(embed.cast_id.hash)
-            const checkImages = await checkImageUrls(subcastData)
+            const checkImages = await checkEmbedType(subcastData)
             // console.log(checkImages)
             return {
               ...embed,
@@ -365,11 +365,57 @@ export default function ProfilePage() {
         };
       }
       
-      return cast; // Return original cast object if embeds array is empty or undefined
+      return cast; 
+    }
+
+    async function populateEmbeds(cast) {
+      const { embeds } = cast
+      // console.log(embeds)
+      if (embeds && embeds.length > 0) {
+        const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
+          // console.log(embed.type)
+          if (embed && embed.url && embed.type == 'html') {
+            // console.log(embed)
+            const metaData = await axios.get('/api/getMetaTags', {
+              params: {
+                url: embed.url,
+              }
+            })
+            if (metaData && metaData.data) {
+              return {
+                ...embed,
+                metadata: metaData.data
+              };
+            } else {
+              return {
+                ...embed
+              }
+            }
+
+          } else {
+            return {
+              ...embed
+            }
+          }
+        }));
+        return {
+          ...cast,
+          embeds: updatedEmbeds
+        };
+      }
+      
+      return cast;
+    }
+
+    async function checkEmbeds(casts) {
+      const updatedCasts = await Promise.all(casts.map(async (cast) => {
+        return await populateEmbeds(cast);
+      }));
+    
+      return updatedCasts;
     }
 
     async function checkSubcasts(casts) {
-      // Map over each cast and apply checkImageUrls function
       const updatedCasts = await Promise.all(casts.map(async (cast) => {
         return await populateSubcasts(cast);
       }));
@@ -381,6 +427,9 @@ export default function ProfilePage() {
     console.log(castsWithSubcasts)
     setUserFeed(castsWithSubcasts);
 
+    const castsWithEmbeds = await checkEmbeds(castsWithSubcasts)
+    console.log(castsWithEmbeds)
+    setUserFeed(castsWithEmbeds);
   }
 
 

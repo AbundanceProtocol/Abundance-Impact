@@ -12,7 +12,7 @@ export default async function handler(req, res) {
         },
       });
       const cast = await response.json();
-      console.log(cast)
+      // console.log(cast)
       res.status(200).json({ cast: cast });
     } catch (error) {
       console.error('Error handling GET request:', error);

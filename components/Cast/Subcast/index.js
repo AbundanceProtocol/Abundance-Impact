@@ -76,7 +76,7 @@ export default function Subcast({ cast, index }) {
     cast && (<div className="inner-container" style={{width: '100%', display: 'flex', flexDirection: 'row', borderRadius: '8px', border: '1px solid #888'}}>
 
       <div className="flex-col" style={{gap: '0.75rem'}}>
-        <div className="flex-row" style={{width: '100%', justifyContent: 'space-between', height: '20px', alignItems: 'center', flexWrap: 'wrap'}}>
+        <div className="flex-row" style={{width: '100%', justifyContent: 'space-between', height: '', alignItems: 'center', flexWrap: 'wrap'}}>
           <div className="flex-row" style={{alignItems: 'center', gap: '0.25rem', flexWrap: 'wrap', userSelect: 'none'}}>
             
             <div className="" style={{margin: '5px 5px 0 0'}}>
