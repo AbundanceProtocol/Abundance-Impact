@@ -319,10 +319,7 @@ export default function ProfilePage() {
       if (hash) {
         try {
           const response = await axios.get('/api/getCastByHash', {
-            params: {
-              hash
-            }
-          })
+            params: { hash } })
           const castData = response.data.cast.cast
           if (castData) {
             console.log(castData)
@@ -349,20 +346,12 @@ export default function ProfilePage() {
             const subcastData = await getSubcast(embed.cast_id.hash)
             const checkImages = await checkEmbedType(subcastData)
             // console.log(checkImages)
-            return {
-              ...embed,
-              subcast: checkImages
-            };
+            return { ...embed, subcast: checkImages };
           } else {
-            return {
-              ...embed
-            }
+            return { ...embed }
           }
         }));
-        return {
-          ...cast,
-          embeds: updatedEmbeds
-        };
+        return { ...cast, embeds: updatedEmbeds };
       }
       
       return cast; 
@@ -376,32 +365,22 @@ export default function ProfilePage() {
           // console.log(embed.type)
           if (embed && embed.url && embed.type == 'html') {
             // console.log(embed)
-            const metaData = await axios.get('/api/getMetaTags', {
-              params: {
-                url: embed.url,
+            try {
+              const metaData = await axios.get('/api/getMetaTags', {
+                params: { url: embed.url } })
+              if (metaData && metaData.data) {
+                return { ...embed, metadata: metaData.data };
+              } else {
+                return { ...embed }
               }
-            })
-            if (metaData && metaData.data) {
-              return {
-                ...embed,
-                metadata: metaData.data
-              };
-            } else {
-              return {
-                ...embed
-              }
+            } catch (error) {
+              return { ...embed }
             }
-
           } else {
-            return {
-              ...embed
-            }
+            return { ...embed }
           }
         }));
-        return {
-          ...cast,
-          embeds: updatedEmbeds
-        };
+        return { ...cast, embeds: updatedEmbeds };
       }
       
       return cast;
@@ -456,10 +435,7 @@ export default function ProfilePage() {
     // if (!userFeed) {
       try {
         const response = await axios.get('/api/getLatestUserCasts', {
-          params: {
-            fid
-          }
-        })
+          params: { fid } })
         // console.log(response)
         const feed = response.data.feed
         console.log(response.data.feed)

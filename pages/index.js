@@ -636,32 +636,22 @@ export default function Home() {
           // console.log(embed.type)
           if (embed && embed.url && embed.type == 'html') {
             // console.log(embed)
-            const metaData = await axios.get('/api/getMetaTags', {
-              params: {
-                url: embed.url,
+            try {
+              const metaData = await axios.get('/api/getMetaTags', {
+                params: { url: embed.url } })
+              if (metaData && metaData.data) {
+                return { ...embed, metadata: metaData.data };
+              } else {
+                return { ...embed }
               }
-            })
-            if (metaData && metaData.data) {
-              return {
-                ...embed,
-                metadata: metaData.data
-              };
-            } else {
-              return {
-                ...embed
-              }
+            } catch (error) {
+              return { ...embed }
             }
-
           } else {
-            return {
-              ...embed
-            }
+            return { ...embed }
           }
         }));
-        return {
-          ...cast,
-          embeds: updatedEmbeds
-        };
+        return { ...cast, embeds: updatedEmbeds };
       }
       
       return cast;

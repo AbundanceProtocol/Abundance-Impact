@@ -6,10 +6,12 @@ import { FaSearch, FaLock, FaRegStar, FaStar, FaArrowUp, FaArrowDown } from "rea
 import axios from 'axios';
 import { timePassed } from '../../utils/utils';
 import CastText from './Text'
+import Embed from './Embed';
 import Subcast from './Subcast';
 import { IoDiamondOutline as Diamond } from "react-icons/io5";
 import { ImArrowUp, ImArrowDown  } from "react-icons/im";
 import VideoPlayer from './VideoPlayer';
+import Images from './Images';
 
 export default function Cast({ cast, index, updateCast, openImagePopup }) {
   const store = useStore()
@@ -26,6 +28,9 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
   const handleClick = (embed) => {
     openImagePopup(embed); 
   };
+  const [hide, setHide] = useState(false)
+
+
 
   function clickFailed() {
     setFail(true);
@@ -157,8 +162,6 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
   useEffect(() => {
     setuserFid(store.fid)
 
-    // console.log(cast)
-    // console.log(userFid, cast.author.fid, store.fid)
     const handleResize = () => {
       setScreenWidth(window.innerWidth)
     }
@@ -207,9 +210,9 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
     }
   }
 
-  async function postRecast(hash, index) {
-    // need to update recasts counter
-    recastRefs.current[index].style.color = '#3b3'
+  async function postRecast(hash, index, count) {
+    const recastedCount = count ? Number(count) : 0
+    recastRefs.current[index].style.color = '#191'
     try {
       const response = await axios.post('/api/postRecastReaction', {       
         hash: hash,
@@ -217,16 +220,20 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
       })
       if (response.status !== 200) {
         recastRefs.current[index].style.color = '#000'
-        // need to revert recasts counter
+      } else if (response.status == 200) {
+        const { viewer_context, reactions } = cast
+        const updatedRecast = {...viewer_context, recasted: true}
+        const updateRecastCount = {...reactions, recasts_count: recastedCount + 1}
+        const updatedCast = {...cast, viewer_context: updatedRecast, reactions: updateRecastCount}
+        updateCast(index, updatedCast)
       }
-      console.log(response.status)
     } catch (error) {
       console.error('Error submitting data:', error)
     }
   }
 
-  async function postLike(hash, index) {
-    // need to update likes counter
+  async function postLike(hash, index, count) {
+    const likesCount = count ? Number(count) : 0
     likeRefs.current[index].style.color = '#b33'
     try {
       const response = await axios.post('/api/postLikeReaction', {       
@@ -235,11 +242,11 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
       })
       if (response.status !== 200) {
         likeRefs.current[index].style.color = '#000'
-        // need to revert likes counter
       } else if (response.status == 200) {
-        const { viewer_context } = cast
+        const { viewer_context, reactions } = cast
         const updatedLike = {...viewer_context, liked: true}
-        const updatedCast = {...cast, viewer_context: updatedLike}
+        const updateLikesCount = {...reactions, likes_count: likesCount + 1}
+        const updatedCast = {...cast, viewer_context: updatedLike, reactions: updateLikesCount}
         updateCast(index, updatedCast)
       }
       console.log(response.status)
@@ -305,24 +312,9 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
               </div>
             {(cast.embeds.length > 0) && (cast.embeds.map((embed, subindex) => (
               
-            <div className='flex-col' style={{alignItems: 'center'}}>
-              {(embed && embed.type && embed.type == 'image') && (
-                <div className="" key={`${index}-${subindex}`}>
-                  <div className="flex-col" style={{position: 'relative'}}>
-                    <img 
-                      loading="lazy" 
-                      src={embed.url} 
-                      alt="Cast image embed" 
-                      style={{
-                        maxWidth: textMax, 
-                        maxHeight: '500px', 
-                        marginTop: '10px', 
-                        cursor: 'pointer', 
-                        position: 'relative',
-                        borderRadius: '8px'}} 
-                        onClick={() => {handleClick(embed)}} />
-                  </div>
-                </div>
+            <div className='flex-col' style={{alignItems: 'center', display: hide ? 'flex' : 'flex'}}>
+              {(embed && embed.type && (embed.type == 'image' || embed.type == 'other')) && (
+                <Images embed={embed} subindex={subindex} textMax={textMax} handleClick={handleClick} index={index} />
               )}
               {(embed && embed.type && embed.type == 'subcast') && (
                 <div className="" key={`${index}-${subindex}`} style={{marginTop: '10px'}}>
@@ -334,35 +326,8 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
                   <VideoPlayer width={textMax} src={embed.url} />
                 </div>
               )}
-              {(embed && embed.url && embed.type && (embed.type == 'html')) && (
-                <a href={embed.url} target="_blank" rel="noopener noreferrer" style={{marginTop: '10px'}} >
-                  <div className="flex-col url-meta" key={`${index}-${subindex}`}>
-                    {(embed.metadata && embed.metadata.image) && (
-                      <img 
-                      loading="lazy" 
-                      src={embed.metadata.image} 
-                      alt="Link image" 
-                      style={{
-                        width: textMax, 
-                        maxHeight: '500px', 
-                        cursor: 'pointer', 
-                        position: 'relative',
-                        border: '1px solid #888', 
-                        borderRadius: '8px 8px 0 0'}} />
-                    )}
-                    <div className='flex-col' style={{border: '1px solid #888', borderRadius: '0 0 8px 8px', padding: '10px'}}>
-                      {(embed.metadata && embed.metadata.title) && (
-                        <div style={{fontSize: '13px', color: '#333', fontWeight: '600'}}>{embed.metadata.title}</div>
-                      )}
-                      {(embed.metadata && embed.metadata.description) && (
-                        <div style={{fontSize: '11px', color: '#333', fontWeight: '500'}}>{embed.metadata.description}</div>
-                      )}
-                      {(embed.metadata && embed.metadata.domain) && (
-                        <div style={{fontSize: '11px', color: '#555', fontWeight: '400'}}>{embed.metadata.domain}</div>
-                      )}
-                    </div>
-                  </div>
-                </a>
+              {(embed && embed.url && embed.type && (embed.type == 'html') && embed.metadata && embed.metadata.title) && (
+                <Embed embed={embed} index={index} subindex={subindex} textMax={textMax} />
               )}
             </div>
             )))}
@@ -388,13 +353,13 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
               <div
                 ref={el => (recastRefs.current[index] = el)} 
                 className='flex-row recast-btn' 
-                style={{color: cast.viewer_context?.recasted ? '#3b3' : ''}}
-                onClick={() => postRecast(cast.hash, index, cast.reactions.recasts.length)}
+                style={{color: cast.viewer_context?.recasted ? '#191' : ''}}
+                onClick={() => postRecast(cast.hash, index, cast.reactions.recasts_count)}
                 >
                 <div className="">
                   <Recast />
                 </div>
-                <span className="" style={{padding: '0 0 0 5px'}}>{cast.reactions.recasts.length}</span>
+                <span className="" style={{padding: '0 0 0 5px'}}>{cast.reactions.recasts_count}</span>
               </div>
             </div>
             <div className="flex-row" style={{flex: 4}}>
@@ -402,12 +367,12 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
                 ref={el => (likeRefs.current[index] = el)} 
                 className='flex-row like-btn' 
                 style={{color: cast.viewer_context?.liked ? '#b33' : ''}}
-                onClick={() => postLike(cast.hash, index, cast.reactions.likes.length)}
+                onClick={() => postLike(cast.hash, index, cast.reactions.likes_count)}
                 >
                 <div className="">
                   {cast.viewer_context?.liked ? <LikeOn /> : <Like />}
                 </div>
-                <span className="" style={{padding: '0 0 0 5px'}}>{cast.reactions.likes.length}</span>
+                <span className="" style={{padding: '0 0 0 5px'}}>{cast.reactions.likes_count}</span>
               </div>
             </div>
             <div className="flex-row" style={{flex: 1, padding: '3px', gap: '0.5rem'}}>
