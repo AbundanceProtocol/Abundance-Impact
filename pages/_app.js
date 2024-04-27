@@ -8,7 +8,7 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Drawer from '@mui/material/Drawer';
 import { HiChevronUp as CollapseIcon, HiMenu } from 'react-icons/hi';
-import { FaPen } from 'react-icons/fa';
+import { FaPen, FaStar, FaRegStar } from 'react-icons/fa';
 import { AccountContext } from '../context'
 import useStore from '../utils/store'
 import useMatchBreakpoints from '../hooks/useMatchBreakpoints';
@@ -20,6 +20,8 @@ import NeynarSigninButton from '../components/Signin';
 import { IoIosWarning } from "react-icons/io"
 import { FaLock } from "react-icons/fa";
 import axios from 'axios';
+import { PiSquaresFourLight as Actions } from "react-icons/pi";
+import { IoInformationCircleOutline as Info } from "react-icons/io5";
 
 export default function App({ Component, pageProps }) {
   const store = useStore()
@@ -633,6 +635,37 @@ export default function App({ Component, pageProps }) {
         <div className="flex-col" style={{padding: '58px 0 0 0'}}>
           { button['side-menu'].map((btn, index) => (
             <LeftNav buttonName={btn} key={index} /> ))}
+            <div className='left-container' style={{margin: '20px 23px 0 0', maxWidth: '237px'}}>
+              <div style={{backgroundColor: '#334455ee', borderRadius: '20px', padding: '0px', border: '0px solid #678', color: '#fff', fontWeight: '700', alignItems:' center', fontSize: '20px'}}>
+                <div title='Cast Actions' className='flex-row' style={{alignItems: 'center', justifyContent: 'center', margin: '8px'}}>
+                  <Actions size={32} color={'#9cf'} /><p className='left-nav' style={{paddingLeft: '10px', fontSize: isTablet ? '12px' : '18px', fontWeight: '500'}}>Cast Actions </p>
+                </div>
+                <div className='flex-col' style={{gap: '0.5rem', margin: '8px'}}>
+                  <a className="" title="+1 Impact" href='https://warpcast.com/~/add-cast-action?name=%2B1+Impact&icon=star&actionType=post&postUrl=https%3A%2Fimpact.abundance.id%2Fapi%2Faction%2Fimpact%3Fp%3D1&description=Curate+Casts+with+the+Impact+App' target="_blank" rel="noopener noreferrer">
+                    <div className='flex-row cast-act' style={{borderRadius: '8px', padding: '8px 4px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
+                      <FaRegStar size={20} />
+                      <p className='left-nav' style={{padding: '0px', fontSize: '15px', fontWeight: '500'}}>+1 Impact</p>
+                    </div>
+                  </a>
+
+                  <a className="" title='+5 Impact' href='https://warpcast.com/~/add-cast-action?name=%2B5+Impact&icon=star&actionType=post&postUrl=https%3A%2Fimpact.abundance.id%2Fapi%2Faction%2Fimpact%3Fp%3D5&description=Curate+Casts+with+the+Impact+App' target="_blank" rel="noopener noreferrer">
+                    <div className='flex-row cast-act' style={{borderRadius: '8px', padding: '8px 4px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
+                      <FaRegStar size={20} />
+                      <p className='left-nav' style={{padding: '0px', fontSize: '15px', fontWeight: '500'}}>+5 Impact</p>
+                    </div>
+                  </a>
+
+                  <a className="" title="Cast Impact Balance" href='https://warpcast.com/~/add-cast-action?name=Cast+Impact+Balance&icon=info&actionType=post&postUrl=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Faction%2Fbalance&description=Get+Cast+Balance+for+Impact+App ' target="_blank" rel="noopener noreferrer">
+                    <div className='flex-row cast-act' style={{borderRadius: '8px', padding: '8px 4px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
+                      <div className='left-nav' style={{width: '2px', fontSize: '0px'}}>&nbsp;</div>
+                      <Info size={20} />
+                      <p className='left-nav' style={{padding: '0px', fontSize: '15px', fontWeight: '500'}}>Cast Impact Balance</p>
+                      <div className='left-nav' style={{width: '2px', fontSize: '0px'}}>&nbsp;</div>
+                    </div>
+                  </a>
+                </div>
+              </div>
+            </div>
           {/* { button['side-menu'].map((btn, index) => (
             <LeftMenu btn={btn} index={index} key={index} LoginPopup={LoginPopup} /> ))} */}
         </div>
@@ -645,7 +678,22 @@ export default function App({ Component, pageProps }) {
         </div>
         <div className='right-nav-text' style={{width: '400px'}}>
           <div>
-            <div style={{margin: '58px 0px 12px 20px', backgroundColor: '#334455ee', width: '380px', borderRadius: '20px', padding: '32px', border: '0px solid #678', color: '#fff', fontWeight: '700', alignItems:' center', fontSize: '20px'}}><IoIosWarning size={40} color={'#fbb'} /><p style={{paddingTop: '10px'}}>NOTICE: the Abundance Protocol&apos;s Impact App is currently in an early development stage </p></div>
+            <div style={{margin: '58px 0px 12px 20px', backgroundColor: '#334455ee', width: '380px', borderRadius: '20px', padding: '32px', border: '0px solid #678', color: '#fff', fontWeight: '700', alignItems:' center', fontSize: '20px'}}><FaStar size={40} color={'#9cf'} /><p style={{paddingTop: '10px', fontSize: '20px', fontWeight: '600'}}>3 ways to earn with Impact: </p>
+              <div className='flex-col' style={{gap: '0.5rem', marginTop: '10px'}}>
+                <div className='flex-row'>
+                  <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '10px 35px 0 0'}}>1</div>
+                  <p style={{paddingTop: '10px', fontSize: '16px', fontWeight: '500'}}>Create great things that benefit the Farcaster community. Curators will be looking for great content.</p>
+                </div>
+                <div className='flex-row'>
+                  <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '10px 35px 0 0'}}>2</div>
+                  <p style={{paddingTop: '10px', fontSize: '16px', fontWeight: '500'}}>Curate impactful casts. Curators get a percent of the rewards going to creators.</p>
+                </div>
+                <div className='flex-row'>
+                  <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '10px 35px 0 0'}}>3</div>
+                  <p style={{paddingTop: '10px', fontSize: '16px', fontWeight: '500'}}>Reward creators. The more rewards you give the more Impact Points you get to stake.</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

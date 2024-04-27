@@ -49,7 +49,7 @@ export default function DropdownMenu({options=[], children}) {
                 color: '#eee',
                 fontWeight: opt.action ? 'bold' : '500',
                 borderBottom: idx !== options.length - 1 && '1px solid #dcb',
-                '&:hover': {color: opt.action && '#ddd425'}
+                '&:hover': {color: opt.action && '#99ddff'}
               }}
               onClick={() => {
               if (opt.action) opt.action()
