@@ -109,6 +109,8 @@ export default function Home() {
   const [totalTip, setTotalTip] = useState(0)
   const [modal, setModal] = useState({on: false, success: false, text: ''})
   const [initValue, setInitValue] = useState(50)
+  const [initHour, setInitHour] = useState('0')
+  const [initMinute, setInitMinute] = useState('0')
 
   function btnText(type) {
     if (type == 'tags' && (userQuery[type] == 'all' || userQuery[type].length == 0)) {
@@ -124,6 +126,78 @@ export default function Home() {
       const option = options.find(option => option.value === userQuery[type]);
       return option ? option.text : '';
     }
+  }
+
+  const ScheduleTaskForm = () => {
+    const [hour, setHour] = useState(initHour);
+    const [minute, setMinute] = useState(initMinute);
+
+    // Generate options for hours (0-23)
+    const hoursOptions = [
+      { value: 'Hr', label: 'Hr' },
+      ...Array.from({ length: 24 }, (_, i) => ({
+          value: i.toString().padStart(2, '0'),
+          label: i.toString().padStart(2, '0'),
+      })),
+  ];
+
+    // Generate options for minutes (00, 30)
+    const minutesOptions = [
+      { value: '', label: 'Min' },
+      { value: '00', label: '00' },
+      { value: '30', label: '30' },
+    ];
+
+    const handleHourChange = (event) => {
+      setHour(event.target.value);
+      setInitHour(event.target.value);
+    };
+
+    const handleMinuteChange = (event) => {
+      setMinute(event.target.value);
+      setInitMinute(event.target.value);
+    };
+
+    const handleSubmit = () => {
+      // Schedule the task with the selected hour and minute
+      const cronSchedule = `${minute} ${hour} * * *`;
+      // cron.schedule(cronSchedule, async () => {
+        // console.log('hello world')
+      // });
+
+      // Optionally, provide feedback to the user
+      console.log('Task scheduled successfully with cron schedule:', cronSchedule);
+    };
+
+    return (
+      <>
+        <div className='flex-col follow-locked' style={{backgroundColor: '', borderRadius: '5px', width: '220px', gap: '0.25rem', alignItems: 'center', justifyContent: 'center', padding: '0px 8px', height: '48px', margin: '2px 0 2px 10px'}}>
+          <div className='flex-row' style={{gap: '0.5rem'}}>
+
+            <select id="hourSelect" value={hour} onChange={handleHourChange} style={{backgroundColor: '#adf', borderRadius: '4px'}}>
+              {hoursOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+            <select id="minuteSelect" value={minute} onChange={handleMinuteChange} style={{backgroundColor: '#adf', borderRadius: '4px'}}>
+              {minutesOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <button onClick={handleSubmit} style={{backgroundColor: 'transparent', fontWeight: '600', color: '#fff', cursor: 'pointer', fontSize: '12px', padding: '0'}}>SCHEDULE TIP</button>
+        </div>
+        <div style={{position: 'relative', fontSize: '0', width: '0', height: '100%'}}>
+          <div className='top-layer' style={{position: 'absolute', top: 0, left: 0, transform: 'translate(-70%, -50%)' }}>
+            <div className='soon-btn'>SOON</div>
+          </div>
+        </div>
+      </>
+    );
   }
 
   const updateSearch = (key, value) => {
@@ -584,9 +658,7 @@ export default function Home() {
       if (hash) {
         try {
           const response = await axios.get('/api/getCastByHash', {
-            params: {
-              hash
-            }
+            params: { hash }
           })
           const castData = response.data.cast.cast
           if (castData) {
@@ -609,20 +681,12 @@ export default function Home() {
           if (embed.type == 'subcast') {
             const subcastData = await getSubcast(embed.cast_id.hash)
             const checkImages = await checkEmbedType(subcastData)
-            return {
-              ...embed,
-              subcast: checkImages
-            };
+            return { ...embed, subcast: checkImages };
           } else {
-            return {
-              ...embed
-            }
+            return { ...embed }
           }
         }));
-        return {
-          ...cast,
-          embeds: updatedEmbeds
-        };
+        return { ...cast, embeds: updatedEmbeds };
       }
       
       return cast;
@@ -1071,7 +1135,7 @@ export default function Home() {
           {isLogged ? (
             <div className="flex-row">
               {(
-                <div className={`flex-row ${(loading || totalTip == 0) ? 'follow-locked' : 'follow-select'} ${modal.success ? 'flash-success' : ''}`} style={{position: 'relative', height: 'auto', width: '120px', marginRight: '0', cursor: (loading || totalTip == 0) ? 'default' : 'pointer'}}>
+                <div className={`flex-row ${(loading || totalTip == 0) ? 'follow-locked' : 'follow-select'} ${modal.success ? 'flash-success' : ''}`} style={{position: 'relative', height: 'auto', width: '100px', marginRight: '0', cursor: (loading || totalTip == 0) ? 'default' : 'pointer'}}>
                   {(loading || totalTip == 0) ? (
                     <div className='flex-row' style={{height: '100%', alignItems: 'center'}}>
                       <Spinner size={21} color={'#999'} />
@@ -1083,7 +1147,7 @@ export default function Home() {
                       postMultiTip()
                     }
                     }}
-                     name='follow' style={{color: loading ? 'transparent' : '#fff', height: 'auto', width: '100px'}}>Tip all</div>
+                     name='follow' style={{color: loading ? 'transparent' : '#fff', height: 'auto', width: '100px'}}>TIP ALL</div>
                   )
 
                   }
@@ -1091,14 +1155,15 @@ export default function Home() {
               )}
             </div>
           ) : (
-            <div className="flex-row follow-locked" style={{position: 'relative', height: 'auto', width: '120px', marginRight: '0'}}>
-              <div className='cast-btn' onClick={account.LoginPopup} style={{height: 'auto', width: '100px'}}>Tip all</div>
+            <div className="flex-row follow-locked" style={{position: 'relative', height: 'auto', width: '100px', marginRight: '0'}}>
+              <div className='cast-btn' onClick={account.LoginPopup} style={{height: 'auto', width: '100px'}}>TIP ALL</div>
               <div className='top-layer' style={{position: 'absolute', top: 0, right: 0, transform: 'translate(40%, -60%)' }}>
                 <FaLock size={8} color='#eee' />
               </div>
             </div>
           )
         }
+        <ScheduleTaskForm />
       </div>
     </div>
     <div>

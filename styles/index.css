@@ -35,12 +35,12 @@ html, body {
 }
 
 .cast-act {
-    background-color: #012;
+    background-color: #123;
     cursor: pointer;
 }
 
 .cast-act:hover {
-    background-color: #023;
+    background-color: #234;
 }
 
 @media only screen and (min-width: 1380px) {
