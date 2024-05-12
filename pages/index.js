@@ -143,7 +143,7 @@ export default function Home() {
 
     // Generate options for minutes (00, 30)
     const minutesOptions = [
-      { value: '', label: 'Min' },
+      { value: '00', label: 'Min' },
       { value: '00', label: '00' },
       { value: '30', label: '30' },
     ];
@@ -158,15 +158,44 @@ export default function Home() {
       setInitMinute(event.target.value);
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
       // Schedule the task with the selected hour and minute
-      const cronSchedule = `${minute} ${hour} * * *`;
+      const schedTime = `${minute} ${hour} * * *`;
+      const { shuffle, time, tags, channels, curators } = userQuery
+      // const timeRange = getTimeRange(time)
+      // getUserSearch(timeRange, tags, channels, curators, null, shuffle)
+      console.log(schedTime)
+      async function postSchedule(shuffle, time, tags, channels, curators, schedTime) {
+        const fid = await store.fid
+        const uuid = await store.signer_uuid
+        const percent = initValue
+
+        try {
+          const response = await axios.post('/api/curation/postTipSchedule', { fid, uuid, shuffle, time, tags, channels, curators, percent, schedTime })
+          let schedData = []
+          if (response && response.data) {
+            schedData = response.data
+
+            // const postSchedule = await axios.post('/api/curation/scheduleTips', {schedTime, fid})
+            // console.log(postSchedule)
+          }
+          console.log(schedData)
+  
+          return schedData
+        } catch (error) {
+          console.error('Error submitting data:', error)
+          return null
+        }
+      }
+    
+      const schedData = await postSchedule(shuffle, time, tags, channels, curators, schedTime)
+
       // cron.schedule(cronSchedule, async () => {
         // console.log('hello world')
       // });
 
       // Optionally, provide feedback to the user
-      console.log('Task scheduled successfully with cron schedule:', cronSchedule);
+      // console.log('Task scheduled successfully with cron schedule:', schedData);
     };
 
     return (
@@ -189,7 +218,8 @@ export default function Home() {
               ))}
             </select>
           </div>
-          <button onClick={handleSubmit} style={{backgroundColor: 'transparent', fontWeight: '600', color: '#fff', cursor: 'pointer', fontSize: '12px', padding: '0'}}>SCHEDULE TIP</button>
+          <button onClick={() => {
+            if (hour !== 'Hr') { handleSubmit() }}} style={{backgroundColor: 'transparent', fontWeight: '600', color: '#fff', cursor: (hour !== 'Hr') ?'pointer' : 'default', fontSize: '12px', padding: '0'}}>SCHEDULE TIP</button>
         </div>
         <div style={{position: 'relative', fontSize: '0', width: '0', height: '100%'}}>
           <div className='top-layer' style={{position: 'absolute', top: 0, left: 0, transform: 'translate(-70%, -50%)' }}>
@@ -1257,7 +1287,7 @@ export default function Home() {
               <div className='flex-row' style={{gap: '0.5rem', padding: '0px 6px', flexWrap: 'wrap'}}>
                 {curators && (
                   curators.map((curator, index) => (
-                    <div key={index} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addCurator(curator)}}>
+                    <div key={`Cu2-${index}`} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addCurator(curator)}}>
                       <img loading="lazy" src={curator.pfp} className="" alt={curator.display_name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
                       <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>@{curator.username}</div>
                     </div>
@@ -1269,7 +1299,7 @@ export default function Home() {
                 <div style={{color: '#ddd', fontWeight: '600', fontSize: '13px', padding: '0 0 3px 6px'}}>Selected:</div>
                 {(
                   selectedCurators.map((curator, index) => (
-                    <div key={index} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addCurator(curator)}}>
+                    <div key={`Cu-${index}`} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addCurator(curator)}}>
                       <img loading="lazy" src={curator.pfp} className="" alt={curator.display_name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
                       <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>@{curator.username}</div>
                     </div>
@@ -1295,7 +1325,7 @@ export default function Home() {
               <div className='flex-row top-layer' style={{gap: '0.5rem', padding: '0px 6px', flexWrap: 'wrap'}}>
                 {channels && (
                   channels.map((channel, index) => (
-                    <div key={index} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addChannel(channel)}}>
+                    <div key={`Ch2-${index}`} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addChannel(channel)}}>
                       <img loading="lazy" src={channel.image_url} className="" alt={channel.name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
                       <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>{channel.name}</div>
                       <div style={{fontWeight: '400', fontSize: '10px', color: '#ccc'}}>{formatNum(channel.follower_count)}</div>
@@ -1308,7 +1338,7 @@ export default function Home() {
                 <div style={{color: '#ddd', fontWeight: '600', fontSize: '13px', padding: '0 0 3px 6px'}}>Selected:</div>
                 {(
                   selectedChannels.map((channel, index) => (
-                    <div key={index} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addChannel(channel)}}>
+                    <div key={`Ch-${index}`} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addChannel(channel)}}>
                       <img loading="lazy" src={channel.image_url} className="" alt={channel.name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
                       <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>{channel.name}</div>
                     </div>

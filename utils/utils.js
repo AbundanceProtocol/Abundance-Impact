@@ -1,4 +1,5 @@
 import axios from 'axios';
+import CryptoJS from 'crypto-js';
 
 // shorten a hash address
 export function shortenAddress(input, long) {
@@ -216,4 +217,16 @@ export async function checkEmbedType(cast) {
   }
   
   return cast; // Return original cast object if embeds array is empty or undefined
+}
+
+
+// Encryption function
+export function encryptPassword(password, secretKey) {
+    return CryptoJS.AES.encrypt(password, secretKey).toString();
+}
+
+// Decryption function
+export function decryptPassword(encryptedPassword, secretKey) {
+    const bytes = CryptoJS.AES.decrypt(encryptedPassword, secretKey);
+    return bytes.toString(CryptoJS.enc.Utf8);
 }
