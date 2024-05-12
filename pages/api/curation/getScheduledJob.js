@@ -328,7 +328,7 @@ export default async function handler(req, res) {
 
       
             let returnedCurators = []
-            if (fidSet.length > 0) {
+            if (fidSet && fidSet.length > 0) {
         
               let userFids = fidSet.join(',')
       
@@ -349,16 +349,18 @@ export default async function handler(req, res) {
         
               returnedCurators = await getCurators(userFids)
             }
-      
+            console.log('352', returnedCurators)
+
             const lookupTable = returnedCurators.reduce((acc, obj) => {
               acc[obj.fid] = obj;
               return acc;
             }, {});
       
             const creatorData = tipDistribution.creators
-      
+            console.log('360', creatorData)
+
             let curatorData
-            if (curatorList.legnth > 0) {
+            if (curatorList && curatorList.legnth > 0) {
               curatorData = curatorList.map(obj => {
                 const matchingObj = lookupTable[obj.fid];
                 if (matchingObj) {
@@ -375,7 +377,7 @@ export default async function handler(req, res) {
             }
       
             let combinedLists = [...new Set([...creatorData, ...curatorData])];
-            console.log('364', combinedLists)
+            console.log('380', combinedLists)
 
             combinedLists.forEach(cast => {
               cast.text = `${cast.tip} ${cast.coin} via /impact`
