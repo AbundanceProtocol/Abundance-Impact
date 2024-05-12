@@ -241,7 +241,8 @@ export default async function handler(req, res) {
           }
         
           let casts = filterObjects(ulfilteredCasts, fid);
-          
+          console.log('244', casts)
+
           const totalBalanceImpact = casts.reduce((total, obj) => {
             return total + obj.impact_balance - obj.quality_balance;
           }, 0);
@@ -284,7 +285,8 @@ export default async function handler(req, res) {
             })
       
             const tempCasts = newCurators.filter(obj => obj.cast === 'temp');
-      
+            console.log('288', tempCasts)
+
             tempCasts.sort((a, b) => a.fid - b.fid);
         
             // Combine objects with the same fid by adding up the tip
@@ -308,7 +310,8 @@ export default async function handler(req, res) {
                 fidSet.push(curator.fid)
               })
             }
-      
+            console.log('313', curatorList)
+
       
             let returnedCurators = []
             if (fidSet.length > 0) {
@@ -358,7 +361,8 @@ export default async function handler(req, res) {
             }
       
             let combinedLists = [...new Set([...creatorData, ...curatorData])];
-        
+            console.log('364', combinedLists)
+
             combinedLists.forEach(cast => {
               cast.text = `${cast.tip} ${cast.coin} via /impact`
             })
@@ -422,9 +426,11 @@ export default async function handler(req, res) {
               }
               return tipCounter
             }
-      
+
+            console.log('430', fid, combinedLists)
+
             const confirmCasts = await postMultipleTips(decryptedUuid, fid, combinedLists)
-            console.log('427', confirmCasts)
+            console.log('433', confirmCasts)
 
             if (confirmCasts) {
               return true
@@ -438,8 +444,9 @@ export default async function handler(req, res) {
       
         const tip = tipAllowance * percent
 
-        console.log('440', casts, tip, fid)
+        console.log('447', casts, tip, fid)
         const tipped = await determineDistribution(casts, tip, fid)
+        console.log('449', tipped)
 
         if (!tipped) {
           res.status(500).json({ error: 'Internal Server Error' });
