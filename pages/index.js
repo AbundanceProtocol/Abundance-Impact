@@ -173,9 +173,32 @@ export default function Home() {
         try {
           const response = await axios.post('/api/curation/postTipSchedule', { fid, uuid, shuffle, time, tags, channels, curators, percent, schedTime })
           let schedData = []
+
+
+          if (response && response.status !== 200) {
+            setLoading(false)
+            console.log(response)
+            setModal({on: true, success: false, text: 'Tip scheduling failed'});
+            setTimeout(() => {
+              setModal({on: false, success: false, text: ''});
+            }, 2500);
+          } else {
+            setLoading(false)
+            console.log(response)
+
+            setModal({on: true, success: true, text: response.data.message});
+            setTimeout(() => {
+              setModal({on: false, success: false, text: ''});
+            }, 2500);
+          }
+
+
+
           if (response && response.data) {
             schedData = response.data
 
+
+            
             // const postSchedule = await axios.post('/api/curation/scheduleTips', {schedTime, fid})
             // console.log(postSchedule)
           }
