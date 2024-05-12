@@ -458,7 +458,7 @@ export default async function handler(req, res) {
           }
         }
       
-        const tip = tipAllowance * percent
+        const tip = tipAllowance * percent/100
 
         console.log('447', casts, tip, fid)
         const tipped = await determineDistribution(casts, tip, fid)
