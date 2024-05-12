@@ -264,11 +264,13 @@ export default async function handler(req, res) {
               // console.log(castTip)
               let castDistribution = null
               castDistribution = {
-                fid: cast.author.fid,
-                cast: cast.hash,
+                fid: cast.author_fid,
+                cast: cast.cast_hash,
                 tip: castTip,
                 coin: '$degen'
               }
+              console.log('272', castDistribution)
+
               newDistribution.push(castDistribution)
               const curators = cast.impact_points
               // console.log(curators)
