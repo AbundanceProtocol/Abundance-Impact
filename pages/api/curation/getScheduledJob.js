@@ -246,9 +246,10 @@ export default async function handler(req, res) {
           console.log('244', casts)
 
           const totalBalanceImpact = casts.reduce((total, obj) => {
-            return total + obj.impact_balance - obj.quality_balance;
+            return total + obj.impact_total - obj.quality_balance;
           }, 0);
-      
+          console.log('251', totalBalanceImpact)
+
           let newDistribution = []
           let newCurators = []
           if (casts && tip) {
@@ -257,7 +258,7 @@ export default async function handler(req, res) {
               if (cast.impact_points && cast.impact_points.length > 0) {
                 ratio =  0.92
               }
-              let castTip = Math.floor((cast.impact_balance  - cast.quality_balance) / totalBalanceImpact * ratio * tip)
+              let castTip = Math.floor((cast.impact_total  - cast.quality_balance) / totalBalanceImpact * ratio * tip)
               // console.log(castTip)
               let castDistribution = null
               castDistribution = {
