@@ -254,6 +254,8 @@ export default async function handler(req, res) {
           let newCurators = []
           if (casts && tip) {
             casts.forEach(cast => {
+              console.log('257', cast)
+
               let ratio = 1
               if (cast.impact_points && cast.impact_points.length > 0) {
                 ratio =  0.92
@@ -286,25 +288,32 @@ export default async function handler(req, res) {
                 newCurators.push(curatorDistribution)
               })
             })
-      
-            const tempCasts = newCurators.filter(obj => obj.cast === 'temp');
-            console.log('288', tempCasts)
+            console.log('289', newCurators)
+            let tempCasts
+            if (newCurators) {
+              tempCasts = newCurators.filter(obj => obj.cast === 'temp');
+              console.log('292', tempCasts)
+              tempCasts.sort((a, b) => a.fid - b.fid);
+            }
+            let combinedCasts
+            if (tempCasts && tempCasts.length > 0) {
+              // Combine objects with the same fid by adding up the tip
+              combinedCasts = tempCasts.reduce((acc, curr) => {
+                const existingCast = acc.find(obj => obj.fid === curr.fid);
+                if (existingCast) {
+                  existingCast.points += curr.points;
+                } else {
+                  acc.push(curr);
+                }
+                return acc;
+              }, []);
+            }
+            console.log('311', combinedCasts)
 
-            tempCasts.sort((a, b) => a.fid - b.fid);
-        
-            // Combine objects with the same fid by adding up the tip
-            const combinedCasts = tempCasts.reduce((acc, curr) => {
-              const existingCast = acc.find(obj => obj.fid === curr.fid);
-              if (existingCast) {
-                existingCast.points += curr.points;
-              } else {
-                acc.push(curr);
-              }
-              return acc;
-            }, []);
         
             let tipDistribution = {curators: combinedCasts, creators: newDistribution, totalPoints: totalBalanceImpact, totalTip: Math.round(tip)}
-      
+            console.log('315', tipDistribution)
+
             let fidSet = []
         
             const curatorList = tipDistribution.curators
@@ -313,7 +322,7 @@ export default async function handler(req, res) {
                 fidSet.push(curator.fid)
               })
             }
-            console.log('313', curatorList)
+            console.log('324', curatorList)
 
       
             let returnedCurators = []
