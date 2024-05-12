@@ -297,7 +297,7 @@ export default async function handler(req, res) {
               console.log('292', tempCasts)
               tempCasts.sort((a, b) => a.fid - b.fid);
             }
-            let combinedCasts
+            let combinedCasts = []
             if (tempCasts && tempCasts.length > 0) {
               // Combine objects with the same fid by adding up the tip
               combinedCasts = tempCasts.reduce((acc, curr) => {
@@ -359,8 +359,8 @@ export default async function handler(req, res) {
             const creatorData = tipDistribution.creators
             console.log('360', creatorData)
 
-            let curatorData
-            if (curatorList && curatorList.legnth > 0) {
+            let curatorData = []
+            if (curatorList && curatorList.legnth > 0 && lookupTable) {
               curatorData = curatorList.map(obj => {
                 const matchingObj = lookupTable[obj.fid];
                 if (matchingObj) {
