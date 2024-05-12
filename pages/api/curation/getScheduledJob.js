@@ -17,6 +17,8 @@ export default async function handler(req, res) {
     res.status(405).json({ error: 'Method Not Allowed', message: 'Failed to provide required data' });
   } else {
 
+    console.log('20', fid, encryptedUuid)
+
     async function getSchedule(uuid) {
       try {
         await connectToDatabase();
@@ -42,6 +44,7 @@ export default async function handler(req, res) {
     }
   
     const { shuffle, timeRange, tags, channels, curators, percent, decryptedUuid } = await getSchedule(encryptedUuid)
+    console.log('47', shuffle, timeRange, tags, channels, curators, percent)
 
     if (!percent || !decryptedUuid) {
       res.status(500).json({ error: 'Internal Server Error' });
@@ -77,6 +80,7 @@ export default async function handler(req, res) {
       }
     
       const tipAllowance = await getAllowance(fid)
+      console.log('83', tipAllowance)
 
       if (!tipAllowance) {
         res.status(500).json({ error: 'Internal Server Error' });
@@ -216,6 +220,8 @@ export default async function handler(req, res) {
           }
           
           const { casts, totalCount } = await fetchCasts(query, shuffle === 'true');
+          console.log('223', casts, totalCount)
+
           return { casts, totalCount }
         }  
       
@@ -418,6 +424,8 @@ export default async function handler(req, res) {
             }
       
             const confirmCasts = await postMultipleTips(decryptedUuid, fid, combinedLists)
+            console.log('427', confirmCasts)
+
             if (confirmCasts) {
               return true
             } else {
