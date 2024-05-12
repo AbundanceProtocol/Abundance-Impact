@@ -229,8 +229,10 @@ export default async function handler(req, res) {
       
       
         async function determineDistribution(ulfilteredCasts, tip, fid) {
-      
+          console.log('232', ulfilteredCasts, tip, fid)
           function filterObjects(castArray, filterFid) {
+            console.log('234', castArray, filterFid)
+
             return castArray.filter(obj => {
               if (obj.author.fid != filterFid) {
                 obj.impact_points = obj.impact_points.filter(point => point.curator_fid != filterFid);
