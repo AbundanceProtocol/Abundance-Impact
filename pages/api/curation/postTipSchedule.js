@@ -9,7 +9,7 @@ const secretKey = process.env.SECRET_KEY
 
 export default async function handler(req, res) {
   const { fid, uuid, shuffle, time, tags, channels, curators, percent, schedTime } = req.body;
-  
+  console.log(fid, shuffle, time, tags, channels, curators, percent, schedTime)
   if (req.method === 'POST' && fid && uuid && shuffle && percent) {
     const encryptedUuid = encryptPassword(uuid, secretKey);
 

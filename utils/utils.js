@@ -222,11 +222,13 @@ export async function checkEmbedType(cast) {
 
 // Encryption function
 export function encryptPassword(password, secretKey) {
+  console.log('testing1')
     return CryptoJS.AES.encrypt(password, secretKey).toString();
 }
 
 // Decryption function
 export function decryptPassword(encryptedPassword, secretKey) {
+  console.log('testing2')
     const bytes = CryptoJS.AES.decrypt(encryptedPassword, secretKey);
     return bytes.toString(CryptoJS.enc.Utf8);
 }
