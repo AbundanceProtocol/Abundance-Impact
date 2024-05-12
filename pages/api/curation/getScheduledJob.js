@@ -234,7 +234,7 @@ export default async function handler(req, res) {
             console.log('234', castArray, filterFid)
 
             return castArray.filter(obj => {
-              if (obj.author.fid != filterFid) {
+              if (obj.author_fid != filterFid) {
                 obj.impact_points = obj.impact_points.filter(point => point.curator_fid != filterFid);
                 return true; 
               }
