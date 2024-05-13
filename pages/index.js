@@ -238,7 +238,7 @@ export default function Home() {
               account.LoginPopup() 
             } else if (hour !== 'Hr') {
               handleSubmit() 
-            }}} style={{backgroundColor: 'transparent', fontWeight: '600', color: '#fff', cursor: (hour !== 'Hr') ?'pointer' : 'default', fontSize: '12px', padding: '0'}}>SCHEDULE TIP</button>
+            }}} style={{backgroundColor: 'transparent', fontWeight: '600', color: '#fff', cursor: (hour !== 'Hr' || !isLogged) ? 'pointer' : 'default', fontSize: '12px', padding: '0'}}>SCHEDULE TIP</button>
         </div>
         {!isLogged && (<div style={{position: 'relative', fontSize: '0', width: '0', height: '100%'}}>
           <div className='top-layer' style={{position: 'absolute', top: 0, left: 0, transform: 'translate(-70%, -30%)' }}>
