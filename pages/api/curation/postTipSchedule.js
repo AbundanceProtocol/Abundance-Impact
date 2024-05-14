@@ -12,7 +12,7 @@ export default async function handler(req, res) {
   console.log(fid, shuffle, time, tags, channels, curators, percent, schedTime)
   if (req.method === 'POST' && fid && uuid && shuffle && percent) {
     const encryptedUuid = encryptPassword(uuid, secretKey);
-    const qsUuid = qs.stringify({ encryptedUuid })
+
     try {
       await connectToDatabase();
 
@@ -28,7 +28,7 @@ export default async function handler(req, res) {
       } else {
         schedule = new ScheduleTip({ 
           fid: fid,
-          uuid: qsUuid,
+          uuid: encryptedUuid,
           search_shuffle: shuffle,
           search_time: time,
           search_tags: tags,

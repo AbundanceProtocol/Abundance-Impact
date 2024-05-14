@@ -12,11 +12,11 @@ const apiKey = process.env.NEYNAR_API_KEY
 
 export default async function handler(req, res) {
   const { fid, encryptedUuid } = req.query
-
   if (!(req.method === 'GET') || !fid || !encryptedUuid) {
     res.status(405).json({ error: 'Method Not Allowed', message: 'Failed to provide required data' });
   } else {
-
+    
+    const decodedUuid = decodeURIComponent(encryptedUuid)
     console.log('20', fid, encryptedUuid)
 
     async function getSchedule(uuid) {
@@ -51,7 +51,7 @@ export default async function handler(req, res) {
       }
     }
   
-    const { shuffle, timeRange, tags, channels, curators, percent, decryptedUuid } = await getSchedule(encryptedUuid)
+    const { shuffle, timeRange, tags, channels, curators, percent, decryptedUuid } = await getSchedule(decodedUuid)
     console.log('47', shuffle, timeRange, tags, channels, curators, percent)
 
     if (!percent || !decryptedUuid) {
