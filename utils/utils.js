@@ -221,14 +221,17 @@ export async function checkEmbedType(cast) {
 
 
 // Encryption function
-export function encryptPassword(password, secretKey) {
-  console.log('testing1')
-    return CryptoJS.AES.encrypt(password, secretKey).toString();
+export function encryptPassword(text, key) {
+    const cipher = crypto.createCipheriv('aes-256-ecb', key, null);
+    let encrypted = cipher.update(text, 'utf8', 'base64');
+    encrypted += cipher.final('base64');
+    return encrypted;
 }
 
 // Decryption function
-export function decryptPassword(encryptedPassword, secretKey) {
-  console.log('testing2')
-    const bytes = CryptoJS.AES.decrypt(encryptedPassword, secretKey);
-    return bytes.toString(CryptoJS.enc.Utf8);
+export function decryptPassword(encryptedText, key) {
+  const decipher = crypto.createDecipheriv('aes-256-ecb', key, null);
+  let decrypted = decipher.update(encryptedText, 'base64', 'utf8');
+  decrypted += decipher.final('utf8');
+  return decrypted;
 }
