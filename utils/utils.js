@@ -222,23 +222,16 @@ export async function checkEmbedType(cast) {
 
 // Encryption function
 export function encryptPassword(text, key) {
-  const iv = crypto.randomBytes(16); // Generate a random IV (Initialization Vector)
-  const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
+  const cipher = crypto.createCipheriv('aes-128-ecb', key, Buffer.alloc(0)); // Empty IV for ECB mode
   let encrypted = cipher.update(text, 'utf8', 'base64');
   encrypted += cipher.final('base64');
-  const tag = cipher.getAuthTag(); // Get the authentication tag
-  return iv.toString('base64') + ':' + encrypted + ':' + tag.toString('base64');
+  return encrypted;
 }
 
 // Decryption function
 export function decryptPassword(encryptedText, key) {
-  const parts = encryptedText.split(':');
-  const iv = Buffer.from(parts[0], 'base64');
-  const encrypted = Buffer.from(parts[1], 'base64');
-  const tag = Buffer.from(parts[2], 'base64');
-  const decipher = crypto.createDecipheriv('aes-256-gcm', key, iv);
-  decipher.setAuthTag(tag); // Set the authentication tag
-  let decrypted = decipher.update(encrypted, 'base64', 'utf8');
+  const decipher = crypto.createDecipheriv('aes-128-ecb', key, Buffer.alloc(0)); // Empty IV for ECB mode
+  let decrypted = decipher.update(encryptedText, 'base64', 'utf8');
   decrypted += decipher.final('utf8');
   return decrypted;
 }
