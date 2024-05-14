@@ -25,7 +25,7 @@ export default async function handler(req, res) {
         const decodedUuid = decodeURIComponent(uuid)
         const schedule = await ScheduleTip.findOne({ $or: [{ uuid: uuid }, { uuid: decodedUuid }] }).exec();
         if (schedule) {
-          const decryptedUuid = decryptPassword(schedule.uuid, secretKey);
+          const decryptedUuid = decryptPassword(decodedUuid, secretKey);
           return {
             shuffle: schedule.search_shuffle,
             timeRange: schedule.search_time,

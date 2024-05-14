@@ -1,5 +1,5 @@
 import axios from 'axios';
-import crypto from 'crypto';
+import CryptoJS from 'crypto-js';
 
 // shorten a hash address
 export function shortenAddress(input, long) {
@@ -221,17 +221,14 @@ export async function checkEmbedType(cast) {
 
 
 // Encryption function
-export function encryptPassword(text, key) {
-  const cipher = crypto.createCipheriv('aes-128-ecb', key, Buffer.alloc(0)); // Empty IV for ECB mode
-  let encrypted = cipher.update(text, 'utf8', 'base64');
-  encrypted += cipher.final('base64');
-  return encrypted;
+export function encryptPassword(password, secretKey) {
+  console.log('testing1')
+    return CryptoJS.AES.encrypt(password, secretKey).toString();
 }
 
 // Decryption function
-export function decryptPassword(encryptedText, key) {
-  const decipher = crypto.createDecipheriv('aes-128-ecb', key, Buffer.alloc(0)); // Empty IV for ECB mode
-  let decrypted = decipher.update(encryptedText, 'base64', 'utf8');
-  decrypted += decipher.final('utf8');
-  return decrypted;
+export function decryptPassword(encryptedPassword, secretKey) {
+  console.log('testing2')
+    const bytes = CryptoJS.AES.decrypt(encryptedPassword, secretKey);
+    return bytes.toString(CryptoJS.enc.Utf8);
 }
