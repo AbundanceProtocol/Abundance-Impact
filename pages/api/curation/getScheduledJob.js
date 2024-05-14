@@ -22,9 +22,10 @@ export default async function handler(req, res) {
     async function getSchedule(uuid) {
       try {
         await connectToDatabase();
-        const schedule = await ScheduleTip.findOne({ uuid }).exec();
+        const decodedUuid = decodeURIComponent(uuid)
+        const schedule = await ScheduleTip.findOne({ $or: [{ uuid: uuid }, { uuid: decodedUuid }] }).exec();
         if (schedule) {
-          const decryptedUuid = decryptPassword(uuid, secretKey);
+          const decryptedUuid = decryptPassword(schedule.uuid, secretKey);
           return {
             shuffle: schedule.search_shuffle,
             timeRange: schedule.search_time,
