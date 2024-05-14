@@ -45,13 +45,31 @@ export default async function handler(req, res) {
         console.log(schedule.cron_job_id)
         cronId = schedule.cron_job_id
       }
+
+      const cronTimezoneUrl = `https://www.easycron.com/rest/timezone?${qs.stringify({
+        token: easyCronKey,
+      })}`;
+      const cronTimezoneResponse = await fetch(cronTimezoneUrl)
+      console.log(cronTimezoneResponse)
+      let timezone = null
+      if (cronTimezoneResponse) {
+        const cronTimezone = await cronTimezoneResponse.json()
+        console.log(cronTimezone)
+        if (cronTimezoneResponse.status == 'success') {
+          timezone = cronTimezone.timezone
+        }
+      }
+
       const cronUrl = `https://www.easycron.com/rest/${cronId ? 'edit' : 'add'}?${qs.stringify({
         token: easyCronKey,
         url: `${frontUrl}/api/curation/getScheduledJob?${qs.stringify({ fid, encryptedUuid })}`,
         id: cronId,
         cron_expression: schedTime,
+        timezone_from: 2,
+        timezone: timezone || 'America/New_York',
         cron_job_name: `${fid}ScheduledTips`,
       })}`;
+
 
       const cronResponse = await fetch(cronUrl)
       console.log(cronResponse)

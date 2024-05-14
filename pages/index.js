@@ -190,20 +190,7 @@ export default function Home() {
             setTimeout(() => {
               setModal({on: false, success: false, text: ''});
             }, 2500);
-          }
-
-
-
-          if (response && response.data) {
-            schedData = response.data
-
-
-            
-            // const postSchedule = await axios.post('/api/curation/scheduleTips', {schedTime, fid})
-            // console.log(postSchedule)
-          }
-          console.log(schedData)
-  
+          }  
           return schedData
         } catch (error) {
           console.error('Error submitting data:', error)
@@ -212,20 +199,12 @@ export default function Home() {
       }
     
       const schedData = await postSchedule(shuffle, time, tags, channels, curators, schedTime)
-
-      // cron.schedule(cronSchedule, async () => {
-        // console.log('hello world')
-      // });
-
-      // Optionally, provide feedback to the user
-      // console.log('Task scheduled successfully with cron schedule:', schedData);
     };
 
     return (
       <>
-        <div className={`flex-col ${(hour !== 'Hr') ? 'follow-select' : 'follow-locked'}`} style={{backgroundColor: '', borderRadius: '5px', width: '220px', gap: '0.25rem', alignItems: 'center', justifyContent: 'center', padding: '0px 8px', height: '48px', margin: '2px 0 2px 10px'}}>
+        <div className={`flex-col ${(hour !== 'Hr' && isLogged) ? 'follow-select' : 'follow-locked'}`} style={{backgroundColor: '', borderRadius: '5px', width: '220px', gap: '0.25rem', alignItems: 'center', justifyContent: 'center', padding: '0px 8px', height: '48px', margin: '2px 0 2px 10px', cursor: 'default'}}>
           <div className='flex-row' style={{gap: '0.5rem'}}>
-
             <select id="hourSelect" value={hour} onChange={handleHourChange} style={{backgroundColor: '#adf', borderRadius: '4px'}}>
               {hoursOptions.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -242,13 +221,17 @@ export default function Home() {
             </select>
           </div>
           <button onClick={() => {
-            if (hour !== 'Hr') { handleSubmit() }}} style={{backgroundColor: 'transparent', fontWeight: '600', color: '#fff', cursor: (hour !== 'Hr') ?'pointer' : 'default', fontSize: '12px', padding: '0'}}>SCHEDULE TIP</button>
+            if (!isLogged) { 
+              account.LoginPopup() 
+            } else if (hour !== 'Hr') {
+              handleSubmit() 
+            }}} style={{backgroundColor: 'transparent', fontWeight: '600', color: '#fff', cursor: (hour !== 'Hr' || !isLogged) ? 'pointer' : 'default', fontSize: '12px', padding: '0'}}>SCHEDULE TIP</button>
         </div>
-        {/* <div style={{position: 'relative', fontSize: '0', width: '0', height: '100%'}}>
-          <div className='top-layer' style={{position: 'absolute', top: 0, left: 0, transform: 'translate(-70%, -50%)' }}>
-            <div className='soon-btn'>SOON</div>
+        {!isLogged && (<div style={{position: 'relative', fontSize: '0', width: '0', height: '100%'}}>
+          <div className='top-layer' style={{position: 'absolute', top: 0, left: 0, transform: 'translate(-70%, -30%)' }}>
+            <FaLock size={8} color='#eee' />
           </div>
-        </div> */}
+        </div>)}
       </>
     );
   }
