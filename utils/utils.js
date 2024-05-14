@@ -1,5 +1,5 @@
 import axios from 'axios';
-import CryptoJS from 'crypto-js';
+import crypto from 'crypto';
 
 // shorten a hash address
 export function shortenAddress(input, long) {

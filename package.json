@@ -30,6 +30,7 @@
     "buffer": "^6.0.3",
     "chai": "^4.3.6",
     "cheerio": "^1.0.0-rc.12",
+    "crypto": "^1.0.1",
     "crypto-js": "^4.2.0",
     "css-loader": "^6.10.0",
     "dids": "^3.2.0",
