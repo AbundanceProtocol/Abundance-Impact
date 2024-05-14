@@ -143,7 +143,7 @@ export default function Home() {
 
     // Generate options for minutes (00, 30)
     const minutesOptions = [
-      { value: '00', label: 'Min' },
+      { value: '0', label: 'Min' },
       { value: '00', label: '00' },
       { value: '30', label: '30' },
     ];
@@ -160,7 +160,11 @@ export default function Home() {
 
     const handleSubmit = async () => {
       // Schedule the task with the selected hour and minute
-      const schedTime = `${minute} ${hour} * * *`;
+      let minutes = minute
+      if (minute == '0') {
+        minutes = '00'
+      }
+      const schedTime = `${minutes} ${hour} * * *`;
       const { shuffle, time, tags, channels, curators } = userQuery
       // const timeRange = getTimeRange(time)
       // getUserSearch(timeRange, tags, channels, curators, null, shuffle)
@@ -171,6 +175,7 @@ export default function Home() {
         const percent = initValue
 
         try {
+          setLoading(true)
           const response = await axios.post('/api/curation/postTipSchedule', { fid, uuid, shuffle, time, tags, channels, curators, percent, schedTime })
           let schedData = []
 
@@ -203,7 +208,7 @@ export default function Home() {
 
     return (
       <>
-        <div className={`flex-col ${(hour !== 'Hr' && isLogged) ? 'follow-select' : 'follow-locked'}`} style={{backgroundColor: '', borderRadius: '5px', width: '220px', gap: '0.25rem', alignItems: 'center', justifyContent: 'center', padding: '0px 8px', height: '48px', margin: '2px 0 2px 10px', cursor: 'default'}}>
+        <div className={`flex-col ${(hour !== 'Hr' && isLogged) ? 'follow-select' : 'follow-locked'}`} style={{backgroundColor: '', borderRadius: '5px', width: '150px', gap: '0.25rem', alignItems: 'center', justifyContent: 'center', padding: '0px 8px', height: '48px', margin: '2px 0 2px 10px', cursor: 'default', maxWidth: '150px'}}>
           <div className='flex-row' style={{gap: '0.5rem'}}>
             <select id="hourSelect" value={hour} onChange={handleHourChange} style={{backgroundColor: '#adf', borderRadius: '4px'}}>
               {hoursOptions.map((option) => (
@@ -1161,33 +1166,34 @@ export default function Home() {
 
 
     <div className="top-layer">
-      <div className="flex-row" style={{padding: '0', marginBottom: '10px'}}>
-        {isLogged && (
-          <a className="" title="" href={`/${store.userProfile.username}`} onClick={() => {goToUserProfile(event, store.userProfile)}}>
-            <img loading="lazy" src={store.srcUrlFC} className="" alt={`${store.userDisplayNameFC} avatar`} style={{width: '40px', height: '40px', maxWidth: '48px', maxHeight: '48px', borderRadius: '24px', border: '1px solid #abc', margin: '6px 0 2px 0'}} />
-          </a>
-        )}
+      <div className="flex-row" style={{padding: '0', marginBottom: '10px', flexWrap: 'wrap', justifyContent: 'center'}}>
+        <div className='flex-row' style={{gap: '0.5rem', width: '100%'}}>
+
+          {isLogged && (
+            <a className="" title="" href={`/${store.userProfile.username}`} onClick={() => {goToUserProfile(event, store.userProfile)}}>
+              <img loading="lazy" src={store.srcUrlFC} className="" alt={`${store.userDisplayNameFC} avatar`} style={{width: '40px', height: '40px', maxWidth: '48px', maxHeight: '48px', borderRadius: '24px', border: '1px solid #abc', margin: '6px 0 2px 20px'}} />
+            </a>
+          )}
           <HorizontalScale />
+        </div>
+        <div className='flex-row' style={{gap: '0.5rem'}}>
           {isLogged ? (
             <div className="flex-row">
               {(
-                <div className={`flex-row ${(loading || totalTip == 0) ? 'follow-locked' : 'follow-select'} ${modal.success ? 'flash-success' : ''}`} style={{position: 'relative', height: 'auto', width: '100px', marginRight: '0', cursor: (loading || totalTip == 0) ? 'default' : 'pointer'}}>
-                  {(loading || totalTip == 0) ? (
-                    <div className='flex-row' style={{height: '100%', alignItems: 'center'}}>
-                      <Spinner size={21} color={'#999'} />
-                    </div>
-                  ) : (
-                    <div className='cast-btn'
-                    //  onClick={routeCast} 
-                    onClick={() => { if (totalTip !== 0) {
-                      postMultiTip()
-                    }
-                    }}
-                     name='follow' style={{color: loading ? 'transparent' : '#fff', height: 'auto', width: '100px'}}>TIP ALL</div>
-                  )
-
-                  }
-                </div>
+              <div className={`flex-row ${(loading || totalTip == 0) ? 'follow-locked' : 'follow-select'} ${modal.success ? 'flash-success' : ''}`} style={{position: 'relative', height: 'auto', width: '100px', marginRight: '0', cursor: (loading || totalTip == 0) ? 'default' : 'pointer'}}>
+                {(loading || totalTip == 0) ? (
+                  <div className='flex-row' style={{height: '100%', alignItems: 'center'}}>
+                    <Spinner size={21} color={'#999'} />
+                  </div>
+                ) : (
+                  <div className='cast-btn'
+                  //  onClick={routeCast} 
+                  onClick={() => { if (totalTip !== 0) {
+                    postMultiTip()
+                  }}}
+                  name='follow' style={{color: loading ? 'transparent' : '#fff', height: 'auto', width: '100px'}}>TIP ALL</div>
+                )}
+              </div>
               )}
             </div>
           ) : (
@@ -1197,9 +1203,9 @@ export default function Home() {
                 <FaLock size={8} color='#eee' />
               </div>
             </div>
-          )
-        }
-        <ScheduleTaskForm />
+          )}
+          <ScheduleTaskForm />
+        </div>
       </div>
     </div>
     <div>
@@ -1360,7 +1366,13 @@ export default function Home() {
     </div>
 
     <div style={{margin: '0 0 70px 0'}}>
-      {userFeed && userFeed.map((cast, index) => (<Cast cast={cast} key={index} index={index} updateCast={updateCast} openImagePopup={openImagePopup} />))}
+
+    {(!userFeed) ? (
+      <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
+        <Spinner size={31} color={'#999'} />
+      </div>
+    ) : (userFeed.map((cast, index) => (<Cast cast={cast} key={index} index={index} updateCast={updateCast} openImagePopup={openImagePopup} />)))}
+
     </div>
     <div>
       {showPopup.open && (<ExpandImg embed={{showPopup}} />)}
