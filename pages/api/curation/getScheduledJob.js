@@ -27,13 +27,13 @@ export default async function handler(req, res) {
           const decryptedUuid = decryptPassword(uuid, secretKey);
           console.log(schedule.search_shuffle, schedule.search_time, schedule.search_tags, schedule.search_channels, schedule.search_curators, schedule.percent_tip)
           return {
-            shuffle: schedule.search_shuffle,
-            timeRange: schedule.search_time,
-            tags: schedule.search_tags,
-            channels: schedule.search_channels,
-            curators: schedule.search_curators,
-            percent: schedule.percent_tip,
-            decryptedUuid: decryptedUuid
+            shuffle: schedule.search_shuffle || null,
+            timeRange: schedule.search_time || null,
+            tags: schedule.search_tags || null,
+            channels: schedule.search_channels || null,
+            curators: schedule.search_curators || null,
+            percent: schedule.percent_tip || null,
+            decryptedUuid: decryptedUuid || null
           }
         } else {
           return null
