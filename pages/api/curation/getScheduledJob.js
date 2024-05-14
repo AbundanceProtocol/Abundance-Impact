@@ -25,6 +25,7 @@ export default async function handler(req, res) {
         const schedule = await ScheduleTip.findOne({ uuid }).exec();
         if (schedule) {
           const decryptedUuid = decryptPassword(uuid, secretKey);
+          console.log(schedule.search_shuffle, schedule.search_time, schedule.search_tags, schedule.search_channels, schedule.search_curators, schedule.percent_tip)
           return {
             shuffle: schedule.search_shuffle,
             timeRange: schedule.search_time,
