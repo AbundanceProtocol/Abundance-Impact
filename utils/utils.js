@@ -222,15 +222,15 @@ export async function checkEmbedType(cast) {
 
 // Encryption function
 export function encryptPassword(text, key) {
-    const cipher = crypto.createCipheriv('aes-256-ecb', key, null);
-    let encrypted = cipher.update(text, 'utf8', 'base64');
-    encrypted += cipher.final('base64');
-    return encrypted;
+  const cipher = crypto.createCipheriv('aes-256-ecb', Buffer.from(key), null);
+  let encrypted = cipher.update(text, 'utf8', 'base64');
+  encrypted += cipher.final('base64');
+  return encrypted;
 }
 
 // Decryption function
 export function decryptPassword(encryptedText, key) {
-  const decipher = crypto.createDecipheriv('aes-256-ecb', key, null);
+  const decipher = crypto.createDecipheriv('aes-256-ecb', Buffer.from(key), null);
   let decrypted = decipher.update(encryptedText, 'base64', 'utf8');
   decrypted += decipher.final('utf8');
   return decrypted;
