@@ -457,7 +457,7 @@ export default async function handler(req, res) {
             const confirmCasts = await postMultipleTips(decryptedUuid, fid, combinedLists)
             console.log('433', confirmCasts)
 
-            if (confirmCasts) {
+            if (confirmCasts || confirmCasts == 0) {
               return true
             } else {
               return null
