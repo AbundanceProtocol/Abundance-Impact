@@ -232,3 +232,11 @@ export function decryptPassword(encryptedPassword, secretKey) {
     const bytes = CryptoJS.AES.decrypt(encryptedPassword, secretKey);
     return bytes.toString(CryptoJS.enc.Utf8);
 }
+
+
+export function desensitizeString(s) {
+  s = s.replace(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b/g, '***@***.***');
+  s = s.replace(/\b\d{3}[-.]?\d{3}[-.]?\d{4}\b/g, '***-***-****');
+  s = s.replace(/\b\d{3}-\d{2}-\d{4}\b/g, '***-**-****');
+  return s;
+}

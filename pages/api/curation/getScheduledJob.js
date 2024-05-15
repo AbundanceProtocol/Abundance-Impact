@@ -5,7 +5,7 @@ import Cast from '../../../models/Cast';
 import Impact from '../../../models/Impact';
 import User from '../../../models/User';
 import Tip from '../../../models/Tip';
-import { getTimeRange } from '../../../utils/utils';
+import { getTimeRange, desensitizeString } from '../../../utils/utils';
 
 const secretKey = process.env.SECRET_KEY
 const apiKey = process.env.NEYNAR_API_KEY
@@ -22,10 +22,10 @@ export default async function handler(req, res) {
     async function getSchedule(uuid) {
       try {
         await connectToDatabase();
-        const decodedUuid = decodeURIComponent(uuid)
-        const schedule = await ScheduleTip.findOne({ $or: [{ uuid: uuid }, { uuid: decodedUuid }] }).exec();
+        const desenitizedUuid = desensitizeString(uuid)
+        const schedule = await ScheduleTip.findOne({ $or: [{ uuid: uuid }, { uuid: desenitizedUuid }] }).exec();
         if (schedule) {
-          const decryptedUuid = decryptPassword(decodedUuid, secretKey);
+          const decryptedUuid = decryptPassword(desenitizedUuid, secretKey);
           return {
             shuffle: schedule.search_shuffle,
             timeRange: schedule.search_time,
@@ -51,7 +51,7 @@ export default async function handler(req, res) {
         return null;
       }
     }
-  
+
     const { shuffle, timeRange, tags, channels, curators, percent, decryptedUuid } = await getSchedule(encryptedUuid)
     console.log('47', shuffle, timeRange, tags, channels, curators, percent)
 
