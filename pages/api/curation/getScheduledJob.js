@@ -238,7 +238,6 @@ export default async function handler(req, res) {
       
       
         async function determineDistribution(ulfilteredCasts, tip, fid) {
-          console.log('232', ulfilteredCasts, tip, fid)
           function filterObjects(castArray, filterFid) {
             console.log('234', castArray, filterFid)
 
@@ -252,7 +251,7 @@ export default async function handler(req, res) {
           }
         
           let casts = filterObjects(ulfilteredCasts, fid);
-          console.log('244', casts)
+          // console.log('244', casts)
 
           const totalBalanceImpact = casts.reduce((total, obj) => {
             return total + obj.impact_total - obj.quality_balance;
@@ -270,7 +269,6 @@ export default async function handler(req, res) {
                 ratio =  0.92
               }
               let castTip = Math.floor((cast.impact_total  - cast.quality_balance) / totalBalanceImpact * ratio * tip)
-              // console.log(castTip)
               let castDistribution = null
               castDistribution = {
                 fid: cast.author_fid,
@@ -278,15 +276,11 @@ export default async function handler(req, res) {
                 tip: castTip,
                 coin: '$degen'
               }
-              console.log('272', castDistribution)
 
               newDistribution.push(castDistribution)
               const curators = cast.impact_points
-              // console.log(curators)
               curators.forEach(curator => {
-                // console.log(newCurators)
                 let points = curator.impact_points
-                // console.log(curator.impact_points)
                 let curatorTip = Math.floor(curator.impact_points / totalBalanceImpact * 0.08 * tip)
                 let curatorDistribution = null
                 curatorDistribution = {
@@ -366,7 +360,6 @@ export default async function handler(req, res) {
             }, {});
       
             const creatorData = tipDistribution.creators
-            console.log('360', creatorData)
 
             let curatorData = []
             if (curatorList && curatorList.legnth > 0 && lookupTable) {
@@ -387,6 +380,16 @@ export default async function handler(req, res) {
       
             let combinedLists = [...new Set([...creatorData, ...curatorData])];
             console.log('380', combinedLists)
+
+            let countTips = 0
+            combinedLists.forEach(cast => {
+              countTips += Number(cast.tip)
+            })
+
+            if (countTips < tip && combinedLists && combinedLists.length > 0) {
+              let remainingTip = tip - countTips
+              combinedLists[0].tip += Number(remainingTip)
+            }
 
             combinedLists.forEach(cast => {
               cast.text = `${cast.tip} ${cast.coin} via /impact`
@@ -424,7 +427,7 @@ export default async function handler(req, res) {
                       },
                       body: JSON.stringify(body),
                     });
-            
+
                     if (!response.ok) {
                       console.error(`Failed to send request for ${castText}`);
                     } else {
@@ -467,7 +470,7 @@ export default async function handler(req, res) {
           }
         }
       
-        const tip = tipAllowance * percent/100
+        const tip = Math.floor(tipAllowance * percent / 100)
 
         console.log('447', casts, tip, fid)
         const tipped = await determineDistribution(casts, tip, fid)
