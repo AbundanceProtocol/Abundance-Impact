@@ -1,4 +1,4 @@
-import { FaSearch, FaCode, FaUser, FaLightbulb, FaKey, FaLockOpen, FaGlobe, FaPen, FaCoins, FaLink, FaAddressCard, FaWallet, FaAward, FaQuestionCircle, FaMap, FaCogs, FaFileAlt, FaGithub, FaMediumM, FaYoutube, FaTwitter, FaAt, FaDiscord, FaFolderOpen, FaTasks, FaScroll, FaSearchDollar, FaHandshake, FaRegListAlt, FaToolbox, FaFlag } from 'react-icons/fa';
+import { FaSearch, FaCode, FaUser, FaLightbulb, FaKey, FaLockOpen, FaGlobe, FaPen, FaCoins, FaLink, FaAddressCard, FaWallet, FaAward, FaQuestionCircle, FaMap, FaCogs, FaFileAlt, FaGithub, FaMediumM, FaYoutube, FaTwitter, FaAt, FaDiscord, FaFolderOpen, FaTasks, FaScroll, FaSearchDollar, FaHandshake, FaRegListAlt, FaToolbox, FaFlag, FaRegClock } from 'react-icons/fa';
 import { AiFillHome } from "react-icons/ai";
 import OpenSeaIcon from './OpenSeaIcon';
 import { GiTwoCoins, GiReceiveMoney } from 'react-icons/gi'
@@ -9,6 +9,7 @@ import { TiFlag } from "react-icons/ti";
 import { HiBadgeCheck, HiThumbDown, HiUserGroup, HiViewGridAdd } from 'react-icons/hi'
 import { IoReader, IoNotifications } from 'react-icons/io5'
 import { SiSubstack } from 'react-icons/si'
+import { PiSquaresFourLight as Actions } from "react-icons/pi";
 
 const Buttons = () => {
     return <div className="button" />
@@ -21,7 +22,7 @@ const button = {
     'top-menu': ['main'],
     'side-menu': ['Impact', 'Studio'],
     // 'side-menu': ['Impact', 'Search', 'Ecosystem', 'Reviews', 'Notifications', 'Studio', 'Funding', 'Challenge', 'Propose', 'Cast'],
-    'bottom-nav': ['Impact', 'Studio'],
+    'bottom-nav': ['Impact', 'Studio', 'Cast Actions'],
     // 'bottom-nav': ['Impact', 'Search', 'Ecosystem', 'Reviews', 'Notifications'],
     'nav-menu': {
         'main': ['Impact', 'Studio'],
@@ -67,6 +68,22 @@ const button = {
         account: false,
         working: true,
         icon: FaSearch
+    },
+        'Schedule': {
+        link: '/~/schedule',
+        menu: 'Search',
+        description: 'Schedule tipping and casts',
+        account: true,
+        working: true,
+        icon: FaRegClock
+    },
+        'Cast Actions': {
+        link: false,
+        menu: 'Home',
+        description: 'Install Cast Actions for client',
+        account: false,
+        working: true,
+        icon: Actions
     },
     'Ecosystem': {
         link: '/~/ecosystems',

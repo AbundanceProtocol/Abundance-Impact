@@ -41,6 +41,7 @@ export default function App({ Component, pageProps }) {
   const [menuHover, setMenuHover] = useState( {in: Date.now(), out: Date.now() } )
   const [showLogin, setShowLogin] = useState(false)
   const [showLogout, setShowLogout] = useState(false)
+  const [showActions, setShowActions] = useState(false)
 
   const Col = styled.div`
     display: grid;
@@ -81,6 +82,14 @@ export default function App({ Component, pageProps }) {
   function handleNavResize() {
     setNavWidth((ref?.current?.offsetWidth - 1312)/2 - 167)
     setBottomNavSize(ref?.current?.offsetWidth)
+  }
+
+  const toggleShowActions = () => {
+    if (showActions) {
+      setShowActions(false)
+    } else {
+      setShowActions(true)
+    }
   }
 
   const handleSignIn = async (data) => {
@@ -446,50 +455,80 @@ export default function App({ Component, pageProps }) {
     )
   }
 
-  const BottomNav = (props) => {
-    let btn = button[props.buttonName]
-    let btnName = props.buttonName
-    if (btnName === 'portal' && account) {
-      btnName = store.username
-    }
-    const TopIcon = btn.icon
+  const BottomNav = ({buttonName}) => {
+    let { account, icon, link, working } = button[buttonName]
+    const TopIcon = icon
     let menuState = "nav-link"
-    let accountState = !btn.account || (account && btn.account)
-    if ((router.route === btn.link) && accountState) {
+    let accountState = !account || (store.isAuth && account)
+    if ((router.route === link) && accountState || (buttonName == 'Cast Actions' && showActions)) {
       menuState = "active-nav-link"
-    } else if (!btn.working) {
+    } else if (!working) {
       menuState = "inactive-nav-link"
     }
+    let unlockedState = 'btn-hvr'
+    if (account && !store.isAuth || !working) {
+      unlockedState = 'lock-btn-hvr'
+    }
 
-    return (
-      <div className="flex-row" style={{padding: 'auto 8px', width: 'auto', justifyContent: 'center', alignItems: 'center'}}
-      //  onMouseEnter={() => {
-      //   setNavMenu(btn.menu)
-      //   setMenuHover({ ...menuHover, in: Date.now() })
-      // }}
-      // onMouseLeave={() => setMenuHover({ ...menuHover, out: Date.now() }) }
-      >
-        <Link href={(btn.link && btn.working && !(!store.isAuth && btn.account)) ? btn.link : '#'} style={{width: 'auto'}}>
-          <div className={`flex-row ${menuState}`} style={{padding: isMobile ? '2px' : 'unset', width: 'auto' }} onClick={() => {(!store.isAuth && btn.account) && LoginPopup()}}>
-            <div className="flex-col" style={{height: '58px', alignItems: 'center', justifyContent: 'center'}}>
-              {btn.working ? (
-              <div className="flex-row btn-hvr flex-middle" style={{padding: '6px 2px', borderRadius: '12px'}}>
-                <TopIcon className="size-25" style={{margin: '6px 12px 6px 12px'}} />
-                <div className="font-15 left-nav" style={{textAlign: 'center', fontSize: isTablet ? '12px' : '18px'}}>
-                  {btnName}
-                </div>
+    const Working = () => {
+      return (
+        <div onClick={() => {
+          if (buttonName == 'Cast Actions') {
+            toggleShowActions()
+          }
+        }}>
+        <Link href={link || ''} style={{maxWidth: '260px'}}>
+          <div className={`flex-row`} style={{padding: '0 10px', justifyContent: 'center'}}>
+            <div className="flex-col" style={{height: '46px', alignItems: 'center', justifyContent: 'center'}}>
+              <div className={`flex-row flex-middle ${menuState} btn-hvr`} style={{padding: '2px 0 2px 0', borderRadius: '16px'}}>
+                <TopIcon style={{margin: '3px 12px 3px 12px', width: (buttonName == 'Cast Actions') ? '30px' : '25px', height: (buttonName == 'Cast Actions') ? '30px' : '25px'}} />
               </div>
-              ) : (
-              <div className="flex-row btn-hvr lock-btn-hvr flex-middle" style={{padding: '6px 2px', borderRadius: '12px', position: 'relative'}}>
-                <TopIcon className="size-25" style={{margin: '6px 12px 6px 12px'}} />
-                <div className='top-layer' style={{position: 'absolute', top: 0, right: 0, transform: 'translate(30%, -50%)' }}>
-                  <div className='soon-btn'>SOON</div>
-                </div>
-              </div>
-              )}
             </div>
           </div>
         </Link>
+        </div>
+      )
+    }
+
+    const Locked = () => {
+      return (
+        <div className={`flex-row`} style={{padding: '0 10px', justifyContent: 'flex-start', maxWidth: '260px'}} onClick={LoginPopup}>
+          <div className="flex-col" style={{height: '46px', alignItems: 'center', justifyContent: 'center'}}>
+            <div className={`flex-row flex-middle ${menuState} lock-btn-hvr`} style={{padding: '2px 0 2px 0', borderRadius: '16px'}}>
+              <TopIcon className="size-25" style={{margin: '3px 12px 3px 12px'}} />
+              <div style={{position: 'relative', fontSize: '0', width: '0', height: '100%'}}>
+                <div className='top-layer' style={{position: 'absolute', top: 0, left: 0, transform: 'translate(-100%, -50%)' }}>
+                  <FaLock size={8} color='#999' />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    const Soon = () => {
+      return (
+        <div className={`flex-row`} style={{padding: '0 10px', justifyContent: 'flex-start', maxWidth: '260px'}}>
+          <div className="flex-col" style={{height: '46px', alignItems: 'center', justifyContent: 'center'}}>
+            <div className={`flex-row flex-middle inactive-nav-link lock-btn-hvr`} style={{padding: '2px 0 2px 0', borderRadius: '16px'}}>
+              <TopIcon className="size-25" style={{margin: '3px 12px 3px 12px'}} />
+              <div style={{position: 'relative', fontSize: '0', width: '0', height: '100%'}}>
+                <div className='top-layer' style={{position: 'absolute', top: 0, left: 0, transform: 'translate(-70%, -50%)' }}>
+                  <div className='soon-btn'>SOON</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+
+
+    return (
+      <div className="flex-row" style={{padding: 'auto 8px', width: 'auto', justifyContent: 'center', alignItems: 'center'}}>
+        {!working ? (<Soon />) : (isLogged || !account) ? (<Working />) : (<Locked />)}
       </div>
     )
   }
@@ -697,8 +736,41 @@ export default function App({ Component, pageProps }) {
           </div>
         </div>
       </div>
+      {(isMobile && showActions) && (
+        <div style={{margin: '20px 23px 0 0', bottom: '46px', width: `100%`, position: 'fixed'}}>
+          <div style={{backgroundColor: '#1D3244cc', borderRadius: '16px 16px 0 0', padding: '3px 0 6px 0', border: '0px solid #678', color: '#fff', fontWeight: '700', alignItems:' center', fontSize: '20px'}}>
+          <div title='Cast Actions' className='flex-row' style={{alignItems: 'center', justifyContent: 'center', margin: '8px'}}>
+            <Actions size={32} color={'#9cf'} /><p className='' style={{paddingLeft: '10px', fontSize: isTablet ? '12px' : '18px', fontWeight: '500'}}>Cast Actions </p>
+          </div>
+          <div className='flex-col' style={{gap: '0.5rem', margin: '8px'}}>
+            <a className="" title="+1 Impact" href='https://warpcast.com/~/add-cast-action?name=%2B1+Impact&icon=star&actionType=post&postUrl=https%3A%2Fimpact.abundance.id%2Fapi%2Faction%2Fimpact%3Fp%3D1&description=Curate+Casts+with+the+Impact+App' target="_blank" rel="noopener noreferrer">
+              <div className='flex-row cast-act' style={{borderRadius: '8px', padding: '8px 4px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
+                <FaRegStar size={20} />
+                <p className='' style={{padding: '0px', fontSize: '15px', fontWeight: '500'}}>+1 Impact</p>
+              </div>
+            </a>
+
+            <a className="" title='+5 Impact' href='https://warpcast.com/~/add-cast-action?name=%2B5+Impact&icon=star&actionType=post&postUrl=https%3A%2Fimpact.abundance.id%2Fapi%2Faction%2Fimpact%3Fp%3D5&description=Curate+Casts+with+the+Impact+App' target="_blank" rel="noopener noreferrer">
+              <div className='flex-row cast-act' style={{borderRadius: '8px', padding: '8px 4px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
+                <FaRegStar size={20} />
+                <p className='' style={{padding: '0px', fontSize: '15px', fontWeight: '500'}}>+5 Impact</p>
+              </div>
+            </a>
+
+            <a className="" title="Cast Impact Balance" href='https://warpcast.com/~/add-cast-action?name=Cast+Impact+Balance&icon=info&actionType=post&postUrl=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Faction%2Fbalance&description=Get+Cast+Balance+for+Impact+App ' target="_blank" rel="noopener noreferrer">
+              <div className='flex-row cast-act' style={{borderRadius: '8px', padding: '8px 4px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
+                <div className='' style={{width: '2px', fontSize: '0px'}}>&nbsp;</div>
+                <Info size={20} />
+                <p className='' style={{padding: '0px', fontSize: '15px', fontWeight: '500'}}>Cast Impact Balance</p>
+                <div className='' style={{width: '2px', fontSize: '0px'}}>&nbsp;</div>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+      )}
       {isMobile ? (
-        <div ref={ref1} className='flex-row' style={{position: 'fixed', bottom: 0, backgroundColor: '#1D3244cc', height: '56px', width: `100%`, borderRadius: '0px', padding: '0', border: '0px solid #678', boxSizing: 'border-box'}}>
+        <div ref={ref1} className='flex-row' style={{position: 'fixed', bottom: 0, backgroundColor: '#1D3244cc', height: '46px', width: `100%`, borderRadius: '0px', padding: '0', border: '0px solid #678', boxSizing: 'border-box'}}>
           <div className='flex-row' style={{position: 'relative', width: '100%', justifyContent: 'space-between', padding: '0 10px'}}>
           { button['bottom-nav'].map((btn, index) => (
             <BottomNav buttonName={btn} key={index} /> ))}

@@ -176,9 +176,10 @@ export default function Home() {
 
         try {
           setLoading(true)
+          setInitHour('Hr')
+          setInitMinute('0')
           const response = await axios.post('/api/curation/postTipSchedule', { fid, uuid, shuffle, time, tags, channels, curators, percent, schedTime })
           let schedData = []
-
 
           if (response && response.status !== 200) {
             setLoading(false)
