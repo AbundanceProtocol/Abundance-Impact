@@ -20,12 +20,12 @@ export default Buttons;
 const button = {
     // 'top-menu': ['main', 'user'],
     'top-menu': ['main'],
-    'side-menu': ['Impact', 'Studio'],
+    'side-menu': ['Impact', 'Studio', 'Schedule'],
     // 'side-menu': ['Impact', 'Search', 'Ecosystem', 'Reviews', 'Notifications', 'Studio', 'Funding', 'Challenge', 'Propose', 'Cast'],
-    'bottom-nav': ['Impact', 'Studio', 'Cast Actions'],
+    'bottom-nav': ['Impact', 'Studio', 'Cast Actions', 'Schedule'],
     // 'bottom-nav': ['Impact', 'Search', 'Ecosystem', 'Reviews', 'Notifications'],
     'nav-menu': {
-        'main': ['Impact', 'Studio'],
+        'main': ['Impact', 'Studio', 'Schedule'],
         // 'user': ['Studio'],
         // 'main': ['Impact', 'Search', 'Ecosystem'],
         // 'user': ['Studio', 'Reviews', 'Notifications', 'Funding', 'Challenge', 'Propose', 'Cast'],
