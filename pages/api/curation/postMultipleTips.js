@@ -2,76 +2,70 @@ import Tip from '../../../models/Tip';
 
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method Not Allowed' });
-  }
-
   const apiKey = process.env.NEYNAR_API_KEY;
   const { signer, fid, data } = req.body;
+  if (req.method !== 'POST' || !signer || !fid || !data || !Array.isArray(data)) {
+    return res.status(405).json({ error: 'Method Not Allowed' });
+  } else {
 
-  if (!signer || !fid || !data || !Array.isArray(data)) {
-    return res.status(400).json({ error: 'Invalid request body' });
-  }
+    async function sendRequests(data, signer, apiKey) {
+      const base = "https://api.neynar.com/";
+      const url = `${base}v2/farcaster/cast`;
+      let tipCounter = 0;
+      for (const cast of data) {
+        const castText = cast.text;
+        const parentUrl = cast.cast;
+        let body = {
+          signer_uuid: signer,
+          text: castText,
+        };
 
-  async function sendRequests(data, signer, apiKey) {
-    const base = "https://api.neynar.com/";
-    const url = `${base}v2/farcaster/cast`;
-    let tipCounter = 0;
-    for (const cast of data) {
-      const castText = cast.text;
-      const parentUrl = cast.cast;
-      let body = {
-        signer_uuid: signer,
-        text: castText,
-      };
-
-      if (parentUrl) {
-        body.parent = parentUrl;
-      }
-
-      try {
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'api_key': apiKey,
-          },
-          body: JSON.stringify(body),
-        });
-
-        if (!response.ok) {
-          console.error(`Failed to send request for ${castText}`);
-        } else {
-          console.log(`Request sent successfully for ${castText}`);
+        if (parentUrl) {
+          body.parent = parentUrl;
         }
 
-        await Tip.create({
-          receiver_fid: cast.fid,
-          tipper_fid: fid,
-          cast_hash: cast.cast,
-          tip: [{
-            currency: cast.coin,
-            amount: cast.tip
-          }],
-        });
-        tipCounter += Number(cast.tip)
+        try {
+          const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'api_key': apiKey,
+            },
+            body: JSON.stringify(body),
+          });
 
-      } catch (error) {
-        console.error(`Error occurred while sending request for ${castText}:`, error);
+          if (!response.ok) {
+            console.error(`Failed to send request for ${castText}`);
+          } else {
+            console.log(`Request sent successfully for ${castText}`);
+          }
+
+          await Tip.create({
+            receiver_fid: cast.fid,
+            tipper_fid: fid,
+            cast_hash: cast.cast,
+            tip: [{
+              currency: cast.coin,
+              amount: cast.tip
+            }],
+          });
+          tipCounter += Number(cast.tip)
+
+        } catch (error) {
+          console.error(`Error occurred while sending request for ${castText}:`, error);
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 500));
       }
-
-      await new Promise(resolve => setTimeout(resolve, 500));
+      return tipCounter
     }
-    return tipCounter
-  }
 
-
-
-  try {
-    const remainingTip = await sendRequests(data, signer, apiKey);
-    res.status(200).json({ message: 'All casts tipped successfully', tip: remainingTip });
-  } catch (error) {
-    console.error('Error sending requests:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    try {
+      const remainingTip = await sendRequests(data, signer, apiKey);
+      res.status(200).json({ message: 'All casts tipped successfully', tip: remainingTip });
+    } catch (error) {
+      console.error('Error sending requests:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
   }
 }

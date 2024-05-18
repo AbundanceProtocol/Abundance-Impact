@@ -421,7 +421,7 @@ export default function Schedule() {
 
   useEffect(() => {
     setIsLogged(store.isAuth)
-    if (store.isAuth && feedRouterScheduled) {
+    if (store.isAuth && jobScheduled) {
       getUserSchedule(store.fid)
       setJobScheduled(false);
     } else if (store.isAuth) {
@@ -755,11 +755,11 @@ export default function Schedule() {
     setUserFeed(castsWithImages);
 
 
-    async function getSubcast(hash) {
-      if (hash) {
+    async function getSubcast(hash, userFid) {
+      if (hash && userFid) {
         try {
           const response = await axios.get('/api/getCastByHash', {
-            params: { hash }
+            params: { hash, userFid }
           })
           const castData = response.data.cast.cast
           if (castData) {
@@ -775,12 +775,12 @@ export default function Schedule() {
       }
     }
 
-    async function populateSubcasts(cast) {
+    async function populateSubcasts(cast, fid) {
       const { embeds } = cast;
       if (embeds && embeds.length > 0) {
         const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
           if (embed.type == 'subcast') {
-            const subcastData = await getSubcast(embed.cast_id.hash)
+            const subcastData = await getSubcast(embed.cast_id.hash, fid)
             const checkImages = await checkEmbedType(subcastData)
             return { ...embed, subcast: checkImages };
           } else {
@@ -830,15 +830,15 @@ export default function Schedule() {
       return updatedCasts;
     }
 
-    async function checkSubcasts(casts) {
+    async function checkSubcasts(casts, fid) {
       const updatedCasts = await Promise.all(casts.map(async (cast) => {
-        return await populateSubcasts(cast);
+        return await populateSubcasts(cast, fid);
       }));
     
       return updatedCasts;
     }
 
-    const castsWithSubcasts = await checkSubcasts(castsWithImages)
+    const castsWithSubcasts = await checkSubcasts(castsWithImages, fid)
     console.log(castsWithSubcasts)
     setUserFeed(castsWithSubcasts);
 
@@ -1106,7 +1106,7 @@ export default function Schedule() {
     try {
       const response = await axios.delete('/api/curation/deleteTipSchedule', {
         params: {
-          cronId: cronId,
+          cronId: cronId, fid: store.fid
         }
       })
       if (response && response.status == 200) {
@@ -1118,11 +1118,25 @@ export default function Schedule() {
         updatedUserQuery.tags = []
         setUserQuery(updatedUserQuery)
 
+        setModal({on: true, success: true, text: response.data.message});
+        setTimeout(() => {
+          setModal({on: false, success: false, text: ''});
+        }, 2500);
+
         return true
       } else {
+
+        setModal({on: true, success: false, text: 'Tip schedule delete failed'});
+        setTimeout(() => {
+          setModal({on: false, success: false, text: ''});
+        }, 2500);
         return null
       }
     } catch (error) {
+      setModal({on: true, success: false, text: 'Tip schedule delete failed'});
+      setTimeout(() => {
+        setModal({on: false, success: false, text: ''});
+      }, 2500);
       console.error('Error submitting data:', error)
       return null
     }
@@ -1132,7 +1146,7 @@ export default function Schedule() {
     try {
       const response = await axios.get('/api/curation/updateTipSchedule', {
         params: {
-          cronId: cronId,
+          cronId: cronId, fid: store.fid
         }
       })
       console.log(response)
@@ -1140,8 +1154,19 @@ export default function Schedule() {
       if (response && response.data) {
         const curators = response.data
         if (response.data.update == 1) {
+          setModal({on: true, success: true, text: 'Tip schedule paused'});
+          setTimeout(() => {
+            setModal({on: false, success: false, text: ''});
+          }, 2500);
+
           setActiveCron(false)
+
         } else if (response.data.update == 0) {
+          setModal({on: true, success: true, text: 'Tip schedule resumed'});
+          setTimeout(() => {
+            setModal({on: false, success: false, text: ''});
+          }, 2500);
+
           setActiveCron(true)
         }
         console.log(curators)
@@ -1278,18 +1303,18 @@ export default function Schedule() {
     <div style={{padding: '58px 0 0 0', width: feedMax}}>
     </div>
 
-{userQuery.time && (<div style={{border: '1px solid #777', padding: '8px', borderRadius: '10px', margin: '3px', backgroundColor: '#eef6ff11'}}>
+{(userQuery.time && isLogged) ? (<div style={{border: '1px solid #777', padding: '8px', borderRadius: '10px', margin: '3px', backgroundColor: '#eef6ff11'}}>
     <div className="top-layer">
       <div className="flex-row" style={{padding: '0', marginBottom: '10px', flexWrap: 'wrap', justifyContent: 'flex-start', gap: '0.50rem'}}>
 
         <div className='flex-row' style={{gap: '0.75rem', margin: '2px 0 0 0'}}>
-            <div className={`mini-btn flex-row ${userQuery['shuffle'] ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{border: '1px solid #abc', padding: '3px 5px', borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'flex-start'}} onClick={() => {deleteSchedule()}}>
+            <div className={`mini-btn flex-row ${userQuery['shuffle'] ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{border: '1px solid #abc', padding: '3px 5px', borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'flex-start'}} onClick={() => {if (isLogged) {deleteSchedule()}}}>
               <div className={`flex-row`} style={{alignItems: 'center', gap: '0.3rem'}}>
                 <FaRegTrashAlt size={15} />
               </div>
             </div>
 
-            <div className={`flex-row ${userQuery['shuffle'] ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{border: '1px solid #abc', padding: '4px 5px', borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'flex-start'}} onClick={() => {pauseSchedule()}}>
+            <div className={`flex-row ${userQuery['shuffle'] ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{border: '1px solid #abc', padding: '4px 5px', borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'flex-start'}} onClick={() => { if (isLogged) {pauseSchedule()}}}>
               <div className={`flex-row`} style={{alignItems: 'center', gap: '0.3rem'}}>
                 {activeCron ? (<FaPause size={14} />) : (<Forward size={14} />)}
               </div>
@@ -1473,7 +1498,10 @@ export default function Schedule() {
       </div>
 
     </div>
-    </div>)}
+    </div>) : (
+      <div style={{width: '100%', fontSize: '20px', fontWeight: '400', textAlign: 'center', color: '#cde'}}>No schedule found</div>
+    )
+    }
     <div style={{margin: '0 0 70px 0'}}>
 
     {/* {(!userFeed) ? (

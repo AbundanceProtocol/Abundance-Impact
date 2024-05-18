@@ -57,7 +57,7 @@ const button = {
         link: '/',
         menu: 'Home',
         description: 'Your feed',
-        account: false,
+        account: true,
         working: true,
         icon: AiFillHome
     },
@@ -65,7 +65,7 @@ const button = {
         link: '/~/search',
         menu: 'Search',
         description: 'Search for communities, projects, users, and proposals',
-        account: false,
+        account: true,
         working: true,
         icon: FaSearch
     },

@@ -214,9 +214,7 @@ export default function ProfilePage() {
   async function getUserSearch(time, tags, channel, curator, text, shuffle) {
     const fid = await store.fid
 
-    const timeRange = getTimeRange(time)
-
-    async function getSearch() {
+    async function getSearch(time, tags, channel, curator, text, shuffle) {
       try {
         const response = await axios.get('/api/curation/getUserSearch', {
           params: { time, tags, channel, curator, text, shuffle }
@@ -234,13 +232,15 @@ export default function ProfilePage() {
       }
     }
 
-    const casts = await getSearch(timeRange, tags, channel, curator, text, shuffle)
+    const casts = await getSearch(time, tags, channel, curator, text, shuffle)
     let filteredCasts
     let sortedCasts
 
-    if (casts) {
+    if (!casts) {
+      setUserFeed([])
+    } else {
 
-      // console.log(casts)
+      console.log(casts)
       filteredCasts = await casts.reduce((acc, current) => {
         const existingItem = acc.find(item => item._id === current._id);
         if (!existingItem) {
@@ -252,163 +252,168 @@ export default function ProfilePage() {
       sortedCasts = filteredCasts.sort((a, b) => b.impact_total - a.impact_total);
       // console.log(sortedCasts)
 
-    }
+      let displayedCasts = await populateCast(sortedCasts)
+      // setUserFeed(displayedCasts)
 
-    let displayedCasts = await populateCast(sortedCasts)
-    // setUserFeed(displayedCasts)
+      let castString
 
-    let castString
-
-    if (sortedCasts) {
-      const castHashes = sortedCasts.map(obj => obj.cast_hash)
-      castString = castHashes.join(',');
-    }
-
-
-    async function populateCasts(fid, castString) {
-      try {
-        const response = await axios.get('/api/curation/getCastsByHash', {
-          params: { fid, castString }
-        })
-        return response
-      } catch (error) {
-        console.error('Error submitting data:', error)
-        return null
+      if (sortedCasts) {
+        const castHashes = sortedCasts.map(obj => obj.cast_hash)
+        castString = castHashes.join(',');
       }
-    }
 
-    const populateResponse = await populateCasts(fid, castString)
 
-    let populatedCasts = []
+      setUserFeed(displayedCasts)
 
-    if (populateResponse) {
-      populatedCasts = populateResponse.data.casts
-      // setUserFeed(populatedCasts)
-    }
-
-    for (let i = 0; i < populatedCasts.length; i++) {
-      const obj2 = populatedCasts[i]
-      let obj1 = displayedCasts.find(cast => cast.hash === obj2.hash)
-      if (obj1) {
-        Object.keys(obj2).forEach(key => {
-          obj1[key] = obj2[key]
-        })
+      if (!fid) {
+        account.LoginPopup()
       } else {
-        displayedCasts.push({...obj2})
-      }
-    }
-
-    setUserFeed(displayedCasts)
-
-
-    async function checkEmbedTypeForCasts(casts) {
-      // Map over each cast and apply checkEmbedType function
-      const updatedCasts = await Promise.all(casts.map(async (cast) => {
-        return await checkEmbedType(cast);
-      }));
-    
-      return updatedCasts;
-    }
-    
-    // Usage
-    const castsWithImages = await checkEmbedTypeForCasts(displayedCasts);
-    setUserFeed(castsWithImages);
-
-
-    async function getSubcast(hash) {
-      if (hash) {
-        try {
-          const response = await axios.get('/api/getCastByHash', {
-            params: { hash } })
-          const castData = response.data.cast.cast
-          if (castData) {
-            console.log(castData)
-            return castData
-          } else {
+          
+        async function populateCasts(fid, castString) {
+          try {
+            const response = await axios.get('/api/curation/getCastsByHash', {
+              params: { fid, castString }
+            })
+            return response
+          } catch (error) {
+            console.error('Error submitting data:', error)
             return null
           }
-        } catch (error) {
-          console.error('Error submitting data:', error)
-          return null
         }
-      }
-    }
 
-    async function populateSubcasts(cast) {
-      const { embeds } = cast;
-      // console.log(embeds)
+        const populateResponse = await populateCasts(fid, castString)
 
-      if (embeds && embeds.length > 0) {
-        const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
-          // console.log(embed)
-          if (embed.type == 'subcast') {
-            // console.log(embed.cast_id.hash)
-            const subcastData = await getSubcast(embed.cast_id.hash)
-            const checkImages = await checkEmbedType(subcastData)
-            // console.log(checkImages)
-            return { ...embed, subcast: checkImages };
+        let populatedCasts = []
+
+        if (populateResponse) {
+          populatedCasts = populateResponse.data.casts
+          // setUserFeed(populatedCasts)
+        }
+
+        for (let i = 0; i < populatedCasts.length; i++) {
+          const obj2 = populatedCasts[i]
+          let obj1 = displayedCasts.find(cast => cast.hash === obj2.hash)
+          if (obj1) {
+            Object.keys(obj2).forEach(key => {
+              obj1[key] = obj2[key]
+            })
           } else {
-            return { ...embed }
+            displayedCasts.push({...obj2})
           }
-        }));
-        return { ...cast, embeds: updatedEmbeds };
-      }
-      
-      return cast; 
-    }
+        }
 
-    async function populateEmbeds(cast) {
-      const { embeds } = cast
-      // console.log(embeds)
-      if (embeds && embeds.length > 0) {
-        const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
-          // console.log(embed.type)
-          if (embed && embed.url && embed.type == 'html') {
-            // console.log(embed)
+        setUserFeed(displayedCasts)
+
+        async function checkEmbedTypeForCasts(casts) {
+          // Map over each cast and apply checkEmbedType function
+          const updatedCasts = await Promise.all(casts.map(async (cast) => {
+            return await checkEmbedType(cast);
+          }));
+        
+          return updatedCasts;
+        }
+        
+        // Usage
+        const castsWithImages = await checkEmbedTypeForCasts(displayedCasts);
+        setUserFeed(castsWithImages);
+
+
+        async function getSubcast(hash, userFid) {
+          if (hash && userFid) {
             try {
-              const metaData = await axios.get('/api/getMetaTags', {
-                params: { url: embed.url } })
-              if (metaData && metaData.data) {
-                return { ...embed, metadata: metaData.data };
+              const response = await axios.get('/api/getCastByHash', {
+                params: { hash, userFid } })
+              const castData = response.data.cast.cast
+              if (castData) {
+                console.log(castData)
+                return castData
+              } else {
+                return null
+              }
+            } catch (error) {
+              console.error('Error submitting data:', error)
+              return null
+            }
+          }
+        }
+
+        async function populateSubcasts(cast, fid) {
+          const { embeds } = cast;
+          // console.log(embeds)
+
+          if (embeds && embeds.length > 0) {
+            const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
+              // console.log(embed)
+              if (embed.type == 'subcast') {
+                // console.log(embed.cast_id.hash)
+                const subcastData = await getSubcast(embed.cast_id.hash, fid)
+                const checkImages = await checkEmbedType(subcastData)
+                // console.log(checkImages)
+                return { ...embed, subcast: checkImages };
               } else {
                 return { ...embed }
               }
-            } catch (error) {
-              return { ...embed }
-            }
-          } else {
-            return { ...embed }
+            }));
+            return { ...cast, embeds: updatedEmbeds };
           }
-        }));
-        return { ...cast, embeds: updatedEmbeds };
+          
+          return cast; 
+        }
+
+        async function populateEmbeds(cast) {
+          const { embeds } = cast
+          // console.log(embeds)
+          if (embeds && embeds.length > 0) {
+            const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
+              // console.log(embed.type)
+              if (embed && embed.url && embed.type == 'html') {
+                // console.log(embed)
+                try {
+                  const metaData = await axios.get('/api/getMetaTags', {
+                    params: { url: embed.url } })
+                  if (metaData && metaData.data) {
+                    return { ...embed, metadata: metaData.data };
+                  } else {
+                    return { ...embed }
+                  }
+                } catch (error) {
+                  return { ...embed }
+                }
+              } else {
+                return { ...embed }
+              }
+            }));
+            return { ...cast, embeds: updatedEmbeds };
+          }
+          
+          return cast;
+        }
+
+        async function checkEmbeds(casts) {
+          const updatedCasts = await Promise.all(casts.map(async (cast) => {
+            return await populateEmbeds(cast);
+          }));
+        
+          return updatedCasts;
+        }
+
+        async function checkSubcasts(casts, fid) {
+          const updatedCasts = await Promise.all(casts.map(async (cast) => {
+            return await populateSubcasts(cast, fid);
+          }));
+        
+          return updatedCasts;
+        }
+
+        const castsWithSubcasts = await checkSubcasts(castsWithImages, fid)
+        console.log(castsWithSubcasts)
+        setUserFeed(castsWithSubcasts);
+
+        const castsWithEmbeds = await checkEmbeds(castsWithSubcasts)
+        console.log(castsWithEmbeds)
+        setUserFeed(castsWithEmbeds);
       }
-      
-      return cast;
     }
-
-    async function checkEmbeds(casts) {
-      const updatedCasts = await Promise.all(casts.map(async (cast) => {
-        return await populateEmbeds(cast);
-      }));
-    
-      return updatedCasts;
-    }
-
-    async function checkSubcasts(casts) {
-      const updatedCasts = await Promise.all(casts.map(async (cast) => {
-        return await populateSubcasts(cast);
-      }));
-    
-      return updatedCasts;
-    }
-
-    const castsWithSubcasts = await checkSubcasts(castsWithImages)
-    console.log(castsWithSubcasts)
-    setUserFeed(castsWithSubcasts);
-
-    const castsWithEmbeds = await checkEmbeds(castsWithSubcasts)
-    console.log(castsWithEmbeds)
-    setUserFeed(castsWithEmbeds);
   }
 
 
@@ -717,7 +722,7 @@ export default function ProfilePage() {
     const [loading, setLoading] = useState(false);
 
    return (
-    <div className="inner-container flex-col" style={{width: '100%', display: 'flex', flexDirection: 'col', justifyContent: 'space-between', backgroundColor: '#66666633', gap: '1rem'}}>
+    <div className="inner-container flex-col" style={{width: '100%', display: 'flex', flexDirection: 'col', justifyContent: 'space-between', backgroundColor: '#33445588', gap: '1rem'}}>
       <div className='flex-row' style={{gap: '0.5rem'}}>
 
         <div style={{width: '100%'}}>
@@ -805,7 +810,7 @@ export default function ProfilePage() {
     const btn = props.buttonName
     let isSearchable = true
     let comingSoon = false
-    if (props.buttonName == 'Casts' && !store.isAuth) {
+    if ((props.buttonName == 'Casts' && !store.isAuth) || (props.buttonName == 'Casts + Replies' && !store.isAuth)) {
       isSearchable = false
     }
     // if (props.buttonName == 'Channels' || props.buttonName == 'Media' || props.buttonName == 'Proposals') {

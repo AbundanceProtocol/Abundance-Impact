@@ -1,8 +1,10 @@
 export default async function handler(req, res) {
   const pinataGatewayToken = process.env.PINATA_GATEWAY_TOKEN
+  const { hash } = req.query;
 
-  if (req.method === 'GET') {
-    const { hash } = req.query;
+  if (req.method !== 'GET' || !hash) {
+    res.status(405).json({ error: 'Method Not Allowed' });
+  } else {
     console.log('6: hash:', hash)
     
     const url = `https://emerald-keen-peacock-448.mypinata.cloud/ipfs/${hash}?pinataGatewayToken=${pinataGatewayToken}`
@@ -28,7 +30,5 @@ export default async function handler(req, res) {
       console.error('Error handling GET request:', error);
       res.status(500).json({ error: 'Internal Server Error' });
     }
-  } else {
-      res.status(405).json({ error: 'Method Not Allowed' });
   }
 }

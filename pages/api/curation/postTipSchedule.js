@@ -10,7 +10,9 @@ const secretKey = process.env.SECRET_KEY
 export default async function handler(req, res) {
   const { fid, uuid, shuffle, time, tags, channels, curators, percent, schedTime } = req.body;
   console.log(fid, shuffle, time, tags, channels, curators, percent, schedTime)
-  if (req.method === 'POST' && fid && uuid && shuffle && percent) {
+  if (req.method !== 'POST' || !fid || !uuid || !percent) {
+    res.status(405).json({ error: 'Method not allowed' });
+  } else {
     const encryptedUuid = encryptPassword(uuid, secretKey);
 
     try {
@@ -86,7 +88,5 @@ export default async function handler(req, res) {
       console.error("Error while fetching casts:", error);
       res.status(500).json({ error: 'Internal Server Error' });
     }   
-  } else {
-    res.status(405).json({ error: 'Method not allowed' });
   }
 } 

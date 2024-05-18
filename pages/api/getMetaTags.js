@@ -2,16 +2,12 @@ import cheerio from 'cheerio';
 
 export default async function handler(req, res) {
   const { url } = req.query;
-  if (req.method === 'GET') {
-    if (!url) {
-      return res.status(400).json({ error: 'URL parameter is missing' });
-    }
+  if (req.method !== 'GET' || !url) {
+    return res.status(400).json({ error: 'URL parameter is missing' });
+  } else {
   
-
     async function extractMetaTags(url) {
-
       try {
-
         const response = await fetch(url, {
           method: 'GET',
           mode: 'no-cors'

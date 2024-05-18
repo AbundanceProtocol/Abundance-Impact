@@ -3,10 +3,12 @@ import Cast from '../../../models/Cast';
 import User from '../../../models/User';
 
 export default async function handler(req, res) {
-  const curators = req.query.name
-  console.log(curators)
-  if (req.method === 'GET') {
-
+  const { name } = req.query
+  if (req.method !== 'GET' || !name) {
+    res.status(405).json({ error: 'Method not allowed' });
+  } else {
+    console.log('10', name, fid)
+    
     async function getCurators(curators) {
       try {
         await connectToDatabase();
@@ -20,11 +22,13 @@ export default async function handler(req, res) {
       }
     }
 
-    const topCurators = await getCurators(curators)
+    try {
+      const topCurators = await getCurators(name)
 
-    res.status(200).json({ users: topCurators });
-  } else {
-
-    res.status(405).json({ error: 'Method not allowed' });
+      res.status(200).json({ users: topCurators });
+    } catch (error) {
+      console.error('Error submitting data:', error)
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
   }
 }

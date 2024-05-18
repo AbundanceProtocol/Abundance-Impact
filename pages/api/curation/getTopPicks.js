@@ -5,7 +5,9 @@ const apiKey = process.env.NEYNAR_API_KEY
 
 export default async function handler(req, res) {
 
-  if (req.method === 'GET') {
+  if (req.method !== 'GET') {
+    res.status(405).json({ error: 'Method not allowed' });
+  } else {
 
     const page = parseInt(req.query.page) || 1;
     const limit = 15;
@@ -31,19 +33,22 @@ export default async function handler(req, res) {
       }
     }
 
-    const { casts, totalCount } = await fetchCasts();
+    try {
+      const { casts, totalCount } = await fetchCasts();
 
-    res.status(200).json({
-      total: totalCount,
-      page: page,
-      pages: Math.ceil(totalCount / limit),
-      per_page: limit,
-      casts: casts,
-      message: 'Top picks fetched successfully'
-    });
+      res.status(200).json({
+        total: totalCount,
+        page: page,
+        pages: Math.ceil(totalCount / limit),
+        per_page: limit,
+        casts: casts,
+        message: 'Top picks fetched successfully'
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
 
   // res.status(200).json({ casts, message: 'Top picks fetched successfully' });
-  } else {
-    res.status(500).json({ error: 'Internal Server Error' });
   }
 }

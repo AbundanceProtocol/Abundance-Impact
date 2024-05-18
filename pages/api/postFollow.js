@@ -4,12 +4,17 @@ export default async function handler(req, res) {
   const apiKey = process.env.REDASH_404_API_KEY
   const queryId = 404 // SELECT count(type) FROM links WHERE fid = {{fid}} AND target_fid = {{target}} - check if fid follows target_fid
   const { fid, target } = req.body
-  const options = {"parameters": {"fid": fid, "target": target}, "max_age": 100}
+  
   function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
+  
+  if (req.method !== 'POST' || !target || !fid) {
+    res.status(404).json({ error: 'Not found' });
+  } else {
+    console.log(fid)
+    const options = {"parameters": {"fid": fid, "target": target}, "max_age": 100}
 
-  if (req.method === 'POST') {
     try {
       async function postFollowing() {
         const instance = axios.create({
@@ -45,7 +50,5 @@ export default async function handler(req, res) {
       console.error('Error handling POST requests:', error);
       res.status(500).json({ error: 'Internal Server Error' });
     }
-  } else {
-    res.status(404).json({ error: 'Not found' });
   }
 }

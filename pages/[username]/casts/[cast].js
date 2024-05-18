@@ -1,6 +1,7 @@
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { useRef, useEffect, useState } from 'react';
+import { useContext, useRef, useEffect, useState } from 'react';
+import { AccountContext } from '../../../context';
 import axios from 'axios';
 import useStore from '../../../utils/store';
 import Cast from '../../../components/Cast'
@@ -10,6 +11,7 @@ const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_
 export default function CastPage({username, castHash}) {
   const router = useRouter();
   const ref = useRef(null)
+  const account = useContext(AccountContext)
   const [cast, setCast] = useState(null)
   const initialUser = {
     username: 'none',
@@ -28,6 +30,7 @@ export default function CastPage({username, castHash}) {
   const [feedMax, setFeedMax ] = useState('620px')
   const [longcastLoaded, setLongcastLoaded] = useState(false)
   const [showPopup, setShowPopup] = useState({open: false, url: null})
+  const [isLogged, setIsLogged] = useState(false)
 
   let noCast = {
     author: user,
@@ -44,6 +47,9 @@ export default function CastPage({username, castHash}) {
   }
   
   useEffect(() => {
+    if (!isLogged) {
+      setIsLogged(store.isAuth)
+    }
     const handleResize = () => {
       setScreenWidth(window.innerWidth)
       setScreenHeight(window.innerHeight)
@@ -79,13 +85,25 @@ export default function CastPage({username, castHash}) {
   }, [screenWidth])
 
   useEffect(() => {
-    if (store.castData && store.castData.hash == castHash) {
+    if (store.castData && store.castData.hash == castHash && isLogged) {
       setCast(store.castData)
       store.setCastData(null)
-    } else if (castHash) {
-      getCast(castHash)
+    } else if (castHash && isLogged) {
+      getCast(castHash, store.fid)
     }
   }, [router]);
+
+  useEffect(() => {
+    if (!isLogged) {
+      setIsLogged(store.isAuth)
+    }
+    if (castHash && isLogged) {
+      getCast(castHash, store.fid)
+    } else if (!isLogged && !store.isAuth) {
+      console.log('triggered')
+      account.LoginPopup()
+    }
+  }, [isLogged, store.isAuth])
 
   useEffect(() => {
     if (cast && cast.hash !== '-' && !longcastLoaded) {
@@ -158,13 +176,11 @@ export default function CastPage({username, castHash}) {
     }
   }
 
-  async function getCast(hash) {
+  async function getCast(hash, userFid) {
     if (!cast || !cast.author) {
       try {
         const response = await axios.get('/api/getCastByHash', {
-          params: {
-            hash
-          }
+          params: { hash, userFid }
         })
         const castData = response.data.cast.cast
         if (castData) {

@@ -12,7 +12,9 @@ export default async function handler(req, res) {
   const { fid, castContext, impactAmount } = req.body;
   // // console.log(fid, castContext, amount)
   
-  if (req.method === 'POST' && fid && fid != '-' && impactAmount && castContext) {
+  if (req.method !== 'POST' || !fid || fid == '-' || !impactAmount || !castContext) {
+    res.status(405).json({ error: 'Method not allowed' });
+  } else {
     // console.log('1')
 
     async function getQuality(curatorFid, castHash) {
@@ -369,10 +371,5 @@ export default async function handler(req, res) {
         message: `Can't add Impact to reviewed cast`
       });
     }
-
-  } else {
-    // console.log('23')
-
-    res.status(405).json({ error: 'Method not allowed' });
   }
 }

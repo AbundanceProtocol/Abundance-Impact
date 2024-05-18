@@ -1,7 +1,6 @@
 import connectToDatabase from '../../../libs/mongodb';
 import Cast from '../../../models/Cast';
 import Impact from '../../../models/Impact';
-const apiKey = process.env.NEYNAR_API_KEY
 
 export default async function handler(req, res) {
   if (req.method === 'GET') {
@@ -11,8 +10,6 @@ export default async function handler(req, res) {
     const skip = (page - 1) * limit;
 
     let query = {};
-
-
 
     async function getCuratorIds(fids) {
       try {

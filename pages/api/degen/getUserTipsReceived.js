@@ -5,8 +5,11 @@ export default async function handler(req, res) {
   const queryId = 487 // SELECT SUM(extracted_number) AS total_extracted_numbers FROM (SELECT (REGEXP_MATCHES(c2.text, '(\d+)\s*\$degen', 'i'))[1]::int AS extracted_number FROM casts c1 JOIN casts c2 ON c1.hash = c2.parent_hash WHERE c1.fid = {{fid}} AND c1. reated_at >= NOW() - INTERVAL '1 DAY' AND c1.fid <> c2.fid AND c2.text ILIKE '%$degen%') AS subquery
 
   const { fid } = req.query;
-  console.log('8:', fid)
-  if (req.method === 'GET' && fid) {
+
+  if (req.method !== 'GET' || !fid) {
+    res.status(405).json({ error: 'Method Not Allowed' });
+  } else {
+    console.log(fid)
     const options = {"parameters": {"fid": fid}, "max_age": 100}
     function sleep(ms) {
       return new Promise(resolve => setTimeout(resolve, ms));
@@ -49,7 +52,5 @@ export default async function handler(req, res) {
       console.error('Error handling GET request:', error);
       res.status(500).json({ error: 'Internal Server Error' });
     }
-  } else {
-    res.status(400).json({ error: 'Bad Request.' });
   }
 }

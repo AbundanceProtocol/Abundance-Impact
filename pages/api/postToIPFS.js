@@ -5,10 +5,12 @@ export default async function handler(req, res) {
   const pinataSecret = process.env.PINATA_API_SECRET
   const pinataKey = process.env.PINATA_API_KEY
   const pinata = new pinataSDK(pinataKey, pinataSecret)
+  const { username, text, fid } = req.body;
 
-  if (req.method === 'POST') {
+  if (req.method !== 'POST' || !fid || !text || !username) {
+    res.status(405).end();
+  } else {
     try {
-      const { username, text, fid } = req.body;
       const datetime = new Date().toISOString()
       const jsonData = { text, username, datetime, fid };
       const jsonString = JSON.stringify(jsonData);
@@ -36,7 +38,5 @@ export default async function handler(req, res) {
       console.error('Error handling POST requests:', error);
       res.status(500).json({ error: 'Internal Server Error' });
     }
-  } else {
-    res.status(405).end();
   }
 }

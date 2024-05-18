@@ -13,7 +13,7 @@ const apiKey = process.env.NEYNAR_API_KEY
 export default async function handler(req, res) {
   const { fid, encryptedUuid } = req.query
 
-  if (!(req.method === 'GET') || !fid || !encryptedUuid) {
+  if (req.method !== 'GET' || !fid || !encryptedUuid) {
     res.status(405).json({ error: 'Method Not Allowed', message: 'Failed to provide required data' });
   } else {
 

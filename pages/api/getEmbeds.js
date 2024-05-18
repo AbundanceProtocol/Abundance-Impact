@@ -1,3 +1,5 @@
+import { desensitizeString } from "../../utils/utils";
+
 async function getEmbedTypes(url) {
   try {
     const response = await fetch(url, { method: 'HEAD' });
@@ -24,13 +26,12 @@ async function getEmbedTypes(url) {
 
 export default async function handler(req, res) {
   const { url } = req.query;
-  if (req.method === 'GET') {
-    if (!url) {
-      return res.status(400).json({ error: 'URL parameter is missing' });
-    }
-
+  if (req.method !== 'GET' || !url) {
+    return res.status(400).json({ error: 'URL parameter is missing' });
+  } else {
+    const desensitizedUrl = desensitizeString(url)
     try {
-      const embedType = await getEmbedTypes(url);
+      const embedType = await getEmbedTypes(desensitizedUrl);
       if (embedType) {
         res.status(200).json({embed: embedType});
       } else {

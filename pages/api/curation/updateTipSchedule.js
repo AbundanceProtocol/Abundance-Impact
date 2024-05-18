@@ -4,8 +4,8 @@ import qs from "querystring";
 const easyCronKey = process.env.EASYCRON_API_KEY;
 
 export default async function handler(req, res) {
-  const { cronId } = req.query;
-  if (!(req.method === 'GET') || !cronId ) {
+  const { cronId, fid } = req.query;
+  if (req.method !== 'GET' || !cronId || !fid ) {
     res.status(405).json({ error: 'Method not allowed' });
   } else {
     console.log(cronId)
@@ -42,76 +42,83 @@ export default async function handler(req, res) {
       res.status(500).json({ error: 'Internal Server Error' });
     } else {
 
-      async function updateCron(cronId, cronStatus) {
+      async function updateObject(cronId, fid, cronStatus) {
         try {
-          const updatedCron = `https://www.easycron.com/rest/${(cronStatus == 1) ? 'disable' : 'enable'}?${qs.stringify({
-            token: easyCronKey,
-            id: cronId,
-          })}`;
+          console.log('46', cronId)
+
+          await connectToDatabase();
     
-          const cronResponse = await fetch(updatedCron)
-    
-          if (cronResponse) {
-            const cronData = await cronResponse.json()
-            console.log('23', cronData)
-            if (cronData.status == 'success') {
-              console.log('25', cronData)
-  
-              return true
+          // Find and update the document
+          const getObject = await ScheduleTip.findOne({ cron_job_id: cronId, fid: fid }).exec();
+          console.log('46', getObject)
+
+          if (getObject) {
+            if (cronStatus == 1) {
+              getObject.active_cron = false
+            } else if (cronStatus == 0) {
+              getObject.active_cron = true
             }
+            getObject.save()
+            console.log('Document deleted');
+            return true
+          } else {
+            console.log('Document not found');
+            return false
           }
-          return false
         } catch (error) {
           console.error('Error:', error);
           return false
         }
       }
-    
-      const updatedCron = await updateCron(cronId, cronStatus);
-      console.log('38', updatedCron)
-  
-      if (!updatedCron) {
-        res.status(500).json({ error: 'Internal Server Error' });
-      } else {
-        console.log('40')
-        async function updateObject(cronId, cronStatus) {
-          try {
-            console.log('46', cronId)
-  
-            await connectToDatabase();
-      
-            // Find and delete the document
-            const getObject = await ScheduleTip.findOne({ cron_job_id: cronId }).exec();
-            console.log('46', getObject)
-  
-            if (getObject) {
-              if (cronStatus == 1) {
-                getObject.active_cron = false
-              } else if (cronStatus == 0) {
-                getObject.active_cron = true
-              }
-              getObject.save()
-              console.log('Document deleted');
-              return true
-            } else {
-              console.log('Document not found');
-              return false
-            }
-          } catch (error) {
-            console.error('Error:', error);
-            return false
-          }
-        }
-        
-        const updatedObject = await updateObject(cronId, cronStatus);
+
+      try {
+        const updatedObject = await updateObject(cronId, fid, cronStatus);
         if (!updatedObject) {
           res.status(500).json({ error: 'Internal Server Error' });
         } else {
-          res.status(200).send({ message: `Tip schedule updated successfully`, update: cronStatus });
+          async function updateCron(cronId, cronStatus) {
+            try {
+              const updatedCron = `https://www.easycron.com/rest/${(cronStatus == 1) ? 'disable' : 'enable'}?${qs.stringify({
+                token: easyCronKey,
+                id: cronId,
+              })}`;
+        
+              const cronResponse = await fetch(updatedCron)
+        
+              if (cronResponse) {
+                const cronData = await cronResponse.json()
+                console.log('89', cronData)
+                if (cronData.status == 'success') {
+                  console.log('91', cronData)
+                  return true
+                }
+              }
+              return false
+            } catch (error) {
+              console.error('Error:', error);
+              return false
+            }
+          }
+
+          try {
+            const updatedCron = await updateCron(cronId, cronStatus);
+            console.log('38', updatedCron)
+        
+            if (!updatedCron) {
+              res.status(500).json({ error: 'Internal Server Error' });
+            } else {
+              res.status(200).send({ message: `Tip schedule updated successfully`, update: cronStatus });
+            }
+          } catch (error) {
+            console.error('Error:', error);
+            res.status(500).json({ error: 'Internal Server Error' });
+          }
         }
-      }   
+      } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+      }
     }
   }
-}
-  
+}  
 

@@ -6,7 +6,10 @@ export default async function handler(req, res) {
 
   const { fid } = req.query;
 
-  if (req.method === 'GET' && fid) {
+  if (req.method !== 'GET' || !fid) {
+    res.status(400).json({ error: 'Bad Request.' });
+  } else {
+    console.log(fid)
     const options = {"parameters": {"fid": fid}, "max_age": 100}
     function sleep(ms) {
       return new Promise(resolve => setTimeout(resolve, ms));
@@ -49,7 +52,5 @@ export default async function handler(req, res) {
       console.error('Error handling GET request:', error);
       res.status(500).json({ error: 'Internal Server Error' });
     }
-  } else {
-    res.status(400).json({ error: 'Bad Request.' });
   }
 }

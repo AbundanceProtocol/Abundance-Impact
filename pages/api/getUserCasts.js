@@ -1,7 +1,10 @@
 export default async function handler(req, res) {
   const apiKey = process.env.NEYNAR_API_KEY
-  const { fid } = req.query;
-  if (req.method === 'GET' && fid) {
+  const { fid, userFid } = req.query;
+  if (req.method !== 'GET' || !fid || !userFid) {
+    res.status(405).json({ error: 'Method Not Allowed' });
+  } else {
+    console.log('7:', fid)
     try {
       const base = "https://api.neynar.com/";
       const url = `${base}v2/farcaster/feed/user/${fid}/replies_and_recasts?limit=15`;
@@ -18,7 +21,5 @@ export default async function handler(req, res) {
       console.error('Error handling GET request:', error);
       res.status(500).json({ error: 'Internal Server Error' });
     }
-  } else {
-    res.status(405).json({ error: 'Method Not Allowed' });
   }
 }

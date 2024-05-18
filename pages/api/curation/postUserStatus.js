@@ -7,7 +7,9 @@ const apiKey = process.env.NEYNAR_API_KEY
 
 export default async function handler(req, res) {
   const { fid, invited } = req.body;
-  if (req.method === 'POST' && fid) {
+  if (req.method !== 'POST' || !fid) {
+    res.status(405).json({ error: 'Method not allowed' });
+  } else {
 
     const currentDate = getCurrentDateUTC();
 
@@ -194,7 +196,5 @@ export default async function handler(req, res) {
       console.error('Error processing request:', error);
       res.status(500).json({ error: 'Internal Server Error' });
     }
-  } else {
-    res.status(405).json({ error: 'Method not allowed' });
   }
 }

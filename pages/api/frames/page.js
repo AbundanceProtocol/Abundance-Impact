@@ -4,9 +4,11 @@ const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_
 const HubURL = process.env.NEYNAR_HUB
 const client = HubURL ? getSSLHubRpcClient(HubURL) : undefined;
 
-
 export default async function handler(req, res) {
-  if (req.method === 'POST') {
+  if (req.method !== 'POST') {
+    res.setHeader('Allow', ['POST']);
+    res.status(405).end(`Method ${req.method} Not Allowed`);
+  } else {
     // console.log('api/frames/page 15:', req.query.id)
     // console.log('api/frames/page 16:', req.query.page)
     // console.log('api/frames/page 17:', req.query.total)
@@ -78,14 +80,11 @@ export default async function handler(req, res) {
         </body>
       </html>
     `);
-        } catch (error) {
-            console.error(error);
-            res.status(500).send('Error generating image');
-        }
-    } else {
-        res.setHeader('Allow', ['POST']);
-        res.status(405).end(`Method ${req.method} Not Allowed`);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error generating image');
     }
+  }
 }
 
 

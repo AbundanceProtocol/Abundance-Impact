@@ -11,7 +11,9 @@ export default async function handler(req, res) {
   const { fid, castHash, qualityAmount } = req.body;
   // console.log(fid, castHash, qualityAmount)
   
-  if (req.method === 'POST' && fid && qualityAmount && castHash) {
+  if (req.method !== 'POST' || !fid || !qualityAmount || !castHash) {
+    res.status(500).json({ error: 'Internal Server Error' });
+  } else {
     // console.log('1')
     // console.log(fid, castHash, qualityAmount)
 
@@ -358,7 +360,5 @@ export default async function handler(req, res) {
         message: `Can't add q/dau to staked cast`
       });
     }
-  } else {
-    res.status(500).json({ error: 'Internal Server Error' });
   }
-} 
+}

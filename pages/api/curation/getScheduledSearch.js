@@ -5,7 +5,9 @@ const secretKey = process.env.SECRET_KEY
 
 export default async function handler(req, res) {
   const fid = req.query.fid
-  if (req.method === 'GET' && fid) {
+  if (req.method !== 'GET' || !fid) {
+    res.status(405).json({ error: 'Method not allowed' });
+  } else {
 
     async function getSchedule(fid) {
       try {
@@ -13,7 +15,6 @@ export default async function handler(req, res) {
 
         let schedule = await ScheduleTip.findOne({ fid }).exec();
         if (schedule) {
-          // const decryptedUuid = decryptPassword(schedule.uuid, secretKey);
           return {
             shuffle: schedule.search_shuffle,
             time: schedule.search_time,
@@ -54,11 +55,13 @@ export default async function handler(req, res) {
       }
     }
 
-    const { shuffle, time, tags, channels, curators, percent, schedTime, cron_job_id, active_cron } = await getSchedule(fid)
-
-    res.status(200).json({ shuffle, time, tags, channels, curators, percent, schedTime, cron_job_id, active_cron });
-  } else {
-
-    res.status(405).json({ error: 'Method not allowed' });
+    try {
+      const { shuffle, time, tags, channels, curators, percent, schedTime, cron_job_id, active_cron } = await getSchedule(fid)
+  
+      res.status(200).json({ shuffle, time, tags, channels, curators, percent, schedTime, cron_job_id, active_cron });
+    } catch (error) {
+      console.error('Error submitting data:', error)
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
   }
 }
