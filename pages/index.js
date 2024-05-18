@@ -158,7 +158,7 @@ export default function Home() {
       setInitMinute(event.target.value);
     };
 
-    const handleSubmit = async () => {
+    const handleSubmit = async (fid, uuid, percent) => {
       // Schedule the task with the selected hour and minute
       let minutes = minute
       if (minute == '0') {
@@ -169,10 +169,10 @@ export default function Home() {
       // const timeRange = getTimeRange(time)
       // getUserSearch(timeRange, tags, channels, curators, null, shuffle)
       console.log(schedTime)
-      async function postSchedule(shuffle, time, tags, channels, curators, schedTime) {
-        const fid = await store.fid
-        const uuid = await store.signer_uuid
-        const percent = initValue
+      async function postSchedule(shuffle, time, tags, channels, curators, schedTime, fid, uuid, percent) {
+        // const fid = await store.fid
+        // const uuid = await store.signer_uuid
+        // const percent = initValue
 
         try {
           setLoading(true)
@@ -204,7 +204,7 @@ export default function Home() {
         }
       }
     
-      const schedData = await postSchedule(shuffle, time, tags, channels, curators, schedTime)
+      const schedData = await postSchedule(shuffle, time, tags, channels, curators, schedTime, fid, uuid, percent)
     };
 
     return (
@@ -230,7 +230,7 @@ export default function Home() {
             if (!isLogged) { 
               account.LoginPopup() 
             } else if (hour !== 'Hr') {
-              handleSubmit() 
+              handleSubmit(store.fid, store.signer_uuid, initValue) 
             }}} style={{backgroundColor: 'transparent', fontWeight: '600', color: '#fff', cursor: (hour !== 'Hr' || !isLogged) ? 'pointer' : 'default', fontSize: '12px', padding: '0'}}>SCHEDULE TIP</button>
         </div>
         {!isLogged && (<div style={{position: 'relative', fontSize: '0', width: '0', height: '100%'}}>
