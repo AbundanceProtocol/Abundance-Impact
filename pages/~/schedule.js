@@ -420,7 +420,9 @@ export default function Schedule() {
   }
 
   useEffect(() => {
-    setIsLogged(store.isAuth)
+    if (!isLogged) {
+      setIsLogged(store.isAuth)
+    }
     if (store.isAuth && jobScheduled) {
       getUserSchedule(store.fid)
       setJobScheduled(false);
@@ -483,7 +485,9 @@ export default function Schedule() {
 
   useEffect(() => {
     console.log('triggered')
-    setIsLogged(store.isAuth)
+    if (!isLogged) {
+      setIsLogged(store.isAuth)
+    }
 
     const handleResize = () => {
       setScreenWidth(window.innerWidth)
@@ -1103,6 +1107,7 @@ export default function Schedule() {
   }
 
   async function deleteSchedule() {
+    console.log(cronId, store.fid)
     try {
       const response = await axios.delete('/api/curation/deleteTipSchedule', {
         params: {
@@ -1143,6 +1148,7 @@ export default function Schedule() {
   }
 
   async function pauseSchedule() {
+    console.log(cronId, store.fid)
     try {
       const response = await axios.get('/api/curation/updateTipSchedule', {
         params: {
