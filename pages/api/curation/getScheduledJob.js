@@ -23,7 +23,9 @@ export default async function handler(req, res) {
       try {
         await connectToDatabase();
         const desenitizedUuid = desensitizeString(uuid)
+        console.log('26', desenitizedUuid, uuid)
         const schedule = await ScheduleTip.findOne({ $or: [{ uuid: uuid }, { uuid: desenitizedUuid }] }).exec();
+        console.log(schedule)
         if (schedule) {
           const decryptedUuid = decryptPassword(desenitizedUuid, secretKey);
           return {
