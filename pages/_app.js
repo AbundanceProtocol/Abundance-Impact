@@ -42,6 +42,9 @@ export default function App({ Component, pageProps }) {
   const [showLogin, setShowLogin] = useState(false)
   const [showLogout, setShowLogout] = useState(false)
   const [showActions, setShowActions] = useState(false)
+  const [topCreators, setTopCreators] = useState([])
+  const [topCreatorsSched, setTopCreatorsSched] = useState(false)
+  const [paused, setPaused] = useState(false)
 
   const Col = styled.div`
     display: grid;
@@ -59,9 +62,9 @@ export default function App({ Component, pageProps }) {
   useEffect(() => {
     let menuLink = targetLink()
     setBottomNavSize(ref?.current?.offsetWidth)
-
     setNavSize(ref?.current?.offsetWidth - 60)
     setLinkTarget(menuLink)
+    setTopCreators([])
     setNavMenu(button[menuLink].menu)
     handleNavResize()
     window.addEventListener("resize", handleNavResize);
@@ -70,6 +73,26 @@ export default function App({ Component, pageProps }) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  useEffect(() => {
+    console.log(paused, topCreatorsSched)
+    if (topCreatorsSched) {
+      if (!paused) {
+        getTopCreators()
+      }
+      setTopCreatorsSched(false);
+    } else {
+      const timeoutId = setTimeout(() => {
+        if (!paused) {
+          getTopCreators()        
+        }
+        setTopCreatorsSched(false);
+      }, 300);
+  
+      return () => clearTimeout(timeoutId);
+    }
+  }, [topCreators, topCreatorsSched]);
+
 
   useEffect(() => {
     // console.log(store.signer_uuid)
@@ -130,6 +153,30 @@ export default function App({ Component, pageProps }) {
       setIsLogged(false)
     }
   }, [store.fid, store.isAuth, store.signer_uuid]);
+
+  async function getTopCreators() {
+    if (!paused) {
+      try {
+        await setPaused(true)
+        const response = await axios.get('/api/curation/getTopCreators')
+        console.log(response)
+
+        if (response && response.data && response.data.topCreators?.length > 0) {
+          const receiverFids = response.data.topCreators
+          console.log(receiverFids)
+          setTopCreators(receiverFids)
+        } else {
+          setTopCreators([])
+        }
+      } catch (error) {
+        console.error('Error submitting data:', error)
+        setTopCreators([])
+  
+      }
+
+    }
+  }
+
 
   async function setUserProfile(fid) {
     try {
@@ -733,6 +780,22 @@ export default function App({ Component, pageProps }) {
                 </div>
               </div>
             </div>
+
+            <div style={{margin: '18px 0px 12px 20px', backgroundColor: '#334455ee', width: '380px', borderRadius: '20px', padding: '32px', border: '0px solid #678', color: '#fff', fontWeight: '700', alignItems:' center', fontSize: '20px'}}>
+              <p style={{padding: '0 0 6px 0', fontSize: '20px', fontWeight: '600'}}>Creator & Builder Leaderboard: </p>
+              <div className='flex-col' style={{gap: '0.5rem', marginTop: '10px'}}>
+                {topCreators && (topCreators.map((creator, index) => (
+                <div className='flex-row' key={index} style={{alignItems: 'center', justifyContent: 'flex-start'}}>
+                  <div style={{fontSize: '15px', fontWeight: '700', width: '15px', padding: '6px 35px 6px 0', color: '#cde'}}>{index + 1}</div>
+                  <img loading="lazy" src={creator.author_pfp} className="" alt={`${creator.author_name} avatar`} style={{width: '28px', height: '28px', maxWidth: '28px', maxHeight: '28px', borderRadius: '24px', border: '1px solid #000'}} />
+                  <div style={{fontSize: '15px', fontWeight: '500', width: '15px', padding: '6px 10px'}}>@{creator.author_name}</div>
+                </div>
+                )))}
+              </div>
+            </div>
+
+
+
           </div>
         </div>
       </div>
