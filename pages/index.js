@@ -843,7 +843,7 @@ export default function Home() {
   
     return (
       <div className='flex-row' style={{ width: '100%', padding: '3px 12px', gap: '1.0rem', alignItems: 'center' }}
-      onMouseLeave={handleMouseLeave}>
+      onMouseLeave={handleMouseLeave} onTouchEnd={handleMouseLeave}>
         <input
           type="range"
           min="1"
