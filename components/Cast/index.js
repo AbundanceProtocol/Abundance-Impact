@@ -85,13 +85,13 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
 
 
   async function boostImpact(cast, impactAmount) {
-    let channel = null
-    if (cast.parent_url) {
-      const isChannel = cast.parent_url.slice(0,31)
-      if (isChannel == 'https://warpcast.com/~/channel/') {
-        channel = cast.parent_url
-      }
-    }
+    // let channel = null
+    // if (cast.parent_url) {
+    //   const isChannel = cast.parent_url.slice(0,31)
+    //   if (isChannel == 'https://warpcast.com/~/channel/') {
+    //     channel = cast.parent_url
+    //   }
+    // }
     // const amount = 1
     const fid = store.fid
     const castContext = {
@@ -101,7 +101,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
       author_display_name: cast.author.display_name,
       cast_hash: cast.hash,
       cast_text: cast.text,
-      cast_channel: channel
+      cast_channel: cast.parent_url
     }
     // console.log(castContext)
     
