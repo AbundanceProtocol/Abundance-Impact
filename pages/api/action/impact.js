@@ -377,7 +377,7 @@ export default async function handler(req, res) {
                       author_display_name: castContext.author_display_name,
                       cast_hash: castContext.cast_hash,
                       cast_text: castContext.cast_text,
-                      cast_channel: castContext.channel,
+                      cast_channel: castContext.cast_channel,
                       quality_balance: 0,
                       quality_absolute: 0,
                       impact_total: impactAmount,
