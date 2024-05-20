@@ -22,6 +22,7 @@ import { FaLock } from "react-icons/fa";
 import axios from 'axios';
 import { PiSquaresFourLight as Actions } from "react-icons/pi";
 import { IoInformationCircleOutline as Info } from "react-icons/io5";
+import Creators from '../components/Leaderboard/Creators';
 
 export default function App({ Component, pageProps }) {
   const store = useStore()
@@ -788,13 +789,7 @@ export default function App({ Component, pageProps }) {
             {(topCreators.length > 0) && (<div style={{margin: '18px 0px 12px 20px', backgroundColor: '#334455ee', width: '380px', borderRadius: '20px', padding: '32px', border: '0px solid #678', color: '#fff', fontWeight: '700', alignItems:' center', fontSize: '20px'}}>
               <p style={{padding: '0 0 6px 0', fontSize: '20px', fontWeight: '600'}}>Creator & Builder Leaderboard: </p>
               <div className='flex-col' style={{gap: '0.5rem', marginTop: '10px'}}>
-                {(topCreators.map((creator, index) => (
-                <div className='flex-row' key={index} style={{alignItems: 'center', justifyContent: 'flex-start'}}>
-                  <div style={{fontSize: '15px', fontWeight: '700', width: '15px', padding: '6px 35px 6px 0', color: '#cde'}}>{index + 1}</div>
-                  <img loading="lazy" src={creator.author_pfp} className="" alt={`${creator.author_name} avatar`} style={{width: '28px', height: '28px', maxWidth: '28px', maxHeight: '28px', borderRadius: '24px', border: '1px solid #000'}} />
-                  <div style={{fontSize: '15px', fontWeight: '500', width: '15px', padding: '6px 10px'}}><Link href={'/' + creator.author_name}>@{creator.author_name}</Link></div>
-                </div>
-                )))}
+                {(topCreators.map((creator, index) => (<Creators creator={creator} index={index} />)))}
               </div>
             </div>)}
 
