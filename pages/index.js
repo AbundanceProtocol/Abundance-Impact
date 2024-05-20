@@ -10,7 +10,7 @@ import { AiOutlineLoading3Quarters as Loading } from "react-icons/ai";
 import mql from '@microlink/mql';
 import { useRouter } from 'next/router';
 import Cast from '../components/Cast'
-import { formatNum, getTimeRange, checkEmbedType } from '../utils/utils';
+import { formatNum, getTimeRange, checkEmbedType, populateCast, filterObjects } from '../utils/utils';
 import { IoShuffleOutline as Shuffle, IoPeople, IoPeopleOutline } from "react-icons/io5";
 import { BsClock } from "react-icons/bs";
 import { GoTag } from "react-icons/go";
@@ -446,44 +446,6 @@ export default function Home() {
     getUserSearch(timeRange, tags, channels, curators, null, shuffle)
   }
 
-  async function populateCast(casts) {
-    let displayedCasts = []
-    
-    if (casts) {
-      casts.forEach(cast => {
-        let newCast = {
-          author: {
-            fid: cast.author_fid,
-            pfp_url: cast.author_pfp,
-            username: cast.author_username,
-            display_name: cast.author_display_name,
-            power_badge: false,
-          },
-          hash: cast.cast_hash,
-          timestamp: cast.createdAt,
-          text: cast.cast_text,
-          impact_points: cast.impact_points,
-          embeds: [],
-          mentioned_profiles: [],
-          replies: {
-            count: 0
-          },
-          reactions: {
-            recasts: [],
-            likes: []
-          },
-          impact_balance: cast.impact_total,
-          quality_absolute: cast.quality_absolute,
-          quality_balance: cast.quality_balance
-        }
-
-        displayedCasts.push(newCast)
-      });
-    }
-    return displayedCasts
-  }
-
-
 
   async function getUserAllowance(fid) {
     if (isLogged && !userAllowance && fid) {
@@ -514,16 +476,6 @@ export default function Home() {
 
 
   function determineDistribution(ulfilteredCasts, tip) {
-
-    function filterObjects(castArray, filterFid) {
-      return castArray.filter(obj => {
-        if (obj.author.fid != filterFid) {
-          obj.impact_points = obj.impact_points.filter(point => point.curator_fid != filterFid);
-          return true; 
-        }
-        return false;
-      });
-    }
   
   let casts = filterObjects(ulfilteredCasts, store.fid);
   
@@ -1370,7 +1322,7 @@ export default function Home() {
 
     <div style={{margin: '0 0 70px 0'}}>
 
-    {(!userFeed) ? (
+    {(!userFeed || userFeed.length == 0) ? (
       <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
         <Spinner size={31} color={'#999'} />
       </div>

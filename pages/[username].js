@@ -10,6 +10,7 @@ import axios from 'axios';
 import { FaSearch, FaLock, FaRegStar } from "react-icons/fa"
 import Cast from '../components/Cast'
 import { setEmbeds, formatNum } from '../utils/utils';
+import Spinner from '../components/Spinner';
 
 export default function UserPage({username}) {
   const router = useRouter();
@@ -31,7 +32,7 @@ export default function UserPage({username}) {
   const [screenWidth, setScreenWidth ] = useState(undefined)
   const [screenHeight, setScreenHeight] = useState(undefined)
   const [feedMax, setFeedMax ] = useState('620px')
-  const userButtons = ['Casts', 'Channels', 'Media', 'Proposals']
+  const userButtons = ['Casts', 'Casts + Replies', 'Proposals']
   const [searchSelect, setSearchSelect ] = useState('Casts')
   const { isMobile } = useMatchBreakpoints();
   const [userFeed, setUserFeed] = useState(null)
@@ -103,6 +104,24 @@ export default function UserPage({username}) {
     }
   }
 
+  async function getLatestUserCasts(fid) {
+    try {
+      const response = await axios.get('/api/getLatestUserCasts', {
+        params: { fid } })
+      // console.log(response)
+      if (response && response.data && response.data?.feed.length > 0) {
+        const feed = response.data.feed
+        await setUserFeed(feed)
+        const updatedFeed = await setEmbeds(feed)
+        setUserFeed([...updatedFeed])
+      } else {
+        setUserFeed([])
+      }
+    } catch (error) {
+      console.error('Error submitting data:', error)
+    }
+  }
+
   async function getUserCasts(fid, userFid) {
     console.log(fid, userFeed)
     if (!userFeed) {
@@ -110,13 +129,14 @@ export default function UserPage({username}) {
         const response = await axios.get('/api/getUserCasts', {
           params: { fid, userFid }
         })
-        const feed = response.data.feed
-        await setUserFeed(feed)
-        const updatedFeed = await setEmbeds(feed)
-        setUserFeed([...updatedFeed])
-
-        // console.log(response.data.feed)
-        // setUserFeed(feed)
+        if (response && response.data && response.data?.feed.length > 0) {
+          const feed = response.data.feed
+          await setUserFeed(feed)
+          const updatedFeed = await setEmbeds(feed)
+          setUserFeed([...updatedFeed])
+        } else {
+          setUserFeed([])
+        }
       } catch (error) {
         console.error('Error submitting data:', error)
       }
@@ -282,8 +302,8 @@ export default function UserPage({username}) {
                     </a>
                   </span>
                   <div className="flex-col" style={{width: '100%', gap: '1rem', alignItems: 'flex-start'}}>
-                    <div className="flex-row" style={{width: '100%', justifyContent: 'space-between', height: '20px', alignItems: 'flex-start'}}>
-                      <div className="flex-row" style={{alignItems: 'center', gap: '0.25rem'}}>
+                    <div className="flex-row" style={{width: '100%', justifyContent: 'space-between', alignItems: 'flex-start'}}>
+                      <div className="flex-row" style={{alignItems: 'center', gap: '0.25rem', flexWrap: 'wrap'}}>
                         <span className="" data-state="closed">
                           <a className="fc-lnk" title="" href={`https://warpcast.com/${user.username}`}>
                             <div className="flex-row" style={{alignItems: 'center'}}>
@@ -427,6 +447,12 @@ export default function UserPage({username}) {
     )
   }
 
+  const updateCast = (index, newData) => {
+    const updatedFeed = [...userFeed]
+    updatedFeed[index] = newData
+    console.log(newData)
+    setUserFeed(updatedFeed)
+  }
 
   return (
     <div className='flex-col' style={{width: 'auto', position: 'relative'}} ref={ref}>
@@ -442,8 +468,16 @@ export default function UserPage({username}) {
         { userButtons.map((btn, index) => (
           <SearchOptionButton buttonName={btn} key={index} /> ))}
       </div>
-      <div style={{margin: '0 0 30px 0'}}>
-        {userFeed && userFeed.map((cast, index) => (<Cast cast={cast} key={index} index={index} openImagePopup={openImagePopup} />))}
+      <div style={{margin: '0 0 70px 0'}}>
+        {(!userFeed || userFeed.length == 0) ? (
+        <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
+          <Spinner size={31} color={'#999'} />
+        </div>
+        ) : (userFeed.map((cast, index) => (<Cast cast={cast} key={index} index={index} updateCast={updateCast} openImagePopup={openImagePopup} />)))}
+
+
+
+        {/* {userFeed && userFeed.map((cast, index) => (<Cast cast={cast} key={index} index={index} updateCast={updateCast} openImagePopup={openImagePopup} />))} */}
       </div>
       <div>
         {showPopup.open && (<ExpandImg embed={{showPopup}} />)}

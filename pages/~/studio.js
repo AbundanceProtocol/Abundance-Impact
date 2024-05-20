@@ -9,7 +9,7 @@ import axios from 'axios';
 import Cast from '../../components/Cast'
 import DashboardBtn from '../../components/Panels/DashboardBtn'
 import { FaLock, FaPowerOff } from "react-icons/fa";
-import { formatNum, getCurrentDateUTC, getTimeRange, isYesterday, checkEmbedType } from '../../utils/utils';
+import { formatNum, getCurrentDateUTC, getTimeRange, isYesterday, checkEmbedType, populateCast } from '../../utils/utils';
 import { FaRegStar } from 'react-icons/fa';
 import { IoDiamondOutline as Diamond } from "react-icons/io5";
 // import { MdOutlineRefresh } from "react-icons/md";
@@ -18,6 +18,7 @@ import { IoShuffleOutline as Shuffle, IoPeopleOutline } from "react-icons/io5";
 import { BsClock } from "react-icons/bs";
 import { GoTag } from "react-icons/go";
 import { AiOutlineBars } from "react-icons/ai";
+import Spinner from '../../components/Spinner';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -145,43 +146,6 @@ export default function ProfilePage() {
   }, [user, userRouterScheduled]);
 
 
-  async function populateCast(casts) {
-    let displayedCasts = []
-    
-    if (casts) {
-      casts.forEach(cast => {
-        let newCast = {
-          author: {
-            fid: cast.author_fid,
-            pfp_url: cast.author_pfp,
-            username: cast.author_username,
-            display_name: cast.author_display_name,
-            power_badge: false,
-          },
-          hash: cast.cast_hash,
-          timestamp: cast.createdAt,
-          text: cast.cast_text,
-          impact_points: cast.impact_points,
-          embeds: [],
-          mentioned_profiles: [],
-          replies: {
-            count: 0
-          },
-          reactions: {
-            recasts: [],
-            likes: []
-          },
-          impact_balance: cast.impact_total,
-          quality_absolute: cast.quality_absolute,
-          quality_balance: cast.quality_balance
-        }
-
-        displayedCasts.push(newCast)
-      });
-    }
-    return displayedCasts
-  }
-
   useEffect(() => {
     if (feedRouterScheduled) {
       feedRouter();
@@ -199,9 +163,9 @@ export default function ProfilePage() {
   function feedRouter() {
     // console.log(searchSelect)
     if (user && searchSelect == 'Casts') {
-      getLatestUserCasts(user.fid)
+      getLatestUserCasts(user.fid, user.fid)
     } else if (searchSelect == 'Casts + Replies') {
-      getUserFeed(user.fid, false)
+      getUserFeed(user.fid, false, user.fid)
     } else if (searchSelect == 'Curation') {
       const { shuffle, time, tags, channels, curators } = userQuery
       const timeRange = getTimeRange(time)
@@ -417,38 +381,29 @@ export default function ProfilePage() {
   }
 
 
-
-  async function getUserFeed(fid, recasts) {
-    // if (!userFeed) {
-      try {
-        const response = await axios.get('/api/getUserCasts', {
-          params: {
-            fid,
-            recasts
-          }
-        })
-        const feed = response.data.feed
-        console.log(response.data.feed)
-        setUserFeed(feed)
-      } catch (error) {
-        console.error('Error submitting data:', error)
-      }
-    // }
+  async function getUserFeed(fid, recasts, userFid) {
+    try {
+      const response = await axios.get('/api/getUserCasts', {
+        params: { fid, recasts, userFid }})
+      const feed = response.data.feed
+      console.log(response.data.feed)
+      setUserFeed(feed)
+    } catch (error) {
+      console.error('Error submitting data:', error)
+    }
   }
 
-  async function getLatestUserCasts(fid) {
-    // if (!userFeed) {
-      try {
-        const response = await axios.get('/api/getLatestUserCasts', {
-          params: { fid } })
-        // console.log(response)
-        const feed = response.data.feed
-        console.log(response.data.feed)
-        setUserFeed(feed)
-      } catch (error) {
-        console.error('Error submitting data:', error)
-      }
-    // }
+  async function getLatestUserCasts(fid, userFid) {
+    try {
+      const response = await axios.get('/api/getLatestUserCasts', {
+        params: { fid, userFid } })
+      // console.log(response)
+      const feed = response.data.feed
+      console.log(response.data.feed)
+      setUserFeed(feed)
+    } catch (error) {
+      console.error('Error submitting data:', error)
+    }
   }
 
 
@@ -957,14 +912,15 @@ export default function ProfilePage() {
               </div>
             </div>
           )}
-
       </div>
       )}
 
-
-
       <div style={{margin: '0 0 70px 0'}}>
-        {userFeed && userFeed.map((cast, index) => (<Cast cast={cast} key={index} index={index} updateCast={updateCast} openImagePopup={openImagePopup} />))}
+        {(!userFeed || userFeed.length == 0) ? (
+        <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
+          <Spinner size={31} color={'#999'} />
+        </div>
+        ) : (userFeed.map((cast, index) => (<Cast cast={cast} key={index} index={index} updateCast={updateCast} openImagePopup={openImagePopup} />)))}
       </div>
       <div>
         {showPopup.open && (<ExpandImg embed={{showPopup}} />)}

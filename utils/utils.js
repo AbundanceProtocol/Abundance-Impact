@@ -240,3 +240,52 @@ export function desensitizeString(s) {
   s = s.replace(/\b\d{3}-\d{2}-\d{4}\b/g, '***-**-****');
   return s;
 }
+
+
+export async function populateCast(casts) {
+  let displayedCasts = []
+  
+  if (casts) {
+    casts.forEach(cast => {
+      let newCast = {
+        author: {
+          fid: cast.author_fid,
+          pfp_url: cast.author_pfp,
+          username: cast.author_username,
+          display_name: cast.author_display_name,
+          power_badge: false,
+        },
+        hash: cast.cast_hash,
+        timestamp: cast.createdAt,
+        text: cast.cast_text,
+        impact_points: cast.impact_points,
+        embeds: [],
+        mentioned_profiles: [],
+        replies: {
+          count: 0
+        },
+        reactions: {
+          recasts: [],
+          likes: []
+        },
+        impact_balance: cast.impact_total,
+        quality_absolute: cast.quality_absolute,
+        quality_balance: cast.quality_balance
+      }
+
+      displayedCasts.push(newCast)
+    });
+  }
+  return displayedCasts
+}
+
+
+export function filterObjects(castArray, filterFid) {
+  return castArray.filter(obj => {
+    if (obj.author.fid != filterFid) {
+      obj.impact_points = obj.impact_points.filter(point => point.curator_fid != filterFid);
+      return true; 
+    }
+    return false;
+  });
+}

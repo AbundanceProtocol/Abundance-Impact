@@ -1,8 +1,8 @@
 export default async function handler(req, res) {
   const apiKey = process.env.NEYNAR_API_KEY
-  const { fid } = req.query;
+  const { fid, userFid } = req.query;
   console.log('4:', fid)
-  if (req.method !== 'GET' || !fid) {
+  if (req.method !== 'GET' || !fid || !userFid) {
     res.status(405).json({ error: 'Method Not Allowed' });
   } else {
     console.log(fid)
