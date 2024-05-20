@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import Link from 'next/link'
 import useStore from '../../../utils/store';
+import { AccountContext } from '../../../context';
 
 export default function Creators({creator, index}) {
   const store = useStore()
+  const account = useContext(AccountContext)
 
   return (
     <div className='flex-row' key={index} style={{alignItems: 'center', justifyContent: 'flex-start'}}>

@@ -792,9 +792,6 @@ export default function App({ Component, pageProps }) {
                 {(topCreators.map((creator, index) => (<Creators creator={creator} index={index} />)))}
               </div>
             </div>)}
-
-
-
           </div>
         </div>
       </div>
