@@ -68,10 +68,10 @@ export default async function handler(req, res) {
       let castContext
       let channel = null
       if (getCastData) {
-        // if (getCastData.parent_url) {
-        //   const isChannel = getCastData.parent_url.slice(0,31)
+        // if (getCastData.root_parent_url) {
+        //   const isChannel = getCastData.root_parent_url.slice(0,31)
         //   if (isChannel == 'https://warpcast.com/~/channel/') {
-        //     channel = getCastData.parent_url
+        //     channel = getCastData.root_parent_url
         //   }
         // }
 
@@ -82,7 +82,7 @@ export default async function handler(req, res) {
           author_display_name: getCastData.author.display_name,
           cast_hash: getCastData.hash,
           cast_text: getCastData.text,
-          cast_channel: getCastData.parent_url
+          cast_channel: getCastData.root_parent_url
         }
       }
 

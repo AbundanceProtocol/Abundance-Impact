@@ -86,10 +86,10 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
 
   async function boostImpact(cast, impactAmount) {
     // let channel = null
-    // if (cast.parent_url) {
-    //   const isChannel = cast.parent_url.slice(0,31)
+    // if (cast.root_parent_url) {
+    //   const isChannel = cast.root_parent_url.slice(0,31)
     //   if (isChannel == 'https://warpcast.com/~/channel/') {
-    //     channel = cast.parent_url
+    //     channel = cast.root_parent_url
     //   }
     // }
     // const amount = 1
@@ -101,7 +101,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
       author_display_name: cast.author.display_name,
       cast_hash: cast.hash,
       cast_text: cast.text,
-      cast_channel: cast.parent_url
+      cast_channel: cast.root_parent_url
     }
     // console.log(castContext)
     

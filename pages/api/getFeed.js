@@ -17,11 +17,11 @@ export default async function handler(req, res) {
       const feed = await response.json();
       if (typeof feed !== 'undefined') {
         for (let i = 0; i < feed.casts.length; i++) {
-          if (feed.casts[i].parent_url !== null) {
-            const isChannel = feed.casts[i].parent_url.slice(0,31)
+          if (feed.casts[i].root_parent_url !== null) {
+            const isChannel = feed.casts[i].root_parent_url.slice(0,31)
             if (isChannel == 'https://warpcast.com/~/channel/') {
               const base = "https://api.neynar.com/";
-              const getChannel = feed.casts[i].parent_url.slice(31)
+              const getChannel = feed.casts[i].root_parent_url.slice(31)
               const channelQuery = `${base}v2/farcaster/channel?id=${getChannel}`;
               const channelData = await fetch(channelQuery, {
                 headers: {

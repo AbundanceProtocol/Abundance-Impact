@@ -14,7 +14,7 @@ export default async function handler(req, res) {
       let tipCounter = 0;
       for (const cast of data) {
         const castText = cast.text;
-        const parentUrl = cast.cast;
+        const parentUrl = cast.castHash;
         let body = {
           signer_uuid: signer,
           text: castText,
@@ -39,17 +39,28 @@ export default async function handler(req, res) {
           } else {
             console.log(`Request sent successfully for ${castText}`);
           }
+          let tips = []
 
+          for (const coin of cast.allCoins) {
+            let amount = 0
+            if (coin.coin == '$TN100x' && coin.tip > 0) {
+              amount = coin.tip * 10
+            } else if (coin.tip > 0) {
+              amount = coin.tip
+            }
+            if (coin.tip > 0) {
+              let tip = {currency: coin.coin, amount: amount}
+              tips.push(tip)
+            }
+          }
+          
           await Tip.create({
             receiver_fid: cast.fid,
             tipper_fid: fid,
-            cast_hash: cast.cast,
-            tip: [{
-              currency: cast.coin,
-              amount: cast.tip
-            }],
+            cast_hash: cast.castHash,
+            tip: tips,
           });
-          tipCounter += Number(cast.tip)
+          // tipCounter += Number(cast.tip)
 
         } catch (error) {
           console.error(`Error occurred while sending request for ${castText}:`, error);

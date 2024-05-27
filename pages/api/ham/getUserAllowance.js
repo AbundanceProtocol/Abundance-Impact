@@ -6,8 +6,8 @@ export default async function handler(req, res) {
   } else {
     console.log(fid)
     try {
-      const remainingBase = "https://www.degentip.me/";
-      const remainingUrl = `${remainingBase}api/get_allowance?fid=${fid}`;
+      // const remainingBase = "https://www.degentip.me/";
+      const remainingUrl = `https://farcaster.dep.dev/lp/tips/${fid}`;
       const remainingBalance = await fetch(remainingUrl, {
         headers: {
           accept: "application/json",
@@ -18,9 +18,9 @@ export default async function handler(req, res) {
       let total = 0
 
       if (getRemaining) {
-        remaining = getRemaining.allowance.remaining_allowance
-        total = getRemaining.allowance.tip_allowance
-        console.log(remaining)
+        console.log(getRemaining)
+        remaining = Number(getRemaining.allowance) - Number(getRemaining.used)
+        total = Number(getRemaining.allowance)
       }
       res.status(200).json({ total, remaining });
     } catch (error) {

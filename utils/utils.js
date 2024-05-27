@@ -289,3 +289,186 @@ export function filterObjects(castArray, filterFid) {
     return false;
   });
 }
+
+
+export async function processTips(userFeed, userFid, tokenData) {
+
+  if (!userFeed || !userFid || !tokenData) {
+    
+    return { castData: null, coinTotals: null }
+
+  } else {
+
+    // console.log(userFeed)
+  
+    let casts = filterObjects(userFeed, userFid)
+  
+    // console.log(casts)
+  
+    let totalImpact = casts.reduce((total, cast) => {
+      return total + cast.impact_balance - cast.quality_balance;
+    }, 0);
+  
+    // console.log(totalImpact)
+  
+    let tipCasts = []
+  
+    for (const cast of casts) {
+      let tipRatio = 1
+      if (cast.impact_points && cast.impact_points.length > 0) {
+        tipRatio = 0.92
+      }
+      let castImpact = cast.impact_balance - cast.quality_balance
+      let tipWeight = tipRatio * castImpact / totalImpact
+      let castSchema = {
+        castWeight: tipWeight,
+        castHash: cast.hash,
+        fid: cast.author.fid,
+        allCoins: [],
+        text: ''
+      }
+      tipCasts.push(castSchema)
+    }
+  
+    for (const cast of casts) {
+      if (cast.impact_points && cast.impact_points.length > 0) {
+        for (const subCast of cast.impact_points) {
+          let subTipWeight = 0.08 * subCast.impact_points / totalImpact
+          let subCastSchema = {
+            castWeight: subTipWeight,
+            castHash: subCast.target_cast_hash,
+            fid: subCast.curator_fid,
+            allCoins: [],
+            text: ''
+          }
+          tipCasts.push(subCastSchema)
+        }
+      }
+    }
+  
+    let tipCount = 0
+    for (const tipCast of tipCasts) {
+      tipCount += tipCast.castWeight
+    }
+  
+    // console.log(tipCount)
+  
+    let coinTotals = []
+  
+    for (const coin of tokenData) {
+      if (coin.set) {
+        for (const tipCast of tipCasts) {
+          let tip = 0
+          if (coin.token == '$TN100x') {
+            tip = Math.floor(tipCast.castWeight * coin.totalTip / 10)
+          } else {
+            tip = Math.floor(tipCast.castWeight * coin.totalTip)
+          }
+          let coinSchema = {
+            coin: coin.token,
+            tip: tip
+          }
+          tipCast.allCoins.push(coinSchema)
+        }
+      }
+      coinTotals[coin.token] = {totalTip: 0, usedTip: 0, remaining: 0, mod: 0, div: 0}
+      if (coin.token == '$TN100x') {
+        coinTotals[coin.token].totalTip = Math.floor(coin.totalTip / 10)
+      } else {
+        coinTotals[coin.token].totalTip = coin.totalTip
+      }
+      coinTotals[coin.token].usedTip = 0
+      coinTotals[coin.token].mod = 0
+      coinTotals[coin.token].div = 0
+      coinTotals[coin.token].remaining = 0
+    }
+  
+    // console.log(tipCasts)
+  
+    // console.log(coinTotals)
+  
+    for (const tipCast of tipCasts) {
+      if (tipCast.allCoins && tipCast.allCoins.length > 0) {
+        for (const coin of tipCast.allCoins) {
+          coinTotals[coin.coin].usedTip += coin.tip
+        }
+      }
+    }
+  
+    for (const coin of tokenData) {
+      if (coin.set) {
+        coinTotals[coin.token].remaining = coinTotals[coin.token].totalTip - coinTotals[coin.token].usedTip
+  
+        if (tipCasts.length > 0) {
+          coinTotals[coin.token].mod = coinTotals[coin.token].remaining % tipCasts.length
+  
+          coinTotals[coin.token].div = Math.floor(coinTotals[coin.token].remaining / tipCasts.length)
+        }
+      }
+    }
+  
+    for (const cast of tipCasts) {
+      if (cast.allCoins && cast.allCoins.length > 0) {
+        for (const coin of cast.allCoins) {
+          if (coinTotals[coin.coin].div > 0) {
+            coin.tip += coinTotals[coin.coin].div
+          }
+        }
+      }
+    }
+  
+    // console.log(tipCasts)
+  
+    for (const token of tokenData) {
+      if (token.set) {
+        if (coinTotals[token.token].mod > 0) {
+          for (let i = 0; i < coinTotals[token.token].mod; i++) {
+            const coinIndex = tipCasts[i].allCoins.findIndex(currentCoin => currentCoin.coin == token.token)
+            if (coinIndex !== -1 && tipCasts[i].allCoins[coinIndex].tip) {
+              tipCasts[i].allCoins[coinIndex].tip += 1
+            } else if (coinIndex !== -1) {
+              tipCasts[i].allCoins[coinIndex].tip = 1
+              tipCasts[i].allCoins[coinIndex].coin = token.token
+            } else {
+              tipCasts[i].allCoins.push({coin: token.token, tip: 1})
+            }              
+          }
+        }
+      }
+    }
+  
+    // console.log(tipCasts)
+  
+    for (const cast of tipCasts) {
+      if (cast.allCoins && cast.allCoins.length > 0) {
+        for (const coin of cast.allCoins) {
+          let coinText = ''
+          if (coin.coin == '$TN100x' && coin.tip > 0) {
+            coinText = `🍖x${coin.tip} \n`
+            cast.text += coinText
+          } else if (coin.tip > 0) {
+            coinText = `${coin.tip} ${coin.coin} \n`
+            cast.text += coinText
+          }
+        }
+        if (cast.text.length > 0) {
+          cast.text += 'tipped via /impact'
+        }
+      }
+    }
+  
+    console.log(coinTotals)
+  
+    // console.log(tipCasts)
+  
+    let cleanTips = tipCasts.map(({ castWeight, ...rest }) => rest)
+  
+    // console.log(cleanTips)
+  
+    let finalTips = cleanTips.filter(cast => cast.text.length > 0)
+  
+    console.log(finalTips)
+  
+    return { castData: finalTips, coinTotals: coinTotals }
+  }
+}

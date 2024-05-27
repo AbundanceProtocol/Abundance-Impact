@@ -6,16 +6,18 @@ import useMatchBreakpoints from '../hooks/useMatchBreakpoints'
 import useStore from '../utils/store'
 import axios from 'axios';
 import { FaSearch, FaLock, FaRegStar, FaRegClock } from "react-icons/fa"
-import { AiOutlineLoading3Quarters as Loading } from "react-icons/ai";
-import mql from '@microlink/mql';
+// import { AiOutlineLoading3Quarters as Loading } from "react-icons/ai";
+// import mql from '@microlink/mql';
 import { useRouter } from 'next/router';
 import Cast from '../components/Cast'
-import { formatNum, getTimeRange, checkEmbedType, populateCast, filterObjects } from '../utils/utils';
+import { formatNum, getTimeRange, checkEmbedType, populateCast, filterObjects, processTips } from '../utils/utils';
 import { IoShuffleOutline as Shuffle, IoPeople, IoPeopleOutline } from "react-icons/io5";
 import { BsClock } from "react-icons/bs";
 import { GoTag } from "react-icons/go";
 import { AiOutlineBars } from "react-icons/ai";
 import Spinner from '../components/Spinner';
+import { Degen } from './assets';
+import { GiMeat, GiTwoCoins } from "react-icons/gi";
 
 export default function Home() {
   const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
@@ -33,7 +35,6 @@ export default function Home() {
   const [feedMax, setFeedMax ] = useState('620px')
   const initialQuery = {shuffle: true, time: '3days', tags: [], channels: [], curators: []}
   const [userQuery, setUserQuery] = useState(initialQuery)
-  // const [oldQuery, setOldQuery] = useState(null)
   const [showPopup, setShowPopup] = useState({open: false, url: null})
   const router = useRouter()
   const queryOptions = {
@@ -95,8 +96,8 @@ export default function Home() {
   const [isLogged, setIsLogged] = useState(false)
   const [success, setSuccess] = useState(false)
   const [textboxRows, setTextboxRows] = useState(1)
-  const [userAllowance, setUserAllowance] = useState(null)
-  const [tipValue, setTipValue] = useState(null)
+  const tokenInfo = [{token: '$DEGEN', set: true}]
+  const [tokenData, setTokenData] = useState(tokenInfo)
   const [isSelected, setIsSelected] = useState('none')
   const [feedRouterScheduled, setFeedRouterScheduled] = useState(false);
   const userTipPercent = useStore(state => state.userTipPercent);
@@ -105,12 +106,13 @@ export default function Home() {
   const [curators, setCurators] = useState([])
   const [selectedCurators, setSelectedCurators] = useState([])
   const [selectedChannels, setSelectedChannels] = useState([])
-  const [tipDistribution, setTipDistribution] = useState({curators: [], creators: [], totalTip: null, totalPoints: null})
-  const [totalTip, setTotalTip] = useState(0)
   const [modal, setModal] = useState({on: false, success: false, text: ''})
   const [initValue, setInitValue] = useState(50)
   const [initHour, setInitHour] = useState('Hr')
   const [initMinute, setInitMinute] = useState('0')
+  const [tokensSelected, setTokensSelected] = useState(['$DEGEN'])
+  const availableTokens = ['$DEGEN', '$TN100x']
+  const [noTip, setNoTip] = useState(true)
 
   function btnText(type) {
     if (type == 'tags' && (userQuery[type] == 'all' || userQuery[type].length == 0)) {
@@ -139,7 +141,7 @@ export default function Home() {
           value: i.toString().padStart(2, '0'),
           label: i.toString().padStart(2, '0'),
       })),
-  ];
+    ];
 
     // Generate options for minutes (00, 30)
     const minutesOptions = [
@@ -166,13 +168,8 @@ export default function Home() {
       }
       const schedTime = `${minutes} ${hour} * * *`;
       const { shuffle, time, tags, channels, curators } = userQuery
-      // const timeRange = getTimeRange(time)
-      // getUserSearch(timeRange, tags, channels, curators, null, shuffle)
       console.log(schedTime)
       async function postSchedule(shuffle, time, tags, channels, curators, schedTime, fid, uuid, percent) {
-        // const fid = await store.fid
-        // const uuid = await store.signer_uuid
-        // const percent = initValue
 
         try {
           setLoading(true)
@@ -249,6 +246,49 @@ export default function Home() {
     }));
   };
 
+  const handleToken = async (selection) => {
+    console.log(userTipPercent)
+    if (selection === 'All tokens') {
+      availableTokens.forEach((tokenSymbol) => {
+        console.log(tokenSymbol)
+        setTokenData((prevTokenData) => {
+          const tokenIndex = prevTokenData.findIndex(token => token.token == tokenSymbol);
+
+          if (tokenIndex !== -1) {
+            const updatedTokenData = [...prevTokenData];
+            updatedTokenData[tokenIndex].set = true
+            console.log(updatedTokenData[tokenIndex])
+            return updatedTokenData
+          } else {
+            const newToken = {token: tokenSymbol, set: true}
+            return [...prevTokenData, newToken];
+          }
+        })
+      })
+    } else {
+      setTokenData((prevTokenData) => {
+        const updatedTokenData = [...prevTokenData];
+        updatedTokenData.forEach((token) => {
+          if (token.token == selection) {
+            token.set = true
+          } else {
+            token.set = false
+          }
+        })
+        return updatedTokenData
+      })
+    }
+
+    console.log(selection)
+    if (selection === 'All tokens') {
+      setTokensSelected(availableTokens);
+    } else {
+      setTokensSelected([selection])
+    }
+    console.log(tokensSelected)
+  }
+
+
   const handleSelect = async (type, selection) => {
     console.log(type)
     if (type == 'shuffle') {
@@ -322,19 +362,35 @@ export default function Home() {
   }
 
   useEffect(() => {
-    // console.log(userFeed, totalTip)
+    setTokenData((prevTokenData) => {
+      let updatedTokenData = [...prevTokenData];
 
-    determineDistribution(userFeed, totalTip)
+      updatedTokenData.forEach((token) => {
+        if (token.allowance) {
+          return token.totalTip = Math.round((token.allowance * userTipPercent) / 100)
+        }
+      })
+      return updatedTokenData
+    })
+    console.log(tokenData)
 
-  }, [userFeed])
+  }, [userTipPercent])
 
   useEffect(() => {
-    // console.log(userFeed, totalTip)
-    if (store.fid) {
-      determineDistribution(userFeed, totalTip)
+    for (const token of tokenData) {
+      if (token.set) {
+        if (token.token == '$TN100x' && token.totalTip >= 10) {
+          setNoTip(false)
+          return
+        } else if (token.totalTip > 0) {
+          setNoTip(false)
+          return
+        }
+      }
     }
+    setNoTip(true)
+  }, [tokenData])
 
-  }, [totalTip])
 
   const getName = (tag, value) => {
     const categoryOptions = queryOptions[qType];
@@ -415,10 +471,60 @@ export default function Home() {
     setShowPopup(newPopup)
   }
 
+  async function getAllowance(token, fid) {
+    let getToken = 'degen'
+    if (token == '$DEGEN') {
+      getToken = 'degen'
+    } else if (token == '$TN100x') {
+      getToken = 'ham'
+    }
+
+    try {
+      const responseTotal = await axios.get(`/api/${getToken}/getUserAllowance`, {
+        params: {
+          fid: fid,
+        }
+      })
+      let remaningAllowance = 0
+      if (responseTotal && responseTotal?.data) {
+        remaningAllowance = responseTotal.data.remaining
+        return remaningAllowance
+      } else {
+        return 0
+      }
+    } catch (error) {
+      console.error('Error creating post:', error);
+      return 0
+    }
+  }
+
+  async function updateAllowances(tokens, fid) {
+    let updatedTokenData = [...tokenData]
+    for (const token of tokens) {
+      let allowance = await getAllowance(token, fid)
+      const tokenIndex = updatedTokenData.findIndex(currentToken => currentToken.token == token)
+      if (tokenIndex !== -1) {
+        if (!updatedTokenData[tokenIndex].set) {
+          updatedTokenData[tokenIndex].set = false
+        }
+        updatedTokenData[tokenIndex].allowance = allowance
+        updatedTokenData[tokenIndex].totalTip = Math.round(allowance * userTipPercent / 100)
+      } else {
+        const newToken = {
+          token: token,
+          set: false,
+          allowance: allowance,
+          totalTip: Math.round(allowance * userTipPercent / 100)
+        }
+        updatedTokenData.push(newToken)
+      }
+      setTokenData(updatedTokenData)
+    }
+  }
+
   useEffect(() => {
-    setIsLogged(store.isAuth)
     if (store.isAuth) {
-      getUserAllowance(store.fid)
+      updateAllowances(availableTokens, store.fid)
     }
   }, [isLogged, store.isAuth])
 
@@ -446,103 +552,6 @@ export default function Home() {
     getUserSearch(timeRange, tags, channels, curators, null, shuffle)
   }
 
-
-  async function getUserAllowance(fid) {
-    if (isLogged && !userAllowance && fid) {
-      let remaningAllowance = 0
-      try {
-        const responseTotal = await axios.get('/api/degen/getUserAllowance', {
-          params: {
-            fid: fid,
-          }
-        })
-        if (responseTotal?.data) {
-          remaningAllowance = await responseTotal.data.remaining
-        }
-        console.log(remaningAllowance)
-        setTotalTip(remaningAllowance * userTipPercent / 100)
-        if (!isNaN(remaningAllowance)) {
-          setUserAllowance(remaningAllowance)
-          setTipValue(remaningAllowance)
-        } else {
-          setUserAllowance(0)
-        }
-      } catch (error) {
-        console.error('Error creating post:', error);
-        setUserAllowance(0)
-      }
-    }
-  }
-
-
-  function determineDistribution(ulfilteredCasts, tip) {
-  
-  let casts = filterObjects(ulfilteredCasts, store.fid);
-  
-  console.log(casts);
-
-    const totalBalanceImpact = casts.reduce((total, obj) => {
-      return total + obj.impact_balance - obj.quality_balance;
-    }, 0);
-    console.log(totalBalanceImpact)
-    let newDistribution = []
-    let newCurators = []
-    if (casts && tip) {
-      casts.forEach(cast => {
-        let ratio = 1
-        if (cast.impact_points && cast.impact_points.length > 0) {
-          ratio =  0.92
-        }
-        let castTip = Math.floor((cast.impact_balance  - cast.quality_balance) / totalBalanceImpact * ratio * tip)
-        // console.log(castTip)
-        let castDistribution = null
-        castDistribution = {
-          fid: cast.author.fid,
-          cast: cast.hash,
-          tip: castTip,
-          coin: '$degen'
-        }
-        newDistribution.push(castDistribution)
-        const curators = cast.impact_points
-        // console.log(curators)
-        curators.forEach(curator => {
-          // console.log(newCurators)
-          let points = curator.impact_points
-          // console.log(curator.impact_points)
-          let curatorTip = Math.floor(curator.impact_points / totalBalanceImpact * 0.08 * tip)
-          let curatorDistribution = null
-          curatorDistribution = {
-            fid: curator.curator_fid,
-            cast: 'temp',
-            points: points,
-            // tip: curatorTip,
-            coin: '$degen'
-          }
-          newCurators.push(curatorDistribution)
-        })
-      })
-
-
-      const tempCasts = newCurators.filter(obj => obj.cast === 'temp');
-
-      tempCasts.sort((a, b) => a.fid - b.fid);
-      // console.log(tempCasts)
-  
-      // Combine objects with the same fid by adding up the tip
-      const combinedCasts = tempCasts.reduce((acc, curr) => {
-        const existingCast = acc.find(obj => obj.fid === curr.fid);
-        if (existingCast) {
-          existingCast.points += curr.points;
-        } else {
-          acc.push(curr);
-        }
-        return acc;
-      }, []);
-  
-      setTipDistribution({curators: combinedCasts, creators: newDistribution, totalPoints: totalBalanceImpact, totalTip: Math.round(tip)})
-    }
-
-  }
 
   async function getUserSearch(time, tags, channel, curator, text, shuffle) {
     const fid = await store.fid
@@ -774,22 +783,13 @@ export default function Home() {
 
   const HorizontalScale = () => {
     const [value, setValue] = useState(initValue);
-    const [allowance, setAllowance] = useState(() => {
-      return userAllowance;
-    });
-    useEffect(() => {
-      setAllowance(userAllowance);
-    }, [userAllowance]);
   
     const handleChange = (event) => {
       setValue(parseInt(event.target.value));
     };
-    
-    const tip = Math.round(allowance * value / 100);
 
     const handleMouseLeave = () => {
       store.setUserTipPercent(value);
-      setTotalTip(tip)
       setInitValue(value)
     };
   
@@ -804,10 +804,20 @@ export default function Home() {
           onChange={handleChange}
           style={{ width: '100%' }}
         />
-
-        <div className='flex-col' style={{ textAlign: 'center', color: '#def', width: '80px', gap: '0.25rem' }}>
-          <div style={{ textAlign: 'center', color: '#def', fontSize: '18px', fontWeight: '700' }}>{formatNum(tip)}</div>
-          <div style={{ textAlign: 'center', color: '#def', fontSize: '12px' }}>({value}%)</div>
+        <div className='flex-col' style={{gap: '0.45rem'}}>
+          <div className='flex-row' style={{flexWrap: 'wrap', justifyContent: 'center', gap: '0.35rem', width: '150px'}}>
+          {(tokenData && tokenData.length > 0) && tokenData.map((token, index) => {
+            return ((token.allowance > 0) && (<div key={index} className='flex-row' style={{border: token.set ? '1px solid #abc' : '1px solid #aaa', borderRadius: '6px', padding: '2px 5px', color: token.set ? '#9df' : '#ccc', gap: '0.35rem', alignItems: 'center', cursor: 'pointer', backgroundColor: token.set ? '#246' : 'transparent'}} onClick={() => {handleToken(token.token)}}>
+              <div style={{textAlign: 'center', color: token.set ? '#9df' : '#ccc', fontSize: '15px', fontWeight: '700'}}>
+                {formatNum(Math.round(token.allowance * value / 100))}
+              </div>
+              {(token.token == '$DEGEN') ? (<Degen />) : (token.token == '$TN100x') ? (<GiMeat style={{transform: 'scaleX(-1)'}} />) : (<GiTwoCoins />)}
+            </div>))
+          })}
+          </div>
+          <div className='flex-row' style={{gap: '0.5rem', alignItems: 'center', justifyContent: 'center'}}>
+            <div style={{ textAlign: 'center', color: '#def', fontSize: '12px' }}>({value}%)</div><div style={{border: '1px solid #abc', fontSize: '12px', color: (tokensSelected.length == 0 || tokensSelected.length == 2) ? '#9df' : '#eee', padding: '1px 3px', borderRadius: '5px', backgroundColor: (tokensSelected.length == 0 || tokensSelected.length == 2) ? '#246' : 'transparent', cursor: 'pointer'}} onClick={() => {handleToken('All tokens')}}>SELECT ALL</div>
+          </div>
         </div>
       </div>
     );
@@ -1000,88 +1010,15 @@ export default function Home() {
 
   async function postMultiTip() {
 
-    console.log(tipDistribution)
+    const { castData, coinTotals } = await processTips(userFeed, store.fid, tokenData)
 
-    let fidSet = []
-
-    const curatorList = tipDistribution.curators
-    if (curatorList && curatorList.length > 0) {
-      curatorList.forEach(curator => {
-        fidSet.push(curator.fid)
-      })
-    }
-    // console.log(fidSet)
-    let returnedCurators = []
-    if (fidSet.length > 0) {
-
-      async function getCuratorsByFid(fidSet) {
-        let userFids = fidSet.join(',')
-        try {
-          const response = await axios.get('/api/curation/getCuratorsByFid', {
-            params: {
-              name: userFids,
-            }
-          })
-          if (response) {
-            const curators = response.data.users
-            // console.log(curators)
-            // setCurators(curators)
-            return curators
-          } else {
-            return null
-          }
-          // console.log(channels)
-        } catch (error) {
-          console.error('Error submitting data:', error)
-          return null
-        }
-
-      }
-
-      returnedCurators = await getCuratorsByFid(fidSet)
-    }
-
-   
-    // Map to create a lookup table for faster access
-    const lookupTable = returnedCurators.reduce((acc, obj) => {
-        acc[obj.fid] = obj;
-        return acc;
-    }, {});
-  
-    const creatorData = tipDistribution.creators
-    // Construct the third array
-    const curatorData = curatorList.map(obj => {
-      const matchingObj = lookupTable[obj.fid];
-      if (matchingObj) {
-        return {
-          fid: obj.fid,
-          cast: matchingObj.set_cast_hash,
-          coin: obj.coin,
-          tip: Math.floor(obj.points / tipDistribution.totalPoints * tipDistribution.totalTip * 0.08)
-        };
-      } else {
-        return null;
-      }
-    }).filter(obj => obj !== null);
-    
-    console.log(curatorData);
-
-    const combinedLists = [...new Set([...creatorData, ...curatorData])];
-    console.log(combinedLists)
-
-    combinedLists.forEach(cast => {
-      cast.text = `${cast.tip} ${cast.coin} via /impact`
-    })
-    console.log(combinedLists)
-
-
-    if (combinedLists && combinedLists.length > 0 && store.signer_uuid) {
+    if (castData && castData.length > 0 && store.signer_uuid) {
       setLoading(true)
       try {
         const response = await axios.post('/api/curation/postMultipleTips', {       
           signer: store.signer_uuid,
           fid: store.fid,
-          data: combinedLists
+          data: castData
         })
         if (response.status !== 200) {
           setLoading(false)
@@ -1092,11 +1029,20 @@ export default function Home() {
           }, 2500);
           // need to revert recasts counter
         } else {
+          let updatedTokenData = [...tokenData]
+          for (const token of updatedTokenData) {
+            if (token.set) {
+              if (token.token == '$TN100x') {
+                token.allowance = token.allowance - (coinTotals[token.token].totalTip * 10)
+              } else {
+                token.allowance = token.allowance - coinTotals[token.token].totalTip
+              }
+              token.totalTip = Math.round(token.allowance * userTipPercent / 100)
+            }
+          }
+          setTokenData(updatedTokenData)
           setLoading(false)
           console.log(response)
-          if (response?.data?.tip) {
-            setUserAllowance(userAllowance - response.data.tip)
-          }
           setModal({on: true, success: true, text: response.data.message});
           setTimeout(() => {
             setModal({on: false, success: false, text: ''});
@@ -1108,6 +1054,7 @@ export default function Home() {
       }
     }
   }
+
 
 
   return (
@@ -1135,15 +1082,15 @@ export default function Home() {
           {isLogged ? (
             <div className="flex-row">
               {(
-              <div className={`flex-row ${(loading || totalTip == 0) ? 'follow-locked' : 'follow-select'} ${modal.success ? 'flash-success' : ''}`} style={{position: 'relative', height: 'auto', width: '100px', marginRight: '0', cursor: (loading || totalTip == 0) ? 'default' : 'pointer'}}>
-                {(loading || totalTip == 0) ? (
+              <div className={`flex-row ${(loading || noTip) ? 'follow-locked' : 'follow-select'} ${modal.success ? 'flash-success' : ''}`} style={{position: 'relative', height: 'auto', width: '100px', marginRight: '0', cursor: (loading || noTip) ? 'default' : 'pointer'}}>
+                {(loading || noTip) ? (
                   <div className='flex-row' style={{height: '100%', alignItems: 'center'}}>
                     <Spinner size={21} color={'#999'} />
                   </div>
                 ) : (
                   <div className='cast-btn'
                   //  onClick={routeCast} 
-                  onClick={() => { if (totalTip !== 0) {
+                  onClick={() => { if (!noTip) {
                     postMultiTip()
                   }}}
                   name='follow' style={{color: loading ? 'transparent' : '#fff', height: 'auto', width: '100px'}}>TIP ALL</div>
