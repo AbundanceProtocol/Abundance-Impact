@@ -169,13 +169,20 @@ export default function Home() {
       const schedTime = `${minutes} ${hour} * * *`;
       const { shuffle, time, tags, channels, curators } = userQuery
       console.log(schedTime)
-      async function postSchedule(shuffle, time, tags, channels, curators, schedTime, fid, uuid, percent) {
-
+      let currencies = []
+      console.log(tokenData)
+      for (const token of tokenData) {
+        if (token.set) {
+          currencies.push(token.token)
+        }
+      }
+      async function postSchedule(shuffle, time, tags, channels, curators, schedTime, fid, uuid, percent, currencies) {
+        console.log(currencies)
         try {
           setLoading(true)
           setInitHour('Hr')
           setInitMinute('0')
-          const response = await axios.post('/api/curation/postTipSchedule', { fid, uuid, shuffle, time, tags, channels, curators, percent, schedTime })
+          const response = await axios.post('/api/curation/postTipSchedule', { fid, uuid, shuffle, time, tags, channels, curators, percent, schedTime, currencies })
           let schedData = []
 
           if (response && response.status !== 200) {
@@ -201,7 +208,7 @@ export default function Home() {
         }
       }
     
-      const schedData = await postSchedule(shuffle, time, tags, channels, curators, schedTime, fid, uuid, percent)
+      const schedData = await postSchedule(shuffle, time, tags, channels, curators, schedTime, fid, uuid, percent, currencies)
     };
 
     return (
