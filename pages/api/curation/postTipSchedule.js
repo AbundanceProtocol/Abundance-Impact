@@ -8,7 +8,7 @@ const secretKey = process.env.SECRET_KEY
 
 export default async function handler(req, res) {
   const { fid, uuid, shuffle, time, tags, channels, curators, percent, schedTime, currencies } = req.body;
-  console.log(fid, shuffle, time, tags, channels, curators, percent, schedTime)
+  console.log(fid, shuffle, time, tags, channels, curators, percent, schedTime, currencies)
   if (req.method !== 'POST' || !fid || !uuid || !percent) {
     res.status(405).json({ error: 'Method not allowed' });
   } else {
