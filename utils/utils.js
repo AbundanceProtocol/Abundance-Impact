@@ -294,7 +294,7 @@ export function filterObjects(castArray, filterFid) {
 export async function processTips(userFeed, userFid, tokenData) {
 
   if (!userFeed || !userFid || !tokenData) {
-    
+
     return { castData: null, coinTotals: null }
 
   } else {
@@ -471,4 +471,17 @@ export async function processTips(userFeed, userFid, tokenData) {
   
     return { castData: finalTips, coinTotals: coinTotals }
   }
+}
+
+
+export function generateRandomString(length) {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  const charactersLength = characters.length;
+  
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  
+  return result;
 }

@@ -6,7 +6,6 @@ export default async function handler(req, res) {
   } else {
     console.log(fid)
     try {
-      // const remainingBase = "https://www.degentip.me/";
       const remainingUrl = `https://farcaster.dep.dev/lp/tips/${fid}`;
       const remainingBalance = await fetch(remainingUrl, {
         headers: {

@@ -5,29 +5,28 @@ import Cast from '../../../models/Cast';
 import Impact from '../../../models/Impact';
 import User from '../../../models/User';
 import Tip from '../../../models/Tip';
-import { getTimeRange, desensitizeString } from '../../../utils/utils';
+import { getTimeRange, processTips, populateCast } from '../../../utils/utils';
 
 const secretKey = process.env.SECRET_KEY
 const apiKey = process.env.NEYNAR_API_KEY
 
 export default async function handler(req, res) {
-  const { fid, encryptedUuid } = req.query
+  const { fid, code } = req.query
 
-  if (req.method !== 'GET' || !fid || !encryptedUuid) {
+  if (req.method !== 'GET' || !fid || !code) {
     res.status(405).json({ error: 'Method Not Allowed', message: 'Failed to provide required data' });
   } else {
 
-    console.log('20', fid, encryptedUuid)
+    console.log('20', fid, code)
 
-    async function getSchedule(uuid) {
+    async function getSchedule(code) {
       try {
         await connectToDatabase();
-        const desenitizedUuid = desensitizeString(uuid)
-        console.log('26', desenitizedUuid, uuid)
-        const schedule = await ScheduleTip.findOne({ $or: [{ uuid: uuid }, { uuid: desenitizedUuid }] }).exec();
+
+        const schedule = await ScheduleTip.findOne({ code: code }).exec();
         console.log(schedule)
         if (schedule) {
-          const decryptedUuid = decryptPassword(desenitizedUuid, secretKey);
+          const decryptedUuid = decryptPassword(schedule.uuid, secretKey);
           return {
             shuffle: schedule.search_shuffle,
             timeRange: schedule.search_time,
@@ -35,6 +34,7 @@ export default async function handler(req, res) {
             channels: schedule.search_channels,
             curators: schedule.search_curators,
             percent: schedule.percent_tip,
+            currencies: schedule.currencies,
             decryptedUuid: decryptedUuid
           }
         } else {
@@ -45,17 +45,27 @@ export default async function handler(req, res) {
             channels: null,
             curators: null,
             percent: null,
+            currencies: null,
             decryptedUuid: null
           }
         }
       } catch (error) {
         console.error('Error:', error);
-        return null;
+        return {
+          shuffle: null,
+          timeRange: null,
+          tags: null,
+          channels: null,
+          curators: null,
+          percent: null,
+          currencies: null,
+          decryptedUuid: null
+        }
       }
     }
 
-    const { shuffle, timeRange, tags, channels, curators, percent, decryptedUuid } = await getSchedule(encryptedUuid)
-    console.log('47', shuffle, timeRange, tags, channels, curators, percent)
+    const { shuffle, timeRange, tags, channels, curators, percent, currencies, decryptedUuid } = await getSchedule(code)
+    console.log('47', shuffle, timeRange, tags, channels, curators, percent, currencies)
 
     if (!percent || !decryptedUuid) {
       res.status(500).json({ error: 'Internal Server Error' });
@@ -66,7 +76,7 @@ export default async function handler(req, res) {
         time = getTimeRange(timeRange)
       }
 
-      async function getAllowance(fid) {
+      async function getDegenAllowance(fid) {
         try {
           const remainingBase = "https://www.degentip.me/";
           const remainingUrl = `${remainingBase}api/get_allowance?fid=${fid}`;
@@ -76,24 +86,60 @@ export default async function handler(req, res) {
             },
           });
           const getRemaining = await remainingBalance.json()
-          let remaining
+          let remaining = 0
     
           if (getRemaining) {
             remaining = getRemaining.allowance.remaining_allowance
-            return remaining
-          } else {
-            return null
           }
+          return remaining
         } catch (error) {
           console.error('Error handling GET request:', error);
-          return null
+          return 0
         }
       }
-    
-      const tipAllowance = await getAllowance(fid)
-      console.log('83', tipAllowance)
 
-      if (!tipAllowance) {
+      async function getHamAllowance(fid) {
+        try {
+          const remainingUrl = `https://farcaster.dep.dev/lp/tips/${fid}`;
+          const remainingBalance = await fetch(remainingUrl, {
+            headers: {
+              accept: "application/json",
+            },
+          });
+          const getRemaining = await remainingBalance.json()
+          let remaining = 0
+          let total = 0
+    
+          if (getRemaining) {
+            console.log(getRemaining)
+            remaining = Number(getRemaining.allowance) - Number(getRemaining.used)
+            total = Number(getRemaining.allowance)
+          }
+          return remaining
+        } catch (error) {
+          console.error('Error handling GET request:', error);
+          return 0
+        }
+      }
+
+      let allowances = []
+      for (const coin of currencies) {
+        if (coin == '$TN100x') {
+          const allowance = await getHamAllowance(fid)
+          const tip = Math.floor(allowance * percent / 100)
+          const allowanceData = {token: coin, set: true, allowance: tip, totalTip: tip}
+          allowances.push(allowanceData)
+        } else if (coin == '$DEGEN') {
+          const allowance = await getDegenAllowance(fid)
+          const tip = Math.round(allowance * percent / 100)
+          const allowanceData = {token: coin, set: true, allowance: tip, totalTip: tip}
+          allowances.push(allowanceData)
+        }
+      }
+
+      console.log('141', allowances)
+
+      if (allowances.length == 0) {
         res.status(500).json({ error: 'Internal Server Error' });
       } else {
 
@@ -230,258 +276,100 @@ export default async function handler(req, res) {
             }
           }
           
-          const { casts, totalCount } = await fetchCasts(query, shuffle === 'true');
-          console.log('223', casts, totalCount)
+          const { casts, totalCount } = await fetchCasts(query, shuffle === true);
+          // console.log('223', casts, totalCount)
 
           return { casts, totalCount }
         }  
       
         const { casts, totalCount } = await getUserSearch(time, tags, channels, curators, shuffle)
       
-      
-        async function determineDistribution(ulfilteredCasts, tip, fid) {
-          function filterObjects(castArray, filterFid) {
-            console.log('234', castArray, filterFid)
+        console.log(casts)
+        // console.log(casts[0].impact_points)
 
-            return castArray.filter(obj => {
-              if (obj.author_fid != filterFid) {
-                obj.impact_points = obj.impact_points.filter(point => point.curator_fid != filterFid);
-                return true; 
-              }
-              return false;
-            });
+        let filteredCasts = await casts.reduce((acc, current) => {
+          const existingItem = acc.find(item => item._id === current._id);
+          if (!existingItem) {
+            acc.push(current);
           }
-        
-          let casts = filterObjects(ulfilteredCasts, fid);
-          // console.log('244', casts)
+          return acc;
+        }, [])
 
-          const totalBalanceImpact = casts.reduce((total, obj) => {
-            return total + obj.impact_total - obj.quality_balance;
-          }, 0);
-          console.log('251', totalBalanceImpact)
+        let sortedCasts = filteredCasts.sort((a, b) => b.impact_total - a.impact_total);
 
-          let newDistribution = []
-          let newCurators = []
-          if (casts && tip) {
-            casts.forEach(cast => {
-              console.log('257', cast)
+        let displayedCasts = await populateCast(sortedCasts)
 
-              let ratio = 1
-              if (cast.impact_points && cast.impact_points.length > 0) {
-                ratio =  0.92
+        const { castData, coinTotals } = await processTips(displayedCasts, fid, allowances)
+
+        async function sendRequests(data, signer, apiKey) {
+          const base = "https://api.neynar.com/";
+          const url = `${base}v2/farcaster/cast`;
+          let tipCounter = 0;
+          for (const cast of data) {
+            const castText = cast.text;
+            const parentUrl = cast.castHash;
+            let body = {
+              signer_uuid: signer,
+              text: castText,
+            };
+    
+            if (parentUrl) {
+              body.parent = parentUrl;
+            }
+    
+            try {
+              const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'api_key': apiKey,
+                },
+                body: JSON.stringify(body),
+              });
+    
+              if (!response.ok) {
+                console.error(`Failed to send request for ${castText}`);
+              } else {
+                console.log(`Request sent successfully for ${castText}`);
               }
-              let castTip = Math.floor((cast.impact_total  - cast.quality_balance) / totalBalanceImpact * ratio * tip)
-              let castDistribution = null
-              castDistribution = {
-                fid: cast.author_fid,
-                cast: cast.cast_hash,
-                tip: castTip,
-                coin: '$degen'
-              }
-
-              newDistribution.push(castDistribution)
-              const curators = cast.impact_points
-              curators.forEach(curator => {
-                let points = curator.impact_points
-                let curatorTip = Math.floor(curator.impact_points / totalBalanceImpact * 0.08 * tip)
-                let curatorDistribution = null
-                curatorDistribution = {
-                  fid: curator.curator_fid,
-                  cast: 'temp',
-                  points: points,
-                  // tip: curatorTip,
-                  coin: '$degen'
+              let tips = []
+    
+              for (const coin of cast.allCoins) {
+                let amount = 0
+                if (coin.coin == '$TN100x' && coin.tip > 0) {
+                  amount = coin.tip * 10
+                } else if (coin.tip > 0) {
+                  amount = coin.tip
                 }
-                newCurators.push(curatorDistribution)
-              })
-            })
-            console.log('289', newCurators)
-            let tempCasts
-            if (newCurators) {
-              tempCasts = newCurators.filter(obj => obj.cast === 'temp');
-              console.log('292', tempCasts)
-              tempCasts.sort((a, b) => a.fid - b.fid);
-            }
-            let combinedCasts = []
-            if (tempCasts && tempCasts.length > 0) {
-              // Combine objects with the same fid by adding up the tip
-              combinedCasts = tempCasts.reduce((acc, curr) => {
-                const existingCast = acc.find(obj => obj.fid === curr.fid);
-                if (existingCast) {
-                  existingCast.points += curr.points;
-                } else {
-                  acc.push(curr);
-                }
-                return acc;
-              }, []);
-            }
-            console.log('311', combinedCasts)
-
-        
-            let tipDistribution = {curators: combinedCasts, creators: newDistribution, totalPoints: totalBalanceImpact, totalTip: Math.round(tip)}
-            console.log('315', tipDistribution)
-
-            let fidSet = []
-        
-            const curatorList = tipDistribution.curators
-            if (curatorList && curatorList.length > 0) {
-              curatorList.forEach(curator => {
-                fidSet.push(curator.fid)
-              })
-            }
-            console.log('324', curatorList)
-
-      
-            let returnedCurators = []
-            if (fidSet && fidSet.length > 0) {
-        
-              let userFids = fidSet.join(',')
-      
-              async function getCurators(curators) {
-                try {
-                  await connectToDatabase();
-                  const users = await User.find({ fid: { $in: curators } }).select('fid set_cast_hash').exec();
-                  if (users) {
-                    return users;
-                  } else {
-                    return null
-                  }
-                } catch (error) {
-                  console.error('Error:', error);
-                  return null;
+                if (coin.tip > 0) {
+                  let tip = {currency: coin.coin, amount: amount}
+                  tips.push(tip)
                 }
               }
-        
-              returnedCurators = await getCurators(userFids)
+              
+              await Tip.create({
+                receiver_fid: cast.fid,
+                tipper_fid: fid,
+                cast_hash: cast.castHash,
+                tip: tips,
+              });
+              // tipCounter += Number(cast.tip)
+    
+            } catch (error) {
+              console.error(`Error occurred while sending request for ${castText}:`, error);
             }
-            console.log('352', returnedCurators)
-
-            const lookupTable = returnedCurators.reduce((acc, obj) => {
-              acc[obj.fid] = obj;
-              return acc;
-            }, {});
-      
-            const creatorData = tipDistribution.creators
-
-            let curatorData = []
-            if (curatorList && curatorList.legnth > 0 && lookupTable) {
-              curatorData = curatorList.map(obj => {
-                const matchingObj = lookupTable[obj.fid];
-                if (matchingObj) {
-                  return {
-                    fid: obj.fid,
-                    cast: matchingObj.set_cast_hash,
-                    coin: obj.coin,
-                    tip: Math.floor(obj.points / tipDistribution.totalPoints * tipDistribution.totalTip * 0.08)
-                  };
-                } else {
-                  return null;
-                }
-              }).filter(obj => obj !== null);
-            }
-      
-            let combinedLists = [...new Set([...creatorData, ...curatorData])];
-            console.log('380', combinedLists)
-
-            let countTips = 0
-            combinedLists.forEach(cast => {
-              countTips += Number(cast.tip)
-            })
-
-            if (countTips < tip && combinedLists && combinedLists.length > 0) {
-              let remainingTip = tip - countTips
-              combinedLists[0].tip += Number(remainingTip)
-            }
-
-            combinedLists.forEach(cast => {
-              cast.text = `${cast.tip} ${cast.coin} via /impact`
-            })
-      
-      
-            async function postMultipleTips(signer, fid, data) {
-      
-              if (!signer || !fid || !data || !Array.isArray(data)) {
-                return null
-              }
-            
-              const base = "https://api.neynar.com/";
-              const url = `${base}v2/farcaster/cast`;
-              let tipCounter = 0;
-              for (const cast of data) {
-                const castText = cast.text;
-                const parentUrl = cast.cast;
-                let body = {
-                  signer_uuid: signer,
-                  text: castText,
-                };
-          
-                if (parentUrl) {
-                  body.parent = parentUrl;
-                }
-          
-                try {
-                  if (cast.tip >= 1) {
-                    const response = await fetch(url, {
-                      method: 'POST',
-                      headers: {
-                        'Content-Type': 'application/json',
-                        'api_key': apiKey,
-                      },
-                      body: JSON.stringify(body),
-                    });
-
-                    if (!response.ok) {
-                      console.error(`Failed to send request for ${castText}`);
-                    } else {
-                      console.log(`Request sent successfully for ${castText}`);
-                    }
-      
-                    await Tip.create({
-                      receiver_fid: cast.fid,
-                      tipper_fid: fid,
-                      cast_hash: cast.cast,
-                      tip: [{
-                        currency: cast.coin,
-                        amount: cast.tip
-                      }],
-                    });
-                    tipCounter += Number(cast.tip)
-                  }
-      
-                } catch (error) {
-                  console.error(`Error occurred while sending request for ${castText}:`, error);
-                }
-          
-                await new Promise(resolve => setTimeout(resolve, 500));
-              }
-              return tipCounter
-            }
-
-            console.log('430', fid, combinedLists)
-
-            const confirmCasts = await postMultipleTips(decryptedUuid, fid, combinedLists)
-            console.log('433', confirmCasts)
-
-            if (confirmCasts || confirmCasts == 0) {
-              return true
-            } else {
-              return null
-            }
-          } else {
-            return null
+    
+            await new Promise(resolve => setTimeout(resolve, 500));
           }
+          return tipCounter
         }
-      
-        const tip = Math.floor(tipAllowance * percent / 100)
-
-        console.log('447', casts, tip, fid)
-        const tipped = await determineDistribution(casts, tip, fid)
-        console.log('449', tipped)
-
-        if (!tipped) {
+    
+        try {
+          const remainingTip = await sendRequests(castData, decryptedUuid, apiKey);
+          res.status(200).json({ message: 'All casts tipped successfully', tip: remainingTip });
+        } catch (error) {
+          console.error('Error sending requests:', error);
           res.status(500).json({ error: 'Internal Server Error' });
-        } else {
-          res.status(200).json({ message: 'Task scheduled successfully.' });
         }
       }
     }
