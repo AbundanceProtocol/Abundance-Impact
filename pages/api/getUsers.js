@@ -4,10 +4,13 @@ export default async function handler(req, res) {
   const neyNarApiKey = process.env.NEYNAR_API_KEY
   const redashApiKey = process.env.REDASH_404_API_KEY
   const queryId = 404 // SELECT count(type) FROM links WHERE fid = {{fid}} AND target_fid = {{target}} - check if fid follows target_fid
+  const { fid, name } = req.query;
 
-  if (req.method === 'GET') {
+  if (req.method !== 'GET' || !fid || !name) {
+    res.status(405).json({ error: 'Method Not Allowed' });
+  } else {
+    console.log(fid)
     try {
-      const { fid, name } = req.query;
       const base = "https://api.neynar.com/";
       const url = `${base}v2/farcaster/user/search?q=${name}&viewer_fid=${fid}`;
       const response = await fetch(url, {
@@ -66,7 +69,5 @@ export default async function handler(req, res) {
       console.error('Error handling GET request:', error);
       res.status(500).json({ error: 'Internal Server Error' });
     }
-  } else {
-    res.status(405).json({ error: 'Method Not Allowed' });
   }
 }

@@ -1,10 +1,12 @@
 export default async function handler(req, res) {
   const apiKey = process.env.NEYNAR_API_KEY
+  const { hash, signer } = req.body;
  
-  if (req.method === 'POST') {
+  if (req.method !== 'POST' || !signer || !hash) {
+    res.status(405).json({ error: 'Method Not Allowed' });
+  } else {
     try {
-      const { hash, signer } = req.body;
-      console.log(hash, signer)
+      console.log(hash)
 
       const base = "https://api.neynar.com/";
       const url = `${base}v2/farcaster/reaction`;
@@ -29,7 +31,5 @@ export default async function handler(req, res) {
       console.error('Error handling POST request:', error);
       res.status(500).json({ error: 'Internal Server Error' });
     }
-  } else {
-    res.status(405).json({ error: 'Method Not Allowed' });
   }
 }

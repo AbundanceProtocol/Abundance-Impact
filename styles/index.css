@@ -34,6 +34,14 @@ html, body {
     }
 }
 
+.cast-act {
+    background-color: #123;
+    cursor: pointer;
+}
+
+.cast-act:hover {
+    background-color: #234;
+}
 
 @media only screen and (min-width: 1380px) {
     .top-left {
@@ -231,12 +239,29 @@ html, body {
     align-items: center;
     justify-content: center;
     height: 38px !important;
-    width: 100px !important;
+    width: 130px !important;
     padding: 7px;
     min-width: 80px !important;
     border: 2px solid #770000;
     border-radius: 12px;
     cursor: pointer;
+}
+
+.mini-btn {
+    background-color: #990000 !important;
+    font-weight: 600;
+    color: #eee;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #770000;
+    border-radius: 12px;
+    cursor: pointer;
+}
+
+.mini-btn:hover {
+    background-color: #660000 !important;
+    color: #ccc;
+    border: 2px solid #440000;
 }
 
 .mini-out-btn {
@@ -885,6 +910,15 @@ blockquote {
     justify-content: center;
     background-color: #38b;
     cursor: pointer;
+}
+
+.url-meta {
+    border-radius: 8px;
+    background-color: #eee;
+}
+
+.url-meta:hover {
+    background-color: #f6f6f6;
 }
 
 .follow-select:hover {
@@ -1790,11 +1824,11 @@ blockquote {
 }
 
 .toggle-on {
-    background-color: #ddd425;
+    background-color: #99ddff;
 }
 
 .toggle-on:hover {
-    background-color: #e5e189;
+    background-color: #aaeeff;
 }
 
 .toggle-off {
@@ -1860,7 +1894,7 @@ blockquote {
 }
 
 .input-button {
-    background-color: #ddd425;
+    background-color: #99ddff;
     outline: none;
     width: 100%;
     border: 1px solid #666;
@@ -1890,7 +1924,7 @@ blockquote {
 
 
 .input-button:hover {
-    background-color: #e5e189;
+    background-color: #aaeeff;
 }
 
 .container-title {
@@ -2096,14 +2130,14 @@ blockquote {
 
 .nav-home-button-active {
     display: flex;
-    color: #ddd425;
-    fill: #ddd425;
+    color: #99ddff;
+    fill: #99ddff;
     flex-direction: column;
 }
 
 .nav-home-button-active:hover {
-    color: #e5e189;
-    fill: #e5e189;
+    color: #aaeeff;
+    fill: #aaeeff;
 }
 
 .container {
@@ -2264,14 +2298,14 @@ blockquote {
 
 .active-nav-link {
     background-color: #ddeeff11;
-    color: #ddd425;
+    color: #99ddff;
     display: flex;
     cursor: pointer;
     justify-content: center;
 }
 
 .active-nav-link:hover {
-    color: #e5e189;
+    color: #aaeeff;
 }
 
 .soon-btn {

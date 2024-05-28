@@ -24,7 +24,7 @@ const ScienceIcon = () => {
                 </g>
             </g>
         </g>
-        <path fill="none" stroke="#DDD425" strokeMiterlimit="10" d="M51.177,113.25"/>
+        <path fill="none" stroke="#99ddff" strokeMiterlimit="10" d="M51.177,113.25"/>
         </svg>
         
         

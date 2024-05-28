@@ -1,8 +1,12 @@
 export default async function handler(req, res) {
   const apiKey = process.env.NEYNAR_API_KEY
-  if (req.method === 'GET') {
+  const { fid } = req.query;
+
+  if (req.method !== 'GET' || !fid) {
+    res.status(405).json({ error: 'Method Not Allowed' });
+  } else {
+    console.log(fid)
     try {
-      const { fid } = req.query;
       // console.log(fid)
       // console.log(typeof fid)
       const base = "https://api.neynar.com/";
@@ -20,7 +24,5 @@ export default async function handler(req, res) {
       console.error('Error handling GET request:', error);
       res.status(500).json({ error: 'Internal Server Error' });
     }
-  } else {
-    res.status(405).json({ error: 'Method Not Allowed' });
   }
 }

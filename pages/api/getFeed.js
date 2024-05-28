@@ -1,6 +1,10 @@
 export default async function handler(req, res) {
   const apiKey = process.env.NEYNAR_API_KEY
-  if (req.method === 'GET') {
+  const { fid } = req.query;
+
+  if (req.method !== 'GET' || !fid) {
+    res.status(405).json({ error: 'Method Not Allowed' });
+  } else {
     try {
       const base = "https://api.neynar.com/";
       const url = `${base}v2/farcaster/feed?feed_type=filter&filter_type=global_trending&with_recasts=true&with_replies=false&limit=4`;
@@ -13,11 +17,11 @@ export default async function handler(req, res) {
       const feed = await response.json();
       if (typeof feed !== 'undefined') {
         for (let i = 0; i < feed.casts.length; i++) {
-          if (feed.casts[i].parent_url !== null) {
-            const isChannel = feed.casts[i].parent_url.slice(0,31)
+          if (feed.casts[i].root_parent_url !== null) {
+            const isChannel = feed.casts[i].root_parent_url.slice(0,31)
             if (isChannel == 'https://warpcast.com/~/channel/') {
               const base = "https://api.neynar.com/";
-              const getChannel = feed.casts[i].parent_url.slice(31)
+              const getChannel = feed.casts[i].root_parent_url.slice(31)
               const channelQuery = `${base}v2/farcaster/channel?id=${getChannel}`;
               const channelData = await fetch(channelQuery, {
                 headers: {
@@ -42,7 +46,5 @@ export default async function handler(req, res) {
       console.error('Error handling GET request:', error);
       res.status(500).json({ error: 'Internal Server Error' });
     }
-  } else {
-    res.status(405).json({ error: 'Method Not Allowed' });
   }
 }

@@ -3,7 +3,9 @@ import Cast from '../../../models/Cast';
 
 export default async function handler(req, res) {
   
-  if (req.method === 'GET') {
+  if (req.method !== 'GET') {
+    res.status(405).json({ error: 'Method not allowed' });
+  } else {
 
     async function getCasts() {
       try {
@@ -17,11 +19,16 @@ export default async function handler(req, res) {
       }
     }
 
-    const topCasts = await getCasts()
-
-    res.status(200).json({ casts: topCasts });
-  } else {
-
-    res.status(405).json({ error: 'Method not allowed' });
+    try {
+      const topCasts = await getCasts()
+      if (topCasts) {
+        res.status(200).json({ casts: topCasts });
+      } else {
+        res.status(500).json({ error: 'Internal Server Error' });
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
   }
 }

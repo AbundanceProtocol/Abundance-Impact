@@ -6,16 +6,18 @@ import useMatchBreakpoints from '../hooks/useMatchBreakpoints'
 import useStore from '../utils/store'
 import axios from 'axios';
 import { FaSearch, FaLock, FaRegStar, FaRegClock } from "react-icons/fa"
-import { AiOutlineLoading3Quarters as Loading } from "react-icons/ai";
-import mql from '@microlink/mql';
+// import { AiOutlineLoading3Quarters as Loading } from "react-icons/ai";
+// import mql from '@microlink/mql';
 import { useRouter } from 'next/router';
 import Cast from '../components/Cast'
-import { formatNum, getTimeRange, checkImageUrls } from '../utils/utils';
+import { formatNum, getTimeRange, checkEmbedType, populateCast, filterObjects, processTips } from '../utils/utils';
 import { IoShuffleOutline as Shuffle, IoPeople, IoPeopleOutline } from "react-icons/io5";
 import { BsClock } from "react-icons/bs";
 import { GoTag } from "react-icons/go";
 import { AiOutlineBars } from "react-icons/ai";
 import Spinner from '../components/Spinner';
+import { Degen } from './assets';
+import { GiMeat, GiTwoCoins } from "react-icons/gi";
 
 export default function Home() {
   const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
@@ -33,7 +35,6 @@ export default function Home() {
   const [feedMax, setFeedMax ] = useState('620px')
   const initialQuery = {shuffle: true, time: '3days', tags: [], channels: [], curators: []}
   const [userQuery, setUserQuery] = useState(initialQuery)
-  const [oldQuery, setOldQuery] = useState(null)
   const [showPopup, setShowPopup] = useState({open: false, url: null})
   const router = useRouter()
   const queryOptions = {
@@ -76,6 +77,10 @@ export default function Home() {
         text: '30 days',
         value: '30days'
       },
+      {
+        text: 'All',
+        value: 'all'
+      },
     ]
   }
 
@@ -91,8 +96,8 @@ export default function Home() {
   const [isLogged, setIsLogged] = useState(false)
   const [success, setSuccess] = useState(false)
   const [textboxRows, setTextboxRows] = useState(1)
-  const [userAllowance, setUserAllowance] = useState(null)
-  const [tipValue, setTipValue] = useState(null)
+  const tokenInfo = [{token: '$DEGEN', set: true}]
+  const [tokenData, setTokenData] = useState(tokenInfo)
   const [isSelected, setIsSelected] = useState('none')
   const [feedRouterScheduled, setFeedRouterScheduled] = useState(false);
   const userTipPercent = useStore(state => state.userTipPercent);
@@ -101,9 +106,13 @@ export default function Home() {
   const [curators, setCurators] = useState([])
   const [selectedCurators, setSelectedCurators] = useState([])
   const [selectedChannels, setSelectedChannels] = useState([])
-  const [tipDistribution, setTipDistribution] = useState({curators: [], creators: [], totalTip: null, totalPoints: null})
-  const [totalTip, setTotalTip] = useState(0)
   const [modal, setModal] = useState({on: false, success: false, text: ''})
+  const [initValue, setInitValue] = useState(50)
+  const [initHour, setInitHour] = useState('Hr')
+  const [initMinute, setInitMinute] = useState('0')
+  const [tokensSelected, setTokensSelected] = useState(['$DEGEN'])
+  const availableTokens = ['$DEGEN', '$TN100x']
+  const [noTip, setNoTip] = useState(true)
 
   function btnText(type) {
     if (type == 'tags' && (userQuery[type] == 'all' || userQuery[type].length == 0)) {
@@ -121,12 +130,171 @@ export default function Home() {
     }
   }
 
+  const ScheduleTaskForm = () => {
+    const [hour, setHour] = useState(initHour);
+    const [minute, setMinute] = useState(initMinute);
+
+    // Generate options for hours (0-23)
+    const hoursOptions = [
+      { value: 'Hr', label: 'Hr' },
+      ...Array.from({ length: 24 }, (_, i) => ({
+          value: i.toString().padStart(2, '0'),
+          label: i.toString().padStart(2, '0'),
+      })),
+    ];
+
+    // Generate options for minutes (00, 30)
+    const minutesOptions = [
+      { value: '0', label: 'Min' },
+      { value: '00', label: '00' },
+      { value: '30', label: '30' },
+    ];
+
+    const handleHourChange = (event) => {
+      setHour(event.target.value);
+      setInitHour(event.target.value);
+    };
+
+    const handleMinuteChange = (event) => {
+      setMinute(event.target.value);
+      setInitMinute(event.target.value);
+    };
+
+    const handleSubmit = async (fid, uuid, percent) => {
+      // Schedule the task with the selected hour and minute
+      let minutes = minute
+      if (minute == '0') {
+        minutes = '00'
+      }
+      const schedTime = `${minutes} ${hour} * * *`;
+      const { shuffle, time, tags, channels, curators } = userQuery
+      console.log(schedTime)
+      let currencies = []
+      console.log(tokenData)
+      for (const token of tokenData) {
+        if (token.set) {
+          currencies.push(token.token)
+        }
+      }
+      async function postSchedule(shuffle, time, tags, channels, curators, schedTime, fid, uuid, percent, currencies) {
+        console.log(currencies)
+        try {
+          setLoading(true)
+          setInitHour('Hr')
+          setInitMinute('0')
+          const response = await axios.post('/api/curation/postTipSchedule', { fid, uuid, shuffle, time, tags, channels, curators, percent, schedTime, currencies })
+          let schedData = []
+
+          if (response && response.status !== 200) {
+            setLoading(false)
+            console.log(response)
+            setModal({on: true, success: false, text: 'Tip scheduling failed'});
+            setTimeout(() => {
+              setModal({on: false, success: false, text: ''});
+            }, 2500);
+          } else {
+            setLoading(false)
+            console.log(response)
+
+            setModal({on: true, success: true, text: response.data.message});
+            setTimeout(() => {
+              setModal({on: false, success: false, text: ''});
+            }, 2500);
+          }  
+          return schedData
+        } catch (error) {
+          console.error('Error submitting data:', error)
+          return null
+        }
+      }
+    
+      const schedData = await postSchedule(shuffle, time, tags, channels, curators, schedTime, fid, uuid, percent, currencies)
+    };
+
+    return (
+      <>
+        <div className={`flex-col ${(hour !== 'Hr' && isLogged) ? 'follow-select' : 'follow-locked'}`} style={{backgroundColor: '', borderRadius: '5px', width: '150px', gap: '0.25rem', alignItems: 'center', justifyContent: 'center', padding: '0px 8px', height: '48px', margin: '2px 0 2px 10px', cursor: 'default', maxWidth: '150px'}}>
+          <div className='flex-row' style={{gap: '0.5rem'}}>
+            <select id="hourSelect" value={hour} onChange={handleHourChange} style={{backgroundColor: '#adf', borderRadius: '4px'}}>
+              {hoursOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+            <select id="minuteSelect" value={minute} onChange={handleMinuteChange} style={{backgroundColor: '#adf', borderRadius: '4px'}}>
+              {minutesOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <button onClick={() => {
+            if (!isLogged) { 
+              account.LoginPopup() 
+            } else if (hour !== 'Hr') {
+              handleSubmit(store.fid, store.signer_uuid, initValue) 
+            }}} style={{backgroundColor: 'transparent', fontWeight: '600', color: '#fff', cursor: (hour !== 'Hr' || !isLogged) ? 'pointer' : 'default', fontSize: '12px', padding: '0'}}>SCHEDULE TIP</button>
+        </div>
+        {!isLogged && (<div style={{position: 'relative', fontSize: '0', width: '0', height: '100%'}}>
+          <div className='top-layer' style={{position: 'absolute', top: 0, left: 0, transform: 'translate(-170%, -10%)' }}>
+            <FaLock size={8} color='#eee' />
+          </div>
+        </div>)}
+      </>
+    );
+  }
+
   const updateSearch = (key, value) => {
     setSearch(prevState => ({
       ...prevState,
       [key]: value
     }));
   };
+
+  const handleToken = async (selection) => {
+    console.log(userTipPercent)
+    if (selection === 'All tokens') {
+      availableTokens.forEach((tokenSymbol) => {
+        console.log(tokenSymbol)
+        setTokenData((prevTokenData) => {
+          const tokenIndex = prevTokenData.findIndex(token => token.token == tokenSymbol);
+
+          if (tokenIndex !== -1) {
+            const updatedTokenData = [...prevTokenData];
+            updatedTokenData[tokenIndex].set = true
+            console.log(updatedTokenData[tokenIndex])
+            return updatedTokenData
+          } else {
+            const newToken = {token: tokenSymbol, set: true}
+            return [...prevTokenData, newToken];
+          }
+        })
+      })
+    } else {
+      setTokenData((prevTokenData) => {
+        const updatedTokenData = [...prevTokenData];
+        updatedTokenData.forEach((token) => {
+          if (token.token == selection) {
+            token.set = true
+          } else {
+            token.set = false
+          }
+        })
+        return updatedTokenData
+      })
+    }
+
+    console.log(selection)
+    if (selection === 'All tokens') {
+      setTokensSelected(availableTokens);
+    } else {
+      setTokensSelected([selection])
+    }
+    console.log(tokensSelected)
+  }
+
 
   const handleSelect = async (type, selection) => {
     console.log(type)
@@ -201,19 +369,35 @@ export default function Home() {
   }
 
   useEffect(() => {
-    // console.log(userFeed, totalTip)
+    setTokenData((prevTokenData) => {
+      let updatedTokenData = [...prevTokenData];
 
-    determineDistribution(userFeed, totalTip)
+      updatedTokenData.forEach((token) => {
+        if (token.allowance) {
+          return token.totalTip = Math.round((token.allowance * userTipPercent) / 100)
+        }
+      })
+      return updatedTokenData
+    })
+    console.log(tokenData)
 
-  }, [userFeed])
+  }, [userTipPercent])
 
   useEffect(() => {
-    // console.log(userFeed, totalTip)
-    if (store.fid) {
-      determineDistribution(userFeed, totalTip)
+    for (const token of tokenData) {
+      if (token.set) {
+        if (token.token == '$TN100x' && token.totalTip >= 10) {
+          setNoTip(false)
+          return
+        } else if (token.totalTip > 0) {
+          setNoTip(false)
+          return
+        }
+      }
     }
+    setNoTip(true)
+  }, [tokenData])
 
-  }, [totalTip])
 
   const getName = (tag, value) => {
     const categoryOptions = queryOptions[qType];
@@ -294,10 +478,60 @@ export default function Home() {
     setShowPopup(newPopup)
   }
 
+  async function getAllowance(token, fid) {
+    let getToken = 'degen'
+    if (token == '$DEGEN') {
+      getToken = 'degen'
+    } else if (token == '$TN100x') {
+      getToken = 'ham'
+    }
+
+    try {
+      const responseTotal = await axios.get(`/api/${getToken}/getUserAllowance`, {
+        params: {
+          fid: fid,
+        }
+      })
+      let remaningAllowance = 0
+      if (responseTotal && responseTotal?.data) {
+        remaningAllowance = responseTotal.data.remaining
+        return remaningAllowance
+      } else {
+        return 0
+      }
+    } catch (error) {
+      console.error('Error creating post:', error);
+      return 0
+    }
+  }
+
+  async function updateAllowances(tokens, fid) {
+    let updatedTokenData = [...tokenData]
+    for (const token of tokens) {
+      let allowance = await getAllowance(token, fid)
+      const tokenIndex = updatedTokenData.findIndex(currentToken => currentToken.token == token)
+      if (tokenIndex !== -1) {
+        if (!updatedTokenData[tokenIndex].set) {
+          updatedTokenData[tokenIndex].set = false
+        }
+        updatedTokenData[tokenIndex].allowance = allowance
+        updatedTokenData[tokenIndex].totalTip = Math.round(allowance * userTipPercent / 100)
+      } else {
+        const newToken = {
+          token: token,
+          set: false,
+          allowance: allowance,
+          totalTip: Math.round(allowance * userTipPercent / 100)
+        }
+        updatedTokenData.push(newToken)
+      }
+      setTokenData(updatedTokenData)
+    }
+  }
+
   useEffect(() => {
-    setIsLogged(store.isAuth)
     if (store.isAuth) {
-      getUserAllowance(store.fid)
+      updateAllowances(availableTokens, store.fid)
     }
   }, [isLogged, store.isAuth])
 
@@ -322,161 +556,14 @@ export default function Home() {
     const { shuffle, time, tags, channels, curators } = userQuery
     const timeRange = getTimeRange(time)
     console.log(userQuery)
-    getUserSearch(timeRange, null, channels, curators, null, shuffle)
+    getUserSearch(timeRange, tags, channels, curators, null, shuffle)
   }
 
-  async function populateCast(casts) {
-    let displayedCasts = []
-    
-    if (casts) {
-      casts.forEach(cast => {
-        let newCast = {
-          author: {
-            fid: cast.author_fid,
-            pfp_url: cast.author_pfp,
-            username: cast.author_username,
-            display_name: cast.author_display_name,
-            power_badge: false,
-          },
-          hash: cast.cast_hash,
-          timestamp: cast.createdAt,
-          text: cast.cast_text,
-          impact_points: cast.impact_points,
-          embeds: [],
-          mentioned_profiles: [],
-          replies: {
-            count: 0
-          },
-          reactions: {
-            recasts: [],
-            likes: []
-          },
-          impact_balance: cast.impact_total,
-          quality_absolute: cast.quality_absolute,
-          quality_balance: cast.quality_balance
-        }
-
-        displayedCasts.push(newCast)
-      });
-    }
-    return displayedCasts
-  }
-
-
-
-  async function getUserAllowance(fid) {
-    if (isLogged && !userAllowance && fid) {
-      let remaningAllowance = 0
-      try {
-        const responseTotal = await axios.get('/api/degen/getUserAllowance', {
-          params: {
-            fid: fid,
-          }
-        })
-        if (responseTotal?.data) {
-          remaningAllowance = await responseTotal.data.remaining
-        }
-        console.log(remaningAllowance)
-        setTotalTip(remaningAllowance * userTipPercent / 100)
-        if (!isNaN(remaningAllowance)) {
-          setUserAllowance(remaningAllowance)
-          setTipValue(remaningAllowance)
-        } else {
-          setUserAllowance(0)
-        }
-      } catch (error) {
-        console.error('Error creating post:', error);
-        setUserAllowance(0)
-      }
-    }
-  }
-
-
-  function determineDistribution(ulfilteredCasts, tip) {
-
-    function filterObjects(castArray, filterFid) {
-      return castArray.filter(obj => {
-        if (obj.author.fid != filterFid) {
-          obj.impact_points = obj.impact_points.filter(point => point.curator_fid != filterFid);
-          return true; 
-        }
-        return false;
-      });
-    }
-  
-  let casts = filterObjects(ulfilteredCasts, store.fid);
-  
-  console.log(casts);
-
-    const totalBalanceImpact = casts.reduce((total, obj) => {
-      return total + obj.impact_balance - obj.quality_balance;
-    }, 0);
-    console.log(totalBalanceImpact)
-    let newDistribution = []
-    let newCurators = []
-    if (casts && tip) {
-      casts.forEach(cast => {
-        let ratio = 1
-        if (cast.impact_points && cast.impact_points.length > 0) {
-          ratio =  0.92
-        }
-        let castTip = Math.floor((cast.impact_balance  - cast.quality_balance) / totalBalanceImpact * ratio * tip)
-        // console.log(castTip)
-        let castDistribution = null
-        castDistribution = {
-          fid: cast.author.fid,
-          cast: cast.hash,
-          tip: castTip,
-          coin: '$degen'
-        }
-        newDistribution.push(castDistribution)
-        const curators = cast.impact_points
-        // console.log(curators)
-        curators.forEach(curator => {
-          // console.log(newCurators)
-          let points = curator.impact_points
-          // console.log(curator.impact_points)
-          let curatorTip = Math.floor(curator.impact_points / totalBalanceImpact * 0.08 * tip)
-          let curatorDistribution = null
-          curatorDistribution = {
-            fid: curator.curator_fid,
-            cast: 'temp',
-            points: points,
-            // tip: curatorTip,
-            coin: '$degen'
-          }
-          newCurators.push(curatorDistribution)
-        })
-      })
-
-
-      const tempCasts = newCurators.filter(obj => obj.cast === 'temp');
-
-      tempCasts.sort((a, b) => a.fid - b.fid);
-      // console.log(tempCasts)
-  
-      // Combine objects with the same fid by adding up the tip
-      const combinedCasts = tempCasts.reduce((acc, curr) => {
-        const existingCast = acc.find(obj => obj.fid === curr.fid);
-        if (existingCast) {
-          existingCast.points += curr.points;
-        } else {
-          acc.push(curr);
-        }
-        return acc;
-      }, []);
-  
-      setTipDistribution({curators: combinedCasts, creators: newDistribution, totalPoints: totalBalanceImpact, totalTip: Math.round(tip)})
-    }
-
-  }
 
   async function getUserSearch(time, tags, channel, curator, text, shuffle) {
     const fid = await store.fid
 
-    const timeRange = getTimeRange(time)
-
-    async function getSearch() {
+    async function getSearch(time, tags, channel, curator, text, shuffle) {
       try {
         const response = await axios.get('/api/curation/getUserSearch', {
           params: { time, tags, channel, curator, text, shuffle }
@@ -494,13 +581,14 @@ export default function Home() {
       }
     }
 
-    const casts = await getSearch(timeRange, tags, channel, curator, text, shuffle)
+    const casts = await getSearch(time, tags, channel, curator, text, shuffle)
     let filteredCasts
     let sortedCasts
+    if (!casts) {
+      setUserFeed([])
+    } else {
 
-    if (casts) {
-
-      // console.log(casts)
+      console.log(casts)
       filteredCasts = await casts.reduce((acc, current) => {
         const existingItem = acc.find(item => item._id === current._id);
         if (!existingItem) {
@@ -512,136 +600,165 @@ export default function Home() {
       sortedCasts = filteredCasts.sort((a, b) => b.impact_total - a.impact_total);
       // console.log(sortedCasts)
 
-    }
-
-    let displayedCasts = await populateCast(sortedCasts)
-    // setUserFeed(displayedCasts)
-
-    let castString
-
-    if (sortedCasts) {
-      const castHashes = sortedCasts.map(obj => obj.cast_hash)
-      castString = castHashes.join(',');
-    }
-
-
-    async function populateCasts(fid, castString) {
-      try {
-        const response = await axios.get('/api/curation/getCastsByHash', {
-          params: { fid, castString }
-        })
-        return response
-      } catch (error) {
-        console.error('Error submitting data:', error)
-        return null
+      let displayedCasts = await populateCast(sortedCasts)
+      // setUserFeed(displayedCasts)
+  
+      let castString
+  
+      if (sortedCasts) {
+        const castHashes = sortedCasts.map(obj => obj.cast_hash)
+        castString = castHashes.join(',');
       }
-    }
 
-    const populateResponse = await populateCasts(fid, castString)
+      setUserFeed(displayedCasts)
 
-    let populatedCasts = []
-
-    if (populateResponse) {
-      populatedCasts = populateResponse.data.casts
-      // setUserFeed(populatedCasts)
-    }
-
-    for (let i = 0; i < populatedCasts.length; i++) {
-      const obj2 = populatedCasts[i]
-      let obj1 = displayedCasts.find(cast => cast.hash === obj2.hash)
-      if (obj1) {
-        Object.keys(obj2).forEach(key => {
-          obj1[key] = obj2[key]
-        })
+      if (!fid) {
+        account.LoginPopup()
       } else {
-        displayedCasts.push({...obj2})
-      }
-    }
-
-    setUserFeed(displayedCasts)
-
-
-    async function checkImageUrlsForCasts(casts) {
-      // Map over each cast and apply checkImageUrls function
-      const updatedCasts = await Promise.all(casts.map(async (cast) => {
-        return await checkImageUrls(cast);
-      }));
-    
-      return updatedCasts;
-    }
-    
-    // Usage
-    const castsWithImages = await checkImageUrlsForCasts(displayedCasts);
-    setUserFeed(castsWithImages);
-
-
-    async function getSubcast(hash) {
-      if (hash) {
-        try {
-          const response = await axios.get('/api/getCastByHash', {
-            params: {
-              hash
-            }
-          })
-          const castData = response.data.cast.cast
-          if (castData) {
-            console.log(castData)
-            return castData
-          } else {
+        async function populateCasts(fid, castString) {
+          try {
+            const response = await axios.get('/api/curation/getCastsByHash', {
+              params: { fid, castString }
+            })
+            return response
+          } catch (error) {
+            console.error('Error submitting data:', error)
             return null
           }
-        } catch (error) {
-          console.error('Error submitting data:', error)
-          return null
         }
-      }
-    }
+    
+        const populateResponse = await populateCasts(fid, castString)
 
-    async function populateSubcasts(cast) {
-      const { embeds } = cast;
-      // console.log(embeds)
+        let populatedCasts = []
+    
+        if (populateResponse) {
+          populatedCasts = populateResponse.data.casts
+          // setUserFeed(populatedCasts)
+        }
 
-      if (embeds && embeds.length > 0) {
-        const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
-          // console.log(embed)
-          if (embed.type == 'subcast') {
-            // console.log(embed.cast_id.hash)
-            const subcastData = await getSubcast(embed.cast_id.hash)
-            const checkImages = await checkImageUrls(subcastData)
-            // console.log(checkImages)
-            return {
-              ...embed,
-              subcast: checkImages
-            };
+        for (let i = 0; i < populatedCasts.length; i++) {
+          const obj2 = populatedCasts[i]
+          let obj1 = displayedCasts.find(cast => cast.hash === obj2.hash)
+          if (obj1) {
+            Object.keys(obj2).forEach(key => {
+              obj1[key] = obj2[key]
+            })
           } else {
-            return {
-              ...embed
+            displayedCasts.push({...obj2})
+          }
+        }
+    
+        setUserFeed(displayedCasts)
+
+        async function checkEmbedTypeForCasts(casts) {
+          // Map over each cast and apply checkEmbedType function
+          const updatedCasts = await Promise.all(casts.map(async (cast) => {
+            return await checkEmbedType(cast);
+          }));
+        
+          return updatedCasts;
+        }
+        
+        // Usage
+        const castsWithImages = await checkEmbedTypeForCasts(displayedCasts);
+        setUserFeed(castsWithImages);
+
+
+        async function getSubcast(hash, userFid) {
+          if (hash && userFid) {
+            try {
+              const response = await axios.get('/api/getCastByHash', {
+                params: { hash, userFid }
+              })
+              const castData = response.data.cast.cast
+              if (castData) {
+                console.log(castData)
+                return castData
+              } else {
+                return null
+              }
+            } catch (error) {
+              console.error('Error submitting data:', error)
+              return null
             }
           }
-        }));
-        return {
-          ...cast,
-          embeds: updatedEmbeds
-        };
-      }
-      
-      return cast; // Return original cast object if embeds array is empty or undefined
-    }
-
-    async function checkSubcasts(casts) {
-      // Map over each cast and apply checkImageUrls function
-      const updatedCasts = await Promise.all(casts.map(async (cast) => {
-        return await populateSubcasts(cast);
-      }));
+        }
     
-      return updatedCasts;
+        async function populateSubcasts(cast, fid) {
+          const { embeds } = cast;
+          if (embeds && embeds.length > 0) {
+            const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
+              if (embed.type == 'subcast') {
+                const subcastData = await getSubcast(embed.cast_id.hash, fid)
+                const checkImages = await checkEmbedType(subcastData)
+                return { ...embed, subcast: checkImages };
+              } else {
+                return { ...embed }
+              }
+            }));
+            return { ...cast, embeds: updatedEmbeds };
+          }
+          
+          return cast;
+        }
+        
+        async function populateEmbeds(cast) {
+          const { embeds } = cast
+          // console.log(embeds)
+          if (embeds && embeds.length > 0) {
+            const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
+              // console.log(embed.type)
+              if (embed && embed.url && embed.type == 'html') {
+                // console.log(embed)
+                try {
+                  const metaData = await axios.get('/api/getMetaTags', {
+                    params: { url: embed.url } })
+                  if (metaData && metaData.data) {
+                    return { ...embed, metadata: metaData.data };
+                  } else {
+                    return { ...embed }
+                  }
+                } catch (error) {
+                  return { ...embed }
+                }
+              } else {
+                return { ...embed }
+              }
+            }));
+            return { ...cast, embeds: updatedEmbeds };
+          }
+          
+          return cast;
+        }
+    
+        async function checkEmbeds(casts) {
+          const updatedCasts = await Promise.all(casts.map(async (cast) => {
+            return await populateEmbeds(cast);
+          }));
+        
+          return updatedCasts;
+        }
+    
+        async function checkSubcasts(casts, fid) {
+          const updatedCasts = await Promise.all(casts.map(async (cast) => {
+            return await populateSubcasts(cast, fid);
+          }));
+        
+          return updatedCasts;
+        }
+    
+        const castsWithSubcasts = await checkSubcasts(castsWithImages, fid)
+        console.log(castsWithSubcasts)
+        setUserFeed(castsWithSubcasts);
+    
+    
+        const castsWithEmbeds = await checkEmbeds(castsWithSubcasts)
+        console.log(castsWithEmbeds)
+        setUserFeed(castsWithEmbeds);
+      }
     }
-
-    const castsWithSubcasts = await checkSubcasts(castsWithImages)
-    console.log(castsWithSubcasts)
-    setUserFeed(castsWithSubcasts);
-
   }
+
 
   const ExpandImg = ({embed}) => {
     return (
@@ -655,7 +772,6 @@ export default function Home() {
   const Modal = () => {
     return (
       <>
-        {/* <div className="overlay" onClick={closeImagePopup}></div> */}
         <div className="modalConainer" style={{borderRadius: '10px', backgroundColor: modal.success ? '#9e9' : '#e99'}}>
           <div className='flex-col' id="notificationContent" style={{alignItems: 'center', justifyContent: 'center'}}>
             <div style={{fontSize: '20px', width: '380px', maxWidth: '380px', fontWeight: '400', height: 'auto', padding: '6px', fontSize: '16px'}}>{modal.text}</div>
@@ -672,37 +788,21 @@ export default function Home() {
     router.push(`/${username}`)
   }
 
-  const searchOption = (event, qType) => {
-    setSearchSelect(event.target.getAttribute('name'))
-    updateSearch(qType, event.target.getAttribute('name'))
-  }
-
-
   const HorizontalScale = () => {
-    const [value, setValue] = useState(userTipPercent);
-    const [allowance, setAllowance] = useState(() => {
-      return userAllowance;
-    });
-  
-    useEffect(() => {
-      setAllowance(userAllowance);
-    }, [userAllowance]);
+    const [value, setValue] = useState(initValue);
   
     const handleChange = (event) => {
-      const newValue = parseInt(event.target.value);
-      setValue(newValue);
+      setValue(parseInt(event.target.value));
     };
-    
-    const tip = Math.round(allowance * value / 100);
 
     const handleMouseLeave = () => {
       store.setUserTipPercent(value);
-      setTotalTip(tip)
+      setInitValue(value)
     };
   
     return (
       <div className='flex-row' style={{ width: '100%', padding: '3px 12px', gap: '1.0rem', alignItems: 'center' }}
-      onMouseLeave={handleMouseLeave}>
+      onMouseLeave={handleMouseLeave} onTouchEnd={handleMouseLeave}>
         <input
           type="range"
           min="1"
@@ -711,10 +811,20 @@ export default function Home() {
           onChange={handleChange}
           style={{ width: '100%' }}
         />
-
-        <div className='flex-col' style={{ textAlign: 'center', color: '#def', width: '80px', gap: '0.25rem' }}>
-          <div style={{ textAlign: 'center', color: '#def', fontSize: '18px', fontWeight: '700' }}>{formatNum(tip)}</div>
-          <div style={{ textAlign: 'center', color: '#def', fontSize: '12px' }}>({value}%)</div>
+        <div className='flex-col' style={{gap: '0.45rem'}}>
+          <div className='flex-row' style={{flexWrap: 'wrap', justifyContent: 'center', gap: '0.35rem', width: '150px'}}>
+          {(tokenData && tokenData.length > 0) && tokenData.map((token, index) => {
+            return ((token.allowance > 0) && (<div key={index} className='flex-row' style={{border: token.set ? '1px solid #abc' : '1px solid #aaa', borderRadius: '6px', padding: '2px 5px', color: token.set ? '#9df' : '#ccc', gap: '0.35rem', alignItems: 'center', cursor: 'pointer', backgroundColor: token.set ? '#246' : 'transparent'}} onClick={() => {handleToken(token.token)}}>
+              <div style={{textAlign: 'center', color: token.set ? '#9df' : '#ccc', fontSize: '15px', fontWeight: '700'}}>
+                {formatNum(Math.round(token.allowance * value / 100))}
+              </div>
+              {(token.token == '$DEGEN') ? (<Degen />) : (token.token == '$TN100x') ? (<GiMeat style={{transform: 'scaleX(-1)'}} />) : (<GiTwoCoins />)}
+            </div>))
+          })}
+          </div>
+          <div className='flex-row' style={{gap: '0.5rem', alignItems: 'center', justifyContent: 'center'}}>
+            <div style={{ textAlign: 'center', color: '#def', fontSize: '12px' }}>({value}%)</div><div style={{border: '1px solid #abc', fontSize: '12px', color: (tokensSelected.length == 0 || tokensSelected.length == 2) ? '#9df' : '#eee', padding: '1px 3px', borderRadius: '5px', backgroundColor: (tokensSelected.length == 0 || tokensSelected.length == 2) ? '#246' : 'transparent', cursor: 'pointer'}} onClick={() => {handleToken('All tokens')}}>SELECT ALL</div>
+          </div>
         </div>
       </div>
     );
@@ -907,88 +1017,15 @@ export default function Home() {
 
   async function postMultiTip() {
 
-    console.log(tipDistribution)
+    const { castData, coinTotals } = await processTips(userFeed, store.fid, tokenData)
 
-    let fidSet = []
-
-    const curatorList = tipDistribution.curators
-    if (curatorList && curatorList.length > 0) {
-      curatorList.forEach(curator => {
-        fidSet.push(curator.fid)
-      })
-    }
-    // console.log(fidSet)
-    let returnedCurators = []
-    if (fidSet.length > 0) {
-
-      async function getCuratorsByFid(fidSet) {
-        let userFids = fidSet.join(',')
-        try {
-          const response = await axios.get('/api/curation/getCuratorsByFid', {
-            params: {
-              name: userFids,
-            }
-          })
-          if (response) {
-            const curators = response.data.users
-            // console.log(curators)
-            // setCurators(curators)
-            return curators
-          } else {
-            return null
-          }
-          // console.log(channels)
-        } catch (error) {
-          console.error('Error submitting data:', error)
-          return null
-        }
-
-      }
-
-      returnedCurators = await getCuratorsByFid(fidSet)
-    }
-
-   
-    // Map to create a lookup table for faster access
-    const lookupTable = returnedCurators.reduce((acc, obj) => {
-        acc[obj.fid] = obj;
-        return acc;
-    }, {});
-  
-    const creatorData = tipDistribution.creators
-    // Construct the third array
-    const curatorData = curatorList.map(obj => {
-      const matchingObj = lookupTable[obj.fid];
-      if (matchingObj) {
-        return {
-          fid: obj.fid,
-          cast: matchingObj.set_cast_hash,
-          coin: obj.coin,
-          tip: Math.floor(obj.points / tipDistribution.totalPoints * tipDistribution.totalTip * 0.08)
-        };
-      } else {
-        return null;
-      }
-    }).filter(obj => obj !== null);
-    
-    console.log(curatorData);
-
-    const combinedLists = [...new Set([...creatorData, ...curatorData])];
-    console.log(combinedLists)
-
-    combinedLists.forEach(cast => {
-      cast.text = `${cast.tip} ${cast.coin}`
-    })
-    console.log(combinedLists)
-
-
-    if (combinedLists && combinedLists.length > 0 && store.signer_uuid) {
+    if (castData && castData.length > 0 && store.signer_uuid) {
       setLoading(true)
       try {
         const response = await axios.post('/api/curation/postMultipleTips', {       
           signer: store.signer_uuid,
           fid: store.fid,
-          data: combinedLists
+          data: castData
         })
         if (response.status !== 200) {
           setLoading(false)
@@ -999,11 +1036,20 @@ export default function Home() {
           }, 2500);
           // need to revert recasts counter
         } else {
+          let updatedTokenData = [...tokenData]
+          for (const token of updatedTokenData) {
+            if (token.set) {
+              if (token.token == '$TN100x') {
+                token.allowance = token.allowance - (coinTotals[token.token].totalTip * 10)
+              } else {
+                token.allowance = token.allowance - coinTotals[token.token].totalTip
+              }
+              token.totalTip = Math.round(token.allowance * userTipPercent / 100)
+            }
+          }
+          setTokenData(updatedTokenData)
           setLoading(false)
           console.log(response)
-          if (response?.data?.tip) {
-            setUserAllowance(userAllowance - response.data.tip)
-          }
           setModal({on: true, success: true, text: response.data.message});
           setTimeout(() => {
             setModal({on: false, success: false, text: ''});
@@ -1017,6 +1063,7 @@ export default function Home() {
   }
 
 
+
   return (
   <div name='feed' style={{width: 'auto', maxWidth: '620px'}} ref={ref}>
     <Head>
@@ -1028,49 +1075,51 @@ export default function Home() {
 
 
     <div className="top-layer">
-      <div className="flex-row" style={{padding: '0', marginBottom: '10px'}}>
-        {isLogged && (
-          <a className="" title="" href={`/${store.userProfile.username}`} onClick={() => {goToUserProfile(event, store.userProfile)}}>
-            <img loading="lazy" src={store.srcUrlFC} className="" alt={`${store.userDisplayNameFC} avatar`} style={{width: '40px', height: '40px', maxWidth: '48px', maxHeight: '48px', borderRadius: '24px', border: '1px solid #abc', margin: '6px 0 2px 0'}} />
-          </a>
-        )}
+      <div className="flex-row" style={{padding: '0', marginBottom: '10px', flexWrap: 'wrap', justifyContent: 'center'}}>
+        <div className='flex-row' style={{gap: '0.5rem', width: '100%'}}>
+
+          {isLogged && (
+            <a className="" title="" href={`/${store.userProfile.username}`} onClick={() => {goToUserProfile(event, store.userProfile)}}>
+              <img loading="lazy" src={store.srcUrlFC} className="" alt={`${store.userDisplayNameFC} avatar`} style={{width: '40px', height: '40px', maxWidth: '48px', maxHeight: '48px', borderRadius: '24px', border: '1px solid #abc', margin: '6px 0 2px 20px'}} />
+            </a>
+          )}
           <HorizontalScale />
+        </div>
+        <div className='flex-row' style={{gap: '0.5rem'}}>
           {isLogged ? (
             <div className="flex-row">
               {(
-                <div className={`flex-row ${(loading || totalTip == 0) ? 'follow-locked' : 'follow-select'} ${modal.success ? 'flash-success' : ''}`} style={{position: 'relative', height: 'auto', width: '120px', marginRight: '0', cursor: (loading || totalTip == 0) ? 'default' : 'pointer'}}>
-                  {(loading || totalTip == 0) ? (
-                    <div className='flex-row' style={{height: '100%', alignItems: 'center'}}>
-                      <Spinner size={21} color={'#999'} />
-                    </div>
-                  ) : (
-                    <div className='cast-btn'
-                    //  onClick={routeCast} 
-                    onClick={() => { if (totalTip !== 0) {
-                      postMultiTip()
-                    }
-                    }}
-                     name='follow' style={{color: loading ? 'transparent' : '#fff', height: 'auto', width: '100px'}}>Tip to all</div>
-                  )
-
-                  }
-                </div>
+              <div className={`flex-row ${(loading || noTip) ? 'follow-locked' : 'follow-select'} ${modal.success ? 'flash-success' : ''}`} style={{position: 'relative', height: 'auto', width: '100px', marginRight: '0', cursor: (loading || noTip) ? 'default' : 'pointer'}}>
+                {(loading || noTip) ? (
+                  <div className='flex-row' style={{height: '100%', alignItems: 'center'}}>
+                    <Spinner size={21} color={'#999'} />
+                  </div>
+                ) : (
+                  <div className='cast-btn'
+                  //  onClick={routeCast} 
+                  onClick={() => { if (!noTip) {
+                    postMultiTip()
+                  }}}
+                  name='follow' style={{color: loading ? 'transparent' : '#fff', height: 'auto', width: '100px'}}>TIP ALL</div>
+                )}
+              </div>
               )}
             </div>
           ) : (
-            <div className="flex-row follow-locked" style={{position: 'relative', height: 'auto', width: '120px', marginRight: '0'}}>
-              <div className='cast-btn' onClick={account.LoginPopup} style={{height: 'auto', width: '100px'}}>Tip to all</div>
+            <div className="flex-row follow-locked" style={{position: 'relative', height: 'auto', width: '100px', marginRight: '0'}}>
+              <div className='cast-btn' onClick={account.LoginPopup} style={{height: 'auto', width: '100px'}}>TIP ALL</div>
               <div className='top-layer' style={{position: 'absolute', top: 0, right: 0, transform: 'translate(40%, -60%)' }}>
                 <FaLock size={8} color='#eee' />
               </div>
             </div>
-          )
-        }
+          )}
+          <ScheduleTaskForm />
+        </div>
       </div>
     </div>
-
-    <div className='flex-row' style={{justifyContent: 'space-between', marginTop: '15px', marginBottom: '30px'}}>
-      <div className='flex-row' style={{gap: '0.5rem'}}>
+    <div>
+    <div className='flex-row' style={{justifyContent: 'space-between', margin: '15px 0 30px 0'}}>
+      <div className='flex-row' style={{gap: '0.5rem', marginLeft: '4px'}}>
         <div className="flex-row" style={{border: '1px solid #abc', padding: '2px 6px 2px 6px', borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'center'}} onClick={() => {handleSelection('picks')}}>
           <div className="flex-row" style={{alignItems: 'center', gap: '0.3rem'}}>
             <span className="channel-font" style={{color: '#eee'}}>Top Picks</span>
@@ -1085,7 +1134,7 @@ export default function Home() {
       </div>
 
       <div style={{position: 'relative'}}>
-        <div className={`flex-row ${!isMobile ? 'active-nav-link btn-hvr' : ''}`} style={{border: '1px solid #abc', padding: `2px 6px 2px 6px`, borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'center', borderBottom: (isSelected == 'time') ? '2px solid #ddd425' : '1px solid #abc', height: '28px'}} onMouseEnter={() => {handleSelection('time')}} onMouseLeave={() => {handleSelection('none')}}>
+        <div className={`flex-row ${!isMobile ? 'active-nav-link btn-hvr' : ''}`} style={{border: '1px solid #abc', padding: `2px 6px 2px 6px`, borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'center', borderBottom: (isSelected == 'time') ? '2px solid #99ddff' : '1px solid #abc', height: '28px'}} onMouseEnter={() => {handleSelection('time')}} onMouseLeave={() => {handleSelection('none')}}>
           <div className="flex-row" style={{alignItems: 'center', gap: isMobile ? '0' : '0.3rem', selection: 'none'}}>
             <BsClock size={15} color='#eee' />
             <span className={`${!isMobile ? 'selection-btn' : ''}`} style={{cursor: 'pointer', padding: '0'}}>{!isMobile && btnText('time')}</span>
@@ -1098,13 +1147,14 @@ export default function Home() {
               <span className={`selection-btn ${userQuery['time'] == '3days' ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}} onClick={() => {handleSelect('time', '3days')}}>{'3 days'}</span>
               <span className={`selection-btn ${userQuery['time'] == '7days' ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}} onClick={() => {handleSelect('time', '7days')}}>{'7 days'}</span>
               <span className={`selection-btn ${userQuery['time'] == '30days' ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}} onClick={() => {handleSelect('time', '30days')}}>{'30 days'}</span>
+              <span className={`selection-btn ${userQuery['time'] == 'all' ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}} onClick={() => {handleSelect('time', 'all')}}>{'All'}</span>
             </div>
           </div>
         )}
       </div>
 
       <div style={{position: 'relative'}}>
-        <div className={`flex-row ${!isMobile ? 'active-nav-link btn-hvr' : ''}`} style={{border: '1px solid #abc', padding: `2px 6px 2px 6px`, borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'center', borderBottom: (isSelected == 'tags') ? '2px solid #ddd425' : '1px solid #abc', height: '28px'}} onMouseEnter={() => {handleSelection('tags')}} onMouseLeave={() => {handleSelection('none')}}>
+        <div className={`flex-row ${!isMobile ? 'active-nav-link btn-hvr' : ''}`} style={{border: '1px solid #abc', padding: `2px 6px 2px 6px`, borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'center', borderBottom: (isSelected == 'tags') ? '2px solid #99ddff' : '1px solid #abc', height: '28px'}} onMouseEnter={() => {handleSelection('tags')}} onMouseLeave={() => {handleSelection('none')}}>
           <div className="flex-row" style={{alignItems: 'center', gap: isMobile ? '0' : '0.3rem', selection: 'none'}}>
             <GoTag size={23} color='#eee' />
             <span className={`${!isMobile ? 'selection-btn' : ''}`} style={{cursor: 'pointer', padding: '0'}}>{!isMobile && btnText('tags')}</span>
@@ -1123,62 +1173,29 @@ export default function Home() {
       </div>
 
       <div style={{position: 'relative'}}>
-        <div className={`flex-row ${!isMobile ? 'active-nav-link btn-hvr' : ''}`} style={{border: '1px solid #abc', padding: `2px 6px 2px 6px`, borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'center', borderBottom: (isSelected == 'channels') ? '2px solid #ddd425' : '1px solid #abc', height: '28px'}} onMouseEnter={() => {handleSelection('channels')}} onMouseLeave={() => {handleSelection('none')}}>
+        <div className={`flex-row ${!isMobile ? 'active-nav-link btn-hvr' : ''}`} style={{border: '1px solid #abc', padding: `2px 6px 2px 6px`, borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'center', borderBottom: (isSelected == 'channels') ? '2px solid #99ddff' : '1px solid #abc', height: '28px'}} onMouseEnter={() => {handleSelection('channels')}} onMouseLeave={() => {handleSelection('none')}}>
           <div className="flex-row" style={{alignItems: 'center', gap: isMobile ? '0' : '0.3rem', selection: 'none'}}>
             <AiOutlineBars size={15} color='#eee' />
             <span className={`${!isMobile ? 'selection-btn' : ''}`} style={{cursor: 'pointer', padding: '0', color: userQuery['channels'].length == 0 ? '#aaa' : ''}}>{isMobile ? '' : userQuery['channels'].length == 0 ? 'All channels' : 'Channels'}</span>
           </div>
         </div>
-        {(isSelected == 'channels') && (
-          <div className='top-layer' style={{position: 'absolute', right: isMobile ? '-95px' : '-110px', width: textMax, margin: 'auto'}} onMouseEnter={() => {handleSelection('channels')}} onMouseLeave={() => {handleSelection('none')}}>
-            <div className='flex-col' style={{gap: '0.25rem', padding: '6px 6px', borderRadius: '10px', backgroundColor: '#1D3244dd', border: '1px solid #abc', width: 'auto', marginTop: '10px', alignItems: 'flex-start'}}>
-              <div className={`selection-btn ${(userQuery['channels'] == 'all' || userQuery['channels'].length == 0) ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}}>
-                <input onChange={onChannelChange} 
-                  name='search' 
-                  placeholder={`Search channels`} 
-                  value={userSearch.search} 
-                    className='srch-btn' 
-                  style={{width: '100%', backgroundColor: '#234'}} 
-                  onKeyDown={channelKeyDown} />
-              </div>
-              <div className='flex-row top-layer' style={{gap: '0.5rem', padding: '0px 6px', flexWrap: 'wrap'}}>
-                {channels && (
-                  channels.map((channel, index) => (
-                    <div key={index} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addChannel(channel)}}>
-                      <img loading="lazy" src={channel.image_url} className="" alt={channel.name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
-                      <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>{channel.name}</div>
-                      <div style={{fontWeight: '400', fontSize: '10px', color: '#ccc'}}>{formatNum(channel.follower_count)}</div>
-                    </div>
-                  )
-                ))}
-              </div>
 
-              {(selectedChannels && selectedChannels.length > 0) && (<div className='flex-row' style={{gap: '0.5rem', padding: '10px 6px 6px 6px', flexWrap: 'wrap', borderTop: '1px solid #888', width: '100%', alignItems: 'center'}}>
-                <div style={{color: '#ddd', fontWeight: '600', fontSize: '13px', padding: '0 0 3px 6px'}}>Selected:</div>
-                {(
-                  selectedChannels.map((channel, index) => (
-                    <div key={index} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addChannel(channel)}}>
-                      <img loading="lazy" src={channel.image_url} className="" alt={channel.name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
-                      <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>{channel.name}</div>
-                    </div>
-                  )
-                ))}
-              </div>)}
-            </div>
-          </div>
-        )}
       </div>
 
       <div style={{position: 'relative'}}>
-        <div className={`flex-row ${!isMobile ? 'active-nav-link btn-hvr' : ''}`} style={{border: '1px solid #abc', padding: `2px 6px 2px 6px`, borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'center', borderBottom: (isSelected == 'curators') ? '2px solid #ddd425' : '1px solid #abc', height: '28px'}} onMouseEnter={() => {handleSelection('curators')}} onMouseLeave={() => {handleSelection('none')}}>
+        <div className={`flex-row ${!isMobile ? 'active-nav-link btn-hvr' : ''}`} style={{border: '1px solid #abc', padding: `2px 6px 2px 6px`, borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'center', borderBottom: (isSelected == 'curators') ? '2px solid #99ddff' : '1px solid #abc', height: '28px', marginRight: '4px'}} onMouseEnter={() => {handleSelection('curators')}} onMouseLeave={() => {handleSelection('none')}}>
           <div className="flex-row" style={{alignItems: 'center', gap: isMobile ? '0' : '0.3rem', selection: 'none'}}>
             <IoPeopleOutline size={15} color='#eee' />
             <span className={`${!isMobile ? 'selection-btn' : ''}`} style={{cursor: 'pointer', padding: '0', color: userQuery['curators'].length == 0 ? '#aaa' : ''}}>{isMobile ? '' : userQuery['curators'].length == 0 ? 'All curators' : 'Curators'}</span>
           </div>
         </div>
-        {(isSelected == 'curators') && (
-          <div className='top-layer' style={{position: 'absolute', right: isMobile ? '5px' : '30px', width: textMax, margin: 'auto'}} onMouseEnter={() => {handleSelection('curators')}} onMouseLeave={() => {handleSelection('none')}}>
-            <div className='flex-col' style={{gap: '0.25rem', padding: '6px 6px', borderRadius: '10px', backgroundColor: '#1D3244dd', border: '1px solid #abc', width: 'auto', marginTop: '10px', alignItems: 'flex-start'}}>
+
+      </div>
+
+
+      {(isSelected == 'curators') && (
+          <div className='' style={{position: 'absolute', width: feedMax, margin: 'auto', marginTop: '28px'}} onMouseEnter={() => {handleSelection('curators')}} onMouseLeave={() => {handleSelection('none')}}>
+            <div className='top-layer flex-col' style={{gap: '0.25rem', padding: '6px 6px', borderRadius: '10px', backgroundColor: '#1D3244dd', border: '1px solid #abc', width: 'auto', marginTop: '10px', alignItems: 'flex-start'}}>
               <div className={`selection-btn ${(userQuery['curators'] == 'all' || userQuery['curators'].length == 0) ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}}>
                 <input onChange={onCuratorSearch} 
                   name='search' 
@@ -1191,7 +1208,7 @@ export default function Home() {
               <div className='flex-row' style={{gap: '0.5rem', padding: '0px 6px', flexWrap: 'wrap'}}>
                 {curators && (
                   curators.map((curator, index) => (
-                    <div key={index} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addCurator(curator)}}>
+                    <div key={`Cu2-${index}`} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addCurator(curator)}}>
                       <img loading="lazy" src={curator.pfp} className="" alt={curator.display_name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
                       <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>@{curator.username}</div>
                     </div>
@@ -1203,7 +1220,7 @@ export default function Home() {
                 <div style={{color: '#ddd', fontWeight: '600', fontSize: '13px', padding: '0 0 3px 6px'}}>Selected:</div>
                 {(
                   selectedCurators.map((curator, index) => (
-                    <div key={index} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addCurator(curator)}}>
+                    <div key={`Cu-${index}`} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addCurator(curator)}}>
                       <img loading="lazy" src={curator.pfp} className="" alt={curator.display_name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
                       <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>@{curator.username}</div>
                     </div>
@@ -1213,11 +1230,58 @@ export default function Home() {
             </div>
           </div>
         )}
+
+      {(isSelected == 'channels') && (
+          <div className='' style={{position: 'absolute', width: feedMax, margin: 'auto', marginTop: '28px'}} onMouseEnter={() => {handleSelection('channels')}} onMouseLeave={() => {handleSelection('none')}}>
+            <div className='top-layer flex-col' style={{gap: '0.25rem', padding: '6px 6px', borderRadius: '10px', backgroundColor: '#1D3244dd', border: '1px solid #abc', width: 'auto', marginTop: '10px', alignItems: 'flex-start'}}>
+              <div className={`selection-btn ${(userQuery['channels'] == 'all' || userQuery['channels'].length == 0) ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}}>
+                <input onChange={onChannelChange} 
+                  name='search' 
+                  placeholder={`Search channels`} 
+                  value={userSearch.search} 
+                    className='srch-btn' 
+                  style={{width: '100%', backgroundColor: '#234'}} 
+                  onKeyDown={channelKeyDown} />
+              </div>
+              <div className='flex-row top-layer' style={{gap: '0.5rem', padding: '0px 6px', flexWrap: 'wrap'}}>
+                {channels && (
+                  channels.map((channel, index) => (
+                    <div key={`Ch2-${index}`} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addChannel(channel)}}>
+                      <img loading="lazy" src={channel.image_url} className="" alt={channel.name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
+                      <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>{channel.name}</div>
+                      <div style={{fontWeight: '400', fontSize: '10px', color: '#ccc'}}>{formatNum(channel.follower_count)}</div>
+                    </div>
+                  )
+                ))}
+              </div>
+
+              {(selectedChannels && selectedChannels.length > 0) && (<div className='flex-row' style={{gap: '0.5rem', padding: '10px 6px 6px 6px', flexWrap: 'wrap', borderTop: '1px solid #888', width: '100%', alignItems: 'center'}}>
+                <div style={{color: '#ddd', fontWeight: '600', fontSize: '13px', padding: '0 0 3px 6px'}}>Selected:</div>
+                {(
+                  selectedChannels.map((channel, index) => (
+                    <div key={`Ch-${index}`} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addChannel(channel)}}>
+                      <img loading="lazy" src={channel.image_url} className="" alt={channel.name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
+                      <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>{channel.name}</div>
+                    </div>
+                  )
+                ))}
+              </div>)}
+            </div>
+          </div>
+        )}
+
       </div>
+
     </div>
 
-    <div style={{margin: '0 0 30px 0'}}>
-      {userFeed && userFeed.map((cast, index) => (<Cast cast={cast} key={index} index={index} updateCast={updateCast} openImagePopup={openImagePopup} />))}
+    <div style={{margin: '0 0 70px 0'}}>
+
+    {(!userFeed || userFeed.length == 0) ? (
+      <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
+        <Spinner size={31} color={'#999'} />
+      </div>
+    ) : (userFeed.map((cast, index) => (<Cast cast={cast} key={index} index={index} updateCast={updateCast} openImagePopup={openImagePopup} />)))}
+
     </div>
     <div>
       {showPopup.open && (<ExpandImg embed={{showPopup}} />)}
@@ -1228,4 +1292,3 @@ export default function Home() {
   </div>
   )
 }
-

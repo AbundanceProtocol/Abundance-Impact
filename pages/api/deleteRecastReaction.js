@@ -1,9 +1,11 @@
 export default async function handler(req, res) {
   const apiKey = process.env.NEYNAR_API_KEY
+  const { hash, signer } = req.body;
  
-  if (req.method === 'DELETE') {
+  if (req.method !== 'DELETE' || !hash || !signer) {
+    res.status(405).json({ error: 'Method Not Allowed' });
+  } else {
     try {
-      const { hash, signer } = req.body;
       console.log(hash, signer)
 
       const base = "https://api.neynar.com/";
@@ -29,7 +31,5 @@ export default async function handler(req, res) {
       console.error('Error handling DELETE request:', error);
       res.status(500).json({ error: 'Internal Server Error' });
     }
-  } else {
-    res.status(405).json({ error: 'Method Not Allowed' });
   }
 }

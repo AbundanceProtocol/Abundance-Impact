@@ -1,30 +1,37 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useContext, useRef, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import useStore from '../../utils/store';
+import { AccountContext } from '../../context';
 import { Like, LikeOn, Recast, Message, Kebab, ActiveUser } from '../../pages/assets'
 import { FaSearch, FaLock, FaRegStar, FaStar, FaArrowUp, FaArrowDown } from "react-icons/fa"
 import axios from 'axios';
 import { timePassed } from '../../utils/utils';
 import CastText from './Text'
+import Embed from './Embed';
 import Subcast from './Subcast';
 import { IoDiamondOutline as Diamond } from "react-icons/io5";
 import { ImArrowUp, ImArrowDown  } from "react-icons/im";
+import VideoPlayer from './VideoPlayer';
+import Images from './Images';
 
 export default function Cast({ cast, index, updateCast, openImagePopup }) {
   const store = useStore()
   const router = useRouter();
   const [screenWidth, setScreenWidth] = useState(undefined)
+  const account = useContext(AccountContext)
   const [textMax, setTextMax] = useState('522px')
   const [feedMax, setFeedMax ] = useState('620px')
   const likeRefs = useRef([])
   const recastRefs = useRef([])
-  const [userFid, setuserFid] = useState(null)
+  const [userFid, setUserFid] = useState(null)
   const [fail, setFail] = useState(false)
   const userRemainingImpact = useStore(state => state.userRemainingImpact);
   const userRemainingQuality = useStore(state => state.userRemainingQuality);
   const handleClick = (embed) => {
     openImagePopup(embed); 
   };
+  const [hide, setHide] = useState(false)
+  const [isLogged, setIsLogged] = useState(false)
 
   function clickFailed() {
     setFail(true);
@@ -78,13 +85,13 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
 
 
   async function boostImpact(cast, impactAmount) {
-    let channel = null
-    if (cast.parent_url) {
-      const isChannel = cast.parent_url.slice(0,31)
-      if (isChannel == 'https://warpcast.com/~/channel/') {
-        channel = cast.parent_url
-      }
-    }
+    // let channel = null
+    // if (cast.root_parent_url) {
+    //   const isChannel = cast.root_parent_url.slice(0,31)
+    //   if (isChannel == 'https://warpcast.com/~/channel/') {
+    //     channel = cast.root_parent_url
+    //   }
+    // }
     // const amount = 1
     const fid = store.fid
     const castContext = {
@@ -94,7 +101,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
       author_display_name: cast.author.display_name,
       cast_hash: cast.hash,
       cast_text: cast.text,
-      cast_channel: channel
+      cast_channel: cast.root_parent_url
     }
     // console.log(castContext)
     
@@ -154,10 +161,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
   }, [screenWidth])
 
   useEffect(() => {
-    setuserFid(store.fid)
-
-    // console.log(cast)
-    // console.log(userFid, cast.author.fid, store.fid)
+    setIsLogged(store.isAuth)
     const handleResize = () => {
       setScreenWidth(window.innerWidth)
     }
@@ -169,6 +173,13 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  useEffect(() => {
+    setIsLogged(store.isAuth)
+    if (isLogged) {
+      setUserFid(store.fid)
+    }
+  }, [isLogged, store.isAuth])
 
 
   const goToCast = async (event, cast) => {
@@ -206,9 +217,9 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
     }
   }
 
-  async function postRecast(hash, index) {
-    // need to update recasts counter
-    recastRefs.current[index].style.color = '#3b3'
+  async function postRecast(hash, index, count) {
+    const recastedCount = count ? Number(count) : 0
+    recastRefs.current[index].style.color = '#191'
     try {
       const response = await axios.post('/api/postRecastReaction', {       
         hash: hash,
@@ -216,16 +227,20 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
       })
       if (response.status !== 200) {
         recastRefs.current[index].style.color = '#000'
-        // need to revert recasts counter
+      } else if (response.status == 200) {
+        const { viewer_context, reactions } = cast
+        const updatedRecast = {...viewer_context, recasted: true}
+        const updateRecastCount = {...reactions, recasts_count: recastedCount + 1}
+        const updatedCast = {...cast, viewer_context: updatedRecast, reactions: updateRecastCount}
+        updateCast(index, updatedCast)
       }
-      console.log(response.status)
     } catch (error) {
       console.error('Error submitting data:', error)
     }
   }
 
-  async function postLike(hash, index) {
-    // need to update likes counter
+  async function postLike(hash, index, count) {
+    const likesCount = count ? Number(count) : 0
     likeRefs.current[index].style.color = '#b33'
     try {
       const response = await axios.post('/api/postLikeReaction', {       
@@ -234,11 +249,11 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
       })
       if (response.status !== 200) {
         likeRefs.current[index].style.color = '#000'
-        // need to revert likes counter
       } else if (response.status == 200) {
-        const { viewer_context } = cast
+        const { viewer_context, reactions } = cast
         const updatedLike = {...viewer_context, liked: true}
-        const updatedCast = {...cast, viewer_context: updatedLike}
+        const updateLikesCount = {...reactions, likes_count: likesCount + 1}
+        const updatedCast = {...cast, viewer_context: updatedLike, reactions: updateLikesCount}
         updateCast(index, updatedCast)
       }
       console.log(response.status)
@@ -253,7 +268,14 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
         <div className="flex-col" style={{alignItems: 'center', userSelect: 'none'}}>
 
           <div className="" style={{margin: '0 10px 0 0'}}>
-            <a className="" title="" href={`/${cast.author.username}`} onClick={() => {goToUserProfile(event, cast.author)}}>
+            <a className="" title="" href={`/${cast.author.username}`} onClick={(event) => {
+                  if (!isLogged) {
+                    account.LoginPopup()
+                    event.preventDefault()
+                  } else {
+                    goToUserProfile(event, cast.author)
+                  }
+                }}>
               <img loading="lazy" src={cast.author.pfp_url} className="" alt={`${cast.author.display_name} avatar`} style={{width: '48px', height: '48px', maxWidth: '48px', maxHeight: '48px', borderRadius: '24px', border: '1px solid #000'}} />
             </a>
           </div>
@@ -263,8 +285,17 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
               <div>{cast.impact_balance || 0}</div>
             </div>
             <div className={`impact-arrow ${fail ? 'flash-fail' : ''}`} onClick={
-             () => {if(store.userRemainingImpact > 0) {boostImpact(cast, 1)} else { clickFailed()
-             }}
+             () => {
+                if (!isLogged) {
+                  account.LoginPopup()
+                } else {
+                  if(store.userRemainingImpact > 0) {
+                    boostImpact(cast, 1)
+                  } else { 
+                    clickFailed()
+                  }
+                }
+              }
             } style={{margin: `${shrinkMargin(cast.impact_balance)}px 0 ${shrinkMargin(cast.impact_balance)}px 0`}}>
               <FaStar size={growPoints(cast.impact_balance)} className='' style={{fontSize: '25px'}} />
             </div>
@@ -273,10 +304,17 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
         </div>
         <div className="flex-col" style={{width: 'auto', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.5rem'}}>
         <div className="flex-col" style={{gap: '0.5rem'}}>
-          <div className="flex-row" style={{width: '100%', justifyContent: 'space-between', height: '20px', alignItems: 'flex-start', flexWrap: 'wrap'}}>
+          <div className="flex-row" style={{width: '100%', justifyContent: 'space-between', height: '', alignItems: 'flex-start', flexWrap: 'wrap'}}>
             <div className="flex-row" style={{alignItems: 'center', gap: '0.25rem', flexWrap: 'wrap', userSelect: 'none'}}>
               <span className="">
-                <a href={`/${cast.author.username}`} className="fc-lnk" title={cast.author.display_name} style={{cursor: 'pointer'}} onClick={() => {goToUserProfile(event, cast.author)}}>
+                <a href={`/${cast.author.username}`} className="fc-lnk" title={cast.author.display_name} style={{cursor: 'pointer'}} onClick={(event) => {
+                  if (!isLogged) {
+                    account.LoginPopup()
+                    event.preventDefault()
+                  } else {
+                    goToUserProfile(event, cast.author)
+                  }
+                }}>
                   <div className="flex-row" style={{alignItems: 'center'}}>
                     <span className="name-font">{cast.author.display_name}</span>
                     <div className="" style={{margin: '0 0 0 3px'}}>
@@ -286,16 +324,30 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
                 </a>
               </span>
               <span className="user-font">
-                <a href={`/${cast.author.username}`} className="fc-lnk" title={cast.author.display_name} onClick={() => {goToUserProfile(event, cast.author)}}>@{cast.author.username}</a>
+                <a href={`/${cast.author.username}`} className="fc-lnk" title={cast.author.display_name} onClick={(event) => {
+                  if (!isLogged) {
+                    account.LoginPopup()
+                    event.preventDefault()
+                  } else {
+                    goToUserProfile(event, cast.author)
+                  }
+                }}>@{cast.author.username}</a>
               </span>
               <div className="">·</div>
-              <a href={`/${cast.author.username}/casts/${cast.hash}`} className="fc-lnk" title="Navigate to cast" onClick={() => {goToCast(event, cast)}}>
+              <a href={`/${cast.author.username}/casts/${cast.hash}`} className="fc-lnk" title="Navigate to cast" onClick={(event) => {
+                  if (!isLogged) {
+                    account.LoginPopup()
+                    event.preventDefault()
+                  } else {
+                    goToCast(event, cast)
+                  }
+                }}>
                 <div className="user-font">{timePassed(cast.timestamp)}</div>
               </a>
             </div>
-            <div className="">
+            {/* <div className="">
               <Kebab />
-            </div>
+            </div> */}
           </div>
           <div className="">
             <div style={{wordWrap: 'break-word', maxWidth: `100%`, width: textMax, whiteSpace: 'pre-line'}}>
@@ -304,29 +356,22 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
               </div>
             {(cast.embeds.length > 0) && (cast.embeds.map((embed, subindex) => (
               
-            <div className='flex-col' style={{alignItems: 'center'}}>
-              {(embed && embed.type && embed.type == 'image') && (
-                <div className="" key={`${index}-${subindex}`}>
-                  <div className="flex-col" style={{position: 'relative'}}>
-                    <img 
-                      loading="lazy" 
-                      src={embed.url} 
-                      alt="Cast image embed" 
-                      style={{
-                        maxWidth: textMax, 
-                        maxHeight: '500px', 
-                        marginTop: '10px', 
-                        cursor: 'pointer', 
-                        position: 'relative',
-                        borderRadius: '8px'}} 
-                        onClick={() => {handleClick(embed)}} />
-                  </div>
-                </div>
+            <div className='flex-col' style={{alignItems: 'center', display: hide ? 'flex' : 'flex'}}>
+              {(embed && embed.type && (embed.type == 'image' || embed.type == 'other')) && (
+                <Images embed={embed} subindex={subindex} textMax={textMax} handleClick={handleClick} index={index} />
               )}
               {(embed && embed.type && embed.type == 'subcast') && (
-                <div className="" key={`${index}-${subindex}`}>
+                <div className="" key={`${index}-${subindex}`} style={{marginTop: '10px'}}>
                   <Subcast cast={embed.subcast} key={subindex} index={subindex} />
                 </div>
+              )}
+              {(embed && embed.type && embed.type == 'video') && (
+                <div className="" key={`${index}-${subindex}`}>
+                  <VideoPlayer width={textMax} src={embed.url} />
+                </div>
+              )}
+              {(embed && embed.url && embed.type && (embed.type == 'html') && embed.metadata && embed.metadata.title) && (
+                <Embed embed={embed} index={index} subindex={subindex} textMax={textMax} />
               )}
             </div>
             )))}
@@ -352,13 +397,19 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
               <div
                 ref={el => (recastRefs.current[index] = el)} 
                 className='flex-row recast-btn' 
-                style={{color: cast.viewer_context?.recasted ? '#3b3' : ''}}
-                onClick={() => postRecast(cast.hash, index, cast.reactions.recasts.length)}
+                style={{color: cast.viewer_context?.recasted ? '#191' : ''}}
+                onClick={() => {
+                  if (!isLogged) {
+                    account.LoginPopup()
+                  } else {
+                    postRecast(cast.hash, index, cast.reactions.recasts_count)
+                  }
+                }}
                 >
                 <div className="">
                   <Recast />
                 </div>
-                <span className="" style={{padding: '0 0 0 5px'}}>{cast.reactions.recasts.length}</span>
+                <span className="" style={{padding: '0 0 0 5px'}}>{cast.reactions.recasts_count}</span>
               </div>
             </div>
             <div className="flex-row" style={{flex: 4}}>
@@ -366,16 +417,27 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
                 ref={el => (likeRefs.current[index] = el)} 
                 className='flex-row like-btn' 
                 style={{color: cast.viewer_context?.liked ? '#b33' : ''}}
-                onClick={() => postLike(cast.hash, index, cast.reactions.likes.length)}
-                >
+                onClick={() => {
+                  if (!isLogged) {
+                    account.LoginPopup()
+                  } else {
+                    postLike(cast.hash, index, cast.reactions.likes_count)
+                  }
+                }}>
                 <div className="">
                   {cast.viewer_context?.liked ? <LikeOn /> : <Like />}
                 </div>
-                <span className="" style={{padding: '0 0 0 5px'}}>{cast.reactions.likes.length}</span>
+                <span className="" style={{padding: '0 0 0 5px'}}>{cast.reactions.likes_count}</span>
               </div>
             </div>
             <div className="flex-row" style={{flex: 1, padding: '3px', gap: '0.5rem'}}>
-              <div className={`impact-arrow ${fail ? 'flash-fail' : ''}`} style={{padding: '0px 1px 0 0px'}} onClick={() => {boostQuality(cast, 1)}}>
+              <div className={`impact-arrow ${fail ? 'flash-fail' : ''}`} style={{padding: '0px 1px 0 0px'}} onClick={() => {
+                if (!isLogged) {
+                  account.LoginPopup()
+                } else {
+                  boostQuality(cast, 1)
+                }
+                }}>
                 <ImArrowUp />
               </div>
 
@@ -388,7 +450,13 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
                 <Diamond />
               </div>
 
-              <div className={`like-btn ${fail ? 'flash-fail' : ''}`} style={{padding: '2px 0 0 0px'}} onClick={() => {boostQuality(cast, -1)}}>
+              <div className={`like-btn ${fail ? 'flash-fail' : ''}`} style={{padding: '2px 0 0 0px'}} onClick={() => {
+                if (!isLogged) {
+                  account.LoginPopup()
+                } else {
+                  boostQuality(cast, -1)
+                }
+                }}>
                 <ImArrowDown />
               </div>
 

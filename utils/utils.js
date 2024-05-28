@@ -1,4 +1,5 @@
 import axios from 'axios';
+import CryptoJS from 'crypto-js';
 
 // shorten a hash address
 export function shortenAddress(input, long) {
@@ -46,27 +47,6 @@ export function timePassed(timestamp) {
     return 'now'
   }
 }
-
-
-// check if url is an image
-// export async function isImage(url) {
-//   if (url) {
-//     try {
-//       const response = await axios.get('/api/getHeader', {
-//         params: { url }
-//       })
-//       if (response.data) {
-//         return response.data
-//       } else {
-//         return false
-//       }
-//     } catch (error) {
-//       return false
-//     }
-//   } else {
-//     return false
-//   }
-// }
 
 
 // add 'img' or 'url' label to embeds
@@ -149,53 +129,84 @@ export function getTimeRange(time) {
 
   let timeRange = null
   if (time === '24hr') {
-    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    timeRange = { $gte: twentyFourHoursAgo };
+    timeRange = new Date(Date.now() - 24 * 60 * 60 * 1000);
   } else if (time === '3days') {
-    const sevenDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
-    timeRange = { $gte: sevenDaysAgo };
+    timeRange = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
   } else if (time === '7days') {
-    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-    timeRange = { $gte: sevenDaysAgo };
+    timeRange = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
   } else if (time === '30days') {
-    const lastMonthStart = new Date();
-    lastMonthStart.setMonth(lastMonthStart.getMonth() - 1);
-    lastMonthStart.setDate(1);
-    lastMonthStart.setHours(0, 0, 0, 0);
-    const lastMonthEnd = new Date();
-    lastMonthEnd.setDate(0);
-    lastMonthEnd.setHours(23, 59, 59, 999);
-    timeRange = { $gte: lastMonthStart, $lte: lastMonthEnd };
+    timeRange = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  } else if (time === 'all') {
+    timeRange = null
   }
   return timeRange
 }
 
 
 async function isImage(url) {
+  // console.log(url)
   try {
     const response = await fetch(url, { method: 'HEAD' });
+    console.log(url)
+
     if (response.ok) {
       const contentType = response.headers.get('Content-Type');
-      // console.log(contentType)
-      return contentType && contentType.startsWith('image/');
+      console.log(contentType, url)
+      if (contentType && contentType.startsWith('image/')) {
+        return 'image'
+      } else if (contentType && contentType == 'application/x-mpegURL') {
+        return 'video'
+      } else if (contentType && contentType.startsWith('text/html')) {
+        console.log(contentType)
+        return 'html'
+      } else {
+        return 'other';
+      }
+    } else {
+      return 'other';
     }
-    return false;
   } catch (error) {
     console.error('Error checking image URL:', error);
-    return false;
+    return 'other';
   }
 }
 
-export async function checkImageUrls(cast) {
+async function getEmbeds(url) {
+  // console.log(url)
+  try {
+    const embedType = await axios.get('/api/getEmbeds', {
+      params: { url }
+    })
+    // console.log(embedType)
+    // console.log(embedType.data)
+    if (embedType && embedType.data) {
+      return embedType.data.embed
+    } else {
+      return 'other'
+    }
+  } catch (error) {
+    console.error('Error handling GET request:', error);
+    return 'other'
+  }
+}
+
+
+export async function checkEmbedType(cast) {
   const { embeds } = cast;
 
   if (embeds && embeds.length > 0) {
     const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
-      const isImageResult = await isImage(embed.url);
+
+      // console.log(embed)
+      // const imageResult = await isImage(embed.url);
+      const embedType = await getEmbeds(embed.url)
+
+      // console.log(embedType)
+      // console.log(embedType.data.embed)
       const isSubcast = typeof embed.cast_id !== 'undefined'
       return {
         ...embed,
-        type: isImageResult ? 'image' : isSubcast ? 'subcast' : 'other'
+        type: isSubcast ? 'subcast' : embedType
       };
     }));
     
@@ -206,4 +217,271 @@ export async function checkImageUrls(cast) {
   }
   
   return cast; // Return original cast object if embeds array is empty or undefined
+}
+
+
+// Encryption function
+export function encryptPassword(password, secretKey) {
+  console.log('testing1')
+    return CryptoJS.AES.encrypt(password, secretKey).toString();
+}
+
+// Decryption function
+export function decryptPassword(encryptedPassword, secretKey) {
+  console.log('testing2')
+    const bytes = CryptoJS.AES.decrypt(encryptedPassword, secretKey);
+    return bytes.toString(CryptoJS.enc.Utf8);
+}
+
+
+export function desensitizeString(s) {
+  s = s.replace(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b/g, '***@***.***');
+  s = s.replace(/\b\d{3}[-.]?\d{3}[-.]?\d{4}\b/g, '***-***-****');
+  s = s.replace(/\b\d{3}-\d{2}-\d{4}\b/g, '***-**-****');
+  return s;
+}
+
+
+export async function populateCast(casts) {
+  let displayedCasts = []
+  
+  if (casts) {
+    casts.forEach(cast => {
+      let newCast = {
+        author: {
+          fid: cast.author_fid,
+          pfp_url: cast.author_pfp,
+          username: cast.author_username,
+          display_name: cast.author_display_name,
+          power_badge: false,
+        },
+        hash: cast.cast_hash,
+        timestamp: cast.createdAt,
+        text: cast.cast_text,
+        impact_points: cast.impact_points,
+        embeds: [],
+        mentioned_profiles: [],
+        replies: {
+          count: 0
+        },
+        reactions: {
+          recasts: [],
+          likes: []
+        },
+        impact_balance: cast.impact_total,
+        quality_absolute: cast.quality_absolute,
+        quality_balance: cast.quality_balance
+      }
+
+      displayedCasts.push(newCast)
+    });
+  }
+  return displayedCasts
+}
+
+
+export function filterObjects(castArray, filterFid) {
+  return castArray.filter(obj => {
+    if (obj.author.fid != filterFid) {
+      obj.impact_points = obj.impact_points.filter(point => point.curator_fid != filterFid);
+      return true; 
+    }
+    return false;
+  });
+}
+
+
+export async function processTips(userFeed, userFid, tokenData) {
+
+  if (!userFeed || !userFid || !tokenData) {
+
+    return { castData: null, coinTotals: null }
+
+  } else {
+
+    // console.log(userFeed)
+  
+    let casts = filterObjects(userFeed, userFid)
+  
+    // console.log(casts)
+  
+    let totalImpact = casts.reduce((total, cast) => {
+      return total + cast.impact_balance - cast.quality_balance;
+    }, 0);
+  
+    // console.log(totalImpact)
+  
+    let tipCasts = []
+  
+    for (const cast of casts) {
+      let tipRatio = 1
+      if (cast.impact_points && cast.impact_points.length > 0) {
+        tipRatio = 0.92
+      }
+      let castImpact = cast.impact_balance - cast.quality_balance
+      let tipWeight = tipRatio * castImpact / totalImpact
+      let castSchema = {
+        castWeight: tipWeight,
+        castHash: cast.hash,
+        fid: cast.author.fid,
+        allCoins: [],
+        text: ''
+      }
+      tipCasts.push(castSchema)
+    }
+  
+    for (const cast of casts) {
+      if (cast.impact_points && cast.impact_points.length > 0) {
+        for (const subCast of cast.impact_points) {
+          let subTipWeight = 0.08 * subCast.impact_points / totalImpact
+          let subCastSchema = {
+            castWeight: subTipWeight,
+            castHash: subCast.target_cast_hash,
+            fid: subCast.curator_fid,
+            allCoins: [],
+            text: ''
+          }
+          tipCasts.push(subCastSchema)
+        }
+      }
+    }
+  
+    let tipCount = 0
+    for (const tipCast of tipCasts) {
+      tipCount += tipCast.castWeight
+    }
+  
+    // console.log(tipCount)
+  
+    let coinTotals = []
+  
+    for (const coin of tokenData) {
+      if (coin.set) {
+        for (const tipCast of tipCasts) {
+          let tip = 0
+          if (coin.token == '$TN100x') {
+            tip = Math.floor(tipCast.castWeight * coin.totalTip / 10)
+          } else {
+            tip = Math.floor(tipCast.castWeight * coin.totalTip)
+          }
+          let coinSchema = {
+            coin: coin.token,
+            tip: tip
+          }
+          tipCast.allCoins.push(coinSchema)
+        }
+      }
+      coinTotals[coin.token] = {totalTip: 0, usedTip: 0, remaining: 0, mod: 0, div: 0}
+      if (coin.token == '$TN100x') {
+        coinTotals[coin.token].totalTip = Math.floor(coin.totalTip / 10)
+      } else {
+        coinTotals[coin.token].totalTip = coin.totalTip
+      }
+      coinTotals[coin.token].usedTip = 0
+      coinTotals[coin.token].mod = 0
+      coinTotals[coin.token].div = 0
+      coinTotals[coin.token].remaining = 0
+    }
+  
+    // console.log(tipCasts)
+  
+    // console.log(coinTotals)
+  
+    for (const tipCast of tipCasts) {
+      if (tipCast.allCoins && tipCast.allCoins.length > 0) {
+        for (const coin of tipCast.allCoins) {
+          coinTotals[coin.coin].usedTip += coin.tip
+        }
+      }
+    }
+  
+    for (const coin of tokenData) {
+      if (coin.set) {
+        coinTotals[coin.token].remaining = coinTotals[coin.token].totalTip - coinTotals[coin.token].usedTip
+  
+        if (tipCasts.length > 0) {
+          coinTotals[coin.token].mod = coinTotals[coin.token].remaining % tipCasts.length
+  
+          coinTotals[coin.token].div = Math.floor(coinTotals[coin.token].remaining / tipCasts.length)
+        }
+      }
+    }
+  
+    for (const cast of tipCasts) {
+      if (cast.allCoins && cast.allCoins.length > 0) {
+        for (const coin of cast.allCoins) {
+          if (coinTotals[coin.coin].div > 0) {
+            coin.tip += coinTotals[coin.coin].div
+          }
+        }
+      }
+    }
+  
+    // console.log(tipCasts)
+  
+    for (const token of tokenData) {
+      if (token.set) {
+        if (coinTotals[token.token].mod > 0) {
+          for (let i = 0; i < coinTotals[token.token].mod; i++) {
+            const coinIndex = tipCasts[i].allCoins.findIndex(currentCoin => currentCoin.coin == token.token)
+            if (coinIndex !== -1 && tipCasts[i].allCoins[coinIndex].tip) {
+              tipCasts[i].allCoins[coinIndex].tip += 1
+            } else if (coinIndex !== -1) {
+              tipCasts[i].allCoins[coinIndex].tip = 1
+              tipCasts[i].allCoins[coinIndex].coin = token.token
+            } else {
+              tipCasts[i].allCoins.push({coin: token.token, tip: 1})
+            }              
+          }
+        }
+      }
+    }
+  
+    // console.log(tipCasts)
+  
+    for (const cast of tipCasts) {
+      if (cast.allCoins && cast.allCoins.length > 0) {
+        for (const coin of cast.allCoins) {
+          let coinText = ''
+          if (coin.coin == '$TN100x' && coin.tip > 0) {
+            coinText = `🍖x${coin.tip} \n`
+            cast.text += coinText
+          } else if (coin.tip > 0) {
+            coinText = `${coin.tip} ${coin.coin} \n`
+            cast.text += coinText
+          }
+        }
+        if (cast.text.length > 0) {
+          cast.text += 'tipped via /impact'
+        }
+      }
+    }
+  
+    console.log(coinTotals)
+  
+    // console.log(tipCasts)
+  
+    let cleanTips = tipCasts.map(({ castWeight, ...rest }) => rest)
+  
+    // console.log(cleanTips)
+  
+    let finalTips = cleanTips.filter(cast => cast.text.length > 0)
+  
+    console.log(finalTips)
+  
+    return { castData: finalTips, coinTotals: coinTotals }
+  }
+}
+
+
+export function generateRandomString(length) {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  const charactersLength = characters.length;
+  
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  
+  return result;
 }

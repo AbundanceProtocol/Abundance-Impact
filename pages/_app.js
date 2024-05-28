@@ -8,7 +8,7 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Drawer from '@mui/material/Drawer';
 import { HiChevronUp as CollapseIcon, HiMenu } from 'react-icons/hi';
-import { FaPen } from 'react-icons/fa';
+import { FaPen, FaStar, FaRegStar } from 'react-icons/fa';
 import { AccountContext } from '../context'
 import useStore from '../utils/store'
 import useMatchBreakpoints from '../hooks/useMatchBreakpoints';
@@ -20,6 +20,9 @@ import NeynarSigninButton from '../components/Signin';
 import { IoIosWarning } from "react-icons/io"
 import { FaLock } from "react-icons/fa";
 import axios from 'axios';
+import { PiSquaresFourLight as Actions } from "react-icons/pi";
+import { IoInformationCircleOutline as Info } from "react-icons/io5";
+import Creators from '../components/Leaderboard/Creators';
 
 export default function App({ Component, pageProps }) {
   const store = useStore()
@@ -27,7 +30,7 @@ export default function App({ Component, pageProps }) {
   const { isMobile, isTablet } = useMatchBreakpoints();
   const ref = useRef(null)
   const ref1 = useRef(null)
-  const [isSignedIn, setIsSignedIn] = useState()
+  const [isLogged, setIsLogged] = useState()
   const [bottomNavSize, setBottomNavSize] = useState(ref?.current?.offsetWidth)
   const [navSize, setNavSize] = useState(1060)
   const router = useRouter()
@@ -39,6 +42,10 @@ export default function App({ Component, pageProps }) {
   const [menuHover, setMenuHover] = useState( {in: Date.now(), out: Date.now() } )
   const [showLogin, setShowLogin] = useState(false)
   const [showLogout, setShowLogout] = useState(false)
+  const [showActions, setShowActions] = useState(false)
+  const [topCreators, setTopCreators] = useState([])
+  const [topCreatorsSched, setTopCreatorsSched] = useState(false)
+  const [paused, setPaused] = useState(false)
 
   const Col = styled.div`
     display: grid;
@@ -56,9 +63,9 @@ export default function App({ Component, pageProps }) {
   useEffect(() => {
     let menuLink = targetLink()
     setBottomNavSize(ref?.current?.offsetWidth)
-
     setNavSize(ref?.current?.offsetWidth - 60)
     setLinkTarget(menuLink)
+    setTopCreators([])
     setNavMenu(button[menuLink].menu)
     handleNavResize()
     window.addEventListener("resize", handleNavResize);
@@ -69,11 +76,31 @@ export default function App({ Component, pageProps }) {
   }, [])
 
   useEffect(() => {
+    console.log(paused, topCreatorsSched)
+    if (topCreatorsSched) {
+      if (!paused) {
+        getTopCreators()
+      }
+      setTopCreatorsSched(false);
+    } else {
+      const timeoutId = setTimeout(() => {
+        if (!paused) {
+          getTopCreators()        
+        }
+        setTopCreatorsSched(false);
+      }, 300);
+  
+      return () => clearTimeout(timeoutId);
+    }
+  }, [topCreators, topCreatorsSched]);
+
+
+  useEffect(() => {
     // console.log(store.signer_uuid)
     if (store.isAuth)
-      setIsSignedIn(true)
+      setIsLogged(true)
     else
-      setIsSignedIn(false)
+      setIsLogged(false)
   }, [store.isAuth])
   
   function handleNavResize() {
@@ -81,10 +108,18 @@ export default function App({ Component, pageProps }) {
     setBottomNavSize(ref?.current?.offsetWidth)
   }
 
+  const toggleShowActions = () => {
+    if (showActions) {
+      setShowActions(false)
+    } else {
+      setShowActions(true)
+    }
+  }
+
   const handleSignIn = async (data) => {
     // console.log(data)
     // console.log(store.isAuth)
-    setIsSignedIn(true)
+    setIsLogged(true)
     setShowLogin(false)
   };
 
@@ -102,7 +137,7 @@ export default function App({ Component, pageProps }) {
     store.setUserFollowingFC(null)
     store.setUserEthVerAddresses([])
     store.setUserSolVerAddresses([])
-    setIsSignedIn(false)
+    setIsLogged(false)
     setShowLogout(false)
     if (router.route == '/~/profile') {
       router.push(`/`)
@@ -113,12 +148,36 @@ export default function App({ Component, pageProps }) {
     // console.log(store.fid, store.isAuth, store.signer_uuid);
     if (store.isAuth) {
       setUserProfile(store.fid)
-      // setIsSignedIn(true)
+      setIsLogged(true)
     }
     else {
-      setIsSignedIn(false)
+      setIsLogged(false)
     }
   }, [store.fid, store.isAuth, store.signer_uuid]);
+
+  async function getTopCreators() {
+    if (!paused) {
+      try {
+        await setPaused(true)
+        const response = await axios.get('/api/curation/getTopCreators')
+        console.log(response)
+
+        if (response && response.data && response.data.topCreators?.length > 0) {
+          const receiverFids = response.data.topCreators
+          console.log(receiverFids)
+          setTopCreators(receiverFids)
+        } else {
+          setTopCreators([])
+        }
+      } catch (error) {
+        console.error('Error submitting data:', error)
+        setTopCreators([])
+  
+      }
+
+    }
+  }
+
 
   async function setUserProfile(fid) {
     try {
@@ -319,9 +378,6 @@ export default function App({ Component, pageProps }) {
 
   const testButton = async () => {
 
-
-
-
   }
 
   const LoginPopup = async () => {
@@ -366,96 +422,161 @@ export default function App({ Component, pageProps }) {
     )
   }
 
-  const LeftNav = (props) => {
-    let btn = button[props.buttonName]
-    let btnName = props.buttonName
-    const TopIcon = btn.icon
+  const LeftNav = ({buttonName}) => {
+    let { account, icon, link, working } = button[buttonName]
+    const TopIcon = icon
     let menuState = "nav-link"
-    let accountState = !btn.account || (store.isAuth && btn.account)
-    if ((router.route === btn.link) && accountState) {
+    let accountState = !account || (store.isAuth && account)
+    if ((router.route === link) && accountState) {
       menuState = "active-nav-link"
-    } else if (!btn.working) {
+    } else if (!working) {
       menuState = "inactive-nav-link"
     }
     let unlockedState = 'btn-hvr'
-    if (btn.account && !store.isAuth || !btn.working)
+    if (account && !store.isAuth || !working) {
       unlockedState = 'lock-btn-hvr'
-      
-    return (
-      <div className="left-container" style={{padding: 'auto 8px'}} onMouseEnter={() => {
-        setNavMenu(btn.menu)
-        setMenuHover({ ...menuHover, in: Date.now() })
-      }}
-      onMouseLeave={() => setMenuHover({ ...menuHover, out: Date.now() }) }>
-        <Link href={(btn.link && btn.working && !(!store.isAuth && btn.account)) ? btn.link : '#'} style={{maxWidth: '260px'}}>
-          <div className={`flex-row`} style={{paddingRight: isMobile ? '1em' : 'unset', justifyContent: 'flex-start'}} onClick={() => {(!store.isAuth && btn.account) && LoginPopup()}}>
+    }
+
+    const Working = () => {
+      return (
+        <Link href={link} style={{maxWidth: '260px'}}>
+          <div className={`flex-row`} style={{paddingRight: isMobile ? '1em' : 'unset', justifyContent: 'flex-start'}}>
             <div className="flex-col" style={{height: '58px', alignItems: 'center', justifyContent: 'center'}}>
-              <div className={`flex-row flex-middle ${menuState} ${unlockedState}`} style={{padding: '2px 0 2px 0', borderRadius: '16px'}}>
+              <div className={`flex-row flex-middle ${menuState} btn-hvr`} style={{padding: '2px 0 2px 0', borderRadius: '16px'}}>
                 <TopIcon className="size-25" style={{margin: '6px 12px 6px 12px'}} />
                 <div className="font-15 left-nav mid-layer" style={{textAlign: 'center', fontSize: isTablet ? '12px' : '18px', padding: '0 24px 0 0'}}>
-                  {btnName}
+                  {buttonName}
                 </div>
                 <div style={{position: 'relative', fontSize: '0', width: '0', height: '100%'}}>
-                  {btn.working ? (<>
-                    {(btn.account && !store.isAuth) && (<div className='top-layer' style={{position: 'absolute', top: 0, left: 0, transform: 'translate(-100%, -50%)' }}>
-                      <FaLock size={8} color='#999' />
-                    </div>)}</>
-                    ) : (
-                    <div className='top-layer' style={{position: 'absolute', top: 0, left: 0, transform: 'translate(-70%, -50%)' }}>
-                      <div className='soon-btn'>SOON</div>
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
           </div>
         </Link>
+      )
+    }
+
+    const Locked = () => {
+      return (
+        <div className={`flex-row`} style={{paddingRight: isMobile ? '1em' : 'unset', justifyContent: 'flex-start', maxWidth: '260px'}} onClick={LoginPopup}>
+          <div className="flex-col" style={{height: '58px', alignItems: 'center', justifyContent: 'center'}}>
+            <div className={`flex-row flex-middle ${menuState} lock-btn-hvr`} style={{padding: '2px 0 2px 0', borderRadius: '16px'}}>
+              <TopIcon className="size-25" style={{margin: '6px 12px 6px 12px'}} />
+              <div className="font-15 left-nav mid-layer" style={{textAlign: 'center', fontSize: isTablet ? '12px' : '18px', padding: '0 24px 0 0'}}>
+                {buttonName}
+              </div>
+              <div style={{position: 'relative', fontSize: '0', width: '0', height: '100%'}}>
+                <div className='top-layer' style={{position: 'absolute', top: 0, left: 0, transform: 'translate(-100%, -50%)' }}>
+                  <FaLock size={8} color='#999' />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    const Soon = () => {
+      return (
+        <div className={`flex-row`} style={{paddingRight: isMobile ? '1em' : 'unset', justifyContent: 'flex-start', maxWidth: '260px'}}>
+          <div className="flex-col" style={{height: '58px', alignItems: 'center', justifyContent: 'center'}}>
+            <div className={`flex-row flex-middle inactive-nav-link lock-btn-hvr`} style={{padding: '2px 0 2px 0', borderRadius: '16px'}}>
+              <TopIcon className="size-25" style={{margin: '6px 12px 6px 12px'}} />
+              <div className="font-15 left-nav mid-layer" style={{textAlign: 'center', fontSize: isTablet ? '12px' : '18px', padding: '0 24px 0 0'}}>
+                {buttonName}
+              </div>
+              <div style={{position: 'relative', fontSize: '0', width: '0', height: '100%'}}>
+                <div className='top-layer' style={{position: 'absolute', top: 0, left: 0, transform: 'translate(-70%, -50%)' }}>
+                  <div className='soon-btn'>SOON</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    return (
+      <div className="left-container" style={{padding: 'auto 8px'}}>
+        {!working ? (<Soon />) : (isLogged || !account) ? (<Working />) : (<Locked />)}
       </div>
     )
   }
 
-  const BottomNav = (props) => {
-    let btn = button[props.buttonName]
-    let btnName = props.buttonName
-    if (btnName === 'portal' && account) {
-      btnName = store.username
-    }
-    const TopIcon = btn.icon
+  const BottomNav = ({buttonName}) => {
+    let { account, icon, link, working } = button[buttonName]
+    const TopIcon = icon
     let menuState = "nav-link"
-    let accountState = !btn.account || (account && btn.account)
-    if ((router.route === btn.link) && accountState) {
+    let accountState = !account || (store.isAuth && account)
+    if ((router.route === link) && accountState || (buttonName == 'Cast Actions' && showActions)) {
       menuState = "active-nav-link"
-    } else if (!btn.working) {
+    } else if (!working) {
       menuState = "inactive-nav-link"
     }
+    let unlockedState = 'btn-hvr'
+    if (account && !store.isAuth || !working) {
+      unlockedState = 'lock-btn-hvr'
+    }
 
-    return (
-      <div className="flex-row" style={{padding: 'auto 8px', width: 'auto', justifyContent: 'center', alignItems: 'center'}} onMouseEnter={() => {
-        setNavMenu(btn.menu)
-        setMenuHover({ ...menuHover, in: Date.now() })
-      }}
-      onMouseLeave={() => setMenuHover({ ...menuHover, out: Date.now() }) }>
-        <Link href={(btn.link && btn.working && !(!store.isAuth && btn.account)) ? btn.link : '#'} style={{width: 'auto'}}>
-          <div className={`flex-row ${menuState}`} style={{padding: isMobile ? '2px' : 'unset', width: 'auto' }} onClick={() => {(!store.isAuth && btn.account) && LoginPopup()}}>
-            <div className="flex-col" style={{height: '58px', alignItems: 'center', justifyContent: 'center'}}>
-              {btn.working? (
-              <div className="flex-row btn-hvr flex-middle" style={{padding: '6px 2px', borderRadius: '12px'}}>
-                <TopIcon className="size-25" style={{margin: '6px 12px 6px 12px'}} />
-                <div className="font-15 left-nav" style={{textAlign: 'center', fontSize: isTablet ? '12px' : '18px'}}>
-                  {btnName}
-                </div>
+    const Working = () => {
+      return (
+        <div onClick={() => {
+          if (buttonName == 'Cast Actions') {
+            toggleShowActions()
+          }
+        }}>
+        <Link href={link || ''} style={{maxWidth: '260px'}}>
+          <div className={`flex-row`} style={{padding: '0 10px', justifyContent: 'center'}}>
+            <div className="flex-col" style={{height: '46px', alignItems: 'center', justifyContent: 'center'}}>
+              <div className={`flex-row flex-middle ${menuState} btn-hvr`} style={{padding: '2px 0 2px 0', borderRadius: '16px'}}>
+                <TopIcon style={{margin: '3px 12px 3px 12px', width: (buttonName == 'Cast Actions') ? '30px' : '25px', height: (buttonName == 'Cast Actions') ? '30px' : '25px'}} />
               </div>
-              ) : (
-              <div className="flex-row btn-hvr lock-btn-hvr flex-middle" style={{padding: '6px 2px', borderRadius: '12px', position: 'relative'}}>
-                <TopIcon className="size-25" style={{margin: '6px 12px 6px 12px'}} />
-                <div className='top-layer' style={{position: 'absolute', top: 0, right: 0, transform: 'translate(30%, -50%)' }}>
-                  <div className='soon-btn'>SOON</div>
-                </div>
-              </div>
-              )}
             </div>
           </div>
         </Link>
+        </div>
+      )
+    }
+
+    const Locked = () => {
+      return (
+        <div className={`flex-row`} style={{padding: '0 10px', justifyContent: 'flex-start', maxWidth: '260px'}} onClick={LoginPopup}>
+          <div className="flex-col" style={{height: '46px', alignItems: 'center', justifyContent: 'center'}}>
+            <div className={`flex-row flex-middle ${menuState} lock-btn-hvr`} style={{padding: '2px 0 2px 0', borderRadius: '16px'}}>
+              <TopIcon className="size-25" style={{margin: '3px 12px 3px 12px'}} />
+              <div style={{position: 'relative', fontSize: '0', width: '0', height: '100%'}}>
+                <div className='top-layer' style={{position: 'absolute', top: 0, left: 0, transform: 'translate(-100%, -50%)' }}>
+                  <FaLock size={8} color='#999' />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    const Soon = () => {
+      return (
+        <div className={`flex-row`} style={{padding: '0 10px', justifyContent: 'flex-start', maxWidth: '260px'}}>
+          <div className="flex-col" style={{height: '46px', alignItems: 'center', justifyContent: 'center'}}>
+            <div className={`flex-row flex-middle inactive-nav-link lock-btn-hvr`} style={{padding: '2px 0 2px 0', borderRadius: '16px'}}>
+              <TopIcon className="size-25" style={{margin: '3px 12px 3px 12px'}} />
+              <div style={{position: 'relative', fontSize: '0', width: '0', height: '100%'}}>
+                <div className='top-layer' style={{position: 'absolute', top: 0, left: 0, transform: 'translate(-70%, -50%)' }}>
+                  <div className='soon-btn'>SOON</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+
+
+    return (
+      <div className="flex-row" style={{padding: 'auto 8px', width: 'auto', justifyContent: 'center', alignItems: 'center'}}>
+        {!working ? (<Soon />) : (isLogged || !account) ? (<Working />) : (<Locked />)}
       </div>
     )
   }
@@ -545,7 +666,7 @@ export default function App({ Component, pageProps }) {
                 <div className="navbar-header">
                   <HomeButton />
                   <Box className="navbar-header-end flex-row" sx={{alignItems: 'center', justifyContent: 'space-between'}}>
-                  {/* {isSignedIn ? (<LogOut />) : (<NeynarSigninButton onSignInSuccess={handleSignIn} />)} */}
+                  {/* {isLogged ? (<LogOut />) : (<NeynarSigninButton onSignInSuccess={handleSignIn} />)} */}
                     {/* <ConnectButton 
                       account={store.account}
                       isMobile={isMobile}
@@ -578,14 +699,14 @@ export default function App({ Component, pageProps }) {
                 <HomeButton />
               </div>
               <Col className='top-right'>
-              <TopNavWrapper>
+              {/* <TopNavWrapper> */}
                 {/* { button['top-menu'].map((btn, index) => (
                       <TopNav buttonName={btn} key={index} /> ))} */}
-              </TopNavWrapper>
+              {/* </TopNavWrapper> */}
               {/* //// test buttons //// */}
                {/* <div id="showLoginBtn" className='srch-select-btn' onClick={testButton}>Test Button</div>  */}
-              {/* {(isSignedIn || showLogin) ? (<LogOut />) : (<NeynarSigninButton onSignInSuccess={handleSignIn} />)} */}
-              {/* {isSignedIn ? (<LogOut />) : (<LogOut />)} */}
+              {/* {(isLogged || showLogin) ? (<LogOut />) : (<NeynarSigninButton onSignInSuccess={handleSignIn} />)} */}
+              {/* {isLogged ? (<LogOut />) : (<LogOut />)} */}
               {/* <ConnectButton 
                 account={account}
                 isMobile={isMobile}
@@ -598,9 +719,46 @@ export default function App({ Component, pageProps }) {
         </nav>
       )}
       <div className='flex-row' style={{justifyContent: 'center', width: 'auto'}}>
-        <div className="flex-col" style={{padding: '58px 0 0 0'}}>
+        <div className="flex-col" style={{padding: '58px 0 0 0', position: 'relative'}}>
+          <div className='left-container'></div>
+          <div className='flex-col left-container' style={{position: 'fixed'}}>
+
           { button['side-menu'].map((btn, index) => (
             <LeftNav buttonName={btn} key={index} /> ))}
+            <div className='left-container' style={{margin: '20px 23px 0 0', maxWidth: '237px'}}>
+              <div style={{backgroundColor: '#334455ee', borderRadius: '16px', padding: '0px', border: '0px solid #678', color: '#fff', fontWeight: '700', alignItems:' center', fontSize: '20px'}}>
+                <div title='Cast Actions' className='flex-row' style={{alignItems: 'center', justifyContent: 'center', margin: '8px'}}>
+                  <Actions size={32} color={'#9cf'} /><p className='left-nav' style={{paddingLeft: '10px', fontSize: isTablet ? '12px' : '18px', fontWeight: '500'}}>Cast Actions </p>
+                </div>
+                <div className='flex-col' style={{gap: '0.5rem', margin: '8px'}}>
+                  <a className="" title="+1 Impact" href='https://warpcast.com/~/add-cast-action?name=%2B1+Impact&icon=star&actionType=post&postUrl=https%3A%2Fimpact.abundance.id%2Fapi%2Faction%2Fimpact%3Fp%3D1&description=Curate+Casts+with+the+Impact+App' target="_blank" rel="noopener noreferrer">
+                    <div className='flex-row cast-act' style={{borderRadius: '8px', padding: '8px 4px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
+                      <FaRegStar size={20} />
+                      <p className='left-nav' style={{padding: '0px', fontSize: '15px', fontWeight: '500'}}>+1 Impact</p>
+                    </div>
+                  </a>
+
+                  <a className="" title='+5 Impact' href='https://warpcast.com/~/add-cast-action?name=%2B5+Impact&icon=star&actionType=post&postUrl=https%3A%2Fimpact.abundance.id%2Fapi%2Faction%2Fimpact%3Fp%3D5&description=Curate+Casts+with+the+Impact+App' target="_blank" rel="noopener noreferrer">
+                    <div className='flex-row cast-act' style={{borderRadius: '8px', padding: '8px 4px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
+                      <FaRegStar size={20} />
+                      <p className='left-nav' style={{padding: '0px', fontSize: '15px', fontWeight: '500'}}>+5 Impact</p>
+                    </div>
+                  </a>
+
+                  <a className="" title="Cast Impact Balance" href='https://warpcast.com/~/add-cast-action?name=Cast+Impact+Balance&icon=info&actionType=post&postUrl=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Faction%2Fbalance&description=Get+Cast+Balance+for+Impact+App ' target="_blank" rel="noopener noreferrer">
+                    <div className='flex-row cast-act' style={{borderRadius: '8px', padding: '8px 4px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
+                      <div className='left-nav' style={{width: '2px', fontSize: '0px'}}>&nbsp;</div>
+                      <Info size={20} />
+                      <p className='left-nav' style={{padding: '0px', fontSize: '15px', fontWeight: '500'}}>Cast Impact Balance</p>
+                      <div className='left-nav' style={{width: '2px', fontSize: '0px'}}>&nbsp;</div>
+                    </div>
+                  </a>
+                </div>
+              </div>
+            </div>
+          {/* { button['side-menu'].map((btn, index) => (
+            <LeftMenu btn={btn} index={index} key={index} LoginPopup={LoginPopup} /> ))} */}
+          </div>
         </div>
         <div>
           <div className="container cast-area" style={isMobile ? {} : {width: isMobile? '100%' : '620px'}}>
@@ -611,12 +769,67 @@ export default function App({ Component, pageProps }) {
         </div>
         <div className='right-nav-text' style={{width: '400px'}}>
           <div>
-            <div style={{margin: '58px 0px 12px 20px', backgroundColor: '#334455ee', width: '380px', borderRadius: '20px', padding: '32px', border: '0px solid #678', color: '#fff', fontWeight: '700', alignItems:' center', fontSize: '20px'}}><IoIosWarning size={40} color={'#fbb'} /><p style={{paddingTop: '10px'}}>NOTICE: the Abundance Protocol&apos;s Impact App is currently in an early development stage </p></div>
+            <div style={{margin: '58px 0px 12px 20px', backgroundColor: '#334455ee', width: '380px', borderRadius: '20px', padding: '32px', border: '0px solid #678', color: '#fff', fontWeight: '700', alignItems:' center', fontSize: '20px'}}><FaStar size={40} color={'#9cf'} /><p style={{paddingTop: '10px', fontSize: '20px', fontWeight: '600'}}>3 ways to earn with Impact: </p>
+              <div className='flex-col' style={{gap: '0.5rem', marginTop: '10px'}}>
+                <div className='flex-row'>
+                  <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '10px 35px 0 0'}}>1</div>
+                  <p style={{paddingTop: '10px', fontSize: '16px', fontWeight: '500'}}>Create great things that benefit the Farcaster community. Curators will be looking for great content.</p>
+                </div>
+                <div className='flex-row'>
+                  <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '10px 35px 0 0'}}>2</div>
+                  <p style={{paddingTop: '10px', fontSize: '16px', fontWeight: '500'}}>Curate impactful casts. Curators get a percent of the rewards going to creators.</p>
+                </div>
+                <div className='flex-row'>
+                  <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '10px 35px 0 0'}}>3</div>
+                  <p style={{paddingTop: '10px', fontSize: '16px', fontWeight: '500'}}>Reward creators. The more rewards you give the more Impact Points you get to stake.</p>
+                </div>
+              </div>
+            </div>
+
+            {(topCreators.length > 0) && (<div style={{margin: '18px 0px 12px 20px', backgroundColor: '#334455ee', width: '380px', borderRadius: '20px', padding: '32px', border: '0px solid #678', color: '#fff', fontWeight: '700', alignItems:' center', fontSize: '20px'}}>
+              <p style={{padding: '0 0 6px 0', fontSize: '20px', fontWeight: '600'}}>Creator & Builder Leaderboard: </p>
+              <div className='flex-col' style={{gap: '0.5rem', marginTop: '10px'}}>
+                {(topCreators.map((creator, index) => (<Creators creator={creator} index={index} />)))}
+              </div>
+            </div>)}
           </div>
         </div>
       </div>
+      {(isMobile && showActions) && (
+        <div style={{margin: '20px 23px 0 0', bottom: '46px', width: `100%`, position: 'fixed'}}>
+          <div style={{backgroundColor: '#1D3244cc', borderRadius: '16px 16px 0 0', padding: '3px 0 6px 0', border: '0px solid #678', color: '#fff', fontWeight: '700', alignItems:' center', fontSize: '20px'}}>
+          <div title='Cast Actions' className='flex-row' style={{alignItems: 'center', justifyContent: 'center', margin: '8px'}}>
+            <Actions size={32} color={'#9cf'} /><p className='' style={{paddingLeft: '10px', fontSize: isTablet ? '12px' : '18px', fontWeight: '500'}}>Cast Actions </p>
+          </div>
+          <div className='flex-col' style={{gap: '0.5rem', margin: '8px'}}>
+            <a className="" title="+1 Impact" href='https://warpcast.com/~/add-cast-action?name=%2B1+Impact&icon=star&actionType=post&postUrl=https%3A%2Fimpact.abundance.id%2Fapi%2Faction%2Fimpact%3Fp%3D1&description=Curate+Casts+with+the+Impact+App' target="_blank" rel="noopener noreferrer">
+              <div className='flex-row cast-act' style={{borderRadius: '8px', padding: '8px 4px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
+                <FaRegStar size={20} />
+                <p className='' style={{padding: '0px', fontSize: '15px', fontWeight: '500'}}>+1 Impact</p>
+              </div>
+            </a>
+
+            <a className="" title='+5 Impact' href='https://warpcast.com/~/add-cast-action?name=%2B5+Impact&icon=star&actionType=post&postUrl=https%3A%2Fimpact.abundance.id%2Fapi%2Faction%2Fimpact%3Fp%3D5&description=Curate+Casts+with+the+Impact+App' target="_blank" rel="noopener noreferrer">
+              <div className='flex-row cast-act' style={{borderRadius: '8px', padding: '8px 4px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
+                <FaRegStar size={20} />
+                <p className='' style={{padding: '0px', fontSize: '15px', fontWeight: '500'}}>+5 Impact</p>
+              </div>
+            </a>
+
+            <a className="" title="Cast Impact Balance" href='https://warpcast.com/~/add-cast-action?name=Cast+Impact+Balance&icon=info&actionType=post&postUrl=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Faction%2Fbalance&description=Get+Cast+Balance+for+Impact+App ' target="_blank" rel="noopener noreferrer">
+              <div className='flex-row cast-act' style={{borderRadius: '8px', padding: '8px 4px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
+                <div className='' style={{width: '2px', fontSize: '0px'}}>&nbsp;</div>
+                <Info size={20} />
+                <p className='' style={{padding: '0px', fontSize: '15px', fontWeight: '500'}}>Cast Impact Balance</p>
+                <div className='' style={{width: '2px', fontSize: '0px'}}>&nbsp;</div>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+      )}
       {isMobile ? (
-        <div ref={ref1} className='flex-row' style={{position: 'fixed', bottom: 0, backgroundColor: '#1D3244cc', height: '56px', width: `100%`, borderRadius: '0px', padding: '0', border: '0px solid #678', boxSizing: 'border-box'}}>
+        <div ref={ref1} className='flex-row' style={{position: 'fixed', bottom: 0, backgroundColor: '#1D3244cc', height: '46px', width: `100%`, borderRadius: '0px', padding: '0', border: '0px solid #678', boxSizing: 'border-box'}}>
           <div className='flex-row' style={{position: 'relative', width: '100%', justifyContent: 'space-between', padding: '0 10px'}}>
           { button['bottom-nav'].map((btn, index) => (
             <BottomNav buttonName={btn} key={index} /> ))}

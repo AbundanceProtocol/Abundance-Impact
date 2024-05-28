@@ -12,7 +12,9 @@ export default async function handler(req, res) {
   const { fid, castContext, impactAmount } = req.body;
   // // console.log(fid, castContext, amount)
   
-  if (req.method === 'POST' && fid && fid != '-' && impactAmount && castContext) {
+  if (req.method !== 'POST' || !fid || fid == '-' || !impactAmount || !castContext) {
+    res.status(405).json({ error: 'Method not allowed' });
+  } else {
     // console.log('1')
 
     async function getQuality(curatorFid, castHash) {
@@ -318,7 +320,7 @@ export default async function handler(req, res) {
                     author_display_name: castContext.author_display_name,
                     cast_hash: castContext.cast_hash,
                     cast_text: castContext.cast_text,
-                    cast_channel: castContext.channel,
+                    cast_channel: castContext.cast_channel,
                     quality_balance: 0,
                     quality_absolute: 0,
                     impact_total: impactAmount,
@@ -369,10 +371,5 @@ export default async function handler(req, res) {
         message: `Can't add Impact to reviewed cast`
       });
     }
-
-  } else {
-    // console.log('23')
-
-    res.status(405).json({ error: 'Method not allowed' });
   }
 }
