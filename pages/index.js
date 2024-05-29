@@ -19,7 +19,7 @@ import Spinner from '../components/Spinner';
 import { Degen } from './assets';
 import { GiMeat, GiTwoCoins } from "react-icons/gi";
 
-export default function Home() {
+export default function Home({time, curators, channels, tags, shuffle, referrer}) {
   const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
   const ref = useRef(null)
   const likeRefs = useRef([])
@@ -102,8 +102,8 @@ export default function Home() {
   const [feedRouterScheduled, setFeedRouterScheduled] = useState(false);
   const userTipPercent = useStore(state => state.userTipPercent);
 	const [userSearch, setUserSearch] = useState({ search: '' })
-  const [channels, setChannels] = useState([])
-  const [curators, setCurators] = useState([])
+  const [filterChannels, setFilterChannels] = useState([])
+  const [filterCurators, setFilterCurators] = useState([])
   const [selectedCurators, setSelectedCurators] = useState([])
   const [selectedChannels, setSelectedChannels] = useState([])
   const [modal, setModal] = useState({on: false, success: false, text: ''})
@@ -539,6 +539,43 @@ export default function Home() {
     console.log('triggered')
     setIsLogged(store.isAuth)
 
+    setUserQuery(updateUserQuery => {
+      return {time, channels, tags, shuffle, curators}
+    })
+
+    if (curators && selectedCurators && selectedCurators.length == 0) {
+      getCuratorsQuery(curators)
+    }
+
+    async function getCuratorsQuery(curators) {
+
+      const getCuratorData = async (name) => {
+        try {
+          const response = await axios.get('/api/curation/queryCurators', {
+            params: {
+              name: name,
+            }
+          })
+          if (response) {
+            const curatorsData = response.data.users
+            console.log(curatorsData)
+            return curatorsData
+          } else {
+            return null
+          }
+          // console.log(channels)
+        } catch (error) {
+          console.error('Error submitting data:', error)
+          return null
+        }
+      }
+
+      for (const curator of curators) {
+        const curatorData = await getCuratorData(curator)
+        addCurator(curatorData)
+      }
+    }
+
     const handleResize = () => {
       setScreenWidth(window.innerWidth)
       setScreenHeight(window.innerHeight)
@@ -920,9 +957,9 @@ export default function Home() {
         }
       })
       if (response) {
-        const channels = response.data.channels.channels
-        console.log(channels)
-        setChannels(channels)
+        const channelsData = response.data.channels.channels
+        console.log(channelsData)
+        setFilterChannels(channelsData)
       }
     } catch (error) {
       console.error('Error submitting data:', error)
@@ -938,9 +975,9 @@ export default function Home() {
         }
       })
       if (response) {
-        const curators = response.data.users
-        console.log(curators)
-        setCurators(curators)
+        const curatorsData = response.data.users
+        console.log(curatorsData)
+        setFilterCurators(curatorsData)
       }
       // console.log(channels)
     } catch (error) {
@@ -1206,8 +1243,8 @@ export default function Home() {
                   onKeyDown={curatorKeyDown} />
               </div>
               <div className='flex-row' style={{gap: '0.5rem', padding: '0px 6px', flexWrap: 'wrap'}}>
-                {curators && (
-                  curators.map((curator, index) => (
+                {filterCurators && (
+                  filterCurators.map((curator, index) => (
                     <div key={`Cu2-${index}`} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addCurator(curator)}}>
                       <img loading="lazy" src={curator.pfp} className="" alt={curator.display_name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
                       <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>@{curator.username}</div>
@@ -1244,8 +1281,8 @@ export default function Home() {
                   onKeyDown={channelKeyDown} />
               </div>
               <div className='flex-row top-layer' style={{gap: '0.5rem', padding: '0px 6px', flexWrap: 'wrap'}}>
-                {channels && (
-                  channels.map((channel, index) => (
+                {filterChannels && (
+                  filterChannels.map((channel, index) => (
                     <div key={`Ch2-${index}`} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addChannel(channel)}}>
                       <img loading="lazy" src={channel.image_url} className="" alt={channel.name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
                       <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>{channel.name}</div>
@@ -1291,4 +1328,48 @@ export default function Home() {
     </div>
   </div>
   )
+}
+
+
+
+export async function getServerSideProps(context) {
+  // Fetch dynamic parameters from the context object
+  const { query } = context;
+  const { time, curators, channels, tags, shuffle, referrer } = query;
+  let setTime = '3days'
+  if (time) {
+    setTime = time
+  }
+  let setCurators = []
+  if (curators) {
+    setCurators = Array.isArray(curators) ? curators : [curators]
+  }  
+  let setChannels = []
+  if (channels) {
+    setChannels = Array.isArray(channels) ? channels : [channels]
+  }
+  let setTags = []
+  if (tags) {
+    setTags = Array.isArray(tags) ? tags : [tags]
+  }
+  let setShuffle = true
+  if (shuffle) {
+    if (shuffle == 'true') {
+      setShuffle = true
+    } else if (shuffle == 'false') {
+      setShuffle = false
+    }
+  }
+  let setReferrer = referrer || null
+  console.log(setTime, setCurators, setChannels, setTags, setShuffle)
+  return {
+    props: {
+      time: setTime,
+      curators: setCurators,
+      channels: setChannels,
+      tags: setTags,
+      shuffle: setShuffle,
+      referrer: setReferrer
+    },
+  };
 }
