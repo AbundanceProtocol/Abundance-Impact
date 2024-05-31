@@ -17,6 +17,8 @@ import { GoTag } from "react-icons/go";
 import { AiOutlineBars } from "react-icons/ai";
 import { IoCaretForwardOutline as Forward } from "react-icons/io5";
 import Spinner from '../../components/Spinner';
+import { Degen } from '../assets';
+import { GiMeat, GiTwoCoins } from "react-icons/gi";
 
 export default function Schedule() {
   const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
@@ -115,6 +117,11 @@ export default function Schedule() {
   const [cronId, setCronId] = useState(null)
   const [activeCron, setActiveCron] = useState(null)
   const [jobScheduled, setJobScheduled] = useState(false);
+  const [loadedSchedule, setLoadedSchedule] = useState(false)
+  const tokenInfo = [{token: '$DEGEN', set: true}, {token: '$TN100x', set: true}]
+  const [tokenData, setTokenData] = useState(tokenInfo)
+  const [tokensSelected, setTokensSelected] = useState(['$DEGEN'])
+  const availableTokens = ['$DEGEN', '$TN100x']
 
   function btnText(type) {
     if (type == 'tags' && (userQuery[type] == 'all' || userQuery[type].length == 0)) {
@@ -476,11 +483,24 @@ export default function Schedule() {
       if (schedule.cron_job_id) {
         setCronId(schedule.cron_job_id)
       }
-
-
+      if (schedule.currencies && schedule.currencies.length > 0) {
+        let updatedTokenData = [...tokenData]
+        for (const token of updatedTokenData) {
+          if (schedule.currencies.includes(token.token)) {
+            token.allowance = 0
+            token.set = true
+            token.totalTip = 0
+          } else {
+            token.allowance = 0
+            token.set = false
+            token.totalTip = 0
+          }
+        }
+        setTokenData(updatedTokenData)
+      }
       console.log(userSchedule.data)
     }
-    // getScheduledSearch
+    setLoadedSchedule(true)
   }
 
   useEffect(() => {
@@ -883,28 +903,19 @@ export default function Schedule() {
 
   const HorizontalScale = () => {
     const [value, setValue] = useState(initValue);
-    const [allowance, setAllowance] = useState(() => {
-      return userAllowance;
-    });
-    useEffect(() => {
-      setAllowance(userAllowance);
-    }, [userAllowance]);
   
     const handleChange = (event) => {
       setValue(parseInt(event.target.value));
     };
-    
-    const tip = Math.round(allowance * value / 100);
 
     const handleMouseLeave = () => {
       store.setUserTipPercent(value);
-      setTotalTip(tip)
       setInitValue(value)
     };
   
     return (
       <div className='flex-row' style={{ width: '100%', padding: '3px 12px', gap: '1.0rem', alignItems: 'center' }}
-      onMouseLeave={handleMouseLeave}>
+      onMouseLeave={handleMouseLeave} onTouchEnd={handleMouseLeave}>
         <input
           type="range"
           min="1"
@@ -913,10 +924,20 @@ export default function Schedule() {
           onChange={handleChange}
           style={{ width: '100%' }}
         />
-
-        <div className='flex-col' style={{ textAlign: 'center', color: '#def', width: '80px', gap: '0.25rem' }}>
-          <div style={{ textAlign: 'center', color: '#def', fontSize: '18px', fontWeight: '700' }}>{formatNum(tip)}</div>
-          <div style={{ textAlign: 'center', color: '#def', fontSize: '12px' }}>({value}%)</div>
+        <div className='flex-col' style={{gap: '0.45rem'}}>
+          <div className='flex-row' style={{flexWrap: 'wrap', justifyContent: 'center', gap: '0.35rem', width: '150px'}}>
+          {(tokenData && tokenData.length > 0) && tokenData.map((token, index) => {
+            return ((token.allowance >= 0) && (<div key={index} className='flex-row' style={{border: token.set ? '1px solid #abc' : '1px solid #aaa', borderRadius: '6px', padding: '2px 5px', color: token.set ? '#9df' : '#ccc', gap: '0.35rem', alignItems: 'center', cursor: 'pointer', backgroundColor: token.set ? '#246' : 'transparent'}} onClick={() => {handleToken(token.token)}}>
+              <div style={{textAlign: 'center', color: token.set ? '#9df' : '#ccc', fontSize: '14px', fontWeight: '700'}}>
+                {value}%
+              </div>
+              {(token.token == '$DEGEN') ? (<Degen />) : (token.token == '$TN100x') ? (<GiMeat style={{transform: 'scaleX(-1)'}} />) : (<GiTwoCoins />)}
+            </div>))
+          })}
+          </div>
+          <div className='flex-row' style={{gap: '0.5rem', alignItems: 'center', justifyContent: 'center'}}>
+            <div style={{ textAlign: 'center', color: '#def', fontSize: '12px' }}>({value}%)</div><div style={{border: '1px solid #abc', fontSize: '12px', color: (tokensSelected.length == 0 || tokensSelected.length == 2) ? '#9df' : '#eee', padding: '1px 3px', borderRadius: '5px', backgroundColor: (tokensSelected.length == 0 || tokensSelected.length == 2) ? '#246' : 'transparent', cursor: 'pointer'}} onClick={() => {handleToken('All tokens')}}>SELECT ALL</div>
+          </div>
         </div>
       </div>
     );
@@ -1309,42 +1330,44 @@ export default function Schedule() {
     <div style={{padding: '58px 0 0 0', width: feedMax}}>
     </div>
 
-{(userQuery.time && isLogged) ? (<div style={{border: '1px solid #777', padding: '8px', borderRadius: '10px', margin: '3px', backgroundColor: '#eef6ff11'}}>
+    {!loadedSchedule ? (
+      <div className='flex-row' style={{height: '100%', alignItems: 'center', width: feedMax, justifyContent: 'center', marginTop: '40px'}}>
+        <Spinner size={31} color={'#999'} />
+      </div>
+    ) : (userQuery.time && isLogged) ? (<div style={{border: '1px solid #777', padding: '8px', borderRadius: '10px', margin: '3px', backgroundColor: '#eef6ff11'}}>
     <div className="top-layer">
       <div className="flex-row" style={{padding: '0', marginBottom: '10px', flexWrap: 'wrap', justifyContent: 'flex-start', gap: '0.50rem'}}>
-
         <div className='flex-row' style={{gap: '0.75rem', margin: '2px 0 0 0'}}>
-            <div className={`mini-btn flex-row ${userQuery['shuffle'] ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{border: '1px solid #abc', padding: '3px 5px', borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'flex-start'}} onClick={() => {if (isLogged) {deleteSchedule()}}}>
-              <div className={`flex-row`} style={{alignItems: 'center', gap: '0.3rem'}}>
-                <FaRegTrashAlt size={15} />
-              </div>
-            </div>
-
-            <div className={`flex-row ${userQuery['shuffle'] ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{border: '1px solid #abc', padding: '4px 5px', borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'flex-start'}} onClick={() => { if (isLogged) {pauseSchedule()}}}>
-              <div className={`flex-row`} style={{alignItems: 'center', gap: '0.3rem'}}>
-                {activeCron ? (<FaPause size={14} />) : (<Forward size={14} />)}
-              </div>
-            </div>
-
-            <div className={`flex-row ${userQuery['shuffle'] ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{border: '1px solid #abc', padding: '4px 5px', borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'flex-start'}} onClick={() => {modifySchedule('shuffle')}}>
-              <div className={`flex-row`} style={{alignItems: 'center', gap: '0.3rem'}}>
-                <FaPen size={14} />
-              </div>
+          <div className={`mini-btn flex-row ${userQuery['shuffle'] ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{border: '1px solid #abc', padding: '3px 5px', borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'flex-start'}} onClick={() => {if (isLogged) {deleteSchedule()}}}>
+            <div className={`flex-row`} style={{alignItems: 'center', gap: '0.3rem'}}>
+              <FaRegTrashAlt size={15} />
             </div>
           </div>
 
+          <div className={`flex-row ${userQuery['shuffle'] ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{border: '1px solid #abc', padding: '4px 5px', borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'flex-start'}} onClick={() => { if (isLogged) {pauseSchedule()}}}>
+            <div className={`flex-row`} style={{alignItems: 'center', gap: '0.3rem'}}>
+              {activeCron ? (<FaPause size={14} />) : (<Forward size={14} />)}
+            </div>
+          </div>
 
-        <div className='flex-row' style={{gap: '0.5rem', width: '100%'}}>
-
-          {isLogged && (
-            <a className="" title="" href={`/${store.userProfile.username}`} onClick={() => {goToUserProfile(event, store.userProfile)}}>
-              <img loading="lazy" src={store.srcUrlFC} className="" alt={`${store.userDisplayNameFC} avatar`} style={{width: '40px', height: '40px', maxWidth: '48px', maxHeight: '48px', borderRadius: '24px', border: '1px solid #abc', margin: '12px 0 8px 20px'}} />
-            </a>
-          )}
-          <HorizontalScale />
-
-          <ScheduleTaskForm />
-
+          <div className={`flex-row ${userQuery['shuffle'] ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{border: '1px solid #abc', padding: '4px 5px', borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'flex-start'}} onClick={() => {modifySchedule('shuffle')}}>
+            <div className={`flex-row`} style={{alignItems: 'center', gap: '0.3rem'}}>
+              <FaPen size={14} />
+            </div>
+          </div>
+        </div>
+        <div className={`${isMobile ? 'flex-col' : 'flex-row'}`} style={{gap: '0.5rem', width: '100%', justifyContent: 'center', alignItems: 'center'}}>
+          <div className='flex-row'>
+            {isLogged && (
+              <a className="" title="" href={`/${store.userProfile.username}`} onClick={() => {goToUserProfile(event, store.userProfile)}}>
+                <img loading="lazy" src={store.srcUrlFC} className="" alt={`${store.userDisplayNameFC} avatar`} style={{width: '40px', height: '40px', maxWidth: '48px', maxHeight: '48px', borderRadius: '24px', border: '1px solid #abc', margin: '12px 0 8px 20px'}} />
+              </a>
+            )}
+            <HorizontalScale />
+          </div>
+          <div>
+            <ScheduleTaskForm />
+          </div>
         </div>
       </div>
     </div>
@@ -1410,7 +1433,6 @@ export default function Schedule() {
             <span className={`${!isMobile ? 'selection-btn' : ''}`} style={{cursor: 'pointer', padding: '0', color: userQuery['channels'].length == 0 ? '#aaa' : ''}}>{isMobile ? '' : userQuery['channels'].length == 0 ? 'All channels' : 'Channels'}</span>
           </div>
         </div>
-
       </div>
 
       <div style={{position: 'relative'}}>
@@ -1420,102 +1442,89 @@ export default function Schedule() {
             <span className={`${!isMobile ? 'selection-btn' : ''}`} style={{cursor: 'pointer', padding: '0', color: userQuery['curators'].length == 0 ? '#aaa' : ''}}>{isMobile ? '' : userQuery['curators'].length == 0 ? 'All curators' : 'Curators'}</span>
           </div>
         </div>
-
       </div>
 
 
       {(isSelected == 'curators') && (
-          <div className='' style={{position: 'absolute', width: feedMax, margin: 'auto', marginTop: '28px', transform: 'translate(-11px, 0)'}} onMouseEnter={() => {handleSelection('curators')}} onMouseLeave={() => {handleSelection('none')}}>
-            <div className='top-layer flex-col' style={{gap: '0.25rem', padding: '6px 6px', borderRadius: '10px', backgroundColor: '#1D3244dd', border: '1px solid #abc', width: 'auto', marginTop: '10px', alignItems: 'flex-start'}}>
-              <div className={`selection-btn ${(userQuery['curators'] == 'all' || userQuery['curators'].length == 0) ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}}>
-                <input onChange={onCuratorSearch} 
-                  name='search' 
-                  placeholder={`Search curators`} 
-                  value={userSearch.search} 
-                    className='srch-btn' 
-                  style={{width: '100%', backgroundColor: '#234'}} 
-                  onKeyDown={curatorKeyDown} />
-              </div>
-              <div className='flex-row' style={{gap: '0.5rem', padding: '0px 6px', flexWrap: 'wrap'}}>
-                {curators && (
-                  curators.map((curator, index) => (
-                    <div key={`Cu2-${index}`} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addCurator(curator)}}>
-                      <img loading="lazy" src={curator.pfp} className="" alt={curator.display_name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
-                      <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>@{curator.username}</div>
-                    </div>
-                  )
-                ))}
-              </div>
+        <div className='' style={{position: 'absolute', width: feedMax, margin: 'auto', marginTop: '28px', transform: 'translate(-11px, 0)'}} onMouseEnter={() => {handleSelection('curators')}} onMouseLeave={() => {handleSelection('none')}}>
+          <div className='top-layer flex-col' style={{gap: '0.25rem', padding: '6px 6px', borderRadius: '10px', backgroundColor: '#1D3244dd', border: '1px solid #abc', width: 'auto', marginTop: '10px', alignItems: 'flex-start'}}>
+            <div className={`selection-btn ${(userQuery['curators'] == 'all' || userQuery['curators'].length == 0) ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}}>
+              <input onChange={onCuratorSearch} 
+                name='search' 
+                placeholder={`Search curators`} 
+                value={userSearch.search} 
+                  className='srch-btn' 
+                style={{width: '100%', backgroundColor: '#234'}} 
+                onKeyDown={curatorKeyDown} />
+            </div>
+            <div className='flex-row' style={{gap: '0.5rem', padding: '0px 6px', flexWrap: 'wrap'}}>
+            {curators && (
+              curators.map((curator, index) => (
+                <div key={`Cu2-${index}`} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addCurator(curator)}}>
+                  <img loading="lazy" src={curator.pfp} className="" alt={curator.display_name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
+                  <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>@{curator.username}</div>
+                </div>
+            )))}
+            </div>
 
-              {(selectedCurators && selectedCurators.length > 0) && (<div className='flex-row' style={{gap: '0.5rem', padding: '10px 6px 6px 6px', flexWrap: 'wrap', borderTop: '1px solid #888', width: '100%', alignItems: 'center'}}>
+            {(selectedCurators && selectedCurators.length > 0) && (
+              <div className='flex-row' style={{gap: '0.5rem', padding: '10px 6px 6px 6px', flexWrap: 'wrap', borderTop: '1px solid #888', width: '100%', alignItems: 'center'}}>
                 <div style={{color: '#ddd', fontWeight: '600', fontSize: '13px', padding: '0 0 3px 6px'}}>Selected:</div>
-                {(
-                  selectedCurators.map((curator, index) => (
-                    <div key={`Cu-${index}`} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addCurator(curator)}}>
-                      <img loading="lazy" src={curator.pfp} className="" alt={curator.display_name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
-                      <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>@{curator.username}</div>
-                    </div>
-                  )
-                ))}
+                {(selectedCurators.map((curator, index) => (
+                  <div key={`Cu-${index}`} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addCurator(curator)}}>
+                    <img loading="lazy" src={curator.pfp} className="" alt={curator.display_name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
+                    <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>@{curator.username}</div>
+                  </div>
+                )))}
               </div>)}
             </div>
           </div>
-        )}
+      )}
 
       {(isSelected == 'channels') && (
-          <div className='' style={{position: 'absolute', width: feedMax, margin: 'auto', marginTop: '28px', transform: 'translate(-11px, 0)' }} onMouseEnter={() => {handleSelection('channels')}} onMouseLeave={() => {handleSelection('none')}}>
-            <div className='top-layer flex-col' style={{gap: '0.25rem', padding: '6px 6px', borderRadius: '10px', backgroundColor: '#1D3244dd', border: '1px solid #abc', width: 'auto', marginTop: '10px', alignItems: 'flex-start'}}>
-              <div className={`selection-btn ${(userQuery['channels'] == 'all' || userQuery['channels'].length == 0) ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}}>
-                <input onChange={onChannelChange} 
-                  name='search' 
-                  placeholder={`Search channels`} 
-                  value={userSearch.search} 
-                    className='srch-btn' 
-                  style={{width: '100%', backgroundColor: '#234'}} 
-                  onKeyDown={channelKeyDown} />
-              </div>
-              <div className='flex-row top-layer' style={{gap: '0.5rem', padding: '0px 6px', flexWrap: 'wrap'}}>
-                {channels && (
-                  channels.map((channel, index) => (
-                    <div key={`Ch2-${index}`} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addChannel(channel)}}>
-                      <img loading="lazy" src={channel.image_url} className="" alt={channel.name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
-                      <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>{channel.name}</div>
-                      <div style={{fontWeight: '400', fontSize: '10px', color: '#ccc'}}>{formatNum(channel.follower_count)}</div>
-                    </div>
-                  )
-                ))}
-              </div>
-
-              {(selectedChannels && selectedChannels.length > 0) && (<div className='flex-row' style={{gap: '0.5rem', padding: '10px 6px 6px 6px', flexWrap: 'wrap', borderTop: '1px solid #888', width: '100%', alignItems: 'center'}}>
-                <div style={{color: '#ddd', fontWeight: '600', fontSize: '13px', padding: '0 0 3px 6px'}}>Selected:</div>
-                {(
-                  selectedChannels.map((channel, index) => (
-                    <div key={`Ch-${index}`} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addChannel(channel)}}>
-                      <img loading="lazy" src={channel.image_url} className="" alt={channel.name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
-                      <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>{channel.name}</div>
-                    </div>
-                  )
-                ))}
-              </div>)}
+        <div className='' style={{position: 'absolute', width: feedMax, margin: 'auto', marginTop: '28px', transform: 'translate(-11px, 0)' }} onMouseEnter={() => {handleSelection('channels')}} onMouseLeave={() => {handleSelection('none')}}>
+          <div className='top-layer flex-col' style={{gap: '0.25rem', padding: '6px 6px', borderRadius: '10px', backgroundColor: '#1D3244dd', border: '1px solid #abc', width: 'auto', marginTop: '10px', alignItems: 'flex-start'}}>
+            <div className={`selection-btn ${(userQuery['channels'] == 'all' || userQuery['channels'].length == 0) ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}}>
+              <input onChange={onChannelChange} 
+                name='search' 
+                placeholder={`Search channels`} 
+                value={userSearch.search} 
+                className='srch-btn' 
+                style={{width: '100%', backgroundColor: '#234'}} 
+                onKeyDown={channelKeyDown} />
             </div>
+            <div className='flex-row top-layer' style={{gap: '0.5rem', padding: '0px 6px', flexWrap: 'wrap'}}>
+              {channels && (
+                channels.map((channel, index) => (
+                    <div key={`Ch2-${index}`} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addChannel(channel)}}>
+                    <img loading="lazy" src={channel.image_url} className="" alt={channel.name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
+                    <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>{channel.name}</div>
+                    <div style={{fontWeight: '400', fontSize: '10px', color: '#ccc'}}>{formatNum(channel.follower_count)}</div>
+                  </div>
+                  )
+              ))}
+            </div>
+
+            {(selectedChannels && selectedChannels.length > 0) && (
+              <div className='flex-row' style={{gap: '0.5rem', padding: '10px 6px 6px 6px', flexWrap: 'wrap', borderTop: '1px solid #888', width: '100%', alignItems: 'center'}}>
+                <div style={{color: '#ddd', fontWeight: '600', fontSize: '13px', padding: '0 0 3px 6px'}}>Selected:</div>
+                {(selectedChannels.map((channel, index) => (
+                  <div key={`Ch-${index}`} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addChannel(channel)}}>
+                    <img loading="lazy" src={channel.image_url} className="" alt={channel.name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
+                    <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>{channel.name}</div>
+                  </div>
+              )))}
+              </div>
+            )}
           </div>
+        </div>
         )}
-
       </div>
-
     </div>
     </div>) : (
       <div style={{width: '100%', fontSize: '20px', fontWeight: '400', textAlign: 'center', color: '#cde'}}>No schedule found</div>
-    )
-    }
+    )}
     <div style={{margin: '0 0 70px 0'}}>
-
-    {/* {(!userFeed) ? (
-      <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
-        <Spinner size={31} color={'#999'} />
-      </div>
-    ) : (userFeed.map((cast, index) => (<Cast cast={cast} key={index} index={index} updateCast={updateCast} openImagePopup={openImagePopup} />)))} */}
-
     </div>
     <div>
       {showPopup.open && (<ExpandImg embed={{showPopup}} />)}

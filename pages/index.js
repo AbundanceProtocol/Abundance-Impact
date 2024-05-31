@@ -1238,7 +1238,7 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
                   name='search' 
                   placeholder={`Search curators`} 
                   value={userSearch.search} 
-                    className='srch-btn' 
+                  className='srch-btn' 
                   style={{width: '100%', backgroundColor: '#234'}} 
                   onKeyDown={curatorKeyDown} />
               </div>
@@ -1306,19 +1306,15 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
             </div>
           </div>
         )}
-
       </div>
-
     </div>
 
     <div style={{margin: '0 0 70px 0'}}>
-
-    {(!userFeed || userFeed.length == 0) ? (
-      <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
-        <Spinner size={31} color={'#999'} />
-      </div>
-    ) : (userFeed.map((cast, index) => (<Cast cast={cast} key={index} index={index} updateCast={updateCast} openImagePopup={openImagePopup} />)))}
-
+      {(!userFeed || userFeed.length == 0) ? (
+        <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
+          <Spinner size={31} color={'#999'} />
+        </div>
+      ) : (userFeed.map((cast, index) => (<Cast cast={cast} key={index} index={index} updateCast={updateCast} openImagePopup={openImagePopup} />)))}
     </div>
     <div>
       {showPopup.open && (<ExpandImg embed={{showPopup}} />)}
@@ -1335,8 +1331,9 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
 export async function getServerSideProps(context) {
   // Fetch dynamic parameters from the context object
   const { query } = context;
-  const { time, curators, channels, tags, shuffle, referrer } = query;
+  const { time, curators, channels, tags, shuffle, referrer, eco } = query;
   let setTime = '3days'
+  let setEco = eco || '$IMPACT'
   if (time) {
     setTime = time
   }
@@ -1369,7 +1366,8 @@ export async function getServerSideProps(context) {
       channels: setChannels,
       tags: setTags,
       shuffle: setShuffle,
-      referrer: setReferrer
+      referrer: setReferrer,
+      eco: setEco
     },
   };
 }

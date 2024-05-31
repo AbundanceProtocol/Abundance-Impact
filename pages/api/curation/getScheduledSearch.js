@@ -24,7 +24,8 @@ export default async function handler(req, res) {
             percent: schedule.percent_tip,
             schedTime: schedule.schedule_time,
             cron_job_id: schedule.cron_job_id,
-            active_cron: schedule.active_cron
+            active_cron: schedule.active_cron,
+            currencies: schedule.currencies
           }
         } else {
           return {
@@ -37,6 +38,7 @@ export default async function handler(req, res) {
             schedTime: null,
             cron_job_id: null,
             active_cron: null,
+            currencies: null
           }
         }
       } catch (error) {
@@ -51,14 +53,15 @@ export default async function handler(req, res) {
           schedTime: null,
           cron_job_id: null,
           active_cron: null,
+          currencies: null
         }
       }
     }
 
     try {
-      const { shuffle, time, tags, channels, curators, percent, schedTime, cron_job_id, active_cron } = await getSchedule(fid)
+      const { shuffle, time, tags, channels, curators, percent, schedTime, cron_job_id, active_cron, currencies } = await getSchedule(fid)
   
-      res.status(200).json({ shuffle, time, tags, channels, curators, percent, schedTime, cron_job_id, active_cron });
+      res.status(200).json({ shuffle, time, tags, channels, curators, percent, schedTime, cron_job_id, active_cron, currencies });
     } catch (error) {
       console.error('Error submitting data:', error)
       res.status(500).json({ error: 'Internal Server Error' });
