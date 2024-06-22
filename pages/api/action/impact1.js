@@ -7,7 +7,7 @@ import Cast from "../../../models/Cast";
 import EcosystemRules from "../../../models/EcosystemRules";
 import Allowlist from '../../../models/Allowlist';
 
-import { getCurrentDateUTC } from "../../../utils/utils"; 
+import { decryptPassword } from "../../../utils/utils"; 
 
 const HubURL = process.env.NEYNAR_HUB
 const client = HubURL ? getSSLHubRpcClient(HubURL) : undefined;
