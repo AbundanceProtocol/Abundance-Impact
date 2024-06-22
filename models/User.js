@@ -1,3 +1,4 @@
+import { ObjectId } from 'mongodb';
 import mongoose from 'mongoose';
 
 const { Schema } = mongoose;
@@ -5,6 +6,8 @@ const { Schema } = mongoose;
 const userSchema = new mongoose.Schema({
   invited_by: { type: Number, default: null },
   fid: String,
+  ecosystem_points: String,
+  ecosystem_name: String,
   pfp: String,
   wallet: String,
   username: String,
