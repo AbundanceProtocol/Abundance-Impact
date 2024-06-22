@@ -17,7 +17,7 @@ const secretKey = process.env.SECRET_KEY
 
 export default async function handler(req, res) {
   if (req.method === 'POST' && req.body && req.body.untrustedData && req.query.points) {
-    const impactAmount = 1
+    const impactAmount = 5
     const points = '$' + req.query.points
     const curatorFid = req.body.untrustedData.fid
     const castHash = req.body.untrustedData.castId.hash
