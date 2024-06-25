@@ -540,6 +540,7 @@ export default function App({ Component, pageProps }) {
   }, [ecoValue, ecoSched])
 
   const checkEcoEligibility = async (fid, points) => {
+    console.log(fid, points, prevPoints)
     if (points !== prevPoints) {
       setPrevPoints(points)
       setLoadRemaining(true)
