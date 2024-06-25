@@ -1045,10 +1045,10 @@ export default function App({ Component, pageProps }) {
       </div>
       {(isMobile && showActions) && (
         <div style={{margin: '20px 23px 0 0', bottom: '46px', width: `100%`, position: 'fixed'}}>
-          <div style={{backgroundColor: '#1D3244cc', borderRadius: '16px 16px 0 0', padding: '13px 0 6px 0', border: '0px solid #678', color: '#fff', fontWeight: '700', alignItems:' center', fontSize: '20px'}}>
-          {/* <div title='Cast Actions' className='flex-row' style={{alignItems: 'center', justifyContent: 'center', margin: '8px'}}>
-            <Actions size={32} color={'#9cf'} /><p className='' style={{paddingLeft: '10px', fontSize: isTablet ? '12px' : '18px', fontWeight: '500'}}>Cast Actions </p>
-          </div> */}
+          <div style={{backgroundColor: '#1D3244cc', borderRadius: '16px 16px 0 0', padding: '10px 0 20px 0', border: '0px solid #678', color: '#fff', fontWeight: '700', alignItems:' center', fontSize: '20px'}}>
+          <div title='Cast Actions' className='flex-row' style={{alignItems: 'center', justifyContent: 'center', margin: '8px'}}>
+            <p className='' style={{padding: '10px', fontSize: isTablet ? '12px' : '18px', fontWeight: '500'}}>{ecoValue.ecosystem_name} Ecosystem </p>
+          </div>
 
           <div className='flex-row' style={{justifyContent: 'center', alignItems: 'center', gap: '0.5rem'}}>
             <div className="flex-row" style={{border: '1px solid #abc', padding: '4px 8px', borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'center', backgroundColor: (ecoButton == 'rules') ? '#012' : '', cursor: 'pointer'}} onClick={() => {handleEcoButton('rules')}}>
