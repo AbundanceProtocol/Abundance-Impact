@@ -77,8 +77,9 @@ export default async function handler(req, res) {
       let holdingNFTReq = false
       let holdingERC20 = false
       let holdingERC20Req = false
-      let eligibility = true
+      let hasWalletReq = true
       let hasWallet = true
+      let eligibility = true
 
 
       if (ecosystem.condition_channels && ecosystem.condition_following_channel) {
@@ -413,7 +414,8 @@ export default async function handler(req, res) {
         holdingERC20,
         holdingERC20Req,
         eligibility,
-        hasWallet
+        hasWallet,
+        hasWalletReq
       }
 
       res.status(200).json({ ecosystem, user, eligibilityData, createUser });

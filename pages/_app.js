@@ -91,7 +91,8 @@ export default function App({ Component, pageProps }) {
     holdingERC20: false,
     holdingERC20Req: false,
     eligibility: false,
-    hasWallet: false
+    hasWallet: false,
+    hasWalletReq: false
   }
   const [eligibility, setEligibility] = useState(initialEligibility)
   const [loadRemaining, setLoadRemaining] = useState(true)
@@ -508,7 +509,6 @@ export default function App({ Component, pageProps }) {
     )
   }
 
-
   const handleEcoButton = (button) => {
     console.log(button)
     setEcoButton(button)
@@ -525,19 +525,43 @@ export default function App({ Component, pageProps }) {
   useEffect(() => {
     if (ecoSched) {
       if (store.isAuth && ecoValue) {
-        checkEcoEligibility(store.fid, ecoValue.ecosystem_points_name)
+        getRemainingBalances(store.fid, ecoValue.ecosystem_points_name)
       }
       setEcoSched(false);
     } else {
       const timeoutId = setTimeout(() => {
         if (store.isAuth && ecoValue) {
-          checkEcoEligibility(store.fid, ecoValue.ecosystem_points_name)
+          getRemainingBalances(store.fid, ecoValue.ecosystem_points_name)
         }
         setEcoSched(false);
       }, 300);
       return () => clearTimeout(timeoutId);
     }
   }, [ecoValue, ecoSched])
+
+  const getRemainingBalances = async (fid, points) => {
+    setLoadRemaining(true)
+    try {
+      const response = await axios.get('/api/ecosystem/getBalances', {
+        params: { fid, points } })
+      if (response) {
+        console.log(response)
+        if (response.data && response.data?.user) {
+          const remainingImpact = response.data.user.remaining_i_allowance
+          const remainingQuality = response.data.user.remaining_q_allowance
+          store.setUserRemainingImpact(remainingImpact)
+          store.setUserRemainingQuality(remainingQuality)
+          setLoadRemaining(false)
+          setEligibility(initialEligibility)
+        }
+      } else {
+        checkEcoEligibility(fid, points)
+      }
+    } catch (error) {
+      console.error('error', error)
+      checkEcoEligibility(fid, points)
+    }
+  }
 
   const checkEcoEligibility = async (fid, points) => {
     console.log(fid, points, prevPoints)
@@ -546,13 +570,7 @@ export default function App({ Component, pageProps }) {
       setLoadRemaining(true)
       try {
         const response = await axios.get('/api/ecosystem/checkUserEligibility', {
-          params: {
-            fid,
-            points
-            // ecosystemName: 'Abundance',
-            // owner: 'abundance'
-          }
-        })
+          params: { fid, points } })
         if (response) {
           console.log(response)
           if (response.data && response.data?.eligibilityData?.eligibility && response.data?.createUser) {
@@ -859,14 +877,6 @@ export default function App({ Component, pageProps }) {
                     </div>)}
                   </div>
                   <Box className="navbar-header-end flex-row" sx={{alignItems: 'center', justifyContent: 'space-between'}}>
-                  {/* {isLogged ? (<LogOut />) : (<NeynarSigninButton onSignInSuccess={handleSignIn} />)} */}
-                    {/* <ConnectButton 
-                      account={store.account}
-                      isMobile={isMobile}
-                      onConnect={connect}
-                      onDisconnect={disconnect}
-                      /> */}
-
                     <MenuButton onClick={toggleDrawer()}>
                       {mobileMenuOpen ? <CollapseIcon/> : <HiMenu />}
                     </MenuButton>
@@ -886,7 +896,6 @@ export default function App({ Component, pageProps }) {
           </Drawer>
         </React.Fragment>
       )} 
-
 
       <div className='flex-row' style={{justifyContent: 'center', width: 'auto'}}>
         <div className="flex-col" style={{padding: '58px 0 0 0', position: 'relative'}}>
@@ -931,13 +940,6 @@ export default function App({ Component, pageProps }) {
                 </div>
               </div>
             </div>
-
-
-
-
-
-
-
           </div>
         </div>
         <div>
@@ -997,9 +999,10 @@ export default function App({ Component, pageProps }) {
                 <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>Upvote/Downvote effect: {ecoValue.upvote_value} / -{ecoValue.downvote_value} points</p>
               </div>)}
             </div>
-            <p style={{paddingTop: '30px', fontSize: '17px', fontWeight: '500'}}>Eligibility Criteria: </p>
-              <div className='flex-col' style={{gap: '0.5rem', marginTop: '10px'}}>
-                {eligibility && (<div className='flex-row' style={{alignItems: 'center'}}>
+            
+            {eligibility.hasWalletReq && (<p style={{paddingTop: '30px', fontSize: '17px', fontWeight: '500'}}>Eligibility Criteria: </p>)}
+              {eligibility.hasWalletReq ? (<div className='flex-col' style={{gap: '0.5rem', marginTop: '10px'}}>
+                {eligibility.hasWalletReq && (<div className='flex-row' style={{alignItems: 'center'}}>
                   <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '0px 35px 0 0'}}>{eligibility.hasWallet ? (<ImCheckmark size={20} color={'#6f6'} />) : (<ImCross size={20} color={'red'} />)}</div>
                   <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>Has verified wallet</p>
                 </div>)}
@@ -1024,7 +1027,11 @@ export default function App({ Component, pageProps }) {
                   <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>Follows @{ecoValue.owner_name}</p>
                 </div>)}
 
-              </div>
+              </div>) : (<div className="flex-row" style={{border: '1px solid #abc', padding: '8px 8px', margin: '30px 40px 0px 40px', borderRadius: '10px', justifyContent: 'center', alignItems: 'center', backgroundColor: '#012', cursor: 'pointer'}} onClick={() => {checkEcoEligibility(store.fid, ecoValue.ecosystem_points_name)}}>
+                <div className="flex-row" style={{alignItems: 'center', gap: '0.3rem'}}>
+                  <span className="channel-font" style={{color: '#eee'}}>Show Eligibility Criteria</span>
+                </div>
+              </div>)}
             </div>
 
             {(topCreators.length > 0) && (<div style={{margin: '18px 0px 12px 20px', backgroundColor: '#334455ee', width: '380px', borderRadius: '20px', padding: '32px', border: '0px solid #678', color: '#fff', fontWeight: '700', alignItems:' center', fontSize: '20px'}}>
@@ -1092,7 +1099,7 @@ export default function App({ Component, pageProps }) {
               </div>)}
             </div>
           )}
-          {(ecoButton == 'eligibility') && (
+          {(ecoButton == 'eligibility') && (eligibility.hasWalletReq ? (
             <div className='flex-col' style={{gap: '0.25rem', margin: '10px 20px'}}>
             {eligibility && (<div className='flex-row' style={{alignItems: 'center'}}>
               <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '0px 35px 0 0'}}>{eligibility.hasWallet ? (<ImCheckmark size={20} color={'#6f6'} />) : (<ImCross size={20} color={'red'} />)}</div>
@@ -1110,7 +1117,7 @@ export default function App({ Component, pageProps }) {
               <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '0px 35px 0 0'}}>{eligibility.holdingERC20 ? (<ImCheckmark size={20} color={'#6f6'} />) : (<ImCross size={20} color={'red'} />)}</div>
               <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>Holds a min. of {erc20.min} <a href={getTokenAddress(erc20.erc20_chain, erc20.erc20_address, 'token')} className="fc-lnk" target="_blank" rel="noopener noreferrer" style={{textDecoration: 'underline'}}>{shortenAddress(erc20.erc20_address)}</a></p>
             </div>)))}
-            {(eligibility.holdingNFTReq && ecoValue && ecoValue.nfts && ecoValue.nfts.length > 0) && (ecoValue.erc20s.map((nft, index) => (<div key={index} className='flex-row' style={{alignItems: 'center'}}>
+            {(eligibility.holdingNFTReq && ecoValue && ecoValue.nfts && ecoValue.nfts.length > 0) && (ecoValue.nfts.map((nft, index) => (<div key={index} className='flex-row' style={{alignItems: 'center'}}>
               <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '0px 35px 0 0'}}>{eligibility.holdingNFT ? (<ImCheckmark size={20} color={'#6f6'} />) : (<ImCross size={20} color={'red'} />)}</div>
               <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>Holds <a href={getTokenAddress(nft.nft_chain, nft.nft_address, 'token')} className="fc-lnk" target="_blank" rel="noopener noreferrer" style={{textDecoration: 'underline'}}>{shortenAddress(nft.nft_address)}</a> NFT </p>
             </div>)))}
@@ -1119,7 +1126,12 @@ export default function App({ Component, pageProps }) {
               <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>Follows @{ecoValue.owner_name}</p>
             </div>)}
           </div>
-          )}
+          ) : (<div className="flex-row" style={{border: '1px solid #abc', padding: '8px 8px', margin: '30px', borderRadius: '10px', justifyContent: 'center', alignItems: 'center', backgroundColor: '#012', cursor: 'pointer'}} onClick={() => {checkEcoEligibility(store.fid, ecoValue.ecosystem_points_name)}}>
+            <div className="flex-row" style={{alignItems: 'center', gap: '0.3rem'}}>
+              <span className="channel-font" style={{color: '#eee'}}>Show Eligibility Criteria</span>
+            </div>
+          </div>))}
+
           {(ecoButton == 'actions') && (<div className='flex-col' style={{gap: '0.5rem', margin: '8px'}}>
             <a className="" title="+1 Impact" href={`https://warpcast.com/~/add-cast-action?name=%2B1+%24${ecoValue.ecosystem_points_name.substring(1)}&icon=star&actionType=post&postUrl=https%3A%2Fimpact.abundance.id%2Fapi%2Faction%2Fimpact1%3Fpoints=${ecoValue.ecosystem_points_name.substring(1)}&description=Curate+Casts+with+the+Impact+App`} target="_blank" rel="noopener noreferrer">
               <div className='flex-row cast-act' style={{borderRadius: '8px', padding: '8px 4px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
