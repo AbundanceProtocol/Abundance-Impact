@@ -1809,6 +1809,24 @@ blockquote {
     word-wrap: break-word;
 }
 
+.btn-empty {
+    color: grey;
+    border: 1px solid grey;
+    cursor: default;
+}
+
+.btn-error {
+    color: #ff9999;
+    border: 1px solid #ff9999;
+    cursor: default;
+}
+
+.btn-set {
+    color: #00ff00;
+    border: 1px solid #00ff00;
+    cursor: default;
+}
+
 .input-toggle-button-r {
     outline: none;
     width: fit-content;

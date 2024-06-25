@@ -14,7 +14,7 @@ import { ImArrowUp, ImArrowDown  } from "react-icons/im";
 import VideoPlayer from './VideoPlayer';
 import Images from './Images';
 
-export default function Cast({ cast, index, updateCast, openImagePopup }) {
+export default function Cast({ cast, index, updateCast, openImagePopup, ecosystem }) {
   const store = useStore()
   const router = useRouter();
   const [screenWidth, setScreenWidth] = useState(undefined)
@@ -43,12 +43,13 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
   async function boostQuality(cast, qualityAmount) {
     const fid = store.fid
     const castHash = cast.hash
+    const castChannel = cast.root_parent_url
     // console.log(fid, castHash, qualityAmount)
     
-    async function postQuality(fid, castHash, qualityAmount) {
+    async function postQuality(fid, castHash, castChannel, qualityAmount) {
       // console.log(fid, castContext, impactAmount)
       try {
-        const response = await axios.post('/api/curation/postQuality', { fid, castHash, qualityAmount })
+        const response = await axios.post('/api/curation/postPointQuality', { fid, castHash, castChannel, qualityAmount, points: ecosystem })
         // console.log(response)
         return response
       } catch (error) {
@@ -60,7 +61,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
 
     let qualityResponse
     if (fid && fid !== '-' && qualityAmount && castHash && userRemainingQuality > 0 && (cast.impact_balance || cast.impact_balance == 0)  &&  !(cast.impact_balance == 0 && qualityAmount < 0)) {
-      qualityResponse = await postQuality(fid, castHash, qualityAmount)
+      qualityResponse = await postQuality(fid, castHash, castChannel, qualityAmount)
       console.log(qualityResponse)
       if (qualityResponse && qualityResponse.data && qualityResponse.status == 201) {
         let userBalance = qualityResponse.data.userBalance
@@ -108,7 +109,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
     async function postImpact(fid, castContext, impactAmount) {
       // console.log(fid, castContext, impactAmount)
       try {
-        const response = await axios.post('/api/curation/postImpact', { fid, castContext, impactAmount })
+        const response = await axios.post('/api/curation/postPointImpact', { fid, castContext, impactAmount, points: ecosystem })
         return response
       } catch (error) {
         console.error('Error creating post:', error);

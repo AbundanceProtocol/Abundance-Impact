@@ -33,8 +33,34 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
   const store = useStore()
   const [textMax, setTextMax] = useState('562px')
   const [feedMax, setFeedMax ] = useState('620px')
-  const initialQuery = {shuffle: true, time: '3days', tags: [], channels: [], curators: []}
+  const [allowanceSched, setAllowanceSched] = useState(false)
+  const initialQuery = {shuffle: true, time: '7days', tags: [], channels: [], curators: []}
   const [userQuery, setUserQuery] = useState(initialQuery)
+  const initialEco = {
+    channels: [],
+    condition_channels: false,
+    condition_curators_threshold: 1,
+    condition_following_channel: false,
+    condition_following_owner: false,
+    condition_holding_erc20: false,
+    condition_holding_nft: false,
+    condition_points_threshold: 1,
+    condition_powerbadge: false,
+    createdAt: "2024-06-17T03:19:16.065Z",
+    downvote_value: 1,
+    ecosystem_moderators: [],
+    ecosystem_name: 'none',
+    ecosystem_points_name: '$IMPACT',
+    ecosystem_rules: [`Can't do evil`],
+    erc20s: [],
+    fid: 3,
+    nfts: [],
+    owner_name: 'none',
+    percent_tipped: 10,
+    points_per_tip: 1,
+    upvote_value: 1,
+  }
+  const [eco, setEco] = useState(initialEco)
   const [showPopup, setShowPopup] = useState({open: false, url: null})
   const router = useRouter()
   const queryOptions = {
@@ -113,6 +139,8 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
   const [tokensSelected, setTokensSelected] = useState(['$DEGEN'])
   const availableTokens = ['$DEGEN', '$TN100x']
   const [noTip, setNoTip] = useState(true)
+  const [points, setPoints] = useState('$IMPACT')
+  const savedEco = useStore(state => state.ecosystemData)
 
   function btnText(type) {
     if (type == 'tags' && (userQuery[type] == 'all' || userQuery[type].length == 0)) {
@@ -357,8 +385,13 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
   
       return () => clearTimeout(timeoutId);
     }
-  }, [userQuery, feedRouterScheduled]);
+  }, [userQuery, points, feedRouterScheduled]);
 
+  useEffect(() => {
+    if (savedEco && savedEco.ecosystem_points_name) {
+      setPoints(savedEco.ecosystem_points_name)
+    }
+  }, [savedEco]);
 
   const handleSelection = (type, selection) => {
     if (type == 'shuffle') {
@@ -530,10 +563,22 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
   }
 
   useEffect(() => {
-    if (store.isAuth) {
-      updateAllowances(availableTokens, store.fid)
+    if (allowanceSched) {
+      if (store.isAuth) {
+        updateAllowances(availableTokens, store.fid)
+      }
+      setAllowanceSched(false);
+    } else {
+      const timeoutId = setTimeout(() => {
+        if (store.isAuth) {
+          updateAllowances(availableTokens, store.fid)
+        }
+        setAllowanceSched(false);
+      }, 300);
+      return () => clearTimeout(timeoutId);
     }
-  }, [isLogged, store.isAuth])
+  }, [isLogged, store.isAuth, allowanceSched])
+
 
   useEffect(() => {
     console.log('triggered')
@@ -599,11 +644,12 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
 
   async function getUserSearch(time, tags, channel, curator, text, shuffle) {
     const fid = await store.fid
+    // const points = '$IMPACT'
 
     async function getSearch(time, tags, channel, curator, text, shuffle) {
       try {
         const response = await axios.get('/api/curation/getUserSearch', {
-          params: { time, tags, channel, curator, text, shuffle }
+          params: { time, tags, channel, curator, text, shuffle, points }
         })
         let casts = []
         if (response && response.data && response.data.casts.length > 0) {
@@ -835,6 +881,7 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
     const handleMouseLeave = () => {
       store.setUserTipPercent(value);
       setInitValue(value)
+      // account.newTest()
     };
   
     return (
@@ -1314,7 +1361,7 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
         <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
           <Spinner size={31} color={'#999'} />
         </div>
-      ) : (userFeed.map((cast, index) => (<Cast cast={cast} key={index} index={index} updateCast={updateCast} openImagePopup={openImagePopup} />)))}
+      ) : (userFeed.map((cast, index) => (<Cast cast={cast} key={index} index={index} updateCast={updateCast} openImagePopup={openImagePopup} ecosystem={points} />)))}
     </div>
     <div>
       {showPopup.open && (<ExpandImg embed={{showPopup}} />)}
@@ -1332,7 +1379,7 @@ export async function getServerSideProps(context) {
   // Fetch dynamic parameters from the context object
   const { query } = context;
   const { time, curators, channels, tags, shuffle, referrer, eco } = query;
-  let setTime = '3days'
+  let setTime = '7days'
   let setEco = eco || '$IMPACT'
   if (time) {
     setTime = time

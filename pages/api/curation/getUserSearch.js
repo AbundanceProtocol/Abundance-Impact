@@ -23,6 +23,10 @@ export default async function handler(req, res) {
       }   
     }
 
+    if (req.query.points) {
+      query.points = req.query.points
+    }
+
     if (req.query.time) {
       query.createdAt = { $gte: req.query.time } ;
     }

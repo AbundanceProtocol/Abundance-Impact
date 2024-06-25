@@ -34,6 +34,31 @@ export default function UserPage({username}) {
   const [feedMax, setFeedMax ] = useState('620px')
   const userButtons = ['Casts', 'Casts + Replies', 'Proposals']
   const [searchSelect, setSearchSelect ] = useState('Casts')
+  const initialEco = {
+    channels: [],
+    condition_channels: false,
+    condition_curators_threshold: 1,
+    condition_following_channel: false,
+    condition_following_owner: false,
+    condition_holding_erc20: false,
+    condition_holding_nft: false,
+    condition_points_threshold: 1,
+    condition_powerbadge: false,
+    createdAt: "2024-06-17T03:19:16.065Z",
+    downvote_value: 1,
+    ecosystem_moderators: [],
+    ecosystem_name: 'none',
+    ecosystem_points_name: '$IMPACT',
+    ecosystem_rules: [`Can't do evil`],
+    erc20s: [],
+    fid: 3,
+    nfts: [],
+    owner_name: 'none',
+    percent_tipped: 10,
+    points_per_tip: 1,
+    upvote_value: 1,
+  }
+  const [eco, setEco] = useState(initialEco)
   const { isMobile } = useMatchBreakpoints();
   const [userFeed, setUserFeed] = useState(null)
   const [showPopup, setShowPopup] = useState({open: false, url: null})
@@ -473,11 +498,8 @@ export default function UserPage({username}) {
         <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
           <Spinner size={31} color={'#999'} />
         </div>
-        ) : (userFeed.map((cast, index) => (<Cast cast={cast} key={index} index={index} updateCast={updateCast} openImagePopup={openImagePopup} />)))}
+        ) : (userFeed.map((cast, index) => (<Cast cast={cast} key={index} index={index} updateCast={updateCast} openImagePopup={openImagePopup} ecosystem={eco.ecosystem_points_name} />)))}
 
-
-
-        {/* {userFeed && userFeed.map((cast, index) => (<Cast cast={cast} key={index} index={index} updateCast={updateCast} openImagePopup={openImagePopup} />))} */}
       </div>
       <div>
         {showPopup.open && (<ExpandImg embed={{showPopup}} />)}

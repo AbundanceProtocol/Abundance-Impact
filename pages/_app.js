@@ -23,8 +23,13 @@ import axios from 'axios';
 import { PiSquaresFourLight as Actions } from "react-icons/pi";
 import { IoInformationCircleOutline as Info } from "react-icons/io5";
 import Creators from '../components/Leaderboard/Creators';
+import qs from "querystring";
+import { encryptPassword, decryptPassword, shortenAddress, getTokenAddress } from '../utils/utils';
+import { ImCross, ImCheckmark } from "react-icons/im";
 
 export default function App({ Component, pageProps }) {
+  const secretKey = process.env.SECRET_KEY
+  const botUuid = process.env.BOT_UUID
   const store = useStore()
   const auth = useAuth();
   const { isMobile, isTablet } = useMatchBreakpoints();
@@ -33,9 +38,37 @@ export default function App({ Component, pageProps }) {
   const [isLogged, setIsLogged] = useState()
   const [bottomNavSize, setBottomNavSize] = useState(ref?.current?.offsetWidth)
   const [navSize, setNavSize] = useState(1060)
+  const [ecoSched, setEcoSched] = useState(false)
+
   const router = useRouter()
   const [navWidth, setNavWidth] = useState((ref?.current?.offsetWidth - 1312)/2 - 167)
   const [linkTarget, setLinkTarget] = useState('Vision')
+  const initEcosystem = [{
+    channels: [],
+    condition_channels: false,
+    condition_curators_threshold: 1,
+    condition_following_channel: false,
+    condition_following_owner: false,
+    condition_holding_erc20: false,
+    condition_holding_nft: false,
+    condition_points_threshold: 1,
+    condition_powerbadge: false,
+    createdAt: "2024-06-17T03:19:16.065Z",
+    downvote_value: 1,
+    ecosystem_moderators: [],
+    ecosystem_name: 'Abundance',
+    ecosystem_points_name: '$IMPACT',
+    ecosystem_rules: [`Can't do evil`],
+    erc20s: [],
+    fid: 3,
+    nfts: [],
+    owner_name: 'none',
+    percent_tipped: 10,
+    points_per_tip: 1,
+    upvote_value: 1,
+  }]
+  const [ecosystems, setEcosystems] = useState(initEcosystem)
+  const [ecoValue, setEcoValue] = useState(initEcosystem[0])
   const [account, setAccount] = useState(null)
   const [navMenu, setNavMenu] = useState('Home')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -46,6 +79,24 @@ export default function App({ Component, pageProps }) {
   const [topCreators, setTopCreators] = useState([])
   const [topCreatorsSched, setTopCreatorsSched] = useState(false)
   const [paused, setPaused] = useState(false)
+  const initialEligibility = {
+    badge: false,
+    badgeReq: false,
+    channelFollower: false,
+    channelFollowerReq: false,
+    ownerFollower: false,
+    ownerFollowerReq: false,
+    holdingNFT: false,
+    holdingNFTReq: false,
+    holdingERC20: false,
+    holdingERC20Req: false,
+    eligibility: false,
+    hasWallet: false
+  }
+  const [eligibility, setEligibility] = useState(initialEligibility)
+  const [loadRemaining, setLoadRemaining] = useState(true)
+  const [prevPoints, setPrevPoints] = useState(null)
+  const [ecoButton, setEcoButton] = useState('rules')
 
   const Col = styled.div`
     display: grid;
@@ -66,6 +117,7 @@ export default function App({ Component, pageProps }) {
     setNavSize(ref?.current?.offsetWidth - 60)
     setLinkTarget(menuLink)
     setTopCreators([])
+    getEcosystems()
     setNavMenu(button[menuLink].menu)
     handleNavResize()
     window.addEventListener("resize", handleNavResize);
@@ -80,12 +132,14 @@ export default function App({ Component, pageProps }) {
     if (topCreatorsSched) {
       if (!paused) {
         getTopCreators()
+        // getEcosystems()
       }
       setTopCreatorsSched(false);
     } else {
       const timeoutId = setTimeout(() => {
         if (!paused) {
-          getTopCreators()        
+          getTopCreators()
+          // getEcosystems()
         }
         setTopCreatorsSched(false);
       }, 300);
@@ -154,6 +208,33 @@ export default function App({ Component, pageProps }) {
       setIsLogged(false)
     }
   }, [store.fid, store.isAuth, store.signer_uuid]);
+
+
+  async function getEcosystems() {
+    try {
+      await setPaused(true)
+      const response = await axios.get('/api/ecosystem/getEcosystems')
+      console.log(response)
+
+      if (response && response.data) {
+        const ecosystemData = response.data.ecosystems
+        console.log('triggered')
+        
+        const ecoIndex = ecosystemData.findIndex(eco => eco.ecosystem_points_name == '$IMPACT')
+        if (ecoIndex !== -1) {
+          setEcoValue(ecosystemData[ecoIndex])
+        }
+        setEcosystems(ecosystemData)
+
+      } else {
+        setEcosystems(initEcosystem)
+      }
+    } catch (error) {
+      console.error('Error submitting data:', error)
+      setEcosystems(initEcosystem)
+    }
+  }
+
 
   async function getTopCreators() {
     if (!paused) {
@@ -377,8 +458,13 @@ export default function App({ Component, pageProps }) {
   }
 
   const testButton = async () => {
-
+    console.log('test')
   }
+
+  function newTest(value) {
+    console.log(value)
+  }
+
 
   const LoginPopup = async () => {
     setShowLogin(true)
@@ -419,6 +505,98 @@ export default function App({ Component, pageProps }) {
           </div>
         </div>
       </>
+    )
+  }
+
+
+  const handleEcoButton = (button) => {
+    console.log(button)
+    setEcoButton(button)
+  }
+
+  const handleEcoChange = (event) => {
+    const system = ecosystems.find(eco => eco.ecosystem_points_name == event.target.value)
+    console.log(event.target.value)
+    store.setEcosystemData(system)
+    setEcoValue(system);
+  };
+
+  
+  useEffect(() => {
+    if (ecoSched) {
+      if (store.isAuth && ecoValue) {
+        checkEcoEligibility(store.fid, ecoValue.ecosystem_points_name)
+      }
+      setEcoSched(false);
+    } else {
+      const timeoutId = setTimeout(() => {
+        if (store.isAuth && ecoValue) {
+          checkEcoEligibility(store.fid, ecoValue.ecosystem_points_name)
+        }
+        setEcoSched(false);
+      }, 300);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [ecoValue, ecoSched])
+
+  const checkEcoEligibility = async (fid, points) => {
+    if (points !== prevPoints) {
+      setPrevPoints(points)
+      setLoadRemaining(true)
+      try {
+        const response = await axios.get('/api/ecosystem/checkUserEligibility', {
+          params: {
+            fid,
+            points
+            // ecosystemName: 'Abundance',
+            // owner: 'abundance'
+          }
+        })
+        if (response) {
+          console.log(response)
+          if (response.data && response.data?.eligibilityData?.eligibility && response.data?.createUser) {
+            let userData = response.data?.createUser
+            let eligibilityData = response.data.eligibilityData
+            setEligibility(eligibilityData)
+            store.setUserRemainingImpact(userData.remaining_i_allowance)
+            store.setUserRemainingQuality(userData.remaining_q_allowance)
+            setLoadRemaining(false)
+            console.log(eligibility, eligibilityData)
+          }
+        } else {
+          setEligibility(initialEligibility)
+          store.setUserRemainingImpact(0)
+          store.setUserRemainingQuality(0)
+          setLoadRemaining(false)
+        }
+      } catch (error) {
+        console.error('error', error)
+        setEligibility(initialEligibility)
+        store.setUserRemainingImpact(0)
+        store.setUserRemainingQuality(0)
+        setLoadRemaining(false)
+      }
+
+    }
+  }
+
+
+  const EcosystemMenu = ({ecosystems}) => {
+
+    return (
+      <div className={isMobile ? '' : 'left-container'} style={{margin: '0', maxWidth: '237px', width: 'auto'}}>
+        <div style={{backgroundColor: '#334455ee', borderRadius: '16px', padding: '0px', border: '0px solid #678', color: '#fff', fontWeight: '700', alignItems:' center', fontSize: '20px'}}>
+          <div className='flex-row' style={{gap: '0.5rem'}}>
+            <select id="minuteSelect" value={ecoValue.ecosystem_points_name} onChange={handleEcoChange} style={{backgroundColor: '#adf', borderRadius: '4px', fontSize: '18px', fontWeight: '500', padding: isMobile ? '0 1px' : '0 3px'}}>
+              {ecosystems.map((ecosystem) => (
+                <option key={ecosystem.ecosystem_points_name} value={ecosystem.ecosystem_points_name}>
+                  {ecosystem.ecosystem_name}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </div>
     )
   }
 
@@ -640,17 +818,17 @@ export default function App({ Component, pageProps }) {
         <Box height="100%" width="100%">
           <div style={{display: 'grid', gridAutoFlow: 'row'}}>
             {button['top-menu'].map((btn, index) => (
-                <TopNav buttonName={btn} key={index} /> ))}
+              <TopNav buttonName={btn} key={index} /> ))}
           </div>
         </Box>
         <Box style={{width: 'calc(100vw / 1.4)'}}>
           <MobileNavBox className="sub-nav-box" 
-              onMouseEnter={() => {
-              setMenuHover({ ...menuHover, in: Date.now() })
-              }} onMouseLeave={() => {
-              setMenuHover({ ...menuHover, out: Date.now() })}}>
-              <SubCat />
-            </MobileNavBox>
+            onMouseEnter={() => {
+            setMenuHover({ ...menuHover, in: Date.now() })
+            }} onMouseLeave={() => {
+            setMenuHover({ ...menuHover, out: Date.now() })}}>
+            <SubCat />
+          </MobileNavBox>
         </Box>
       </div>
     )
@@ -658,13 +836,27 @@ export default function App({ Component, pageProps }) {
 
   return (
     <div ref={ref} className='flex-col' style={{position: 'absolute', display: 'flex', minHeight: '100%', height: '100%', width: '100%', overflowX: 'hidden'}}>
-      {isMobile ? (
+      {isMobile && (
         <React.Fragment key="top">
           <MobileAppbar className='top-layer' position="fixed" elevation={0} sx={{paddingRight: 0}} style={{backgroundColor: '#2D4254'}}>
             <nav className="nav-bar-mobile">
               <NavbarHeader>
                 <div className="navbar-header">
                   <HomeButton />
+                  <div className='flex-row' style={{gap: '0.3rem', justifyContent: 'center', alignItems: 'center'}}>
+                    {/* <div style={{fontSize: '18px', fontWeight: '600'}}>Ecosystem</div> */}
+                    <EcosystemMenu ecosystems={ecosystems} />
+                    {!loadRemaining && (<div className="flex-row" style={{border: '1px solid #abc', padding: '2px 6px 2px 6px', borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'center'}}>
+                      <div className="flex-row" style={{alignItems: 'center', gap: '0.3rem'}}>
+                        <span className="channel-font" style={{color: '#eee'}}>{store.userRemainingImpact}</span><span className="channel-font" style={{color: '#eee', fontWeight: '400', fontSize: '10px'}}>{ecoValue.ecosystem_points_name}</span>
+                      </div>
+                    </div>)}
+                   {!loadRemaining && ( <div className="flex-row" style={{border: '1px solid #abc', padding: '2px 6px 2px 6px', borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'center'}}>
+                      <div className="flex-row" style={{alignItems: 'center', gap: '0.3rem'}}>
+                        <span className="channel-font" style={{color: '#eee'}}>{store.userRemainingQuality}</span><span className="channel-font" style={{color: '#eee', fontWeight: '400', fontSize: '10px'}}>qDAU</span>
+                      </div>
+                    </div>)}
+                  </div>
                   <Box className="navbar-header-end flex-row" sx={{alignItems: 'center', justifyContent: 'space-between'}}>
                   {/* {isLogged ? (<LogOut />) : (<NeynarSigninButton onSignInSuccess={handleSignIn} />)} */}
                     {/* <ConnectButton 
@@ -673,6 +865,7 @@ export default function App({ Component, pageProps }) {
                       onConnect={connect}
                       onDisconnect={disconnect}
                       /> */}
+
                     <MenuButton onClick={toggleDrawer()}>
                       {mobileMenuOpen ? <CollapseIcon/> : <HiMenu />}
                     </MenuButton>
@@ -691,98 +884,145 @@ export default function App({ Component, pageProps }) {
             <MobileNavMenu />
           </Drawer>
         </React.Fragment>
-      ) : (
-        <nav ref={ref1} className="nav-bar top-layer flex-col" style={{width: '100%', justifyContent: 'center', height: '58px'}}>
-          <div className="flex-col nav-top" style={{justifyContent: 'center', margin: '0 auto', width: '100%'}}>
-            <div className="flex-row" style={{justifyContent: 'center', alignItems: 'center'}}>
-              <div className='top-left'>
-                <HomeButton />
-              </div>
-              <Col className='top-right'>
-              {/* <TopNavWrapper> */}
-                {/* { button['top-menu'].map((btn, index) => (
-                      <TopNav buttonName={btn} key={index} /> ))} */}
-              {/* </TopNavWrapper> */}
-              {/* //// test buttons //// */}
-               {/* <div id="showLoginBtn" className='srch-select-btn' onClick={testButton}>Test Button</div>  */}
-              {/* {(isLogged || showLogin) ? (<LogOut />) : (<NeynarSigninButton onSignInSuccess={handleSignIn} />)} */}
-              {/* {isLogged ? (<LogOut />) : (<LogOut />)} */}
-              {/* <ConnectButton 
-                account={account}
-                isMobile={isMobile}
-                onConnect={connect}
-                onDisconnect={disconnect}
-                /> */}
-              </Col>
-            </div>
-          </div>
-        </nav>
-      )}
+      )} 
+
+
       <div className='flex-row' style={{justifyContent: 'center', width: 'auto'}}>
         <div className="flex-col" style={{padding: '58px 0 0 0', position: 'relative'}}>
           <div className='left-container'></div>
-          <div className='flex-col left-container' style={{position: 'fixed'}}>
+            <div className='flex-row left-container' style={{position: 'fixed', top: '4px', width: '49px', height: '33px', alignItems: 'center', justifyContent: 'center'}}>
+              <HomeButton />
+            </div>
 
-          { button['side-menu'].map((btn, index) => (
-            <LeftNav buttonName={btn} key={index} /> ))}
+            <div className='flex-col left-container' style={{position: 'fixed'}}>
+
+            { button['side-menu'].map((btn, index) => (
+              <LeftNav buttonName={btn} key={index} /> ))}
+
             <div className='left-container' style={{margin: '20px 23px 0 0', maxWidth: '237px'}}>
               <div style={{backgroundColor: '#334455ee', borderRadius: '16px', padding: '0px', border: '0px solid #678', color: '#fff', fontWeight: '700', alignItems:' center', fontSize: '20px'}}>
                 <div title='Cast Actions' className='flex-row' style={{alignItems: 'center', justifyContent: 'center', margin: '8px'}}>
                   <Actions size={32} color={'#9cf'} /><p className='left-nav' style={{paddingLeft: '10px', fontSize: isTablet ? '12px' : '18px', fontWeight: '500'}}>Cast Actions </p>
                 </div>
                 <div className='flex-col' style={{gap: '0.5rem', margin: '8px'}}>
-                  <a className="" title="+1 Impact" href='https://warpcast.com/~/add-cast-action?name=%2B1+Impact&icon=star&actionType=post&postUrl=https%3A%2Fimpact.abundance.id%2Fapi%2Faction%2Fimpact%3Fp%3D1&description=Curate+Casts+with+the+Impact+App' target="_blank" rel="noopener noreferrer">
+                  <a className="" title={`+1 ${ecoValue.ecosystem_points_name}`} href={`https://warpcast.com/~/add-cast-action?name=%2B1+%24${ecoValue.ecosystem_points_name.substring(1)}&icon=star&actionType=post&postUrl=https%3A%2Fimpact.abundance.id%2Fapi%2Faction%2Fimpact1%3Fpoints=${ecoValue.ecosystem_points_name.substring(1)}&description=Curate+Casts+with+the+Impact+App`} target="_blank" rel="noopener noreferrer">
                     <div className='flex-row cast-act' style={{borderRadius: '8px', padding: '8px 4px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
                       <FaRegStar size={20} />
-                      <p className='left-nav' style={{padding: '0px', fontSize: '15px', fontWeight: '500'}}>+1 Impact</p>
+                      <p className='left-nav' style={{padding: '0px', fontSize: '15px', fontWeight: '500'}}>+1 {ecoValue.ecosystem_points_name}</p>
                     </div>
                   </a>
 
-                  <a className="" title='+5 Impact' href='https://warpcast.com/~/add-cast-action?name=%2B5+Impact&icon=star&actionType=post&postUrl=https%3A%2Fimpact.abundance.id%2Fapi%2Faction%2Fimpact%3Fp%3D5&description=Curate+Casts+with+the+Impact+App' target="_blank" rel="noopener noreferrer">
+                  <a className="" title={`+5 ${ecoValue.ecosystem_points_name}`} href={`https://warpcast.com/~/add-cast-action?name=%2B5+%24${ecoValue.ecosystem_points_name.substring(1)}&icon=star&actionType=post&postUrl=https%3A%2Fimpact.abundance.id%2Fapi%2Faction%2Fimpact5%3Fpoints=${ecoValue.ecosystem_points_name.substring(1)}&description=Curate+Casts+with+the+Impact+App`} target="_blank" rel="noopener noreferrer">
                     <div className='flex-row cast-act' style={{borderRadius: '8px', padding: '8px 4px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
                       <FaRegStar size={20} />
-                      <p className='left-nav' style={{padding: '0px', fontSize: '15px', fontWeight: '500'}}>+5 Impact</p>
+                      <p className='left-nav' style={{padding: '0px', fontSize: '15px', fontWeight: '500'}}>+5 {ecoValue.ecosystem_points_name}</p>
                     </div>
                   </a>
 
-                  <a className="" title="Cast Impact Balance" href='https://warpcast.com/~/add-cast-action?name=Cast+Impact+Balance&icon=info&actionType=post&postUrl=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Faction%2Fbalance&description=Get+Cast+Balance+for+Impact+App ' target="_blank" rel="noopener noreferrer">
+                  <a className="" title={`${ecoValue.ecosystem_points_name} Balance`} href={`https://warpcast.com/~/add-cast-action?name=%24${ecoValue.ecosystem_points_name.substring(1)}+Balance&icon=info&actionType=post&postUrl=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Faction%2Fbalance?points=${ecoValue.ecosystem_points_name.substring(1)}&description=Get+Cast+Balance+for+Impact+App`} target="_blank" rel="noopener noreferrer">
                     <div className='flex-row cast-act' style={{borderRadius: '8px', padding: '8px 4px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
                       <div className='left-nav' style={{width: '2px', fontSize: '0px'}}>&nbsp;</div>
                       <Info size={20} />
-                      <p className='left-nav' style={{padding: '0px', fontSize: '15px', fontWeight: '500'}}>Cast Impact Balance</p>
+                      <p className='left-nav' style={{padding: '0px', fontSize: '15px', fontWeight: '500'}}>{ecoValue.ecosystem_points_name} Balance</p>
                       <div className='left-nav' style={{width: '2px', fontSize: '0px'}}>&nbsp;</div>
                     </div>
                   </a>
                 </div>
               </div>
             </div>
-          {/* { button['side-menu'].map((btn, index) => (
-            <LeftMenu btn={btn} index={index} key={index} LoginPopup={LoginPopup} /> ))} */}
+
+
+
+
+
+
+
           </div>
         </div>
         <div>
-          <div className="container cast-area" style={isMobile ? {} : {width: isMobile? '100%' : '620px'}}>
-            <AccountContext.Provider value={{...store.account, ref1, LoginPopup, LogoutPopup }}>
+          <div className="container cast-area flex-col" style={isMobile ? {} : {width: isMobile? '100%' : '620px', position: 'relative'}}>
+            {!isMobile && (<div className="flex-row top-layer" style={{gap: '0.3rem', justifyContent: 'center', alignItems: 'center', width: isMobile? '100%' : '620px', position: 'fixed', backgroundColor: '#1D324466', padding: '4px 0'}}>
+              {/* <div style={{fontSize: '20px', fontWeight: '600', color: '#def'}}>Ecosystem</div> */}
+              <EcosystemMenu ecosystems={ecosystems} />
+              {!loadRemaining && (<div className="flex-row" style={{border: '1px solid #abc', padding: '2px 6px 2px 6px', borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'center'}}>
+                <div className="flex-row" style={{alignItems: 'center', gap: '0.3rem'}}>
+                  <span className="channel-font" style={{color: '#eee'}}>{store.userRemainingImpact}</span><span className="channel-font" style={{color: '#eee', fontWeight: '400', fontSize: '10px'}}>{ecoValue.ecosystem_points_name}</span>
+                </div>
+              </div>)}
+              {!loadRemaining && ( <div className="flex-row" style={{border: '1px solid #abc', padding: '2px 6px 2px 6px', borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'center'}}>
+                <div className="flex-row" style={{alignItems: 'center', gap: '0.3rem'}}>
+                  <span className="channel-font" style={{color: '#eee'}}>{store.userRemainingQuality}</span><span className="channel-font" style={{color: '#eee', fontWeight: '400', fontSize: '10px'}}>qDAU</span>
+                </div>
+              </div>)}
+              {/* <div style={{color: 'white', fontWeight: '600'}} onClick={testButton}>Test btn</div> */}
+            </div>)}
+            <AccountContext.Provider value={{...store.account, ref1, LoginPopup, LogoutPopup, newTest }}>
               <Component {...pageProps} connect={connect} />
             </AccountContext.Provider>
           </div>
         </div>
         <div className='right-nav-text' style={{width: '400px'}}>
           <div>
-            <div style={{margin: '58px 0px 12px 20px', backgroundColor: '#334455ee', width: '380px', borderRadius: '20px', padding: '32px', border: '0px solid #678', color: '#fff', fontWeight: '700', alignItems:' center', fontSize: '20px'}}><FaStar size={40} color={'#9cf'} /><p style={{paddingTop: '10px', fontSize: '20px', fontWeight: '600'}}>3 ways to earn with Impact: </p>
+            <div style={{margin: '58px 0px 12px 10px', backgroundColor: '#334455ee', width: '380px', borderRadius: '20px', padding: '32px', border: '0px solid #678', color: '#fff', fontWeight: '700', alignItems:' center', fontSize: '20px'}}><div className='flex-row' style={{alignItems: 'center', gap: '0.5rem', marginBottom: '10px'}}>
+              <FaStar size={34} color={'#9cf'} />
+              <div style={{fontSize: '22px', fontWeight: '600'}}>
+                {ecoValue.ecosystem_name} Ecosystem
+              </div>
+            </div>
+            <p style={{paddingTop: '20px', fontSize: '17px', fontWeight: '500'}}>Ecosystem Rules: </p>
+            <div className='flex-col' style={{gap: '0.5rem', marginTop: '10px'}}>
+              {(ecoValue && ecoValue.ecosystem_rules && ecoValue.ecosystem_rules.length > 0) && (ecoValue.ecosystem_rules.map((rule, index) => (<div key={index} className='flex-row' style={{alignItems: 'center'}}>
+                <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '0px 35px 0 0'}}><FaStar size={20} color={'#6f6'} /></div>
+                <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>{rule}</p>
+              </div>)))}
+              {(ecoValue && ecoValue.points_per_tip) && (<div className='flex-row' style={{alignItems: 'center'}}>
+                <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '0px 35px 0 0'}}><FaStar size={20} color={'#6f6'} /></div>
+                <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>Points per $1 tipped: {ecoValue.points_per_tip}</p>
+              </div>)}
+              {(ecoValue && ecoValue.condition_points_threshold) && (<div className='flex-row' style={{alignItems: 'center'}}>
+                <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '0px 35px 0 0'}}><FaStar size={20} color={'#6f6'} /></div>
+                <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>Curation points threshold: {ecoValue.condition_points_threshold}</p>
+              </div>)}
+              {(ecoValue && ecoValue.condition_curators_threshold) && (<div className='flex-row' style={{alignItems: 'center'}}>
+                <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '0px 35px 0 0'}}><FaStar size={20} color={'#6f6'} /></div>
+                <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>Curators threshold: {ecoValue.condition_curators_threshold}</p>
+              </div>)}
+              {(ecoValue && ecoValue.percent_tipped) && (<div className='flex-row' style={{alignItems: 'center'}}>
+                <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '0px 35px 0 0'}}><FaStar size={20} color={'#6f6'} /></div>
+                <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>Percent tipped to curators: {ecoValue.percent_tipped}%</p>
+              </div>)}
+              {(ecoValue && ecoValue.upvote_value && ecoValue.downvote_value) && (<div className='flex-row' style={{alignItems: 'center'}}>
+                <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '0px 35px 0 0'}}><FaStar size={20} color={'#6f6'} /></div>
+                <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>Upvote/Downvote effect: {ecoValue.upvote_value} / -{ecoValue.downvote_value} points</p>
+              </div>)}
+            </div>
+            <p style={{paddingTop: '30px', fontSize: '17px', fontWeight: '500'}}>Eligibility Criteria: </p>
               <div className='flex-col' style={{gap: '0.5rem', marginTop: '10px'}}>
-                <div className='flex-row'>
-                  <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '10px 35px 0 0'}}>1</div>
-                  <p style={{paddingTop: '10px', fontSize: '16px', fontWeight: '500'}}>Create great things that benefit the Farcaster community. Curators will be looking for great content.</p>
-                </div>
-                <div className='flex-row'>
-                  <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '10px 35px 0 0'}}>2</div>
-                  <p style={{paddingTop: '10px', fontSize: '16px', fontWeight: '500'}}>Curate impactful casts. Curators get a percent of the rewards going to creators.</p>
-                </div>
-                <div className='flex-row'>
-                  <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '10px 35px 0 0'}}>3</div>
-                  <p style={{paddingTop: '10px', fontSize: '16px', fontWeight: '500'}}>Reward creators. The more rewards you give the more Impact Points you get to stake.</p>
-                </div>
+                {eligibility && (<div className='flex-row' style={{alignItems: 'center'}}>
+                  <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '0px 35px 0 0'}}>{eligibility.hasWallet ? (<ImCheckmark size={20} color={'#6f6'} />) : (<ImCross size={20} color={'red'} />)}</div>
+                  <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>Has verified wallet</p>
+                </div>)}
+                {(eligibility.badgeReq && ecoValue) && (<div className='flex-row' style={{alignItems: 'center'}}>
+                  <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '0px 35px 0 0'}}>{eligibility.badge ? (<ImCheckmark size={20} color={'#6f6'} />) : (<ImCross size={20} color={'red'} />)}</div>
+                  <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>Has Powerbadge</p>
+                </div>)}
+                {(eligibility.channelFollowerReq && ecoValue) && (<div className='flex-row' style={{alignItems: 'center'}}>
+                  <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '0px 35px 0 0'}}>{eligibility.channelFollower ? (<ImCheckmark size={20} color={'#6f6'} />) : (<ImCross size={20} color={'red'} />)}</div>
+                  <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>Follows channel</p>
+                </div>)}
+                {(eligibility.holdingERC20Req && ecoValue && ecoValue.erc20s && ecoValue.erc20s.length > 0) && (ecoValue.erc20s.map((erc20, index) => (<div key={index} className='flex-row' style={{alignItems: 'center'}}>
+                  <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '0px 35px 0 0'}}>{eligibility.holdingERC20 ? (<ImCheckmark size={20} color={'#6f6'} />) : (<ImCross size={20} color={'red'} />)}</div>
+                  <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>Holds a min. of {erc20.min} <a href={getTokenAddress(erc20.erc20_chain, erc20.erc20_address, 'token')} className="fc-lnk" target="_blank" rel="noopener noreferrer" style={{textDecoration: 'underline'}}>{shortenAddress(erc20.erc20_address)}</a></p>
+                </div>)))}
+                {(eligibility.holdingNFTReq && ecoValue && ecoValue.nfts && ecoValue.nfts.length > 0) && (ecoValue.erc20s.map((nft, index) => (<div key={index} className='flex-row' style={{alignItems: 'center'}}>
+                  <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '0px 35px 0 0'}}>{eligibility.holdingNFT ? (<ImCheckmark size={20} color={'#6f6'} />) : (<ImCross size={20} color={'red'} />)}</div>
+                  <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>Holds <a href={getTokenAddress(nft.nft_chain, nft.nft_address, 'token')} className="fc-lnk" target="_blank" rel="noopener noreferrer" style={{textDecoration: 'underline'}}>{shortenAddress(nft.nft_address)}</a> NFT </p>
+                </div>)))}
+                {(eligibility.ownerFollowerReq && ecoValue && ecoValue.owner_name) && (<div className='flex-row' style={{alignItems: 'center'}}>
+                  <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '0px 35px 0 0'}}>{eligibility.ownerFollower ? (<ImCheckmark size={20} color={'#6f6'} />) : (<ImCross size={20} color={'red'} />)}</div>
+                  <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>Follows @{ecoValue.owner_name}</p>
+                </div>)}
+
               </div>
             </div>
 
@@ -797,34 +1037,113 @@ export default function App({ Component, pageProps }) {
       </div>
       {(isMobile && showActions) && (
         <div style={{margin: '20px 23px 0 0', bottom: '46px', width: `100%`, position: 'fixed'}}>
-          <div style={{backgroundColor: '#1D3244cc', borderRadius: '16px 16px 0 0', padding: '3px 0 6px 0', border: '0px solid #678', color: '#fff', fontWeight: '700', alignItems:' center', fontSize: '20px'}}>
-          <div title='Cast Actions' className='flex-row' style={{alignItems: 'center', justifyContent: 'center', margin: '8px'}}>
+          <div style={{backgroundColor: '#1D3244cc', borderRadius: '16px 16px 0 0', padding: '13px 0 6px 0', border: '0px solid #678', color: '#fff', fontWeight: '700', alignItems:' center', fontSize: '20px'}}>
+          {/* <div title='Cast Actions' className='flex-row' style={{alignItems: 'center', justifyContent: 'center', margin: '8px'}}>
             <Actions size={32} color={'#9cf'} /><p className='' style={{paddingLeft: '10px', fontSize: isTablet ? '12px' : '18px', fontWeight: '500'}}>Cast Actions </p>
+          </div> */}
+
+          <div className='flex-row' style={{justifyContent: 'center', alignItems: 'center', gap: '0.5rem'}}>
+            <div className="flex-row" style={{border: '1px solid #abc', padding: '4px 8px', borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'center', backgroundColor: (ecoButton == 'rules') ? '#012' : '', cursor: 'pointer'}} onClick={() => {handleEcoButton('rules')}}>
+              <div className="flex-row" style={{alignItems: 'center', gap: '0.3rem'}}>
+                <span className="channel-font" style={{color: '#eee'}}>Ecosystem rules</span>
+              </div>
+            </div>
+
+            <div className="flex-row" style={{border: '1px solid #abc', padding: '4px 8px', borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'center', backgroundColor: (ecoButton == 'eligibility') ? '#012' : '', cursor: 'pointer'}} onClick={() => {handleEcoButton('eligibility')}}>
+              <div className="flex-row" style={{alignItems: 'center', gap: '0.3rem'}}>
+                <span className="channel-font" style={{color: '#eee'}}>Eligibility</span>
+              </div>
+            </div>
+
+            <div className="flex-row" style={{border: '1px solid #abc', padding: '4px 8px', borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'center', backgroundColor: (ecoButton == 'actions') ? '#012' : '', cursor: 'pointer'}} onClick={() => {handleEcoButton('actions')}}>
+              <div className="flex-row" style={{alignItems: 'center', gap: '0.3rem'}}>
+                <span className="channel-font" style={{color: '#eee'}}>Cast Actions</span>
+              </div>
+            </div>
+
           </div>
-          <div className='flex-col' style={{gap: '0.5rem', margin: '8px'}}>
-            <a className="" title="+1 Impact" href='https://warpcast.com/~/add-cast-action?name=%2B1+Impact&icon=star&actionType=post&postUrl=https%3A%2Fimpact.abundance.id%2Fapi%2Faction%2Fimpact%3Fp%3D1&description=Curate+Casts+with+the+Impact+App' target="_blank" rel="noopener noreferrer">
+
+          {(ecoButton == 'rules') && (
+            <div className='flex-col' style={{gap: '0.25rem', margin: '10px 20px'}}>
+              {(ecoValue && ecoValue.ecosystem_rules && ecoValue.ecosystem_rules.length > 0) && (ecoValue.ecosystem_rules.map((rule, index) => (<div key={index} className='flex-row' style={{alignItems: 'center'}}>
+                <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '0px 35px 0 0'}}><FaStar size={20} color={'#6f6'} /></div>
+                <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>{rule}</p>
+              </div>)))}
+              {(ecoValue && ecoValue.points_per_tip) && (<div className='flex-row' style={{alignItems: 'center'}}>
+                <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '0px 35px 0 0'}}><FaStar size={20} color={'#6f6'} /></div>
+                <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>Points per $1 tipped: {ecoValue.points_per_tip}</p>
+              </div>)}
+              {(ecoValue && ecoValue.condition_points_threshold) && (<div className='flex-row' style={{alignItems: 'center'}}>
+                <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '0px 35px 0 0'}}><FaStar size={20} color={'#6f6'} /></div>
+                <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>Curation points threshold: {ecoValue.condition_points_threshold}</p>
+              </div>)}
+              {(ecoValue && ecoValue.condition_curators_threshold) && (<div className='flex-row' style={{alignItems: 'center'}}>
+                <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '0px 35px 0 0'}}><FaStar size={20} color={'#6f6'} /></div>
+                <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>Curators threshold: {ecoValue.condition_curators_threshold}</p>
+              </div>)}
+              {(ecoValue && ecoValue.percent_tipped) && (<div className='flex-row' style={{alignItems: 'center'}}>
+                <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '0px 35px 0 0'}}><FaStar size={20} color={'#6f6'} /></div>
+                <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>Percent tipped to curators: {ecoValue.percent_tipped}%</p>
+              </div>)}
+              {(ecoValue && ecoValue.upvote_value && ecoValue.downvote_value) && (<div className='flex-row' style={{alignItems: 'center'}}>
+                <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '0px 35px 0 0'}}><FaStar size={20} color={'#6f6'} /></div>
+                <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>Upvote/Downvote effect: {ecoValue.upvote_value} / -{ecoValue.downvote_value} points</p>
+              </div>)}
+            </div>
+          )}
+          {(ecoButton == 'eligibility') && (
+            <div className='flex-col' style={{gap: '0.25rem', margin: '10px 20px'}}>
+            {eligibility && (<div className='flex-row' style={{alignItems: 'center'}}>
+              <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '0px 35px 0 0'}}>{eligibility.hasWallet ? (<ImCheckmark size={20} color={'#6f6'} />) : (<ImCross size={20} color={'red'} />)}</div>
+              <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>Has verified wallet</p>
+            </div>)}
+            {(eligibility.badgeReq && ecoValue) && (<div className='flex-row' style={{alignItems: 'center'}}>
+              <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '0px 35px 0 0'}}>{eligibility.badge ? (<ImCheckmark size={20} color={'#6f6'} />) : (<ImCross size={20} color={'red'} />)}</div>
+              <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>Has Powerbadge</p>
+            </div>)}
+            {(eligibility.channelFollowerReq && ecoValue) && (<div className='flex-row' style={{alignItems: 'center'}}>
+              <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '0px 35px 0 0'}}>{eligibility.channelFollower ? (<ImCheckmark size={20} color={'#6f6'} />) : (<ImCross size={20} color={'red'} />)}</div>
+              <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>Follows channel</p>
+            </div>)}
+            {(eligibility.holdingERC20Req && ecoValue && ecoValue.erc20s && ecoValue.erc20s.length > 0) && (ecoValue.erc20s.map((erc20, index) => (<div key={index} className='flex-row' style={{alignItems: 'center'}}>
+              <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '0px 35px 0 0'}}>{eligibility.holdingERC20 ? (<ImCheckmark size={20} color={'#6f6'} />) : (<ImCross size={20} color={'red'} />)}</div>
+              <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>Holds a min. of {erc20.min} <a href={getTokenAddress(erc20.erc20_chain, erc20.erc20_address, 'token')} className="fc-lnk" target="_blank" rel="noopener noreferrer" style={{textDecoration: 'underline'}}>{shortenAddress(erc20.erc20_address)}</a></p>
+            </div>)))}
+            {(eligibility.holdingNFTReq && ecoValue && ecoValue.nfts && ecoValue.nfts.length > 0) && (ecoValue.erc20s.map((nft, index) => (<div key={index} className='flex-row' style={{alignItems: 'center'}}>
+              <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '0px 35px 0 0'}}>{eligibility.holdingNFT ? (<ImCheckmark size={20} color={'#6f6'} />) : (<ImCross size={20} color={'red'} />)}</div>
+              <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>Holds <a href={getTokenAddress(nft.nft_chain, nft.nft_address, 'token')} className="fc-lnk" target="_blank" rel="noopener noreferrer" style={{textDecoration: 'underline'}}>{shortenAddress(nft.nft_address)}</a> NFT </p>
+            </div>)))}
+            {(eligibility.ownerFollowerReq && ecoValue && ecoValue.owner_name) && (<div className='flex-row' style={{alignItems: 'center'}}>
+              <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '0px 35px 0 0'}}>{eligibility.ownerFollower ? (<ImCheckmark size={20} color={'#6f6'} />) : (<ImCross size={20} color={'red'} />)}</div>
+              <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>Follows @{ecoValue.owner_name}</p>
+            </div>)}
+          </div>
+          )}
+          {(ecoButton == 'actions') && (<div className='flex-col' style={{gap: '0.5rem', margin: '8px'}}>
+            <a className="" title="+1 Impact" href={`https://warpcast.com/~/add-cast-action?name=%2B1+%24${ecoValue.ecosystem_points_name.substring(1)}&icon=star&actionType=post&postUrl=https%3A%2Fimpact.abundance.id%2Fapi%2Faction%2Fimpact1%3Fpoints=${ecoValue.ecosystem_points_name.substring(1)}&description=Curate+Casts+with+the+Impact+App`} target="_blank" rel="noopener noreferrer">
               <div className='flex-row cast-act' style={{borderRadius: '8px', padding: '8px 4px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
                 <FaRegStar size={20} />
-                <p className='' style={{padding: '0px', fontSize: '15px', fontWeight: '500'}}>+1 Impact</p>
+                <p className='' style={{padding: '0px', fontSize: '15px', fontWeight: '500'}}>+1 {ecoValue.ecosystem_points_name}</p>
               </div>
             </a>
 
-            <a className="" title='+5 Impact' href='https://warpcast.com/~/add-cast-action?name=%2B5+Impact&icon=star&actionType=post&postUrl=https%3A%2Fimpact.abundance.id%2Fapi%2Faction%2Fimpact%3Fp%3D5&description=Curate+Casts+with+the+Impact+App' target="_blank" rel="noopener noreferrer">
+            <a className="" title='+5 Impact' href={`https://warpcast.com/~/add-cast-action?name=%2B5+%24${ecoValue.ecosystem_points_name.substring(1)}&icon=star&actionType=post&postUrl=https%3A%2Fimpact.abundance.id%2Fapi%2Faction%2Fimpact5%3Fpoints=${ecoValue.ecosystem_points_name.substring(1)}&description=Curate+Casts+with+the+Impact+App`} target="_blank" rel="noopener noreferrer">
               <div className='flex-row cast-act' style={{borderRadius: '8px', padding: '8px 4px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
                 <FaRegStar size={20} />
-                <p className='' style={{padding: '0px', fontSize: '15px', fontWeight: '500'}}>+5 Impact</p>
+                <p className='' style={{padding: '0px', fontSize: '15px', fontWeight: '500'}}>+5 {ecoValue.ecosystem_points_name}</p>
               </div>
             </a>
 
-            <a className="" title="Cast Impact Balance" href='https://warpcast.com/~/add-cast-action?name=Cast+Impact+Balance&icon=info&actionType=post&postUrl=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Faction%2Fbalance&description=Get+Cast+Balance+for+Impact+App ' target="_blank" rel="noopener noreferrer">
+            <a className="" title="Cast Impact Balance" href={`https://warpcast.com/~/add-cast-action?name=%24${ecoValue.ecosystem_points_name.substring(1)}+Balance&icon=info&actionType=post&postUrl=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Faction%2Fbalance?points=${ecoValue.ecosystem_points_name.substring(1)}&description=Get+Cast+Balance+for+Impact+App`} target="_blank" rel="noopener noreferrer">
               <div className='flex-row cast-act' style={{borderRadius: '8px', padding: '8px 4px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
                 <div className='' style={{width: '2px', fontSize: '0px'}}>&nbsp;</div>
                 <Info size={20} />
-                <p className='' style={{padding: '0px', fontSize: '15px', fontWeight: '500'}}>Cast Impact Balance</p>
+                <p className='' style={{padding: '0px', fontSize: '15px', fontWeight: '500'}}>{ecoValue.ecosystem_points_name} Balance</p>
                 <div className='' style={{width: '2px', fontSize: '0px'}}>&nbsp;</div>
               </div>
             </a>
-          </div>
+          </div>)}
+
         </div>
       </div>
       )}

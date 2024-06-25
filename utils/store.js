@@ -72,6 +72,7 @@ const useStore = create(persist((set, get) => {
     
             userData: null,
             castData: null,
+            ecosystemData: null,
             proposalData: null,
     
             userTipsReceived: [],
@@ -107,6 +108,7 @@ const useStore = create(persist((set, get) => {
 
         setUserData: (userData) => set({ userData: userData }),
         setCastData: (castData) => set({ castData: castData }),
+        setEcosystemData: (ecosystemData) => set({ ecosystemData: ecosystemData }),
         setProposalData: (proposalData) => set({ proposalData: proposalData }),
 
         setUserTipsReceived: (userTipsReceived) => set({ userTipsReceived }),

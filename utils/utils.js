@@ -1,19 +1,26 @@
 import axios from 'axios';
 import CryptoJS from 'crypto-js';
+import { ethers } from 'ethers';
+import Moralis from 'moralis';
+const apiKey = process.env.MORALIS_API_KEY
 
 // shorten a hash address
 export function shortenAddress(input, long) {
-  let address = input
-  let shortenedAddress = ''
-  if (long) {
-    const parts = input.split(':');
-    address = parts[2].substring(2);
-  } 
-  if (address.length <= 8) {
-    return address
+  if (!input) {
+    return ''
   } else {
-    shortenedAddress = `${address.substring(0, 4)}...${address.substring(address.length - 4)}`;
-    return shortenedAddress;
+    let address = input
+    let shortenedAddress = ''
+    if (long) {
+      const parts = input.split(':');
+      address = parts[2].substring(2);
+    } 
+    if (address && address.length <= 8) {
+      return address
+    } else {
+      shortenedAddress = `${address.substring(0, 4)}...${address.substring(address.length - 4)}`;
+      return shortenedAddress;
+    }
   }
 
   // } else {
@@ -484,4 +491,55 @@ export function generateRandomString(length) {
   }
   
   return result;
+}
+
+
+export const isAlphanumeric = (str) => {
+  const regex = /^[a-zA-Z0-9]*$/;
+  return regex.test(str);
+};
+
+
+const ERC20_ABI = [
+  "function balanceOf(address owner) view returns (uint256)"
+];
+
+export const getTokenBalance = async (walletAddress, tokenAddress, provider) => {
+  try {
+    const tokenContract = new ethers.Contract(tokenAddress, ERC20_ABI, provider);
+    const balance = await tokenContract.balanceOf(walletAddress);
+    return balance;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+};
+
+
+let moralisInitialized = false;
+
+export const initializeMoralis = async () => {
+  if (!moralisInitialized) {
+    await Moralis.start({ apiKey });
+    moralisInitialized = true;
+  }
+};
+
+export const getTokenAddress = (chain, address, tokenType) => {
+  if (!chain || !address || !tokenType) {
+    return ''
+  } else {
+    let chainString = 'https://etherscan.io/'
+    if (chain == 'eip155:8453') {
+      chainString = 'https://basescan.org/'
+    } else if (chain == 'eip155:42161') {
+      chainString = 'https://arbiscan.io/'
+    } else if (chain == 'eip155:10') {
+      chainString = 'https://optimistic.etherscan.io/'
+    } else if (chain == 'eip155:1') {
+      chainString = 'https://etherscan.io/'
+    }
+    let tokenAddress = chainString + tokenType + '/' + address
+    return tokenAddress
+  }
 }

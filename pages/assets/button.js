@@ -20,9 +20,9 @@ export default Buttons;
 const button = {
     // 'top-menu': ['main', 'user'],
     'top-menu': ['main'],
-    'side-menu': ['Impact', 'Studio', 'Schedule'],
+    'side-menu': ['Impact', 'Ecosystems', 'Studio', 'Schedule'],
     // 'side-menu': ['Impact', 'Search', 'Ecosystem', 'Reviews', 'Notifications', 'Studio', 'Funding', 'Challenge', 'Propose', 'Cast'],
-    'bottom-nav': ['Impact', 'Studio', 'Cast Actions', 'Schedule'],
+    'bottom-nav': ['Impact', 'Ecosystems', 'Studio', 'Cast Actions', 'Schedule'],
     // 'bottom-nav': ['Impact', 'Search', 'Ecosystem', 'Reviews', 'Notifications'],
     'nav-menu': {
         'main': ['Impact', 'Studio', 'Schedule'],
@@ -69,7 +69,7 @@ const button = {
         working: true,
         icon: FaSearch
     },
-        'Schedule': {
+    'Schedule': {
         link: '/~/schedule',
         menu: 'Search',
         description: 'Schedule tipping and casts',
@@ -77,7 +77,7 @@ const button = {
         working: true,
         icon: FaRegClock
     },
-        'Cast Actions': {
+    'Cast Actions': {
         link: false,
         menu: 'Home',
         description: 'Install Cast Actions for client',
@@ -85,12 +85,12 @@ const button = {
         working: true,
         icon: Actions
     },
-    'Ecosystem': {
+    'Ecosystems': {
         link: '/~/ecosystems',
-        menu: 'Ecosystem',
+        menu: 'Ecosystems',
         description: 'Ecosystems',
-        account: false,
-        working: false,
+        account: true,
+        working: true,
         icon: FaGlobe
     },
     'Reviews': {
