@@ -1015,7 +1015,7 @@ export default function App({ Component, pageProps }) {
                   <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '0px 35px 0 0'}}>{eligibility.holdingERC20 ? (<ImCheckmark size={20} color={'#6f6'} />) : (<ImCross size={20} color={'red'} />)}</div>
                   <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>Holds a min. of {erc20.min} <a href={getTokenAddress(erc20.erc20_chain, erc20.erc20_address, 'token')} className="fc-lnk" target="_blank" rel="noopener noreferrer" style={{textDecoration: 'underline'}}>{shortenAddress(erc20.erc20_address)}</a></p>
                 </div>)))}
-                {(eligibility.holdingNFTReq && ecoValue && ecoValue.nfts && ecoValue.nfts.length > 0) && (ecoValue.erc20s.map((nft, index) => (<div key={index} className='flex-row' style={{alignItems: 'center'}}>
+                {(eligibility.holdingNFTReq && ecoValue && ecoValue.nfts && ecoValue.nfts.length > 0) && (ecoValue.nfts.map((nft, index) => (<div key={index} className='flex-row' style={{alignItems: 'center'}}>
                   <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '0px 35px 0 0'}}>{eligibility.holdingNFT ? (<ImCheckmark size={20} color={'#6f6'} />) : (<ImCross size={20} color={'red'} />)}</div>
                   <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>Holds <a href={getTokenAddress(nft.nft_chain, nft.nft_address, 'token')} className="fc-lnk" target="_blank" rel="noopener noreferrer" style={{textDecoration: 'underline'}}>{shortenAddress(nft.nft_address)}</a> NFT </p>
                 </div>)))}
