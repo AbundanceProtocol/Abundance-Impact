@@ -17,14 +17,14 @@ import {Logo } from './assets'
 import { button } from './assets/button';
 // import ConnectButton from '../components/ConnectButton';
 import NeynarSigninButton from '../components/Signin';
-import { IoIosWarning } from "react-icons/io"
+// import { IoIosWarning } from "react-icons/io"
 import { FaLock } from "react-icons/fa";
 import axios from 'axios';
 import { PiSquaresFourLight as Actions } from "react-icons/pi";
 import { IoInformationCircleOutline as Info } from "react-icons/io5";
 import Creators from '../components/Leaderboard/Creators';
-import qs from "querystring";
-import { encryptPassword, decryptPassword, shortenAddress, getTokenAddress } from '../utils/utils';
+// import qs from "querystring";
+import { shortenAddress, getTokenAddress } from '../utils/utils';
 import { ImCross, ImCheckmark } from "react-icons/im";
 
 export default function App({ Component, pageProps }) {
@@ -204,6 +204,7 @@ export default function App({ Component, pageProps }) {
     if (store.isAuth) {
       setUserProfile(store.fid)
       setIsLogged(true)
+      getRemainingBalances(store.fid, ecoValue.ecosystem_points_name)
     }
     else {
       setIsLogged(false)
