@@ -577,8 +577,16 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
       }, 300);
       return () => clearTimeout(timeoutId);
     }
-  }, [isLogged, store.isAuth, allowanceSched])
 
+  }, [isLogged, allowanceSched])
+
+  useEffect(() => {
+    if (!isLogged) {
+      if (store.isAuth) {
+        setIsLogged(store.isAuth)
+      }
+    }
+  }, [store.isAuth])
 
   useEffect(() => {
     console.log('triggered')

@@ -98,7 +98,6 @@ export default function App({ Component, pageProps }) {
   const [loadRemaining, setLoadRemaining] = useState(true)
   const [prevPoints, setPrevPoints] = useState(null)
   const [ecoButton, setEcoButton] = useState('rules')
-
   const Col = styled.div`
     display: grid;
     grid-template-columns: 1fr auto auto; 
