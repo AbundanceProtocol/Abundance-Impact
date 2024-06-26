@@ -138,6 +138,8 @@ export default function Ecosystem({time, curators, channels, tags, shuffle, refe
   const [tokensSelected, setTokensSelected] = useState(['$DEGEN'])
   const availableTokens = ['$DEGEN', '$TN100x']
   const [noTip, setNoTip] = useState(true)
+  const [points, setPoints] = useState('$IMPACT')
+  const savedEco = useStore(state => state.ecosystemData)
 
   useEffect(() => {
     console.log('triggered')
@@ -145,7 +147,6 @@ export default function Ecosystem({time, curators, channels, tags, shuffle, refe
       console.log('stored data')
       console.log(store.ecosystemData)
       setEco(store.ecosystemData)
-      // store.setEcosystemData(null)
       account.changeEco(store.ecosystemData)
     } else if (ecosystem && isLogged) {
       console.log('no stored data')
@@ -159,10 +160,10 @@ export default function Ecosystem({time, curators, channels, tags, shuffle, refe
   const getEco = async (ecosystem, fid) => {
     try {
       const ecosystemsData = await axios.get('/api/ecosystem/getEcosystemByHandle', { params: { handle: ecosystem, fid: fid } })
-      if (ecosystemsData) {
+      if (ecosystemsData && ecosystemsData.data && ecosystemsData.data.ecosystems) {
         const ecosystems = ecosystemsData.data.ecosystems
-        console.log(ecosystems)
         setEco(ecosystems)
+        setPoints(ecosystems.ecosystem_points_name)
         account.changeEco(ecosystems)
       } else {
         setEco(initialEco)
@@ -420,7 +421,7 @@ export default function Ecosystem({time, curators, channels, tags, shuffle, refe
         return () => clearTimeout(timeoutId);
       }
     }
-  }, [userQuery, feedRouterScheduled, eco]);
+  }, [userQuery, points, feedRouterScheduled, eco]);
 
 
   const handleSelection = (type, selection) => {
@@ -593,6 +594,12 @@ export default function Ecosystem({time, curators, channels, tags, shuffle, refe
   }
 
   useEffect(() => {
+    if (savedEco && savedEco.ecosystem_points_name) {
+      setPoints(savedEco.ecosystem_points_name)
+    }
+  }, [savedEco]);
+
+  useEffect(() => {
     if (store.isAuth) {
       updateAllowances(availableTokens, store.fid)
     }
@@ -655,16 +662,16 @@ export default function Ecosystem({time, curators, channels, tags, shuffle, refe
   function feedRouter() {
     const { shuffle, time, tags, channels, curators } = userQuery
     const timeRange = getTimeRange(time)
-    const points = eco.ecosystem_points_name
+    // const points = eco.ecosystem_points_name
     console.log(userQuery)
     getUserSearch(timeRange, tags, channels, curators, null, shuffle, points)
   }
 
 
-  async function getUserSearch(time, tags, channel, curator, text, shuffle, points) {
+  async function getUserSearch(time, tags, channel, curator, text, shuffle) {
     const fid = await store.fid
 
-    async function getSearch(time, tags, channel, curator, text, shuffle, points) {
+    async function getSearch(time, tags, channel, curator, text, shuffle) {
       try {
         const response = await axios.get('/api/curation/getUserSearch', {
           params: { time, tags, channel, curator, text, shuffle, points }
@@ -682,7 +689,7 @@ export default function Ecosystem({time, curators, channels, tags, shuffle, refe
       }
     }
 
-    const casts = await getSearch(time, tags, channel, curator, text, shuffle, points)
+    const casts = await getSearch(time, tags, channel, curator, text, shuffle)
     let filteredCasts
     let sortedCasts
     if (!casts) {

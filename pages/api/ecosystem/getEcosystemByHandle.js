@@ -11,7 +11,7 @@ export default async function handler(req, res) {
     async function getEcosystems(handle) {
       try {
         await connectToDatabase();
-        const ecosystems = await EcosystemRules.findOne({ecosystem_handle: handle}).exec()
+        const ecosystems = await EcosystemRules.findOne({ecosystem_handle:  { $regex: new RegExp(`^${handle}$`, 'i') }}).exec()
         if (ecosystems) {
           console.log(ecosystems)
           return ecosystems
