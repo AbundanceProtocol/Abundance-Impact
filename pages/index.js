@@ -389,6 +389,7 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
   }, [userQuery, points, feedRouterScheduled]);
 
   useEffect(() => {
+    console.log('trigger')
     if (savedEco && savedEco.ecosystem_points_name) {
       setPoints(savedEco.ecosystem_points_name)
     }
@@ -654,6 +655,7 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
   async function getUserSearch(time, tags, channel, curator, text, shuffle) {
     const fid = await store.fid
     // const points = '$IMPACT'
+    console.log(points)
 
     async function getSearch(time, tags, channel, curator, text, shuffle) {
       try {
