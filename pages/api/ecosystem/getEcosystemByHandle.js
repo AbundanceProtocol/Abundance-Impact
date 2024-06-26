@@ -2,16 +2,16 @@ import connectToDatabase from "../../../libs/mongodb";
 import EcosystemRules from "../../../models/EcosystemRules";
 
 export default async function handler(req, res) {
-  const { name, fid } = req.query;
+  const { handle, fid } = req.query;
 
-  if (req.method !== 'GET' || !name || !fid) {
+  if (req.method !== 'GET' || !handle || !fid) {
     res.status(405).json({ error: 'Method Not Allowed' });
   } else {
 
-    async function getEcosystems(name) {
+    async function getEcosystems(handle) {
       try {
         await connectToDatabase();
-        const ecosystems = await EcosystemRules.findOne({ecosystem_name: name}).exec()
+        const ecosystems = await EcosystemRules.findOne({ecosystem_handle: handle}).exec()
         if (ecosystems) {
           console.log(ecosystems)
           return ecosystems
@@ -24,7 +24,7 @@ export default async function handler(req, res) {
       }
     }
 
-    const ecosystems = await getEcosystems(name)    
+    const ecosystems = await getEcosystems(handle)    
 
     res.status(200).json({ ecosystems });
   }

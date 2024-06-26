@@ -33,7 +33,7 @@ export default function Ecosystem({time, curators, channels, tags, shuffle, refe
   const store = useStore()
   const [textMax, setTextMax] = useState('562px')
   const [feedMax, setFeedMax ] = useState('620px')
-  const initialQuery = {shuffle: true, time: '3days', tags: [], channels: [], curators: []}
+  const initialQuery = {shuffle: true, time: '7days', tags: [], channels: [], curators: []}
   const [userQuery, setUserQuery] = useState(initialQuery)
   const [showPopup, setShowPopup] = useState({open: false, url: null})
   const router = useRouter()
@@ -97,6 +97,7 @@ export default function Ecosystem({time, curators, channels, tags, shuffle, refe
     downvote_value: 1,
     ecosystem_moderators: [],
     ecosystem_name: 'none',
+    ecosystem_handle: 'none',
     ecosystem_points_name: '$NONE',
     ecosystem_rules: [`Can't do evil`],
     erc20s: [],
@@ -140,13 +141,15 @@ export default function Ecosystem({time, curators, channels, tags, shuffle, refe
 
   useEffect(() => {
     console.log('triggered')
-    if (store.ecosystemData && store.ecosystemData.ecosystem_name == ecosystem && isLogged) {
+    if (store.ecosystemData && store.ecosystemData.ecosystem_handle == ecosystem && isLogged) {
       console.log('stored data')
       console.log(store.ecosystemData)
       setEco(store.ecosystemData)
-      store.setEcosystemData(null)
+      // store.setEcosystemData(null)
+      account.changeEco(store.ecosystemData)
     } else if (ecosystem && isLogged) {
       console.log('no stored data')
+      account.changeEco(initialEco)
       getEco(ecosystem, store.fid)
     } else {
       console.log('not logged')
@@ -155,17 +158,20 @@ export default function Ecosystem({time, curators, channels, tags, shuffle, refe
 
   const getEco = async (ecosystem, fid) => {
     try {
-      const ecosystemsData = await axios.get('/api/ecosystem/getEcosystemByName', { params: { name: ecosystem, fid: fid } })
+      const ecosystemsData = await axios.get('/api/ecosystem/getEcosystemByHandle', { params: { handle: ecosystem, fid: fid } })
       if (ecosystemsData) {
         const ecosystems = ecosystemsData.data.ecosystems
         console.log(ecosystems)
         setEco(ecosystems)
+        account.changeEco(ecosystems)
       } else {
         setEco(initialEco)
+        account.changeEco(initialEco)
       }
     } catch (error) {
       console.error('Error creating post:', error);
       setEco(initialEco)
+      account.changeEco(initialEco)
     }
   }
 
@@ -401,7 +407,7 @@ export default function Ecosystem({time, curators, channels, tags, shuffle, refe
 
 
   useEffect(() => {
-    if (eco.ecosystem_points_name !== '$NONE') {
+    if (eco && eco.ecosystem_points_name !== '$NONE') {
       if (feedRouterScheduled) {
         feedRouter();
         setFeedRouterScheduled(false);
@@ -1392,7 +1398,7 @@ export async function getServerSideProps(context) {
   const { time, curators, channels, tags, shuffle, referrer, eco } = query;
   const { ecosystem } = params;
 
-  let setTime = '3days'
+  let setTime = '7days'
   let setEco = eco || '$IMPACT'
   if (time) {
     setTime = time

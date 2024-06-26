@@ -58,6 +58,7 @@ export default function ProfilePage() {
     downvote_value: 1,
     ecosystem_moderators: [],
     ecosystem_name: 'none',
+    ecosystem_handle: 'none',
     ecosystem_points_name: '$IMPACT',
     ecosystem_rules: [`Can't do evil`],
     erc20s: [],

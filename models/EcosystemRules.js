@@ -4,6 +4,7 @@ const ecosystemRulesSchema = new mongoose.Schema({
   fid: Number,
   owner_name: String,
   ecosystem_name: String,
+  ecosystem_handle: String,
   ecosystem_points_name: String,
   ecosystem_moderators: [Number],
   ecosystem_rules: [String],

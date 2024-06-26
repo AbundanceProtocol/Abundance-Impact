@@ -24,6 +24,7 @@ export default async function handler(req, res) {
 
       ecosystem.owner_name = data.ecoOwner
       ecosystem.ecosystem_name = data.ecoName
+      ecosystem.ecosystem_handle = data.ecoHandle
       ecosystem.ecosystem_points_name = data.ecoPoints
       if (data.ecoRules && data.ecoRules.length > 0) {
         for (const rule of data.ecoRules) {

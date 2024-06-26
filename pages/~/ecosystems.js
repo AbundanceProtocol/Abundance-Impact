@@ -144,6 +144,7 @@ export default function Ecosystem() {
     fid: null, 
     nameField: false, 
     name: null, 
+    handle: null, 
     points: '$', 
     dropdown: null,
     pointsField: false, 
@@ -165,8 +166,10 @@ export default function Ecosystem() {
   }
   const controller = {
     name: 'empty', 
+    handle: 'empty', 
     channel: 'empty', 
     moderators: 'empty', 
+    handleDescription: 'Choose ecosystem handle', 
     nameDescription: 'Choose an ecosystem name', 
     pointsDescription: 'Choose a name for the points system',
     rules: ['empty'],
@@ -494,7 +497,7 @@ export default function Ecosystem() {
           passed = false
         }
       }
-      if ((formController.name && formController.name !== 'working') ||( formController.points && formController.points !== 'working')) {
+      if ((formController.name && formController.name !== 'working') || ( formController.points && formController.points !== 'working') || ( formController.handle && formController.handle !== 'working')) {
         passed = false
       }
       if (passed) {
@@ -516,6 +519,7 @@ export default function Ecosystem() {
 
   function updateEcosystemData() {
     let ecoName = ''
+    let ecoHandle = ''
     let ecoOwner = store.usernameFC
     let ecoPoints = ''
     let ecoChannels = []
@@ -527,6 +531,7 @@ export default function Ecosystem() {
     let ecoEligibility = []
 
     ecoName = newEcosystem.name
+    ecoHandle = newEcosystem.handle
     ecoPoints = newEcosystem.points
     if (selectedChannels && selectedChannels.length > 0) {
       for (const channel of selectedChannels) {
@@ -1683,6 +1688,12 @@ export default function Ecosystem() {
       updatedformController.name = 'empty'
       updatedformController.nameDescription = 'Choose an ecosystem name'
       setFormController(updatedformController)
+    } else if (target == 'handle') {
+      updatedNewEcosystem.handle = ''
+      setNewEcosystem(updatedNewEcosystem)
+      updatedformController.handle = 'empty'
+      updatedformController.handleDescription = 'Choose ecosystem handle'
+      setFormController(updatedformController)
     } else if (target == 'points') {
       updatedNewEcosystem.points = '$'
       setNewEcosystem(updatedNewEcosystem)
@@ -1784,7 +1795,6 @@ export default function Ecosystem() {
       updatedNewEcosystem.incentives[target].isSet = 'working'
       updatedNewEcosystem.incentives[target].condition = 'percent-tipped'
       updatedNewEcosystem.incentives[target].state = {...updatedNewEcosystem.incentives[target].state, ...state}
-      // console.log(updatedNewEcosystem.incentives[target])
     } else if (value == 'percent-tipped') {
       updatedNewEcosystem.incentives[target].isSet = 'empty'
       updatedNewEcosystem.incentives[target].condition = 'percent-tipped'
@@ -1802,7 +1812,6 @@ export default function Ecosystem() {
         updatedNewEcosystem.incentives[target].isSet = 'working'
         updatedNewEcosystem.incentives[target].condition = 'tip'
       }
-      // console.log(updatedNewEcosystem.incentives[target])
     } else if (value == 'qdao-up') {
       if (state) {
         // console.log(state.qdaoUp)
@@ -1814,7 +1823,6 @@ export default function Ecosystem() {
         updatedNewEcosystem.incentives[target].isSet = 'working'
         updatedNewEcosystem.incentives[target].condition = 'qdao'
       }
-      // console.log(updatedNewEcosystem.incentives[target])
     } else if (value == 'qdao-down') {
       if (state) {
         // console.log(state.qdaoDown)
@@ -1826,7 +1834,6 @@ export default function Ecosystem() {
         updatedNewEcosystem.incentives[target].isSet = 'working'
         updatedNewEcosystem.incentives[target].condition = 'qdao'
       }
-      // console.log(updatedNewEcosystem.incentives[target])
     } else {
       updatedNewEcosystem.incentives[target].isSet = 'empty'
     }
@@ -1857,7 +1864,6 @@ export default function Ecosystem() {
       if (state) {
         updatedNewEcosystem.eligibility[target].state = {...updatedNewEcosystem.eligibility[target].state, ...state}
       }
-      // console.log(updatedNewEcosystem.eligibility[target])
     } else if (value == 'hypersub-address') {
       if (state) {
         updatedNewEcosystem.eligibility[target].state = {...updatedNewEcosystem.eligibility[target].state, ...state}
@@ -1876,8 +1882,6 @@ export default function Ecosystem() {
         // console.log(state.chain)
         updatedNewEcosystem.eligibility[target].state = {...updatedNewEcosystem.eligibility[target].state, ...state}
         const currentState = updatedNewEcosystem.eligibility[target].state
-        // console.log(state, state.nftAddress, state?.nftAddress?.length == 0, currentState.chain, currentState?.chain == '0')
-        // console.log(state?.nftAddress?.length == 0 && currentState?.chain == '0')
         updatedNewEcosystem.eligibility[target].condition = 'nft'
         if (state && state.nftAddress && state.nftAddress.length == 42 && state.nftAddress.slice(0,2) == '0x' && currentState.chain && currentState.chain !== '0') {
           updatedNewEcosystem.eligibility[target].isSet = 'working'
@@ -1887,7 +1891,6 @@ export default function Ecosystem() {
           updatedNewEcosystem.eligibility[target].isSet = 'empty'
         }
       }
-      // console.log(updatedNewEcosystem.eligibility[target])
     } else if (value == 'erc20-min-token') {
       if (state) {
         if (state && state.tokenMinValue && (state.tokenMinValue < 0 || isNaN(state.tokenMinValue))) {
@@ -1903,7 +1906,6 @@ export default function Ecosystem() {
           updatedNewEcosystem.eligibility[target].isSet = 'error'
         }
       }
-      // console.log(updatedNewEcosystem.eligibility[target])
     } else if (value == 'erc20-token') {
       if (state) {
         updatedNewEcosystem.eligibility[target].state = {...updatedNewEcosystem.eligibility[target].state, ...state}
@@ -1916,20 +1918,17 @@ export default function Ecosystem() {
           updatedNewEcosystem.eligibility[target].isSet = 'error'
         }
       }
-      // console.log(updatedNewEcosystem.eligibility[target])
     } else if (value == 'erc20-address') {
       if (state) {
         updatedNewEcosystem.eligibility[target].state = {...updatedNewEcosystem.eligibility[target].state, ...state}
         updatedNewEcosystem.eligibility[target].condition = 'erc20'
         const currentState = updatedNewEcosystem.eligibility[target].state
-        // console.log((state.token !== '0' && state.token !== '8' && currentState.tokenMinValue && currentState.tokenMinValue >= 0))
         if (state && state.erc20Address && state.erc20Address.length == 42 && state.erc20Address.slice(0,2) == '0x' && currentState.token && currentState.token == '8' && currentState.chain && currentState.chain !== '0' && currentState.tokenMinValue && currentState.tokenMinValue >= 0) {
           updatedNewEcosystem.eligibility[target].isSet = 'working'
         } else {
           updatedNewEcosystem.eligibility[target].isSet = 'error'
         }
       }
-      // console.log(updatedNewEcosystem.eligibility[target])
     } else if (value == 'erc20-chain') {
       if (state) {
         updatedNewEcosystem.eligibility[target].state = {...updatedNewEcosystem.eligibility[target].state, ...state}
@@ -1941,7 +1940,6 @@ export default function Ecosystem() {
           updatedNewEcosystem.eligibility[target].isSet = 'error'
         }
       }
-      // console.log(updatedNewEcosystem.eligibility[target])
     } else if (value == 'nft-chain') {
       if (state) {
         updatedNewEcosystem.eligibility[target].state = {...updatedNewEcosystem.eligibility[target].state, ...state}
@@ -1955,7 +1953,6 @@ export default function Ecosystem() {
           updatedNewEcosystem.eligibility[target].isSet = 'empty'
         }
       }
-      // console.log(updatedNewEcosystem.eligibility[target])
     } else if (value == 'erc20') {
       updatedNewEcosystem.eligibility[target].isSet = 'empty'
       updatedNewEcosystem.eligibility[target].condition = 'erc20'
@@ -1969,7 +1966,39 @@ export default function Ecosystem() {
     setNewEcosystem(updatedNewEcosystem)
   }
 
-  function onInput(event) {
+  async function checkPoints(points) {
+    try {
+      const response = await axios.get('/api/ecosystem/checkPoints', { params: {      
+        points }})
+      if (response && response.data && response.data?.ecoPoints) {
+        console.log(response)
+        return response.data?.ecoPoints
+      } else {
+        return false
+      }
+    } catch (error) {
+      console.error('Error submitting data:', error)
+      return true
+    }
+  }
+
+  async function checkHandle(handle) {
+    try {
+      const response = await axios.get('/api/ecosystem/checkHandle', { params: {      
+        handle }})
+      if (response && response.data && response.data?.ecoHandle) {
+        console.log(response)
+        return response.data?.ecoHandle
+      } else {
+        return false
+      }
+    } catch (error) {
+      console.error('Error submitting data:', error)
+      return true
+    }
+  }
+
+  async function onInput(event) {
     if (event.target.name == 'points') {
       const inputValue = event.target.value
       console.log(inputValue.startsWith('$'))
@@ -2006,12 +2035,43 @@ export default function Ecosystem() {
         } else if (inputValue.length > 7) {
           updatedformController.points = 'error'
           updatedformController.pointsDescription = 'No more than 6 chars'
-        } else if (isAlphanumeric(restOfString)) {
-          updatedformController.points = 'working'
-          updatedformController.pointsDescription = 'Choose an ecosystem name'
-        } else {
+        } else if (!isAlphanumeric(restOfString)) {
           updatedformController.points = 'error'
           updatedformController.pointsDescription = 'Needs to be numbers & chars'
+        } else {
+          const pointsExist = await checkPoints(inputValue)
+          if (pointsExist) {
+            updatedformController.points = 'error'
+            updatedformController.pointsDescription = 'Points already exist'
+          } else {
+            updatedformController.points = 'working'
+            updatedformController.pointsDescription = 'Choose a name for the points system'
+          }
+        }
+      }
+    } else if (event.target.name == 'handle') {
+      const inputValue = event.target.value
+      // const restOfString = inputValue.slice(1);
+      if (inputValue.length == 0) {
+        updatedformController.handle = 'empty'
+        updatedformController.handleDescription = 'Choose ecosystem handle'
+      } else if (inputValue.length < 4) {
+        updatedformController.handle = 'error'
+        updatedformController.handleDescription = 'Must be at least 4 chars'
+      } else if (inputValue.length > 12) {
+        updatedformController.handle = 'error'
+        updatedformController.handleDescription = 'No more than 12 chars'
+      } else if (!isAlphanumeric(inputValue)) {
+        updatedformController.handle = 'error'
+        updatedformController.handleDescription = 'Needs to be numbers & chars'
+      } else {
+        const handleExists = await checkHandle(inputValue)
+        if (handleExists) {
+          updatedformController.handle = 'error'
+          updatedformController.handleDescription = 'Handle already exists'
+        } else {
+          updatedformController.handle = 'working'
+          updatedformController.handleDescription = 'Choose ecosystem handle'
         }
       }
     } else if (event.target.name == 'channels') {
@@ -2043,9 +2103,6 @@ export default function Ecosystem() {
       setNewEcosystem(updatedNewEcosystem)
     }
     setFormController(updatedformController)
-    // console.log(event.target.name)
-    // console.log(event.target.value)
-    // console.log(newEcosystem)
 	}
 
   const inputKeyDown = (event) => {
@@ -2057,9 +2114,9 @@ export default function Ecosystem() {
 
   const goToEcosystem = async (event, ecosystem) => {
     event.preventDefault()
-    const systemName = ecosystem.ecosystem_name
+    const systemHandle = ecosystem.ecosystem_handle
     await store.setEcosystemData(ecosystem)
-    router.push(`/~/ecosystems/${systemName}`)
+    router.push(`/~/ecosystems/${systemHandle}`)
   }
 
 
@@ -2085,6 +2142,14 @@ export default function Ecosystem() {
     {newEcosystem.nameField && (
       <InputField title={'Ecosystem name:'} description={formController.nameDescription} name={'name'} value={newEcosystem.name} placeholder={`Ecosystem name`} inputKeyDown={inputKeyDown} onInput={onInput} setupEcosystem={setupEcosystem} target={'name'} isSet={formController.name} clearInput={clearInput} cancel={false} />
     )}
+
+
+    {newEcosystem.nameField && (<Description text={'Ecosystem handle:'} padding={'20px 0 4px 10px'} />)}
+
+    {newEcosystem.nameField && (
+      <InputField title={'Handle:'} description={formController.handleDescription} name={'handle'} value={newEcosystem.handle} placeholder={`handle`} inputKeyDown={inputKeyDown} onInput={onInput} setupEcosystem={setupEcosystem} target={'handle'} isSet={formController.handle} clearInput={clearInput} cancel={false} />
+    )}
+
 
     {newEcosystem.nameField && (<Description text={'Point system:'} padding={'20px 0 4px 10px'} />)}
 
@@ -2213,19 +2278,12 @@ export default function Ecosystem() {
       (<Dropdown key={index} name={index} value={eligibility.condition} setupEcosystem={setupEcosystem} target={index} conditions={conditions} cancel={true} removeField={removeEligibilityField} isSet={eligibility.isSet} setCondition={setEligibility} state={eligibility.state} onInput={onInput} />))
     )}
 
-    {/* {newEcosystem.nameField && (
-      <Dropdown name={'name'} value={newEcosystem.dropdown} inputKeyDown={inputKeyDown} onInput={onInput} setupEcosystem={setupEcosystem} target={'points'} conditions={conditions} cancel={true} />
-    )} */}
-
 
     {newEcosystem.nameField && (<div className='flex-row' style={{margin: '33px 3px 8px 3px', gap: '1rem'}}>
       <Description text={'Point incentives:'} padding={'0 0 0 10px'} />
       <Button text={'Add'} prevIcon={FaPlus} setupEcosystem={setupEcosystem} target={'incentives'} />
     </div>)}
 
-    {/* {newEcosystem.nameField && (
-      <Dropdown setupEcosystem={setupEcosystem} target={'points'} conditions={incentives} cancel={true} />
-    )} */}
 
     {newEcosystem.nameField && (newEcosystem.incentives.map((incentive, index) => 
       (<Dropdown key={index} name={index} value={incentive.condition} setupEcosystem={setupEcosystem} target={index} conditions={incentives} cancel={true} removeField={removeIncentiveField} isSet={incentive.isSet} setCondition={setIncentives} state={incentive.state} onInput={onInput} />))
@@ -2278,8 +2336,6 @@ export default function Ecosystem() {
     {!newEcosystem.nameField && (<Description text={'All Ecosystems:'} padding={'30px 0 4px 10px'} />)}
 
 
-
-
     {!newEcosystem.nameField && (
       <>{!loadedSchedule ? (
       <div className='flex-row' style={{height: '100%', alignItems: 'center', width: feedMax, justifyContent: 'center', marginTop: '40px'}}>
@@ -2301,15 +2357,6 @@ export default function Ecosystem() {
     </div>)}) : (
       <div style={{width: '100%', fontSize: '20px', fontWeight: '400', textAlign: 'center', color: '#cde'}}>No ecosystems found</div>
     )}</>)}
-
-
-
-
-
-
-
-
-
 
 
     <div style={{margin: '0 0 70px 0'}}>

@@ -57,6 +57,7 @@ export default function App({ Component, pageProps }) {
     downvote_value: 1,
     ecosystem_moderators: [],
     ecosystem_name: 'Abundance',
+    ecosystem_handle: 'none',
     ecosystem_points_name: '$IMPACT',
     ecosystem_rules: [`Can't do evil`],
     erc20s: [],
@@ -462,9 +463,9 @@ export default function App({ Component, pageProps }) {
     console.log('test')
   }
 
-  function newTest(value) {
-    console.log(value)
-  }
+  // function newTest(value) {
+  //   console.log(value)
+  // }
 
 
   const LoginPopup = async () => {
@@ -521,6 +522,10 @@ export default function App({ Component, pageProps }) {
     setEcoValue(system);
   };
 
+  const changeEco = (system) => {
+    store.setEcosystemData(system)
+    setEcoValue(system);
+  };
   
   useEffect(() => {
     if (ecoSched) {
@@ -959,7 +964,7 @@ export default function App({ Component, pageProps }) {
               </div>)}
               {/* <div style={{color: 'white', fontWeight: '600'}} onClick={testButton}>Test btn</div> */}
             </div>)}
-            <AccountContext.Provider value={{...store.account, ref1, LoginPopup, LogoutPopup, newTest }}>
+            <AccountContext.Provider value={{...store.account, ref1, LoginPopup, LogoutPopup, changeEco }}>
               <Component {...pageProps} connect={connect} />
             </AccountContext.Provider>
           </div>

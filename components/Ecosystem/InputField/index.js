@@ -67,7 +67,7 @@ export default function InputField({ title, description, name, value, placeholde
               {button}
             </div>
           </div>) : (<div className={`flex-row ${setButton} btn-hvr`} style={{border: '0px solid #abc', padding: '1px 5px', borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'flex-start', margin: isMobile ? ((title) ? '0 0 10px 5px' : '10px 0 10px 5px') : '10px 0 10px 5px'}}>
-            <div className={`flex-row`} style={{alignItems: 'center', gap: '0.3rem', padding: '4px 0px', fontWeight: '600'}}>
+            <div className={`flex-row`} style={{alignItems: 'center', gap: '0.3rem', padding: '4px 0px 4px 4px', fontWeight: '600'}}>
               {(isSet == 'empty') ? (<FaRegFaceMeh  size={isMobile ? 18 : 20} />
               ) : (isSet == 'error') ? (<FaRegFaceFrown size={isMobile ? 18 : 20} />
               ) : (<FaRegFaceSmileBeam size={isMobile ? 18 : 20} />
