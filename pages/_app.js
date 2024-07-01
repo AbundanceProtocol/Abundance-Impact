@@ -172,8 +172,6 @@ export default function App({ Component, pageProps }) {
   }
 
   const handleSignIn = async (data) => {
-    // console.log(data)
-    // console.log(store.isAuth)
     setIsLogged(true)
     setShowLogin(false)
   };
@@ -200,7 +198,6 @@ export default function App({ Component, pageProps }) {
   };
 
   useEffect(() => {
-    // console.log(store.fid, store.isAuth, store.signer_uuid);
     if (store.isAuth) {
       setUserProfile(store.fid)
       setIsLogged(true)

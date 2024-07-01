@@ -199,7 +199,16 @@ async function getEmbeds(url) {
 
 
 export async function checkEmbedType(cast) {
-  const { embeds } = cast;
+  const isCast = (cast) => {
+    if (cast) {
+      const { embeds } = cast
+      return { embeds }
+    } else {
+      return null
+    }
+  }
+
+  const { embeds } = isCast(cast);
 
   if (embeds && embeds.length > 0) {
     const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
