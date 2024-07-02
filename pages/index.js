@@ -36,7 +36,7 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
   const [textMax, setTextMax] = useState('562px')
   const [feedMax, setFeedMax ] = useState('620px')
   const [allowanceSched, setAllowanceSched] = useState(false)
-  const initialQuery = {shuffle: true, time: '7days', tags: [], channels: [], curators: []}
+  const initialQuery = {shuffle: false, time: '7days', tags: [], channels: [], curators: []}
   const [userQuery, setUserQuery] = useState(initialQuery)
   const initialEco = {
     channels: [],
@@ -130,7 +130,10 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
   const tokenInfo = [{token: '$DEGEN', set: true}]
   const [tokenData, setTokenData] = useState(tokenInfo)
   const [isSelected, setIsSelected] = useState('none')
-  const [feedRouterScheduled, setFeedRouterScheduled] = useState(false);
+  const [searchRouterSched, setSearchRouterSched] = useState(false);
+  const [searchSelectSched, setSearchSelectSched] = useState(false);
+  const [inViewSched, setInViewSched] = useState(false);
+  
   const userTipPercent = useStore(state => state.userTipPercent);
 	const [userSearch, setUserSearch] = useState({ search: '' })
   const [filterChannels, setFilterChannels] = useState([])
@@ -333,6 +336,8 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
 
   const handleSelect = async (type, selection) => {
     console.log(type)
+    setPrevCursor('')
+    setCursor('')
     if (type == 'shuffle') {
       setUserQuery(prevState => ({
         ...prevState, 
@@ -381,7 +386,8 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
 
 
   useEffect(() => {
-    if (feedRouterScheduled) {
+
+    const searchRouter = () => {
       if (store.isAuth) {
         if (searchSelect == 'Curation') {
           feedRouter()
@@ -391,25 +397,20 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
           getFeed(store.fid, channelSelect, false)
         }
       }
-      setFeedRouterScheduled(false);
+    }
+
+    if (searchRouterSched) {
+      searchRouter()
+      setSearchRouterSched(false);
     } else {
       const timeoutId = setTimeout(() => {
-        if (store.isAuth) {
-          if (searchSelect == 'Curation') {
-            feedRouter()
-          } else if (searchSelect == 'Main' && channelSelect) {
-            getFeed(store.fid, channelSelect, true)
-          } else if (searchSelect == 'Recent' && channelSelect) {
-            getFeed(store.fid, channelSelect, false)
-          }
-        }
-        setFeedRouterScheduled(false);
+        searchRouter()
+        setSearchRouterSched(false);
       }, 300);
-  
       return () => clearTimeout(timeoutId);
     }
     
-  }, [userQuery, feedRouterScheduled]);
+  }, [userQuery, searchRouterSched]);
 
   useEffect(() => {
     console.log(savedEco)
@@ -602,16 +603,19 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
   }
 
   useEffect(() => {
-    if (allowanceSched) {
+
+    const allowanceUpdate = () => {
       if (store.isAuth) {
         updateAllowances(availableTokens, store.fid)
       }
+    }
+
+    if (allowanceSched) {
+      allowanceUpdate()
       setAllowanceSched(false);
     } else {
       const timeoutId = setTimeout(() => {
-        if (store.isAuth) {
-          updateAllowances(availableTokens, store.fid)
-        }
+        allowanceUpdate()
         setAllowanceSched(false);
       }, 300);
       return () => clearTimeout(timeoutId);
@@ -628,33 +632,70 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
   }, [store.isAuth])
 
   useEffect(() => {
-    console.log(searchSelect, channelSelect)
-    if (store.isAuth) {
-      if (searchSelect == 'Curation') {
-        feedRouter()
-      } else if (searchSelect == 'Main' && channelSelect) {
-        getFeed(store.fid, channelSelect, true)
-      } else if (searchSelect == 'Recent' && channelSelect) {
-        getFeed(store.fid, channelSelect, false)
+
+    const searchSelectRouter = () => {
+      console.log(searchSelect, channelSelect)
+      setLoading(false)
+      setPrevCursor('')
+      setCursor('')
+      if (store.isAuth) {
+        if (searchSelect == 'Curation') {
+          feedRouter()
+        } else if (searchSelect == 'Main' && channelSelect) {
+          getFeed(store.fid, channelSelect, true)
+        } else if (searchSelect == 'Recent' && channelSelect) {
+          getFeed(store.fid, channelSelect, false)
+        }
       }
     }
-  }, [searchSelect])
+
+    if (searchSelectSched) {
+      searchSelectRouter()
+      setSearchSelectSched(false);
+    } else {
+      const timeoutId = setTimeout(() => {
+        searchSelectRouter()
+        setSearchSelectSched(false);
+      }, 300);
+      return () => clearTimeout(timeoutId);
+    }
+
+  }, [searchSelect, searchSelectSched])
   
   useEffect(() => {
-    if (cursor !== prevCursor && cursor !== '' && store.isAuth) {
-      if (searchSelect == 'Main') {
-        setPrevCursor(cursor)
-        addToFeed(store.fid, channelSelect, true, cursor)
-      } else if (searchSelect == 'Recent') {
-        setPrevCursor(cursor)
-        addToFeed(store.fid, channelSelect, false, cursor)
+
+    const inViewRouter = () => {
+      if (cursor !== prevCursor && cursor !== '' && store.isAuth) {
+        if (searchSelect == 'Main') {
+          setPrevCursor(cursor)
+          addToFeed(store.fid, channelSelect, true, cursor)
+        } else if (searchSelect == 'Recent') {
+          setPrevCursor(cursor)
+          addToFeed(store.fid, channelSelect, false, cursor)
+        } else if (searchSelect == 'Curation') {
+          setPrevCursor(cursor)
+          feedRouter()
+        }
+        console.log('trigger get additional casts', cursor, prevCursor, searchSelect)
+        
+      } else {
+        console.log('triggered, no new casts')
+        console.log(cursor, prevCursor, searchSelect)
       }
-      console.log('trigger get additional casts')
-      
-    } else {
-      console.log('triggered, no new casts')
     }
-  }, [inView])
+
+    
+    if (inViewSched) {
+      inViewRouter()
+      setInViewSched(false);
+    } else {
+      const timeoutId = setTimeout(() => {
+        inViewRouter()
+        setInViewSched(false);
+      }, 300);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [inView, inViewSched])
 
 
   async function getFeed(fid, channel, curated) {
@@ -921,33 +962,67 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
     const fid = await store.fid
     // const points = '$IMPACT'
     console.log(points)
+    let page = null
+    if (!shuffle && typeof cursor !== 'number') {
+      page = 1
+      setPrevCursor(page)
+      setCursor(page+1)
+    } else if (!shuffle && typeof cursor == 'number') {
+      page = cursor
+      setPrevCursor(cursor)
+      setCursor(cursor+1)
+    }
 
     async function getSearch(time, tags, channel, curator, text, shuffle) {
       setLoading(true)
       try {
         const response = await axios.get('/api/curation/getUserSearch', {
-          params: { time, tags, channel, curator, text, shuffle, points }
+          params: { time, tags, channel, curator, text, shuffle, points, page }
         })
         setLoading(false)
         let casts = []
-        if (response && response.data && response.data.casts.length > 0) {
+        let getPage = 1
+        let pages = 1
+        if (response?.data?.casts && response?.data?.casts.length > 0) {
           casts = response.data.casts
         }
-        // console.log(casts)
+        if (response?.data?.page) {
+          getPage = response.data.page
+        }
+        if (response?.data?.pages) {
+          pages = response.data.pages
+        }
 
-        return casts
+        if (getPage == pages) {
+          setPrevCursor('')
+          setCursor('')
+        } else {
+          setPrevCursor(cursor)
+          setCursor(getPage+1)
+        }
+        // console.log(response)
+
+        return {casts, getPage}
       } catch (error) {
         console.error('Error submitting data:', error)
-        return null
+        setPrevCursor('')
+        setCursor('')
+        return { casts: null, getPage: 0 }
       }
     }
 
-    const casts = await getSearch(time, tags, channel, curator, text, shuffle)
+    const {casts, getPage} = await getSearch(time, tags, channel, curator, text, shuffle, page)
+
     let filteredCasts
     let sortedCasts
     if (!casts) {
       setUserFeed([])
     } else {
+
+      let oldFeed = []
+      if (getPage > 1) {
+        oldFeed = userFeed
+      }
 
       console.log(casts)
       filteredCasts = await casts.reduce((acc, current) => {
@@ -958,7 +1033,12 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
         return acc;
       }, [])
       // console.log(filteredCasts)
-      sortedCasts = filteredCasts.sort((a, b) => b.impact_total - a.impact_total);
+
+      if (shuffle) {
+        sortedCasts = filteredCasts.sort((a, b) => b.impact_total - a.impact_total);
+      } else {
+        sortedCasts = filteredCasts
+      }
       // console.log(sortedCasts)
 
       let displayedCasts = await populateCast(sortedCasts)
@@ -971,7 +1051,12 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
         castString = castHashes.join(',');
       }
 
-      setUserFeed(displayedCasts)
+      if (shuffle) {
+        setUserFeed(displayedCasts)
+      } else {
+        let combinedFeed = oldFeed.concat(displayedCasts)
+        setUserFeed(combinedFeed)
+      }
 
       if (!fid) {
         account.LoginPopup()
@@ -1009,8 +1094,13 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
           }
         }
     
-        setUserFeed(displayedCasts)
-
+        if (shuffle) {
+          setUserFeed(displayedCasts)
+        } else {
+          let combinedFeed = oldFeed.concat(displayedCasts)
+          setUserFeed(combinedFeed)
+        }
+        
         async function checkEmbedTypeForCasts(casts) {
           // Map over each cast and apply checkEmbedType function
           const updatedCasts = await Promise.all(casts.map(async (cast) => {
@@ -1022,7 +1112,13 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
         
         // Usage
         const castsWithImages = await checkEmbedTypeForCasts(displayedCasts);
-        setUserFeed(castsWithImages);
+
+        if (shuffle) {
+          setUserFeed(castsWithImages)
+        } else {
+          let combinedFeed = oldFeed.concat(castsWithImages)
+          setUserFeed(combinedFeed)
+        }
 
 
         async function getSubcast(hash, userFid) {
@@ -1110,12 +1206,24 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
     
         const castsWithSubcasts = await checkSubcasts(castsWithImages, fid)
         console.log(castsWithSubcasts)
-        setUserFeed(castsWithSubcasts);
-    
+
+        if (shuffle) {
+          setUserFeed(castsWithSubcasts)
+        } else {
+          let combinedFeed = oldFeed.concat(castsWithSubcasts)
+          setUserFeed(combinedFeed)
+        }
+  
     
         const castsWithEmbeds = await checkEmbeds(castsWithSubcasts)
         console.log(castsWithEmbeds)
-        setUserFeed(castsWithEmbeds);
+
+        if (shuffle) {
+          setUserFeed(castsWithEmbeds)
+        } else {
+          let combinedFeed = oldFeed.concat(castsWithEmbeds)
+          setUserFeed(combinedFeed)
+        }
       }
     }
   }
@@ -1717,7 +1825,7 @@ export async function getServerSideProps(context) {
   if (tags) {
     setTags = Array.isArray(tags) ? tags : [tags]
   }
-  let setShuffle = true
+  let setShuffle = false
   if (shuffle) {
     if (shuffle == 'true') {
       setShuffle = true
