@@ -204,7 +204,7 @@ export async function checkEmbedType(cast) {
       const { embeds } = cast
       return { embeds }
     } else {
-      return null
+      return { embeds: [] }
     }
   }
 

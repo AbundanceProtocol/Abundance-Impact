@@ -414,10 +414,10 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
 
   useEffect(() => {
     console.log(savedEco)
-    if (savedEco && savedEco.ecosystem_points_name) {
+    if (savedEco?.ecosystem_points_name) {
       setPoints(savedEco.ecosystem_points_name)
       setEco(savedEco)
-      if (savedEco.channels && savedEco.channels.length > 0) {
+      if (savedEco?.channels?.length > 0) {
         setUserFeed([])
         setPrevCursor('')
         setCursor('')
@@ -470,7 +470,6 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
     }
     setNoTip(true)
   }, [tokenData])
-
 
   const getName = (tag, value) => {
     const categoryOptions = queryOptions[qType];
@@ -684,7 +683,6 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
       }
     }
 
-    
     if (inViewSched) {
       inViewRouter()
       setInViewSched(false);
@@ -745,7 +743,6 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
     } else {
       setUserFeed(feed)
     }
-
 
     async function checkEmbedTypeForCasts(casts) {
       // Map over each cast and apply checkEmbedType function
@@ -856,10 +853,7 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
     combinedFeed = oldFeed.concat(castsWithEmbeds)
     setUserFeed(combinedFeed)
 
-
-
   }
-
 
   async function addToFeed(fid, channel, curated, cursor) {
 
@@ -891,10 +885,8 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
     console.log(channelFeed)
     console.log(cursorData)
     updateFeed(userFeed, channelFeed, fid)
-    // setUserFeed(channelFeed)
     setCursor(cursorData)
   }
-
 
   useEffect(() => {
     console.log('triggered')
@@ -956,7 +948,6 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
     console.log(userQuery)
     getUserSearch(timeRange, tags, channels, curators, null, shuffle)
   }
-
 
   async function getUserSearch(time, tags, channel, curator, text, shuffle) {
     const fid = await store.fid
@@ -1228,7 +1219,6 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
     }
   }
 
-
   const ExpandImg = ({embed}) => {
     return (
       <>
@@ -1267,7 +1257,6 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
     const handleMouseLeave = () => {
       store.setUserTipPercent(value);
       setInitValue(value)
-      // account.newTest()
     };
   
     return (
@@ -1313,7 +1302,6 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
   }
 
   const SearchOptionButton = ({buttonName}) => {
-    // const btn = buttonName
     let isSearchable = true
     let comingSoon = false
     if ((buttonName == 'Casts' && !store.isAuth) || (buttonName == 'Casts + Replies' && !store.isAuth)) {
@@ -1565,7 +1553,6 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
   }
 
 
-
   return (
   <div name='feed' style={{width: 'auto', maxWidth: '620px'}} ref={ref2}>
     <Head>
@@ -1621,8 +1608,7 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
     </div>
     <div>
 
-
-    {(eco && eco.channels?.length > 0) && (<div className="top-layer flex-row" style={{padding: '10px 0 10px 0', alignItems: 'center', justifyContent: 'space-evenly', margin: '0', borderBottom: '1px solid #888'}}>
+    {(eco?.channels?.length > 0) && (<div className="top-layer flex-row" style={{padding: '10px 0 10px 0', alignItems: 'center', justifyContent: 'space-evenly', margin: '0', borderBottom: '1px solid #888'}}>
       { userButtons.map((btn, index) => (
         <SearchOptionButton buttonName={btn} key={index} /> ))}
     </div>)}
@@ -1688,7 +1674,6 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
             <span className={`${!isMobile ? 'selection-btn' : ''}`} style={{cursor: 'pointer', padding: '0', color: userQuery['channels'].length == 0 ? '#aaa' : ''}}>{isMobile ? '' : userQuery['channels'].length == 0 ? 'All channels' : 'Channels'}</span>
           </div>
         </div>
-
       </div>
 
       <div style={{position: 'relative'}}>
@@ -1787,9 +1772,9 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
           {loading ? (<Spinner size={31} color={'#999'} />) : (<div style={{fontSize: '20px', color: '#def'}}>No casts found</div>)}
         </div>
       ) : (userFeed.map((cast, index) => (<Cast cast={cast} key={index} index={index} updateCast={updateCast} openImagePopup={openImagePopup} ecosystem={points} />)))}
-        {(cursor && cursor !== '') && (<div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
-          <Spinner size={31} color={'#999'} />
-        </div>)}
+      {(cursor && cursor !== '') && (<div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
+        <Spinner size={31} color={'#999'} />
+      </div>)}
     </div>
     <div ref={ref}>&nbsp;</div>
     <div>
@@ -1801,7 +1786,6 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
   </div>
   )
 }
-
 
 
 export async function getServerSideProps(context) {
