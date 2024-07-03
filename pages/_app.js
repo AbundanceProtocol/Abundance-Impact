@@ -39,7 +39,6 @@ export default function App({ Component, pageProps }) {
   const [bottomNavSize, setBottomNavSize] = useState(ref?.current?.offsetWidth)
   const [navSize, setNavSize] = useState(1060)
   const [ecoSched, setEcoSched] = useState(false)
-
   const router = useRouter()
   const [navWidth, setNavWidth] = useState((ref?.current?.offsetWidth - 1312)/2 - 167)
   const [linkTarget, setLinkTarget] = useState('Vision')
@@ -70,6 +69,7 @@ export default function App({ Component, pageProps }) {
   }]
   const [ecosystems, setEcosystems] = useState([])
   const [ecoValue, setEcoValue] = useState(null)
+  const [balanceSched, setBalanceSched] = useState(false)
   const [account, setAccount] = useState(null)
   const [navMenu, setNavMenu] = useState('Home')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -93,7 +93,9 @@ export default function App({ Component, pageProps }) {
     holdingERC20Req: false,
     eligibility: false,
     hasWallet: false,
-    hasWalletReq: false
+    hasWalletReq: false,
+    modReq: false,
+    mod: false,
   }
   const [eligibility, setEligibility] = useState(initialEligibility)
   const [loadRemaining, setLoadRemaining] = useState(true)
@@ -133,22 +135,18 @@ export default function App({ Component, pageProps }) {
   }, [])
 
   useEffect(() => {
-    console.log(paused, topCreatorsSched)
     if (topCreatorsSched) {
       if (!paused) {
         getTopCreators()
-        // getEcosystems()
       }
       setTopCreatorsSched(false);
     } else {
       const timeoutId = setTimeout(() => {
         if (!paused) {
           getTopCreators()
-          // getEcosystems()
         }
         setTopCreatorsSched(false);
       }, 300);
-  
       return () => clearTimeout(timeoutId);
     }
   }, [topCreators, topCreatorsSched]);
@@ -202,17 +200,30 @@ export default function App({ Component, pageProps }) {
   };
 
   useEffect(() => {
-    if (store.isAuth) {
-      setUserProfile(store.fid)
-      setIsLogged(true)
-      if (ecoValue) {
-        getRemainingBalances(store.fid, ecoValue?.ecosystem_points_name)
+    const updateLogin = () => {
+      if (store.isAuth) {
+        setUserProfile(store.fid)
+        setIsLogged(true)
+        if (ecoValue) {
+          getRemainingBalances(store.fid, ecoValue?.ecosystem_points_name)
+        }
+      }
+      else {
+        setIsLogged(false)
       }
     }
-    else {
-      setIsLogged(false)
+
+    if (balanceSched) {
+      updateLogin()
+      setBalanceSched(false);
+    } else {
+      const timeoutId = setTimeout(() => {
+        updateLogin()
+        setBalanceSched(false);
+      }, 300);
+      return () => clearTimeout(timeoutId);
     }
-  }, [store.fid, store.isAuth, store.signer_uuid]);
+  }, [store.fid, store.isAuth, store.signer_uuid, balanceSched]);
 
 
   async function getEcosystems() {
@@ -261,7 +272,6 @@ export default function App({ Component, pageProps }) {
         setTopCreators([])
   
       }
-
     }
   }
 
@@ -640,14 +650,14 @@ export default function App({ Component, pageProps }) {
     let { account, icon, link, working } = button[buttonName]
     const TopIcon = icon
     let menuState = "nav-link"
-    let accountState = !account || (store.isAuth && account)
+    let accountState = !account || (isLogged && account)
     if ((router.route === link) && accountState) {
       menuState = "active-nav-link"
     } else if (!working) {
       menuState = "inactive-nav-link"
     }
     let unlockedState = 'btn-hvr'
-    if (account && !store.isAuth || !working) {
+    if (account && !isLogged || !working) {
       unlockedState = 'lock-btn-hvr'
     }
 
@@ -1019,27 +1029,31 @@ export default function App({ Component, pageProps }) {
             
             {eligibility?.hasWalletReq && (<p style={{paddingTop: '30px', fontSize: '17px', fontWeight: '500'}}>Eligibility Criteria: </p>)}
               {eligibility?.hasWalletReq ? (<div className='flex-col' style={{gap: '0.5rem', marginTop: '10px'}}>
+                {(eligibility?.modReq && eligibility?.mod && ecoValue) && (<div className='flex-row' style={{alignItems: 'center'}}>
+                  <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '0px 35px 0 0'}}>{eligibility.badge ? (<ImCheckmark size={20} color={'#6f6'} />) : (<ImCross size={20} color={'red'} />)}</div>
+                  <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>Moderator</p>
+                </div>)}
                 {eligibility?.hasWalletReq && (<div className='flex-row' style={{alignItems: 'center'}}>
                   <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '0px 35px 0 0'}}>{eligibility.hasWallet ? (<ImCheckmark size={20} color={'#6f6'} />) : (<ImCross size={20} color={'red'} />)}</div>
                   <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>Has verified wallet</p>
                 </div>)}
-                {(eligibility?.badgeReq && ecoValue) && (<div className='flex-row' style={{alignItems: 'center'}}>
+                {(eligibility?.badgeReq && !eligibility?.mod && ecoValue) && (<div className='flex-row' style={{alignItems: 'center'}}>
                   <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '0px 35px 0 0'}}>{eligibility.badge ? (<ImCheckmark size={20} color={'#6f6'} />) : (<ImCross size={20} color={'red'} />)}</div>
                   <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>Has Powerbadge</p>
                 </div>)}
-                {(eligibility?.channelFollowerReq && ecoValue) && (<div className='flex-row' style={{alignItems: 'center'}}>
+                {(eligibility?.channelFollowerReq && !eligibility?.mod && ecoValue) && (<div className='flex-row' style={{alignItems: 'center'}}>
                   <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '0px 35px 0 0'}}>{eligibility.channelFollower ? (<ImCheckmark size={20} color={'#6f6'} />) : (<ImCross size={20} color={'red'} />)}</div>
                   <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>Follows channel</p>
                 </div>)}
-                {(eligibility?.holdingERC20Req && ecoValue?.erc20s?.length > 0) && (ecoValue?.erc20s.map((erc20, index) => (<div key={index} className='flex-row' style={{alignItems: 'center'}}>
+                {(eligibility?.holdingERC20Req && !eligibility?.mod && ecoValue?.erc20s?.length > 0) && (ecoValue?.erc20s.map((erc20, index) => (<div key={index} className='flex-row' style={{alignItems: 'center'}}>
                   <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '0px 35px 0 0'}}>{eligibility.holdingERC20 ? (<ImCheckmark size={20} color={'#6f6'} />) : (<ImCross size={20} color={'red'} />)}</div>
                   <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>Holds a min. of {erc20.min} <a href={getTokenAddress(erc20.erc20_chain, erc20.erc20_address, 'token')} className="fc-lnk" target="_blank" rel="noopener noreferrer" style={{textDecoration: 'underline'}}>{shortenAddress(erc20.erc20_address)}</a></p>
                 </div>)))}
-                {(eligibility?.holdingNFTReq && ecoValue?.nfts?.length > 0) && (ecoValue.nfts.map((nft, index) => (<div key={index} className='flex-row' style={{alignItems: 'center'}}>
+                {(eligibility?.holdingNFTReq && !eligibility?.mod && ecoValue?.nfts?.length > 0) && (ecoValue.nfts.map((nft, index) => (<div key={index} className='flex-row' style={{alignItems: 'center'}}>
                   <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '0px 35px 0 0'}}>{eligibility.holdingNFT ? (<ImCheckmark size={20} color={'#6f6'} />) : (<ImCross size={20} color={'red'} />)}</div>
                   <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>Holds <a href={getTokenAddress(nft.nft_chain, nft.nft_address, 'token')} className="fc-lnk" target="_blank" rel="noopener noreferrer" style={{textDecoration: 'underline'}}>{shortenAddress(nft.nft_address)}</a> NFT </p>
                 </div>)))}
-                {(eligibility?.ownerFollowerReq && ecoValue?.owner_name) && (<div className='flex-row' style={{alignItems: 'center'}}>
+                {(eligibility?.ownerFollowerReq && !eligibility?.mod && ecoValue?.owner_name) && (<div className='flex-row' style={{alignItems: 'center'}}>
                   <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '0px 35px 0 0'}}>{eligibility?.ownerFollower ? (<ImCheckmark size={20} color={'#6f6'} />) : (<ImCross size={20} color={'red'} />)}</div>
                   <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>Follows @{ecoValue?.owner_name}</p>
                 </div>)}
@@ -1122,23 +1136,27 @@ export default function App({ Component, pageProps }) {
               <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '0px 35px 0 0'}}>{eligibility.hasWallet ? (<ImCheckmark size={20} color={'#6f6'} />) : (<ImCross size={20} color={'red'} />)}</div>
               <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>Has verified wallet</p>
             </div>)}
-            {(eligibility?.badgeReq && ecoValue) && (<div className='flex-row' style={{alignItems: 'center'}}>
+            {(eligibility?.modReq && eligibility?.mod && ecoValue) && (<div className='flex-row' style={{alignItems: 'center'}}>
+              <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '0px 35px 0 0'}}>{eligibility.badge ? (<ImCheckmark size={20} color={'#6f6'} />) : (<ImCross size={20} color={'red'} />)}</div>
+              <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>Moderator</p>
+            </div>)}
+            {(eligibility?.badgeReq && !eligibility?.mod && ecoValue) && (<div className='flex-row' style={{alignItems: 'center'}}>
               <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '0px 35px 0 0'}}>{eligibility?.badge ? (<ImCheckmark size={20} color={'#6f6'} />) : (<ImCross size={20} color={'red'} />)}</div>
               <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>Has Powerbadge</p>
             </div>)}
-            {(eligibility?.channelFollowerReq && ecoValue) && (<div className='flex-row' style={{alignItems: 'center'}}>
+            {(eligibility?.channelFollowerReq && !eligibility?.mod && ecoValue) && (<div className='flex-row' style={{alignItems: 'center'}}>
               <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '0px 35px 0 0'}}>{eligibility.channelFollower ? (<ImCheckmark size={20} color={'#6f6'} />) : (<ImCross size={20} color={'red'} />)}</div>
               <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>Follows channel</p>
             </div>)}
-            {(eligibility?.holdingERC20Req && ecoValue?.erc20s?.length > 0) && (ecoValue?.erc20s.map((erc20, index) => (<div key={index} className='flex-row' style={{alignItems: 'center'}}>
+            {(eligibility?.holdingERC20Req && !eligibility?.mod && ecoValue?.erc20s?.length > 0) && (ecoValue?.erc20s.map((erc20, index) => (<div key={index} className='flex-row' style={{alignItems: 'center'}}>
               <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '0px 35px 0 0'}}>{eligibility.holdingERC20 ? (<ImCheckmark size={20} color={'#6f6'} />) : (<ImCross size={20} color={'red'} />)}</div>
               <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>Holds a min. of {erc20.min} <a href={getTokenAddress(erc20?.erc20_chain, erc20?.erc20_address, 'token')} className="fc-lnk" target="_blank" rel="noopener noreferrer" style={{textDecoration: 'underline'}}>{shortenAddress(erc20.erc20_address)}</a></p>
             </div>)))}
-            {(eligibility?.holdingNFTReq && ecoValue?.nfts?.length > 0) && (ecoValue?.nfts.map((nft, index) => (<div key={index} className='flex-row' style={{alignItems: 'center'}}>
+            {(eligibility?.holdingNFTReq && !eligibility?.mod && ecoValue?.nfts?.length > 0) && (ecoValue?.nfts.map((nft, index) => (<div key={index} className='flex-row' style={{alignItems: 'center'}}>
               <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '0px 35px 0 0'}}>{eligibility?.holdingNFT ? (<ImCheckmark size={20} color={'#6f6'} />) : (<ImCross size={20} color={'red'} />)}</div>
               <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>Holds <a href={getTokenAddress(nft.nft_chain, nft.nft_address, 'token')} className="fc-lnk" target="_blank" rel="noopener noreferrer" style={{textDecoration: 'underline'}}>{shortenAddress(nft.nft_address)}</a> NFT </p>
             </div>)))}
-            {(eligibility?.ownerFollowerReq && ecoValue?.owner_name) && (<div className='flex-row' style={{alignItems: 'center'}}>
+            {(eligibility?.ownerFollowerReq && !eligibility?.mod && ecoValue?.owner_name) && (<div className='flex-row' style={{alignItems: 'center'}}>
               <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '0px 35px 0 0'}}>{eligibility?.ownerFollower ? (<ImCheckmark size={20} color={'#6f6'} />) : (<ImCross size={20} color={'red'} />)}</div>
               <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>Follows @{ecoValue?.owner_name}</p>
             </div>)}

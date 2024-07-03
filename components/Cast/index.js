@@ -357,7 +357,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
               </div>
             {(cast.embeds.length > 0) && (cast.embeds.map((embed, subindex) => (
               
-            <div className='flex-col' style={{alignItems: 'center', display: hide ? 'flex' : 'flex'}}>
+            <div key={subindex} className='flex-col' style={{alignItems: 'center', display: hide ? 'flex' : 'flex'}}>
               {(embed && embed.type && (embed.type == 'image' || embed.type == 'other')) && (
                 <Images embed={embed} subindex={subindex} textMax={textMax} handleClick={handleClick} index={index} />
               )}

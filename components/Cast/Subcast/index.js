@@ -111,7 +111,7 @@ export default function Subcast({ cast, index }) {
             </div>
           {(cast.embeds.length > 0) && (cast.embeds.map((embed, subindex) => (
             
-          <div className='flex-col' style={{alignItems: 'center'}}>
+          <div key={subindex} className='flex-col' style={{alignItems: 'center'}}>
             {(embed.type && embed.type == 'image') && (
               <div className="" key={`${index}-${subindex}`}>
                 <div className="flex-col" style={{position: 'relative'}}>

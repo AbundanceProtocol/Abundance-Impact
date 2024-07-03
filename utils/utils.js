@@ -186,8 +186,8 @@ async function getEmbeds(url) {
     })
     // console.log(embedType)
     // console.log(embedType.data)
-    if (embedType && embedType.data) {
-      return embedType.data.embed
+    if (embedType?.data) {
+      return embedType?.data?.embed
     } else {
       return 'other'
     }

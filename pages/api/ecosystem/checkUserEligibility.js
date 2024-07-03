@@ -77,6 +77,8 @@ export default async function handler(req, res) {
       let holdingNFTReq = false
       let holdingERC20 = false
       let holdingERC20Req = false
+      let modReq = false
+      let mod = false
       let hasWalletReq = true
       let hasWallet = true
       let eligibility = true
@@ -315,6 +317,16 @@ export default async function handler(req, res) {
         holdingERC20 = await getErc20(user.verifications, ecosystem.erc20s)
       }
 
+      if (ecosystem?.ecosystem_moderators?.length > 0) {
+        modReq = true
+        for (const moderator of ecosystem.ecosystem_moderators) {
+          if (moderator == fid) {
+            mod = true
+            break;
+          }
+        }
+      }
+
       console.log(
         'badge', badge,
         'badgeReq', badgeReq,
@@ -331,12 +343,10 @@ export default async function handler(req, res) {
 
       let createUser = null 
 
-      if (hasWallet == false || (badgeReq == true && badge == false) || (channelFollowerReq == true && channelFollower == false) || (ownerFollowerReq == true && ownerFollower == false) || (holdingNFTReq == true && holdingNFT == false) || (holdingERC20Req == true && holdingERC20 == false)) {
-        eligibility = false
-      } else {
-        eligibility = true
+      async function userCreation(fid, ecosystem) {
+        let createUser = null 
 
-        createUser = await User.findOne({ fid: fid, ecosystem_name: ecosystem.ecosystem_name }).exec();
+        createUser = await User.findOne({ fid: fid, ecosystem_name: ecosystem.ecosystem_name }).select('remaining_i_allowance remaining_q_allowance').exec();
         console.log(createUser)
 
         if (!createUser) {
@@ -353,7 +363,7 @@ export default async function handler(req, res) {
               });
               const cast = await response.json();
               let hash = null
-              if (cast && cast.casts && cast.casts.length > 0) {
+              if (cast?.casts?.length > 0) {
                 hash = cast.casts[0].hash;
                 // console.log(hash);
                 return { hash, needHash: false }
@@ -374,7 +384,7 @@ export default async function handler(req, res) {
           midnight.setUTCDate(midnight.getUTCDate() + 1);
 
           let verification = null
-          if (user.verifications.length > 0) {
+          if (user?.verifications?.length > 0) {
             verification = user.verifications[0]
           }
 
@@ -400,6 +410,17 @@ export default async function handler(req, res) {
 
           console.log('createUser', createUser)
         }
+        return createUser
+      }
+
+      if (modReq == true && mod == true && hasWallet == true) {
+        eligibility = true
+        createUser = await userCreation(fid, ecosystem)
+      } else if (hasWallet == false || (badgeReq == true && badge == false) || (channelFollowerReq == true && channelFollower == false) || (ownerFollowerReq == true && ownerFollower == false) || (holdingNFTReq == true && holdingNFT == false) || (holdingERC20Req == true && holdingERC20 == false)) {
+        eligibility = false
+      } else {
+        eligibility = true
+        createUser = await userCreation(fid, ecosystem)
       }
 
       const eligibilityData = {
@@ -415,7 +436,9 @@ export default async function handler(req, res) {
         holdingERC20Req,
         eligibility,
         hasWallet,
-        hasWalletReq
+        hasWalletReq,
+        mod,
+        modReq,
       }
 
       res.status(200).json({ ecosystem, user, eligibilityData, createUser });

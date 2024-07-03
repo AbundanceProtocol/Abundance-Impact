@@ -179,9 +179,9 @@ export default function Dropdown({ title, setupEcosystem, target, button, condit
       if (event.target.value >= 100) {
         valueState = {tipPercent: 100}
         setSliderValue(100);
-      } else if (event.target.value <= 1 || isNaN(event.target.value)) {
-        valueState = {tipPercent: 1}
-        setSliderValue(1);
+      } else if (event.target.value <= 0 || isNaN(event.target.value)) {
+        valueState = {tipPercent: 0}
+        setSliderValue(0);
       } else {
         setSliderValue(parseInt(event.target.value));
         valueState = {tipPercent: parseInt(event.target.value)}
@@ -326,7 +326,7 @@ export default function Dropdown({ title, setupEcosystem, target, button, condit
           onMouseLeave={handleMouseLeave} onTouchEnd={handleMouseLeave}>
             <input
               type="range"
-              min="1"
+              min="0"
               max="100"
               value={sliderValue}
               onChange={handleSlider}

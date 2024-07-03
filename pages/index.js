@@ -112,7 +112,7 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
       },
     ]
   }
-
+  const [prevSavedEco, setPrevSavedEco] = useState(null)
   const userButtons = ['Curation', 'Main', 'Recent']
   // const userButtons = ['Top Picks', 'Explore', 'Home', 'Trending', 'AI']
   // const timeButtons = ['24hr', '7days', '30d', 'All']
@@ -132,6 +132,7 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
   const [isSelected, setIsSelected] = useState('none')
   const [searchRouterSched, setSearchRouterSched] = useState(false);
   const [searchSelectSched, setSearchSelectSched] = useState(false);
+  const [savedEcoSched, setSavedEcoSched] = useState(false);
   const [inViewSched, setInViewSched] = useState(false);
   
   const userTipPercent = useStore(state => state.userTipPercent);
@@ -223,7 +224,7 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
           const response = await axios.post('/api/curation/postTipSchedule', { fid, uuid, shuffle, time, tags, channels, curators, percent, schedTime, currencies })
           let schedData = []
 
-          if (response && response.status !== 200) {
+          if (response?.status !== 200) {
             setLoading(false)
             console.log(response)
             setModal({on: true, success: false, text: 'Tip scheduling failed'});
@@ -251,7 +252,7 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
 
     return (
       <>
-        <div className={`flex-col ${(hour !== 'Hr' && isLogged) ? 'follow-select' : 'follow-locked'}`} style={{backgroundColor: '', borderRadius: '5px', width: '150px', gap: '0.25rem', alignItems: 'center', justifyContent: 'center', padding: '0px 8px', height: '48px', margin: '2px 0 2px 10px', cursor: 'default', maxWidth: '150px'}}>
+        <div className={`flex-col ${(hour !== 'Hr' && isLogged) ? 'follow-select' : 'follow-locked'}`} style={{width: '150px', gap: '0.25rem', alignItems: 'center', justifyContent: 'center', padding: '0px 8px', height: '48px', margin: '2px 0 2px 10px', cursor: 'default', maxWidth: '150px'}}>
           <div className='flex-row' style={{gap: '0.5rem'}}>
             <select id="hourSelect" value={hour} onChange={handleHourChange} style={{backgroundColor: '#adf', borderRadius: '4px'}}>
               {hoursOptions.map((option) => (
@@ -414,7 +415,8 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
 
   useEffect(() => {
     console.log(savedEco)
-    if (savedEco?.ecosystem_points_name) {
+    if (savedEco?.ecosystem_points_name && prevSavedEco?._id !== savedEco?._id) {
+      setPrevSavedEco(savedEco)
       setPoints(savedEco.ecosystem_points_name)
       setEco(savedEco)
       if (savedEco?.channels?.length > 0) {
@@ -431,7 +433,7 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
         setSearchSelect('Curation')
       }
     }
-  }, [savedEco]);
+  }, [savedEco, savedEcoSched]);
 
   const handleSelection = (type, selection) => {
     if (type == 'shuffle') {
@@ -565,7 +567,7 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
         }
       })
       let remaningAllowance = 0
-      if (responseTotal && responseTotal?.data) {
+      if (responseTotal?.data) {
         remaningAllowance = responseTotal.data.remaining
         return remaningAllowance
       } else {
@@ -583,7 +585,7 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
       let allowance = await getAllowance(token, fid)
       const tokenIndex = updatedTokenData.findIndex(currentToken => currentToken.token == token)
       if (tokenIndex !== -1) {
-        if (!updatedTokenData[tokenIndex].set) {
+        if (!updatedTokenData[tokenIndex]?.set) {
           updatedTokenData[tokenIndex].set = false
         }
         updatedTokenData[tokenIndex].allowance = allowance
@@ -604,7 +606,7 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
   useEffect(() => {
 
     const allowanceUpdate = () => {
-      if (store.isAuth) {
+      if (store?.isAuth) {
         updateAllowances(availableTokens, store.fid)
       }
     }
@@ -624,7 +626,7 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
 
   useEffect(() => {
     if (!isLogged) {
-      if (store.isAuth) {
+      if (store?.isAuth) {
         setIsLogged(store.isAuth)
       }
     }
@@ -664,7 +666,7 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
   useEffect(() => {
 
     const inViewRouter = () => {
-      if (cursor !== prevCursor && cursor !== '' && store.isAuth) {
+      if (cursor !== prevCursor && cursor !== '' && store?.isAuth) {
         if (searchSelect == 'Main') {
           setPrevCursor(cursor)
           addToFeed(store.fid, channelSelect, true, cursor)
@@ -704,11 +706,11 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
         const response = await axios.get('/api/ecosystem/getFeed', {
           params: { fid, channel, curated } })
         setLoading(false)
-        if (response && response.data) {
+        if (response?.data) {
           console.log(response)
           const casts = response.data.casts
           let cursorData = ''
-          if (response.data?.cursor) {
+          if (response?.data?.cursor) {
             cursorData = response.data.cursor
           }
           console.log(casts, cursorData)
@@ -734,11 +736,9 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
   }
 
   async function updateFeed(oldFeed, feed, fid) {
-    // console.log(oldFeed)
-    // console.log(userFeed)
     let combinedFeed = oldFeed.concat(feed)
     console.log(combinedFeed)
-    if (oldFeed && oldFeed.length > 0) {
+    if (oldFeed?.length > 0) {
       setUserFeed((prevUserFeed) => prevUserFeed.concat(feed))
     } else {
       setUserFeed(feed)
@@ -753,7 +753,6 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
       return updatedCasts;
     }
     
-    // Usage
     const castsWithImages = await checkEmbedTypeForCasts(feed);
 
     combinedFeed = oldFeed.concat(castsWithImages)
@@ -766,9 +765,8 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
           const response = await axios.get('/api/getCastByHash', {
             params: { hash, userFid }
           })
-          const castData = response.data.cast.cast
+          const castData = response?.data?.cast?.cast
           if (castData) {
-            console.log(castData)
             return castData
           } else {
             return null
@@ -782,9 +780,9 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
 
     async function populateSubcasts(cast, fid) {
       const { embeds } = cast;
-      if (embeds && embeds.length > 0) {
+      if (embeds?.length > 0) {
         const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
-          if (embed.type == 'subcast') {
+          if (embed?.type == 'subcast') {
             const subcastData = await getSubcast(embed.cast_id.hash, fid)
             const checkImages = await checkEmbedType(subcastData)
             return { ...embed, subcast: checkImages };
@@ -801,15 +799,15 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
     async function populateEmbeds(cast) {
       const { embeds } = cast
       // console.log(embeds)
-      if (embeds && embeds.length > 0) {
+      if (embeds?.length > 0) {
         const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
           // console.log(embed.type)
-          if (embed && embed.url && embed.type == 'html') {
+          if (embed?.url && embed?.type == 'html') {
             // console.log(embed)
             try {
               const metaData = await axios.get('/api/getMetaTags', {
                 params: { url: embed.url } })
-              if (metaData && metaData.data) {
+              if (metaData?.data) {
                 return { ...embed, metadata: metaData.data };
               } else {
                 return { ...embed }
@@ -862,14 +860,14 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
         const response = await axios.get('/api/ecosystem/getFeed', {
           params: { fid, channel, curated, cursor } })
         let casts = []
-        if (response && response.data) {
-          console.log(response)
-          casts = response.data.casts
+        if (response?.data) {
+          // console.log(response)
+          casts = response?.data?.casts
           let cursorData = ''
-          if (response.data?.cursor) {
-            cursorData = response.data.cursor
+          if (response?.data?.cursor) {
+            cursorData = response?.data?.cursor
           }
-          console.log(casts, cursorData)
+          // console.log(casts, cursorData)
           return {channelFeed: casts, cursorData}
         } else {
           return {channelFeed: [], cursorData: ''}
@@ -883,7 +881,6 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
 
     const {channelFeed, cursorData} = await getChannelFeed(fid, channel, curated, cursor)
     console.log(channelFeed)
-    console.log(cursorData)
     updateFeed(userFeed, channelFeed, fid)
     setCursor(cursorData)
   }
@@ -896,7 +893,7 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
       return {time, channels, tags, shuffle, curators}
     })
 
-    if (curators && selectedCurators && selectedCurators.length == 0) {
+    if (curators && selectedCurators?.length == 0) {
       getCuratorsQuery(curators)
     }
 
@@ -910,7 +907,7 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
             }
           })
           if (response) {
-            const curatorsData = response.data.users
+            const curatorsData = response?.data?.users
             console.log(curatorsData)
             return curatorsData
           } else {
@@ -950,7 +947,7 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
   }
 
   async function getUserSearch(time, tags, channel, curator, text, shuffle) {
-    const fid = await store.fid
+    const fid = await store?.fid
     // const points = '$IMPACT'
     console.log(points)
     let page = null
@@ -974,14 +971,14 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
         let casts = []
         let getPage = 1
         let pages = 1
-        if (response?.data?.casts && response?.data?.casts.length > 0) {
+        if (response?.data?.casts.length > 0) {
           casts = response.data.casts
         }
         if (response?.data?.page) {
-          getPage = response.data.page
+          getPage = response?.data?.page
         }
         if (response?.data?.pages) {
-          pages = response.data.pages
+          pages = response?.data?.pages
         }
 
         if (getPage == pages) {
@@ -1134,9 +1131,9 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
     
         async function populateSubcasts(cast, fid) {
           const { embeds } = cast;
-          if (embeds && embeds.length > 0) {
+          if (embeds?.length > 0) {
             const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
-              if (embed.type == 'subcast') {
+              if (embed?.type == 'subcast') {
                 const subcastData = await getSubcast(embed.cast_id.hash, fid)
                 const checkImages = await checkEmbedType(subcastData)
                 return { ...embed, subcast: checkImages };
@@ -1153,15 +1150,15 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
         async function populateEmbeds(cast) {
           const { embeds } = cast
           // console.log(embeds)
-          if (embeds && embeds.length > 0) {
+          if (embeds?.length > 0) {
             const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
               // console.log(embed.type)
-              if (embed && embed.url && embed.type == 'html') {
+              if (embed?.url && embed?.type == 'html') {
                 // console.log(embed)
                 try {
                   const metaData = await axios.get('/api/getMetaTags', {
                     params: { url: embed.url } })
-                  if (metaData && metaData.data) {
+                  if (metaData?.data) {
                     return { ...embed, metadata: metaData.data };
                   } else {
                     return { ...embed }
@@ -1304,7 +1301,7 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
   const SearchOptionButton = ({buttonName}) => {
     let isSearchable = true
     let comingSoon = false
-    if ((buttonName == 'Casts' && !store.isAuth) || (buttonName == 'Casts + Replies' && !store.isAuth)) {
+    if ((buttonName == 'Casts' && !store?.isAuth) || (buttonName == 'Casts + Replies' && !store?.isAuth)) {
       isSearchable = false
     }
     // if (buttonName == 'Channels' || buttonName == 'Media' || buttonName == 'Proposals') {
@@ -1328,9 +1325,9 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
   }
 
   async function routeCast() {
-    console.log(castData.text.length)
-    if (store.isAuth && store.signer_uuid && castData.text.length > 0 && castData.text.length <= 320) {
-      console.log(store.isAuth, castData.text)
+    console.log(castData?.text?.length)
+    if (store.isAuth && store.signer_uuid && castData?.text?.length > 0 && castData?.text?.length <= 320) {
+      console.log(store.isAuth, castData?.text)
       try {
         let updatedCastData = { ...castData }
         updatedCastData.fid = store.fid
@@ -1373,7 +1370,7 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
 
   const shrinkBox = () => {
     console.log(castData.text)
-    if (textboxRows > 1 && castData.text.length < 40) {
+    if (textboxRows > 1 && castData?.text?.length < 40) {
       setIsFocused(false)
       setTextboxRows(1)
     }
@@ -1508,7 +1505,7 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
 
     const { castData, coinTotals } = await processTips(userFeed, store.fid, tokenData)
 
-    if (castData && castData.length > 0 && store.signer_uuid) {
+    if (castData?.length > 0 && store.signer_uuid) {
       setLoading(true)
       try {
         const response = await axios.post('/api/curation/postMultipleTips', {       
@@ -1517,7 +1514,7 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
           data: castData,
           points: points
         })
-        if (response.status !== 200) {
+        if (response?.status !== 200) {
           setLoading(false)
           console.log(response)
           setModal({on: true, success: false, text: 'Tipping all casts failed'});
@@ -1688,42 +1685,42 @@ export default function Home({time, curators, channels, tags, shuffle, referrer}
 
 
       {(isSelected == 'curators') && (
-          <div className='' style={{position: 'absolute', width: feedMax, margin: 'auto', marginTop: '28px'}} onMouseEnter={() => {handleSelection('curators')}} onMouseLeave={() => {handleSelection('none')}}>
-            <div className='top-layer flex-col' style={{gap: '0.25rem', padding: '6px 6px', borderRadius: '10px', backgroundColor: '#1D3244dd', border: '1px solid #abc', width: 'auto', marginTop: '10px', alignItems: 'flex-start'}}>
-              <div className={`selection-btn ${(userQuery['curators'] == 'all' || userQuery['curators'].length == 0) ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}}>
-                <input onChange={onCuratorSearch} 
-                  name='search' 
-                  placeholder={`Search curators`} 
-                  value={userSearch.search} 
-                  className='srch-btn' 
-                  style={{width: '100%', backgroundColor: '#234'}} 
-                  onKeyDown={curatorKeyDown} />
-              </div>
-              <div className='flex-row' style={{gap: '0.5rem', padding: '0px 6px', flexWrap: 'wrap'}}>
-                {filterCurators && (
-                  filterCurators.map((curator, index) => (
-                    <div key={`Cu2-${index}`} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addCurator(curator)}}>
-                      <img loading="lazy" src={curator.pfp} className="" alt={curator.display_name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
-                      <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>@{curator.username}</div>
-                    </div>
-                  )
-                ))}
-              </div>
-
-              {(selectedCurators && selectedCurators.length > 0) && (<div className='flex-row' style={{gap: '0.5rem', padding: '10px 6px 6px 6px', flexWrap: 'wrap', borderTop: '1px solid #888', width: '100%', alignItems: 'center'}}>
-                <div style={{color: '#ddd', fontWeight: '600', fontSize: '13px', padding: '0 0 3px 6px'}}>Selected:</div>
-                {(
-                  selectedCurators.map((curator, index) => (
-                    <div key={`Cu-${index}`} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addCurator(curator)}}>
-                      <img loading="lazy" src={curator.pfp} className="" alt={curator.display_name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
-                      <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>@{curator.username}</div>
-                    </div>
-                  )
-                ))}
-              </div>)}
+        <div className='' style={{position: 'absolute', width: feedMax, margin: 'auto', marginTop: '28px'}} onMouseEnter={() => {handleSelection('curators')}} onMouseLeave={() => {handleSelection('none')}}>
+          <div className='top-layer flex-col' style={{gap: '0.25rem', padding: '6px 6px', borderRadius: '10px', backgroundColor: '#1D3244dd', border: '1px solid #abc', width: 'auto', marginTop: '10px', alignItems: 'flex-start'}}>
+            <div className={`selection-btn ${(userQuery['curators'] == 'all' || userQuery['curators'].length == 0) ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}}>
+              <input onChange={onCuratorSearch} 
+                name='search' 
+                placeholder={`Search curators`} 
+                value={userSearch.search} 
+                className='srch-btn' 
+                style={{width: '100%', backgroundColor: '#234'}} 
+                onKeyDown={curatorKeyDown} />
             </div>
+            <div className='flex-row' style={{gap: '0.5rem', padding: '0px 6px', flexWrap: 'wrap'}}>
+              {filterCurators && (
+                filterCurators.map((curator, index) => (
+                  <div key={`Cu2-${index}`} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addCurator(curator)}}>
+                    <img loading="lazy" src={curator.pfp} className="" alt={curator.display_name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
+                    <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>@{curator.username}</div>
+                  </div>
+                )
+              ))}
+            </div>
+
+            {(selectedCurators && selectedCurators.length > 0) && (<div className='flex-row' style={{gap: '0.5rem', padding: '10px 6px 6px 6px', flexWrap: 'wrap', borderTop: '1px solid #888', width: '100%', alignItems: 'center'}}>
+              <div style={{color: '#ddd', fontWeight: '600', fontSize: '13px', padding: '0 0 3px 6px'}}>Selected:</div>
+              {(
+                selectedCurators.map((curator, index) => (
+                  <div key={`Cu-${index}`} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addCurator(curator)}}>
+                    <img loading="lazy" src={curator.pfp} className="" alt={curator.display_name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
+                    <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>@{curator.username}</div>
+                  </div>
+                )
+              ))}
+            </div>)}
           </div>
-        )}
+        </div>
+      )}
 
       {(isSelected == 'channels') && (
           <div className='' style={{position: 'absolute', width: feedMax, margin: 'auto', marginTop: '28px'}} onMouseEnter={() => {handleSelection('channels')}} onMouseLeave={() => {handleSelection('none')}}>
