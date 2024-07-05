@@ -11,7 +11,8 @@ const ecosystemRulesSchema = new mongoose.Schema({
   condition_channels: { type: Boolean, default: true},
   channels: [{
     url: String,
-    name: String
+    name: String,
+    img: String,
   }],
   condition_points_threshold: { type: Number, default: 1},
   condition_curators_threshold: { type: Number, default: 1},

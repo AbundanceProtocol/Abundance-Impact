@@ -140,6 +140,8 @@ export default function Ecosystem() {
   const [userEcosystems, setUserEcosystems] = useState([])
   const [allEcosystems, setAllEcosystems] = useState([])
   const ecosystemRules = {
+    id: '',
+    update: false,
     start: false, 
     fid: null, 
     nameField: false, 
@@ -535,18 +537,18 @@ export default function Ecosystem() {
     ecoPoints = newEcosystem.points
     if (selectedChannels && selectedChannels.length > 0) {
       for (const channel of selectedChannels) {
-        
-        let channelData = {url: channel.parent_url, name: channel.id}
+        console.log(channel)
+        let channelData = {url: channel.parent_url, name: channel.id, img: channel.image_url}
         ecoChannels.push(channelData)
       }
+      ecoCuratorThreshold = newEcosystem.channelCuratorThreshold
+      ecoPointsThreshold = newEcosystem.channelPointThreshold
     }
     if (selectedModerators && selectedModerators.length > 0) {
       for (const moderator of selectedModerators) {
         let moderatorData = {fid: moderator.fid, username: moderator.username}
         ecoModerators.push(moderatorData)
       }
-      ecoCuratorThreshold = newEcosystem.channelCuratorThreshold
-      ecoPointsThreshold = newEcosystem.channelPointThreshold
     }
     if (newEcosystem.eligibility && newEcosystem.eligibility.length > 0) {
       for (const eligibility of newEcosystem.eligibility) {
@@ -637,6 +639,7 @@ export default function Ecosystem() {
     }
     const ecoData = {
       ecoName,
+      ecoHandle,
       ecoOwner,
       ecoPoints,
       ecoChannels,
@@ -657,13 +660,44 @@ export default function Ecosystem() {
     try {
       const response = await axios.post('/api/ecosystem/postEcosystemRules', {       
         fid: store.fid,
-        data: ecosystemData
+        data: ecosystemData,
+        update: newEcosystem.update,
+        id: newEcosystem.id
       })
-      if (response) {
-        console.log(response)
+      if (response?.status == 200) {
+        setFormController(controller)
+        setNewEcosystem(ecosystemRules)
+        getEcosystems()
+        getUserEcosystems(store.fid)
+        account.getEcosystems()
+        if (newEcosystem.update) {
+          setModal({on: true, success: true, text: 'Ecosystem updated successfully'});
+        } else {
+          setModal({on: true, success: true, text: 'Ecosystem created successfully'});
+        }
+        setTimeout(() => {
+          setModal({on: false, success: false, text: ''});
+        }, 2500);
+      } else {
+        if (newEcosystem.update) {
+          setModal({on: true, success: false, text: 'Ecosystem update failed'});
+        } else {
+          setModal({on: true, success: false, text: 'Ecosystem creation failed'});
+        }
+        setTimeout(() => {
+          setModal({on: false, success: false, text: ''});
+        }, 2500);
       }
     } catch (error) {
       console.error('Error submitting data:', error)
+      if (newEcosystem.update) {
+        setModal({on: true, success: false, text: 'Ecosystem update failed'});
+      } else {
+        setModal({on: true, success: false, text: 'Ecosystem creation failed'});
+      }
+      setTimeout(() => {
+        setModal({on: false, success: false, text: ''});
+      }, 2500);
     }
   }
 
@@ -705,14 +739,14 @@ export default function Ecosystem() {
       setIsLogged(store.isAuth)
     }
     if (store.isAuth && jobScheduled) {
-      getUserSchedule(store.fid)
+      // getUserSchedule(store.fid)
       getUserEcosystems(store.fid)
-      setJobScheduled(false);
+      // setJobScheduled(false);
     } else if (store.isAuth) {
       const timeoutId = setTimeout(() => {
-        getUserSchedule(store.fid)
+        // getUserSchedule(store.fid)
         getUserEcosystems(store.fid)
-        setJobScheduled(false);
+        // setJobScheduled(false);
       }, 300);
   
       return () => clearTimeout(timeoutId);
@@ -730,9 +764,11 @@ export default function Ecosystem() {
         const ecosystems = ecosystemsData.data.ecosystems
         console.log(ecosystems)
         setAllEcosystems(ecosystems)
+        setLoadedSchedule(true)
       }
     } catch (error) {
       console.error('Error creating post:', error);
+      setLoadedSchedule(true)
     }
   }
 
@@ -743,72 +779,74 @@ export default function Ecosystem() {
         const ecosystems = ecosystemsData.data.ecosystems
         console.log(ecosystems)
         setUserEcosystems(ecosystems)
+        setLoadedSchedule(true)
       }
     } catch (error) {
       console.error('Error creating post:', error);
+      setLoadedSchedule(true)
     }
   }
 
 
-  const getUserSchedule = async (fid) => {
-    const userSchedule = await axios.get('/api/curation/getScheduledSearch', {
-      params: {
-        fid: fid,
-      }
-    })
-    if (userSchedule && userSchedule.status == 200) {
-      const schedule = userSchedule.data
-      let updatedUserQuery = { ...userQuery }
-      if (schedule.shuffle) {
-        updatedUserQuery.shuffle = schedule.shuffle
-      }
-      if (schedule.time) {
-        updatedUserQuery.time = schedule.time
-      }
-      if (schedule.curators) {
-        updatedUserQuery.curators = schedule.curators
-      }
-      if (schedule.channels) {
-        updatedUserQuery.channels = schedule.channels
-      }
-      if (schedule.tags) {
-        updatedUserQuery.tags = schedule.tags
-      }
-      setUserQuery(updatedUserQuery)
-      if (schedule.schedTime) {
-        const minutes = schedule.schedTime.substring(0, 2)
-        const hours = schedule.schedTime.substring(3, 5)
-        setInitHour(hours)
-        setInitMinute(minutes)
-      }
-      if (schedule.active_cron == false || schedule.active_cron == true) {
-        setActiveCron(schedule.active_cron)
-      }
-      if (schedule.percent) {
-        setInitValue(schedule.percent)
-      }
-      if (schedule.cron_job_id) {
-        setCronId(schedule.cron_job_id)
-      }
-      if (schedule.currencies && schedule.currencies.length > 0) {
-        let updatedTokenData = [...tokenData]
-        for (const token of updatedTokenData) {
-          if (schedule.currencies.includes(token.token)) {
-            token.allowance = 0
-            token.set = true
-            token.totalTip = 0
-          } else {
-            token.allowance = 0
-            token.set = false
-            token.totalTip = 0
-          }
-        }
-        setTokenData(updatedTokenData)
-      }
-      console.log(userSchedule.data)
-    }
-    setLoadedSchedule(true)
-  }
+  // const getUserSchedule = async (fid) => {
+  //   const userSchedule = await axios.get('/api/curation/getScheduledSearch', {
+  //     params: {
+  //       fid: fid,
+  //     }
+  //   })
+  //   if (userSchedule && userSchedule.status == 200) {
+  //     const schedule = userSchedule.data
+  //     let updatedUserQuery = { ...userQuery }
+  //     if (schedule.shuffle) {
+  //       updatedUserQuery.shuffle = schedule.shuffle
+  //     }
+  //     if (schedule.time) {
+  //       updatedUserQuery.time = schedule.time
+  //     }
+  //     if (schedule.curators) {
+  //       updatedUserQuery.curators = schedule.curators
+  //     }
+  //     if (schedule.channels) {
+  //       updatedUserQuery.channels = schedule.channels
+  //     }
+  //     if (schedule.tags) {
+  //       updatedUserQuery.tags = schedule.tags
+  //     }
+  //     setUserQuery(updatedUserQuery)
+  //     if (schedule.schedTime) {
+  //       const minutes = schedule.schedTime.substring(0, 2)
+  //       const hours = schedule.schedTime.substring(3, 5)
+  //       setInitHour(hours)
+  //       setInitMinute(minutes)
+  //     }
+  //     if (schedule.active_cron == false || schedule.active_cron == true) {
+  //       setActiveCron(schedule.active_cron)
+  //     }
+  //     if (schedule.percent) {
+  //       setInitValue(schedule.percent)
+  //     }
+  //     if (schedule.cron_job_id) {
+  //       setCronId(schedule.cron_job_id)
+  //     }
+  //     if (schedule.currencies && schedule.currencies.length > 0) {
+  //       let updatedTokenData = [...tokenData]
+  //       for (const token of updatedTokenData) {
+  //         if (schedule.currencies.includes(token.token)) {
+  //           token.allowance = 0
+  //           token.set = true
+  //           token.totalTip = 0
+  //         } else {
+  //           token.allowance = 0
+  //           token.set = false
+  //           token.totalTip = 0
+  //         }
+  //       }
+  //       setTokenData(updatedTokenData)
+  //     }
+  //     console.log(userSchedule.data)
+  //   }
+  //   setLoadedSchedule(true)
+  // }
 
   useEffect(() => {
     console.log('triggered')
@@ -829,12 +867,12 @@ export default function Ecosystem() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  function feedRouter() {
-    const { shuffle, time, tags, channels, curators } = userQuery
-    const timeRange = getTimeRange(time)
-    console.log(userQuery)
-    getUserSearch(timeRange, tags, channels, curators, null, shuffle)
-  }
+  // function feedRouter() {
+  //   const { shuffle, time, tags, channels, curators } = userQuery
+  //   const timeRange = getTimeRange(time)
+  //   console.log(userQuery)
+  //   getUserSearch(timeRange, tags, channels, curators, null, shuffle)
+  // }
 
   async function populateCast(casts) {
     let displayedCasts = []
@@ -982,203 +1020,203 @@ export default function Ecosystem() {
 
   }
 
-  async function getUserSearch(time, tags, channel, curator, text, shuffle) {
-    const fid = await store.fid
+  // async function getUserSearch(time, tags, channel, curator, text, shuffle) {
+  //   const fid = await store.fid
 
-    const timeRange = getTimeRange(time)
+  //   const timeRange = getTimeRange(time)
 
-    async function getSearch() {
-      try {
-        const response = await axios.get('/api/curation/getUserSearch', {
-          params: { time, tags, channel, curator, text, shuffle }
-        })
-        let casts = []
-        if (response && response.data && response.data.casts.length > 0) {
-          casts = response.data.casts
-        }
-        // console.log(casts)
+  //   async function getSearch() {
+  //     try {
+  //       const response = await axios.get('/api/curation/getUserSearch', {
+  //         params: { time, tags, channel, curator, text, shuffle }
+  //       })
+  //       let casts = []
+  //       if (response && response.data && response.data.casts.length > 0) {
+  //         casts = response.data.casts
+  //       }
+  //       // console.log(casts)
 
-        return casts
-      } catch (error) {
-        console.error('Error submitting data:', error)
-        return null
-      }
-    }
+  //       return casts
+  //     } catch (error) {
+  //       console.error('Error submitting data:', error)
+  //       return null
+  //     }
+  //   }
 
-    const casts = await getSearch(timeRange, tags, channel, curator, text, shuffle)
-    let filteredCasts
-    let sortedCasts
+  //   const casts = await getSearch(timeRange, tags, channel, curator, text, shuffle)
+  //   let filteredCasts
+  //   let sortedCasts
 
-    if (casts) {
+  //   if (casts) {
 
-      // console.log(casts)
-      filteredCasts = await casts.reduce((acc, current) => {
-        const existingItem = acc.find(item => item._id === current._id);
-        if (!existingItem) {
-          acc.push(current);
-        }
-        return acc;
-      }, [])
-      // console.log(filteredCasts)
-      sortedCasts = filteredCasts.sort((a, b) => b.impact_total - a.impact_total);
-      // console.log(sortedCasts)
+  //     // console.log(casts)
+  //     filteredCasts = await casts.reduce((acc, current) => {
+  //       const existingItem = acc.find(item => item._id === current._id);
+  //       if (!existingItem) {
+  //         acc.push(current);
+  //       }
+  //       return acc;
+  //     }, [])
+  //     // console.log(filteredCasts)
+  //     sortedCasts = filteredCasts.sort((a, b) => b.impact_total - a.impact_total);
+  //     // console.log(sortedCasts)
 
-    }
+  //   }
 
-    let displayedCasts = await populateCast(sortedCasts)
-    // setUserFeed(displayedCasts)
+  //   let displayedCasts = await populateCast(sortedCasts)
+  //   // setUserFeed(displayedCasts)
 
-    let castString
+  //   let castString
 
-    if (sortedCasts) {
-      const castHashes = sortedCasts.map(obj => obj.cast_hash)
-      castString = castHashes.join(',');
-    }
-
-
-    async function populateCasts(fid, castString) {
-      try {
-        const response = await axios.get('/api/curation/getCastsByHash', {
-          params: { fid, castString }
-        })
-        return response
-      } catch (error) {
-        console.error('Error submitting data:', error)
-        return null
-      }
-    }
-
-    const populateResponse = await populateCasts(fid, castString)
-
-    let populatedCasts = []
-
-    if (populateResponse) {
-      populatedCasts = populateResponse.data.casts
-      // setUserFeed(populatedCasts)
-    }
-
-    for (let i = 0; i < populatedCasts.length; i++) {
-      const obj2 = populatedCasts[i]
-      let obj1 = displayedCasts.find(cast => cast.hash === obj2.hash)
-      if (obj1) {
-        Object.keys(obj2).forEach(key => {
-          obj1[key] = obj2[key]
-        })
-      } else {
-        displayedCasts.push({...obj2})
-      }
-    }
-
-    setUserFeed(displayedCasts)
+  //   if (sortedCasts) {
+  //     const castHashes = sortedCasts.map(obj => obj.cast_hash)
+  //     castString = castHashes.join(',');
+  //   }
 
 
-    async function checkEmbedTypeForCasts(casts) {
-      // Map over each cast and apply checkEmbedType function
-      const updatedCasts = await Promise.all(casts.map(async (cast) => {
-        return await checkEmbedType(cast);
-      }));
+  //   async function populateCasts(fid, castString) {
+  //     try {
+  //       const response = await axios.get('/api/curation/getCastsByHash', {
+  //         params: { fid, castString }
+  //       })
+  //       return response
+  //     } catch (error) {
+  //       console.error('Error submitting data:', error)
+  //       return null
+  //     }
+  //   }
+
+  //   const populateResponse = await populateCasts(fid, castString)
+
+  //   let populatedCasts = []
+
+  //   if (populateResponse) {
+  //     populatedCasts = populateResponse.data.casts
+  //     // setUserFeed(populatedCasts)
+  //   }
+
+  //   for (let i = 0; i < populatedCasts.length; i++) {
+  //     const obj2 = populatedCasts[i]
+  //     let obj1 = displayedCasts.find(cast => cast.hash === obj2.hash)
+  //     if (obj1) {
+  //       Object.keys(obj2).forEach(key => {
+  //         obj1[key] = obj2[key]
+  //       })
+  //     } else {
+  //       displayedCasts.push({...obj2})
+  //     }
+  //   }
+
+  //   setUserFeed(displayedCasts)
+
+
+  //   async function checkEmbedTypeForCasts(casts) {
+  //     // Map over each cast and apply checkEmbedType function
+  //     const updatedCasts = await Promise.all(casts.map(async (cast) => {
+  //       return await checkEmbedType(cast);
+  //     }));
     
-      return updatedCasts;
-    }
+  //     return updatedCasts;
+  //   }
     
-    // Usage
-    const castsWithImages = await checkEmbedTypeForCasts(displayedCasts);
-    setUserFeed(castsWithImages);
+  //   // Usage
+  //   const castsWithImages = await checkEmbedTypeForCasts(displayedCasts);
+  //   setUserFeed(castsWithImages);
 
 
-    async function getSubcast(hash, userFid) {
-      if (hash && userFid) {
-        try {
-          const response = await axios.get('/api/getCastByHash', {
-            params: { hash, userFid }
-          })
-          const castData = response.data.cast.cast
-          if (castData) {
-            console.log(castData)
-            return castData
-          } else {
-            return null
-          }
-        } catch (error) {
-          console.error('Error submitting data:', error)
-          return null
-        }
-      }
-    }
+  //   async function getSubcast(hash, userFid) {
+  //     if (hash && userFid) {
+  //       try {
+  //         const response = await axios.get('/api/getCastByHash', {
+  //           params: { hash, userFid }
+  //         })
+  //         const castData = response.data.cast.cast
+  //         if (castData) {
+  //           console.log(castData)
+  //           return castData
+  //         } else {
+  //           return null
+  //         }
+  //       } catch (error) {
+  //         console.error('Error submitting data:', error)
+  //         return null
+  //       }
+  //     }
+  //   }
 
-    async function populateSubcasts(cast, fid) {
-      const { embeds } = cast;
-      if (embeds && embeds.length > 0) {
-        const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
-          if (embed.type == 'subcast') {
-            const subcastData = await getSubcast(embed.cast_id.hash, fid)
-            const checkImages = await checkEmbedType(subcastData)
-            return { ...embed, subcast: checkImages };
-          } else {
-            return { ...embed }
-          }
-        }));
-        return { ...cast, embeds: updatedEmbeds };
-      }
+  //   async function populateSubcasts(cast, fid) {
+  //     const { embeds } = cast;
+  //     if (embeds && embeds.length > 0) {
+  //       const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
+  //         if (embed.type == 'subcast') {
+  //           const subcastData = await getSubcast(embed.cast_id.hash, fid)
+  //           const checkImages = await checkEmbedType(subcastData)
+  //           return { ...embed, subcast: checkImages };
+  //         } else {
+  //           return { ...embed }
+  //         }
+  //       }));
+  //       return { ...cast, embeds: updatedEmbeds };
+  //     }
       
-      return cast;
-    }
+  //     return cast;
+  //   }
     
-    async function populateEmbeds(cast) {
-      const { embeds } = cast
-      // console.log(embeds)
-      if (embeds && embeds.length > 0) {
-        const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
-          // console.log(embed.type)
-          if (embed && embed.url && embed.type == 'html') {
-            // console.log(embed)
-            try {
-              const metaData = await axios.get('/api/getMetaTags', {
-                params: { url: embed.url } })
-              if (metaData && metaData.data) {
-                return { ...embed, metadata: metaData.data };
-              } else {
-                return { ...embed }
-              }
-            } catch (error) {
-              return { ...embed }
-            }
-          } else {
-            return { ...embed }
-          }
-        }));
-        return { ...cast, embeds: updatedEmbeds };
-      }
+  //   async function populateEmbeds(cast) {
+  //     const { embeds } = cast
+  //     // console.log(embeds)
+  //     if (embeds && embeds.length > 0) {
+  //       const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
+  //         // console.log(embed.type)
+  //         if (embed && embed.url && embed.type == 'html') {
+  //           // console.log(embed)
+  //           try {
+  //             const metaData = await axios.get('/api/getMetaTags', {
+  //               params: { url: embed.url } })
+  //             if (metaData && metaData.data) {
+  //               return { ...embed, metadata: metaData.data };
+  //             } else {
+  //               return { ...embed }
+  //             }
+  //           } catch (error) {
+  //             return { ...embed }
+  //           }
+  //         } else {
+  //           return { ...embed }
+  //         }
+  //       }));
+  //       return { ...cast, embeds: updatedEmbeds };
+  //     }
       
-      return cast;
-    }
+  //     return cast;
+  //   }
 
-    async function checkEmbeds(casts) {
-      const updatedCasts = await Promise.all(casts.map(async (cast) => {
-        return await populateEmbeds(cast);
-      }));
+  //   async function checkEmbeds(casts) {
+  //     const updatedCasts = await Promise.all(casts.map(async (cast) => {
+  //       return await populateEmbeds(cast);
+  //     }));
     
-      return updatedCasts;
-    }
+  //     return updatedCasts;
+  //   }
 
-    async function checkSubcasts(casts, fid) {
-      const updatedCasts = await Promise.all(casts.map(async (cast) => {
-        return await populateSubcasts(cast, fid);
-      }));
+  //   async function checkSubcasts(casts, fid) {
+  //     const updatedCasts = await Promise.all(casts.map(async (cast) => {
+  //       return await populateSubcasts(cast, fid);
+  //     }));
     
-      return updatedCasts;
-    }
+  //     return updatedCasts;
+  //   }
 
-    const castsWithSubcasts = await checkSubcasts(castsWithImages, fid)
-    console.log(castsWithSubcasts)
-    setUserFeed(castsWithSubcasts);
+  //   const castsWithSubcasts = await checkSubcasts(castsWithImages, fid)
+  //   console.log(castsWithSubcasts)
+  //   setUserFeed(castsWithSubcasts);
 
 
-    const castsWithEmbeds = await checkEmbeds(castsWithSubcasts)
-    console.log(castsWithEmbeds)
-    setUserFeed(castsWithEmbeds);
+  //   const castsWithEmbeds = await checkEmbeds(castsWithSubcasts)
+  //   console.log(castsWithEmbeds)
+  //   setUserFeed(castsWithEmbeds);
 
-  }
+  // }
 
   const ExpandImg = ({embed}) => {
     return (
@@ -1201,54 +1239,54 @@ export default function Ecosystem() {
     )
   }
 
-  const goToUserProfile = async (event, author) => {
-    event.preventDefault()
-    const username = author.username
-    await store.setUserData(author)
-    router.push(`/${username}`)
-  }
+  // const goToUserProfile = async (event, author) => {
+  //   event.preventDefault()
+  //   const username = author.username
+  //   await store.setUserData(author)
+  //   router.push(`/${username}`)
+  // }
 
-  const HorizontalScale = () => {
-    const [value, setValue] = useState(initValue);
+  // const HorizontalScale = () => {
+  //   const [value, setValue] = useState(initValue);
   
-    const handleChange = (event) => {
-      setValue(parseInt(event.target.value));
-    };
+  //   const handleChange = (event) => {
+  //     setValue(parseInt(event.target.value));
+  //   };
 
-    const handleMouseLeave = () => {
-      store.setUserTipPercent(value);
-      setInitValue(value)
-    };
+  //   const handleMouseLeave = () => {
+  //     store.setUserTipPercent(value);
+  //     setInitValue(value)
+  //   };
   
-    return (
-      <div className='flex-row' style={{ width: '100%', padding: '3px 12px', gap: '1.0rem', alignItems: 'center' }}
-      onMouseLeave={handleMouseLeave} onTouchEnd={handleMouseLeave}>
-        <input
-          type="range"
-          min="1"
-          max="100"
-          value={value}
-          onChange={handleChange}
-          style={{ width: '100%' }}
-        />
-        <div className='flex-col' style={{gap: '0.45rem'}}>
-          <div className='flex-row' style={{flexWrap: 'wrap', justifyContent: 'center', gap: '0.35rem', width: '150px'}}>
-          {(tokenData && tokenData.length > 0) && tokenData.map((token, index) => {
-            return ((token.allowance >= 0) && (<div key={index} className='flex-row' style={{border: token.set ? '1px solid #abc' : '1px solid #aaa', borderRadius: '6px', padding: '2px 5px', color: token.set ? '#9df' : '#ccc', gap: '0.35rem', alignItems: 'center', cursor: 'pointer', backgroundColor: token.set ? '#246' : 'transparent'}} onClick={() => {handleToken(token.token)}}>
-              <div style={{textAlign: 'center', color: token.set ? '#9df' : '#ccc', fontSize: '14px', fontWeight: '700'}}>
-                {value}%
-              </div>
-              {(token.token == '$DEGEN') ? (<Degen />) : (token.token == '$TN100x') ? (<GiMeat style={{transform: 'scaleX(-1)'}} />) : (<GiTwoCoins />)}
-            </div>))
-          })}
-          </div>
-          <div className='flex-row' style={{gap: '0.5rem', alignItems: 'center', justifyContent: 'center'}}>
-            <div style={{ textAlign: 'center', color: '#def', fontSize: '12px' }}>({value}%)</div><div style={{border: '1px solid #abc', fontSize: '12px', color: (tokensSelected.length == 0 || tokensSelected.length == 2) ? '#9df' : '#eee', padding: '1px 3px', borderRadius: '5px', backgroundColor: (tokensSelected.length == 0 || tokensSelected.length == 2) ? '#246' : 'transparent', cursor: 'pointer'}} onClick={() => {handleToken('All tokens')}}>SELECT ALL</div>
-          </div>
-        </div>
-      </div>
-    );
-  };
+  //   return (
+  //     <div className='flex-row' style={{ width: '100%', padding: '3px 12px', gap: '1.0rem', alignItems: 'center' }}
+  //     onMouseLeave={handleMouseLeave} onTouchEnd={handleMouseLeave}>
+  //       <input
+  //         type="range"
+  //         min="1"
+  //         max="100"
+  //         value={value}
+  //         onChange={handleChange}
+  //         style={{ width: '100%' }}
+  //       />
+  //       <div className='flex-col' style={{gap: '0.45rem'}}>
+  //         <div className='flex-row' style={{flexWrap: 'wrap', justifyContent: 'center', gap: '0.35rem', width: '150px'}}>
+  //         {(tokenData && tokenData.length > 0) && tokenData.map((token, index) => {
+  //           return ((token.allowance >= 0) && (<div key={index} className='flex-row' style={{border: token.set ? '1px solid #abc' : '1px solid #aaa', borderRadius: '6px', padding: '2px 5px', color: token.set ? '#9df' : '#ccc', gap: '0.35rem', alignItems: 'center', cursor: 'pointer', backgroundColor: token.set ? '#246' : 'transparent'}} onClick={() => {handleToken(token.token)}}>
+  //             <div style={{textAlign: 'center', color: token.set ? '#9df' : '#ccc', fontSize: '14px', fontWeight: '700'}}>
+  //               {value}%
+  //             </div>
+  //             {(token.token == '$DEGEN') ? (<Degen />) : (token.token == '$TN100x') ? (<GiMeat style={{transform: 'scaleX(-1)'}} />) : (<GiTwoCoins />)}
+  //           </div>))
+  //         })}
+  //         </div>
+  //         <div className='flex-row' style={{gap: '0.5rem', alignItems: 'center', justifyContent: 'center'}}>
+  //           <div style={{ textAlign: 'center', color: '#def', fontSize: '12px' }}>({value}%)</div><div style={{border: '1px solid #abc', fontSize: '12px', color: (tokensSelected.length == 0 || tokensSelected.length == 2) ? '#9df' : '#eee', padding: '1px 3px', borderRadius: '5px', backgroundColor: (tokensSelected.length == 0 || tokensSelected.length == 2) ? '#246' : 'transparent', cursor: 'pointer'}} onClick={() => {handleToken('All tokens')}}>SELECT ALL</div>
+  //         </div>
+  //       </div>
+  //     </div>
+  //   );
+  // };
 
   function clearCastText() {
     setCastData({ ...castData, text: '', parentUrl: null });
@@ -1258,49 +1296,49 @@ export default function Ecosystem() {
 		setCastData( () => ({ ...castData, [e.target.name]: e.target.value }) )
 	}
 
-  async function routeCast() {
-    console.log(castData.text.length)
-    if (store.isAuth && store.signer_uuid && castData.text.length > 0 && castData.text.length <= 320) {
-      console.log(store.isAuth, castData.text)
-      try {
-        let updatedCastData = { ...castData }
-        updatedCastData.fid = store.fid
-        updatedCastData.signer = store.signer_uuid
-        setCastData(updatedCastData)
-        postCast(castData)
-      } catch (error) {
-        console.error('Error submitting data:', error)
-      }
-    }
-    else if (store.isAuth && store.signer_uuid && castData.text.length > 320) {
-      try {
-        const username = store.usernameFC
-        const ipfsData = await axios.post('/api/postToIPFS', { username: username, text: castData.text, fid: store.fid })
-        const longcastHash = ipfsData.data.ipfsHash
-        let updatedCastData = { ...castData }
-        updatedCastData.fid = store.fid
-        updatedCastData.signer = store.signer_uuid
-        const longcastFrame = `${baseURL}/${username}/articles/${longcastHash}`
-        updatedCastData.text = longcastFrame
-        updatedCastData.urls.push(longcastFrame)
-        setCastData(updatedCastData)
-        console.log(longcastFrame)
-        await postCast(updatedCastData)
-        console.log(longcastHash)
-      } catch (error) {
-        console.error('Error submitting data:', error)
-      }
-    } else {
-      return
-    }
-  }
+  // async function routeCast() {
+  //   console.log(castData.text.length)
+  //   if (store.isAuth && store.signer_uuid && castData.text.length > 0 && castData.text.length <= 320) {
+  //     console.log(store.isAuth, castData.text)
+  //     try {
+  //       let updatedCastData = { ...castData }
+  //       updatedCastData.fid = store.fid
+  //       updatedCastData.signer = store.signer_uuid
+  //       setCastData(updatedCastData)
+  //       postCast(castData)
+  //     } catch (error) {
+  //       console.error('Error submitting data:', error)
+  //     }
+  //   }
+  //   else if (store.isAuth && store.signer_uuid && castData.text.length > 320) {
+  //     try {
+  //       const username = store.usernameFC
+  //       const ipfsData = await axios.post('/api/postToIPFS', { username: username, text: castData.text, fid: store.fid })
+  //       const longcastHash = ipfsData.data.ipfsHash
+  //       let updatedCastData = { ...castData }
+  //       updatedCastData.fid = store.fid
+  //       updatedCastData.signer = store.signer_uuid
+  //       const longcastFrame = `${baseURL}/${username}/articles/${longcastHash}`
+  //       updatedCastData.text = longcastFrame
+  //       updatedCastData.urls.push(longcastFrame)
+  //       setCastData(updatedCastData)
+  //       console.log(longcastFrame)
+  //       await postCast(updatedCastData)
+  //       console.log(longcastHash)
+  //     } catch (error) {
+  //       console.error('Error submitting data:', error)
+  //     }
+  //   } else {
+  //     return
+  //   }
+  // }
 
-  const expandBox = () => {
-    if (textboxRows == 1) {
-      setIsFocused(true)
-      setTextboxRows(4)
-    }
-  }
+  // const expandBox = () => {
+  //   if (textboxRows == 1) {
+  //     setIsFocused(true)
+  //     setTextboxRows(4)
+  //   }
+  // }
 
   const shrinkBox = () => {
     console.log(castData.text)
@@ -1310,12 +1348,12 @@ export default function Ecosystem() {
     }
   }
 
-  const updateCast = (index, newData) => {
-    const updatedFeed = [...userFeed]
-    updatedFeed[index] = newData
-    console.log(newData)
-    setUserFeed(updatedFeed)
-  }
+  // const updateCast = (index, newData) => {
+  //   const updatedFeed = [...userFeed]
+  //   updatedFeed[index] = newData
+  //   console.log(newData)
+  //   setUserFeed(updatedFeed)
+  // }
 
   const channelKeyDown = (event) => {
     if (event.key === 'Enter') {
@@ -1342,9 +1380,9 @@ export default function Ecosystem() {
           name: name,
         }
       })
-      if (response && response.data) {
-        const channels = response.data.channels
-        const channelsData = response.data.channels
+      if (response?.data) {
+        const channels = response?.data?.channels
+        const channelsData = response?.data?.channels
         console.log(channels)
         setChannels(channels)
         setFilterChannels(channelsData)
@@ -1447,206 +1485,209 @@ export default function Ecosystem() {
     }
   }
 
-  async function deleteSchedule() {
-    console.log(cronId, store.fid)
-    try {
-      const response = await axios.delete('/api/curation/deleteTipSchedule', {
-        params: {
-          cronId: cronId, fid: store.fid
-        }
-      })
-      if (response && response.status == 200) {
-        let updatedUserQuery = { ...userQuery }
-        updatedUserQuery.shuffle = false
-        updatedUserQuery.time = null
-        updatedUserQuery.curators = []
-        updatedUserQuery.channels = []
-        updatedUserQuery.tags = []
-        setUserQuery(updatedUserQuery)
+  // async function deleteSchedule() {
+  //   console.log(cronId, store.fid)
+  //   try {
+  //     const response = await axios.delete('/api/curation/deleteTipSchedule', {
+  //       params: {
+  //         cronId: cronId, fid: store.fid
+  //       }
+  //     })
+  //     if (response && response.status == 200) {
+  //       let updatedUserQuery = { ...userQuery }
+  //       updatedUserQuery.shuffle = false
+  //       updatedUserQuery.time = null
+  //       updatedUserQuery.curators = []
+  //       updatedUserQuery.channels = []
+  //       updatedUserQuery.tags = []
+  //       setUserQuery(updatedUserQuery)
 
-        setModal({on: true, success: true, text: response.data.message});
-        setTimeout(() => {
-          setModal({on: false, success: false, text: ''});
-        }, 2500);
+  //       setModal({on: true, success: true, text: response.data.message});
+  //       setTimeout(() => {
+  //         setModal({on: false, success: false, text: ''});
+  //       }, 2500);
 
-        return true
-      } else {
+  //       return true
+  //     } else {
 
-        setModal({on: true, success: false, text: 'Tip schedule delete failed'});
-        setTimeout(() => {
-          setModal({on: false, success: false, text: ''});
-        }, 2500);
-        return null
-      }
-    } catch (error) {
-      setModal({on: true, success: false, text: 'Tip schedule delete failed'});
-      setTimeout(() => {
-        setModal({on: false, success: false, text: ''});
-      }, 2500);
-      console.error('Error submitting data:', error)
-      return null
-    }
-  }
+  //       setModal({on: true, success: false, text: 'Tip schedule delete failed'});
+  //       setTimeout(() => {
+  //         setModal({on: false, success: false, text: ''});
+  //       }, 2500);
+  //       return null
+  //     }
+  //   } catch (error) {
+  //     setModal({on: true, success: false, text: 'Tip schedule delete failed'});
+  //     setTimeout(() => {
+  //       setModal({on: false, success: false, text: ''});
+  //     }, 2500);
+  //     console.error('Error submitting data:', error)
+  //     return null
+  //   }
+  // }
 
-  async function pauseSchedule() {
-    console.log(cronId, store.fid)
-    try {
-      const response = await axios.get('/api/curation/updateTipSchedule', {
-        params: {
-          cronId: cronId, fid: store.fid
-        }
-      })
-      console.log(response)
+  // async function pauseSchedule() {
+  //   console.log(cronId, store.fid)
+  //   try {
+  //     const response = await axios.get('/api/curation/updateTipSchedule', {
+  //       params: {
+  //         cronId: cronId, fid: store.fid
+  //       }
+  //     })
+  //     console.log(response)
 
-      if (response && response.data) {
-        const curators = response.data
-        if (response.data.update == 1) {
-          setModal({on: true, success: true, text: 'Tip schedule paused'});
-          setTimeout(() => {
-            setModal({on: false, success: false, text: ''});
-          }, 2500);
+  //     if (response && response.data) {
+  //       const curators = response.data
+  //       if (response.data.update == 1) {
+  //         setModal({on: true, success: true, text: 'Tip schedule paused'});
+  //         setTimeout(() => {
+  //           setModal({on: false, success: false, text: ''});
+  //         }, 2500);
 
-          setActiveCron(false)
+  //         setActiveCron(false)
 
-        } else if (response.data.update == 0) {
-          setModal({on: true, success: true, text: 'Tip schedule resumed'});
-          setTimeout(() => {
-            setModal({on: false, success: false, text: ''});
-          }, 2500);
+  //       } else if (response.data.update == 0) {
+  //         setModal({on: true, success: true, text: 'Tip schedule resumed'});
+  //         setTimeout(() => {
+  //           setModal({on: false, success: false, text: ''});
+  //         }, 2500);
 
-          setActiveCron(true)
-        }
-        console.log(curators)
-        // setCurators(curators)
-        return curators
-      } else {
-        return null
-      }
-      // console.log(channels)
-    } catch (error) {
-      console.error('Error submitting data:', error)
-      return null
-    }
-  }
+  //         setActiveCron(true)
+  //       }
+  //       console.log(curators)
+  //       // setCurators(curators)
+  //       return curators
+  //     } else {
+  //       return null
+  //     }
+  //     // console.log(channels)
+  //   } catch (error) {
+  //     console.error('Error submitting data:', error)
+  //     return null
+  //   }
+  // }
 
-  async function postMultiTip() {
+  // async function postMultiTip() {
 
-    console.log(tipDistribution)
+  //   console.log(tipDistribution)
 
-    let fidSet = []
+  //   let fidSet = []
 
-    const curatorList = tipDistribution.curators
-    if (curatorList && curatorList.length > 0) {
-      curatorList.forEach(curator => {
-        fidSet.push(curator.fid)
-      })
-    }
-    // console.log(fidSet)
-    let returnedCurators = []
-    if (fidSet.length > 0) {
+  //   const curatorList = tipDistribution.curators
+  //   if (curatorList && curatorList.length > 0) {
+  //     curatorList.forEach(curator => {
+  //       fidSet.push(curator.fid)
+  //     })
+  //   }
+  //   // console.log(fidSet)
+  //   let returnedCurators = []
+  //   if (fidSet.length > 0) {
 
-      async function getCuratorsByFid(fidSet) {
-        let userFids = fidSet.join(',')
-        try {
-          const response = await axios.get('/api/curation/getCuratorsByFid', {
-            params: {
-              name: userFids,
-            }
-          })
-          if (response) {
-            const curators = response.data.users
-            // console.log(curators)
-            // setCurators(curators)
-            return curators
-          } else {
-            return null
-          }
-          // console.log(channels)
-        } catch (error) {
-          console.error('Error submitting data:', error)
-          return null
-        }
+  //     async function getCuratorsByFid(fidSet) {
+  //       let userFids = fidSet.join(',')
+  //       try {
+  //         const response = await axios.get('/api/curation/getCuratorsByFid', {
+  //           params: {
+  //             name: userFids,
+  //           }
+  //         })
+  //         if (response) {
+  //           const curators = response.data.users
+  //           // console.log(curators)
+  //           // setCurators(curators)
+  //           return curators
+  //         } else {
+  //           return null
+  //         }
+  //         // console.log(channels)
+  //       } catch (error) {
+  //         console.error('Error submitting data:', error)
+  //         return null
+  //       }
 
-      }
+  //     }
 
-      returnedCurators = await getCuratorsByFid(fidSet)
-    }
+  //     returnedCurators = await getCuratorsByFid(fidSet)
+  //   }
 
    
-    // Map to create a lookup table for faster access
-    const lookupTable = returnedCurators.reduce((acc, obj) => {
-        acc[obj.fid] = obj;
-        return acc;
-    }, {});
+  //   // Map to create a lookup table for faster access
+  //   const lookupTable = returnedCurators.reduce((acc, obj) => {
+  //       acc[obj.fid] = obj;
+  //       return acc;
+  //   }, {});
   
-    const creatorData = tipDistribution.creators
-    // Construct the third array
-    const curatorData = curatorList.map(obj => {
-      const matchingObj = lookupTable[obj.fid];
-      if (matchingObj) {
-        return {
-          fid: obj.fid,
-          cast: matchingObj.set_cast_hash,
-          coin: obj.coin,
-          tip: Math.floor(obj.points / tipDistribution.totalPoints * tipDistribution.totalTip * 0.08)
-        };
-      } else {
-        return null;
-      }
-    }).filter(obj => obj !== null);
+  //   const creatorData = tipDistribution.creators
+  //   // Construct the third array
+  //   const curatorData = curatorList.map(obj => {
+  //     const matchingObj = lookupTable[obj.fid];
+  //     if (matchingObj) {
+  //       return {
+  //         fid: obj.fid,
+  //         cast: matchingObj.set_cast_hash,
+  //         coin: obj.coin,
+  //         tip: Math.floor(obj.points / tipDistribution.totalPoints * tipDistribution.totalTip * 0.08)
+  //       };
+  //     } else {
+  //       return null;
+  //     }
+  //   }).filter(obj => obj !== null);
     
-    console.log(curatorData);
+  //   console.log(curatorData);
 
-    const combinedLists = [...new Set([...creatorData, ...curatorData])];
-    console.log(combinedLists)
+  //   const combinedLists = [...new Set([...creatorData, ...curatorData])];
+  //   console.log(combinedLists)
 
-    combinedLists.forEach(cast => {
-      cast.text = `${cast.tip} ${cast.coin} via /impact`
-    })
-    console.log(combinedLists)
+  //   combinedLists.forEach(cast => {
+  //     cast.text = `${cast.tip} ${cast.coin} via /impact`
+  //   })
+  //   console.log(combinedLists)
 
 
-    if (combinedLists && combinedLists.length > 0 && store.signer_uuid) {
-      setLoading(true)
-      try {
-        const response = await axios.post('/api/curation/postMultipleTips', {       
-          signer: store.signer_uuid,
-          fid: store.fid,
-          data: combinedLists
-        })
-        if (response.status !== 200) {
-          setLoading(false)
-          console.log(response)
-          setModal({on: true, success: false, text: 'Tipping all casts failed'});
-          setTimeout(() => {
-            setModal({on: false, success: false, text: ''});
-          }, 2500);
-          // need to revert recasts counter
-        } else {
-          setLoading(false)
-          console.log(response)
-          if (response?.data?.tip) {
-            setUserAllowance(userAllowance - response.data.tip)
-          }
-          setModal({on: true, success: true, text: response.data.message});
-          setTimeout(() => {
-            setModal({on: false, success: false, text: ''});
-          }, 2500);
-        }
-        console.log(response.status)
-      } catch (error) {
-        console.error('Error submitting data:', error)
-      }
-    }
-  }
+  //   if (combinedLists && combinedLists.length > 0 && store.signer_uuid) {
+  //     setLoading(true)
+  //     try {
+  //       const response = await axios.post('/api/curation/postMultipleTips', {       
+  //         signer: store.signer_uuid,
+  //         fid: store.fid,
+  //         data: combinedLists
+  //       })
+  //       if (response.status !== 200) {
+  //         setLoading(false)
+  //         console.log(response)
+  //         setModal({on: true, success: false, text: 'Tipping all casts failed'});
+  //         setTimeout(() => {
+  //           setModal({on: false, success: false, text: ''});
+  //         }, 2500);
+  //         // need to revert recasts counter
+  //       } else {
+  //         setLoading(false)
+  //         console.log(response)
+  //         if (response?.data?.tip) {
+  //           setUserAllowance(userAllowance - response.data.tip)
+  //         }
+  //         setModal({on: true, success: true, text: response.data.message});
+  //         setTimeout(() => {
+  //           setModal({on: false, success: false, text: ''});
+  //         }, 2500);
+  //       }
+  //       console.log(response.status)
+  //     } catch (error) {
+  //       console.error('Error submitting data:', error)
+  //     }
+  //   }
+  // }
 
   function setupEcosystem(target) {
-    // console.log(newEcosystem)
+    console.log(newEcosystem)
     let updatedNewEcosystem = {...newEcosystem}
     if (target == 'start') {
       updatedNewEcosystem.nameField = true
       setNewEcosystem(updatedNewEcosystem)
     } else if (target == 'cancel') {
+      if (newEcosystem.update) {
+        updatedNewEcosystem.update = false
+      }
       updatedNewEcosystem.nameField = false
       setNewEcosystem(updatedNewEcosystem)
     } else if (target == 'name') {
@@ -1982,6 +2023,201 @@ export default function Ecosystem() {
     }
   }
 
+  async function getModeators(fids) {
+    let jointFids = ''
+    if (fids?.length > 1) {
+      jointFids = fids.join(',')
+    } else if (fids?.length == 1) {
+      jointFids = fids[0]
+    }
+    console.log(fids, jointFids)
+    try {
+      const response = await axios.get('/api/getUserProfile', {
+        params: {
+          fid: jointFids,
+        }
+      })
+      if (response?.data?.userProfile) {
+        const users = response.data.userProfile
+        setSelectedModerators(users)
+      } else {
+        setSelectedModerators([])
+      }
+      updateEcosystemData()
+    } catch (error) {
+      console.error('Error', error)
+      setSelectedModerators([])
+      updateEcosystemData()
+    }
+  }
+
+  async function modifyEcosystem(ecosystem) {
+
+    function getToken(address) {
+      if (address == '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2') {
+        return '1'
+      } else if (address == '0x4200000000000000000000000000000000000042') {
+        return '2'
+      } else if (address == '0x4ed4e862860bed51a9570b96d89af5e1b0efefed') {
+        return '3'
+      } else if (address == '0x5b5dee44552546ecea05edea01dcd7be7aa6144a') {
+        return '4'
+      } else if (address == '0xa6b280b42cb0b7c4a4f789ec6ccc3a7609a1bc39') {
+        return '5'
+      } else if (address == '0x7DD9c5Cba05E151C895FDe1CF355C9A1D5DA6429') {
+        return '6'
+      } else if (address == '0xba5BDe662c17e2aDFF1075610382B9B691296350') {
+        return '7'
+      } else {
+        return null
+      }
+    }
+
+    function getchain(chain) {
+      if (chain == 'eip155:1') {
+        return '1'
+      } else if (chain == 'eip155:10') {
+        return '2'
+      } else if (chain == 'eip155:8453') {
+        return '3'
+      } else if (chain == 'eip155:42161') {
+        return '4'
+      } else if (chain == 'eip155:7777777') {
+        return '5'
+      } else if (chain == 'eip155:137') {
+        return '6'
+      } else if (chain == 'eip155:666666666') {
+        return '7'
+      } else if (chain == 'eip155:5112') {
+        return '8'
+      } else {
+        return '1'
+      }
+    }
+
+    setSelectedChannels([])
+    setSelectedModerators([])
+    let updatedformController = {...formController}
+    let updatedNewEcosystem = {...newEcosystem}
+    console.log(ecosystem)
+    updatedNewEcosystem.eligibility = []
+    updatedNewEcosystem.ecoRules = []
+    updatedNewEcosystem.incentives = []
+
+    updatedNewEcosystem.id = ecosystem._id
+    updatedNewEcosystem.update = true
+    updatedNewEcosystem.nameField = true
+    updatedNewEcosystem.name = ecosystem.ecosystem_name
+    updatedformController.name = 'working'
+    updatedformController.nameDescription = 'Choose an ecosystem name'
+
+    updatedNewEcosystem.handle = ecosystem.ecosystem_handle
+    updatedformController.handle = 'working'
+    updatedformController.handleDescription = 'Choose ecosystem handle'
+
+    updatedNewEcosystem.points = ecosystem.ecosystem_points_name
+    updatedformController.points = 'working'
+    updatedformController.pointsDescription = 'Points name cannot be updated'
+
+    updatedNewEcosystem.fid = ecosystem.fid
+
+    console.log(ecosystem.condition_curators_threshold)
+    if (ecosystem.condition_curators_threshold) {
+
+      updatedNewEcosystem.channelCuratorThreshold = ecosystem.condition_curators_threshold
+    }
+
+    if (ecosystem.condition_points_threshold) {
+      updatedNewEcosystem.channelPointThreshold = ecosystem.condition_points_threshold
+    }
+  
+    if (ecosystem?.ecosystem_rules?.length > 0) {
+      for (const rule of ecosystem.ecosystem_rules) {
+        let ruleData = {rule: rule, isSet: 'working'}
+        updatedNewEcosystem.ecoRules.push(ruleData)
+      }
+    }
+
+    if (ecosystem?.condition_powerbadge) {
+      let state = {type: null}
+      let eligibility = {condition: 'powerbadge', isSet: 'working', state: state}
+      updatedNewEcosystem.eligibility.push(eligibility)
+    }
+
+    if (ecosystem?.condition_following_channel) {
+      let eligibility = {condition: 'follow-channel', isSet: 'working'}
+      updatedNewEcosystem.eligibility.push(eligibility)
+    }
+
+    if (ecosystem?.condition_following_owner) {
+      let eligibility = {condition: 'follow-owner', isSet: 'working'}
+      updatedNewEcosystem.eligibility.push(eligibility)
+    }
+
+    if (ecosystem?.condition_holding_erc20 && ecosystem?.erc20s?.length > 0) {
+      for (const erc20 of ecosystem.erc20s) {
+        const token = getToken(erc20.erc20_address)
+        if (token) {
+          let state = {token: token, tokenMinValue: erc20.min}
+          let eligibility = {condition: 'erc20', isSet: 'working', state: state}
+          updatedNewEcosystem.eligibility.push(eligibility)
+        } else {
+          const chain = getchain(erc20.erco20_chain)
+          let state = {token: '8', tokenMinValue: erc20.min, erc20Address: erc20.erc20_address, chain: chain}
+          let eligibility = {condition: 'erc20', isSet: 'working', state: state}
+          updatedNewEcosystem.eligibility.push(eligibility)
+        }
+      }
+    }
+
+    if (ecosystem?.condition_holding_nft && ecosystem?.nfts?.length > 0) {
+      for (const nft of ecosystem.nfts) {
+        const chain = getchain(nft.nft_chain)
+        let state = {nftAddress: nft.nft_address, chain: chain}
+        let eligibility = {condition: 'nft', isSet: 'working', state: state}
+        updatedNewEcosystem.eligibility.push(eligibility)
+      }
+    }
+
+    if (ecosystem?.percent_tipped) {
+      let state = {tipPercent: ecosystem?.percent_tipped}
+      let incentive = {condition: 'percent-tipped', isSet: 'working', state: state}
+      updatedNewEcosystem.incentives.push(incentive)
+    }
+
+    if (ecosystem?.points_per_tip) {
+      let state = {tip: ecosystem?.points_per_tip}
+      let incentive = {condition: 'tip', isSet: 'working', state: state}
+      updatedNewEcosystem.incentives.push(incentive)
+    }
+
+    if ((ecosystem?.upvote_value || ecosystem?.upvote_value == 0) && (ecosystem?.downvote_value || ecosystem?.downvote_value == 0)) {
+      let state = {qdaoUp: ecosystem?.upvote_value, qdaoDown: (ecosystem?.downvote_value * -1)}
+      let incentive = {condition: 'qdao', isSet: 'working', state: state}
+      updatedNewEcosystem.incentives.push(incentive)
+    }
+
+    if (ecosystem?.channels?.length > 0) {
+      let channels = []
+      for (const channel of ecosystem?.channels) {
+        console.log(channel)
+        let addChannel = {name: channel.name, id: channel.name, parent_url: channel.url, image_url: channel.img}
+        channels.push(addChannel)
+      }
+      setSelectedChannels(channels)
+      updatedformController.channel = 'set'
+    }
+
+    if (ecosystem?.ecosystem_moderators?.length > 0) {
+      getModeators(ecosystem?.ecosystem_moderators)
+      updatedformController.moderators = 'set'
+    }
+
+    setNewEcosystem(updatedNewEcosystem)
+    setFormController(updatedformController)
+    updateEcosystemData()
+  }
+
   async function checkHandle(handle) {
     try {
       const response = await axios.get('/api/ecosystem/checkHandle', { params: {      
@@ -2092,6 +2328,7 @@ export default function Ecosystem() {
       const inputValue = Number(event.target.value)
       let updatedNewEcosystem = {...newEcosystem}
       updatedNewEcosystem.channelCuratorThreshold = inputValue
+      console.log(updatedNewEcosystem.channelCuratorThreshold)
       setNewEcosystem(updatedNewEcosystem)
     } else if (event.target.name == 'channel points') {
       let inputValue = Number(event.target.value)
@@ -2100,9 +2337,13 @@ export default function Ecosystem() {
       }
       let updatedNewEcosystem = {...newEcosystem}
       updatedNewEcosystem.channelPointThreshold = inputValue
+      console.log(updatedNewEcosystem.channelPointThreshold)
       setNewEcosystem(updatedNewEcosystem)
     }
     setFormController(updatedformController)
+    console.log(newEcosystem)
+    console.log(formController)
+    updateEcosystemData()
 	}
 
   const inputKeyDown = (event) => {
@@ -2129,9 +2370,9 @@ export default function Ecosystem() {
     <div style={{padding: '58px 0 0 0', width: feedMax}}>
     </div>
 
-    {!newEcosystem.nameField ? (<div style={{margin: '25px 0 0 0'}}><Button text={'Create Ecosystem'} size={'large'} prevIcon={FaPlus} setupEcosystem={setupEcosystem} target={'start'} isSelected={formController.nextCheck} /></div>) : (
+    {!newEcosystem.nameField ? (<div style={{margin: '25px 0 0 0'}}><Button text={newEcosystem?.update ? 'Update Ecosystem' : 'Create Ecosystem'} size={'large'} prevIcon={FaPlus} setupEcosystem={setupEcosystem} target={'start'} isSelected={formController.nextCheck} /></div>) : (
       <div className='flex-row' style={{margin: '33px 3px 8px 3px', gap: '1rem', justifyContent: 'space-between', alignItems: 'center'}}>
-        <Description text={'Create Ecosystem'} padding={'0px 0 4px 5px'} size={'large'} />
+        <Description text={newEcosystem?.update ? 'Update Ecosystem' : 'Create Ecosystem'} padding={'0px 0 4px 5px'} size={'large'} />
         <Button text={'Cancel'} size={'medium'} setupEcosystem={setupEcosystem} target={'cancel'} isSelected={formController.nextCheck} />
       </div>
     )}
@@ -2154,7 +2395,7 @@ export default function Ecosystem() {
     {newEcosystem.nameField && (<Description text={'Point system:'} padding={'20px 0 4px 10px'} />)}
 
     {newEcosystem.nameField && (
-      <InputField title={'Points name:'} description={formController.pointsDescription} name={'points'} value={newEcosystem.points} placeholder={`$POINTS`} inputKeyDown={inputKeyDown} onInput={onInput} setupEcosystem={setupEcosystem} target={'points'} isSet={formController.points} clearInput={clearInput} cancel={false} />
+      <InputField title={'Points name:'} description={formController.pointsDescription} name={'points'} value={newEcosystem.points} placeholder={`$POINTS`} inputKeyDown={inputKeyDown} onInput={onInput} setupEcosystem={setupEcosystem} target={'points'} isSet={formController.points} clearInput={clearInput} disabled={newEcosystem?.update} cancel={false} />
     )}
 
     {newEcosystem.nameField && (<Description text={'Channels:'} padding={'20px 0 4px 10px'} />)}
@@ -2164,17 +2405,17 @@ export default function Ecosystem() {
     )}
 
 
-    {(newEcosystem.nameField && (selectedChannels.length > 0 || filterChannels.length > 0 || loadingChannel || channelSearched)) && (<div className='flex-col active-nav-link btn-hvr' style={{border: '1px solid #777', padding: '18px 10px 12px 10px', borderRadius: '10px', margin: '3px 3px 13px 3px', backgroundColor: '', maxWidth: '100%', cursor: 'default', width: 'auto', gap: '1rem'}}>
+    {(newEcosystem.nameField && (selectedChannels?.length > 0 || filterChannels?.length > 0 || loadingChannel || channelSearched)) && (<div className='flex-col active-nav-link btn-hvr' style={{border: '1px solid #777', padding: '18px 10px 12px 10px', borderRadius: '10px', margin: '3px 3px 13px 3px', backgroundColor: '', maxWidth: '100%', cursor: 'default', width: 'auto', gap: '1rem'}}>
 
       {loadingChannel && (<div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', marginTop: '0px'}}>
         <Spinner size={31} color={'#999'} />
       </div>)}
 
-      {(channelSearched && filterChannels && filterChannels.length > 0) ? (<div className='flex-row top-layer' style={{gap: '0.5rem', padding: '0px 6px', flexWrap: 'wrap'}}>
+      {(channelSearched && filterChannels?.length > 0) ? (<div className='flex-row top-layer' style={{gap: '0.5rem', padding: '0px 6px', flexWrap: 'wrap'}}>
         {filterChannels && (
           filterChannels.map((channel, index) => (
             <div key={`Ch2-${index}`} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addChannel(channel)}}>
-              <img loading="lazy" src={channel.image_url} className="" alt={channel.name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
+              <img loading="lazy" src={channel?.image_url} className="" alt={channel.name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
               <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>{channel.name}</div>
               <div style={{fontWeight: '400', fontSize: '10px', color: '#ccc'}}>{formatNum(channel.follower_count)}</div>
             </div>
@@ -2186,7 +2427,7 @@ export default function Ecosystem() {
         {(
           selectedChannels.map((channel, index) => (
             <div key={`Ch-${index}`} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addChannel(channel)}}>
-              <img loading="lazy" src={channel.image_url} className="" alt={channel.name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
+              {channel?.image_url && (<img loading="lazy" src={channel?.image_url} className="" alt={channel.name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />)}
               <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>{channel.name}</div>
             </div>
           )))}
@@ -2194,9 +2435,9 @@ export default function Ecosystem() {
     </div>)}
 
 
-    {(newEcosystem.nameField && selectedChannels && selectedChannels.length > 0) &&  (<Description text={'Channel rules:'} padding={'20px 0 4px 10px'} />)}
+    {(newEcosystem.nameField && selectedChannels?.length > 0) &&  (<Description text={'Channel rules:'} padding={'20px 0 4px 10px'} />)}
 
-    {(newEcosystem.nameField && selectedChannels && selectedChannels.length > 0) && (<div className={`active-nav-link btn-hvr ${isMobile ? 'flex-col' : 'flex-row'}`} style={{border: '1px solid #777', padding: '2px', borderRadius: '10px', margin: '3px 3px 13px 3px', backgroundColor: '', maxWidth: '100%', cursor: 'default', width: 'auto', justifyContent: 'flex-start'}}>
+    {(newEcosystem.nameField && selectedChannels?.length > 0) && (<div className={`active-nav-link btn-hvr ${isMobile ? 'flex-col' : 'flex-row'}`} style={{border: '1px solid #777', padding: '2px', borderRadius: '10px', margin: '3px 3px 13px 3px', backgroundColor: '', maxWidth: '100%', cursor: 'default', width: 'auto', justifyContent: 'flex-start'}}>
       <div className='flex-row' style={{width: 'auto', padding: '1px 5px', margin: isMobile ? '5px 10px 0px 10px' : '5px 10px 5px 10px', alignItems: 'center', justifyContent: 'flex-start', flexGrow: 1}}>
 
         <div className='flex-col'>
@@ -2289,38 +2530,38 @@ export default function Ecosystem() {
       (<Dropdown key={index} name={index} value={incentive.condition} setupEcosystem={setupEcosystem} target={index} conditions={incentives} cancel={true} removeField={removeIncentiveField} isSet={incentive.isSet} setCondition={setIncentives} state={incentive.state} onInput={onInput} />))
     )}
 
-    {newEcosystem.nameField && (<div className='flex-row' style={{margin: '33px 3px 8px 3px', gap: '1rem'}}>
+    {newEcosystem?.nameField && (<div className='flex-row' style={{margin: '33px 3px 8px 3px', gap: '1rem'}}>
       <Description text={'Ecosystem rules:'} padding={'0 0 0 10px'} />
       <Button text={'Add'} prevIcon={FaPlus} setupEcosystem={setupEcosystem} target={'rules'} />
     </div>)}
 
-    {newEcosystem.nameField && (newEcosystem.ecoRules.map((ecoRule, index) => 
+    {newEcosystem?.nameField && (newEcosystem?.ecoRules?.map((ecoRule, index) => 
       (<InputField key={index} name={index} value={ecoRule.rule} placeholder={`Ecosystem rule`} inputKeyDown={inputKeyDown} onInput={ecoFields} setupEcosystem={setupEcosystem} target={index} isSet={ecoRule.isSet} clearInput={clearEcoField} cancel={true} removeField={removeEcoField} />)
     ))}
 
 
-    {newEcosystem.nameField && (<div className='flex-row' style={{margin: '33px 3px 8px 3px', gap: '1rem', justifyContent: 'space-between'}}>
+    {newEcosystem?.nameField && (<div className='flex-row' style={{margin: '33px 3px 8px 3px', gap: '1rem', justifyContent: 'space-between'}}>
       {formController.next !== 'none' && (<Button text={'Previous'} prevIcon={GrFormPrevious} setupEcosystem={setupEcosystem} target={formController.prev} isSelected={formController.prevCheck} />)}
       <div></div>
-      {formController.next == 'none' && (<Button text={'Submit'} size={'medium'} setupEcosystem={setupEcosystem} target={submitCheck.target} isSelected={formController.nextCheck} submit={submitCheck.pass} />)}
+      {formController.next == 'none' && (<Button text={newEcosystem?.update ? 'Update' : 'Submit'} size={'medium'} setupEcosystem={setupEcosystem} target={submitCheck.target} isSelected={formController.nextCheck} submit={submitCheck.pass} />)}
     </div>)}
 
 
-    {!newEcosystem.nameField && (<Description text={'My Ecosystems:'} padding={'30px 0 4px 10px'} />)}
+    {!newEcosystem?.nameField && (<Description text={'My Ecosystems:'} padding={'30px 0 4px 10px'} />)}
 
     {!newEcosystem.nameField && (
       <>{!loadedSchedule ? (
       <div className='flex-row' style={{height: '100%', alignItems: 'center', width: feedMax, justifyContent: 'center', marginTop: '40px'}}>
         <Spinner size={31} color={'#999'} />
       </div>
-    ) : (userEcosystems && userEcosystems.length > 0 && isLogged) ? userEcosystems.map((ecosystem, index) => { return (
+    ) : (userEcosystems?.length > 0 && isLogged) ? userEcosystems.map((ecosystem, index) => { return (
     <div key={index} style={{border: '1px solid #777', padding: '8px', borderRadius: '10px', margin: '3px 3px 13px 3px', backgroundColor: '#eef6ff11', cursor: 'pointer'}}>
     <div className="top-layer">
       <div className="flex-row" style={{padding: '0 10px', marginBottom: '0px', flexWrap: 'wrap', justifyContent: 'space-between', gap: '0rem', width: '100%', alignItems: 'center'}}>
         <div style={{fontSize: isMobile ? '18px' : '24px', fontWeight: '600', color: '#def', padding: '10px', width: 'auto', flexGrow: 1}} onClick={() => {goToEcosystem(event, ecosystem)}}>
           {ecosystem.ecosystem_name} Ecosystem
         </div>
-        <div className={`flex-row ${userQuery['shuffle'] ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{border: '1px solid #abc', padding: '4px 5px', borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'flex-start'}} onClick={() => {modifySchedule('shuffle')}}>
+        <div className={`flex-row ${userQuery['shuffle'] ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{border: '1px solid #abc', padding: '4px 5px', borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'flex-start'}} onClick={() => {modifyEcosystem(ecosystem)}}>
           <div className={`flex-row`} style={{alignItems: 'center', gap: '0.3rem', padding: '5px'}}>
             <FaPen size={24} />
           </div>
@@ -2333,15 +2574,15 @@ export default function Ecosystem() {
     )}</>)}
 
 
-    {!newEcosystem.nameField && (<Description text={'All Ecosystems:'} padding={'30px 0 4px 10px'} />)}
+    {!newEcosystem?.nameField && (<Description text={'All Ecosystems:'} padding={'30px 0 4px 10px'} />)}
 
 
-    {!newEcosystem.nameField && (
+    {!newEcosystem?.nameField && (
       <>{!loadedSchedule ? (
       <div className='flex-row' style={{height: '100%', alignItems: 'center', width: feedMax, justifyContent: 'center', marginTop: '40px'}}>
         <Spinner size={31} color={'#999'} />
       </div>
-    ) : (allEcosystems && allEcosystems.length > 0 && isLogged) ? allEcosystems.map((ecosystem, index) => { return (
+    ) : (allEcosystems?.length > 0 && isLogged) ? allEcosystems.map((ecosystem, index) => { return (
     <div key={index} style={{border: '1px solid #777', padding: '8px', borderRadius: '10px', margin: '3px 3px 13px 3px', backgroundColor: '#eef6ff11', justifyContent: 'fit-content', cursor: 'pointer'}} onClick={() => {goToEcosystem(event, ecosystem)}}>
     <div className="top-layer">
       <div className="flex-col" style={{padding: '0 20px', marginBottom: '0px', flexWrap: 'wrap', justifyContent: 'space-between', gap: '0rem', width: '100%', alignItems: 'flex-start', width: 'auto', flexGrow: 1}}>

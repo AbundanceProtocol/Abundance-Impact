@@ -6,7 +6,7 @@ const baseURL = process.env.NEXT_PUBLIC_BASE_URL_PROD;
 const code = process.env.ECOSYSTEM_SECRET
 
 export default async function handler(req, res) {
-  const { fid, data } = req.body;
+  const { fid, data, update, id } = req.body;
   
   if (req.method !== 'POST' || !fid || !data) {
     res.status(500).json({ error: 'Internal Server Error' });
@@ -15,37 +15,43 @@ export default async function handler(req, res) {
 
     try {
       await connectToDatabase();
-      let ecosystem = new EcosystemRules({fid: fid})
+      let ecosystem = {}
+      if (!update) {
+        ecosystem = new EcosystemRules({fid: fid})
+      }
       let rules = []
       let channels = []
       let moderators = []
       let nfts = []
       let erc20s = []
 
+      ecosystem.fid = fid
       ecosystem.owner_name = data.ecoOwner
       ecosystem.ecosystem_name = data.ecoName
       ecosystem.ecosystem_handle = data.ecoHandle
       ecosystem.ecosystem_points_name = data.ecoPoints
-      if (data.ecoRules && data.ecoRules.length > 0) {
-        for (const rule of data.ecoRules) {
+      if (data?.ecoRules?.length > 0) {
+        for (const rule of data?.ecoRules) {
           rules.push(rule.value)
         }
       }
-      if (data.ecoChannels && data.ecoChannels.length > 0) {
-        for (const channel of data.ecoChannels) {
-          let channelInfo = {url: channel.url, name: channel.name}
+      if (data?.ecoChannels?.length > 0) {
+        for (const channel of data?.ecoChannels) {
+          let channelInfo = {url: channel.url, name: channel.name, img: channel.img}
+          console.log('channel', channelInfo)
+          console.log('channel2', channel)
           channels.push(channelInfo)
         }
-        ecosystem.condition_points_threshold = data.channelPointThreshold
-        ecosystem.condition_curators_threshold = data.channelCuratorThreshold
+        ecosystem.condition_points_threshold = data.ecoPointsThreshold
+        ecosystem.condition_curators_threshold = data.ecoCuratorThreshold
       }
-      if (data.ecoModerators && data.ecoModerators.length > 0) {
+      if (data?.ecoModerators?.length > 0) {
         for (const moderator of data.ecoModerators) {
           moderators.push(moderator.fid)
         }
       }
-      if (data.ecoEligibility && data.ecoEligibility.length > 0) {
-        for (const eligibility of data.ecoEligibility) {
+      if (data?.ecoEligibility?.length > 0) {
+        for (const eligibility of data?.ecoEligibility) {
           if (eligibility.type == 'powerbadge') {
             ecosystem.condition_powerbadge = true
           } else if (eligibility.type == 'follow-owner') {
@@ -74,14 +80,16 @@ export default async function handler(req, res) {
         }
       }
       ecosystem.channels = channels
-      if (channels && channels.length > 0) {
+      if (channels?.length > 0) {
         ecosystem.condition_channels = true
       }
       ecosystem.nfts = nfts
       ecosystem.ecosystem_rules = rules
       ecosystem.ecosystem_moderators = moderators
       ecosystem.erc20s = erc20s
-      await ecosystem.save()
+      if (!update) {
+        await ecosystem.save()
+      }
 
       async function updateUserAllowance(easyCronKey, baseURL, points, code) {
         try {
@@ -99,10 +107,35 @@ export default async function handler(req, res) {
           return null
         }
       }
-      const ecoPoints = data.ecoPoints.substring(1)
-      const createCron = await updateUserAllowance(easyCronKey, baseURL, ecoPoints, code)
+
+      if (!update) {
+        const ecoPoints = data.ecoPoints.substring(1)
+        const createCron = await updateUserAllowance(easyCronKey, baseURL, ecoPoints, code)
+      }
+
+      async function updateEcosystem(id, ecosystem) {
+        try {
+          const result = await EcosystemRules.replaceOne({ _id: id }, ecosystem);
+          console.log('Document updated:', result, ecosystem);
+          if (result) {
+            return true
+          } else {
+            return false
+          }
+        } catch (error) {
+          console.error('Error updating document:', error);
+          return false
+        }
+      }
+
+      let updatedEcosystem = false      
+      if (update) {
+        ecosystem._id = id
+        updatedEcosystem = await updateEcosystem(id, ecosystem)
+      }
     
-      res.status(200).json({ ecosystem: ecosystem });
+      console.log(ecosystem, updatedEcosystem)
+      res.status(200).json({ ecosystem: ecosystem, updated: updatedEcosystem });
     } catch (error) {
       console.error('Error handling POST request:', error);
       res.status(500).json({ error: 'Internal Server Error' });

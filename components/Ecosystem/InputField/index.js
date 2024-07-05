@@ -4,23 +4,8 @@ import { FaCheckCircle, FaCheck, FaRegTrashAlt  } from "react-icons/fa";
 import { FaRegFaceMeh, FaRegFaceFrown, FaRegFaceSmileBeam  } from "react-icons/fa6";
 import { ImCross } from "react-icons/im";
 
-export default function InputField({ title, description, name, value, placeholder, inputKeyDown, onInput, setupEcosystem, target, button, isSet, clearInput, cancel, removeField }) {
+export default function InputField({ title, description, name, value, placeholder, inputKeyDown, onInput, setupEcosystem, target, button, isSet, clearInput, cancel, removeField, disabled }) {
   const { isMobile } = useMatchBreakpoints();
-
-  // let mobileText = '18px'
-  // let desktopText = '20px'
-  // if (size && size == 'small') {
-  //   mobileText = '14px'
-  //   desktopText = '18px'
-  // } else if (size && size == 'medium') {
-  //   mobileText = '18px'
-  //   desktopText = '22px'
-  // } else if (size && size == 'large') {
-  //   mobileText = '22px'
-  //   desktopText = '24px'
-  // }
-  
-  
   
   let setButton = 'btn-empty'
   if (isSet == 'empty') {
@@ -53,9 +38,10 @@ export default function InputField({ title, description, name, value, placeholde
               placeholder={placeholder} 
               value={value} 
               className='srch-btn' 
-              style={{width: '100%', backgroundColor: '#234', margin: '0'}} 
+              disabled={disabled}
+              style={{width: '100%', backgroundColor: '#234', margin: '0', color: disabled ? '#aaa' : '#fff'}} 
               onKeyDown={inputKeyDown} />
-            {(isSet !== 'empty') && (<ImCross color={'grey'} size={14} style={{position: 'absolute', right: 18, top: 9, cursor: 'pointer'}} onClick={() => {clearInput(target)}} />)}
+            {(isSet !== 'empty' && !disabled) && (<ImCross color={'grey'} size={14} style={{position: 'absolute', right: 18, top: 9, cursor: 'pointer'}} onClick={() => {clearInput(target)}} />)}
           </div>
 
           {button ? (<div className={`flex-row ${setButton} btn-hvr`} style={{border: '1px solid #abc', padding: '1px 5px', borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'flex-start', margin: isMobile ? '0 0 10px 10px' : '10px 0 10px 10px'}}

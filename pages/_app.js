@@ -474,7 +474,7 @@ export default function App({ Component, pageProps }) {
   }
 
   const testButton = async () => {
-    console.log('test')
+    // console.log('test')
     // try {
     //   const guild = await axios.get('/api/ecosystem/getGuildPoints')
     //   console.log(guild)
@@ -571,16 +571,13 @@ export default function App({ Component, pageProps }) {
     try {
       const response = await axios.get('/api/ecosystem/getBalances', {
         params: { fid, points } })
-      if (response) {
-        console.log(response)
-        if (response.data && response.data?.user) {
-          const remainingImpact = response.data.user.remaining_i_allowance
-          const remainingQuality = response.data.user.remaining_q_allowance
-          store.setUserRemainingImpact(remainingImpact)
-          store.setUserRemainingQuality(remainingQuality)
-          setLoadRemaining(false)
-          setEligibility(initialEligibility)
-        }
+      if (response?.data?.user) {
+        const remainingImpact = response.data.user.remaining_i_allowance
+        const remainingQuality = response.data.user.remaining_q_allowance
+        store.setUserRemainingImpact(remainingImpact)
+        store.setUserRemainingQuality(remainingQuality)
+        setLoadRemaining(false)
+        setEligibility(initialEligibility)
       } else {
         checkEcoEligibility(fid, points)
       }
@@ -598,17 +595,15 @@ export default function App({ Component, pageProps }) {
       try {
         const response = await axios.get('/api/ecosystem/checkUserEligibility', {
           params: { fid, points } })
-        if (response) {
           console.log(response)
-          if (response.data && response.data?.eligibilityData?.eligibility && response.data?.createUser) {
-            let userData = response.data?.createUser
-            let eligibilityData = response.data.eligibilityData
-            setEligibility(eligibilityData)
-            store.setUserRemainingImpact(userData.remaining_i_allowance)
-            store.setUserRemainingQuality(userData.remaining_q_allowance)
-            setLoadRemaining(false)
-            console.log(eligibility, eligibilityData)
-          }
+        if (response?.data?.eligibilityData?.eligibility && response?.data?.createUser) {
+          let userData = response.data?.createUser
+          let eligibilityData = response.data.eligibilityData
+          setEligibility(eligibilityData)
+          store.setUserRemainingImpact(userData.remaining_i_allowance)
+          store.setUserRemainingQuality(userData.remaining_q_allowance)
+          setLoadRemaining(false)
+          console.log(eligibility, eligibilityData)
         } else {
           setEligibility(initialEligibility)
           store.setUserRemainingImpact(0)
@@ -986,7 +981,7 @@ export default function App({ Component, pageProps }) {
               </div>)}
               {/* <div style={{color: 'white', fontWeight: '600'}} onClick={testButton}>Test btn</div> */}
             </div>)}
-            <AccountContext.Provider value={{...store.account, ref1, LoginPopup, LogoutPopup, changeEco }}>
+            <AccountContext.Provider value={{...store.account, ref1, LoginPopup, LogoutPopup, changeEco, getEcosystems }}>
               <Component {...pageProps} connect={connect} />
             </AccountContext.Provider>
           </div>
@@ -1017,11 +1012,11 @@ export default function App({ Component, pageProps }) {
                 <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '0px 35px 0 0'}}><FaStar size={20} color={'#6f6'} /></div>
                 <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>Curators threshold: {ecoValue?.condition_curators_threshold}</p>
               </div>)}
-              {(ecoValue?.percent_tipped) && (<div className='flex-row' style={{alignItems: 'center'}}>
+              {(ecoValue?.percent_tipped || ecoValue?.percent_tipped == 0) && (<div className='flex-row' style={{alignItems: 'center'}}>
                 <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '0px 35px 0 0'}}><FaStar size={20} color={'#6f6'} /></div>
                 <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>Percent tipped to curators: {ecoValue?.percent_tipped}%</p>
               </div>)}
-              {(ecoValue?.upvote_value && ecoValue?.downvote_value) && (<div className='flex-row' style={{alignItems: 'center'}}>
+              {((ecoValue?.upvote_value || ecoValue?.upvote_value == 0) && (ecoValue?.downvote_value || ecoValue?.downvote_value == 0)) && (<div className='flex-row' style={{alignItems: 'center'}}>
                 <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '0px 35px 0 0'}}><FaStar size={20} color={'#6f6'} /></div>
                 <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>Upvote/Downvote effect: {ecoValue?.upvote_value} / -{ecoValue?.downvote_value} points</p>
               </div>)}
@@ -1120,11 +1115,11 @@ export default function App({ Component, pageProps }) {
                 <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '0px 35px 0 0'}}><FaStar size={20} color={'#6f6'} /></div>
                 <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>Curators threshold: {ecoValue?.condition_curators_threshold}</p>
               </div>)}
-              {(ecoValue?.percent_tipped) && (<div className='flex-row' style={{alignItems: 'center'}}>
+              {(ecoValue?.percent_tipped || ecoValue?.percent_tipped == 0) && (<div className='flex-row' style={{alignItems: 'center'}}>
                 <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '0px 35px 0 0'}}><FaStar size={20} color={'#6f6'} /></div>
                 <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>Percent tipped to curators: {ecoValue?.percent_tipped}%</p>
               </div>)}
-              {(ecoValue?.upvote_value && ecoValue?.downvote_value) && (<div className='flex-row' style={{alignItems: 'center'}}>
+              {((ecoValue?.upvote_value || ecoValue?.upvote_value == 0) && (ecoValue?.downvote_value || ecoValue?.downvote_value == 0)) && (<div className='flex-row' style={{alignItems: 'center'}}>
                 <div style={{paddingTop: '10px', fontSize: '30px', fontWeight: '700', width: '30px', padding: '0px 35px 0 0'}}><FaStar size={20} color={'#6f6'} /></div>
                 <p style={{paddingTop: '0px', fontSize: '14px', fontWeight: '500'}}>Upvote/Downvote effect: {ecoValue?.upvote_value} / -{ecoValue?.downvote_value} points</p>
               </div>)}
