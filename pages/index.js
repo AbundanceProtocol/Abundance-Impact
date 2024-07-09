@@ -8,6 +8,7 @@ import { useRouter } from 'next/router';
 import Cast from '../components/Cast'
 import { formatNum, getTimeRange, checkEmbedType, populateCast } from '../utils/utils';
 import { IoShuffleOutline as Shuffle, IoPeople, IoPeopleOutline } from "react-icons/io5";
+import { HiRefresh } from "react-icons/hi";
 import { BsClock } from "react-icons/bs";
 import { GoTag } from "react-icons/go";
 import { AiOutlineBars } from "react-icons/ai";
@@ -25,7 +26,7 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
   const [ref, inView] = useInView()
   const [userFeed, setUserFeed] = useState([])
   const { isMobile } = useMatchBreakpoints();
-  const { LoginPopup, ecoData, points, setPoints, isLogged, fid, userProfile } = useContext(AccountContext)
+  const { LoginPopup, ecoData, points, setPoints, isLogged, fid, userProfile, populate } = useContext(AccountContext)
   const [screenWidth, setScreenWidth] = useState(undefined)
   const [screenHeight, setScreenHeight] = useState(undefined)
   const store = useStore()
@@ -177,13 +178,13 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
   useEffect(() => {
 
     const searchRouter = () => {
-      if (isLogged) {
+      if (isLogged && ecoData) {
         if (searchSelect == 'Curation') {
           feedRouter()
-        } else if (searchSelect == 'Main' && channelSelect) {
-          getFeed(fid, channelSelect, true)
-        } else if (searchSelect == 'Recent' && channelSelect) {
-          getFeed(fid, channelSelect, false)
+        } else if (searchSelect == 'Main') {
+          getFeed(fid, ecoData.channels[0].name, true)
+        } else if (searchSelect == 'Recent') {
+          getFeed(fid, ecoData.channels[0].name, false)
         }
       }
     }
@@ -202,22 +203,22 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
   }, [userQuery, sched.userQuery]);
 
   useEffect(() => {
-    console.log(ecoData)
     const ecoRouter = () => {
-      if (ecoData?.ecosystem_points_name && prevSavedEco?._id !== ecoData?._id) {
-        setPrevSavedEco(ecoData)
+      if (populate && populate !== 0) {
         if (ecoData?.channels?.length > 0) {
           setUserFeed([])
           setPrevCursor('')
           setCursor('')
           setChannelSelect(ecoData.channels[0].name)
           setSearchSelect('Main')
+          getFeed(fid, ecoData?.channels[0]?.name, true)
         } else {
           setUserFeed([])
           setPrevCursor('')
           setCursor('')
           setChannelSelect(null)
           setSearchSelect('Curation')
+          feedRouter()
         }
       }
     }
@@ -232,7 +233,7 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
       }, 300);
       return () => clearTimeout(timeoutId);
     }
-  }, [ecoData, sched.ecoData]);
+  }, [populate, sched.ecoData]);
 
   const handleSelection = (type) => {
     if (type == 'shuffle') {
@@ -373,24 +374,22 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
 
   }, [isLogged, sched.login])
 
-  useEffect(() => {
-
-    const searchSelectRouter = () => {
-      console.log(searchSelect, channelSelect)
-      setLoading(false)
-      setPrevCursor('')
-      setCursor('')
-      if (isLogged) {
-        if (searchSelect == 'Curation') {
-          feedRouter()
-        } else if (searchSelect == 'Main' && channelSelect) {
-          getFeed(fid, channelSelect, true)
-        } else if (searchSelect == 'Recent' && channelSelect) {
-          getFeed(fid, channelSelect, false)
-        }
+  const searchSelectRouter = () => {
+    console.log(searchSelect, ecoData, ecoData?.channels[0])
+    setLoading(false)
+    setPrevCursor('')
+    setCursor('')
+    if (isLogged && ecoData) {
+      if (searchSelect == 'Curation') {
+        feedRouter()
+      } else if (searchSelect == 'Main') {
+        getFeed(fid, ecoData?.channels[0]?.name, true)
+      } else if (searchSelect == 'Recent') {
+        getFeed(fid, ecoData?.channels[0]?.name, false)
       }
     }
-
+  }
+  useEffect(() => {
     if (sched.searchSelect) {
       searchSelectRouter()
       setSched(prev => ({...prev, searchSelect: false }))
@@ -421,8 +420,7 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
         console.log('trigger get additional casts', cursor, prevCursor, searchSelect)
         
       } else {
-        console.log('triggered, no new casts')
-        console.log(cursor, prevCursor, searchSelect)
+        console.log('triggered, no new casts', cursor, prevCursor, searchSelect)
       }
     }
 
@@ -439,7 +437,6 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
   }, [inView, sched.inView])
 
   async function getFeed(fid, channel, curated) {
-
     const getChannelFeed = async (fid, channel, curated) => {
       setLoading(true)
       try {
@@ -458,7 +455,6 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
         } else {
           return {channelFeed: [], cursorData: ''}
         }
-        // console.log(channels)
       } catch (error) {
         console.error('Error submitting data:', error)
         return {channelFeed: [], cursorData: ''}
@@ -536,13 +532,19 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
     }
     
     async function populateEmbeds(cast) {
-      const { embeds } = cast
-      // console.log(embeds)
+      const isCast = (cast) => {
+        if (cast?.embeds > 0) {
+          const { embeds } = cast
+          return { embeds }
+        } else {
+          return { embeds: [] }
+        }
+      }
+    
+      const { embeds } = isCast(cast);      
       if (embeds?.length > 0) {
         const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
-          // console.log(embed.type)
           if (embed?.url && embed?.type == 'html') {
-            // console.log(embed)
             try {
               const metaData = await axios.get('/api/getMetaTags', {
                 params: { url: embed.url } })
@@ -600,18 +602,15 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
           params: { fid, channel, curated, cursor } })
         let casts = []
         if (response?.data) {
-          // console.log(response)
           casts = response?.data?.casts
           let cursorData = ''
           if (response?.data?.cursor) {
             cursorData = response?.data?.cursor
           }
-          // console.log(casts, cursorData)
           return {channelFeed: casts, cursorData}
         } else {
           return {channelFeed: [], cursorData: ''}
         }
-        // console.log(channels)
       } catch (error) {
         console.error('Error submitting data:', error)
         return {channelFeed: [], cursorData: ''}
@@ -625,7 +624,7 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
   }
 
   useEffect(() => {
-    console.log('triggered')
+    console.log('triggered []')
 
     if (isLogged) {
       updateAllowances(availableTokens, fid)
@@ -634,11 +633,6 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
     setUserQuery(updateUserQuery => {
       return {time, channels, tags, shuffle, curators}
     })
-
-
-    if (curators && selectedCurators?.length == 0) {
-      getCuratorsQuery(curators)
-    }
 
     async function getCuratorsQuery(curators) {
 
@@ -666,6 +660,10 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
         const curatorData = await getCuratorData(curator)
         addCurator(curatorData)
       }
+    }
+
+    if (curators && selectedCurators?.length == 0) {
+      getCuratorsQuery(curators)
     }
 
     const handleResize = () => {
@@ -1279,7 +1277,13 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
     <div className='flex-col' style={{margin: '0 0 70px 0'}}>
       {(!userFeed || userFeed.length == 0) ? (
         <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
-          {loading ? (<Spinner size={31} color={'#999'} />) : (<div style={{fontSize: '20px', color: '#def'}}>No casts found</div>)}
+          {loading ? (<Spinner size={31} color={'#999'} />) : (<div className='flex-row' style={{gap: '1rem', alignItems: 'center'}}>
+              <div style={{fontSize: '20px', color: '#def'}}>No casts found</div>
+              <div style={{cursor: 'pointer', margin: '3px 0 0 0'}} onClick={searchSelectRouter}>
+                <HiRefresh size={28} color='#fff' />
+              </div>
+            </div>
+            )}
         </div>
       ) : (userFeed.map((cast, index) => (<Cast key={index} {...{cast, index, updateCast, openImagePopup, ecosystem: points}} />)))}
       {(cursor && cursor !== '') && (<div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>

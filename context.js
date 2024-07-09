@@ -9,6 +9,7 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
   const store = useStore()
   const [showActions, setShowActions] = useState(false)
   const [showLogin, setShowLogin] = useState(false)
+  const [populate, setPopulate] = useState(0)
   const [userProfile, setUserProfile] = useState(null)
   const [showLogout, setShowLogout] = useState(false)
   const [userBalances, setUserBalances] = useState({impact: 0, qdau: 0})
@@ -43,8 +44,10 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
     points_per_tip: 1,
     upvote_value: 1,
   }]
-  const [ecoData, setEcoData] = useState(initEcosystems[0])
-  const [ecosystemsData, setEcosystemsData] = useState(initEcosystems)
+  // const [ecoData, setEcoData] = useState(initEcosystems[0])
+  const [ecoData, setEcoData] = useState(null)
+  const [ecosystemsData, setEcosystemsData] = useState([])
+  // const [ecosystemsData, setEcosystemsData] = useState(initEcosystems)
   const initialEligibility = {
     badge: false,
     badgeReq: false,
@@ -97,6 +100,7 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
   }
 
   const getEcosystems = async (points) => {
+    console.log(points)
     try {
       const response = await axios.get('/api/ecosystem/getEcosystems')
       console.log(response)
@@ -110,16 +114,19 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
         }
         
         if (ecoIndex !== -1) { 
+          console.log(ecosystems[ecoIndex])
           setEcoData(ecosystems[ecoIndex])
           store.setPoints(ecosystems[ecoIndex].ecosystem_points_name)
           setPoints(ecosystems[ecoIndex].ecosystem_points_name)
         } else {
+          console.log(ecosystems[0])
           setEcoData(ecosystems[0])
           store.setPoints(ecosystems[0].ecosystem_points_name)
           setPoints(ecosystems[0].ecosystem_points_name)
         }
         setEcosystemsData(ecosystems)
       } else {
+        console.log(initEcosystems)
         setEcosystemsData(initEcosystems)
         setEcoData(initEcosystems[0])
       }
@@ -131,13 +138,18 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
   }
 
   useEffect(() => {
+    console.log(' triggered []')
+    console.log(store.points, points)
     getEcosystems(store.points || points)
     console.log(router)
   }, [])
 
   useEffect(() => {
+    console.log(' triggered [ecoData]')
+    console.log(isLogged, ecoData)
     const updateEcoData = () => {
       if (isLogged && ecoData) {
+        setPopulate(populate+1)
         setPoints(ecoData?.ecosystem_points_name)
         getRemainingBalances(store.fid, ecoData?.ecosystem_points_name)
       }
@@ -156,6 +168,8 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
   }, [ecoData, isLogged, sched.ecoData])
 
   useEffect(() => {
+    console.log(' triggered [store.isAuth]')
+
     const updateLogin = () => {
       console.log('store triggered', store.isAuth)
       if (store.isAuth) {
@@ -283,7 +297,8 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
     showLogin, setShowLogin,
     prevPoints, setPrevPoints,
     showActions, setShowActions,
-    userProfile, setUserProfile
+    userProfile, setUserProfile,
+    populate, setPopulate
   };
 
   return (

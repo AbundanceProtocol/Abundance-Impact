@@ -22,7 +22,7 @@ export default function ProfilePage() {
   const router = useRouter();
   const store = useStore()
   const [user, setUser] = useState(null)
-  const { LoginPopup } = useContext(AccountContext)
+  const { LoginPopup, isLogged } = useContext(AccountContext)
   const ref = useRef(null)
   const [textMax, setTextMax] = useState('430px')
   const [screenWidth, setScreenWidth ] = useState(undefined)
@@ -675,10 +675,10 @@ export default function ProfilePage() {
     <div className='flex-col' style={{width: 'auto', position: 'relative'}} ref={ref}>
       <div className="" style={{padding: '58px 0 0 0'}}>
       </div>
-      <UserData user={user} textMax={textMax} userAllowance={userAllowance} getCurationAllowance={getCurationAllowance} show={store.isAuth && user} />
+      <UserData {...{ show: (isLogged && user), user, textMax, userAllowance, getCurationAllowance }} />
       <div className="top-layer flex-row" style={{padding: '10px 0 10px 0', alignItems: 'center', justifyContent: 'space-evenly', margin: '0', borderBottom: '1px solid #888'}}>
         {userButtons.map((btn, index) => (
-          <FeedMenu buttonName={btn} key={index} searchSelect={searchSelect} searchOption={searchOption} isMobile={isMobile} />))}
+          <FeedMenu {...{buttonName: btn, searchSelect, searchOption, isMobile }} key={index} />))}
       </div>
 
       {searchSelect == 'Curation' && (
