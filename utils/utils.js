@@ -179,21 +179,24 @@ async function isImage(url) {
 }
 
 async function getEmbeds(url) {
-  // console.log(url)
-  try {
-    const embedType = await axios.get('/api/getEmbeds', {
-      params: { url }
-    })
-    // console.log(embedType)
-    // console.log(embedType.data)
-    if (embedType?.data) {
-      return embedType?.data?.embed
-    } else {
+  if (typeof url == 'undefined') {
+    return 'other'
+  } else {
+    try {
+      const embedType = await axios.get('/api/getEmbeds', {
+        params: { url }
+      })
+      // console.log(embedType)
+      // console.log(embedType.data)
+      if (embedType?.data) {
+        return embedType?.data?.embed
+      } else {
+        return 'other'
+      }
+    } catch (error) {
+      console.error('Error handling GET request:', error);
       return 'other'
     }
-  } catch (error) {
-    console.error('Error handling GET request:', error);
-    return 'other'
   }
 }
 
@@ -307,7 +310,11 @@ export function filterObjects(castArray, filterFid) {
 }
 
 
-export async function processTips(userFeed, userFid, tokenData) {
+export async function processTips(userFeed, userFid, tokenData, ecosystem) {
+  let ecosystemName = ''
+  if (ecosystem) {
+    ecosystemName = ecosystem + ' Ecosystem on '
+  }
 
   if (!userFeed || !userFid || !tokenData) {
 
@@ -468,7 +475,7 @@ export async function processTips(userFeed, userFid, tokenData) {
           }
         }
         if (cast.text.length > 0) {
-          cast.text += 'tipped via /impact'
+          cast.text += `tipped via ${ecosystemName}/impact`
         }
       }
     }
@@ -550,5 +557,49 @@ export const getTokenAddress = (chain, address, tokenType) => {
     }
     let tokenAddress = chainString + tokenType + '/' + address
     return tokenAddress
+  }
+}
+
+
+export function getToken(address) {
+  if (address == '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2') {
+    return '1'
+  } else if (address == '0x4200000000000000000000000000000000000042') {
+    return '2'
+  } else if (address == '0x4ed4e862860bed51a9570b96d89af5e1b0efefed') {
+    return '3'
+  } else if (address == '0x5b5dee44552546ecea05edea01dcd7be7aa6144a') {
+    return '4'
+  } else if (address == '0xa6b280b42cb0b7c4a4f789ec6ccc3a7609a1bc39') {
+    return '5'
+  } else if (address == '0x7DD9c5Cba05E151C895FDe1CF355C9A1D5DA6429') {
+    return '6'
+  } else if (address == '0xba5BDe662c17e2aDFF1075610382B9B691296350') {
+    return '7'
+  } else {
+    return null
+  }
+}
+
+
+export function getChain(chain) {
+  if (chain == 'eip155:1') {
+    return '1'
+  } else if (chain == 'eip155:10') {
+    return '2'
+  } else if (chain == 'eip155:8453') {
+    return '3'
+  } else if (chain == 'eip155:42161') {
+    return '4'
+  } else if (chain == 'eip155:7777777') {
+    return '5'
+  } else if (chain == 'eip155:137') {
+    return '6'
+  } else if (chain == 'eip155:666666666') {
+    return '7'
+  } else if (chain == 'eip155:5112') {
+    return '8'
+  } else {
+    return '1'
   }
 }

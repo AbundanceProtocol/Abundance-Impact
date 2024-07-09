@@ -7,9 +7,9 @@ const baseURL = process.env.NEXT_PUBLIC_BASE_URL_PROD;
 const secretKey = process.env.SECRET_KEY
 
 export default async function handler(req, res) {
-  const { fid, uuid, shuffle, time, tags, channels, curators, percent, schedTime, currencies } = req.body;
+  const { fid, uuid, shuffle, time, tags, channels, curators, percent, schedTime, currencies, points, ecosystem } = req.body;
   console.log(fid, shuffle, time, tags, channels, curators, percent, schedTime, currencies)
-  if (req.method !== 'POST' || !fid || !uuid || !percent) {
+  if (req.method !== 'POST' || !fid || !uuid || !percent || !points || !ecosystem) {
     res.status(405).json({ error: 'Method not allowed' });
   } else {
     const encryptedUuid = encryptPassword(uuid, secretKey);
@@ -25,7 +25,9 @@ export default async function handler(req, res) {
         schedule.search_tags = tags
         schedule.search_channels = channels
         schedule.search_curators = curators
+        schedule.points = points
         schedule.percent_tip = percent
+        schedule.ecosystem_name = ecosystem
         schedule.currencies = currencies
         schedule.schedule_time = schedTime
       } else {
@@ -38,7 +40,9 @@ export default async function handler(req, res) {
           search_tags: tags,
           search_channels: channels,
           search_curators: curators,
+          points: points,
           percent_tip: percent,
+          ecosystem_name: ecosystem,
           currencies: currencies,
           schedule_time: schedTime,
           schedule_count: 1,

@@ -41,6 +41,7 @@ const useStore = create(persist((set, get) => {
         userRemainingQuality: null,
         userRemainingTips: [],
         userUpdateTime: null,
+        points: null,
 
         userTipPercent: 50,
 
@@ -118,6 +119,7 @@ const useStore = create(persist((set, get) => {
         setUserRemainingQuality: (userRemainingQuality) => set({ userRemainingQuality }),
         setUserRemainingTips: (userRemainingTips) => set({ userRemainingTips }),
         setUserUpdateTime: (userUpdateTime) => set({ userUpdateTime }),
+        setPoints: (points) => set({ points }),
 
         setUserTipPercent: (userTipPercent) => set({ userTipPercent }),
 
@@ -145,6 +147,7 @@ const useStore = create(persist((set, get) => {
         userEthVerAddresses: state.userEthVerAddresses,
         userSolVerAddresses: state.userSolVerAddresses,
         userProfile: state.userProfile,
+        points: store.points,
         }),
         onRehydrate: (state) => {
           // This callback is called when the store is rehydrated

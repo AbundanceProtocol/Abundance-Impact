@@ -1,6 +1,24 @@
 import React from 'react';
 import styled from '@emotion/styled';
 
+const Spinner = ({ size, color }) => {
+  let spinnerColor = '#ccc'
+  let spinnerSize = 21
+  if (size) {
+    spinnerSize = size
+  }
+  if (color) {
+    spinnerColor = color
+  }
+
+  return (
+    <SpinnerIcon size={spinnerSize} color={spinnerColor} />
+  );
+}
+
+export default Spinner;
+
+
 const SpinnerIcon = styled.div`
   display: inline-block;
   width: ${props => props.size}px;
@@ -25,18 +43,3 @@ const SpinnerIcon = styled.div`
     }
   }
 `;
-
-export default function Spinner({ size, color }) {
-  let spinnerColor = '#ccc'
-  let spinnerSize = 21
-  if (size) {
-    spinnerSize = size
-  }
-  if (color) {
-    spinnerColor = color
-  }
-
-  return (
-    <SpinnerIcon size={spinnerSize} color={spinnerColor} />
-  );
-}

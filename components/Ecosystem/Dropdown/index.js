@@ -91,19 +91,19 @@ export default function Dropdown({ title, setupEcosystem, target, button, condit
     if (!updatedFieldState.erc20Address) {
       updatedFieldState.erc20Address = ''
     }
-    if (!updatedFieldState.qdaoUp && updatedFieldState.qdaoUp !== 0) {
+    if (!updatedFieldState.qdauUp && updatedFieldState.qdauUp !== 0) {
       console.log('triggered')
-      updatedFieldState.qdaoUp = 1
+      updatedFieldState.qdauUp = 1
     }
-    if (!updatedFieldState.qdaoUpName) {
-      updatedFieldState.qdaoUpName = 'qDAO Up'
+    if (!updatedFieldState.qdauUpName) {
+      updatedFieldState.qdauUpName = 'qDAU Up'
     }
-    if (!updatedFieldState.qdaoDown && updatedFieldState.qdaoUp !== 0) {
+    if (!updatedFieldState.qdauDown && updatedFieldState.qdauUp !== 0) {
       console.log('triggered')
-      updatedFieldState.qdaoDown = -1
+      updatedFieldState.qdauDown = -1
     }
-    if (!updatedFieldState.qdaoDownName) {
-      updatedFieldState.qdaoDownName = 'qDAO Down'
+    if (!updatedFieldState.qdauDownName) {
+      updatedFieldState.qdauDownName = 'qDAU Down'
     }
     if (!updatedFieldState.tipPercentName) {
       updatedFieldState.tipPercentName = 'Tip percent'
@@ -170,10 +170,10 @@ export default function Dropdown({ title, setupEcosystem, target, button, condit
       valueState = {erc20Address: event.target.value}
     } else if (name == 'erc20-min-token') {
       valueState = {tokenMinValue: Number(event.target.value)}
-    } else if (name == 'qdao-up') {
-      valueState = {qdaoUp: Number(event.target.value)}
-    } else if (name == 'qdao-down') {
-      valueState = {qdaoDown: Number(event.target.value)}
+    } else if (name == 'qdau-up') {
+      valueState = {qdauUp: Number(event.target.value)}
+    } else if (name == 'qdau-down') {
+      valueState = {qdauDown: Number(event.target.value)}
     } else if (name == 'tip-percent') {
       console.log(event.target.value)
       if (event.target.value >= 100) {
@@ -254,7 +254,7 @@ export default function Dropdown({ title, setupEcosystem, target, button, condit
           </div>
         </div>
       )}
-      {(value == 'qdao') && (
+      {(value == 'qdau') && (
         <div className='flex-col' style={{width: 'auto', padding: '1px 5px', margin: isMobile ? '0 10px 10px 10px' : '0 10px 10px 10px', alignItems: 'flex-start', justifyContent: 'flex-start'}}
          >
           <div className='flex-row' style={{alignItems: 'center'}}>
@@ -264,15 +264,15 @@ export default function Dropdown({ title, setupEcosystem, target, button, condit
               </div>
             </div>
             <div className='flex-row' style={{margin: isMobile ? (title ? '0 0 10px 0' : '5px 0 5px 0px') : (title ? '5px 0 5px 10px' : '5px 0 5px 0'), width: '', flexGrow: 0, position: 'relative'}}>
-              <input onChange={() => {getValues(event, 'qdao-up')}} 
-                name={fieldState.qdaoUpName} 
+              <input onChange={() => {getValues(event, 'qdau-up')}} 
+                name={fieldState.qdauUpName} 
                 placeholder='1' 
-                value={state?.qdaoUp || fieldState.qdaoUp} 
+                value={state?.qdauUp || fieldState.qdauUp} 
                 type='number'
                 step='0.5' 
                 className='srch-btn' 
                 style={{width: '100px', backgroundColor: '#234', margin: '0'}} 
-                onKeyDown={() => {getValues(event, 'qdao-up')}} />
+                onKeyDown={() => {getValues(event, 'qdau-up')}} />
             </div>
           </div>
           <div className='flex-row' style={{alignItems: 'center'}}>
@@ -282,15 +282,15 @@ export default function Dropdown({ title, setupEcosystem, target, button, condit
               </div>
             </div>
             <div className='flex-row' style={{margin: isMobile ? (title ? '0 0 10px 0' : '5px 0 5px 0px') : (title ? '5px 0 5px 10px' : '5px 0 5px 0'), width: '', flexGrow: 0, position: 'relative'}}>
-              <input onChange={() => {getValues(event, 'qdao-down')}} 
-                name={fieldState.qdaoDownName} 
+              <input onChange={() => {getValues(event, 'qdau-down')}} 
+                name={fieldState.qdauDownName} 
                 placeholder='1' 
-                value={state?.qdaoDown || fieldState.qdaoDown} 
+                value={state?.qdauDown || fieldState.qdauDown} 
                 type='number' 
                 step='0.5' 
                 className='srch-btn' 
                 style={{width: '100px', backgroundColor: '#234', margin: '0'}} 
-                onKeyDown={() => {getValues(event, 'qdao-down')}} />
+                onKeyDown={() => {getValues(event, 'qdau-down')}} />
             </div>
           </div>
         </div>

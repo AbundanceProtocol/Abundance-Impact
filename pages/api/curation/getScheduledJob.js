@@ -31,9 +31,11 @@ export default async function handler(req, res) {
             shuffle: schedule.search_shuffle,
             timeRange: schedule.search_time,
             tags: schedule.search_tags,
+            points: schedule.points,
             channels: schedule.search_channels,
             curators: schedule.search_curators,
             percent: schedule.percent_tip,
+            ecosystem: schedule.ecosystem_name,
             currencies: schedule.currencies,
             decryptedUuid: decryptedUuid
           }
@@ -42,9 +44,11 @@ export default async function handler(req, res) {
             shuffle: null,
             timeRange: null,
             tags: null,
+            points: null, 
             channels: null,
             curators: null,
             percent: null,
+            ecosystem: null,
             currencies: null,
             decryptedUuid: null
           }
@@ -55,17 +59,19 @@ export default async function handler(req, res) {
           shuffle: null,
           timeRange: null,
           tags: null,
+          points: null, 
           channels: null,
           curators: null,
           percent: null,
+          ecosystem: null,
           currencies: null,
           decryptedUuid: null
         }
       }
     }
 
-    const { shuffle, timeRange, tags, channels, curators, percent, currencies, decryptedUuid } = await getSchedule(code)
-    console.log('47', shuffle, timeRange, tags, channels, curators, percent, currencies)
+    const { shuffle, timeRange, tags, points, channels, curators, percent, ecosystem, currencies, decryptedUuid } = await getSchedule(code)
+    console.log('47', shuffle, timeRange, tags, points, channels, curators, percent, ecosystem, currencies)
 
     if (!percent || !decryptedUuid) {
       res.status(500).json({ error: 'Internal Server Error' });
@@ -143,7 +149,7 @@ export default async function handler(req, res) {
         res.status(500).json({ error: 'Internal Server Error' });
       } else {
 
-        async function getUserSearch(time, tags, channel, curator, shuffle) {
+        async function getUserSearch(time, tags, channel, curator, shuffle, points) {
       
           const page = 1;
           const limit = 5;
@@ -154,7 +160,7 @@ export default async function handler(req, res) {
           async function getCuratorIds(fids) {
             try {
               await connectToDatabase();
-              const impacts = await Impact.find({ curator_fid: { $in: fids } });
+              const impacts = await Impact.find({ curator_fid: { $in: fids }, points });
               const impactIds = impacts.map(impact => impact._id);
               return impactIds
             } catch (error) {
@@ -165,6 +171,10 @@ export default async function handler(req, res) {
             
           if (time) {
             query.createdAt = { $gte: time } ;
+          }
+
+          if (points) {
+            query.points = points
           }
           
           if (curator && curator.length > 0) {
@@ -282,7 +292,7 @@ export default async function handler(req, res) {
           return { casts, totalCount }
         }  
       
-        const { casts, totalCount } = await getUserSearch(time, tags, channels, curators, shuffle)
+        const { casts, totalCount } = await getUserSearch(time, tags, channels, curators, shuffle, points)
       
         console.log(casts)
         // console.log(casts[0].impact_points)
@@ -299,7 +309,7 @@ export default async function handler(req, res) {
 
         let displayedCasts = await populateCast(sortedCasts)
 
-        const { castData, coinTotals } = await processTips(displayedCasts, fid, allowances)
+        const { castData, coinTotals } = await processTips(displayedCasts, fid, allowances, ecosystem)
 
         async function sendRequests(data, signer, apiKey) {
           const base = "https://api.neynar.com/";
@@ -350,6 +360,7 @@ export default async function handler(req, res) {
               await Tip.create({
                 receiver_fid: cast.fid,
                 tipper_fid: fid,
+                points: points, 
                 cast_hash: cast.castHash,
                 tip: tips,
               });

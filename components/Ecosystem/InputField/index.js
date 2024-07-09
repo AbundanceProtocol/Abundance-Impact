@@ -4,7 +4,7 @@ import { FaCheckCircle, FaCheck, FaRegTrashAlt  } from "react-icons/fa";
 import { FaRegFaceMeh, FaRegFaceFrown, FaRegFaceSmileBeam  } from "react-icons/fa6";
 import { ImCross } from "react-icons/im";
 
-export default function InputField({ title, description, name, value, placeholder, inputKeyDown, onInput, setupEcosystem, target, button, isSet, clearInput, cancel, removeField, disabled }) {
+export default function InputField({ show, title, description, name, value, placeholder, inputKeyDown, onInput, setupEcosystem, target, button, isSet, clearInput, cancel, removeField, disabled }) {
   const { isMobile } = useMatchBreakpoints();
   
   let setButton = 'btn-empty'
@@ -19,6 +19,7 @@ export default function InputField({ title, description, name, value, placeholde
   }
 
   return (
+    show && (
     <div className='active-nav-link btn-hvr' style={{border: '1px solid #777', padding: '2px', borderRadius: '10px', margin: '3px 3px 13px 3px', backgroundColor: '', maxWidth: '100%', cursor: (isSet == 'set') ? 'pointer' : 'default', width: 'auto'}}>
       
       <div className="" style={{width: '100%'}}>
@@ -69,5 +70,6 @@ export default function InputField({ title, description, name, value, placeholde
         </div>
       </div>
     </div>
+    )
   );
 }

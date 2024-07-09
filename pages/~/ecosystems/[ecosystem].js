@@ -1,42 +1,37 @@
 import Head from 'next/head';
 import React, { useContext, useState, useRef, useEffect } from 'react'
-import Link from 'next/link'
 import { AccountContext } from '../../../context';
 import useMatchBreakpoints from '../../../hooks/useMatchBreakpoints'
 import useStore from '../../../utils/store'
 import axios from 'axios';
-import { FaSearch, FaLock, FaRegStar, FaRegClock } from "react-icons/fa"
-// import { AiOutlineLoading3Quarters as Loading } from "react-icons/ai";
-// import mql from '@microlink/mql';
 import { useRouter } from 'next/router';
 import Cast from '../../../components/Cast'
-import { formatNum, getTimeRange, checkEmbedType, populateCast, filterObjects, processTips } from '../../../utils/utils';
+import { formatNum, getTimeRange, checkEmbedType, populateCast } from '../../../utils/utils';
 import { IoShuffleOutline as Shuffle, IoPeople, IoPeopleOutline } from "react-icons/io5";
 import { BsClock } from "react-icons/bs";
 import { GoTag } from "react-icons/go";
 import { AiOutlineBars } from "react-icons/ai";
-import Spinner from '../../../components/Spinner';
-import { Degen } from '../../assets';
-import { GiMeat, GiTwoCoins } from "react-icons/gi";
+import Spinner from '../../../components/Common/Spinner';
 import { useInView } from 'react-intersection-observer'
+import ExpandImg from '../../../components/Cast/ExpandImg';
+import Modal from '../../../components/Layout/Modals/Modal';
+import FeedMenu from '../../../components/Common/FeedMenu';
+import TipScheduler from '../../../components/Common/TipScheduler';
+import HorizontalScale from '../../../components/Common/HorizontalScale';
+import TipAll from '../../../components/Common/TipAll';
 
 export default function Ecosystem({time, curators, channels, tags, shuffle, referrer, ecosystem}) {
-  const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
   const ref2 = useRef(null)
   const [ref, inView] = useInView()
-  // const likeRefs = useRef([])
-  // const recastRefs = useRef([])
   const [userFeed, setUserFeed] = useState([])
   const { isMobile } = useMatchBreakpoints();
-  const [feedWidth, setFeedWidth] = useState()
-  const account = useContext(AccountContext)
+  const { LoginPopup, ecoData, points, isLogged, fid, userProfile } = useContext(AccountContext)
   const [screenWidth, setScreenWidth] = useState(undefined)
   const [screenHeight, setScreenHeight] = useState(undefined)
   const store = useStore()
   const [textMax, setTextMax] = useState('562px')
   const [feedMax, setFeedMax ] = useState('620px')
-  const [allowanceSched, setAllowanceSched] = useState(false)
-  const initialQuery = {shuffle: true, time: '7days', tags: [], channels: [], curators: []}
+  const initialQuery = {shuffle: false, time: 'all', tags: [], channels: [], curators: []}
   const [userQuery, setUserQuery] = useState(initialQuery)
   const [showPopup, setShowPopup] = useState({open: false, url: null})
   const router = useRouter()
@@ -86,54 +81,17 @@ export default function Ecosystem({time, curators, channels, tags, shuffle, refe
       },
     ]
   }
-  const initialEco = {
-    channels: [],
-    condition_channels: false,
-    condition_curators_threshold: 1,
-    condition_following_channel: false,
-    condition_following_owner: false,
-    condition_holding_erc20: false,
-    condition_holding_nft: false,
-    condition_points_threshold: 1,
-    condition_powerbadge: false,
-    createdAt: "2024-06-17T03:19:16.065Z",
-    downvote_value: 1,
-    ecosystem_moderators: [],
-    ecosystem_name: 'none',
-    ecosystem_handle: 'none',
-    ecosystem_points_name: '$NONE',
-    ecosystem_rules: [`Can't do evil`],
-    erc20s: [],
-    fid: 3,
-    nfts: [],
-    owner_name: 'none',
-    percent_tipped: 10,
-    points_per_tip: 1,
-    upvote_value: 1,
-  }
-  const [eco, setEco] = useState(initialEco)
+  const [prevSavedEco, setPrevSavedEco] = useState(null)
+  const [sched, setSched] = useState({userQuery: false, ecoData: false, login: false, searchSelect: false, inView: false})
   const userButtons = ['Curation', 'Main', 'Recent']
-  // const userButtons = ['Top Picks', 'Explore', 'Home', 'Trending', 'AI']
-  // const timeButtons = ['24hr', '7days', '30d', 'All']
-  // const tagButtons = ['Art', 'Media', 'Dev', 'Vibes']
   const [searchSelect, setSearchSelect] = useState('Main')
   const [channelSelect, setChannelSelect] = useState(null)
-  const [search, setSearch] = useState({})
   const initialState = { fid: null, signer: null, urls: [], channel: null, parentUrl: null, text: '' }
 	const [castData, setCastData] = useState(initialState)
   const [loading, setLoading] = useState(false);
-  const [isFocused, setIsFocused] = useState(false);
-  const [isLogged, setIsLogged] = useState(false)
-  const [success, setSuccess] = useState(false)
-  const [textboxRows, setTextboxRows] = useState(1)
   const tokenInfo = [{token: '$DEGEN', set: true}]
   const [tokenData, setTokenData] = useState(tokenInfo)
   const [isSelected, setIsSelected] = useState('none')
-  const [searchRouterSched, setSearchRouterSched] = useState(false);
-  const [searchSelectSched, setSearchSelectSched] = useState(false);
-  const [inViewSched, setInViewSched] = useState(false);
-  const [feedRouterScheduled, setFeedRouterScheduled] = useState(false);
-  const userTipPercent = useStore(state => state.userTipPercent);
 	const [userSearch, setUserSearch] = useState({ search: '' })
   const [filterChannels, setFilterChannels] = useState([])
   const [filterCurators, setFilterCurators] = useState([])
@@ -146,49 +104,34 @@ export default function Ecosystem({time, curators, channels, tags, shuffle, refe
   const [tokensSelected, setTokensSelected] = useState(['$DEGEN'])
   const availableTokens = ['$DEGEN', '$TN100x']
   const [noTip, setNoTip] = useState(true)
-  const [points, setPoints] = useState('$IMPACT')
-  const savedEco = useStore(state => state.ecosystemData)
   const [cursor, setCursor] = useState('')
   const [prevCursor, setPrevCursor] = useState('')
+  const [tipPercent, setTipPercent] = useState(50)
 
-  useEffect(() => {
-    console.log('triggered')
-    console.log(ecosystem)
-    if (store?.ecosystemData?.ecosystem_handle == ecosystem && isLogged) {
-      console.log('stored data')
-      console.log(store.ecosystemData)
-      setEco(store.ecosystemData)
-      account.changeEco(store.ecosystemData)
-    } else if (ecosystem && isLogged) {
-      console.log('no stored data')
-      // account.changeEco(initialEco)
-      getEco(ecosystem, store.fid)
-    } else {
-      console.log('not logged')
-    }
-  }, [router, isLogged]);
+  // const getEco = async (ecosystem, fid) => {
+  //   try {
+  //     const ecosystemsData = await axios.get('/api/ecosystem/getEcosystemByHandle', { params: { handle: ecosystem, fid: fid } })
+  //     if (ecosystemsData?.data?.ecosystems) {
+  //       const ecosystems = ecosystemsData.data.ecosystems
+  //       console.log(ecosystems)
+  //       setEco(ecosystems)
+  //       setPoints(ecosystems.ecosystem_points_name)
+  //       changeEco(ecosystems)
+  //     } else {
+  //       console.log('ecosystems')
+  //       setEco(initialEco)
+  //       changeEco(initialEco)
+  //     }
+  //   } catch (error) {
+  //     console.error('Error creating post:', error);
+  //     console.log('ecosystems failed')
+  //     setEco(initialEco)
+  //     changeEco(initialEco)
+  //   }
+  // }
 
-  const getEco = async (ecosystem, fid) => {
-    try {
-      const ecosystemsData = await axios.get('/api/ecosystem/getEcosystemByHandle', { params: { handle: ecosystem, fid: fid } })
-      if (ecosystemsData?.data?.ecosystems) {
-        const ecosystems = ecosystemsData.data.ecosystems
-        console.log(ecosystems)
-        setEco(ecosystems)
-        setPoints(ecosystems.ecosystem_points_name)
-        account.changeEco(ecosystems)
-      } else {
-        console.log('ecosystems')
-        setEco(initialEco)
-        account.changeEco(initialEco)
-      }
-    } catch (error) {
-      console.error('Error creating post:', error);
-      console.log('ecosystems failed')
-      setEco(initialEco)
-      account.changeEco(initialEco)
-    }
-  }
+
+
 
   function btnText(type) {
     if (type == 'tags' && (userQuery[type] == 'all' || userQuery[type].length == 0)) {
@@ -205,172 +148,6 @@ export default function Ecosystem({time, curators, channels, tags, shuffle, refe
       return option ? option.text : '';
     }
   }
-
-  const ScheduleTaskForm = () => {
-    const [hour, setHour] = useState(initHour);
-    const [minute, setMinute] = useState(initMinute);
-
-    // Generate options for hours (0-23)
-    const hoursOptions = [
-      { value: 'Hr', label: 'Hr' },
-      ...Array.from({ length: 24 }, (_, i) => ({
-          value: i.toString().padStart(2, '0'),
-          label: i.toString().padStart(2, '0'),
-      })),
-    ];
-
-    // Generate options for minutes (00, 30)
-    const minutesOptions = [
-      { value: '0', label: 'Min' },
-      { value: '00', label: '00' },
-      { value: '30', label: '30' },
-    ];
-
-    const handleHourChange = (event) => {
-      setHour(event.target.value);
-      setInitHour(event.target.value);
-    };
-
-    const handleMinuteChange = (event) => {
-      setMinute(event.target.value);
-      setInitMinute(event.target.value);
-    };
-
-    const handleSubmit = async (fid, uuid, percent) => {
-      // Schedule the task with the selected hour and minute
-      let minutes = minute
-      if (minute == '0') {
-        minutes = '00'
-      }
-      const schedTime = `${minutes} ${hour} * * *`;
-      const { shuffle, time, tags, channels, curators } = userQuery
-      console.log(schedTime)
-      let currencies = []
-      console.log(tokenData)
-      for (const token of tokenData) {
-        if (token.set) {
-          currencies.push(token.token)
-        }
-      }
-      async function postSchedule(shuffle, time, tags, channels, curators, schedTime, fid, uuid, percent, currencies) {
-        console.log(currencies)
-        try {
-          setLoading(true)
-          setInitHour('Hr')
-          setInitMinute('0')
-          const response = await axios.post('/api/curation/postTipSchedule', { fid, uuid, shuffle, time, tags, channels, curators, percent, schedTime, currencies })
-          let schedData = []
-
-          if (response && response.status !== 200) {
-            setLoading(false)
-            console.log(response)
-            setModal({on: true, success: false, text: 'Tip scheduling failed'});
-            setTimeout(() => {
-              setModal({on: false, success: false, text: ''});
-            }, 2500);
-          } else {
-            setLoading(false)
-            console.log(response)
-
-            setModal({on: true, success: true, text: response.data.message});
-            setTimeout(() => {
-              setModal({on: false, success: false, text: ''});
-            }, 2500);
-          }  
-          return schedData
-        } catch (error) {
-          console.error('Error submitting data:', error)
-          return null
-        }
-      }
-    
-      const schedData = await postSchedule(shuffle, time, tags, channels, curators, schedTime, fid, uuid, percent, currencies)
-    };
-
-    return (
-      <>
-        <div className={`flex-col ${(hour !== 'Hr' && isLogged) ? 'follow-select' : 'follow-locked'}`} style={{backgroundColor: '', borderRadius: '5px', width: '150px', gap: '0.25rem', alignItems: 'center', justifyContent: 'center', padding: '0px 8px', height: '48px', margin: '2px 0 2px 10px', cursor: 'default', maxWidth: '150px'}}>
-          <div className='flex-row' style={{gap: '0.5rem'}}>
-            <select id="hourSelect" value={hour} onChange={handleHourChange} style={{backgroundColor: '#adf', borderRadius: '4px'}}>
-              {hoursOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-            <select id="minuteSelect" value={minute} onChange={handleMinuteChange} style={{backgroundColor: '#adf', borderRadius: '4px'}}>
-              {minutesOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <button onClick={() => {
-            if (!isLogged) { 
-              account.LoginPopup() 
-            } else if (hour !== 'Hr') {
-              handleSubmit(store.fid, store.signer_uuid, initValue) 
-            }}} style={{backgroundColor: 'transparent', fontWeight: '600', color: '#fff', cursor: (hour !== 'Hr' || !isLogged) ? 'pointer' : 'default', fontSize: '12px', padding: '0'}}>SCHEDULE TIP</button>
-        </div>
-        {!isLogged && (<div style={{position: 'relative', fontSize: '0', width: '0', height: '100%'}}>
-          <div className='top-layer' style={{position: 'absolute', top: 0, left: 0, transform: 'translate(-170%, -10%)' }}>
-            <FaLock size={8} color='#eee' />
-          </div>
-        </div>)}
-      </>
-    );
-  }
-
-  const updateSearch = (key, value) => {
-    setSearch(prevState => ({
-      ...prevState,
-      [key]: value
-    }));
-  };
-
-  const handleToken = async (selection) => {
-    console.log(userTipPercent)
-    if (selection === 'All tokens') {
-      availableTokens.forEach((tokenSymbol) => {
-        console.log(tokenSymbol)
-        setTokenData((prevTokenData) => {
-          const tokenIndex = prevTokenData.findIndex(token => token.token == tokenSymbol);
-
-          if (tokenIndex !== -1) {
-            const updatedTokenData = [...prevTokenData];
-            updatedTokenData[tokenIndex].set = true
-            console.log(updatedTokenData[tokenIndex])
-            return updatedTokenData
-          } else {
-            const newToken = {token: tokenSymbol, set: true}
-            return [...prevTokenData, newToken];
-          }
-        })
-      })
-    } else {
-      setTokenData((prevTokenData) => {
-        const updatedTokenData = [...prevTokenData];
-        updatedTokenData.forEach((token) => {
-          if (token.token == selection) {
-            token.set = true
-          } else {
-            token.set = false
-          }
-        })
-        return updatedTokenData
-      })
-    }
-
-    console.log(selection)
-    if (selection === 'All tokens') {
-      setTokensSelected(availableTokens);
-    } else {
-      setTokensSelected([selection])
-    }
-    console.log(tokensSelected)
-  }
-
 
   const handleSelect = async (type, selection) => {
     console.log(type)
@@ -425,296 +202,64 @@ export default function Ecosystem({time, curators, channels, tags, shuffle, refe
   useEffect(() => {
 
     const searchRouter = () => {
-      if (store.isAuth) {
+      if (isLogged) {
         if (searchSelect == 'Curation') {
           feedRouter()
         } else if (searchSelect == 'Main' && channelSelect) {
-          getFeed(store.fid, channelSelect, true)
+          getFeed(fid, channelSelect, true)
         } else if (searchSelect == 'Recent' && channelSelect) {
-          getFeed(store.fid, channelSelect, false)
+          getFeed(fid, channelSelect, false)
         }
       }
     }
 
-    if (eco?.ecosystem_points_name !== '$NONE') {
-      if (searchRouterSched) {
+    if (sched.userQuery) {
+      searchRouter()
+      setSched(prev => ({...prev, userQuery: false }))
+    } else {
+      const timeoutId = setTimeout(() => {
         searchRouter()
-        setSearchRouterSched(false);
-      } else {
-        const timeoutId = setTimeout(() => {
-          searchRouter()
-          setSearchRouterSched(false);
-        }, 300);
-        return () => clearTimeout(timeoutId);
-      }
-    }
-    
-  }, [userQuery, searchRouterSched, eco]);
-
-  useEffect(() => {
-    if (!isLogged) {
-      if (store.isAuth) {
-        setIsLogged(store.isAuth)
-      }
-    }
-  }, [store.isAuth])
-
-  useEffect(() => {
-
-    const searchSelectRouter = () => {
-      console.log(searchSelect, channelSelect)
-      setLoading(false)
-      setPrevCursor('')
-      setCursor('')
-      if (store.isAuth) {
-        if (searchSelect == 'Curation') {
-          feedRouter()
-        } else if (searchSelect == 'Main' && channelSelect) {
-          getFeed(store.fid, channelSelect, true)
-        } else if (searchSelect == 'Recent' && channelSelect) {
-          getFeed(store.fid, channelSelect, false)
-        }
-      }
-    }
-
-    if (searchSelectSched) {
-      searchSelectRouter()
-      setSearchSelectSched(false);
-    } else {
-      const timeoutId = setTimeout(() => {
-        searchSelectRouter()
-        setSearchSelectSched(false);
+        setSched(prev => ({...prev, userQuery: false }))
       }, 300);
       return () => clearTimeout(timeoutId);
     }
+    
+  }, [userQuery, sched.userQuery]);
 
-  }, [searchSelect, searchSelectSched])
-  
   useEffect(() => {
-
-    const inViewRouter = () => {
-      if (cursor !== prevCursor && cursor !== '' && store.isAuth) {
-        if (searchSelect == 'Main') {
-          setPrevCursor(cursor)
-          addToFeed(store.fid, channelSelect, true, cursor)
-        } else if (searchSelect == 'Recent') {
-          setPrevCursor(cursor)
-          addToFeed(store.fid, channelSelect, false, cursor)
-        } else if (searchSelect == 'Curation') {
-          setPrevCursor(cursor)
-          feedRouter()
+    console.log(ecoData)
+    const ecoRouter = () => {
+      if (ecoData?.ecosystem_points_name && prevSavedEco?._id !== ecoData?._id) {
+        setPrevSavedEco(ecoData)
+        if (ecoData?.channels?.length > 0) {
+          setUserFeed([])
+          setPrevCursor('')
+          setCursor('')
+          setChannelSelect(ecoData.channels[0].name)
+          setSearchSelect('Main')
+        } else {
+          setUserFeed([])
+          setPrevCursor('')
+          setCursor('')
+          setChannelSelect(null)
+          setSearchSelect('Curation')
         }
-        console.log('trigger get additional casts', cursor, prevCursor, searchSelect)
-        
-      } else {
-        console.log('triggered, no new casts')
-        console.log(cursor, prevCursor, searchSelect)
       }
     }
 
-    if (inViewSched) {
-      inViewRouter()
-      setInViewSched(false);
+    if (sched.ecoData) {
+      ecoRouter()
+      setSched(prev => ({...prev, ecoData: false }))
     } else {
       const timeoutId = setTimeout(() => {
-        inViewRouter()
-        setInViewSched(false);
+        ecoRouter()
+        setSched(prev => ({...prev, ecoData: false }))
       }, 300);
       return () => clearTimeout(timeoutId);
     }
-  }, [inView, inViewSched])
+  }, [ecoData, sched.ecoData]);
 
-  async function getFeed(fid, channel, curated) {
-
-    const getChannelFeed = async (fid, channel, curated) => {
-      setLoading(true)
-      try {
-        const response = await axios.get('/api/ecosystem/getFeed', {
-          params: { fid, channel, curated } })
-        setLoading(false)
-        if (response && response.data) {
-          console.log(response)
-          const casts = response.data.casts
-          let cursorData = ''
-          if (response.data?.cursor) {
-            cursorData = response.data.cursor
-          }
-          console.log(casts, cursorData)
-          return {channelFeed: casts, cursorData}
-        } else {
-          return {channelFeed: [], cursorData: ''}
-        }
-        // console.log(channels)
-      } catch (error) {
-        console.error('Error submitting data:', error)
-        return {channelFeed: [], cursorData: ''}
-      }
-    }
-
-    const {channelFeed, cursorData} = await getChannelFeed(fid, channel, curated)
-    
-    setUserFeed(channelFeed)
-    updateFeed([], channelFeed, fid)
-    
-    setPrevCursor(cursor)
-    setCursor(cursorData)
-  }
-
-  async function updateFeed(oldFeed, feed, fid) {
-    // console.log(oldFeed)
-    // console.log(userFeed)
-    let combinedFeed = oldFeed.concat(feed)
-    console.log(combinedFeed)
-    if (oldFeed && oldFeed.length > 0) {
-      setUserFeed((prevUserFeed) => prevUserFeed.concat(feed))
-    } else {
-      setUserFeed(feed)
-    }
-
-    async function checkEmbedTypeForCasts(casts) {
-      // Map over each cast and apply checkEmbedType function
-      const updatedCasts = await Promise.all(casts.map(async (cast) => {
-        return await checkEmbedType(cast);
-      }));
-    
-      return updatedCasts;
-    }
-    
-    // Usage
-    const castsWithImages = await checkEmbedTypeForCasts(feed);
-
-    combinedFeed = oldFeed.concat(castsWithImages)
-    setUserFeed(combinedFeed)
-
-
-    async function getSubcast(hash, userFid) {
-      if (hash && userFid) {
-        try {
-          const response = await axios.get('/api/getCastByHash', {
-            params: { hash, userFid }
-          })
-          const castData = response.data.cast.cast
-          if (castData) {
-            console.log(castData)
-            return castData
-          } else {
-            return null
-          }
-        } catch (error) {
-          console.error('Error submitting data:', error)
-          return null
-        }
-      }
-    }
-
-    async function populateSubcasts(cast, fid) {
-      const { embeds } = cast;
-      if (embeds && embeds.length > 0) {
-        const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
-          if (embed.type == 'subcast') {
-            const subcastData = await getSubcast(embed.cast_id.hash, fid)
-            const checkImages = await checkEmbedType(subcastData)
-            return { ...embed, subcast: checkImages };
-          } else {
-            return { ...embed }
-          }
-        }));
-        return { ...cast, embeds: updatedEmbeds };
-      }
-      
-      return cast;
-    }
-    
-    async function populateEmbeds(cast) {
-      const { embeds } = cast
-      // console.log(embeds)
-      if (embeds && embeds.length > 0) {
-        const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
-          // console.log(embed.type)
-          if (embed && embed.url && embed.type == 'html') {
-            // console.log(embed)
-            try {
-              const metaData = await axios.get('/api/getMetaTags', {
-                params: { url: embed.url } })
-              if (metaData && metaData.data) {
-                return { ...embed, metadata: metaData.data };
-              } else {
-                return { ...embed }
-              }
-            } catch (error) {
-              return { ...embed }
-            }
-          } else {
-            return { ...embed }
-          }
-        }));
-        return { ...cast, embeds: updatedEmbeds };
-      }
-      
-      return cast;
-    }
-
-    async function checkEmbeds(casts) {
-      const updatedCasts = await Promise.all(casts.map(async (cast) => {
-        return await populateEmbeds(cast);
-      }));
-    
-      return updatedCasts;
-    }
-
-    async function checkSubcasts(casts, fid) {
-      const updatedCasts = await Promise.all(casts.map(async (cast) => {
-        return await populateSubcasts(cast, fid);
-      }));
-    
-      return updatedCasts;
-    }
-
-    const castsWithSubcasts = await checkSubcasts(castsWithImages, fid)
-    console.log(castsWithSubcasts)
-    combinedFeed = oldFeed.concat(castsWithSubcasts)
-    setUserFeed(combinedFeed)
-
-    const castsWithEmbeds = await checkEmbeds(castsWithSubcasts)
-    console.log(castsWithEmbeds)
-    combinedFeed = oldFeed.concat(castsWithEmbeds)
-    setUserFeed(combinedFeed)
-  }
-
-  async function addToFeed(fid, channel, curated, cursor) {
-
-    const getChannelFeed = async (fid, channel, curated, cursor) => {
-      try {
-        const response = await axios.get('/api/ecosystem/getFeed', {
-          params: { fid, channel, curated, cursor } })
-        let casts = []
-        if (response && response.data) {
-          console.log(response)
-          casts = response.data.casts
-          let cursorData = ''
-          if (response.data?.cursor) {
-            cursorData = response.data.cursor
-          }
-          console.log(casts, cursorData)
-          return {channelFeed: casts, cursorData}
-        } else {
-          return {channelFeed: [], cursorData: ''}
-        }
-        // console.log(channels)
-      } catch (error) {
-        console.error('Error submitting data:', error)
-        return {channelFeed: [], cursorData: ''}
-      }
-    }
-
-    const {channelFeed, cursorData} = await getChannelFeed(fid, channel, curated, cursor)
-    console.log(channelFeed)
-    console.log(cursorData)
-    updateFeed(userFeed, channelFeed, fid)
-    setCursor(cursorData)
-  }
-
-  const handleSelection = (type, selection) => {
+  const handleSelection = (type) => {
     if (type == 'shuffle') {
       setIsSelected('none')
     } else {
@@ -728,14 +273,14 @@ export default function Ecosystem({time, curators, channels, tags, shuffle, refe
 
       updatedTokenData.forEach((token) => {
         if (token.allowance) {
-          return token.totalTip = Math.round((token.allowance * userTipPercent) / 100)
+          return token.totalTip = Math.round((token.allowance * tipPercent) / 100)
         }
       })
       return updatedTokenData
     })
     console.log(tokenData)
 
-  }, [userTipPercent])
+  }, [tipPercent])
 
   useEffect(() => {
     for (const token of tokenData) {
@@ -751,53 +296,6 @@ export default function Ecosystem({time, curators, channels, tags, shuffle, refe
     }
     setNoTip(true)
   }, [tokenData])
-
-  const getName = (tag, value) => {
-    const categoryOptions = queryOptions[qType];
-  
-    if (categoryOptions) {
-      const tag = categoryOptions.find(tag => tag.value === value);
-  
-      if (tag) {
-        console.log(tag.text)
-
-        return tag.text;
-      } else {
-        return null; // Value not found
-      }
-    } else {
-      return null; // Category not found
-    }
-  }
-
-  async function postCast(castData) {
-    if (castData.signer && castData.text) {
-      try {
-        const response = await axios.post('/api/postCast', {       
-          signer: castData.signer,
-          urls: castData.urls,
-          // channel: castData.channel,
-          channel: 'impact', // temp for testing
-          parentUrl: castData.parentUrl, // cast hash or parent URL
-          castText: castData.text,
-        })
-        if (response.status !== 200) {
-          console.log(response)
-          // need to revert recasts counter
-        } else {
-          clearCastText()
-          shrinkBox()
-          setSuccess(true);
-          setTimeout(() => {
-            setSuccess(false);
-          }, 2000);
-        }
-        console.log(response.status)
-      } catch (error) {
-        console.error('Error submitting data:', error)
-      }
-    }
-  }
 
   useEffect(() => {
     if (screenWidth) {
@@ -841,13 +339,10 @@ export default function Ecosystem({time, curators, channels, tags, shuffle, refe
 
     try {
       const responseTotal = await axios.get(`/api/${getToken}/getUserAllowance`, {
-        params: {
-          fid: fid,
-        }
-      })
+        params: { fid } })
       let remaningAllowance = 0
-      if (responseTotal && responseTotal?.data) {
-        remaningAllowance = responseTotal.data.remaining
+      if (responseTotal?.data) {
+        remaningAllowance = responseTotal?.data?.remaining
         return remaningAllowance
       } else {
         return 0
@@ -864,17 +359,17 @@ export default function Ecosystem({time, curators, channels, tags, shuffle, refe
       let allowance = await getAllowance(token, fid)
       const tokenIndex = updatedTokenData.findIndex(currentToken => currentToken.token == token)
       if (tokenIndex !== -1) {
-        if (!updatedTokenData[tokenIndex].set) {
+        if (!updatedTokenData[tokenIndex]?.set) {
           updatedTokenData[tokenIndex].set = false
         }
         updatedTokenData[tokenIndex].allowance = allowance
-        updatedTokenData[tokenIndex].totalTip = Math.round(allowance * userTipPercent / 100)
+        updatedTokenData[tokenIndex].totalTip = Math.round(allowance * tipPercent / 100)
       } else {
         const newToken = {
           token: token,
           set: false,
           allowance: allowance,
-          totalTip: Math.round(allowance * userTipPercent / 100)
+          totalTip: Math.round(allowance * tipPercent / 100)
         }
         updatedTokenData.push(newToken)
       }
@@ -883,54 +378,288 @@ export default function Ecosystem({time, curators, channels, tags, shuffle, refe
   }
 
   useEffect(() => {
-    console.log(savedEco)
-    if (savedEco?.ecosystem_points_name) {
-      setPoints(savedEco.ecosystem_points_name)
-      setEco(savedEco)
-      if (savedEco?.channels?.length > 0) {
-        setUserFeed([])
-        setPrevCursor('')
-        setCursor('')
-        setChannelSelect(savedEco.channels[0].name)
-        setSearchSelect('Main')
-      } else {
-        setUserFeed([])
-        setPrevCursor('')
-        setCursor('')
-        setChannelSelect(null)
-        setSearchSelect('Curation')
-      }
-    }
-  }, [savedEco]);
-
-  useEffect(() => {
 
     const allowanceUpdate = () => {
-      if (store.isAuth) {
-        updateAllowances(availableTokens, store.fid)
+      if (isLogged) {
+        updateAllowances(availableTokens, fid)
       }
     }
 
-    if (allowanceSched) {
+    if (sched.login) {
       allowanceUpdate()
-      setAllowanceSched(false);
+      setSched(prev => ({...prev, login: false }))
     } else {
       const timeoutId = setTimeout(() => {
         allowanceUpdate()
-        setAllowanceSched(false);
+        setSched(prev => ({...prev, login: false }))
       }, 300);
       return () => clearTimeout(timeoutId);
     }
 
-  }, [isLogged, allowanceSched])
+  }, [isLogged, sched.login])
+
+  useEffect(() => {
+
+    const searchSelectRouter = () => {
+      console.log(searchSelect, channelSelect)
+      setLoading(false)
+      setPrevCursor('')
+      setCursor('')
+      if (isLogged) {
+        if (searchSelect == 'Curation') {
+          feedRouter()
+        } else if (searchSelect == 'Main' && channelSelect) {
+          getFeed(fid, channelSelect, true)
+        } else if (searchSelect == 'Recent' && channelSelect) {
+          getFeed(fid, channelSelect, false)
+        }
+      }
+    }
+
+    if (sched.searchSelect) {
+      searchSelectRouter()
+      setSched(prev => ({...prev, searchSelect: false }))
+    } else {
+      const timeoutId = setTimeout(() => {
+        searchSelectRouter()
+        setSched(prev => ({...prev, searchSelect: false }))
+      }, 300);
+      return () => clearTimeout(timeoutId);
+    }
+
+  }, [searchSelect, sched.searchSelect])
+  
+  useEffect(() => {
+
+    const inViewRouter = () => {
+      if (cursor !== prevCursor && cursor !== '' && isLogged) {
+        if (searchSelect == 'Main') {
+          setPrevCursor(cursor)
+          addToFeed(fid, channelSelect, true, cursor)
+        } else if (searchSelect == 'Recent') {
+          setPrevCursor(cursor)
+          addToFeed(fid, channelSelect, false, cursor)
+        } else if (searchSelect == 'Curation') {
+          setPrevCursor(cursor)
+          feedRouter()
+        }
+        console.log('trigger get additional casts', cursor, prevCursor, searchSelect)
+        
+      } else {
+        console.log('triggered, no new casts')
+        console.log(cursor, prevCursor, searchSelect)
+      }
+    }
+
+    if (sched.inView) {
+      inViewRouter()
+      setSched(prev => ({...prev, inView: false }))
+    } else {
+      const timeoutId = setTimeout(() => {
+        inViewRouter()
+        setSched(prev => ({...prev, inView: false }))
+      }, 300);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [inView, sched.inView])
+
+  async function getFeed(fid, channel, curated) {
+
+    const getChannelFeed = async (fid, channel, curated) => {
+      setLoading(true)
+      try {
+        const response = await axios.get('/api/ecosystem/getFeed', {
+          params: { fid, channel, curated } })
+        setLoading(false)
+        if (response?.data) {
+          console.log(response)
+          const casts = response?.data?.casts
+          let cursorData = ''
+          if (response?.data?.cursor) {
+            cursorData = response.data.cursor
+          }
+          console.log(casts, cursorData)
+          return {channelFeed: casts, cursorData}
+        } else {
+          return {channelFeed: [], cursorData: ''}
+        }
+        // console.log(channels)
+      } catch (error) {
+        console.error('Error submitting data:', error)
+        return {channelFeed: [], cursorData: ''}
+      }
+    }
+
+    const {channelFeed, cursorData} = await getChannelFeed(fid, channel, curated)
+    
+    setUserFeed(channelFeed)
+    updateFeed([], channelFeed, fid)
+    
+    setPrevCursor(cursor)
+    setCursor(cursorData)
+
+  }
+
+  async function updateFeed(oldFeed, feed, fid) {
+    let combinedFeed = oldFeed.concat(feed)
+    console.log(combinedFeed)
+    if (oldFeed?.length > 0) {
+      setUserFeed((prevUserFeed) => prevUserFeed.concat(feed))
+    } else {
+      setUserFeed(feed)
+    }
+
+    async function checkEmbedTypeForCasts(casts) {
+      // Map over each cast and apply checkEmbedType function
+      const updatedCasts = await Promise.all(casts.map(async (cast) => {
+        return await checkEmbedType(cast);
+      }));
+    
+      return updatedCasts;
+    }
+    
+    const castsWithImages = await checkEmbedTypeForCasts(feed);
+
+    combinedFeed = oldFeed.concat(castsWithImages)
+    setUserFeed(combinedFeed)
+
+    async function getSubcast(hash, userFid) {
+      if (hash && userFid) {
+        try {
+          const response = await axios.get('/api/getCastByHash', {
+            params: { hash, userFid }
+          })
+          const castData = response?.data?.cast?.cast
+          if (castData) {
+            return castData
+          } else {
+            return null
+          }
+        } catch (error) {
+          console.error('Error submitting data:', error)
+          return null
+        }
+      }
+    }
+
+    async function populateSubcasts(cast, fid) {
+      const { embeds } = cast;
+      if (embeds?.length > 0) {
+        const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
+          if (embed?.type == 'subcast') {
+            const subcastData = await getSubcast(embed.cast_id.hash, fid)
+            const checkImages = await checkEmbedType(subcastData)
+            return { ...embed, subcast: checkImages };
+          } else {
+            return { ...embed }
+          }
+        }));
+        return { ...cast, embeds: updatedEmbeds };
+      }
+      
+      return cast;
+    }
+    
+    async function populateEmbeds(cast) {
+      const { embeds } = cast
+      // console.log(embeds)
+      if (embeds?.length > 0) {
+        const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
+          // console.log(embed.type)
+          if (embed?.url && embed?.type == 'html') {
+            // console.log(embed)
+            try {
+              const metaData = await axios.get('/api/getMetaTags', {
+                params: { url: embed.url } })
+              if (metaData?.data) {
+                return { ...embed, metadata: metaData.data };
+              } else {
+                return { ...embed }
+              }
+            } catch (error) {
+              return { ...embed }
+            }
+          } else {
+            return { ...embed }
+          }
+        }));
+        return { ...cast, embeds: updatedEmbeds };
+      }
+      
+      return cast;
+    }
+
+    async function checkEmbeds(casts) {
+      const updatedCasts = await Promise.all(casts.map(async (cast) => {
+        return await populateEmbeds(cast);
+      }));
+    
+      return updatedCasts;
+    }
+
+    async function checkSubcasts(casts, fid) {
+      const updatedCasts = await Promise.all(casts.map(async (cast) => {
+        return await populateSubcasts(cast, fid);
+      }));
+    
+      return updatedCasts;
+    }
+
+    const castsWithSubcasts = await checkSubcasts(castsWithImages, fid)
+    console.log(castsWithSubcasts)
+    combinedFeed = oldFeed.concat(castsWithSubcasts)
+    setUserFeed(combinedFeed)
+
+    const castsWithEmbeds = await checkEmbeds(castsWithSubcasts)
+    console.log(castsWithEmbeds)
+    combinedFeed = oldFeed.concat(castsWithEmbeds)
+    setUserFeed(combinedFeed)
+
+  }
+
+  async function addToFeed(fid, channel, curated, cursor) {
+
+    const getChannelFeed = async (fid, channel, curated, cursor) => {
+      try {
+        const response = await axios.get('/api/ecosystem/getFeed', {
+          params: { fid, channel, curated, cursor } })
+        let casts = []
+        if (response?.data) {
+          // console.log(response)
+          casts = response?.data?.casts
+          let cursorData = ''
+          if (response?.data?.cursor) {
+            cursorData = response?.data?.cursor
+          }
+          // console.log(casts, cursorData)
+          return {channelFeed: casts, cursorData}
+        } else {
+          return {channelFeed: [], cursorData: ''}
+        }
+        // console.log(channels)
+      } catch (error) {
+        console.error('Error submitting data:', error)
+        return {channelFeed: [], cursorData: ''}
+      }
+    }
+
+    const {channelFeed, cursorData} = await getChannelFeed(fid, channel, curated, cursor)
+    console.log(channelFeed)
+    updateFeed(userFeed, channelFeed, fid)
+    setCursor(cursorData)
+  }
 
   useEffect(() => {
     console.log('triggered')
-    setIsLogged(store.isAuth)
+
+    if (isLogged) {
+      updateAllowances(availableTokens, fid)
+    }
 
     setUserQuery(updateUserQuery => {
       return {time, channels, tags, shuffle, curators}
     })
+
 
     if (curators && selectedCurators?.length == 0) {
       getCuratorsQuery(curators)
@@ -952,7 +681,6 @@ export default function Ecosystem({time, curators, channels, tags, shuffle, refe
           } else {
             return null
           }
-          // console.log(channels)
         } catch (error) {
           console.error('Error submitting data:', error)
           return null
@@ -969,6 +697,7 @@ export default function Ecosystem({time, curators, channels, tags, shuffle, refe
       setScreenWidth(window.innerWidth)
       setScreenHeight(window.innerHeight)
     }
+
     handleResize()
     window.addEventListener('resize', handleResize);
     
@@ -986,9 +715,6 @@ export default function Ecosystem({time, curators, channels, tags, shuffle, refe
   }
 
   async function getUserSearch(time, tags, channel, curator, text, shuffle) {
-    const fid = await store.fid
-    // const points = '$IMPACT'
-    console.log(points)
     let page = null
     if (!shuffle && typeof cursor !== 'number') {
       page = 1
@@ -1010,14 +736,14 @@ export default function Ecosystem({time, curators, channels, tags, shuffle, refe
         let casts = []
         let getPage = 1
         let pages = 1
-        if (response?.data?.casts && response?.data?.casts.length > 0) {
+        if (response?.data?.casts.length > 0) {
           casts = response.data.casts
         }
         if (response?.data?.page) {
-          getPage = response.data.page
+          getPage = response?.data?.page
         }
         if (response?.data?.pages) {
-          pages = response.data.pages
+          pages = response?.data?.pages
         }
 
         if (getPage == pages) {
@@ -1027,8 +753,6 @@ export default function Ecosystem({time, curators, channels, tags, shuffle, refe
           setPrevCursor(cursor)
           setCursor(getPage+1)
         }
-        // console.log(response)
-
         return {casts, getPage}
       } catch (error) {
         console.error('Error submitting data:', error)
@@ -1059,14 +783,12 @@ export default function Ecosystem({time, curators, channels, tags, shuffle, refe
         }
         return acc;
       }, [])
-      // console.log(filteredCasts)
 
       if (shuffle) {
         sortedCasts = filteredCasts.sort((a, b) => b.impact_total - a.impact_total);
       } else {
         sortedCasts = filteredCasts
       }
-      // console.log(sortedCasts)
 
       let displayedCasts = await populateCast(sortedCasts)
       // setUserFeed(displayedCasts)
@@ -1086,7 +808,7 @@ export default function Ecosystem({time, curators, channels, tags, shuffle, refe
       }
 
       if (!fid) {
-        account.LoginPopup()
+        LoginPopup()
       } else {
         async function populateCasts(fid, castString) {
           try {
@@ -1137,7 +859,6 @@ export default function Ecosystem({time, curators, channels, tags, shuffle, refe
           return updatedCasts;
         }
         
-        // Usage
         const castsWithImages = await checkEmbedTypeForCasts(displayedCasts);
 
         if (shuffle) {
@@ -1170,9 +891,9 @@ export default function Ecosystem({time, curators, channels, tags, shuffle, refe
     
         async function populateSubcasts(cast, fid) {
           const { embeds } = cast;
-          if (embeds && embeds.length > 0) {
+          if (embeds?.length > 0) {
             const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
-              if (embed.type == 'subcast') {
+              if (embed?.type == 'subcast') {
                 const subcastData = await getSubcast(embed.cast_id.hash, fid)
                 const checkImages = await checkEmbedType(subcastData)
                 return { ...embed, subcast: checkImages };
@@ -1189,15 +910,15 @@ export default function Ecosystem({time, curators, channels, tags, shuffle, refe
         async function populateEmbeds(cast) {
           const { embeds } = cast
           // console.log(embeds)
-          if (embeds && embeds.length > 0) {
+          if (embeds?.length > 0) {
             const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
               // console.log(embed.type)
-              if (embed && embed.url && embed.type == 'html') {
+              if (embed?.url && embed?.type == 'html') {
                 // console.log(embed)
                 try {
                   const metaData = await axios.get('/api/getMetaTags', {
                     params: { url: embed.url } })
-                  if (metaData && metaData.data) {
+                  if (metaData?.data) {
                     return { ...embed, metadata: metaData.data };
                   } else {
                     return { ...embed }
@@ -1255,75 +976,12 @@ export default function Ecosystem({time, curators, channels, tags, shuffle, refe
     }
   }
 
-  const ExpandImg = ({embed}) => {
-    return (
-      <>
-        <div className="overlay" onClick={closeImagePopup}></div>
-        <img loading="lazy" src={embed.showPopup.url} className='popupConainer' alt="Cast image embed" style={{aspectRatio: 'auto', maxWidth: screenWidth, maxHeight: screenHeight, cursor: 'pointer', position: 'fixed', borderRadius: '12px'}} onClick={closeImagePopup} />
-      </>
-    )
-  }
-
-  const Modal = () => {
-    return (
-      <>
-        <div className="modalConainer" style={{borderRadius: '10px', backgroundColor: modal.success ? '#9e9' : '#e99'}}>
-          <div className='flex-col' id="notificationContent" style={{alignItems: 'center', justifyContent: 'center'}}>
-            <div style={{fontSize: '20px', width: '380px', maxWidth: '380px', fontWeight: '400', height: 'auto', padding: '6px', fontSize: '16px'}}>{modal.text}</div>
-          </div>
-        </div>
-      </>
-    )
-  }
-
   const goToUserProfile = async (event, author) => {
     event.preventDefault()
     const username = author.username
     await store.setUserData(author)
     router.push(`/${username}`)
   }
-
-  const HorizontalScale = () => {
-    const [value, setValue] = useState(initValue);
-  
-    const handleChange = (event) => {
-      setValue(parseInt(event.target.value));
-    };
-
-    const handleMouseLeave = () => {
-      store.setUserTipPercent(value);
-      setInitValue(value)
-    };
-  
-    return (
-      <div className='flex-row' style={{ width: '100%', padding: '3px 12px', gap: '1.0rem', alignItems: 'center' }}
-      onMouseLeave={handleMouseLeave} onTouchEnd={handleMouseLeave}>
-        <input
-          type="range"
-          min="1"
-          max="100"
-          value={value}
-          onChange={handleChange}
-          style={{ width: '100%' }}
-        />
-        <div className='flex-col' style={{gap: '0.45rem'}}>
-          <div className='flex-row' style={{flexWrap: 'wrap', justifyContent: 'center', gap: '0.35rem', width: '150px'}}>
-          {(tokenData && tokenData.length > 0) && tokenData.map((token, index) => {
-            return ((token.allowance > 0) && (<div key={index} className='flex-row' style={{border: token.set ? '1px solid #abc' : '1px solid #aaa', borderRadius: '6px', padding: '2px 5px', color: token.set ? '#9df' : '#ccc', gap: '0.35rem', alignItems: 'center', cursor: 'pointer', backgroundColor: token.set ? '#246' : 'transparent'}} onClick={() => {handleToken(token.token)}}>
-              <div style={{textAlign: 'center', color: token.set ? '#9df' : '#ccc', fontSize: '15px', fontWeight: '700'}}>
-                {formatNum(Math.round(token.allowance * value / 100))}
-              </div>
-              {(token.token == '$DEGEN') ? (<Degen />) : (token.token == '$TN100x') ? (<GiMeat style={{transform: 'scaleX(-1)'}} />) : (<GiTwoCoins />)}
-            </div>))
-          })}
-          </div>
-          <div className='flex-row' style={{gap: '0.5rem', alignItems: 'center', justifyContent: 'center'}}>
-            <div style={{ textAlign: 'center', color: '#def', fontSize: '12px' }}>({value}%)</div><div style={{border: '1px solid #abc', fontSize: '12px', color: (tokensSelected.length == 0 || tokensSelected.length == 2) ? '#9df' : '#eee', padding: '1px 3px', borderRadius: '5px', backgroundColor: (tokensSelected.length == 0 || tokensSelected.length == 2) ? '#246' : 'transparent', cursor: 'pointer'}} onClick={() => {handleToken('All tokens')}}>SELECT ALL</div>
-          </div>
-        </div>
-      </div>
-    );
-  };
 
   function clearCastText() {
     setCastData({ ...castData, text: '', parentUrl: null });
@@ -1335,84 +993,6 @@ export default function Ecosystem({time, curators, channels, tags, shuffle, refe
 
   const searchOption = (e) => {
     setSearchSelect(e.target.getAttribute('name'))
-  }
-
-  const SearchOptionButton = ({buttonName}) => {
-    let isSearchable = true
-    let comingSoon = false
-    if ((buttonName == 'Casts' && !store.isAuth) || (buttonName == 'Casts + Replies' && !store.isAuth)) {
-      isSearchable = false
-    }
-    // if (buttonName == 'Channels' || buttonName == 'Media' || buttonName == 'Proposals') {
-    //   comingSoon = true
-    // }
-
-    return isSearchable ? (<>{comingSoon ? (<div className='flex-row' style={{position: 'relative'}}><div className={(searchSelect == buttonName) ? 'active-nav-link btn-hvr lock-btn-hvr' : 'nav-link btn-hvr lock-btn-hvr'} onClick={searchOption} name={buttonName} style={{fontWeight: '600', padding: '5px 14px', borderRadius: '14px', fontSize: isMobile ? '12px' : '15px'}}>{buttonName}</div>
-      <div className='top-layer' style={{position: 'absolute', top: 0, right: 0, transform: 'translate(20%, -50%)' }}>
-        <div className='soon-btn'>SOON</div>
-      </div>
-    </div>) : (
-      <div className={(searchSelect == buttonName) ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'} onClick={searchOption} name={buttonName} style={{fontWeight: '600', padding: '5px 14px', borderRadius: '14px', fontSize: isMobile ? '12px' : '15px'}}>{buttonName}</div>)}</>
-    ) : (
-      <div className='flex-row' style={{position: 'relative'}}>
-        <div className='lock-btn-hvr' name={buttonName} style={{color: '#bbb', fontWeight: '600', padding: '5px 14px', borderRadius: '14px', cursor: 'pointer', fontSize: isMobile ? '12px' : '15px'}} onClick={account.LoginPopup}>{buttonName}</div>
-        <div className='top-layer' style={{position: 'absolute', top: 0, right: 0, transform: 'translate(-20%, -50%)' }}>
-          <FaLock size={8} color='#999' />
-        </div>
-      </div>
-    )
-  }
-
-  async function routeCast() {
-    console.log(castData.text.length)
-    if (store.isAuth && store.signer_uuid && castData.text.length > 0 && castData.text.length <= 320) {
-      console.log(store.isAuth, castData.text)
-      try {
-        let updatedCastData = { ...castData }
-        updatedCastData.fid = store.fid
-        updatedCastData.signer = store.signer_uuid
-        setCastData(updatedCastData)
-        postCast(castData)
-      } catch (error) {
-        console.error('Error submitting data:', error)
-      }
-    }
-    else if (store.isAuth && store.signer_uuid && castData.text.length > 320) {
-      try {
-        const username = store.usernameFC
-        const ipfsData = await axios.post('/api/postToIPFS', { username: username, text: castData.text, fid: store.fid })
-        const longcastHash = ipfsData.data.ipfsHash
-        let updatedCastData = { ...castData }
-        updatedCastData.fid = store.fid
-        updatedCastData.signer = store.signer_uuid
-        const longcastFrame = `${baseURL}/${username}/articles/${longcastHash}`
-        updatedCastData.text = longcastFrame
-        updatedCastData.urls.push(longcastFrame)
-        setCastData(updatedCastData)
-        console.log(longcastFrame)
-        await postCast(updatedCastData)
-        console.log(longcastHash)
-      } catch (error) {
-        console.error('Error submitting data:', error)
-      }
-    } else {
-      return
-    }
-  }
-
-  const expandBox = () => {
-    if (textboxRows == 1) {
-      setIsFocused(true)
-      setTextboxRows(4)
-    }
-  }
-
-  const shrinkBox = () => {
-    console.log(castData.text)
-    if (textboxRows > 1 && castData.text.length < 40) {
-      setIsFocused(false)
-      setTextboxRows(1)
-    }
   }
 
   const updateCast = (index, newData) => {
@@ -1440,12 +1020,9 @@ export default function Ecosystem({time, curators, channels, tags, shuffle, refe
     console.log(name)
     try {
       const response = await axios.get('/api/getChannels', {
-        params: {
-          name: name,
-        }
-      })
+        params: { name } })
       if (response) {
-        const channelsData = response.data.channels.channels
+        const channelsData = response?.data?.channels?.channels
         console.log(channelsData)
         setFilterChannels(channelsData)
       }
@@ -1458,16 +1035,12 @@ export default function Ecosystem({time, curators, channels, tags, shuffle, refe
     console.log(name)
     try {
       const response = await axios.get('/api/curation/getCurators', {
-        params: {
-          name: name,
-        }
-      })
+        params: { name } })
       if (response) {
-        const curatorsData = response.data.users
+        const curatorsData = response?.data?.users
         console.log(curatorsData)
         setFilterCurators(curatorsData)
       }
-      // console.log(channels)
     } catch (error) {
       console.error('Error submitting data:', error)
     }
@@ -1539,54 +1112,6 @@ export default function Ecosystem({time, curators, channels, tags, shuffle, refe
     }
   }
 
-  async function postMultiTip() {
-
-    const { castData, coinTotals } = await processTips(userFeed, store.fid, tokenData)
-
-    if (castData && castData.length > 0 && store.signer_uuid) {
-      setLoading(true)
-      try {
-        const response = await axios.post('/api/curation/postMultipleTips', {       
-          signer: store.signer_uuid,
-          fid: store.fid,
-          data: castData,
-          points: points
-        })
-        if (response.status !== 200) {
-          setLoading(false)
-          console.log(response)
-          setModal({on: true, success: false, text: 'Tipping all casts failed'});
-          setTimeout(() => {
-            setModal({on: false, success: false, text: ''});
-          }, 2500);
-          // need to revert recasts counter
-        } else {
-          let updatedTokenData = [...tokenData]
-          for (const token of updatedTokenData) {
-            if (token.set) {
-              if (token.token == '$TN100x') {
-                token.allowance = token.allowance - (coinTotals[token.token].totalTip * 10)
-              } else {
-                token.allowance = token.allowance - coinTotals[token.token].totalTip
-              }
-              token.totalTip = Math.round(token.allowance * userTipPercent / 100)
-            }
-          }
-          setTokenData(updatedTokenData)
-          setLoading(false)
-          console.log(response)
-          setModal({on: true, success: true, text: response.data.message});
-          setTimeout(() => {
-            setModal({on: false, success: false, text: ''});
-          }, 2500);
-        }
-        console.log(response.status)
-      } catch (error) {
-        console.error('Error submitting data:', error)
-      }
-    }
-  }
-
 
   return (
   <div name='feed' style={{width: 'auto', maxWidth: '620px'}} ref={ref2}>
@@ -1597,55 +1122,28 @@ export default function Ecosystem({time, curators, channels, tags, shuffle, refe
     <div style={{padding: '58px 0 0 0', width: feedMax}}>
     </div>
 
-
     <div className="top-layer">
       <div className="flex-row" style={{padding: '0', marginBottom: '10px', flexWrap: 'wrap', justifyContent: 'center'}}>
         <div className='flex-row' style={{gap: '0.5rem', width: '100%'}}>
 
-          {isLogged && (
-            <a className="" title="" href={`/${store.userProfile.username}`} onClick={() => {goToUserProfile(event, store.userProfile)}}>
-              <img loading="lazy" src={store.srcUrlFC} className="" alt={`${store.userDisplayNameFC} avatar`} style={{width: '40px', height: '40px', maxWidth: '48px', maxHeight: '48px', borderRadius: '24px', border: '1px solid #abc', margin: '6px 0 2px 20px'}} />
+          {isLogged && userProfile && (
+            <a className="" title="" href={`/${userProfile.username}`} onClick={() => {goToUserProfile(event, store.userProfile)}}>
+              <img loading="lazy" src={userProfile.pfp_url} className="" alt={`${userProfile.display_name} avatar`} style={{width: '40px', height: '40px', maxWidth: '48px', maxHeight: '48px', borderRadius: '24px', border: '1px solid #abc', margin: '6px 0 2px 20px'}} />
             </a>
           )}
-          <HorizontalScale />
+          <HorizontalScale {...{ initValue, setTipPercent, tokenData, setTokenData, availableTokens, tokensSelected, setInitValue }} />
         </div>
         <div className='flex-row' style={{gap: '0.5rem'}}>
-          {isLogged ? (
-            <div className="flex-row">
-              {(
-              <div className={`flex-row ${(loading || noTip) ? 'follow-locked' : 'follow-select'} ${modal.success ? 'flash-success' : ''}`} style={{position: 'relative', height: 'auto', width: '100px', marginRight: '0', cursor: (loading || noTip) ? 'default' : 'pointer'}}>
-                {(loading || noTip) ? (
-                  <div className='flex-row' style={{height: '100%', alignItems: 'center'}}>
-                    <Spinner size={21} color={'#999'} />
-                  </div>
-                ) : (
-                  <div className='cast-btn'
-                  //  onClick={routeCast} 
-                  onClick={() => { if (!noTip) {
-                    postMultiTip()
-                  }}}
-                  name='follow' style={{color: loading ? 'transparent' : '#fff', height: 'auto', width: '100px'}}>TIP ALL</div>
-                )}
-              </div>
-              )}
-            </div>
-          ) : (
-            <div className="flex-row follow-locked" style={{position: 'relative', height: 'auto', width: '100px', marginRight: '0'}}>
-              <div className='cast-btn' onClick={account.LoginPopup} style={{height: 'auto', width: '100px'}}>TIP ALL</div>
-              <div className='top-layer' style={{position: 'absolute', top: 0, right: 0, transform: 'translate(40%, -60%)' }}>
-                <FaLock size={8} color='#eee' />
-              </div>
-            </div>
-          )}
-          <ScheduleTaskForm />
+          <TipAll {...{ tokenData, setTokenData, loading, setLoading, noTip, modal, setModal, userFeed, tipPercent }} />
+          <TipScheduler {...{ initHour, setInitHour, initMinute, setInitMinute, userQuery, tokenData, initValue, setLoading }}  />
         </div>
       </div>
     </div>
     <div>
 
-    {(eco?.channels?.length > 0) && (<div className="top-layer flex-row" style={{padding: '10px 0 10px 0', alignItems: 'center', justifyContent: 'space-evenly', margin: '0', borderBottom: '1px solid #888'}}>
+    {(ecoData?.channels?.length > 0) && (<div className="top-layer flex-row" style={{padding: '10px 0 10px 0', alignItems: 'center', justifyContent: 'space-evenly', margin: '0', borderBottom: '1px solid #888'}}>
       { userButtons.map((btn, index) => (
-        <SearchOptionButton buttonName={btn} key={index} /> ))}
+        <FeedMenu {...{buttonName: btn, key: index, searchOption, searchSelect}} /> ))}
     </div>)}
 
     <div className='flex-row' style={{justifyContent: 'space-between', margin: '15px 0 30px 0'}}>
@@ -1718,47 +1216,46 @@ export default function Ecosystem({time, curators, channels, tags, shuffle, refe
             <span className={`${!isMobile ? 'selection-btn' : ''}`} style={{cursor: 'pointer', padding: '0', color: userQuery['curators'].length == 0 ? '#aaa' : ''}}>{isMobile ? '' : userQuery['curators'].length == 0 ? 'All curators' : 'Curators'}</span>
           </div>
         </div>
-
       </div>
 
 
       {(isSelected == 'curators') && (
-          <div className='' style={{position: 'absolute', width: feedMax, margin: 'auto', marginTop: '28px'}} onMouseEnter={() => {handleSelection('curators')}} onMouseLeave={() => {handleSelection('none')}}>
-            <div className='top-layer flex-col' style={{gap: '0.25rem', padding: '6px 6px', borderRadius: '10px', backgroundColor: '#1D3244dd', border: '1px solid #abc', width: 'auto', marginTop: '10px', alignItems: 'flex-start'}}>
-              <div className={`selection-btn ${(userQuery['curators'] == 'all' || userQuery['curators'].length == 0) ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}}>
-                <input onChange={onCuratorSearch} 
-                  name='search' 
-                  placeholder={`Search curators`} 
-                  value={userSearch.search} 
-                  className='srch-btn' 
-                  style={{width: '100%', backgroundColor: '#234'}} 
-                  onKeyDown={curatorKeyDown} />
-              </div>
-              <div className='flex-row' style={{gap: '0.5rem', padding: '0px 6px', flexWrap: 'wrap'}}>
-                {filterCurators && (
-                  filterCurators.map((curator, index) => (
-                    <div key={`Cu2-${index}`} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addCurator(curator)}}>
-                      <img loading="lazy" src={curator.pfp} className="" alt={curator.display_name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
-                      <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>@{curator.username}</div>
-                    </div>
-                  )
-                ))}
-              </div>
-
-              {(selectedCurators && selectedCurators.length > 0) && (<div className='flex-row' style={{gap: '0.5rem', padding: '10px 6px 6px 6px', flexWrap: 'wrap', borderTop: '1px solid #888', width: '100%', alignItems: 'center'}}>
-                <div style={{color: '#ddd', fontWeight: '600', fontSize: '13px', padding: '0 0 3px 6px'}}>Selected:</div>
-                {(
-                  selectedCurators.map((curator, index) => (
-                    <div key={`Cu-${index}`} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addCurator(curator)}}>
-                      <img loading="lazy" src={curator.pfp} className="" alt={curator.display_name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
-                      <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>@{curator.username}</div>
-                    </div>
-                  )
-                ))}
-              </div>)}
+        <div className='' style={{position: 'absolute', width: feedMax, margin: 'auto', marginTop: '28px'}} onMouseEnter={() => {handleSelection('curators')}} onMouseLeave={() => {handleSelection('none')}}>
+          <div className='top-layer flex-col' style={{gap: '0.25rem', padding: '6px 6px', borderRadius: '10px', backgroundColor: '#1D3244dd', border: '1px solid #abc', width: 'auto', marginTop: '10px', alignItems: 'flex-start'}}>
+            <div className={`selection-btn ${(userQuery['curators'] == 'all' || userQuery['curators'].length == 0) ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}}>
+              <input onChange={onCuratorSearch} 
+                name='search' 
+                placeholder={`Search curators`} 
+                value={userSearch.search} 
+                className='srch-btn' 
+                style={{width: '100%', backgroundColor: '#234'}} 
+                onKeyDown={curatorKeyDown} />
             </div>
+            <div className='flex-row' style={{gap: '0.5rem', padding: '0px 6px', flexWrap: 'wrap'}}>
+              {filterCurators && (
+                filterCurators.map((curator, index) => (
+                  <div key={`Cu2-${index}`} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addCurator(curator)}}>
+                    <img loading="lazy" src={curator.pfp} className="" alt={curator.display_name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
+                    <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>@{curator.username}</div>
+                  </div>
+                )
+              ))}
+            </div>
+
+            {(selectedCurators && selectedCurators.length > 0) && (<div className='flex-row' style={{gap: '0.5rem', padding: '10px 6px 6px 6px', flexWrap: 'wrap', borderTop: '1px solid #888', width: '100%', alignItems: 'center'}}>
+              <div style={{color: '#ddd', fontWeight: '600', fontSize: '13px', padding: '0 0 3px 6px'}}>Selected:</div>
+              {(
+                selectedCurators.map((curator, index) => (
+                  <div key={`Cu-${index}`} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addCurator(curator)}}>
+                    <img loading="lazy" src={curator.pfp} className="" alt={curator.display_name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
+                    <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>@{curator.username}</div>
+                  </div>
+                )
+              ))}
+            </div>)}
           </div>
-        )}
+        </div>
+      )}
 
       {(isSelected == 'channels') && (
           <div className='' style={{position: 'absolute', width: feedMax, margin: 'auto', marginTop: '28px'}} onMouseEnter={() => {handleSelection('channels')}} onMouseLeave={() => {handleSelection('none')}}>
@@ -1801,27 +1298,22 @@ export default function Ecosystem({time, curators, channels, tags, shuffle, refe
       </div>
     </div>
 
-    <div style={{margin: '0 0 70px 0'}}>
-      {(!(eco && eco.ecosystem_points_name !== '$NONE') || !userFeed || userFeed.length == 0) ? (
+    <div className='flex-col' style={{margin: '0 0 70px 0'}}>
+      {(!userFeed || userFeed.length == 0) ? (
         <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
           {loading ? (<Spinner size={31} color={'#999'} />) : (<div style={{fontSize: '20px', color: '#def'}}>No casts found</div>)}
         </div>
-      ) : (userFeed.map((cast, index) => (<Cast cast={cast} key={index} index={index} updateCast={updateCast} openImagePopup={openImagePopup} ecosystem={eco.ecosystem_points_name} />)))}
+      ) : (userFeed.map((cast, index) => (<Cast key={index} {...{cast, index, updateCast, openImagePopup, ecosystem: points}} />)))}
       {(cursor && cursor !== '') && (<div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
         <Spinner size={31} color={'#999'} />
       </div>)}
     </div>
     <div ref={ref}>&nbsp;</div>
-    <div>
-      {showPopup.open && (<ExpandImg embed={{showPopup}} />)}
-    </div>
-    <div>
-      {modal.on && <Modal />}
-    </div>
+    <ExpandImg {...{show: showPopup.open, closeImagePopup, embed: {showPopup}, screenWidth, screenHeight }} />
+    <Modal {...{modal}} />
   </div>
   )
 }
-
 
 export async function getServerSideProps(context) {
   // Fetch dynamic parameters from the context object
@@ -1829,7 +1321,7 @@ export async function getServerSideProps(context) {
   const { time, curators, channels, tags, shuffle, referrer, eco } = query;
   const { ecosystem } = params;
 
-  let setTime = '7days'
+  let setTime = 'all'
   let setEco = eco || '$IMPACT'
   if (time) {
     setTime = time

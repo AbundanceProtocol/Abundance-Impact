@@ -1,5 +1,6 @@
 import { useRouter } from 'next/router';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useContext } from 'react';
+import { AccountContext } from '../../../context';
 import projectData from '../../../data/dummyProject.json'
 import onchainData from '../../../data/dummyOnchainData.json'
 import { Swords, CoinBag, CoinStack, Waste, AbundanceStar, FeedbackLoop, Like, Recast, Message, Kebab, Warp, ActiveUser } from '../../assets'
@@ -17,6 +18,7 @@ export default function ProjectPage() {
   const ref = useRef(null)
   const [textMax, setTextMax] = useState('495px')
   const store = useStore()
+  const { LoginPopup } = useContext(AccountContext)
   const [ screenWidth, setScreenWidth ] = useState(undefined)
   const [feedMax, setFeedMax ] = useState('620px')
   const [verified, setVerified] = useState(null)
@@ -82,7 +84,7 @@ export default function ProjectPage() {
       setSearchSelect(e.target.getAttribute('name'))
     }
 
-    const SearchOptionButton = ({buttonName, size, index, num}) => {
+    const FeedMenu = ({buttonName, size, index, num}) => {
       let count = 0
       const btn = buttonName
       if (btn == 'Resources' && num.resources) {
@@ -124,7 +126,7 @@ export default function ProjectPage() {
         <div className={(searchSelect == btn) ? 'active-nav-link-lt btn-hvr-lt flex-row' : 'nav-link-lt btn-hvr-lt flex-row'} onClick={searchOption} name={btn} style={{fontWeight: '600', padding: '5px 14px 5px 5px', borderRadius: '14px', fontSize: isMobile ? '12px' : `${fontSize}px`}}><Dropdown size={18} /><div>{(count !== 0) && (count + ' ')}{btn} </div></div>)}</>
       ) : (
         <div className='flex-row' style={{position: 'relative'}}>
-          <div className='lock-btn-hvr-lt' name={btn} style={{color: '#bbb', fontWeight: '600', padding: '5px 14px', borderRadius: '14px', cursor: 'pointer', fontSize: isMobile ? '12px' : `${fontSize}px`}} onClick={account.LoginPopup}>{(count !== 0) && (count + ' ')}{btn}</div>
+          <div className='lock-btn-hvr-lt' name={btn} style={{color: '#bbb', fontWeight: '600', padding: '5px 14px', borderRadius: '14px', cursor: 'pointer', fontSize: isMobile ? '12px' : `${fontSize}px`}} onClick={LoginPopup}>{(count !== 0) && (count + ' ')}{btn}</div>
           <div className='top-layer' style={{position: 'absolute', top: 0, right: 0, transform: 'translate(-20%, -50%)' }}>
             <FaLock size={8} color='#999' />
           </div>
@@ -275,11 +277,11 @@ export default function ProjectPage() {
         </div> 
         <div className="top-layer flex-row" style={{padding: '20px 0 0px 0', alignItems: 'center', justifyContent: 'flex-start', margin: '0', gap: '0.75rem', maxWidth: '620px', flexWrap: 'wrap'}}>
           { userButtons.map((btn, index) => (
-            <SearchOptionButton buttonName={btn} size={14} index={index} num={projectInfo} /> ))}
+            <FeedMenu buttonName={btn} size={14} index={index} num={projectInfo} /> ))}
         </div>
         <div className="top-layer flex-row" style={{padding: '25px 0 0px 0', alignItems: 'center', justifyContent: 'space-between', margin: '0', flexWrap: 'wrap'}}>
           {/* { userButtons.map((btn, index) => ( */}
-            <SearchOptionButton buttonName={'Proposals'} size={18} key={0} num={projectInfo} /> 
+            <FeedMenu buttonName={'Proposals'} size={18} key={0} num={projectInfo} /> 
         </div>
       </div>)
     }

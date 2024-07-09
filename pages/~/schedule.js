@@ -16,9 +16,11 @@ import { BsClock } from "react-icons/bs";
 import { GoTag } from "react-icons/go";
 import { AiOutlineBars } from "react-icons/ai";
 import { IoCaretForwardOutline as Forward } from "react-icons/io5";
-import Spinner from '../../components/Spinner';
+import Spinner from '../../components/Common/Spinner';
 import { Degen } from '../assets';
 import { GiMeat, GiTwoCoins } from "react-icons/gi";
+import ExpandImg from '../../components/Cast/ExpandImg';
+import Modal from '../../components/Layout/Modals/Modal';
 
 export default function Schedule() {
   const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
@@ -28,7 +30,7 @@ export default function Schedule() {
   const [userFeed, setUserFeed] = useState([])
   const { isMobile } = useMatchBreakpoints();
   const [feedWidth, setFeedWidth] = useState()
-  const account = useContext(AccountContext)
+  const { LoginPopup } = useContext(AccountContext)
   const [screenWidth, setScreenWidth] = useState(undefined)
   const [screenHeight, setScreenHeight] = useState(undefined)
   const store = useStore()
@@ -139,7 +141,7 @@ export default function Schedule() {
     }
   }
 
-  const ScheduleTaskForm = () => {
+  const TipScheduler = () => {
     const [hour, setHour] = useState(initHour);
     const [minute, setMinute] = useState(initMinute);
 
@@ -239,7 +241,7 @@ export default function Schedule() {
           </div>
           <button onClick={() => {
             if (!isLogged) { 
-              account.LoginPopup() 
+              LoginPopup() 
             } else if (hour !== 'Hr') {
               handleSubmit() 
             }}} style={{backgroundColor: 'transparent', fontWeight: '600', color: '#fff', cursor: (hour !== 'Hr' || !isLogged) ? 'pointer' : 'default', fontSize: '12px', padding: '0'}}>MODIFY SCHEDULE</button>
@@ -873,26 +875,19 @@ export default function Schedule() {
 
   }
 
-  const ExpandImg = ({embed}) => {
-    return (
-      <>
-        <div className="overlay" onClick={closeImagePopup}></div>
-        <img loading="lazy" src={embed.showPopup.url} className='popupConainer' alt="Cast image embed" style={{aspectRatio: 'auto', maxWidth: screenWidth, maxHeight: screenHeight, cursor: 'pointer', position: 'fixed', borderRadius: '12px'}} onClick={closeImagePopup} />
-      </>
-    )
-  }
 
-  const Modal = () => {
-    return (
-      <>
-        <div className="modalConainer" style={{borderRadius: '10px', backgroundColor: modal.success ? '#9e9' : '#e99'}}>
-          <div className='flex-col' id="notificationContent" style={{alignItems: 'center', justifyContent: 'center'}}>
-            <div style={{fontSize: '20px', width: '380px', maxWidth: '380px', fontWeight: '400', height: 'auto', padding: '6px', fontSize: '16px'}}>{modal.text}</div>
-          </div>
-        </div>
-      </>
-    )
-  }
+
+  // const Modal = () => {
+  //   return (
+  //     <>
+  //       <div className="modalConainer" style={{borderRadius: '10px', backgroundColor: modal.success ? '#9e9' : '#e99'}}>
+  //         <div className='flex-col' id="notificationContent" style={{alignItems: 'center', justifyContent: 'center'}}>
+  //           <div style={{fontSize: '20px', width: '380px', maxWidth: '380px', fontWeight: '400', height: 'auto', padding: '6px', fontSize: '16px'}}>{modal.text}</div>
+  //         </div>
+  //       </div>
+  //     </>
+  //   )
+  // }
 
   const goToUserProfile = async (event, author) => {
     event.preventDefault()
@@ -1366,7 +1361,7 @@ export default function Schedule() {
             <HorizontalScale />
           </div>
           <div>
-            <ScheduleTaskForm />
+            <TipScheduler />
           </div>
         </div>
       </div>
@@ -1526,12 +1521,8 @@ export default function Schedule() {
     )}
     <div style={{margin: '0 0 70px 0'}}>
     </div>
-    <div>
-      {showPopup.open && (<ExpandImg embed={{showPopup}} />)}
-    </div>
-    <div>
-      {modal.on && <Modal />}
-    </div>
+    <ExpandImg  {...{show: showPopup.open, closeImagePopup, embed: {showPopup}, screenWidth, screenHeight }} />
+    <Modal modal={modal} />
   </div>
   )
 }

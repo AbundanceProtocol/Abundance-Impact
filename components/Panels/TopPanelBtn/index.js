@@ -1,9 +1,9 @@
-import React, { useRef, useEffect, useState } from 'react';
-import Spinner from '../../Spinner'
+import React from 'react';
+import Spinner from '../../Common/Spinner'
+import { BsPatchCheckFill as Verified } from "react-icons/bs";
+import { MdError as Rejected } from "react-icons/md";
 
-
-
-export default function TopPanelBtn({text, value, color, verified, loading}) {
+const TopPanelBtn = ({text, value, color, verified, loading}) => {
   return (
     <div className="flex-row" style={{border: '1px solid #666', padding: '2px 6px', borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'flex-start', backgroundColor: '#eee'}}>
     <div className="flex-row" style={{alignItems: 'center', gap: '0.25rem'}}>
@@ -20,3 +20,5 @@ export default function TopPanelBtn({text, value, color, verified, loading}) {
   </div>
   )
 }
+
+export default TopPanelBtn;

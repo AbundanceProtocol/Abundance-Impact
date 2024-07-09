@@ -10,7 +10,8 @@ import axios from 'axios';
 import { FaSearch, FaLock, FaRegStar } from "react-icons/fa"
 import Cast from '../components/Cast'
 import { setEmbeds, formatNum } from '../utils/utils';
-import Spinner from '../components/Spinner';
+import Spinner from '../components/Common/Spinner';
+import ExpandImg from '../components/Cast/ExpandImg';
 
 export default function UserPage({username}) {
   const router = useRouter();
@@ -26,7 +27,7 @@ export default function UserPage({username}) {
   }
   const store = useStore()
   const [user, setUser] = useState(null)
-  const account = useContext(AccountContext)
+  const { LoginPopup, isLogged, fid, points } = useContext(AccountContext)
   const ref = useRef(null)
   const [textMax, setTextMax] = useState('430px')
   const [screenWidth, setScreenWidth ] = useState(undefined)
@@ -34,41 +35,19 @@ export default function UserPage({username}) {
   const [feedMax, setFeedMax ] = useState('620px')
   const userButtons = ['Casts', 'Casts + Replies', 'Proposals']
   const [searchSelect, setSearchSelect ] = useState('Casts')
-  const initialEco = {
-    channels: [],
-    condition_channels: false,
-    condition_curators_threshold: 1,
-    condition_following_channel: false,
-    condition_following_owner: false,
-    condition_holding_erc20: false,
-    condition_holding_nft: false,
-    condition_points_threshold: 1,
-    condition_powerbadge: false,
-    createdAt: "2024-06-17T03:19:16.065Z",
-    downvote_value: 1,
-    ecosystem_moderators: [],
-    ecosystem_name: 'none',
-    ecosystem_handle: 'none',
-    ecosystem_points_name: '$IMPACT',
-    ecosystem_rules: [`Can't do evil`],
-    erc20s: [],
-    fid: 3,
-    nfts: [],
-    owner_name: 'none',
-    percent_tipped: 10,
-    points_per_tip: 1,
-    upvote_value: 1,
-  }
-  const [eco, setEco] = useState(initialEco)
   const { isMobile } = useMatchBreakpoints();
   const [userFeed, setUserFeed] = useState(null)
   const [showPopup, setShowPopup] = useState({open: false, url: null})
   const [userTips, setUserTips] = useState(null)
-  const [isLogged, setIsLogged] = useState(false)
 
   useEffect(() => {
-    if (!isLogged) {
-      setIsLogged(store.isAuth)
+    if (isLogged && user && user?.fid !== '-' && !userFeed) {
+      getUserCasts(user.fid, fid)
+      if (!userTips) {
+        getUserTipsReceived(user.fid)
+      }
+    } else if (isLogged && !userFeed) {
+      getUserProfile(username)
     }
     const handleResize = () => {
       setScreenWidth(window.innerWidth)
@@ -84,11 +63,8 @@ export default function UserPage({username}) {
   }, []);
 
   useEffect(() => {
-    if (!isLogged) {
-      setIsLogged(store.isAuth)
-    }
-    if (isLogged && user && user.fid !== '-' && !userFeed) {
-      getUserCasts(user.fid, store.fid)
+    if (isLogged && user && user?.fid !== '-' && !userFeed) {
+      getUserCasts(user.fid, fid)
       if (!userTips) {
         getUserTipsReceived(user.fid)
       }
@@ -96,17 +72,14 @@ export default function UserPage({username}) {
   }, [user])
 
   useEffect(() => {
-    if (!isLogged) {
-      setIsLogged(store.isAuth)
-    }
-    if (isLogged && user && user.fid !== '-' && !userFeed) {
-      getUserCasts(user.fid, store.fid)
+    if (isLogged && user && user?.fid !== '-' && !userFeed) {
+      getUserCasts(user?.fid, fid)
       if (!userTips) {
         getUserTipsReceived(user.fid)
       }
     } else if (!isLogged && !store.isAuth) {
       console.log('triggered')
-      account.LoginPopup()
+      LoginPopup()
     }
   }, [isLogged, store.isAuth])
 
@@ -200,11 +173,8 @@ export default function UserPage({username}) {
   }
 
   useEffect(() => {
-    if (!isLogged) {
-      setIsLogged(store.isAuth)
-    }
     console.log(store.userData)
-    if (store.userData && store.userData.username == username) {
+    if (store?.userData?.username == username) {
       setUserFeed(null)
       setUser(store.userData)
     } else {
@@ -401,7 +371,7 @@ export default function UserPage({username}) {
               </div>
               ) : (
               <div className="flex-row" style={{position: 'relative'}}>
-                <div className='follow-locked' onClick={account.LoginPopup} style={{textAlign: 'center'}}>Follow</div>
+                <div className='follow-locked' onClick={LoginPopup} style={{textAlign: 'center'}}>Follow</div>
                 <div className='top-layer' style={{position: 'absolute', top: 0, right: 0, transform: 'translate(-50%, -50%)' }}>
                   <FaLock size={8} color='#666' />
                 </div>
@@ -433,24 +403,15 @@ export default function UserPage({username}) {
     setShowPopup(newPopup)
   }
 
-  const ExpandImg = ({embed}) => {
-    return (
-      <>
-        <div className="overlay" onClick={closeImagePopup}></div>
-        <img loading="lazy" src={embed.showPopup.url} className='popupConainer' alt="Cast image embed" style={{aspectRatio: 'auto', maxWidth: screenWidth, maxHeight: screenHeight, cursor: 'pointer', position: 'fixed', borderRadius: '12px'}} onClick={closeImagePopup} />
-      </>
-    )
-  }
-
   const searchOption = (e) => {
     setSearchSelect(e.target.getAttribute('name'))
   }
 
-  const SearchOptionButton = (props) => {
+  const FeedMenu = (props) => {
     const btn = props.buttonName
     let isSearchable = true
     let comingSoon = false
-    if (props.buttonName == 'Users' && !store.isAuth) {
+    if (props.buttonName == 'Users' && !isLogged) {
       isSearchable = false
     }
     if (props.buttonName == 'Channels' || props.buttonName == 'Media' || props.buttonName == 'Proposals') {
@@ -465,7 +426,7 @@ export default function UserPage({username}) {
       <div className={(searchSelect == btn) ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'} onClick={searchOption} name={btn} style={{fontWeight: '600', padding: '5px 14px', borderRadius: '14px', fontSize: isMobile ? '12px' : '15px'}}>{btn}</div>)}</>
     ) : (
       <div className='flex-row' style={{position: 'relative'}}>
-        <div className='lock-btn-hvr' name={btn} style={{color: '#bbb', fontWeight: '600', padding: '5px 14px', borderRadius: '14px', cursor: 'pointer', fontSize: isMobile ? '12px' : '15px'}} onClick={account.LoginPopup}>{btn}</div>
+        <div className='lock-btn-hvr' name={btn} style={{color: '#bbb', fontWeight: '600', padding: '5px 14px', borderRadius: '14px', cursor: 'pointer', fontSize: isMobile ? '12px' : '15px'}} onClick={LoginPopup}>{btn}</div>
         <div className='top-layer' style={{position: 'absolute', top: 0, right: 0, transform: 'translate(-20%, -50%)' }}>
           <FaLock size={8} color='#999' />
         </div>
@@ -492,19 +453,16 @@ export default function UserPage({username}) {
       { ((user && username == user.username) || (user && user.fid == '-')) && <UserData/> }
       <div className="top-layer flex-row" style={{padding: '10px 0 10px 0', alignItems: 'center', justifyContent: 'space-between', margin: '0', borderBottom: '1px solid #888'}}>
         { userButtons.map((btn, index) => (
-          <SearchOptionButton buttonName={btn} key={index} /> ))}
+          <FeedMenu buttonName={btn} key={index} /> ))}
       </div>
       <div style={{margin: '0 0 70px 0'}}>
         {(!userFeed || userFeed.length == 0) ? (
         <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
           <Spinner size={31} color={'#999'} />
         </div>
-        ) : (userFeed.map((cast, index) => (<Cast cast={cast} key={index} index={index} updateCast={updateCast} openImagePopup={openImagePopup} ecosystem={eco.ecosystem_points_name} />)))}
-
+        ) : (userFeed.map((cast, index) => (<Cast {...{ cast, index, key: index, updateCast, openImagePopup, ecosystem: points }} />)))}
       </div>
-      <div>
-        {showPopup.open && (<ExpandImg embed={{showPopup}} />)}
-      </div>
+      <ExpandImg {...{ show: showPopup.open, closeImagePopup, embed: {showPopup}, screenWidth, screenHeight }} />
     </div>
   );
 }

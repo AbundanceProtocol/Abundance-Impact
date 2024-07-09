@@ -71,7 +71,7 @@ export default async function handler(req, res) {
         for (const incentive of data.ecoIncentives) {
           if (incentive.type == 'percent-tipped') {
             ecosystem.percent_tipped = incentive.percent
-          } else if (incentive.type == 'qdao') {
+          } else if (incentive.type == 'qdau') {
             ecosystem.upvote_value = incentive.upvote
             ecosystem.downvote_value = Math.abs(incentive.downvote)
           } else if (incentive.type == 'tip') {

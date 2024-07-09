@@ -15,6 +15,7 @@ const scheduleTipSchema = new mongoose.Schema({
   schedule_time: String,
   schedule_count: Number,
   schedule_total: Number,
+  ecosystem_name: String,
   cron_job_id: Number,
   active_cron: { type: Boolean, default: false},
   createdAt: { type: Date, default: () => new Date() }
