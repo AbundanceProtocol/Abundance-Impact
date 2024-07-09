@@ -20,12 +20,12 @@ import TipScheduler from '../components/Common/TipScheduler';
 import HorizontalScale from '../components/Common/HorizontalScale';
 import TipAll from '../components/Common/TipAll';
 
-export default function Home({ time, curators, channels, tags, shuffle, referrer }) {
+export default function Home({ time, curators, channels, tags, shuffle, referrer, eco, ecosystem }) {
   const ref2 = useRef(null)
   const [ref, inView] = useInView()
   const [userFeed, setUserFeed] = useState([])
   const { isMobile } = useMatchBreakpoints();
-  const { LoginPopup, ecoData, points, isLogged, fid, userProfile } = useContext(AccountContext)
+  const { LoginPopup, ecoData, points, setPoints, isLogged, fid, userProfile } = useContext(AccountContext)
   const [screenWidth, setScreenWidth] = useState(undefined)
   const [screenHeight, setScreenHeight] = useState(undefined)
   const store = useStore()
@@ -883,13 +883,19 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
         }
         
         async function populateEmbeds(cast) {
-          const { embeds } = cast
-          // console.log(embeds)
+          const isCast = (cast) => {
+            if (cast?.embeds > 0) {
+              const { embeds } = cast
+              return { embeds }
+            } else {
+              return { embeds: [] }
+            }
+          }
+        
+          const { embeds } = isCast(cast);
           if (embeds?.length > 0) {
             const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
-              // console.log(embed.type)
               if (embed?.url && embed?.type == 'html') {
-                // console.log(embed)
                 try {
                   const metaData = await axios.get('/api/getMetaTags', {
                     params: { url: embed.url } })
@@ -907,7 +913,6 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
             }));
             return { ...cast, embeds: updatedEmbeds };
           }
-          
           return cast;
         }
     
@@ -915,7 +920,6 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
           const updatedCasts = await Promise.all(casts.map(async (cast) => {
             return await populateEmbeds(cast);
           }));
-        
           return updatedCasts;
         }
     
@@ -936,8 +940,7 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
           let combinedFeed = oldFeed.concat(castsWithSubcasts)
           setUserFeed(combinedFeed)
         }
-  
-    
+      
         const castsWithEmbeds = await checkEmbeds(castsWithSubcasts)
         console.log(castsWithEmbeds)
 
@@ -1296,7 +1299,10 @@ export async function getServerSideProps(context) {
   const { query } = context;
   const { time, curators, channels, tags, shuffle, referrer, eco } = query;
   let setTime = 'all'
-  let setEco = eco || '$IMPACT'
+  let setEco = null
+  if (eco) {
+    setEco = '$' + eco
+  }
   if (time) {
     setTime = time
   }

@@ -186,8 +186,6 @@ async function getEmbeds(url) {
       const embedType = await axios.get('/api/getEmbeds', {
         params: { url }
       })
-      // console.log(embedType)
-      // console.log(embedType.data)
       if (embedType?.data) {
         return embedType?.data?.embed
       } else {
@@ -203,7 +201,7 @@ async function getEmbeds(url) {
 
 export async function checkEmbedType(cast) {
   const isCast = (cast) => {
-    if (cast) {
+    if (cast?.embeds > 0) {
       const { embeds } = cast
       return { embeds }
     } else {

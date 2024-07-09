@@ -18,20 +18,17 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
   const store = useStore()
   const router = useRouter();
   const [screenWidth, setScreenWidth] = useState(undefined)
-  const { LoginPopup } = useContext(AccountContext)
+  const { LoginPopup, fid, userBalances, setUserBalances, isLogged } = useContext(AccountContext)
   const [textMax, setTextMax] = useState('522px')
   const [feedMax, setFeedMax ] = useState('620px')
   const likeRefs = useRef([])
   const recastRefs = useRef([])
   const [userFid, setUserFid] = useState(null)
   const [fail, setFail] = useState(false)
-  const userRemainingImpact = useStore(state => state.userRemainingImpact);
-  const userRemainingQuality = useStore(state => state.userRemainingQuality);
   const handleClick = (embed) => {
     openImagePopup(embed); 
   };
   const [hide, setHide] = useState(false)
-  const [isLogged, setIsLogged] = useState(false)
 
   function clickFailed() {
     setFail(true);
@@ -41,16 +38,12 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
   }
 
   async function boostQuality(cast, qualityAmount) {
-    const fid = store.fid
     const castHash = cast.hash
     const castChannel = cast.root_parent_url
-    // console.log(fid, castHash, qualityAmount)
     
     async function postQuality(fid, castHash, castChannel, qualityAmount) {
-      // console.log(fid, castContext, impactAmount)
       try {
         const response = await axios.post('/api/curation/postPointQuality', { fid, castHash, castChannel, qualityAmount, points: ecosystem })
-        // console.log(response)
         return response
       } catch (error) {
         console.error('Error creating post:', error);
@@ -58,23 +51,20 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
       }
     }
 
-
-    let qualityResponse
-    if (fid && fid !== '-' && qualityAmount && castHash && userRemainingQuality > 0 && (cast.impact_balance || cast.impact_balance == 0)  &&  !(cast.impact_balance == 0 && qualityAmount < 0)) {
-      qualityResponse = await postQuality(fid, castHash, castChannel, qualityAmount)
+    if (fid && fid !== '-' && qualityAmount && castHash && userBalances.qdau > 0 && (cast.impact_balance || cast.impact_balance == 0)  &&  !(cast.impact_balance == 0 && qualityAmount < 0)) {
+      const qualityResponse = await postQuality(fid, castHash, castChannel, qualityAmount)
       console.log(qualityResponse)
-      if (qualityResponse && qualityResponse.data && qualityResponse.status == 201) {
-        let userBalance = qualityResponse.data.userBalance
-        let castAbsoluteQ = qualityResponse.data.castAbsoluteQ
-        let castTotalI = qualityResponse.data.castTotalI
-        let castBalanceQ = qualityResponse.data.castBalanceQ
+      if (qualityResponse?.data && qualityResponse?.status == 201) {
+        const qdauBalance = qualityResponse?.data?.userBalance
+        const castAbsoluteQ = qualityResponse?.data?.castAbsoluteQ
+        const castTotalI = qualityResponse?.data?.castTotalI
+        const castBalanceQ = qualityResponse?.data?.castBalanceQ
         const updatedCast = {...cast, impact_balance: castTotalI, quality_absolute: castAbsoluteQ, quality_balance: castBalanceQ}
         updateCast(index, updatedCast)
-        
-        // setPoints(castTotalI)
-        // setQuality(castBalanceQ)
-        // setQualityAbs(castAbsoluteQ)
-        store.setUserRemainingQuality(userBalance)
+        setUserBalances(prev => ({
+          ...prev,
+          qdau: qdauBalance
+        }))
       } else {
         console.log('fail')
         clickFailed()
@@ -86,15 +76,6 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
 
 
   async function boostImpact(cast, impactAmount) {
-    // let channel = null
-    // if (cast.root_parent_url) {
-    //   const isChannel = cast.root_parent_url.slice(0,31)
-    //   if (isChannel == 'https://warpcast.com/~/channel/') {
-    //     channel = cast.root_parent_url
-    //   }
-    // }
-    // const amount = 1
-    const fid = store.fid
     const castContext = {
       author_fid: cast.author.fid,
       author_pfp: cast.author.pfp_url,
@@ -104,10 +85,8 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
       cast_text: cast.text,
       cast_channel: cast.root_parent_url
     }
-    // console.log(castContext)
     
     async function postImpact(fid, castContext, impactAmount) {
-      // console.log(fid, castContext, impactAmount)
       try {
         const response = await axios.post('/api/curation/postPointImpact', { fid, castContext, impactAmount, points: ecosystem })
         return response
@@ -118,17 +97,18 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
     }
 
     let impactResponse
-    if (fid && fid !== '-' && impactAmount && castContext && userRemainingImpact > 0) {
+    if (fid && fid !== '-' && impactAmount && castContext && userBalances?.impact > 0) {
       impactResponse = await postImpact(fid, castContext, impactAmount)
-      // console.log(impactResponse)
-      if (impactResponse && impactResponse.data && impactResponse.status == 201) {
-        let returnedBalance = impactResponse.data.balance
+      if (impactResponse?.data && impactResponse.status == 201) {
+        let impactBalance = impactResponse?.data?.balance
         let currentImpact = cast.impact_balance || 0
         let addedPoints = impactResponse.data.points
         const updatedCast = {...cast, impact_balance: currentImpact + addedPoints}
         updateCast(index, updatedCast)
-        // setPoints(points + addedPoints)
-        store.setUserRemainingImpact(returnedBalance)
+        setUserBalances(prev => ({
+          ...prev,
+          impact: impactBalance
+        }))
       } else {
         console.log('fail')
         clickFailed()
@@ -136,9 +116,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
     } else {
       clickFailed()
     }
-    // console.log(impactResponse)
   }
-
 
   useEffect(() => {
     if (screenWidth) {
@@ -162,7 +140,9 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
   }, [screenWidth])
 
   useEffect(() => {
-    setIsLogged(store.isAuth)
+    if (isLogged) {
+      setUserFid(fid)
+    }
     const handleResize = () => {
       setScreenWidth(window.innerWidth)
     }
@@ -176,11 +156,10 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
   }, [])
 
   useEffect(() => {
-    setIsLogged(store.isAuth)
     if (isLogged) {
-      setUserFid(store.fid)
+      setUserFid(fid)
     }
-  }, [isLogged, store.isAuth])
+  }, [isLogged])
 
 
   const goToCast = async (event, cast) => {
@@ -290,7 +269,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
                 if (!isLogged) {
                   LoginPopup()
                 } else {
-                  if(store.userRemainingImpact > 0) {
+                  if(userBalances.impact > 0) {
                     boostImpact(cast, 1)
                   } else { 
                     clickFailed()
