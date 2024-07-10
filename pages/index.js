@@ -531,7 +531,7 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
     }
 
     async function populateSubcasts(cast, fid) {
-      const { embeds } = cast;
+      const { embeds } = isCast(cast);
       if (embeds?.length > 0) {
         const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
           if (embed?.type == 'subcast') {
@@ -544,12 +544,11 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
         }));
         return { ...cast, embeds: updatedEmbeds };
       }
-      
       return cast;
     }
     
     async function populateEmbeds(cast) {
-      const { embeds } = isCast(cast);      
+      const { embeds } = isCast(cast);
       if (embeds?.length > 0) {
         const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
           if (embed?.url && embed?.type == 'html') {
@@ -570,7 +569,6 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
         }));
         return { ...cast, embeds: updatedEmbeds };
       }
-      
       return cast;
     }
 
@@ -578,7 +576,6 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
       const updatedCasts = await Promise.all(casts.map(async (cast) => {
         return await populateEmbeds(cast);
       }));
-    
       return updatedCasts;
     }
 
@@ -586,7 +583,6 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
       const updatedCasts = await Promise.all(casts.map(async (cast) => {
         return await populateSubcasts(cast, fid);
       }));
-    
       return updatedCasts;
     }
 
@@ -871,7 +867,7 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
         }
     
         async function populateSubcasts(cast, fid) {
-          const { embeds } = cast;
+          const { embeds } = isCast(cast);
           if (embeds?.length > 0) {
             const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
               if (embed?.type == 'subcast') {

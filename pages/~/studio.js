@@ -5,7 +5,7 @@ import { AccountContext } from '../../context';
 import useMatchBreakpoints from '../../hooks/useMatchBreakpoints';
 import axios from 'axios';
 import Cast from '../../components/Cast'
-import { formatNum, getCurrentDateUTC, getTimeRange, isYesterday, checkEmbedType, populateCast } from '../../utils/utils';
+import { formatNum, getCurrentDateUTC, getTimeRange, isYesterday, checkEmbedType, populateCast, isCast } from '../../utils/utils';
 import { BsClock } from "react-icons/bs";
 import { GoTag } from "react-icons/go";
 import { AiOutlineBars } from "react-icons/ai";
@@ -314,7 +314,7 @@ export default function ProfilePage() {
         }
 
         async function populateSubcasts(cast, fid) {
-          const { embeds } = cast;
+          const { embeds } = isCast(cast);
           if (embeds && embeds.length > 0) {
             const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
               if (embed.type == 'subcast') {
@@ -332,7 +332,7 @@ export default function ProfilePage() {
         }
 
         async function populateEmbeds(cast) {
-          const { embeds } = cast
+          const { embeds } = isCast(cast);
           if (embeds && embeds.length > 0) {
             const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
               if (embed && embed.url && embed.type == 'html') {
