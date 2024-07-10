@@ -12,7 +12,7 @@ const TipAll = ({ tokenData, setTokenData, loading, setLoading, noTip, modal, se
 
   async function postMultiTip() {
 
-    const { castData, coinTotals } = await processTips(userFeed, fid, tokenData, ecoData?.ecosystem_name)
+    const { castData, coinTotals } = await processTips(userFeed, fid, tokenData, ecoData?.ecosystem_name, ecoData?.percent_tipped)
 
     if (castData?.length > 0 && store.signer_uuid) {
       setLoading(true)
@@ -23,6 +23,7 @@ const TipAll = ({ tokenData, setTokenData, loading, setLoading, noTip, modal, se
           data: castData,
           points: points
         })
+        console.log(castData)
         if (response?.status !== 200) {
           setLoading(false)
           console.log(response)

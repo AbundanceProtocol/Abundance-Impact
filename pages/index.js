@@ -6,7 +6,7 @@ import useStore from '../utils/store'
 import axios from 'axios';
 import { useRouter } from 'next/router';
 import Cast from '../components/Cast'
-import { formatNum, getTimeRange, checkEmbedType, populateCast } from '../utils/utils';
+import { formatNum, getTimeRange, checkEmbedType, populateCast, isCast } from '../utils/utils';
 import { IoShuffleOutline as Shuffle, IoPeople, IoPeopleOutline } from "react-icons/io5";
 import { HiRefresh } from "react-icons/hi";
 import { BsClock } from "react-icons/bs";
@@ -82,7 +82,6 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
       },
     ]
   }
-  const [prevSavedEco, setPrevSavedEco] = useState(null)
   const [sched, setSched] = useState({userQuery: false, ecoData: false, login: false, searchSelect: false, inView: false})
   const userButtons = ['Curation', 'Main', 'Recent']
   const [searchSelect, setSearchSelect] = useState('Main')
@@ -90,7 +89,7 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
   const initialState = { fid: null, signer: null, urls: [], channel: null, parentUrl: null, text: '' }
 	const [castData, setCastData] = useState(initialState)
   const [loading, setLoading] = useState(false);
-  const tokenInfo = [{token: '$DEGEN', set: true}]
+  const tokenInfo = [{token: '$DEGEN', set: true}, {token: '$TN100x', set: false}, {token: '$FARTHER', set: false}]
   const [tokenData, setTokenData] = useState(tokenInfo)
   const [isSelected, setIsSelected] = useState('none')
 	const [userSearch, setUserSearch] = useState({ search: '' })
@@ -319,29 +318,45 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
       const responseTotal = await axios.get(`/api/${getToken}/getUserAllowance`, {
         params: { fid } })
       let remaningAllowance = 0
+      let minTip = 1
       if (responseTotal?.data) {
         remaningAllowance = responseTotal?.data?.remaining
-        return remaningAllowance
+        if (getToken == 'farther') {
+          minTip = responseTotal?.data?.minTip
+        }
+        return { allowance: remaningAllowance, minTip }
       } else {
-        return 0
+        return { allowance: 0, minTip: 1 }
       }
     } catch (error) {
       console.error('Error creating post:', error);
-      return 0
+      return { allowance: 0, minTip: 1 }
     }
   }
 
   async function updateAllowances(tokens, fid) {
     let updatedTokenData = [...tokenData]
     for (const token of tokens) {
-      let allowance = await getAllowance(token, fid)
+      let { allowance, minTip } = await getAllowance(token, fid)
       const tokenIndex = updatedTokenData.findIndex(currentToken => currentToken.token == token)
       if (tokenIndex !== -1) {
         if (!updatedTokenData[tokenIndex]?.set) {
           updatedTokenData[tokenIndex].set = false
         }
+        if (token == '$FARTHER') {
+          updatedTokenData[tokenIndex].min = minTip
+        }
         updatedTokenData[tokenIndex].allowance = allowance
         updatedTokenData[tokenIndex].totalTip = Math.round(allowance * tipPercent / 100)
+      } else if (token == '$FARTHER') {
+        const newToken = {
+          token: token,
+          set: false,
+          allowance: allowance,
+          min: minTip,
+          totalTip: Math.round(allowance * tipPercent / 100)
+        }
+        updatedTokenData.push(newToken)
       } else {
         const newToken = {
           token: token,
@@ -534,15 +549,6 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
     }
     
     async function populateEmbeds(cast) {
-      const isCast = (cast) => {
-        if (cast?.embeds > 0) {
-          const { embeds } = cast
-          return { embeds }
-        } else {
-          return { embeds: [] }
-        }
-      }
-    
       const { embeds } = isCast(cast);      
       if (embeds?.length > 0) {
         const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
@@ -883,15 +889,6 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
         }
         
         async function populateEmbeds(cast) {
-          const isCast = (cast) => {
-            if (cast?.embeds > 0) {
-              const { embeds } = cast
-              return { embeds }
-            } else {
-              return { embeds: [] }
-            }
-          }
-        
           const { embeds } = isCast(cast);
           if (embeds?.length > 0) {
             const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {

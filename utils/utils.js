@@ -198,17 +198,16 @@ async function getEmbeds(url) {
   }
 }
 
+export const isCast = (cast) => {
+  if (cast) {
+    const { embeds } = cast
+    return { embeds }
+  } else {
+    return { embeds: [] }
+  }
+}
 
 export async function checkEmbedType(cast) {
-  const isCast = (cast) => {
-    if (cast?.embeds > 0) {
-      const { embeds } = cast
-      return { embeds }
-    } else {
-      return { embeds: [] }
-    }
-  }
-
   const { embeds } = isCast(cast);
 
   if (embeds && embeds.length > 0) {
@@ -308,7 +307,12 @@ export function filterObjects(castArray, filterFid) {
 }
 
 
-export async function processTips(userFeed, userFid, tokenData, ecosystem) {
+export async function processTips(userFeed, userFid, tokenData, ecosystem, curatorPercent) {
+  console.log(userFeed, userFid, tokenData, ecosystem, curatorPercent)
+  let curatorTip = 10
+  if (curatorPercent) {
+    curatorTip = curatorPercent
+  }
   let ecosystemName = ''
   if (ecosystem) {
     ecosystemName = ecosystem + ' Ecosystem on '
@@ -337,7 +341,7 @@ export async function processTips(userFeed, userFid, tokenData, ecosystem) {
     for (const cast of casts) {
       let tipRatio = 1
       if (cast.impact_points && cast.impact_points.length > 0) {
-        tipRatio = 0.92
+        tipRatio = (100 - curatorTip) / 100
       }
       let castImpact = cast.impact_balance - cast.quality_balance
       let tipWeight = tipRatio * castImpact / totalImpact
@@ -354,7 +358,7 @@ export async function processTips(userFeed, userFid, tokenData, ecosystem) {
     for (const cast of casts) {
       if (cast.impact_points && cast.impact_points.length > 0) {
         for (const subCast of cast.impact_points) {
-          let subTipWeight = 0.08 * subCast.impact_points / totalImpact
+          let subTipWeight = (curatorTip / 100) * subCast.impact_points / totalImpact
           let subCastSchema = {
             castWeight: subTipWeight,
             castHash: subCast.target_cast_hash,
@@ -382,6 +386,8 @@ export async function processTips(userFeed, userFid, tokenData, ecosystem) {
           let tip = 0
           if (coin.token == '$TN100x') {
             tip = Math.floor(tipCast.castWeight * coin.totalTip / 10)
+          } else if (coin.token == '$FARTHER') {
+            tip = Math.floor(tipCast.castWeight * coin.totalTip / coin.min) * coin.min
           } else {
             tip = Math.floor(tipCast.castWeight * coin.totalTip)
           }
@@ -458,7 +464,7 @@ export async function processTips(userFeed, userFid, tokenData, ecosystem) {
       }
     }
   
-    // console.log(tipCasts)
+    console.log(tipCasts)
   
     for (const cast of tipCasts) {
       if (cast.allCoins && cast.allCoins.length > 0) {

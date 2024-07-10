@@ -13,20 +13,29 @@ export default async function handler(req, res) {
           accept: "application/json",
         },
       });
-      let remainingBalance = 0
+      let allowance = 0
+      let remainingAllowance = 0
+      let tipMin = 0
       if (fartherData?.status == 200) {
         const fartherInfo = await fartherData.json()
-        remainingBalance = fartherInfo?.result?.data?.tips?.currentCycle?.remainingAllowance
-        console.log('20', remainingBalance)
+        allowance = fartherInfo?.result?.data?.tips?.currentCycle?.allowance
+        tipMin = fartherInfo?.result?.data?.tips?.currentCycle?.tipMinimum
+        remainingAllowance = fartherInfo?.result?.data?.tips?.currentCycle?.remainingAllowance
+        if (!remainingAllowance) {
+          remainingAllowance = allowance
+        }
       }
-
-      let remaining = 0
       let total = 0
-      if (remainingBalance) {
-        remaining = Number(remainingBalance)
+      let remaining = 0
+      let minTip = 0
+      if (remainingAllowance) {
+        remaining = Number(remainingAllowance)
       }
-      console.log(total, remaining)
-      res.status(200).json({ total, remaining });
+      if (tipMin) {
+        minTip = Number(tipMin)
+      }
+      console.log(total, remaining, minTip)
+      res.status(200).json({ total, remaining, minTip });
     } catch (error) {
       console.error('Error handling GET request:', error);
       res.status(500).json({ error: 'Internal Server Error' });

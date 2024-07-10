@@ -5,6 +5,7 @@ import Cast from '../../../models/Cast';
 import Impact from '../../../models/Impact';
 import User from '../../../models/User';
 import Tip from '../../../models/Tip';
+import EcosystemRules from '../../../models/EcosystemRules';
 import { getTimeRange, processTips, populateCast } from '../../../utils/utils';
 
 const secretKey = process.env.SECRET_KEY
@@ -23,7 +24,7 @@ export default async function handler(req, res) {
       try {
         await connectToDatabase();
 
-        const schedule = await ScheduleTip.findOne({ code: code }).exec();
+        const schedule = await ScheduleTip.findOne({ code: code }).select('search_shuffle search_time search_tags points search_channels search_curators percent_tip ecosystem_name currencies uuid').exec();
         console.log(schedule)
         if (schedule) {
           const decryptedUuid = decryptPassword(schedule.uuid, secretKey);
@@ -69,13 +70,35 @@ export default async function handler(req, res) {
         }
       }
     }
-
+    
     const { shuffle, timeRange, tags, points, channels, curators, percent, ecosystem, currencies, decryptedUuid } = await getSchedule(code)
+    
     console.log('47', shuffle, timeRange, tags, points, channels, curators, percent, ecosystem, currencies)
-
+    
     if (!percent || !decryptedUuid) {
       res.status(500).json({ error: 'Internal Server Error' });
     } else {
+      
+      async function getCuratorPercent(points) {
+        try {
+          await connectToDatabase();
+  
+          const curatorPercentData = await EcosystemRules.findOne({ ecosystem_points_name: points }).select('percent_tipped').exec();
+          console.log(curatorPercentData)
+          if (curatorPercentData) {
+            return {
+              curatorPercent: curatorPercentData.percent_tipped }
+          } else {
+            return { curatorPercent: 10 }
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          return { curatorPercent: 10 }
+        }
+      }
+  
+      const curatorPercent = await getCuratorPercent(points)
+      console.log(curatorPercent)
 
       let time = null
       if (timeRange) {
@@ -130,22 +153,35 @@ export default async function handler(req, res) {
         try {
           const input = encodeURIComponent(JSON.stringify({ fid: fid }))
           const remainingUrl = `https://farther.social/api/v1/public.user.byFid?input=${input}`;
-          const fartherData = await fetch(remainingUrl)
-          let remainingBalance = 0
+          const fartherData = await fetch(remainingUrl, {
+            headers: {
+              accept: "application/json",
+            },
+          });
+          let allowance = 0
+          let remainingAllowance = 0
+          let tipMin = 0
           if (fartherData?.status == 200) {
             const fartherInfo = await fartherData.json()
-            remainingBalance = fartherInfo?.result?.data?.tips?.currentCycle?.remainingAllowance
-            console.log('20', remainingBalance)
+            allowance = fartherInfo?.result?.data?.tips?.currentCycle?.allowance
+            tipMin = fartherInfo?.result?.data?.tips?.currentCycle?.tipMinimum
+            remainingAllowance = fartherInfo?.result?.data?.tips?.currentCycle?.remainingAllowance
+            if (!remainingAllowance) {
+              remainingAllowance = allowance
+            }
           }
-    
           let remaining = 0
-          if (remainingBalance) {
-            remaining = Number(remainingBalance)
+          let minTip = 1
+          if (remainingAllowance) {
+            remaining = Number(remainingAllowance)
           }
-          return remaining
+          if (tipMin) {
+            minTip = Number(tipMin)
+          }
+          return { allowance: remaining, minTip }
         } catch (error) {
           console.error('Error handling GET request:', error);
-          return 0
+          return { allowance: 0, minTip: 1 }
         }
       }
 
@@ -162,9 +198,9 @@ export default async function handler(req, res) {
           const allowanceData = {token: coin, set: true, allowance: tip, totalTip: tip}
           allowances.push(allowanceData)
         } else if (coin == '$FARTHER') {
-          const allowance = await getFartherAllowance(fid)
+          const {allowance, minTip} = await getFartherAllowance(fid)
           const tip = Math.round(allowance * percent / 100)
-          const allowanceData = {token: coin, set: true, allowance: tip, totalTip: tip}
+          const allowanceData = {token: coin, set: true, allowance: tip, totalTip: tip, min: minTip}
           allowances.push(allowanceData)
         }
       }
@@ -178,7 +214,7 @@ export default async function handler(req, res) {
         async function getUserSearch(time, tags, channel, curator, shuffle, points) {
       
           const page = 1;
-          const limit = 5;
+          const limit = 10;
           const skip = (page - 1) * limit;
       
           let query = {};
@@ -335,7 +371,7 @@ export default async function handler(req, res) {
 
         let displayedCasts = await populateCast(sortedCasts)
 
-        const { castData, coinTotals } = await processTips(displayedCasts, fid, allowances, ecosystem)
+        const { castData, coinTotals } = await processTips(displayedCasts, fid, allowances, ecosystem, curatorPercent)
 
         async function sendRequests(data, signer, apiKey) {
           const base = "https://api.neynar.com/";

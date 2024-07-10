@@ -65,16 +65,16 @@ const HorizontalScale = ({ initValue, setTipPercent, tokenData, setTokenData, av
       <div className='flex-col' style={{gap: '0.45rem'}}>
         <div className='flex-row' style={{flexWrap: 'wrap', justifyContent: 'center', gap: '0.35rem', width: '160px'}}>
         {(tokenData?.length > 0) && tokenData.map((token, index) => {
-          return ((token.allowance >= 0) && (
-            <div key={index} className='flex-row' style={{border: (token.allowance == 0 && type !== 'schedule') ? '1px solid #888' : token.set ? '1px solid #abc' : '1px solid #aaa', borderRadius: '6px', padding: '2px 5px', color: (token.allowance == 0 && type !== 'schedule') ? '#888' : token.set ? '#9df' : '#ccc', gap: '0.35rem', alignItems: 'center', cursor: (token.allowance == 0 && type !== 'schedule') ? 'default' : 'pointer', backgroundColor: token.set ? '#246' : 'transparent'}} onClick={() => {
+          return (
+            <div key={index} className='flex-row' style={{border: (token.allowance == 0 && type !== 'schedule') ? '1px solid #888' : token.set ? '1px solid #abc' : '1px solid #aaa', borderRadius: '6px', padding: '2px 5px', color: (token.allowance == 0 && type !== 'schedule') ? '#888' : token.set ? '#9df' : '#ccc', gap: '0.35rem', alignItems: 'center', cursor: (token.allowance == 0 && type !== 'schedule') ? 'default' : 'pointer', backgroundColor: (token.allowance == 0 && type !== 'schedule') ? 'transparent' : token.set ? '#246' : 'transparent'}} onClick={() => {
               if (token.allowance > 0 || type == 'schedule') {
               handleToken(token.token)
             }}}>
             <div style={{textAlign: 'center', color: (token.allowance == 0 && type !== 'schedule') ? '#888' : token.set ? '#9df' : '#ccc', fontSize: '15px', fontWeight: '700'}}>
               {type == 'schedule' ? value + '%' : formatNum(Math.round(token.allowance * value / 100))}
             </div>
-            {(token.token == '$DEGEN') ? (<Degen />) : (token.token == '$TN100x') ? (<GiMeat style={{transform: 'scaleX(-1)'}} />) : (token.token == '$FARTHER') ? (<div style={{fontSize: '11px'}}>$FARTHER</div>) : (<GiTwoCoins />)}
-          </div>))
+            {(token.token == '$DEGEN') ? (<div style={{fontSize: '11px'}}>$DEGEN</div>) : (token.token == '$TN100x') ? (<div style={{fontSize: '11px'}}>$HAM</div>) : (token.token == '$FARTHER') ? (<div style={{fontSize: '11px'}}>$FARTHER</div>) : (<GiTwoCoins />)}
+          </div>)
         })}
         </div>
         <div className='flex-row' style={{gap: '0.5rem', alignItems: 'center', justifyContent: 'center'}}>
