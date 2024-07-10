@@ -1312,7 +1312,7 @@ export default function Ecosystem() {
     </div>)}
 
     {(newEcosystem?.ecoRules?.map((ecoRule, index) => 
-      (<InputField {...{show: newEcosystem?.nameField, name: index, value: ecoRule?.rule, placeholder: `Ecosystem rule`, inputKeyDown, onInput, setupEcosystem, target: index, isSet: ecoRule?.isSet, clearInput, cancel: true, removeField: removeEcoField }} key={index} />)))}
+      (<InputField {...{show: newEcosystem?.nameField, name: index, value: ecoRule?.rule, placeholder: `Ecosystem rule`, inputKeyDown, onInput: ecoFields, setupEcosystem, target: index, isSet: ecoRule?.isSet, clearInput: clearEcoField, cancel: true, removeField: removeEcoField }} key={index} />)))}
 
 
     {newEcosystem?.nameField && (<div className='flex-row' style={{margin: '33px 3px 8px 3px', gap: '1rem', justifyContent: 'space-between'}}>
