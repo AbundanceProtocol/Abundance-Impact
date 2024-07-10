@@ -114,12 +114,34 @@ export default async function handler(req, res) {
           });
           const getRemaining = await remainingBalance.json()
           let remaining = 0
-          let total = 0
     
           if (getRemaining) {
             console.log(getRemaining)
             remaining = Number(getRemaining.allowance) - Number(getRemaining.used)
-            total = Number(getRemaining.allowance)
+          }
+          return remaining
+        } catch (error) {
+          console.error('Error handling GET request:', error);
+          return 0
+        }
+      }
+
+      async function getHamAllowance(fid) {
+        try {
+          const input = encodeURIComponent(JSON.stringify({ fid: fid }))
+          const remainingUrl = `https://farther.social/api/v1/public.user.byFid?input=${input}`;
+          const fartherData = await fetch(remainingUrl)
+          let remainingBalance = 0
+          if (fartherData?.status == 200) {
+            const fartherInfo = await fartherData.json()
+            remainingBalance = fartherInfo?.result?.data?.tips?.currentCycle?.remainingAllowance
+            console.log('20', remainingBalance)
+          }
+    
+          let remaining = 0
+          let total = 0
+          if (remainingBalance) {
+            remaining = Number(remainingBalance)
           }
           return remaining
         } catch (error) {
@@ -136,6 +158,11 @@ export default async function handler(req, res) {
           const allowanceData = {token: coin, set: true, allowance: tip, totalTip: tip}
           allowances.push(allowanceData)
         } else if (coin == '$DEGEN') {
+          const allowance = await getDegenAllowance(fid)
+          const tip = Math.round(allowance * percent / 100)
+          const allowanceData = {token: coin, set: true, allowance: tip, totalTip: tip}
+          allowances.push(allowanceData)
+        } else if (coin == '$FARTHER') {
           const allowance = await getDegenAllowance(fid)
           const tip = Math.round(allowance * percent / 100)
           const allowanceData = {token: coin, set: true, allowance: tip, totalTip: tip}

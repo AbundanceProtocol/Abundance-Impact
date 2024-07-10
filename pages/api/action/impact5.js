@@ -22,6 +22,7 @@ export default async function handler(req, res) {
     const curatorFid = req.body.untrustedData.fid
     const castHash = req.body.untrustedData.castId.hash
     // const authorFid = req.body.untrustedData.castId.fid
+    const signer = decryptPassword(encryptedBotUuid, secretKey)
 
     async function getEcosystem(points) {
       try {
@@ -243,6 +244,44 @@ export default async function handler(req, res) {
                     const { balance, castImpact } = await saveAll(user, impact, cast)
                     let impactTotal = impactAmount
                     let curatorCount = 1
+                    
+                    async function nominationCast(user, curator, ecosystem, hash, signer) {
+                      try {
+                        const base = "https://api.neynar.com/";
+                        const url = `${base}v2/farcaster/cast`;
+                  
+                        let body = {
+                          signer_uuid: signer,
+                          text: `@${user} has been nominated by @${curator} for contributing to the ${ecosystem} Ecosystem on /impact`,
+                        };
+                  
+                        body.parent = hash;
+  
+                        const response = await fetch(url, {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                            'api_key': apiKey,
+                          },
+                          body: JSON.stringify(body),
+                        });
+                        console.log(response)
+                        if (!response.ok) {
+                          console.error(`Failed to send nomination`);
+                          return false
+                        } else {
+                          console.log(`Nomination sent successfully`);
+                          return true
+                        }
+  
+                      } catch (error) {
+                        console.error('Error handling GET request:', error);
+                        return false
+                      }
+                    }
+  
+                    nominationCast(castContext.author_username, user.username, ecosystem.ecosystem_name, castContext.cast_hash, signer)
+
                     return { balance, castImpact, impactTotal, curatorCount }
                   }
                   
@@ -284,10 +323,7 @@ export default async function handler(req, res) {
           if (impactTotal >= ecosystem.condition_points_threshold &&  curatorCount >= ecosystem.condition_curators_threshold) {
 
             async function curateCast(hash) {
-              const signer = decryptPassword(encryptedBotUuid, secretKey)
               try {
-                // console.log(hash)
-          
                 const base = "https://api.neynar.com/";
                 const url = `${base}v2/farcaster/reaction`;
                 const response = await fetch(url, {

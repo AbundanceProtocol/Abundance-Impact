@@ -3,7 +3,7 @@ import { AccountContext } from '../../../context';
 import { FaLock } from 'react-icons/fa';
 import useStore from '../../../utils/store';
 
-const TipScheduler = ({ initHour, setInitHour, initMinute, setInitMinute, userQuery, tokenData, initValue, setLoading }) => {
+const TipScheduler = ({ initHour, setInitHour, initMinute, setInitMinute, userQuery, tokenData, initValue, setLoading, type }) => {
   const { LoginPopup, isLogged, fid, ecoData } = useContext(AccountContext)
   const [hour, setHour] = useState(initHour);
   const [minute, setMinute] = useState(initMinute);
@@ -91,7 +91,7 @@ const TipScheduler = ({ initHour, setInitHour, initMinute, setInitMinute, userQu
 
   return (
     <>
-      <div className={`flex-col ${(hour !== 'Hr' && isLogged) ? 'follow-select' : 'follow-locked'}`} style={{width: '150px', gap: '0.25rem', alignItems: 'center', justifyContent: 'center', padding: '0px 8px', height: '48px', margin: '2px 0 2px 10px', cursor: 'default', maxWidth: '150px'}}>
+      <div className={`flex-col ${(hour !== 'Hr' && isLogged) ? 'follow-select' : 'follow-locked'}`} style={{width: '150px', gap: '0.25rem', alignItems: 'center', justifyContent: 'center', padding: type == 'schedule' ? '6px 8px 6px 8px' : '0px 8px', height: type == 'schedule' ? '60px': '48px', margin: '2px 0 2px 10px', cursor: 'default', maxWidth: '150px'}}>
         <div className='flex-row' style={{gap: '0.5rem'}}>
           <select id="hourSelect" value={hour} onChange={handleHourChange} style={{backgroundColor: '#adf', borderRadius: '4px'}}>
             {hoursOptions.map((option) => (
@@ -113,7 +113,7 @@ const TipScheduler = ({ initHour, setInitHour, initMinute, setInitMinute, userQu
             LoginPopup() 
           } else if (hour !== 'Hr') {
             handleSubmit(fid, store.signer_uuid, initValue) 
-          }}} style={{backgroundColor: 'transparent', fontWeight: '600', color: '#fff', cursor: (hour !== 'Hr' || !isLogged) ? 'pointer' : 'default', fontSize: '12px', padding: '0'}}>SCHEDULE TIP</button>
+          }}} style={{backgroundColor: 'transparent', fontWeight: '600', color: '#fff', cursor: (hour !== 'Hr' || !isLogged) ? 'pointer' : 'default', fontSize: '12px', padding: '0'}}>{type == 'schedule' ? 'MODIFY SCHEDULE' : 'SCHEDULE TIP'}</button>
       </div>
       {!isLogged && (<div style={{position: 'relative', fontSize: '0', width: '0', height: '100%'}}>
         <div className='top-layer' style={{position: 'absolute', top: 0, left: 0, transform: 'translate(-170%, -10%)' }}>

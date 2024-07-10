@@ -19,6 +19,8 @@ export default async function handler(req, res) {
     res.status(405).json({ error: 'Method not allowed' });
   } else {
     // console.log('1')
+    const signer = decryptPassword(encryptedBotUuid, secretKey)
+
     await connectToDatabase();
 
     const ecosystem = await EcosystemRules.findOne({ ecosystem_points_name: points }).exec();
@@ -156,16 +158,51 @@ export default async function handler(req, res) {
                     impact_total: impactAmount,
                     impact_points: [impact],
                   });
-                  // console.log('325', cast)
+
                   const saveLists = await saveAll(user, impact, cast)
-                  // console.log('savelists 3', saveLists)
                   let impactTotal = impactAmount
                   let curatorCount = 1
+
+                  async function nominationCast(user, curator, ecosystem, hash, signer) {
+                    try {
+                      const base = "https://api.neynar.com/";
+                      const url = `${base}v2/farcaster/cast`;
+                
+                      let body = {
+                        signer_uuid: signer,
+                        text: `@${user} has been nominated by @${curator} for contributing to the ${ecosystem} Ecosystem on /impact`,
+                      };
+                
+                      body.parent = hash;
+
+                      const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                          'api_key': apiKey,
+                        },
+                        body: JSON.stringify(body),
+                      });
+                      console.log(response)
+                      if (!response.ok) {
+                        console.error(`Failed to send nomination`);
+                        return false
+                      } else {
+                        console.log(`Nomination sent successfully`);
+                        return true
+                      }
+
+                    } catch (error) {
+                      console.error('Error handling GET request:', error);
+                      return false
+                    }
+                  }
+
+                  nominationCast(castContext.author_username, user.username, ecosystem.ecosystem_name, castContext.cast_hash, signer)
 
                   return {saveLists, impactTotal, curatorCount}
                 }
               } else {
-                // console.log('18')
                 return {saveLists: null, impactTotal: null , curatorCount: null}
               }
             } catch (error) {
@@ -178,17 +215,13 @@ export default async function handler(req, res) {
           console.log('7', saveLists, impactTotal, curatorCount)
 
           if (saveLists || saveLists == 0) {
-            // console.log('19')
             let curatedCast = null
 
             if (channelCuration) {
               if (impactTotal >= ecosystem.condition_points_threshold &&  curatorCount >= ecosystem.condition_curators_threshold) {
 
                 async function curateCast(hash) {
-                  const signer = decryptPassword(encryptedBotUuid, secretKey)
                   try {
-                    // console.log(hash)
-              
                     const base = "https://api.neynar.com/";
                     const url = `${base}v2/farcaster/reaction`;
                     const response = await fetch(url, {
@@ -205,7 +238,6 @@ export default async function handler(req, res) {
                       })})
                       
                     const cast = await response.json();
-                    // console.log(cast)
                     return cast
                   } catch (error) {
                     console.error('Error handling POST request:', error);

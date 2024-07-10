@@ -390,17 +390,19 @@ export default function Ecosystem() {
   }
 
   const getUserEcosystems = async (fid) => {
-    try {
-      const ecosystemsData = await axios.get('/api/ecosystem/getUserEcosystems', { params: { fid } })
-      if (ecosystemsData) {
-        const ecosystems = ecosystemsData.data.ecosystems
-        console.log(ecosystems)
-        setUserEcosystems(ecosystems)
+    if (fid) {
+      try {
+        const ecosystemsData = await axios.get('/api/ecosystem/getUserEcosystems', { params: { fid } })
+        if (ecosystemsData) {
+          const ecosystems = ecosystemsData.data.ecosystems
+          console.log(ecosystems)
+          setUserEcosystems(ecosystems)
+          setLoadedSchedule(true)
+        }
+      } catch (error) {
+        console.error('Error creating post:', error);
         setLoadedSchedule(true)
       }
-    } catch (error) {
-      console.error('Error creating post:', error);
-      setLoadedSchedule(true)
     }
   }
 

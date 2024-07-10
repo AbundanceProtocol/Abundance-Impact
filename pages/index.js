@@ -103,7 +103,7 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
   const [initHour, setInitHour] = useState('Hr')
   const [initMinute, setInitMinute] = useState('0')
   const [tokensSelected, setTokensSelected] = useState(['$DEGEN'])
-  const availableTokens = ['$DEGEN', '$TN100x']
+  const availableTokens = ['$DEGEN', '$TN100x', '$FARTHER']
   const [noTip, setNoTip] = useState(true)
   const [cursor, setCursor] = useState('')
   const [prevCursor, setPrevCursor] = useState('')
@@ -181,10 +181,10 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
       if (isLogged && ecoData) {
         if (searchSelect == 'Curation') {
           feedRouter()
-        } else if (searchSelect == 'Main') {
-          getFeed(fid, ecoData.channels[0].name, true)
-        } else if (searchSelect == 'Recent') {
-          getFeed(fid, ecoData.channels[0].name, false)
+        } else if (searchSelect == 'Main' && ecoData?.channels?.length > 0) {
+          getFeed(fid, ecoData?.channels[0]?.name, true)
+        } else if (searchSelect == 'Recent' && ecoData?.channels?.length > 0) {
+          getFeed(fid, ecoData?.channels[0]?.name, false)
         }
       }
     }
@@ -311,6 +311,8 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
       getToken = 'degen'
     } else if (token == '$TN100x') {
       getToken = 'ham'
+    } else if (token == '$FARTHER') {
+      getToken = 'farther'
     }
 
     try {
@@ -1097,11 +1099,9 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
     </Head>
     <div style={{padding: '58px 0 0 0', width: feedMax}}>
     </div>
-
     <div className="top-layer">
       <div className="flex-row" style={{padding: '0', marginBottom: '10px', flexWrap: 'wrap', justifyContent: 'center'}}>
-        <div className='flex-row' style={{gap: '0.5rem', width: '100%'}}>
-
+        <div className='flex-row' style={{gap: '0.5rem', width: '100%', alignItems: 'center'}}>
           {isLogged && userProfile && (
             <a className="" title="" href={`/${userProfile.username}`} onClick={() => {goToUserProfile(event, store.userProfile)}}>
               <img loading="lazy" src={userProfile.pfp_url} className="" alt={`${userProfile.display_name} avatar`} style={{width: '40px', height: '40px', maxWidth: '48px', maxHeight: '48px', borderRadius: '24px', border: '1px solid #abc', margin: '6px 0 2px 20px'}} />
