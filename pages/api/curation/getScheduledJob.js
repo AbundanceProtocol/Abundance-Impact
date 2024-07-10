@@ -126,7 +126,7 @@ export default async function handler(req, res) {
         }
       }
 
-      async function getHamAllowance(fid) {
+      async function getFartherAllowance(fid) {
         try {
           const input = encodeURIComponent(JSON.stringify({ fid: fid }))
           const remainingUrl = `https://farther.social/api/v1/public.user.byFid?input=${input}`;
@@ -139,7 +139,6 @@ export default async function handler(req, res) {
           }
     
           let remaining = 0
-          let total = 0
           if (remainingBalance) {
             remaining = Number(remainingBalance)
           }
@@ -163,7 +162,7 @@ export default async function handler(req, res) {
           const allowanceData = {token: coin, set: true, allowance: tip, totalTip: tip}
           allowances.push(allowanceData)
         } else if (coin == '$FARTHER') {
-          const allowance = await getDegenAllowance(fid)
+          const allowance = await getFartherAllowance(fid)
           const tip = Math.round(allowance * percent / 100)
           const allowanceData = {token: coin, set: true, allowance: tip, totalTip: tip}
           allowances.push(allowanceData)
