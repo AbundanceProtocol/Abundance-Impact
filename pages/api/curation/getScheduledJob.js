@@ -107,8 +107,10 @@ export default async function handler(req, res) {
 
       async function getDegenAllowance(fid) {
         try {
-          const remainingBase = "https://www.degentip.me/";
-          const remainingUrl = `${remainingBase}api/get_allowance?fid=${fid}`;
+          // const remainingBase = "https://www.degentip.me/";
+          // const remainingUrl = `${remainingBase}api/get_allowance?fid=${fid}`;
+          const remainingBase = "https://www.degen.tips/";
+          const remainingUrl = `${remainingBase}api/airdrop2/tip-allowance?fid=${fid}`;
           const remainingBalance = await fetch(remainingUrl, {
             headers: {
               accept: "application/json",
@@ -118,7 +120,11 @@ export default async function handler(req, res) {
           let remaining = 0
     
           if (getRemaining) {
-            remaining = getRemaining.allowance.remaining_allowance
+            remaining = parseInt(getRemaining[0]?.remaining_allowance)
+            total = parseInt(getRemaining[0]?.tip_allowance)
+          }
+          if (!remaining && remaining !== 0) {
+            remaining = total
           }
           return remaining
         } catch (error) {

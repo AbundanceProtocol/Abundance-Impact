@@ -1083,7 +1083,6 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
     }
   }
 
-
   return (
   <div name='feed' style={{width: 'auto', maxWidth: '620px'}} ref={ref2}>
     <Head>

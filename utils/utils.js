@@ -415,21 +415,35 @@ export async function processTips(userFeed, userFid, tokenData, ecosystem, curat
     // console.log(coinTotals)
   
     for (const tipCast of tipCasts) {
-      if (tipCast.allCoins && tipCast.allCoins.length > 0) {
+      if (tipCast?.allCoins?.length > 0) {
         for (const coin of tipCast.allCoins) {
           coinTotals[coin.coin].usedTip += coin.tip
         }
       }
     }
   
+    let count = 0
+    for (const cast of tipCasts) {
+      for (const coin of cast.allCoins) {
+        if (coin.coin == '$FARTHER' && coin.tip > 0) {
+          count++
+        }
+      }
+    }
+    console.log(count)
+
     for (const coin of tokenData) {
       if (coin.set) {
         coinTotals[coin.token].remaining = coinTotals[coin.token].totalTip - coinTotals[coin.token].usedTip
-  
+        console.log(tipCasts)
         if (tipCasts.length > 0) {
-          coinTotals[coin.token].mod = coinTotals[coin.token].remaining % tipCasts.length
-  
-          coinTotals[coin.token].div = Math.floor(coinTotals[coin.token].remaining / tipCasts.length)
+          if (coin.token !== '$FARTHER') {
+            coinTotals[coin.token].mod = coinTotals[coin.token].remaining % tipCasts.length
+            coinTotals[coin.token].div = Math.floor(coinTotals[coin.token].remaining / tipCasts.length)
+          } else if (coin.token == '$FARTHER' && count > 0) {
+            coinTotals[coin.token].mod = coinTotals[coin.token].remaining % count
+            coinTotals[coin.token].div = Math.floor(coinTotals[coin.token].remaining / count)
+          }
         }
       }
     }
@@ -438,7 +452,11 @@ export async function processTips(userFeed, userFid, tokenData, ecosystem, curat
       if (cast.allCoins && cast.allCoins.length > 0) {
         for (const coin of cast.allCoins) {
           if (coinTotals[coin.coin].div > 0) {
-            coin.tip += coinTotals[coin.coin].div
+            if (coin.coin !== '$FARTHER') {
+              coin.tip += coinTotals[coin.coin].div
+            } else if (coin.coin == '$FARTHER' && coin.tip > 0) {
+              coin.tip += coinTotals[coin.coin].div
+            }
           }
         }
       }

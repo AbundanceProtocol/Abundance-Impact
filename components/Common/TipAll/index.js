@@ -23,7 +23,6 @@ const TipAll = ({ tokenData, setTokenData, loading, setLoading, noTip, modal, se
           data: castData,
           points: points
         })
-        console.log(castData)
         if (response?.status !== 200) {
           setLoading(false)
           console.log(response)
