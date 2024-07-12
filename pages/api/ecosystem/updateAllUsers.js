@@ -44,7 +44,7 @@ export default async function handler(req, res) {
       async function getUsers(points) {
         try {
           await connectToDatabase();
-          const users = await User.find({ecosystem_points: points}).exec()
+          const users = await User.find({ecosystem_points: points, impact_allowance: { $ne: 0 } }).exec()
   
           if (users) {
             return users

@@ -1,8 +1,9 @@
 import connectToDatabase from "../../../libs/mongodb";
 import EcosystemRules from "../../../models/EcosystemRules";
 import User from "../../../models/User";
-import { getCurrentDateUTC } from "../../../utils/utils";
+import { getCurrentDateUTC, encryptPassword } from "../../../utils/utils";
 import { Alchemy, Network } from "alchemy-sdk";
+const secretKey = process.env.SECRET_KEY
 
 export default async function handler(req, res) {
   const apiKey = process.env.NEYNAR_API_KEY
@@ -10,11 +11,12 @@ export default async function handler(req, res) {
   const BaseAlchemyKey = process.env.ALCHEMY_BASE_API_KEY
   const OpAlchemyKey = process.env.ALCHEMY_OP_API_KEY
   const ArbAlchemyKey = process.env.ALCHEMY_ARB_API_KEY
-  const { fid, points } = req.query;
+  const { fid, points, uuid } = req.query;
 
-  if (req.method !== 'GET' || !fid || !points) {
+  if (req.method !== 'GET' || !fid || !points || !uuid ) {
     res.status(405).json({ error: 'Method Not Allowed' });
   } else {
+    const encryptedUuid = encryptPassword(uuid, secretKey);
 
     async function getEcosystem(points) {
       try {
@@ -82,7 +84,6 @@ export default async function handler(req, res) {
       let hasWalletReq = true
       let hasWallet = true
       let eligibility = true
-
 
       if (ecosystem.condition_channels && ecosystem.condition_following_channel) {
         channelFollowerReq = true
@@ -343,8 +344,9 @@ export default async function handler(req, res) {
 
       let createUser = null 
 
-      async function userCreation(fid, ecosystem) {
+      async function userCreation(fid, ecosystem, eligibility) {
         let createUser = null 
+        let balance = eligibility ? 69 : 0
 
         createUser = await User.findOne({ fid: fid, ecosystem_name: ecosystem.ecosystem_name }).select('remaining_i_allowance remaining_q_allowance').exec();
         console.log(createUser)
@@ -390,6 +392,7 @@ export default async function handler(req, res) {
 
           createUser = await User.create({
             fid: user.fid,
+            uuid: encryptedUuid,
             ecosystem_points: ecosystem.ecosystem_points_name,
             ecosystem_name: ecosystem.ecosystem_name,
             pfp: user.pfp_url,
@@ -398,10 +401,10 @@ export default async function handler(req, res) {
             display_name: user.display_name,
             set_cast_hash: hash,
             need_cast_hash: needHash,
-            impact_allowance: 100,
-            remaining_i_allowance: 100,
-            quality_allowance: 100,
-            remaining_q_allowance: 100,
+            impact_allowance: balance,
+            remaining_i_allowance: balance,
+            quality_allowance: balance,
+            remaining_q_allowance: balance,
             quality_score_added: 0,
             quality_bonus_added: 0,
             power_badge: user.power_badge,
@@ -409,18 +412,31 @@ export default async function handler(req, res) {
           });
 
           console.log('createUser', createUser)
+        } else if (createUser) {
+          console.log(typeof createUser?.uuid == 'undefined')
+          if (typeof createUser.uuid == 'undefined') {
+            createUser.uuid = encryptedUuid
+          }
+          if (createUser?.impact_allowance == 0 && createUser?.quality_allowance == 0 && eligibility) {
+            createUser.impact_allowance = balance
+            createUser.remaining_i_allowance = balance
+            createUser.quality_allowance = balance
+            createUser.remaining_q_allowance = balance
+          }
+          await createUser.save()
         }
         return createUser
       }
 
       if (modReq == true && mod == true && hasWallet == true) {
         eligibility = true
-        createUser = await userCreation(fid, ecosystem)
+        createUser = await userCreation(fid, ecosystem, true)
       } else if (hasWallet == false || (badgeReq == true && badge == false) || (channelFollowerReq == true && channelFollower == false) || (ownerFollowerReq == true && ownerFollower == false) || (holdingNFTReq == true && holdingNFT == false) || (holdingERC20Req == true && holdingERC20 == false)) {
         eligibility = false
+        createUser = await userCreation(fid, ecosystem, false)
       } else {
         eligibility = true
-        createUser = await userCreation(fid, ecosystem)
+        createUser = await userCreation(fid, ecosystem, true)
       }
 
       const eligibilityData = {
@@ -440,6 +456,8 @@ export default async function handler(req, res) {
         mod,
         modReq,
       }
+
+      if (createUser?.uuid) { delete createUser.uuid }
 
       res.status(200).json({ ecosystem, user, eligibilityData, createUser });
     }

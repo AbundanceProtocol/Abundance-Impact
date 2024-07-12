@@ -6,10 +6,10 @@ export default async function handler(req, res) {
   } else {
     console.log(fid)
     try {
-      // const remainingBase = "https://www.degentip.me/";
-      // const remainingUrl = `${remainingBase}api/get_allowance?fid=${fid}`;
-      const remainingBase = "https://www.degen.tips/";
-      const remainingUrl = `${remainingBase}api/airdrop2/tip-allowance?fid=${fid}`;
+      const remainingBase = "https://www.degentip.me/";
+      const remainingUrl = `${remainingBase}api/get_allowance?fid=${fid}`;
+      // const remainingBase = "https://www.degen.tips/";
+      // const remainingUrl = `${remainingBase}api/airdrop2/tip-allowance?fid=${fid}`;
       const remainingBalance = await fetch(remainingUrl, {
         headers: {
           accept: "application/json",
@@ -21,10 +21,10 @@ export default async function handler(req, res) {
       console.log(getRemaining)
 
       if (getRemaining) {
-        // remaining = getRemaining.allowance.remaining_allowance
-        // total = getRemaining.allowance.tip_allowance
-        remaining = parseInt(getRemaining[0]?.remaining_allowance)
-        total = parseInt(getRemaining[0]?.tip_allowance)
+        remaining = getRemaining?.allowance?.remaining_allowance
+        total = getRemaining?.allowance?.tip_allowance
+        // remaining = parseInt(getRemaining[0]?.remaining_allowance)
+        // total = parseInt(getRemaining[0]?.tip_allowance)
       }
       if (!remaining && remaining !== 0) {
         remaining = total
