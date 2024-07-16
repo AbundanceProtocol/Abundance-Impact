@@ -180,6 +180,7 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
         setIsLogged(true);
         setFid(store.fid)
         getUserProfile(store.fid)
+        setShowLogin(false)
       } else {
         setIsLogged(false);
         setFid(null)
