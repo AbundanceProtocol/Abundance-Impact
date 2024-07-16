@@ -135,7 +135,9 @@ export function isYesterday(previous, current) {
 export function getTimeRange(time) {
 
   let timeRange = null
-  if (time === '24hr') {
+  if (time == '1hr') {
+    timeRange = new Date(Date.now() - 1 * 60 * 60 * 1000);
+  } else if (time === '24hr') {
     timeRange = new Date(Date.now() - 24 * 60 * 60 * 1000);
   } else if (time === '3days') {
     timeRange = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);

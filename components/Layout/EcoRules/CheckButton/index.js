@@ -3,7 +3,7 @@ import { AccountContext } from '../../../../context';
 import useStore from '../../../../utils/store';
 
 const CheckButton = ({ isMobile }) => {
-  const { checkEcoEligibility, points, fid, isLogged } = useContext(AccountContext);
+  const { checkEcoEligibility, points, fid, isLogged, LoginPopup } = useContext(AccountContext);
   const store = useStore()
 
   return (

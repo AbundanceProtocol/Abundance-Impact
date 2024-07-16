@@ -927,6 +927,21 @@ blockquote {
     background-color: #169;
 }
 
+.frame-btn {
+    color: #def;
+    cursor: pointer;
+    margin: 0px;
+    padding: 8px;
+    border-radius: 5px;
+    background-color: #345;
+    text-align: center;
+    font-weight: 500;
+}
+
+.frame-btn:hover {
+    background-color: #456;
+}
+
 .unfollow-select {
     border: 2px solid #27a;
     border-radius: 8px;

@@ -684,6 +684,12 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  useEffect(() => {
+    if (!isLogged) {
+      LoginPopup()
+    }
+  }, [router]);
+
   function feedRouter() {
     const { shuffle, time, tags, channels, curators } = userQuery
     const timeRange = getTimeRange(time)
@@ -1028,26 +1034,26 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
   function addCurator(curator) {
     console.log(curator)
     setUserQuery(prevUserQuery => {
-    const curatorIndex = prevUserQuery.curators.indexOf(curator.fid);
+    const curatorIndex = prevUserQuery.curators.indexOf(curator?.fid);
     if (curatorIndex === -1) {
       return {
         ...prevUserQuery,
-        curators: [...prevUserQuery.curators, curator.fid]
+        curators: [...prevUserQuery.curators, curator?.fid]
       };
     } else {
       // If the curator is found, remove it from the array
       return {
         ...prevUserQuery,
-        curators: prevUserQuery.curators.filter(item => item !== curator.fid)
+        curators: prevUserQuery.curators.filter(item => item !== curator?.fid)
         };
       }
     });
 
-    const isCuratorSelected = selectedCurators.some((c) => c.fid === curator.fid);
+    const isCuratorSelected = selectedCurators.some((c) => c.fid === curator?.fid);
 
     if (isCuratorSelected) {
       // If the curator is already selected, remove it from the state
-      setSelectedCurators(selectedCurators.filter((c) => c.fid !== curator.fid));
+      setSelectedCurators(selectedCurators.filter((c) => c.fid !== curator?.fid));
     } else {
       // If the curator is not selected, add it to the state
       setSelectedCurators([...selectedCurators, curator]);

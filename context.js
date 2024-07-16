@@ -138,10 +138,12 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
   }
 
   useEffect(() => {
-    console.log(' triggered []')
-    console.log(store.points, points)
-    getEcosystems(store.points || points)
-    console.log(router)
+    if (router.route !== "/~/ecosystems/[ecosystem]/tip") {
+      console.log(' triggered []')
+      console.log(store.points, points)
+      getEcosystems(store.points || points)
+      console.log(router)
+    }
   }, [])
 
   useEffect(() => {
@@ -155,15 +157,17 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
       }
     }
 
-    if (sched.ecoData) {
-      updateEcoData()
-      setSched(prev => ({...prev, ecoData: false }))
-    } else {
-      const timeoutId = setTimeout(() => {
+    if (router.route !== "/~/ecosystems/[ecosystem]/tip") {
+      if (sched.ecoData) {
         updateEcoData()
         setSched(prev => ({...prev, ecoData: false }))
-      }, 300);
-      return () => clearTimeout(timeoutId);
+      } else {
+        const timeoutId = setTimeout(() => {
+          updateEcoData()
+          setSched(prev => ({...prev, ecoData: false }))
+        }, 300);
+        return () => clearTimeout(timeoutId);
+      }
     }
   }, [ecoData, isLogged, sched.ecoData])
 
@@ -185,16 +189,19 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
       }
     }
 
-    if (sched.login) {
-      updateLogin()
-      setSched(prev => ({...prev, login: false }))
-    } else {
-      const timeoutId = setTimeout(() => {
+    if (router.route !== "/~/ecosystems/[ecosystem]/tip") {
+      if (sched.login) {
         updateLogin()
         setSched(prev => ({...prev, login: false }))
-      }, 300);
-      return () => clearTimeout(timeoutId);
+      } else {
+        const timeoutId = setTimeout(() => {
+          updateLogin()
+          setSched(prev => ({...prev, login: false }))
+        }, 300);
+        return () => clearTimeout(timeoutId);
+      }
     }
+
   }, [store.isAuth, sched.login]);
 
   const getRemainingBalances = async (fid, points, uuid) => {

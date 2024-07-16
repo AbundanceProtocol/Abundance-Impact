@@ -2,11 +2,13 @@ import React, { useState, useContext, useEffect } from 'react';
 import { AccountContext } from '../../../../context';
 import Creators from './Creators';
 import axios from 'axios';
+import { useRouter } from 'next/router';
 
 const Leaderboard = () => {
   const { points } = useContext(AccountContext);
   const [topCreators, setTopCreators] = useState([])
   const [sched, setSched] = useState({points: false})
+  const router = useRouter()
 
   async function getTopCreators() {
     // if (!paused) {
@@ -30,15 +32,17 @@ const Leaderboard = () => {
   }
 
   useEffect(() => {
-    if (sched.points) {
-      getTopCreators()
-      setSched(prev => ({...prev, points: false }))
-    } else {
-      const timeoutId = setTimeout(() => {
+    if (router.route !== "/~/ecosystems/[ecosystem]/tip") {
+      if (sched.points) {
         getTopCreators()
         setSched(prev => ({...prev, points: false }))
-      }, 1000);
-      return () => clearTimeout(timeoutId);
+      } else {
+        const timeoutId = setTimeout(() => {
+          getTopCreators()
+          setSched(prev => ({...prev, points: false }))
+        }, 1000);
+        return () => clearTimeout(timeoutId);
+      }
     }
   }, [points, sched.points]);
 
