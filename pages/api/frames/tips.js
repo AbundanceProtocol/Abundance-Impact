@@ -6,7 +6,7 @@ import Cast from  "../../../models/Cast";
 import Impact from  "../../../models/Impact";
 import EcosystemRules from  "../../../models/EcosystemRules";
 import { decryptPassword, getTimeRange, processTips, populateCast } from "../../../utils/utils";
-import validator from "validator";
+import _ from "lodash";
 
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 const HubURL = process.env.NEYNAR_HUB
@@ -98,8 +98,8 @@ export default async function handler(req, res) {
     let allowances = []
 
     function sanitizeInput(input) {
-      input = validator.trim(input);
-      input = validator.stripLow(input, true);
+      input = _.trim(input);
+      input = _.replace(input, /[\x00-\x1F\x7F-\x9F]/g, ''); // Remove control characters
       return input;
     }
 
