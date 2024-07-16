@@ -6,7 +6,6 @@ import Cast from  "../../../models/Cast";
 import Impact from  "../../../models/Impact";
 import EcosystemRules from  "../../../models/EcosystemRules";
 import { decryptPassword, getTimeRange, processTips, populateCast } from "../../../utils/utils";
-import qs from "querystring";
 
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 const HubURL = process.env.NEYNAR_HUB
@@ -77,11 +76,14 @@ export default async function handler(req, res) {
     const loginUrl = `${baseURL}/~/ecosystems/${ecosystem}/tips-login?tip=0${timeQuery + curatorsQuery + shuffleQuery + referrerQuery + ecoQuery}`
     const sendPost = `${baseURL}/api/frames/tips?tip=0${timeQuery + curatorsQuery + shuffleQuery + referrerQuery + ecoQuery}`
     const postUrl = `${baseURL}/~/ecosystems/${ecosystem}/tips-login?tip=0${timeQuery + curatorsQuery + shuffleQuery + referrerQuery + ecoQuery}`
+    const shareUrl = `${baseURL}/~/ecosystems/${ecosystem}/tips?tip=0${timeQuery + curatorsQuery + shuffleQuery + referrerQuery + ecoQuery}`
 
-    const shareLink = `https://warpcast.com/~/compose?${qs.stringify({
-      text: 'I justed multi-tipped builders and creators on /impact. Try it out here:',
-      embeds: postUrl,
-    })}`
+    const encodedShareUrl = encodeURIComponent(shareUrl); 
+    const shareText = 'I justed multi-tipped builders and creators on /impact. Try it out here:'
+    const encodedShareText = encodeURIComponent(shareText); 
+
+
+    const shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${encodedShareUrl}`
     
     // Example usage
     // const input = "500 $degen, 400 $HAM 10000 $wild 🍖x400, 300 $HAM";
