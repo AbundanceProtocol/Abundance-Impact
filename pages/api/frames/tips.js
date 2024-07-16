@@ -60,9 +60,9 @@ export default async function handler(req, res) {
     }
 
     let timeRange = null
-    if (time) {
-      timeRange = getTimeRange(time)
-    }
+    // if (time) {
+    //   timeRange = getTimeRange(time)
+    // }
 
     const loginImg = `${baseURL}/images/login.jpg`;
     const processingImg = `${baseURL}/images/processing.jpg`;
@@ -357,8 +357,8 @@ export default async function handler(req, res) {
           
               let totalCount;
               let returnedCasts = []
-          
-              if (!shuffle) {
+              let random = true
+              if (!random) {
                 totalCount = await Cast.countDocuments(query);
                 returnedCasts = await Cast.find(query)
                   .sort({ impact_total: -1 })
