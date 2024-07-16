@@ -65,7 +65,7 @@ export default function Tips({time, curators, channels, tags, shuffle, referrer,
         }
       ],
       input: {
-        text: "Eg.: 1000 $Degen, 500 $FARTHER, 100 $RARE"
+        text: "Eg.: 1000 $Degen, 500 $FARTHER"
       },
       state: {},
       frames_url: `${baseURL}/~/ecosystems/${ecosystem}/tips`
@@ -312,7 +312,7 @@ export default function Tips({time, curators, channels, tags, shuffle, referrer,
         <meta property="fc:frame:button:3" content={`What's /impact?`} />
         <meta property="fc:frame:button:3:action" content="link" />
         <meta property="fc:frame:button:3:target" content={`https://warpcast.com/abundance/0x43ddd672`} />
-        <meta name="fc:frame:input:text" content="Eg.: 1000 $Degen, 500 $FARTHER, 100 $RARE" />
+        <meta name="fc:frame:input:text" content="Eg.: 1000 $Degen, 500 $FARTHER" />
       </Head>
     )}
 
