@@ -138,7 +138,7 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
   }
 
   useEffect(() => {
-    if (router.route !== "/~/ecosystems/[ecosystem]/tip") {
+    if (router.route !== "/~/ecosystems/[ecosystem]/tip" && router.route !== "/~/ecosystems/[ecosystem]/[eco]/[curators]/tip") {
       console.log(' triggered []')
       console.log(store.points, points)
       getEcosystems(store.points || points)
@@ -157,7 +157,7 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
       }
     }
 
-    if (router.route !== "/~/ecosystems/[ecosystem]/tip") {
+    if (router.route !== "/~/ecosystems/[ecosystem]/tip" && router.route !== "/~/ecosystems/[ecosystem]/[eco]/[curators]/tip") {
       if (sched.ecoData) {
         updateEcoData()
         setSched(prev => ({...prev, ecoData: false }))
@@ -190,7 +190,7 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
       }
     }
 
-    if (router.route !== "/~/ecosystems/[ecosystem]/tip" || router.route !== "/~/ecosystems/[ecosystem]/[eco]/[curators]/tip") {
+    if (router.route !== "/~/ecosystems/[ecosystem]/tip" && router.route !== "/~/ecosystems/[ecosystem]/[eco]/[curators]/tip") {
       if (sched.login) {
         updateLogin()
         setSched(prev => ({...prev, login: false }))

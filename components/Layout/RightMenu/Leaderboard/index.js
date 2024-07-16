@@ -32,7 +32,7 @@ const Leaderboard = () => {
   }
 
   useEffect(() => {
-    if (router.route !== "/~/ecosystems/[ecosystem]/tip") {
+    if (router.route !== "/~/ecosystems/[ecosystem]/tip" && router.route !== "/~/ecosystems/[ecosystem]/[eco]/[curators]/tip") {
       if (sched.points) {
         getTopCreators()
         setSched(prev => ({...prev, points: false }))
