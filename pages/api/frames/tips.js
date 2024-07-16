@@ -6,6 +6,7 @@ import Cast from  "../../../models/Cast";
 import Impact from  "../../../models/Impact";
 import EcosystemRules from  "../../../models/EcosystemRules";
 import { decryptPassword, getTimeRange, processTips, populateCast } from "../../../utils/utils";
+import validator from "validator";
 
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 const HubURL = process.env.NEYNAR_HUB
@@ -96,6 +97,11 @@ export default async function handler(req, res) {
     // const input = "500 $degen, 400 $HAM 10000 $wild 🍖x400, 300 $HAM";
     let allowances = []
 
+    function sanitizeInput(input) {
+      input = validator.trim(input);
+      input = validator.stripLow(input, true);
+      return input;
+    }
 
     if (!inputText || inputText == '') {
 
@@ -128,8 +134,12 @@ export default async function handler(req, res) {
     } else {
 
       function formatStringToArray(input) {
+
+        // Sanitize the input
+        const sanitizedInput = sanitizeInput(input)
+
         // Split the input string by spaces and commas
-        const items = input.split(/[\s,]+/);
+        const items = sanitizedInput.split(/[\s,]+/);
       
         // Initialize an object to track the combined amounts for each coin
         const combinedAmounts = {};
@@ -144,7 +154,6 @@ export default async function handler(req, res) {
             // Check for specific coins that need special handling
             if (coin === '$HAM') {
               coin = '$TN100x';
-              amount *= 10;
             }
             
             // Combine amounts for the same coin
