@@ -47,7 +47,7 @@ export default async function handler(req, res) {
     let ecoQuery = '&eco=IMPACT'
     let ecosystemQuery = '&ecosystem=abundance'
     if (time) {
-      timeQuery = 'time=' + time
+      timeQuery = '&time=' + time
     }
     if (curators) {
       for (const curator of curators) {
