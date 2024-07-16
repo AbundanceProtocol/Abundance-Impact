@@ -78,12 +78,12 @@ export default async function handler(req, res) {
     const postUrl = `${baseURL}/~/ecosystems/${ecosystem}/tips-login?tip=0${timeQuery + curatorsQuery + shuffleQuery + referrerQuery + ecoQuery}`
     const shareUrl = `${baseURL}/~/ecosystems/${ecosystem}/tips?tip=0${timeQuery + curatorsQuery + shuffleQuery + referrerQuery + ecoQuery}`
 
-    const encodedShareUrl = encodeURIComponent(shareUrl); 
-    const shareText = 'I justed multi-tipped builders and creators on /impact. Try it out here:'
+    // const encodedShareUrl = encodeURIComponent(shareUrl); 
+    const shareText = 'I just multi-tipped builders and creators on /impact. Try it out here:'
     const encodedShareText = encodeURIComponent(shareText); 
 
 
-    const shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${encodedShareUrl}`
+    const shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${shareUrl}`
     
     // Example usage
     // const input = "500 $degen, 400 $HAM 10000 $wild 🍖x400, 300 $HAM";
@@ -351,6 +351,7 @@ export default async function handler(req, res) {
             }
       
           async function fetchCasts(query, shuffle, page, limit) {
+            console.log('354:', query, shuffle)
             try {
               await connectToDatabase();
           
@@ -510,7 +511,7 @@ export default async function handler(req, res) {
                 console.error(`Error occurred while sending request for ${castText}:`, error);
               }
       
-              await new Promise(resolve => setTimeout(resolve, 100));
+              await new Promise(resolve => setTimeout(resolve, 80));
             }
             return tipCounter
           }
