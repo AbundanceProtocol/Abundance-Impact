@@ -30,6 +30,13 @@ export default async function handler(req, res) {
     const inputText = untrustedData?.inputText
     // const button = untrustedData?.buttonIndex
     // console.log('20:', points, fid, castHash, authorFid)
+    let curator = 3
+    if (typeof curators === 'string') {
+      curator = parseInt(curators);
+    } else if (Array.isArray(curators) && curators.length > 0) {
+      curator = curators[0]
+    }
+
 
     // let percent = tip
     let timeQuery = '&time=all'
@@ -76,7 +83,7 @@ export default async function handler(req, res) {
     const loginUrl = `${baseURL}/~/ecosystems/${ecosystem}/tips-login?tip=0${timeQuery + curatorsQuery + shuffleQuery + referrerQuery + ecoQuery}`
     const sendPost = `${baseURL}/api/frames/tips?tip=0${timeQuery + curatorsQuery + shuffleQuery + referrerQuery + ecoQuery}`
     const postUrl = `${baseURL}/~/ecosystems/${ecosystem}/tips-login?tip=0${timeQuery + curatorsQuery + shuffleQuery + referrerQuery + ecoQuery}`
-    const shareUrl = `${baseURL}/~/ecosystems/${ecosystem}/tips?tip=0${timeQuery + curatorsQuery + shuffleQuery + referrerQuery + ecoQuery}`
+    const shareUrl = `${baseURL}/~/ecosystems/${ecosystem}/${eco}/${curator}/tips`
 
     // const encodedShareUrl = encodeURIComponent(shareUrl); 
     const shareText = 'I just multi-tipped builders and creators on /impact. Try it out here:'
