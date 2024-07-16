@@ -26,13 +26,13 @@ export default async function handler(req, res) {
 
     const points = '$' + eco
     const fid = untrustedData?.fid
-    const castHash = untrustedData?.castId?.hash
-    const authorFid = untrustedData?.castId?.fid
+    // const castHash = untrustedData?.castId?.hash
+    // const authorFid = untrustedData?.castId?.fid
     const inputText = untrustedData?.inputText
-    const button = untrustedData?.buttonIndex
-    console.log('20:', points, fid, castHash, authorFid)
+    // const button = untrustedData?.buttonIndex
+    // console.log('20:', points, fid, castHash, authorFid)
 
-    let percent = tip
+    // let percent = tip
     let timeQuery = '&time=all'
     let curatorsQuery = ''
     let shuffleQuery = '&shuffle=true'
@@ -211,7 +211,7 @@ export default async function handler(req, res) {
           const user = await User.findOne({ fid }).select('uuid').exec();
           if (user) {
             const signer = decryptPassword(user.uuid, secretKey)
-            console.log(user)
+            // console.log(user)
             return signer
           } else {
             return null
@@ -264,7 +264,7 @@ export default async function handler(req, res) {
               await connectToDatabase();
 
               const ecoData = await EcosystemRules.findOne({ ecosystem_points_name: points }).select('percent_tipped ecosystem_name').exec();
-              console.log(ecoData)
+              // console.log(ecoData)
               if (ecoData) {
                 return {
                   curatorPercent: ecoData.percent_tipped, ecoName: ecoData.ecosystem_name }
@@ -432,7 +432,7 @@ export default async function handler(req, res) {
       
           const { casts, totalCount } = await getUserSearch(timeRange, tags, channels, curators, shuffle, points)
 
-          console.log(casts)
+          // console.log(casts)
         // console.log(casts[0].impact_points)
   
           let filteredCasts = await casts.reduce((acc, current) => {
@@ -476,9 +476,9 @@ export default async function handler(req, res) {
                 });
       
                 if (!response.ok) {
-                  console.error(`Failed to send request for ${castText}`);
+                  // console.error(`Failed to send request for ${castText}`);
                 } else {
-                  console.log(`Request sent successfully for ${castText}`);
+                  // console.log(`Request sent successfully for ${castText}`);
                 }
                 let tips = []
       
@@ -508,7 +508,7 @@ export default async function handler(req, res) {
                 console.error(`Error occurred while sending request for ${castText}:`, error);
               }
       
-              await new Promise(resolve => setTimeout(resolve, 500));
+              await new Promise(resolve => setTimeout(resolve, 100));
             }
             return tipCounter
           }
