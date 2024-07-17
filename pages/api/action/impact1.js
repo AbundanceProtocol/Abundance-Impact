@@ -69,8 +69,8 @@ export default async function handler(req, res) {
           const castData = await response.json();
           // console.log(castData)
           let casts = []
-          if (castData && castData.result && castData.result.casts.length > 0) {
-            casts = castData.result.casts[0]
+          if (castData?.result?.casts?.length > 0) {
+            casts = castData?.result?.casts[0]
           }
           
           return casts
@@ -97,11 +97,11 @@ export default async function handler(req, res) {
           cast_channel: getCastData.root_parent_url
         }
       }
-      // console.log('2', castContext)
+      console.log('2', castContext.cast_channel, getCastData.root_parent_url)
 
       let channelCuration = false
 
-      if (ecosystem.channels && ecosystem.channels.length > 0 && castContext.cast_channel) {
+      if (ecosystem?.channels?.length > 0 && castContext.cast_channel) {
         for (const channel of ecosystem.channels) {
           if (channel.url == castContext.cast_channel) {
             channelCuration = true
@@ -239,7 +239,7 @@ export default async function handler(req, res) {
                     });
 
                     cast.points = points
-                    // console.log('cast2', cast)
+                    console.log('cast2', cast)
 
                     const { balance, castImpact } = await saveAll(user, impact, cast)
                     let impactTotal = impactAmount
