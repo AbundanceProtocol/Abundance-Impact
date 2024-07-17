@@ -18,7 +18,8 @@ const secretKey = process.env.SECRET_KEY
 export default async function handler(req, res) {
   if (req.method === 'POST' && req.body && req.body.untrustedData && req.query.points) {
     const impactAmount = 1
-    const points = '$' + req.query.points
+    const eco = req.query.points
+    const points = '$' + eco
     const curatorFid = req.body.untrustedData.fid
     const castHash = req.body.untrustedData.castId.hash
     // const authorFid = req.body.untrustedData.castId.fid
@@ -245,18 +246,23 @@ export default async function handler(req, res) {
                     let impactTotal = impactAmount
                     let curatorCount = 1
 
-                    async function nominationCast(user, curator, ecosystem, hash, signer) {
+                    async function nominationCast(user, curator, ecosystem, hash, signer, handle, fid, eco) {
                       try {
                         const base = "https://api.neynar.com/";
                         const url = `${base}v2/farcaster/cast`;
                   
                         let body = {
                           signer_uuid: signer,
-                          text: `@${user} has been nominated by @${curator} for contributing to the ${ecosystem} Ecosystem on /impact`,
+                          text: `@${user} has been nominated by @${curator} for contributing to the ${ecosystem} Ecosystem on /impact\n
+                          \n
+                          Help support @${user}'s nominees:`,
                         };
-                  
+                        
+                        const frameUrl = `https://impact.abundance.id/~/ecosystems/${handle}/tip?time=all&shuffle=true&curators=${fid}&eco=${eco}&referrer=${fid}`
+
                         body.parent = hash;
-  
+                        body.embeds.push({ frameUrl });
+
                         const response = await fetch(url, {
                           method: 'POST',
                           headers: {
@@ -280,7 +286,7 @@ export default async function handler(req, res) {
                       }
                     }
   
-                    nominationCast(castContext.author_username, user.username, ecosystem.ecosystem_name, castContext.cast_hash, signer)
+                    nominationCast(castContext.author_username, user.username, ecosystem.ecosystem_name, castContext.cast_hash, signer, ecosystem.ecosystem_handle, fid, eco)
 
                     return { balance, castImpact, impactTotal, curatorCount }
                   }

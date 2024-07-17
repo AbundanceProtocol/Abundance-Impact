@@ -145,10 +145,10 @@ export default async function handler(req, res) {
         // console.log('20:', points, fid, castHash, authorFid)
         let curator = 3
         if (typeof curators === 'string') {
-          console.log('string')
+          // console.log('string')
           curator = parseInt(curators);
         } else if (Array.isArray(curators) && curators.length > 0) {
-          console.log('array')
+          // console.log('array')
           curator = curators[0]
         }
         console.log(inputText)
@@ -373,7 +373,7 @@ export default async function handler(req, res) {
                 async function getCuratorIds(fids) {
                   try {
                     await connectToDatabase();
-                    const impacts = await Impact.find({ curator_fid: { $in: fids }, points });
+                    const impacts = await Impact.find({ curator_fid: { $in: fids }, points }).select('_id');
                     const impactIds = impacts.map(impact => impact._id);
                     return impactIds
                   } catch (error) {
@@ -414,9 +414,16 @@ export default async function handler(req, res) {
                 //   query.cast_tags = { $in: [tags] };
                 // }
             
-                // if (channel && channel.length > 0) {
-                //   query.cast_channel = { $in: [channel] };
-                // }
+                if (req.query['channel[]'] && req.query['channel[]'].length > 0) {
+
+                  if (typeof req.query['channel[]'] === 'string') {
+                    query.cast_channel = { $in: [req.query['channel[]']]};
+                  } else if (Array.isArray(req.query['channel[]']) && req.query['channel[]'].length > 0) {
+                    query.cast_channel = { $in: req.query['channel[]']};
+                  }
+                        
+                  // query.cast_channel = { $in: [req.query['channel[]']] };
+                }
             
                 // if (text) {
                 //   query.cast_text = { $regex: text, $options: 'i' }; // Case-insensitive search
@@ -431,7 +438,7 @@ export default async function handler(req, res) {
                 }
           
               async function fetchCasts(query, shuffle, page, limit) {
-                console.log('354:', query, shuffle)
+                // console.log('354:', query, shuffle)
                 try {
                   await connectToDatabase();
               
@@ -591,7 +598,7 @@ export default async function handler(req, res) {
                     console.error(`Error occurred while sending request for ${castText}:`, error);
                   }
           
-                  await new Promise(resolve => setTimeout(resolve, 80));
+                  await new Promise(resolve => setTimeout(resolve, 60));
                 }
                 return tipCounter
               }

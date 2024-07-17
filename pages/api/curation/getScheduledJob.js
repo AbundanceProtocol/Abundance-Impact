@@ -230,7 +230,7 @@ export default async function handler(req, res) {
           async function getCuratorIds(fids) {
             try {
               await connectToDatabase();
-              const impacts = await Impact.find({ curator_fid: { $in: fids }, points });
+              const impacts = await Impact.find({ curator_fid: { $in: fids }, points }).select('_id');
               const impactIds = impacts.map(impact => impact._id);
               return impactIds
             } catch (error) {
