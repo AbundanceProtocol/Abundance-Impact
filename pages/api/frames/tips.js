@@ -91,22 +91,36 @@ export default async function handler(req, res) {
     // const shareUrl = `${baseURL}/~/ecosystems/${ecosystem}/${eco}/${curators}/tips`
 
     // const encodedShareUrl = encodeURIComponent(shareUrl); 
-    // const shareText = 'I just multi-tipped builders and creators on /impact. Try it out here:'
-    // const encodedShareText = encodeURIComponent(shareText); 
-
-
-    const shareLink = `https://warpcast.com/~/compose?${qs.stringify({    
-      text: 'I just multi-tipped builders and creators on /impact. Try it out here:',
-      embeds: [`${baseURL}/~/ecosystems/${ecosystem}/tip?${qs.stringify({    
-        tip: 0,
-        time: time, 
-        curators: curators,
-        shuffle: true,
-        referrer: referrer,
-        eco: eco
-      })}`]
-    })}`
     
+    
+    const shareText = 'I just multi-tipped builders and creators on /impact. Try it out here:'
+
+    const shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip?${qs.stringify({    
+      tip: 0,
+      time: time, 
+      curators: curators,
+      shuffle: true,
+      referrer: referrer,
+      eco: eco
+    })}`
+
+    const encodedShareText = encodeURIComponent(shareText); 
+
+    const encodedShareUrl = encodeURIComponent(shareUrl); 
+
+    // const shareLink = `https://warpcast.com/~/compose?${qs.stringify({    
+    //   text: 'I just multi-tipped builders and creators on /impact. Try it out here:',
+    //   embeds: [`${baseURL}/~/ecosystems/${ecosystem}/tip?${qs.stringify({    
+    //     tip: 0,
+    //     time: time, 
+    //     curators: curators,
+    //     shuffle: true,
+    //     referrer: referrer,
+    //     eco: eco
+    //   })}`]
+    // })}`
+    
+    const shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
     
     // text=${encodedShareText}&embeds[]=${shareUrl}`
 
@@ -657,7 +671,7 @@ export default async function handler(req, res) {
                 <meta name="fc:frame:button:1:target" content="${shareLink}" />
                 <meta name="fc:frame:button:2" content="Tip more">
                 <meta name="fc:frame:button:2:action" content="post">
-                <meta name="fc:frame:button:2:target" content="${retryPost}" />
+                <meta name="fc:frame:button:2:target" content="${sendPost}" />
                 <meta name="fc:frame:button:3" content="What's /impact">
                 <meta name="fc:frame:button:3:action" content="link">
                 <meta name="fc:frame:button:3:target" content="${impactLink}" />
