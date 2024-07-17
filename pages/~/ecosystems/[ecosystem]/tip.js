@@ -30,7 +30,7 @@ export default function Tips({time, curators, channels, tags, shuffle, referrer,
   const [fail, setFail] = useState(false)
   const [inputText, setInputText] = useState('')
   const initPayload = {
-    fid: 9326,
+    fid: 3,
     inputText: '',
     buttonIndex: 1,
     castId: {
@@ -233,6 +233,7 @@ export default function Tips({time, curators, channels, tags, shuffle, referrer,
     const updatedPayload = {...payload}
     updatedPayload.buttonIndex = button.index
     updatedPayload.inputText = inputText
+    updatedPayload.fid = fid
 
     setPayload(updatedPayload)
 

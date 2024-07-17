@@ -182,7 +182,7 @@ export default async function handler(req, res) {
           console.log('array')
           curator = curators[0]
         }
-    
+        console.log(inputText)
         // let percent = tip
         let timeQuery = '&time=all'
         let curatorsQuery = ''
