@@ -153,8 +153,6 @@ export default function Tips({time, curators, channels, tags, shuffle, referrer,
       window.removeEventListener('resize', handleResize);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-
-
   }, [router]);
 
   useEffect(() => {
@@ -179,9 +177,6 @@ export default function Tips({time, curators, channels, tags, shuffle, referrer,
       eco: eco,
       ecosystem: ecosystem
     })}`
-
-    // updatedFrameData.buttons[2].target = `${baseURL}/api/frames/tips?tip=0 + ${queryData.time + queryData.curators + queryData.shuffle + queryData.referrer + queryData.eco + queryData.ecosystem}`
-    // updatedFrameData.buttons[3].target = `${baseURL}/~/ecosystems/${ecosystem}?time=${time + queryData.curators + queryData.shuffle + queryData.referrer + queryData.eco + queryData.ecosystem}`
 
     setFrameData(updatedFrameData)
   }, [queryData]);
@@ -237,11 +232,7 @@ export default function Tips({time, curators, channels, tags, shuffle, referrer,
 
     setPayload(updatedPayload)
 
-
     const url = button.target
-
-
-    // const url = `${baseURL}/api/frames/tips?tip=10${queryData.time + queryData.curators + queryData.shuffle + queryData.referrer + queryData.points + queryData.ecosystem}`
 
     async function postFrame(url, untrustedData) {
       try {
@@ -477,28 +468,17 @@ export default function Tips({time, curators, channels, tags, shuffle, referrer,
               </div>
               <div className='flex-row' style={{width: '100%', justifyContent: 'space-evenly', gap: '0.5rem', flexWrap: 'wrap'}}>
 
-              {frameData?.input && (<input onChange={onInput} 
-              name='frame-input' 
-              placeholder={frameData.input.text} 
-              value={inputText} 
-              className='srch-btn' 
-              style={{width: '100%', backgroundColor: '#234', margin: '0', color: '#fff'}} 
-              // onKeyDown={inputKeyDown}
-               />)}
-                
-              {frameData?.buttons && (frameData.buttons.map((button, index) => (<FrameButton key={index} {...{frameData, button, buttonAction, type: button.action_type, index}} />
-                // <div key={index} className='frame-btn' onClick={() => {buttonAction(button)}} style={{flex: (frameData?.buttons?.length == 4 || frameData?.buttons?.length == 2) ? '1 1 45%' : (frameData?.buttons?.length == 3) ? '1 1 1 30%' : '1 100%', maxWidth: (frameData?.buttons?.length == 4 || frameData?.buttons?.length == 2) ? '50%' : (frameData?.buttons?.length == 3) ? '33%' : '100%', width: (frameData?.buttons?.length == 4 || frameData?.buttons?.length == 2) ? '50%' : (frameData?.buttons?.length == 3) ? '33%' : '100%'}}>
-                //   <div className='flex-row' style={{alignItems: 'center', justifyContent: 'center', gap: '0.5rem'}}>
-                //     <div>{button.title}</div>
-                //     {button.action_type == 'link' && (
-                //       <FaExternalLinkAlt color={'#aaa'} size={14} />)}
-                //   </div>
-                // </div>
-              )))}
-
-                {/* <div className='frame-btn' onClick={btn2} style={{}}>Tip 25%</div>
-                <div className='frame-btn' onClick={btn3} style={{}}>Tip 100%</div>
-                <div className='frame-btn' onClick={btn4} style={{}}>Check curation</div> */}
+                {frameData?.input && (<input onChange={onInput} 
+                  name='frame-input' 
+                  placeholder={frameData.input.text} 
+                  value={inputText} 
+                  className='srch-btn' 
+                  style={{width: '100%', backgroundColor: '#234', margin: '0', color: '#fff'}} 
+                />)}
+                    
+                {frameData?.buttons && (frameData.buttons.map((button, index) => (
+                  <FrameButton key={index} {...{frameData, button, buttonAction, type: button.action_type, index}} />
+                )))}
               </div>
             </div>)}
           </div>

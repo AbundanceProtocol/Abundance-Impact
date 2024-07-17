@@ -51,8 +51,6 @@ export default async function handler(req, res) {
       ecosystem: ecosystem,
       retry: true
     })}`
-    
-    // tip=0${timeQuery + curatorsQuery + shuffleQuery + referrerQuery + ecoQuery + ecosystemQuery}`
 
     const loginUrl = `${baseURL}/~/ecosystems/${ecosystem}/tips-login?${qs.stringify({    
       tip: 0,
@@ -62,8 +60,6 @@ export default async function handler(req, res) {
       referrer: referrer,
       eco: eco
     })}`
-    
-    // tip=0${timeQuery + curatorsQuery + shuffleQuery + referrerQuery + ecoQuery}`
 
     const sendPost = `${baseURL}/api/frames/tips?${qs.stringify({    
       tip: 0,
@@ -75,8 +71,6 @@ export default async function handler(req, res) {
       ecosystem: ecosystem
     })}`
 
-    // tip=0${timeQuery + curatorsQuery + shuffleQuery + referrerQuery + ecoQuery}`
-
     const postUrl = `${baseURL}/~/ecosystems/${ecosystem}/tips-login?${qs.stringify({    
       tip: 0,
       time: time, 
@@ -85,13 +79,6 @@ export default async function handler(req, res) {
       referrer: referrer,
       eco: eco
     })}`
-    
-    // tip=0${timeQuery + curatorsQuery + shuffleQuery + referrerQuery + ecoQuery}`
-
-    // const shareUrl = `${baseURL}/~/ecosystems/${ecosystem}/${eco}/${curators}/tips`
-
-    // const encodedShareUrl = encodeURIComponent(shareUrl); 
-    
     
     const shareText = 'I just multi-tipped builders and creators on /impact. Try it out here:'
 
@@ -105,28 +92,10 @@ export default async function handler(req, res) {
     })}`
 
     const encodedShareText = encodeURIComponent(shareText); 
-
     const encodedShareUrl = encodeURIComponent(shareUrl); 
-
-    // const shareLink = `https://warpcast.com/~/compose?${qs.stringify({    
-    //   text: 'I just multi-tipped builders and creators on /impact. Try it out here:',
-    //   embeds: [`${baseURL}/~/ecosystems/${ecosystem}/tip?${qs.stringify({    
-    //     tip: 0,
-    //     time: time, 
-    //     curators: curators,
-    //     shuffle: true,
-    //     referrer: referrer,
-    //     eco: eco
-    //   })}`]
-    // })}`
-    
     const shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
     
-    // text=${encodedShareText}&embeds[]=${shareUrl}`
-
-
     try {
-
 
       if (retry) {
         
@@ -147,7 +116,6 @@ export default async function handler(req, res) {
   
         res.setHeader('Content-Type', 'text/html');
         res.status(200)
-        
         .send(`
           <!DOCTYPE html>
           <html>
@@ -163,6 +131,7 @@ export default async function handler(req, res) {
             </body>
           </html>
         `);
+        return;
       } else {
   
         console.log('14:', tip, time, curators, shuffle, referrer, eco, ecosystem, req.query, refresh)
@@ -183,41 +152,11 @@ export default async function handler(req, res) {
           curator = curators[0]
         }
         console.log(inputText)
-        // let percent = tip
-        let timeQuery = '&time=all'
-        let curatorsQuery = ''
-        let shuffleQuery = '&shuffle=true'
-        let referrerQuery = ''
-        let ecoQuery = '&eco=IMPACT'
-        let ecosystemQuery = '&ecosystem=abundance'
-        if (time) {
-          timeQuery = '&time=' + time
-        }
-        if (curators) {
-          console.log(curators, typeof curators)
-          for (const curator of curators) {
-            curatorsQuery += '&curators=' + curator
-          }
-        }
-        if (shuffle || shuffle == false) {
-          shuffleQuery = '&shuffle=' + shuffle
-        }
-        if (referrer) {
-          referrerQuery = '&referrer=' + referrer
-        }
-        if (eco) {
-          ecoQuery = '&eco=' + eco
-        }
-        if (ecosystem) {
-          ecosystemQuery = '&ecosystem=' + ecosystem
-        }
     
         let timeRange = null
         // if (time) {
         //   timeRange = getTimeRange(time)
-        // }
-    
-  
+        // } 
         
         // Example usage
         // const input = "500 $degen, 400 $HAM 10000 $wild 🍖x400, 300 $HAM";
@@ -241,23 +180,22 @@ export default async function handler(req, res) {
     
           res.setHeader('Content-Type', 'text/html');
           res.status(200)
-          
           .send(`
-          <!DOCTYPE html>
-          <html>
-            <head>
-              <title>Tips | Impact App</title>
-              <meta name="fc:frame" content="vNext">
-              <meta property="og:title" content="Multi-Tip">
-              <meta property="fc:frame:image:aspect_ratio" content="1:1" />
-              ${metatags}
-            </head>
-            <body>
-              <div>Tip frame</div>
-            </body>
-          </html>
+            <!DOCTYPE html>
+            <html>
+              <head>
+                <title>Tips | Impact App</title>
+                <meta name="fc:frame" content="vNext">
+                <meta property="og:title" content="Multi-Tip">
+                <meta property="fc:frame:image:aspect_ratio" content="1:1" />
+                ${metatags}
+              </head>
+              <body>
+                <div>Tip frame</div>
+              </body>
+            </html>
           `);
-    
+          return;
         } else {
     
           function formatStringToArray(input) {
@@ -332,7 +270,6 @@ export default async function handler(req, res) {
     
           res.setHeader('Content-Type', 'text/html');
           res.status(200)
-          
           .send(`
             <!DOCTYPE html>
             <html>
@@ -348,7 +285,7 @@ export default async function handler(req, res) {
               </body>
             </html>
           `);
-    
+          return;
         } else {
     
           async function getSigner(fid) {
@@ -376,16 +313,15 @@ export default async function handler(req, res) {
             <meta name="fc:frame:button:1" content="Login /impact">
             <meta name="fc:frame:button:1:action" content="link">
             <meta name="fc:frame:button:1:target" content="${loginUrl}" />
-            <meta name="fc:frame:button:1" content="Refresh">
-            <meta name="fc:frame:button:1:action" content="post">
-            <meta name="fc:frame:button:1:target" content="${retryPost}" />
+            <meta name="fc:frame:button:2" content="Refresh">
+            <meta name="fc:frame:button:2:action" content="post">
+            <meta name="fc:frame:button:2:target" content="${retryPost}" />
             <meta property="og:image" content="${loginImg}">
             <meta name="fc:frame:image" content="${loginImg}">
             <meta name="fc:frame:post_url" content="${postUrl}">`
     
             res.setHeader('Content-Type', 'text/html');
             res.status(200)
-            
             .send(`
               <!DOCTYPE html>
               <html>
@@ -401,7 +337,7 @@ export default async function handler(req, res) {
                 </body>
               </html>
             `);
-    
+            return;
           } else {
     
             try {
@@ -462,7 +398,6 @@ export default async function handler(req, res) {
                   } else if (Array.isArray(curator) && curator.length > 0) {
                     curatorFids = curator.map(fid => parseInt(fid));
                   }
-    
     
                   // curatorFids = curator.map(fid => parseInt(fid));
             
@@ -581,7 +516,7 @@ export default async function handler(req, res) {
               const { casts, totalCount } = await getUserSearch(timeRange, tags, channels, curators, shuffle, points)
     
               // console.log(casts)
-            // console.log(casts[0].impact_points)
+              // console.log(casts[0].impact_points)
       
               let filteredCasts = await casts.reduce((acc, current) => {
                 const existingItem = acc.find(item => item._id === current._id);
@@ -682,23 +617,22 @@ export default async function handler(req, res) {
           
                 res.setHeader('Content-Type', 'text/html');
                 res.status(200)
-                
                 .send(`
-                <!DOCTYPE html>
-                <html>
-                  <head>
-                    <title>Tips | Impact App</title>
-                    <meta name="fc:frame" content="vNext">
-                    <meta property="og:title" content="Multi-Tip">
-                    <meta property="fc:frame:image:aspect_ratio" content="1:1" />
-                    ${metatags}
-                  </head>
-                  <body>
-                    <div>Tip frame</div>
-                  </body>
-                </html>
+                  <!DOCTYPE html>
+                  <html>
+                    <head>
+                      <title>Tips | Impact App</title>
+                      <meta name="fc:frame" content="vNext">
+                      <meta property="og:title" content="Multi-Tip">
+                      <meta property="fc:frame:image:aspect_ratio" content="1:1" />
+                      ${metatags}
+                    </head>
+                    <body>
+                      <div>Tip frame</div>
+                    </body>
+                  </html>
                 `);
-    
+                return;
               } else {
     
                 let metatags = `
@@ -711,23 +645,22 @@ export default async function handler(req, res) {
           
                 res.setHeader('Content-Type', 'text/html');
                 res.status(200)
-                
                 .send(`
-                <!DOCTYPE html>
-                <html>
-                  <head>
-                    <title>Tips | Impact App</title>
-                    <meta name="fc:frame" content="vNext">
-                    <meta property="og:title" content="Multi-Tip">
-                    <meta property="fc:frame:image:aspect_ratio" content="1:1" />
-                    ${metatags}
-                  </head>
-                  <body>
-                    <div>Tip frame</div>
-                  </body>
-                </html>
+                  <!DOCTYPE html>
+                  <html>
+                    <head>
+                      <title>Tips | Impact App</title>
+                      <meta name="fc:frame" content="vNext">
+                      <meta property="og:title" content="Multi-Tip">
+                      <meta property="fc:frame:image:aspect_ratio" content="1:1" />
+                      ${metatags}
+                    </head>
+                    <body>
+                      <div>Tip frame</div>
+                    </body>
+                  </html>
                 `);
-    
+                return;
               }
     
             } catch (error) {
@@ -743,28 +676,24 @@ export default async function handler(req, res) {
         
               res.setHeader('Content-Type', 'text/html');
               res.status(500).send(`
-              <!DOCTYPE html>
-              <html>
-                <head>
-                  <title>Tips | Impact App</title>
-                  <meta name="fc:frame" content="vNext">
-                  <meta property="og:title" content="Multi-Tip">
-                  <meta property="fc:frame:image:aspect_ratio" content="1:1" />
-                  ${metatags}
-                </head>
-                <body>
-                  <div>Tip frame</div>
-                </body>
-              </html>
+                <!DOCTYPE html>
+                <html>
+                  <head>
+                    <title>Tips | Impact App</title>
+                    <meta name="fc:frame" content="vNext">
+                    <meta property="og:title" content="Multi-Tip">
+                    <meta property="fc:frame:image:aspect_ratio" content="1:1" />
+                    ${metatags}
+                  </head>
+                  <body>
+                    <div>Tip frame</div>
+                  </body>
+                </html>
               `);
-    
+              return;
             }
           }
         }
-
-
-
-
       }
 
     } catch (error) {
@@ -778,20 +707,21 @@ export default async function handler(req, res) {
 
       res.setHeader('Content-Type', 'text/html');
       res.status(500).send(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Tips | Impact App</title>
-          <meta name="fc:frame" content="vNext">
-          <meta property="og:title" content="Multi-Tip">
-          <meta property="fc:frame:image:aspect_ratio" content="1:1" />
-          ${metatags}
-        </head>
-        <body>
-          <div>Tip frame</div>
-        </body>
-      </html>
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Tips | Impact App</title>
+            <meta name="fc:frame" content="vNext">
+            <meta property="og:title" content="Multi-Tip">
+            <meta property="fc:frame:image:aspect_ratio" content="1:1" />
+            ${metatags}
+          </head>
+          <body>
+            <div>Tip frame</div>
+          </body>
+        </html>
       `);
+      return;
     }
   }
 }
