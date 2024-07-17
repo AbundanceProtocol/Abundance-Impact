@@ -25,7 +25,7 @@ export async function getServerSideProps(context) {
   }
   let setCurators = []
   if (curators) {
-    setCurators = Array.isArray(curators) ? curators : [curators]
+    setCurators = Array.isArray(curators) ? parseInt(curators) : [parseInt(curators)]
   }  
   let setChannels = []
   if (channels) {

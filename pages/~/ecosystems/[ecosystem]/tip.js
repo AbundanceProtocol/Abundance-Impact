@@ -10,6 +10,7 @@ import { ImArrowUp, ImArrowDown  } from "react-icons/im";
 import { AccountContext } from '../../../../context';
 import cheerio from 'cheerio'
 import FrameButton from '../../../../components/Cast/Frame/Button';
+import qs from "querystring";
 
 // import useStore from '../../../utils/store';
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
@@ -101,6 +102,7 @@ export default function Tips({time, curators, channels, tags, shuffle, referrer,
 
   useEffect(() => {
     console.log(time, curators, shuffle, referrer, eco, ecosystem)
+
     let timeQuery = '&time=all'
     let curatorsQuery = ''
     let shuffleQuery = '&shuffle=true'
@@ -111,8 +113,9 @@ export default function Tips({time, curators, channels, tags, shuffle, referrer,
       timeQuery = '&time=' + time
     }
     if (curators) {
+      console.log(curators)
       for (const curator of curators) {
-        curatorsQuery += '&curators=' + curator
+        curatorsQuery += '&curators=' + parseInt(curator)
       }
     }
     if (shuffle || shuffle == false) {
@@ -158,9 +161,24 @@ export default function Tips({time, curators, channels, tags, shuffle, referrer,
     console.log(queryData)
 
     const updatedFrameData = {...frameData}
-    updatedFrameData.buttons[0].target = `${baseURL}/api/frames/tips?tip=0${queryData.time + queryData.curators + queryData.shuffle + queryData.referrer + queryData.eco + queryData.ecosystem}`
+    updatedFrameData.buttons[0].target = `${baseURL}/api/frames/tips?${qs.stringify({    
+      tip: 0,
+      time: time, 
+      curators: curators,
+      shuffle: true,
+      referrer: referrer,
+      eco: eco,
+      ecosystem: ecosystem
+    })}`
 
-    updatedFrameData.buttons[1].target = `${baseURL}/~/ecosystems/${ecosystem}?time=${time + queryData.curators + '&shuffle=false' + queryData.referrer + queryData.eco + queryData.ecosystem}`
+    updatedFrameData.buttons[1].target = `${baseURL}/~/ecosystems/${ecosystem}?${qs.stringify({    
+      time: time, 
+      curators: curators,
+      shuffle: false,
+      referrer: referrer,
+      eco: eco,
+      ecosystem: ecosystem
+    })}`
 
     // updatedFrameData.buttons[2].target = `${baseURL}/api/frames/tips?tip=0 + ${queryData.time + queryData.curators + queryData.shuffle + queryData.referrer + queryData.eco + queryData.ecosystem}`
     // updatedFrameData.buttons[3].target = `${baseURL}/~/ecosystems/${ecosystem}?time=${time + queryData.curators + queryData.shuffle + queryData.referrer + queryData.eco + queryData.ecosystem}`
@@ -305,10 +323,28 @@ export default function Tips({time, curators, channels, tags, shuffle, referrer,
         <meta property="fc:frame:image:aspect_ratio" content="1:1" />
         <meta property="fc:frame:button:1" content='Tip Nominees' />
         <meta property="fc:frame:button:1:action" content="post" />
-        <meta property="fc:frame:button:1:target" content={`${baseURL}/api/frames/tips?tip=0${queryData.time + queryData.curators + queryData.shuffle + queryData.referrer + queryData.eco + queryData.ecosystem}`} />
+
+        <meta property="fc:frame:button:1:target" content={`${baseURL}/api/frames/tips?${qs.stringify({    
+          tip: 0,
+          time: time, 
+          curators: curators,
+          shuffle: true,
+          referrer: referrer,
+          eco: eco,
+          ecosystem: ecosystem
+        })}`} />
+
         <meta property="fc:frame:button:2" content={`Explore curation`} />
         <meta property="fc:frame:button:2:action" content="link" />
-        <meta property="fc:frame:button:2:target" content={`${baseURL}/~/ecosystems/${ecosystem}?time=${time + queryData.curators + '&shuffle=false' + queryData.referrer + queryData.eco + queryData.ecosystem}`} />
+
+        <meta property="fc:frame:button:2:target" content={`${baseURL}/~/ecosystems/${ecosystem}?${qs.stringify({    
+          time: time, 
+          curators: curators,
+          shuffle: false,
+          referrer: referrer,
+          eco: eco,
+          ecosystem: ecosystem
+        })}`} />
         <meta property="fc:frame:button:3" content={`What's /impact?`} />
         <meta property="fc:frame:button:3:action" content="link" />
         <meta property="fc:frame:button:3:target" content={`https://warpcast.com/abundance/0x43ddd672`} />
@@ -578,7 +614,7 @@ export async function getServerSideProps(context) {
   }
   let setCurators = []
   if (curators) {
-    setCurators = Array.isArray(curators) ? curators : [curators]
+    setCurators = Array.isArray(curators) ? parseInt(curators) : [parseInt(curators)]
   }  
   let setChannels = []
   if (channels) {
