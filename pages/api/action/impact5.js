@@ -40,15 +40,15 @@ export default async function handler(req, res) {
     async function getQuality(curatorFid, castHash, points) {
       try {
         await connectToDatabase();
-        const quality = await Quality.find({ curator_fid: curatorFid, target_cast_hash: castHash, points })
-        if (quality.length == 0) {
-          return null
+        const quality = await Quality.countDocuments({ curator_fid: curatorFid, target_cast_hash: castHash, points })
+        if (quality > 0) {
+          return true
         } else {
-          return quality
+          return false
         }
       } catch (error) {
         console.error('Error handling request:', error);
-        return null
+        return false
       }
     }
 
@@ -121,7 +121,7 @@ export default async function handler(req, res) {
           try {
             await connectToDatabase();
           
-            let user = await User.findOne({ fid, ecosystem_points: points }).exec();
+            let user = await User.findOne({ fid, ecosystem_points: points }).select('remaining_i_allowance').exec();
             if (user) {
                 remainingImpact = user.remaining_i_allowance
                 return remainingImpact

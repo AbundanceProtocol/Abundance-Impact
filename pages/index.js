@@ -177,7 +177,10 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
   useEffect(() => {
 
     const searchRouter = () => {
+      setCursor('')
+      setPrevCursor('')
       if (isLogged && ecoData) {
+        console.log('triggered')
         if (searchSelect == 'Curation') {
           feedRouter()
         } else if (searchSelect == 'Main' && ecoData?.channels?.length > 0) {
@@ -199,7 +202,7 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
       return () => clearTimeout(timeoutId);
     }
     
-  }, [userQuery, sched.userQuery]);
+  }, [userQuery, selectedChannels, selectedCurators, sched.userQuery]);
 
   useEffect(() => {
     const ecoRouter = () => {

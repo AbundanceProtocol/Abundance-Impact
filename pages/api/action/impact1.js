@@ -40,15 +40,15 @@ export default async function handler(req, res) {
     async function getQuality(curatorFid, castHash, points) {
       try {
         await connectToDatabase();
-        const quality = await Quality.find({ curator_fid: curatorFid, target_cast_hash: castHash, points })
-        if (quality.length == 0) {
-          return null
+        const quality = await Quality.countDocuments({ curator_fid: curatorFid, target_cast_hash: castHash, points })
+        if (quality > 0) {
+          return true
         } else {
-          return quality
+          return false
         }
       } catch (error) {
         console.error('Error handling request:', error);
-        return null
+        return false
       }
     }
 
@@ -97,11 +97,11 @@ export default async function handler(req, res) {
           cast_channel: getCastData.root_parent_url
         }
       }
-      console.log('2', castContext.cast_channel, getCastData.root_parent_url)
+      // console.log('2', castContext)
 
       let channelCuration = false
 
-      if (ecosystem?.channels?.length > 0 && castContext.cast_channel) {
+      if (ecosystem?.channels?.length > 0 && castContext?.cast_channel) {
         for (const channel of ecosystem.channels) {
           if (channel.url == castContext.cast_channel) {
             channelCuration = true
@@ -121,7 +121,7 @@ export default async function handler(req, res) {
           try {
             await connectToDatabase();
           
-            let user = await User.findOne({ fid, ecosystem_points: points }).exec();
+            let user = await User.findOne({ fid, ecosystem_points: points }).select('remaining_i_allowance').exec();
             if (user) {
                 remainingImpact = user.remaining_i_allowance
                 return remainingImpact
@@ -239,7 +239,7 @@ export default async function handler(req, res) {
                     });
 
                     cast.points = points
-                    console.log('cast2', cast)
+                    // console.log('cast2', cast)
 
                     const { balance, castImpact } = await saveAll(user, impact, cast)
                     let impactTotal = impactAmount

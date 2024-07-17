@@ -355,6 +355,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
               )}
             </div>
             )))}
+            {cast?.channel && (<div style={{alignSelf: 'flex-start', fontSize: '13px', margin: '10px 0 0 0', padding: '3px 6px', border: '1px solid #666', width: 'fit-content', borderRadius: '3px', backgroundColor: '#eff', fontWeight: '500', color: '#246'}}>/{cast?.channel?.id}</div>)}
           </div>
           {(typeof cast.channelName !== 'undefined') && (
             <div className="flex-row" style={{border: '1px solid #666', padding: '2px 4px', borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'flex-start'}}>

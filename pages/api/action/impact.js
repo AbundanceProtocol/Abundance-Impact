@@ -22,15 +22,15 @@ export default async function handler(req, res) {
     async function getQuality(curatorFid, castHash) {
       try {
         await connectToDatabase();
-        const quality = await Quality.find({ curator_fid: curatorFid, target_cast_hash: castHash })
-        if (quality.length == 0) {
-          return null
+        const quality = await Quality.countDocuments({ curator_fid: curatorFid, target_cast_hash: castHash })
+        if (quality > 0) {
+          return true
         } else {
-          return quality
+          return false
         }
       } catch (error) {
         console.error('Error handling request:', error);
-        return null
+        return false
       }
     }
 
