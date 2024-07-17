@@ -261,6 +261,8 @@ export default async function handler(req, res) {
                         const frameUrl = `https://impact.abundance.id/~/ecosystems/${handle}/tip?time=all&shuffle=true&curators=${fid}&eco=${eco}&referrer=${fid}`
 
                         body.parent = hash;
+
+                        if (!body.embeds) { body.embeds = []; }
                         body.embeds.push({ frameUrl });
 
                         const response = await fetch(url, {
