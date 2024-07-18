@@ -263,7 +263,7 @@ export default async function handler(req, res) {
                         body.parent = hash;
 
                         if (!body.embeds) { body.embeds = []; }
-                        body.embeds.push({ frameUrl });
+                        body.embeds.push({ url: frameUrl });
 
                         const response = await fetch(url, {
                           method: 'POST',
