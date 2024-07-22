@@ -105,6 +105,28 @@ export default async function handler(req, res) {
       }
     }
 
+    async function checkTips(fid, points, startTime, endTime) {
+      try {
+        await connectToDatabase();
+        const tips = await Tip.countDocuments({
+          tipper_fid: fid,
+          points: points,
+          createdAt: {
+            $gte: startTime,
+            $lte: endTime
+          }});
+
+        if (tips && tips > 0) {
+          return true
+        } else {
+          return false
+        }
+      } catch (err) {
+        console.error(err);
+        return false;
+      }
+    }
+
     let tipText = ''
 
     const now = new Date();
@@ -142,7 +164,7 @@ export default async function handler(req, res) {
       retry: true
     })}`
 
-    const refreshPost = `${baseURL}/api/frames/tips?${qs.stringify({    
+    const refreshPost = `${baseURL}/api/frames/tips2?${qs.stringify({    
       tip: 0,
       time: time, 
       curators: curators,
@@ -153,7 +175,18 @@ export default async function handler(req, res) {
       refresh: true
     })}`
 
-    const loginUrl = `${baseURL}/~/ecosystems/${ecosystem}/tip-login?${qs.stringify({    
+    const freshPost = `${baseURL}/api/frames/tips2?${qs.stringify({    
+      tip: 0,
+      time: time, 
+      curators: curators,
+      shuffle: true,
+      referrer: referrer,
+      eco: eco,
+      ecosystem: ecosystem,
+      start: true
+    })}`
+
+    const loginUrl = `${baseURL}/~/ecosystems/${ecosystem}/tip-login2?${qs.stringify({    
       tip: 0,
       time: time, 
       curators: curators,
@@ -162,7 +195,7 @@ export default async function handler(req, res) {
       eco: eco
     })}`
 
-    const sendPost = `${baseURL}/api/frames/tips?${qs.stringify({    
+    const sendPost = `${baseURL}/api/frames/tips2?${qs.stringify({    
       tip: 0,
       time: time, 
       curators: curators,
@@ -172,7 +205,7 @@ export default async function handler(req, res) {
       ecosystem: ecosystem
     })}`
 
-    const postUrl = `${baseURL}/~/ecosystems/${ecosystem}/tip-login?${qs.stringify({    
+    const postUrl = `${baseURL}/~/ecosystems/${ecosystem}/tip-login2?${qs.stringify({    
       tip: 0,
       time: time, 
       curators: curators,
@@ -235,29 +268,7 @@ export default async function handler(req, res) {
           </html>
         `);
         return;
-      } else {
-
-        async function checkTips(fid, points, startTime, endTime) {
-          try {
-            await connectToDatabase();
-            const tips = await Tip.countDocuments({
-              tipper_fid: fid,
-              points: points,
-              createdAt: {
-                $gte: startTime,
-                $lte: endTime
-              }});
-
-            if (tips && tips > 0) {
-              return true
-            } else {
-              return false
-            }
-          } catch (err) {
-            console.error(err);
-            return false;
-          }
-        }
+      } else if (refresh) {
 
         const isTipped = await checkTips(fid, points, timeMinus3, timePlus1)
 
@@ -287,9 +298,110 @@ export default async function handler(req, res) {
           <meta name="fc:frame:button:1" content="Share contribution">
           <meta name="fc:frame:button:1:action" content="link">
           <meta name="fc:frame:button:1:target" content="${shareLink}" />
-          <meta name="fc:frame:button:2" content="Tip more">
+          <meta name="fc:frame:button:2" content="Tip more >">
           <meta name="fc:frame:button:2:action" content="post">
-          <meta name="fc:frame:button:2:target" content="${sendPost}" />
+          <meta name="fc:frame:button:2:target" content="${freshPost}" />
+          <meta name="fc:frame:button:3" content="What's /impact">
+          <meta name="fc:frame:button:3:action" content="link">
+          <meta name="fc:frame:button:3:target" content="${impactLink}" />
+          <meta name="fc:frame:button:4" content="Refresh">
+          <meta name="fc:frame:button:4:action" content="post">
+          <meta name="fc:frame:button:4:target" content="${refreshPost}" />
+          <meta property="og:image" content="${circlesImg}">
+          <meta name="fc:frame:image" content="${circlesImg}">
+          <meta name="fc:frame:post_url" content="${postUrl}">
+          <meta name="fc:frame:input:text" content="Eg.: 1000 $Degen, 500 $FARTHER" />`
+    
+          res.setHeader('Content-Type', 'text/html');
+          res.status(200)
+          .send(`
+            <!DOCTYPE html>
+            <html>
+              <head>
+                <title>Tips | Impact App</title>
+                <meta name="fc:frame" content="vNext">
+                <meta property="og:title" content="Multi-Tip">
+                <meta property="fc:frame:image:aspect_ratio" content="1:1" />
+                ${metatags}
+              </head>
+              <body>
+                <div>Tip frame</div>
+              </body>
+            </html>
+          `);
+          return;
+        } else {
+          let metatags = `
+          <meta name="fc:frame:button:1" content="Tip Nominees">
+          <meta name="fc:frame:button:1:action" content="post">
+          <meta name="fc:frame:button:1:target" content="${sendPost}" />
+          <meta name="fc:frame:button:2" content="Explore curation">
+          <meta name="fc:frame:button:2:action" content="link">
+          <meta name="fc:frame:button:2:target" content="${exploreLink}" />
+          <meta name="fc:frame:button:3" content="What's /impact">
+          <meta name="fc:frame:button:3:action" content="link">
+          <meta name="fc:frame:button:3:target" content="${impactLink}" />
+          <meta name="fc:frame:button:4" content="Refresh">
+          <meta name="fc:frame:button:4:action" content="post">
+          <meta name="fc:frame:button:4:target" content="${refreshPost}" />
+          <meta property="og:image" content="${tipsImg}">
+          <meta name="fc:frame:image" content="${tipsImg}">
+          <meta name="fc:frame:post_url" content="${postUrl}">
+          <meta name="fc:frame:input:text" content="Eg.: 1000 $Degen, 500 $FARTHER" />`
+    
+          res.setHeader('Content-Type', 'text/html');
+          res.status(200)
+          .send(`
+            <!DOCTYPE html>
+            <html>
+              <head>
+                <title>Tips | Impact App</title>
+                <meta name="fc:frame" content="vNext">
+                <meta property="og:title" content="Multi-Tip">
+                <meta property="fc:frame:image:aspect_ratio" content="1:1" />
+                ${metatags}
+              </head>
+              <body>
+                <div>Tip frame</div>
+              </body>
+            </html>
+          `);
+          return;
+        }
+
+      } else {
+
+        const isTipped = await checkTips(fid, points, timeMinus3, timePlus1)
+
+        if (isTipped) {
+
+          const {username, pfp} = await getSigner(fid)
+
+          const {text} = formatStringToArray(inputText);
+          tipText = text
+
+          circlesImg = `${baseURL}/api/frames/circle?${qs.stringify({    
+            fid, eco, text: tipText, username, pfp, time1: timeMinus3, time2: timePlus1 })}`
+
+          shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share?${qs.stringify({    
+            tip: 0,
+            shuffle: true,
+            time1: timeMinus3,
+            time2: timePlus1,
+            text: tipText,
+            username, pfp, fid, eco, referrer, time, curators
+          })}`
+      
+          encodedShareUrl = encodeURIComponent(shareUrl); 
+          shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
+
+          let metatags = `
+          <meta name="fc:frame:button:1" content="Share contribution">
+          <meta name="fc:frame:button:1:action" content="link">
+          <meta name="fc:frame:button:1:target" content="${shareLink}" />
+          <meta name="fc:frame:button:2" content="Tip more >">
+          <meta name="fc:frame:button:2:action" content="post">
+          <meta name="fc:frame:button:2:target" content="${freshPost}" />
           <meta name="fc:frame:button:3" content="What's /impact">
           <meta name="fc:frame:button:3:action" content="link">
           <meta name="fc:frame:button:3:target" content="${impactLink}" />
@@ -741,9 +853,9 @@ export default async function handler(req, res) {
                   <meta name="fc:frame:button:1" content="Share contribution">
                   <meta name="fc:frame:button:1:action" content="link">
                   <meta name="fc:frame:button:1:target" content="${shareLink}" />
-                  <meta name="fc:frame:button:2" content="Tip more">
+                  <meta name="fc:frame:button:2" content="Tip more >">
                   <meta name="fc:frame:button:2:action" content="post">
-                  <meta name="fc:frame:button:2:target" content="${sendPost}" />
+                  <meta name="fc:frame:button:2:target" content="${freshPost}" />
                   <meta name="fc:frame:button:3" content="What's /impact">
                   <meta name="fc:frame:button:3:action" content="link">
                   <meta name="fc:frame:button:3:target" content="${impactLink}" />
