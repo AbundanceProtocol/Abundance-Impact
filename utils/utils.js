@@ -310,7 +310,7 @@ export function filterObjects(castArray, filterFid) {
 
 
 export async function processTips(userFeed, userFid, tokenData, ecosystem, curatorPercent) {
-  // console.log(userFeed, userFid, tokenData, ecosystem, curatorPercent)
+  // console.log('313', userFeed, userFid, tokenData, ecosystem, curatorPercent)
   let curatorTip = 10
   if (curatorPercent) {
     curatorTip = curatorPercent
@@ -432,12 +432,12 @@ export async function processTips(userFeed, userFid, tokenData, ecosystem, curat
         }
       }
     }
-    console.log('count', count)
+    // console.log('count', count)
 
     for (const coin of tokenData) {
       if (coin.set) {
         coinTotals[coin.token].remaining = coinTotals[coin.token].totalTip - coinTotals[coin.token].usedTip
-        console.log('tipCasts', tipCasts)
+        // console.log('tipCasts', tipCasts)
         if (tipCasts.length > 0) {
           if (coin.token !== '$FARTHER') {
             coinTotals[coin.token].mod = coinTotals[coin.token].remaining % tipCasts.length
@@ -484,7 +484,7 @@ export async function processTips(userFeed, userFid, tokenData, ecosystem, curat
       }
     }
   
-    console.log('tipCasts', tipCasts)
+    // console.log('tipCasts', tipCasts)
   
     for (const cast of tipCasts) {
       if (cast.allCoins && cast.allCoins.length > 0) {
@@ -504,7 +504,7 @@ export async function processTips(userFeed, userFid, tokenData, ecosystem, curat
       }
     }
   
-    console.log('coinTotals', coinTotals)
+    // console.log('coinTotals', coinTotals)
   
     // console.log(tipCasts)
   
@@ -514,7 +514,17 @@ export async function processTips(userFeed, userFid, tokenData, ecosystem, curat
   
     let finalTips = cleanTips.filter(cast => cast.text.length > 0)
   
-    console.log('finalTips', finalTips)
+    // console.log('finalTips', finalTips)
+
+    // const circle = finalTips.map(finalTip => {
+    //   const feedItem = userFeed.find(feedItem => feedItem.author.fid === finalTip.fid);
+    //   if (feedItem) {
+    //     return {friend_fid: finalTip.fid, pfp_url: feedItem.author.pfp_url}
+    //   }
+    //   return null
+    // }).filter(item => item !== null)
+
+    // console.log('circle', circle)
   
     return { castData: finalTips, coinTotals: coinTotals }
   }

@@ -170,9 +170,7 @@ export default async function handler(req, res) {
                 
                       let body = {
                         signer_uuid: signer,
-                        text: `@${user} has been nominated by @${curator} for contributing to the ${ecosystem} Ecosystem on /impact\n
-                        \n
-                        Help support @${user}'s nominees:`,
+                        text: `@${user} has been nominated by @${curator} for contributing to the ${ecosystem} Ecosystem on /impact\n\nHelp support @${user}'s nominees:`,
                       };
                 
                       body.parent = hash;
