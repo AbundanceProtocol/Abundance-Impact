@@ -792,7 +792,7 @@ export default async function handler(req, res) {
           
                 const { castData, circle } = await processTips(displayedCasts, fid, allowances, ecoName, curatorPercent)
               
-                circlesImg = `${baseURL}/api/frames/circle?${qs.stringify({ text: tipText, username, pfp, fids: [circle] })}`
+                circlesImg = `${baseURL}/api/frames/circle?${qs.stringify({ text: tipText, username, pfp, fids: circle })}`
   
                 async function sendRequests(data, signer, apiKey) {
                   const base = "https://api.neynar.com/";

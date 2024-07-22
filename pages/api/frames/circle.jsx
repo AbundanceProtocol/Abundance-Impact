@@ -24,8 +24,10 @@ export default async function handler(req, res) {
 
     async function getPFPs(fids) {
       try {
+        const fidsArray = Array.isArray(fids) ? fids : fids.split(',').map(fid => parseInt(fid.trim(), 10));
+
         await connectToDatabase();
-        const result = await Cast.find({ author_fid: { $in: fids } }, {author_fid: 1, author_pfp: 1, _id: 0} ).limit(40)
+        const result = await Cast.find({ author_fid: { $in: fidsArray } }, {author_fid: 1, author_pfp: 1, _id: 0} ).limit(40)
 
         if (result) {
           const uniqueUsers = result.reduce((acc, current) => {
