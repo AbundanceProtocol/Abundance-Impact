@@ -127,6 +127,32 @@ export default async function handler(req, res) {
       }
     }
 
+    async function getFids(fid, startTime, endTime, points) {
+      try {
+        await connectToDatabase();
+        const result = await Tip.find(
+        {
+          tipper_fid: fid,
+          points: points,
+          createdAt: {
+            $gte: startTime,
+            $lte: endTime
+          }
+        }, {receiver_fid: 1, _id: 0}).limit(15).lean()
+        if (result) {
+          const tippedFids = result.map(doc => doc.receiver_fid);
+          const uniqueFids = [...new Set(tippedFids)]; 
+          console.log(uniqueFids)
+          return uniqueFids
+        } else {
+          return []
+        }
+      } catch (error) {
+        console.error('Error getting PFPs:', error)
+        return []
+      }
+    }
+
     let tipText = ''
 
     const now = new Date();
@@ -274,13 +300,14 @@ export default async function handler(req, res) {
 
         if (isTipped) {
 
+          const circleFids = await getFids(fid, timeMinus3, timePlus1, points)
+
           const {username, pfp} = await getSigner(fid)
 
           const {text} = formatStringToArray(inputText);
           tipText = text
 
-          circlesImg = `${baseURL}/api/frames/circle?${qs.stringify({    
-            fid, eco, text: tipText, username, pfp, time1: timeMinus3, time2: timePlus1 })}`
+          circlesImg = `${baseURL}/api/frames/circle?${qs.stringify({ text: tipText, username, pfp, fids: circleFids })}`
 
           shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share?${qs.stringify({    
             tip: 0,
@@ -375,13 +402,14 @@ export default async function handler(req, res) {
 
         if (isTipped) {
 
+          const circleFids = await getFids(fid, timeMinus3, timePlus1, points)
+
           const {username, pfp} = await getSigner(fid)
 
           const {text} = formatStringToArray(inputText);
           tipText = text
 
-          circlesImg = `${baseURL}/api/frames/circle?${qs.stringify({    
-            fid, eco, text: tipText, username, pfp, time1: timeMinus3, time2: timePlus1 })}`
+          circlesImg = `${baseURL}/api/frames/circle?${qs.stringify({ text: tipText, username, pfp, fids: circleFids })}`
 
           shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share?${qs.stringify({    
             tip: 0,
@@ -762,10 +790,9 @@ export default async function handler(req, res) {
           
                 let displayedCasts = await populateCast(sortedCasts)
           
-                const { castData, coinTotals } = await processTips(displayedCasts, fid, allowances, ecoName, curatorPercent)
+                const { castData, circle } = await processTips(displayedCasts, fid, allowances, ecoName, curatorPercent)
               
-                circlesImg = `${baseURL}/api/frames/circle?${qs.stringify({    
-                  fid, eco, text: tipText, username, pfp, time1: timeMinus3, time2: timePlus1 })}`
+                circlesImg = `${baseURL}/api/frames/circle?${qs.stringify({ text: tipText, username, pfp, fids: circle })}`
   
                 async function sendRequests(data, signer, apiKey) {
                   const base = "https://api.neynar.com/";
@@ -831,14 +858,12 @@ export default async function handler(req, res) {
                   return tipCounter
                 }
 
-                const remainingTip = await sendRequests(castData, decryptedUuid, apiKey);
-                // const remainingTip = 0 
+                // const remainingTip = await sendRequests(castData, decryptedUuid, apiKey);
+                const remainingTip = 0 
 
                 shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share?${qs.stringify({    
                   tip: 0,
                   shuffle: true,
-                  time1: timeMinus3,
-                  time2: timePlus1,
                   text: tipText,
                   username, pfp, fid, eco, referrer, time, curators
                 })}`

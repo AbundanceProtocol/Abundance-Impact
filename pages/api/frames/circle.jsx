@@ -8,54 +8,25 @@ import NodeCache from 'node-cache';
 import Tip from "../../../models/Tip";
 import Cast from "../../../models/Cast";
 import connectToDatabase from "../../../libs/mongodb";
+import { numToText } from "../../../utils/utils";
 
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 const cache = new NodeCache({ stdTTL: 60 });
 
 
 export default async function handler(req, res) {
-  const { fid, time1, time2, eco, text, username, pfp } = req.query
-  // console.log('api/frames/image 15:', req.query)
-  // console.log('api/frames/image 16:', req.query.id)
-  // console.log('api/frames/image 17:', req.query.page)
-  
+  const { text, username, pfp, fids } = req.query
+
+  console.log(fids)
   try {
     const fontPath = path.join(process.cwd(), 'public', 'Inter-SemiBold.ttf');
     const fontData = fs.readFileSync(fontPath);
 
-    const points = '$' + eco
-
-
-    async function getFids(fid, startTime, endTime, points) {
-      try {
-        await connectToDatabase();
-        const result = await Tip.find(
-        {
-          tipper_fid: fid,
-          points: points,
-          createdAt: {
-            $gte: startTime,
-            $lte: endTime
-          }
-        }, {receiver_fid: 1, _id: 0}).limit(15).lean()
-        if (result) {
-          const tippedFids = result.map(doc => doc.receiver_fid);
-          const uniqueFids = [...new Set(tippedFids)]; 
-          console.log(uniqueFids)
-          return uniqueFids
-        } else {
-          return []
-        }
-      } catch (error) {
-        console.error('Error getting PFPs:', error)
-        return []
-      }
-    }
-
     async function getPFPs(fids) {
       try {
         await connectToDatabase();
-        const result = await Cast.find({ author_fid: { $in: fids } }, {author_fid: 1, author_pfp: 1, _id: 0} ).limit(10)
+        const result = await Cast.find({ author_fid: { $in: fids } }, {author_fid: 1, author_pfp: 1, _id: 0} ).limit(40)
+
         if (result) {
           const uniqueUsers = result.reduce((acc, current) => {
             if (!acc.find(item => item.author_fid === current.author_fid)) {
@@ -73,12 +44,7 @@ export default async function handler(req, res) {
       }
     }
 
-
-    // const now = new Date();
-    // const oneDay = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
-    // const oneMin = new Date(Date.now() - 1 * 60 * 1000);
-    const circleFids = await getFids(fid, time1, time2, points)
-    const circlePFPs = await getPFPs(circleFids);
+    const circlePFPs = await getPFPs(fids);
 
     const splitArray = (arr) => {
       // Calculate the midpoint
@@ -120,10 +86,10 @@ export default async function handler(req, res) {
         </div>
         <div style={{display: 'flex', flexDirection: 'column', color: 'white', 
         fontSize: '22px', alignItems: 'center', justifyContent: 'center'}}>
-          <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '30px', margin: '50px 20px 5px 20px'}}>{`@${username} contributed`}</div>
-          <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '28px', margin: '5px 20px 5px 20px'}}>{`to ${circlePFPs?.length} artists and builders`}</div>
+          <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '30px', margin: '75px 20px 5px 20px'}}>{`@${username} contributed`}</div>
+          <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '28px', margin: '5px 20px 5px 20px'}}>{`to ${numToText(fids?.length)} artists and builders`}</div>
           <div style={{display: 'flex', textAlign: 'center', color: '#cde', fontSize: '24px', margin: '5px 20px 5px 20px'}}>{text}</div>
-          <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '26px', margin: '5px 20px 50px 20px'}}>{`via /impact`}</div>
+          <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '26px', margin: '5px 20px 75px 20px'}}>{`via /impact`}</div>
           {/* <div style={{display: 'flex', textAlign: 'left', padding: '15px 0 0 0'}}>b</div> */}
         </div>
         <div style={{gap: '0.5rem', display: 'flex', flexDirection: 'row'}}>

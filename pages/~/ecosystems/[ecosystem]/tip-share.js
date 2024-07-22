@@ -15,7 +15,7 @@ import qs from "querystring";
 // import useStore from '../../../utils/store';
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 
-export default function Tips({time, curators, channels, tags, shuffle, referrer, eco, ecosystem, sharedFid, text, username, pfp, time1, time2}) {
+export default function Tips({time, curators, channels, tags, shuffle, referrer, eco, ecosystem, fids, text, username, pfp, time1, time2}) {
   const { LoginPopup, fid, userBalances, isLogged } = useContext(AccountContext)
   const index = 0
   const router = useRouter();
@@ -165,7 +165,7 @@ export default function Tips({time, curators, channels, tags, shuffle, referrer,
     })}`
 
     updatedFrameData.image = `${baseURL}/api/frames/circle?${qs.stringify({    
-      fid: sharedFid, eco, text, username, pfp, time1, time2 })}`
+      text, username, pfp, fids })}`
 
     setFrameData(updatedFrameData)
   }, [queryData]);
@@ -299,7 +299,7 @@ export default function Tips({time, curators, channels, tags, shuffle, referrer,
         <meta name="viewport" content="width=device-width"/>
         <meta property="og:title" content="Multi-Tip" />
         <meta property='og:image' content={`${baseURL}/api/frames/circle?${qs.stringify({    
-          fid: sharedFid, eco, text, username, pfp, time1, time2 })}`} />
+          text, username, pfp, fids })}`} />
         <meta property="fc:frame" content="vNext" />
         <meta property="fc:frame:image" content={`${baseURL}/api/frames/circle?${qs.stringify({    
           fid: sharedFid, eco, text, username, pfp, time1, time2 })}`} />
@@ -548,16 +548,16 @@ export default function Tips({time, curators, channels, tags, shuffle, referrer,
 export async function getServerSideProps(context) {
   // Fetch dynamic parameters from the context object
   const { query, params } = context;
-  const { time, curators, channels, tags, shuffle, referrer, eco } = query;
+  const { time, curators, channels, tags, shuffle, referrer, eco, text, username, pfp, fids } = query;
   const { ecosystem } = params;
-  console.log(time, curators, channels, tags, shuffle, referrer, eco, fid, text, username, pfp, time1, time2 )
+  console.log(time, curators, channels, tags, shuffle, referrer, eco, text, username, pfp, fids )
   let setTime = 'all'
   let setEco = null
   let setFid = 3
   if (fid) {
     setFid = fid
   }
-  let setText = 3
+  let setText = ''
   if (text) {
     setText = text
   }
@@ -568,14 +568,6 @@ export async function getServerSideProps(context) {
   let setPfp = ''
   if (pfp) {
     setPfp = pfp
-  }
-  let setTime1 = ''
-  if (time1) {
-    setTime1 = time1
-  }
-  let setTime2 = ''
-  if (time2) {
-    setTime2 = time2
   }
   if (eco) {
     setEco = eco
@@ -591,9 +583,14 @@ export async function getServerSideProps(context) {
   if (channels) {
     setChannels = Array.isArray(channels) ? channels : [channels]
   }
+  fids
   let setTags = []
   if (tags) {
     setTags = Array.isArray(tags) ? tags : [tags]
+  }
+  let setFids = []
+  if (fids) {
+    setFids = Array.isArray(fids) ? fids : [fids]
   }
   let setShuffle = false
   if (shuffle || shuffle == false) {
@@ -615,12 +612,10 @@ export async function getServerSideProps(context) {
       referrer: setReferrer,
       eco: setEco,
       ecosystem: ecosystem,
-      sharedFid: setFid,
       text: setText,
       username: setUsername,
       pfp: setPfp,
-      time1: setTime1,
-      time2: setTime2
+      fids: setFids
     },
   };
 }

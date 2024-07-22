@@ -516,20 +516,48 @@ export async function processTips(userFeed, userFid, tokenData, ecosystem, curat
   
     // console.log('finalTips', finalTips)
 
-    // const circle = finalTips.map(finalTip => {
-    //   const feedItem = userFeed.find(feedItem => feedItem.author.fid === finalTip.fid);
-    //   if (feedItem) {
-    //     return {friend_fid: finalTip.fid, pfp_url: feedItem.author.pfp_url}
-    //   }
-    //   return null
-    // }).filter(item => item !== null)
+    const circle = finalTips.map(finalTip => {
+      const feedItem = userFeed.find(feedItem => feedItem.author.fid === finalTip.fid);
+      if (feedItem) {
+        return finalTip.fid
+      }
+      return null
+    }).filter(item => item !== null)
 
-    // console.log('circle', circle)
+    console.log('circle', circle)
   
-    return { castData: finalTips, coinTotals: coinTotals }
+    return { castData: finalTips, coinTotals: coinTotals, circle }
   }
 }
 
+
+export function numToText(number) {
+  if (number == 0) {
+    return 'zero'
+  } else if (number == 1) {
+    return 'one'
+  } else if (number == 2) {
+    return 'two'
+  } else if (number == 3) {
+    return 'three'
+  } else if (number == 4) {
+    return 'four'
+  } else if (number == 5) {
+    return 'five'
+  } else if (number == 6) {
+    return 'six'
+  } else if (number == 7) {
+    return 'seven'
+  } else if (number == 8) {
+    return 'eight'
+  } else if (number == 9) {
+    return 'nine'
+  } else if (number == 10) {
+    return 'ten'
+  } else {
+    return number
+  }
+}
 
 export function generateRandomString(length) {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';

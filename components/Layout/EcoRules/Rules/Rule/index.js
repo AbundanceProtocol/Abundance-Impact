@@ -2,7 +2,6 @@ import React from 'react';
 import { FaStar } from 'react-icons/fa';
 
 const Rule = ({show, children}) => {
-  console.log(show)
 
   return (
     show ? (
