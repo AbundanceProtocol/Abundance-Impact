@@ -2,7 +2,7 @@ import React from 'react'
 import Tips from './tip';
 
 export default function Ecosystem({time, curators, channels, tags, shuffle, referrer, eco, ecosystem}) {
-  
+
   return (
     <Tips {...{time, curators, channels, tags, shuffle, referrer, eco, ecosystem}} />
   )

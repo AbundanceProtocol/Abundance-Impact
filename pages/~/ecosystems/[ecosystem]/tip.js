@@ -50,26 +50,32 @@ export default function Tips({time, curators, channels, tags, shuffle, referrer,
           index: 1,
           title: "Tip Nominees",
           action_type: "post",
-          target: `${baseURL}/api/frames/tips?tip=0`
+          target: `${baseURL}/api/frames/tip/tip?tip=0`
         },
         {
           index: 2,
           title: "Explore curation",
           action_type: "link",
-          target: `${baseURL}/api/frames/tips?tip=0`
+          target: `${baseURL}/api/frames/tip/tip?tip=0`
         },
         {
           index: 3,
           title: "What's /impact?",
           action_type: "link",
           target: `https://warpcast.com/abundance/0x43ddd672`
+        },
+        {
+          index: 4,
+          title: "Refresh",
+          action_type: "post",
+          target: `${baseURL}/api/frames/tip/refresh?tip=0`
         }
       ],
       input: {
         text: "Eg.: 1000 $Degen, 500 $FARTHER"
       },
       state: {},
-      frames_url: `${baseURL}/~/ecosystems/${ecosystem}/tips`
+      frames_url: `${baseURL}/~/ecosystems/${ecosystem}/tip`
     }
   const [frameData, setFrameData] = useState(initFrame)
   const initCast = {
@@ -159,24 +165,14 @@ export default function Tips({time, curators, channels, tags, shuffle, referrer,
     console.log(queryData)
 
     const updatedFrameData = {...frameData}
-    updatedFrameData.buttons[0].target = `${baseURL}/api/frames/tips?${qs.stringify({    
-      tip: 0,
-      time: time, 
-      curators: curators,
-      shuffle: true,
-      referrer: referrer,
-      eco: eco,
-      ecosystem: ecosystem
-    })}`
+    updatedFrameData.buttons[0].target = `${baseURL}/api/frames/tip/tip?${qs.stringify({    
+      tip: 0, shuffle: true, time, curators, referrer, eco, ecosystem })}`
 
     updatedFrameData.buttons[1].target = `${baseURL}/~/ecosystems/${ecosystem}?${qs.stringify({    
-      time: time, 
-      curators: curators,
-      shuffle: false,
-      referrer: referrer,
-      eco: eco,
-      ecosystem: ecosystem
-    })}`
+      shuffle: false, time, curators, referrer, eco, ecosystem })}`
+
+    updatedFrameData.buttons[3].target = `${baseURL}/api/frames/tip/refresh?${qs.stringify({    
+      tip: 0, shuffle: true, time, curators, referrer, eco, ecosystem })}`
 
     setFrameData(updatedFrameData)
   }, [queryData]);
@@ -228,7 +224,7 @@ export default function Tips({time, curators, channels, tags, shuffle, referrer,
     const updatedPayload = {...payload}
     updatedPayload.buttonIndex = button.index
     updatedPayload.inputText = inputText
-    updatedPayload.fid = fid
+    updatedPayload.fid = fid ?? 3
 
     setPayload(updatedPayload)
 
@@ -316,30 +312,23 @@ export default function Tips({time, curators, channels, tags, shuffle, referrer,
         <meta property="fc:frame:button:1" content='Tip Nominees' />
         <meta property="fc:frame:button:1:action" content="post" />
 
-        <meta property="fc:frame:button:1:target" content={`${baseURL}/api/frames/tips?${qs.stringify({    
-          tip: 0,
-          time: time, 
-          curators: curators,
-          shuffle: true,
-          referrer: referrer,
-          eco: eco,
-          ecosystem: ecosystem
-        })}`} />
+        <meta property="fc:frame:button:1:target" content={`${baseURL}/api/frames/tip/tip?${qs.stringify({    
+          tip: 0, time, curators, shuffle: true, referrer, eco, ecosystem })}`} />
 
         <meta property="fc:frame:button:2" content={`Explore curation`} />
         <meta property="fc:frame:button:2:action" content="link" />
 
         <meta property="fc:frame:button:2:target" content={`${baseURL}/~/ecosystems/${ecosystem}?${qs.stringify({    
-          time: time, 
-          curators: curators,
-          shuffle: false,
-          referrer: referrer,
-          eco: eco,
-          ecosystem: ecosystem
-        })}`} />
+          time, curators, shuffle: false, referrer, eco, ecosystem })}`} />
         <meta property="fc:frame:button:3" content={`What's /impact?`} />
         <meta property="fc:frame:button:3:action" content="link" />
         <meta property="fc:frame:button:3:target" content={`https://warpcast.com/abundance/0x43ddd672`} />
+        <meta property="fc:frame:button:4" content='Refresh' />
+        <meta property="fc:frame:button:4:action" content="post" />
+
+        <meta property="fc:frame:button:4:target" content={`${baseURL}/api/frames/tip/tip?${qs.stringify({    
+          tip: 0, time, curators, shuffle: true, referrer, eco, ecosystem })}`} />
+
         <meta name="fc:frame:input:text" content="Eg.: 1000 $Degen, 500 $FARTHER" />
       </Head>
     )}
@@ -442,22 +431,6 @@ export default function Tips({time, curators, channels, tags, shuffle, referrer,
             {(cast.embeds.length > 0) && (cast.embeds.map((embed, subindex) => (
               
             <div key={subindex} className='flex-col' style={{alignItems: 'center', display: hide ? 'flex' : 'flex'}}>
-              {/* {(embed && embed.type && (embed.type == 'image' || embed.type == 'other')) && (
-                <Images embed={embed} subindex={subindex} textMax={textMax} handleClick={handleClick} index={index} />
-              )}
-              {(embed && embed.type && embed.type == 'subcast') && (
-                <div className="" key={`${index}-${subindex}`} style={{marginTop: '10px'}}>
-                  <Subcast cast={embed.subcast} key={subindex} index={subindex} />
-                </div>
-              )}
-              {(embed && embed.type && embed.type == 'video') && (
-                <div className="" key={`${index}-${subindex}`}>
-                  <VideoPlayer width={textMax} src={embed.url} />
-                </div>
-              )} */}
-              {/* {(embed && embed.url && embed.type && (embed.type == 'html') && embed.metadata && embed.metadata.title) && (
-                <Embed embed={embed} index={index} subindex={subindex} textMax={textMax} />
-              )} */}
             </div>
             )))}
           </div>
