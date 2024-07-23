@@ -1,5 +1,5 @@
 import { getSSLHubRpcClient, Message } from "@farcaster/hub-nodejs";
-import connectToDatabase from "../../../libs/mongodb";
+import connectToDatabase from "../../../../libs/mongodb";
 import User from "../../../../models/User";
 import Tip from  "../../../../models/Tip";
 import Cast from  "../../../../models/Cast";

@@ -1,5 +1,5 @@
 import { getSSLHubRpcClient, Message } from "@farcaster/hub-nodejs";
-import connectToDatabase from "../../../libs/mongodb";
+import connectToDatabase from "../../../../libs/mongodb";
 import User from "../../../../models/User";
 import Tip from  "../../../../models/Tip";
 import Cast from  "../../../../models/Cast";
@@ -232,7 +232,7 @@ export default async function handler(req, res) {
       return;
 
     } catch (error) {
-      
+
       let metatags = `
       <meta name="fc:frame:button:1" content="Retry">
       <meta name="fc:frame:button:1:action" content="post">
