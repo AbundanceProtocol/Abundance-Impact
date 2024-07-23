@@ -211,7 +211,7 @@ export default async function handler(req, res) {
       start: true
     })}`
 
-    const loginUrl = `${baseURL}/~/ecosystems/${ecosystem}/tip-login2?${qs.stringify({    
+    const loginUrl = `${baseURL}/~/ecosystems/${ecosystem}/tip-login?${qs.stringify({    
       tip: 0,
       time: time, 
       curators: curators,
@@ -230,7 +230,7 @@ export default async function handler(req, res) {
       ecosystem: ecosystem
     })}`
 
-    const postUrl = `${baseURL}/~/ecosystems/${ecosystem}/tip-login2?${qs.stringify({    
+    const postUrl = `${baseURL}/~/ecosystems/${ecosystem}/tip-login?${qs.stringify({    
       tip: 0,
       time: time, 
       curators: curators,

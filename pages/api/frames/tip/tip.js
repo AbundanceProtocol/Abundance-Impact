@@ -178,11 +178,11 @@ export default async function handler(req, res) {
 
     const startPost = `${baseURL}/api/frames/tip/start?${qs.stringify({ tip: 0, shuffle: true, time, curators, referrer, eco, ecosystem })}`
 
-    const loginUrl = `${baseURL}/~/ecosystems/${ecosystem}/tip-login2?${qs.stringify({ tip: 0, shuffle: true, time, curators, referrer, eco, ecosystem })}`
+    const loginUrl = `${baseURL}/~/ecosystems/${ecosystem}/tip-login?${qs.stringify({ tip: 0, shuffle: true, time, curators, referrer, eco, ecosystem })}`
 
     const sendPost = `${baseURL}/api/frames/tip/tip?${qs.stringify({ tip: 0, shuffle: true, time, curators, referrer, eco, ecosystem })}`
 
-    const postUrl = `${baseURL}/~/ecosystems/${ecosystem}/tip-login2?${qs.stringify({ tip: 0, shuffle: true, time, curators, referrer, eco, ecosystem })}`
+    const postUrl = `${baseURL}/~/ecosystems/${ecosystem}/tip-login?${qs.stringify({ tip: 0, shuffle: true, time, curators, referrer, eco, ecosystem })}`
     
     const shareText = 'I just multi-tipped builders and creators on /impact. Try it out here:'
 
