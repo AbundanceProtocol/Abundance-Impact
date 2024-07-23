@@ -5,10 +5,10 @@ import { promisify } from 'util';
 import svg2img from 'svg2img';
 import fetch from 'isomorphic-unfetch';
 import NodeCache from 'node-cache';
-import Tip from "../../../models/Tip";
-import Cast from "../../../models/Cast";
-import connectToDatabase from "../../../libs/mongodb";
-import { numToText } from "../../../utils/utils";
+import Tip from "../../../../models/Tip";
+import Cast from "../../../../models/Cast";
+import connectToDatabase from "../../../../libs/mongodb";
+import { numToText } from "../../../../utils/utils";
 
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 const cache = new NodeCache({ stdTTL: 60 });

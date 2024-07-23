@@ -136,7 +136,6 @@ export default async function handler(req, res) {
           points: points,
           createdAt: {
             $gte: startTime,
-            $lte: endTime
           }
         }, {receiver_fid: 1, _id: 0}).limit(15).lean()
         if (result) {

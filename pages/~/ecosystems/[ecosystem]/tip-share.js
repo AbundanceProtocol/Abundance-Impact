@@ -15,7 +15,7 @@ import qs from "querystring";
 // import useStore from '../../../utils/store';
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 
-export default function Tips({time, curators, channels, tags, shuffle, referrer, eco, ecosystem, fids, text, username, pfp, time1, time2}) {
+export default function Tips({time, curators, channels, tags, shuffle, referrer, eco, ecosystem, fids, text, username, pfp}) {
   const { LoginPopup, fid, userBalances, isLogged } = useContext(AccountContext)
   const index = 0
   const router = useRouter();
@@ -50,7 +50,7 @@ export default function Tips({time, curators, channels, tags, shuffle, referrer,
           index: 1,
           title: "Multi tip >",
           action_type: "post",
-          target: `${baseURL}/api/frames/tips?tip=0`
+          target: `${baseURL}/api/frames/tips/tip?tip=0`
         },
         {
           index: 2,
@@ -153,7 +153,7 @@ export default function Tips({time, curators, channels, tags, shuffle, referrer,
     console.log(queryData)
 
     const updatedFrameData = {...frameData}
-    updatedFrameData.buttons[0].target = `${baseURL}/api/frames/tips?${qs.stringify({    
+    updatedFrameData.buttons[0].target = `${baseURL}/api/frames/tip/tip?${qs.stringify({    
       tip: 0,
       time: time, 
       curators: curators,
@@ -164,7 +164,7 @@ export default function Tips({time, curators, channels, tags, shuffle, referrer,
       start: true
     })}`
 
-    updatedFrameData.image = `${baseURL}/api/frames/circle?${qs.stringify({    
+    updatedFrameData.image = `${baseURL}/api/frames/tip/circle?${qs.stringify({    
       text, username, pfp, fids })}`
 
     setFrameData(updatedFrameData)
@@ -298,16 +298,16 @@ export default function Tips({time, curators, channels, tags, shuffle, referrer,
         <meta name="description" content={`Support builder and creators with Impact App`} />
         <meta name="viewport" content="width=device-width"/>
         <meta property="og:title" content="Multi-Tip" />
-        <meta property='og:image' content={`${baseURL}/api/frames/circle?${qs.stringify({    
+        <meta property='og:image' content={`${baseURL}/api/frames/tip/circle?${qs.stringify({    
           text, username, pfp, fids })}`} />
         <meta property="fc:frame" content="vNext" />
-        <meta property="fc:frame:image" content={`${baseURL}/api/frames/circle?${qs.stringify({    
-          fid: sharedFid, eco, text, username, pfp, time1, time2 })}`} />
+        <meta property="fc:frame:image" content={`${baseURL}/api/frames/tip/circle?${qs.stringify({    
+          text, username, pfp, fids })}`} />
         <meta property="fc:frame:image:aspect_ratio" content="1:1" />
         <meta property="fc:frame:button:1" content='Multi-tip >' />
         <meta property="fc:frame:button:1:action" content="post" />
 
-        <meta property="fc:frame:button:1:target" content={`${baseURL}/api/frames/tips?${qs.stringify({    
+        <meta property="fc:frame:button:1:target" content={`${baseURL}/api/frames/tip/tip?${qs.stringify({    
           tip: 0,
           time: time, 
           curators: curators,
