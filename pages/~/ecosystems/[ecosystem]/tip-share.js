@@ -217,7 +217,7 @@ export default function Tips({time, curators, channels, tags, shuffle, referrer,
     const updatedPayload = {...payload}
     updatedPayload.buttonIndex = button.index
     updatedPayload.inputText = inputText
-    updatedPayload.fid = fid
+    updatedPayload.fid = fid ?? 3
 
     setPayload(updatedPayload)
 
@@ -553,10 +553,6 @@ export async function getServerSideProps(context) {
   console.log(time, curators, channels, tags, shuffle, referrer, eco, text, username, pfp, fids )
   let setTime = 'all'
   let setEco = null
-  let setFid = 3
-  if (fid) {
-    setFid = fid
-  }
   let setText = ''
   if (text) {
     setText = text

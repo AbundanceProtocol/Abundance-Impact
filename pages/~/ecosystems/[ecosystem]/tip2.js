@@ -224,7 +224,7 @@ export default function Tips({time, curators, channels, tags, shuffle, referrer,
     const updatedPayload = {...payload}
     updatedPayload.buttonIndex = button.index
     updatedPayload.inputText = inputText
-    updatedPayload.fid = fid
+    updatedPayload.fid = fid ?? 3
 
     setPayload(updatedPayload)
 
