@@ -17,7 +17,7 @@ const secretKey = process.env.SECRET_KEY
 const apiKey = process.env.NEYNAR_API_KEY
 
 export default async function handler(req, res) {
-  const { tip, time, curators, channels, tags, shuffle, referrer, eco, ecosystem } = req.query;
+  const { tip, time, curators, channels, tags, shuffle, referrer, eco, ecosystem, time1 } = req.query;
   const { untrustedData } = req.body
 
   if (req.method !== 'POST' || !ecosystem || !eco) {
@@ -174,7 +174,7 @@ export default async function handler(req, res) {
 
     const retryPost = `${baseURL}/api/frames/tip/start?${qs.stringify({ tip: 0, shuffle: true, time, curators, referrer, eco, ecosystem })}`
 
-    const refreshPost = `${baseURL}/api/frames/tip/refresh?${qs.stringify({ tip: 0, shuffle: true, time, curators, referrer, eco, ecosystem, time1 })}`
+    const refreshPost = `${baseURL}/api/frames/tip/refresh?${qs.stringify({ tip: 0, shuffle: true, time, curators, referrer, eco, ecosystem, time1: timeMinus3 })}`
 
     const startPost = `${baseURL}/api/frames/tip/start?${qs.stringify({ tip: 0, shuffle: true, time, curators, referrer, eco, ecosystem })}`
 
