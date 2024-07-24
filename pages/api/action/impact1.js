@@ -80,10 +80,8 @@ export default async function handler(req, res) {
           return null
         }
       }
-      // console.log('populateCasts:', curatorFid, castHash)
 
       const getCastData = await populateCast(curatorFid, castHash)
-      // console.log('2', getCastData)
 
       let castContext
 
@@ -98,7 +96,6 @@ export default async function handler(req, res) {
           cast_channel: getCastData.root_parent_url
         }
       }
-      // console.log('2', castContext)
 
       let channelCuration = false
 
@@ -109,15 +106,11 @@ export default async function handler(req, res) {
           }
         }
       }
-      // console.log('3', channelCuration)
-
 
       async function postImpact(fid, castContext, impactAmount, points) {
-        // console.log(fid, castContext, impactAmount)
 
         async function postUserStatus(fid, points) {
           let remainingImpact = 0
-          // console.log('4', fid, points)
 
           try {
             await connectToDatabase();
@@ -139,24 +132,19 @@ export default async function handler(req, res) {
         // console.log('5', fid, points)
 
         if (userRemainingImpact || userRemainingImpact !== 0) {
-          // console.log('9')
     
           if (userRemainingImpact >= impactAmount) {
-            // console.log('10')
     
             async function updateListings(fid, castContext, impactAmount, points) {
               // console.log(fid, castContext, impactAmount)
               try {
                 await connectToDatabase();
                 let user = await User.findOne({ fid, ecosystem_points: points }).exec();
-                // console.log('user', user)
 
                 if (user) {
-                  // console.log('11', user)
                   user.remaining_i_allowance -= impactAmount
                   
                   let cast = await Cast.findOne({ cast_hash: castContext.cast_hash, points: points }).exec();
-                  // console.log('cast1', cast)
     
                   function createdImpact(fid, castContext, impactAmount, points) {
                     const newImpact = new Impact({
@@ -171,7 +159,6 @@ export default async function handler(req, res) {
                   
     
                   const saveAll = async (user, impact, cast) => {
-                    // console.log('save all', cast)
 
                     try {
                       const [savedUser, savedImpact, savedCast] = await Promise.all([
@@ -179,7 +166,6 @@ export default async function handler(req, res) {
                         impact.save(),
                         cast.save()
                       ]);
-                      // console.log('7', savedImpact, savedCast)
 
                       return { balance: savedUser.remaining_i_allowance, castImpact: cast.impact_total }
                       
@@ -194,11 +180,8 @@ export default async function handler(req, res) {
                     let impact
     
                     impact = await Impact.findOne({ target_cast_hash: castContext.cast_hash, points: points }).sort({ createdAt: -1 }).exec();
-                    // console.log('impact', impact)
 
                     if (impact && impact.curator_fid == fid) {
-                      // console.log('option 1')
-
                       impact.impact_points += impactAmount
                       cast.impact_total += impactAmount
                       let impactTotal = cast.impact_total
@@ -207,8 +190,6 @@ export default async function handler(req, res) {
                       return { balance, castImpact, impactTotal, curatorCount }
     
                     } else {
-                      // console.log('option 2')
-
                       impact = createdImpact(fid, castContext, impactAmount)
                       cast.impact_total += impactAmount
                       cast.impact_points.push(impact)
@@ -222,8 +203,7 @@ export default async function handler(req, res) {
                   } else {
       
                     let impact = createdImpact(fid, castContext, impactAmount, points)
-                    // console.log('impact2', impact)
-                    // console.log('points', points)
+
                     cast = new Cast({
                       author_fid: castContext.author_fid,
                       author_pfp: castContext.author_pfp,
@@ -240,7 +220,6 @@ export default async function handler(req, res) {
                     });
 
                     cast.points = points
-                    // console.log('cast2', cast)
 
                     const { balance, castImpact } = await saveAll(user, impact, cast)
                     let impactTotal = impactAmount
@@ -286,7 +265,9 @@ export default async function handler(req, res) {
                       }
                     }
   
-                    nominationCast(castContext.author_username, user.username, ecosystem.ecosystem_name, castContext.cast_hash, signer, ecosystem.ecosystem_handle, fid, eco)
+                    if (ecosystem.bot_reply) {
+                      nominationCast(castContext.author_username, user.username, ecosystem.ecosystem_name, castContext.cast_hash, signer, ecosystem.ecosystem_handle, fid, eco)
+                    }
 
                     return { balance, castImpact, impactTotal, curatorCount }
                   }
@@ -330,8 +311,6 @@ export default async function handler(req, res) {
 
             async function curateCast(hash) {
               try {
-                // console.log(hash)
-          
                 const base = "https://api.neynar.com/";
                 const url = `${base}v2/farcaster/reaction`;
                 const response = await fetch(url, {
@@ -348,7 +327,6 @@ export default async function handler(req, res) {
                   })})
                   
                 const cast = await response.json();
-                // console.log(cast)
                 return cast
               } catch (error) {
                 console.error('Error handling POST request:', error);
@@ -365,10 +343,10 @@ export default async function handler(req, res) {
             message: `Cast Impact: ${castImpact} / Balance: ${balance}`
           });
         } catch (error) {
-            console.error(error);
-            res.setHeader('Allow', ['POST']);
-            res.status(200).send(`Request failed`);
-          }
+          console.error(error);
+          res.setHeader('Allow', ['POST']);
+          res.status(200).send(`Request failed`);
+        }
 
       } else {
         res.setHeader('Allow', ['POST']);
@@ -382,7 +360,7 @@ export default async function handler(req, res) {
     }
 
   } else {
-      res.setHeader('Allow', ['POST']);
-      res.status(401).end(`Request failed`);
+    res.setHeader('Allow', ['POST']);
+    res.status(401).end(`Request failed`);
   }
 }

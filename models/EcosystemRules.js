@@ -20,6 +20,8 @@ const ecosystemRulesSchema = new mongoose.Schema({
   condition_following_channel: { type: Boolean, default: true},
   condition_following_owner: { type: Boolean, default: true},
   condition_holding_nft: { type: Boolean, default: false},
+  bot_reply: { type: Boolean, default: true},
+  bot_channel_quote: { type: Boolean, default: false},
   percent_tipped: { type: Number, default: 10},
   upvote_value: { type: Number, default: 1},
   downvote_value: { type: Number, default: 1},

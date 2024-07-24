@@ -18,13 +18,11 @@ export default async function handler(req, res) {
   if (req.method !== 'POST' || !fid || fid == '-' || !impactAmount || !castContext || !points) {
     res.status(405).json({ error: 'Method not allowed' });
   } else {
-    // console.log('1')
     const signer = decryptPassword(encryptedBotUuid, secretKey)
 
     await connectToDatabase();
 
     const ecosystem = await EcosystemRules.findOne({ ecosystem_points_name: points }).exec();
-    // console.log('2', ecosystem)
 
     let channelCuration = false
 
@@ -35,8 +33,6 @@ export default async function handler(req, res) {
         }
       }
     }
-
-    // console.log('3', channelCuration)
 
     async function getQuality(curatorFid, castHash, points) {
       try {
@@ -137,7 +133,6 @@ export default async function handler(req, res) {
                     let curatorCount = cast.impact_points.length
                     const saveLists = await saveAll(user, impact, cast)
                     return {saveLists, impactTotal, curatorCount}
-
                   }
 
                 } else {
@@ -198,7 +193,9 @@ export default async function handler(req, res) {
                     }
                   }
 
-                  nominationCast(castContext.author_username, user.username, ecosystem.ecosystem_name, castContext.cast_hash, signer)
+                  if (ecosystem.bot_reply) {
+                    nominationCast(castContext.author_username, user.username, ecosystem.ecosystem_name, castContext.cast_hash, signer)
+                  }
 
                   return {saveLists, impactTotal, curatorCount}
                 }
