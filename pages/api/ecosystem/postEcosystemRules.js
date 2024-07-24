@@ -67,7 +67,11 @@ export default async function handler(req, res) {
           }
         }
       }
-      if (data.ecoIncentives && data.ecoIncentives.length > 0) {
+      if (data?.ecoOptions) {
+        console.log('reply bot', data?.ecoOptions?.botReply)
+        ecosystem.bot_reply = data?.ecoOptions?.botReply
+      }
+      if (data?.ecoIncentives?.length > 0) {
         for (const incentive of data.ecoIncentives) {
           if (incentive.type == 'percent-tipped') {
             ecosystem.percent_tipped = incentive.percent

@@ -14,6 +14,7 @@ import InputField from '../../components/Ecosystem/InputField';
 import Dropdown from '../../components/Ecosystem/Dropdown';
 import { GrFormPrevious, GrFormNext } from "react-icons/gr";
 import Modal from '../../components/Layout/Modals/Modal';
+import Checkbox from '../../components/Ecosystem/Checkbox';
 
 export default function Ecosystem() {
   const ref = useRef(null)
@@ -48,6 +49,7 @@ export default function Ecosystem() {
   const ecosystemRules = {
     id: '',
     update: false,
+    botReply: false,
     start: false, 
     fid: null, 
     nameField: false, 
@@ -56,8 +58,8 @@ export default function Ecosystem() {
     points: '$', 
     dropdown: null,
     pointsField: false, 
-    moderators: null, 
-    channels: null, 
+    moderators: [], 
+    channels: [], 
     channelCuratorThreshold: 1,
     channelPointThreshold: 1,
     rules: [''],
@@ -166,6 +168,9 @@ export default function Ecosystem() {
     let ecoIncentives = []
     let ecoRules = []
     let ecoEligibility = []
+    let ecoOptions = {
+      botReply: false
+    }
 
     ecoName = newEcosystem.name
     ecoHandle = newEcosystem.handle
@@ -272,6 +277,9 @@ export default function Ecosystem() {
         }
       }
     }
+    if (newEcosystem.botReply || newEcosystem.botReply == false) {
+      ecoOptions.botReply = newEcosystem.botReply
+    }
     const ecoData = {
       ecoName,
       ecoHandle,
@@ -284,6 +292,7 @@ export default function Ecosystem() {
       ecoIncentives,
       ecoRules,
       ecoEligibility,
+      ecoOptions
     }
     console.log(ecoData)
     setEcosystemData(ecoData)
@@ -548,6 +557,14 @@ export default function Ecosystem() {
         updatedNewEcosystem.eligibility.push({condition: 'none', isSet: 'empty'})
         setNewEcosystem(updatedNewEcosystem)
       }
+    } else if (target == 'bot-reply') {
+      if (newEcosystem.botReply) {
+        updatedNewEcosystem.botReply = false
+      } else {
+        updatedNewEcosystem.botReply = true
+      }
+      console.log(updatedNewEcosystem.botReply)
+      setNewEcosystem(updatedNewEcosystem)
     } else if (target == 'submit') {
       console.log('submitted')
       sendEcosystemRules()
@@ -904,6 +921,7 @@ export default function Ecosystem() {
     updatedformController.pointsDescription = 'Points name cannot be updated'
 
     updatedNewEcosystem.fid = ecosystem.fid
+    updatedNewEcosystem.botReply = ecosystem.bot_reply
 
     console.log(ecosystem.condition_curators_threshold)
     if (ecosystem.condition_curators_threshold) {
@@ -1158,7 +1176,7 @@ export default function Ecosystem() {
     {!newEcosystem.nameField ? (<div style={{margin: '25px 0 0 0'}}><Button text={newEcosystem?.update ? 'Update Ecosystem' : 'Create Ecosystem'} size={'large'} prevIcon={FaPlus} setupEcosystem={setupEcosystem} target={'start'} isSelected={formController.nextCheck} /></div>) : (
       <div className='flex-row' style={{margin: '33px 3px 8px 3px', gap: '1rem', justifyContent: 'space-between', alignItems: 'center'}}>
         <Description show={true} text={newEcosystem?.update ? 'Update Ecosystem' : 'Create Ecosystem'} padding={'0px 0 4px 5px'} size={'large'} />
-        <Button text={'Cancel'} size={'medium'} setupEcosystem={setupEcosystem} target={'cancel'} isSelected={formController.nextCheck} />
+        <Button {...{text: 'Cancel', size: 'medium', setupEcosystem, target: 'cancel', isSelected: formController.nextCheck}} />
       </div>
     )}
 
@@ -1315,6 +1333,13 @@ export default function Ecosystem() {
 
     {(newEcosystem?.ecoRules?.map((ecoRule, index) => 
       (<InputField {...{show: newEcosystem?.nameField, name: index, value: ecoRule?.rule, placeholder: `Ecosystem rule`, inputKeyDown, onInput: ecoFields, setupEcosystem, target: index, isSet: ecoRule?.isSet, clearInput: clearEcoField, cancel: true, removeField: removeEcoField }} key={index} />)))}
+
+    <Description {...{show: newEcosystem?.nameField, text: 'Options:', padding: '20px 0 4px 10px' }} />
+
+    {(newEcosystem.nameField) && (<div className={`active-nav-link btn-hvr flex-col`} style={{border: '1px solid #777', padding: '2px', borderRadius: '10px', margin: '3px 3px 13px 3px', backgroundColor: '', maxWidth: '100%', cursor: 'default', width: 'auto', justifyContent: 'flex-start'}}>
+      <Checkbox {...{option: newEcosystem.botReply, text: 'Bot reply to curated casts', description: 'Adds a reply with tipping frame', target: 'bot-reply', setupEcosystem}} />
+    </div>)}
+
 
 
     {newEcosystem?.nameField && (<div className='flex-row' style={{margin: '33px 3px 8px 3px', gap: '1rem', justifyContent: 'space-between'}}>
