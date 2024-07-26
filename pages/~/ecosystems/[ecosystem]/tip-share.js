@@ -15,7 +15,7 @@ import qs from "querystring";
 // import useStore from '../../../utils/store';
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 
-export default function Tips({time, curators, channels, tags, shuffle, referrer, eco, ecosystem, fids, text, username, pfp}) {
+export default function Tips({time, curators, channels, tags, shuffle, referrer, eco, ecosystem, fids, text, username}) {
   const { LoginPopup, fid, userBalances, isLogged } = useContext(AccountContext)
   const index = 0
   const router = useRouter();
@@ -165,7 +165,7 @@ export default function Tips({time, curators, channels, tags, shuffle, referrer,
     })}`
 
     updatedFrameData.image = `${baseURL}/api/frames/tip/circle?${qs.stringify({    
-      text, username, pfp, fids })}`
+      text, username, fids })}`
 
     setFrameData(updatedFrameData)
   }, [queryData]);
@@ -299,10 +299,10 @@ export default function Tips({time, curators, channels, tags, shuffle, referrer,
         <meta name="viewport" content="width=device-width"/>
         <meta property="og:title" content="Multi-Tip" />
         <meta property='og:image' content={`${baseURL}/api/frames/tip/circle?${qs.stringify({    
-          text, username, pfp, fids })}`} />
+          text, username, fids })}`} />
         <meta property="fc:frame" content="vNext" />
         <meta property="fc:frame:image" content={`${baseURL}/api/frames/tip/circle?${qs.stringify({    
-          text, username, pfp, fids })}`} />
+          text, username, fids })}`} />
         <meta property="fc:frame:image:aspect_ratio" content="1:1" />
         <meta property="fc:frame:button:1" content='Multi-tip >' />
         <meta property="fc:frame:button:1:action" content="post" />
@@ -548,9 +548,9 @@ export default function Tips({time, curators, channels, tags, shuffle, referrer,
 export async function getServerSideProps(context) {
   // Fetch dynamic parameters from the context object
   const { query, params } = context;
-  const { time, curators, channels, tags, shuffle, referrer, eco, text, username, pfp, fids } = query;
+  const { time, curators, channels, tags, shuffle, referrer, eco, text, username, fids } = query;
   const { ecosystem } = params;
-  console.log(time, curators, channels, tags, shuffle, referrer, eco, text, username, pfp, fids )
+  console.log(time, curators, channels, tags, shuffle, referrer, eco, text, username, fids )
   let setTime = 'all'
   let setEco = null
   let setText = ''
@@ -560,10 +560,6 @@ export async function getServerSideProps(context) {
   let setUsername = ''
   if (username) {
     setUsername = username
-  }
-  let setPfp = ''
-  if (pfp) {
-    setPfp = pfp
   }
   if (eco) {
     setEco = eco
@@ -610,7 +606,6 @@ export async function getServerSideProps(context) {
       ecosystem: ecosystem,
       text: setText,
       username: setUsername,
-      pfp: setPfp,
       fids: setFids
     },
   };

@@ -278,7 +278,7 @@ export default async function handler(req, res) {
         return;
       } else {
       
-        const {decryptedUuid, username, pfp} = await getSigner(fid)
+        const {decryptedUuid, username} = await getSigner(fid)
   
         if (!decryptedUuid) {
           console.log('d')
@@ -513,7 +513,7 @@ export default async function handler(req, res) {
       
             const { castData, circle } = await processTips(displayedCasts, fid, allowances, ecoName, curatorPercent)
           
-            circlesImg = `${baseURL}/api/frames/tip/circle?${qs.stringify({ text: tipText, username, pfp, fids: circle })}`
+            circlesImg = `${baseURL}/api/frames/tip/circle?${qs.stringify({ text: tipText, username, fids: circle })}`
 
             async function sendRequests(data, signer, apiKey) {
               const base = "https://api.neynar.com/";

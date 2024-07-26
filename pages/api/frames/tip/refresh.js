@@ -91,17 +91,17 @@ export default async function handler(req, res) {
     async function getSigner(fid) {
       try {
         await connectToDatabase();
-        const user = await User.findOne({ fid }).select('uuid username pfp').exec();
+        const user = await User.findOne({ fid }).select('uuid username').exec();
         if (user) {
           const signer = decryptPassword(user.uuid, secretKey)
           // console.log(user)
-          return {decryptedUuid: signer, username: user.username, pfp: user.pfp}
+          return {decryptedUuid: signer, username: user.username}
         } else {
-          return {decryptedUuid: null, username: null, pfp: null}
+          return {decryptedUuid: null, username: null}
         }
       } catch (error) {
         console.error('Error getting User:', error)
-        return {decryptedUuid: null, username: null, pfp: null}
+        return {decryptedUuid: null, username: null}
       }
     }
 
@@ -200,13 +200,13 @@ export default async function handler(req, res) {
 
         const circleFids = await getFids(fid, time1, timePlus1, points)
 
-        const {username, pfp} = await getSigner(fid)
+        const {username} = await getSigner(fid)
 
         const {text} = formatStringToArray(inputText);
 
-        circlesImg = `${baseURL}/api/frames/tip/circle?${qs.stringify({ text, username, pfp, fids: circleFids })}`
+        circlesImg = `${baseURL}/api/frames/tip/circle?${qs.stringify({ text, username, fids: circleFids })}`
 
-        shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share?${qs.stringify({ tip: 0, shuffle: true, text, fids: circleFids, username, pfp, eco, referrer, time, curators })}`
+        shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share?${qs.stringify({ tip: 0, shuffle: true, text, fids: circleFids, username, eco, referrer, time, curators })}`
     
         encodedShareUrl = encodeURIComponent(shareUrl); 
         shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
