@@ -15,7 +15,7 @@ const cache = new NodeCache({ stdTTL: 60 });
 
 
 export default async function handler(req, res) {
-  const { text, username, pfp, fids } = req.query
+  const { text, username, fids } = req.query
 
   console.log('fids', fids)
   try {

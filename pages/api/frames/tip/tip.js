@@ -583,7 +583,7 @@ export default async function handler(req, res) {
             // const remainingTip = 0 
 
             shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share?${qs.stringify({    
-              tip: 0, shuffle: true, text: tipText, fids: circle, username, pfp, eco, referrer, time, curators })}`
+              tip: 0, shuffle: true, text: tipText, fids: circle, username, eco, referrer, time, curators })}`
         
             encodedShareUrl = encodeURIComponent(shareUrl); 
             shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
