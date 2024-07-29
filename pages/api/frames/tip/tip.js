@@ -91,17 +91,17 @@ export default async function handler(req, res) {
     async function getSigner(fid) {
       try {
         await connectToDatabase();
-        const user = await User.findOne({ fid }).select('uuid username pfp').exec();
+        const user = await User.findOne({ fid }).select('uuid username').exec();
         if (user) {
           const signer = decryptPassword(user.uuid, secretKey)
           // console.log(user)
-          return {decryptedUuid: signer, username: user.username, pfp: user.pfp}
+          return {decryptedUuid: signer, username: user.username}
         } else {
-          return {decryptedUuid: null, username: null, pfp: null}
+          return {decryptedUuid: null, username: null}
         }
       } catch (error) {
         console.error('Error getting User:', error)
-        return {decryptedUuid: null, username: null, pfp: null}
+        return {decryptedUuid: null, username: null}
       }
     }
 
@@ -513,7 +513,9 @@ export default async function handler(req, res) {
       
             const { castData, circle } = await processTips(displayedCasts, fid, allowances, ecoName, curatorPercent)
           
-            circlesImg = `${baseURL}/api/frames/tip/circle?${qs.stringify({ text: tipText, username, fids: circle })}`
+            const jointFids = circle.join(',')
+
+            circlesImg = `${baseURL}/api/frames/tip/circle?${qs.stringify({ text: tipText, username, fids: jointFids })}`
 
             async function sendRequests(data, signer, apiKey) {
               const base = "https://api.neynar.com/";
@@ -583,7 +585,7 @@ export default async function handler(req, res) {
             // const remainingTip = 0 
 
             shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share?${qs.stringify({    
-              tip: 0, shuffle: true, text: tipText, fids: circle, username, eco, referrer, time, curators })}`
+              shuffle: true, text: tipText, fids: jointFids, username, eco, referrer, time, curators })}`
         
             encodedShareUrl = encodeURIComponent(shareUrl); 
             shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`

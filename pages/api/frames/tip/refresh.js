@@ -204,7 +204,9 @@ export default async function handler(req, res) {
 
         const {text} = formatStringToArray(inputText);
 
-        circlesImg = `${baseURL}/api/frames/tip/circle?${qs.stringify({ text, username, fids: circleFids })}`
+        const jointFids = circleFids.join(',')
+
+        circlesImg = `${baseURL}/api/frames/tip/circle?${qs.stringify({ text, username, fids: jointFids })}`
 
         shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share?${qs.stringify({ tip: 0, shuffle: true, text, fids: circleFids, username, eco, referrer, time, curators })}`
     
