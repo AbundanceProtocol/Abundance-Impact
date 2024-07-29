@@ -17,7 +17,7 @@ const secretKey = process.env.SECRET_KEY
 const apiKey = process.env.NEYNAR_API_KEY
 
 export default async function handler(req, res) {
-  const { tip, time, curators, channels, tags, shuffle, referrer, eco, ecosystem, refresh, time1 } = req.query;
+  const { time, curators, channels, tags, eco, ecosystem, refresh, time1 } = req.query;
   const { untrustedData } = req.body
 
   if (req.method !== 'POST' || !ecosystem || !eco) {
@@ -168,25 +168,25 @@ export default async function handler(req, res) {
     
     console.log('14:', req.query, refresh)
 
-    const exploreLink = `${baseURL}/~/ecosystems/${ecosystem}?${qs.stringify({ tip: 0, shuffle: false, time: 'all', curators, referrer, eco, ecosystem })}`
+    const exploreLink = `${baseURL}/~/ecosystems/${ecosystem}?${qs.stringify({ time: 'all', curators, eco })}`
 
     const impactLink = `https://warpcast.com/abundance/0x43ddd672`
 
-    const retryPost = `${baseURL}/api/frames/tip/start?${qs.stringify({ tip: 0, shuffle: true, time, curators, referrer, eco, ecosystem })}`
+    const retryPost = `${baseURL}/api/frames/tip/start?${qs.stringify({ time, curators, eco, ecosystem })}`
 
-    const refreshPost = `${baseURL}/api/frames/tip/refresh?${qs.stringify({ tip: 0, shuffle: true, time, curators, referrer, eco, ecosystem, time1: timeMinus3 })}`
+    const refreshPost = `${baseURL}/api/frames/tip/refresh?${qs.stringify({ time, curators, eco, ecosystem, time1: timeMinus3 })}`
 
-    const startPost = `${baseURL}/api/frames/tip/start?${qs.stringify({ tip: 0, shuffle: true, time, curators, referrer, eco, ecosystem })}`
+    const startPost = `${baseURL}/api/frames/tip/start?${qs.stringify({ time, curators, eco, ecosystem })}`
 
-    const loginUrl = `${baseURL}/~/ecosystems/${ecosystem}/tip-login?${qs.stringify({ tip: 0, shuffle: true, time, curators, referrer, eco, ecosystem })}`
+    const loginUrl = `${baseURL}/~/ecosystems/${ecosystem}/tip-login?${qs.stringify({ time, curators, eco })}`
 
-    const sendPost = `${baseURL}/api/frames/tip/tip?${qs.stringify({ tip: 0, shuffle: true, time, curators, referrer, eco, ecosystem })}`
+    const sendPost = `${baseURL}/api/frames/tip/tip?${qs.stringify({ time, curators, eco, ecosystem })}`
 
-    const postUrl = `${baseURL}/~/ecosystems/${ecosystem}/tip-login?${qs.stringify({ tip: 0, shuffle: true, time, curators, referrer, eco, ecosystem })}`
+    const postUrl = `${baseURL}/~/ecosystems/${ecosystem}/tip-login?${qs.stringify({ time, curators, eco })}`
     
     const shareText = 'I just multi-tipped builders and creators on /impact. Try it out here:'
 
-    let shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share?${qs.stringify({ tip: 0, shuffle: true, time, curators, referrer, eco, ecosystem })}`
+    let shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share?${qs.stringify({ time, curators, eco })}`
 
     const encodedShareText = encodeURIComponent(shareText); 
     let encodedShareUrl = encodeURIComponent(shareUrl); 
@@ -208,7 +208,7 @@ export default async function handler(req, res) {
 
         circlesImg = `${baseURL}/api/frames/tip/circle?${qs.stringify({ text, username, fids: jointFids })}`
 
-        shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share?${qs.stringify({ tip: 0, shuffle: true, text, fids: circleFids, username, eco, referrer, time, curators })}`
+        shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share?${qs.stringify({ text, fids: circleFids, username, eco, time, curators })}`
     
         encodedShareUrl = encodeURIComponent(shareUrl); 
         shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`

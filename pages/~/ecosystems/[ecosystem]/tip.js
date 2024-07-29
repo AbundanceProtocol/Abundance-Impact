@@ -15,7 +15,7 @@ import qs from "querystring";
 // import useStore from '../../../utils/store';
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 
-export default function Tips({time, curators, channels, tags, shuffle, referrer, eco, ecosystem}) {
+export default function Tips({time, curators, channels, tags, eco, ecosystem}) {
   const { LoginPopup, fid, userBalances, isLogged } = useContext(AccountContext)
   const index = 0
   const router = useRouter();
@@ -107,12 +107,12 @@ export default function Tips({time, curators, channels, tags, shuffle, referrer,
   const [queryData, setQueryData] = useState(initQuery)
 
   useEffect(() => {
-    console.log(time, curators, shuffle, referrer, eco, ecosystem)
+    console.log(time, curators, eco, ecosystem)
 
     let timeQuery = '&time=all'
     let curatorsQuery = ''
-    let shuffleQuery = '&shuffle=true'
-    let referrerQuery = ''
+    // let shuffleQuery = '&shuffle=true'
+    // let referrerQuery = ''
     let ecoQuery = '&eco=IMPACT'
     let ecosystemQuery = '&ecosystem=abundance'
     if (time) {
@@ -124,12 +124,12 @@ export default function Tips({time, curators, channels, tags, shuffle, referrer,
         curatorsQuery += '&curators=' + parseInt(curator)
       }
     }
-    if (shuffle || shuffle == false) {
-      shuffleQuery = '&shuffle=' + shuffle
-    }
-    if (referrer) {
-      referrerQuery = '&referrer=' + referrer
-    }
+    // if (shuffle || shuffle == false) {
+    //   shuffleQuery = '&shuffle=' + shuffle
+    // }
+    // if (referrer) {
+    //   referrerQuery = '&referrer=' + referrer
+    // }
     if (eco) {
       ecoQuery = '&eco=' + eco
     }
@@ -141,8 +141,6 @@ export default function Tips({time, curators, channels, tags, shuffle, referrer,
       ...prev, 
       time: timeQuery, 
       curators: curatorsQuery, 
-      shuffle: shuffleQuery, 
-      referrer: referrerQuery, 
       eco: ecoQuery, 
       ecosystem: ecosystemQuery
     }))
@@ -166,13 +164,13 @@ export default function Tips({time, curators, channels, tags, shuffle, referrer,
 
     const updatedFrameData = {...frameData}
     updatedFrameData.buttons[0].target = `${baseURL}/api/frames/tip/tip?${qs.stringify({    
-      tip: 0, shuffle: true, time, curators, referrer, eco, ecosystem })}`
+      time, curators, eco, ecosystem })}`
 
     updatedFrameData.buttons[1].target = `${baseURL}/~/ecosystems/${ecosystem}?${qs.stringify({    
-      shuffle: false, time, curators, referrer, eco, ecosystem })}`
+      time, curators, eco, ecosystem })}`
 
     updatedFrameData.buttons[3].target = `${baseURL}/api/frames/tip/refresh?${qs.stringify({    
-      tip: 0, shuffle: true, time, curators, referrer, eco, ecosystem })}`
+      time, curators, eco, ecosystem })}`
 
     setFrameData(updatedFrameData)
   }, [queryData]);
@@ -220,7 +218,7 @@ export default function Tips({time, curators, channels, tags, shuffle, referrer,
   }, [screenWidth])
   
   const buttonAction = async (button) => {
-    console.log(queryData.time + queryData.curators + queryData.shuffle + queryData.referrer + queryData.points + queryData.ecosystem)
+    console.log(queryData.time + queryData.curators + queryData.points + queryData.ecosystem)
     const updatedPayload = {...payload}
     updatedPayload.buttonIndex = button.index
     updatedPayload.inputText = inputText
@@ -313,13 +311,13 @@ export default function Tips({time, curators, channels, tags, shuffle, referrer,
         <meta property="fc:frame:button:1:action" content="post" />
 
         <meta property="fc:frame:button:1:target" content={`${baseURL}/api/frames/tip/tip?${qs.stringify({    
-          tip: 0, time, curators, shuffle: true, referrer, eco, ecosystem })}`} />
+          time, curators, eco, ecosystem })}`} />
 
         <meta property="fc:frame:button:2" content={`Explore curation`} />
         <meta property="fc:frame:button:2:action" content="link" />
 
         <meta property="fc:frame:button:2:target" content={`${baseURL}/~/ecosystems/${ecosystem}?${qs.stringify({    
-          time, curators, shuffle: false, referrer, eco, ecosystem })}`} />
+          time, curators, eco, ecosystem })}`} />
         <meta property="fc:frame:button:3" content={`What's /impact?`} />
         <meta property="fc:frame:button:3:action" content="link" />
         <meta property="fc:frame:button:3:target" content={`https://warpcast.com/abundance/0x43ddd672`} />
@@ -327,7 +325,7 @@ export default function Tips({time, curators, channels, tags, shuffle, referrer,
         <meta property="fc:frame:button:4:action" content="post" />
 
         <meta property="fc:frame:button:4:target" content={`${baseURL}/api/frames/tip/tip?${qs.stringify({    
-          tip: 0, time, curators, shuffle: true, referrer, eco, ecosystem })}`} />
+          time, curators, eco, ecosystem })}`} />
 
         <meta name="fc:frame:input:text" content="Eg.: 1000 $Degen, 500 $FARTHER" />
       </Head>
@@ -555,9 +553,9 @@ export default function Tips({time, curators, channels, tags, shuffle, referrer,
 export async function getServerSideProps(context) {
   // Fetch dynamic parameters from the context object
   const { query, params } = context;
-  const { time, curators, channels, tags, shuffle, referrer, eco } = query;
+  const { time, curators, channels, tags, eco } = query;
   const { ecosystem } = params;
-  console.log(time, curators, channels, tags, shuffle, referrer, eco)
+  console.log(time, curators, channels, tags, eco)
   let setTime = 'all'
   let setEco = null
   if (eco) {
@@ -578,24 +576,22 @@ export async function getServerSideProps(context) {
   if (tags) {
     setTags = Array.isArray(tags) ? tags : [tags]
   }
-  let setShuffle = false
-  if (shuffle || shuffle == false) {
-    if (shuffle == 'true') {
-      setShuffle = true
-    } else if (shuffle == 'false') {
-      setShuffle = false
-    }
-  }
-  let setReferrer = referrer || null
-  console.log('192:', setTime, setCurators, setShuffle, setReferrer, setEco, ecosystem)
+  // let setShuffle = false
+  // if (shuffle || shuffle == false) {
+  //   if (shuffle == 'true') {
+  //     setShuffle = true
+  //   } else if (shuffle == 'false') {
+  //     setShuffle = false
+  //   }
+  // }
+  // let setReferrer = referrer || null
+  console.log('192:', setTime, setCurators, setEco, ecosystem)
   return {
     props: {
       time: setTime,
       curators: setCurators,
       channels: setChannels,
       tags: setTags,
-      shuffle: setShuffle,
-      referrer: setReferrer,
       eco: setEco,
       ecosystem: ecosystem
     },

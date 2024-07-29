@@ -1,10 +1,10 @@
 import React from 'react'
 import Tips from './tip';
 
-export default function Ecosystem({time, curators, channels, tags, shuffle, referrer, eco, ecosystem}) {
+export default function Ecosystem({time, curators, channels, tags, eco, ecosystem}) {
 
   return (
-    <Tips {...{time, curators, channels, tags, shuffle, referrer, eco, ecosystem}} />
+    <Tips {...{time, curators, channels, tags, eco, ecosystem}} />
   )
 }
 
@@ -12,9 +12,9 @@ export default function Ecosystem({time, curators, channels, tags, shuffle, refe
 export async function getServerSideProps(context) {
   // Fetch dynamic parameters from the context object
   const { query, params } = context;
-  const { time, curators, channels, tags, shuffle, referrer, eco } = query;
+  const { time, curators, channels, tags, eco } = query;
   const { ecosystem } = params;
-  console.log(time, curators, channels, tags, shuffle, referrer, eco)
+  console.log(time, curators, channels, tags, eco)
   let setTime = 'all'
   let setEco = null
   if (eco) {
@@ -35,24 +35,22 @@ export async function getServerSideProps(context) {
   if (tags) {
     setTags = Array.isArray(tags) ? tags : [tags]
   }
-  let setShuffle = false
-  if (shuffle || shuffle == false) {
-    if (shuffle == 'true') {
-      setShuffle = true
-    } else if (shuffle == 'false') {
-      setShuffle = false
-    }
-  }
-  let setReferrer = referrer || null
-  console.log('192:', setTime, setCurators, setShuffle, setReferrer, setEco, ecosystem)
+  // let setShuffle = false
+  // if (shuffle || shuffle == false) {
+  //   if (shuffle == 'true') {
+  //     setShuffle = true
+  //   } else if (shuffle == 'false') {
+  //     setShuffle = false
+  //   }
+  // }
+  // let setReferrer = referrer || null
+  console.log('192:', setTime, setCurators, setEco, ecosystem)
   return {
     props: {
       time: setTime,
       curators: setCurators,
       channels: setChannels,
       tags: setTags,
-      shuffle: setShuffle,
-      referrer: setReferrer,
       eco: setEco,
       ecosystem: ecosystem
     },

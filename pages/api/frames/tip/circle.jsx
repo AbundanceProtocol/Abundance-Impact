@@ -92,7 +92,6 @@ export default async function handler(req, res) {
           <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '28px', margin: '5px 20px 5px 20px'}}>{`to ${numToText(circlePFPs?.length)} artists and builders`}</div>
           <div style={{display: 'flex', textAlign: 'center', color: '#cde', fontSize: '24px', margin: '5px 20px 5px 20px'}}>{text}</div>
           <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '26px', margin: '5px 20px 75px 20px'}}>{`via /impact`}</div>
-          {/* <div style={{display: 'flex', textAlign: 'left', padding: '15px 0 0 0'}}>b</div> */}
         </div>
         <div style={{gap: '0.5rem', display: 'flex', flexDirection: 'row'}}>
           {(secondHalf?.length > 0) ? (secondHalf.map((creator, index) => <img key={index} src={creator.author_pfp} width={90} height={90} style={{borderRadius: '50px', border: '2px solid #eee'}} />)) : (<div style={{height: '90px'}}>&nbsp;</div>)}
