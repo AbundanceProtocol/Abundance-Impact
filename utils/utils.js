@@ -499,7 +499,7 @@ export async function processTips(userFeed, userFid, tokenData, ecosystem, curat
           }
         }
         if (cast.text.length > 0) {
-          cast.text += `tipped via ${ecosystemName}/impact`
+          cast.text += `tipped via ${ecosystemName}/impact\n\n/impact lets you easily multi-tip your favorite artists & builders, schedule tips & share curations with frens`
         }
       }
     }
