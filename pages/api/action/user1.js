@@ -60,7 +60,7 @@ export default async function handler(req, res) {
           let user = await User.findOne({ fid, ecosystem_points: points }).select('remaining_i_allowance username').exec();
           if (user) {
               remainingImpact = user.remaining_i_allowance
-              username = user.username
+              const username = user.username
               return {remainingImpact, username}
           } else {
             return {remainingImpact: null, username: null}
