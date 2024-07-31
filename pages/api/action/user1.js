@@ -347,7 +347,7 @@ export default async function handler(req, res) {
 
     const userHash = await getHash(curatorFid, authorFid, points)
     
-    if (userHash && ecosystem.curate_user) {
+    if (userHash && ecosystem.curate_user == true) {
 
       async function getQuality(curatorFid, castHash, points) {
         try {
@@ -421,7 +421,7 @@ export default async function handler(req, res) {
         }
 
       }
-    } else if (!userHash && ecosystem.curate_user) {
+    } else if (!userHash && ecosystem.curate_user == true) {
 
       const getCastData = await populateCast(curatorFid, castHash)
 
