@@ -329,13 +329,13 @@ export default async function handler(req, res) {
 
     const ecosystem = await getEcosystem(points)
 
-    async function getHash(curatorFid, authorFid, points) {
+    async function getHash(authorFid, points) {
       try {
         await connectToDatabase();
-        // const casts = await Impact.countDocuments({ curator_fid: curatorFid, creator_fid: authorFid, points })
-        const hash = await Impact.findOne({ curator_fid: curatorFid, creator_fid: authorFid, points }, {target_cast_hash: 1, _id: 0}).lean()
+        const hash = await Cast.findOne({ author_fid: authorFid, points }, {cast_hash: 1, _id: 0}).lean()
         if (hash) {
-          return hash
+          console.log(hash)
+          return hash.cast_hash
         } else {
           return null
         }
@@ -345,11 +345,18 @@ export default async function handler(req, res) {
       }
     }
 
-    const userHash = await getHash(curatorFid, authorFid, points)
+    const userHash = await getHash(authorFid, points)
     
+    console.log('userHash1', userHash)
+
     if (userHash && ecosystem.curate_user == true) {
+      console.log('hash')
 
       async function getQuality(curatorFid, castHash, points) {
+        console.log('castHash', castHash)
+        console.log('curatorFid', curatorFid)
+        console.log('curatorFid', curatorFid)
+
         try {
           await connectToDatabase();
           const quality = await Quality.countDocuments({ curator_fid: curatorFid, target_cast_hash: castHash, points })
@@ -422,7 +429,7 @@ export default async function handler(req, res) {
 
       }
     } else if (!userHash && ecosystem.curate_user == true) {
-
+      console.log('no hash')
       const getCastData = await populateCast(curatorFid, castHash)
 
       let castContext
