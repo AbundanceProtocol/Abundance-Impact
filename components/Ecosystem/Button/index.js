@@ -30,7 +30,7 @@ export default function Button({ text, prevIcon: PrevIcon, postIcon: PostIcon, s
 
 
   return (
-    <div className='active-nav-link btn-hvr' style={{border: `${isSelected ? '2px solid #9df' : '1px solid #777'}`, padding: '2px', borderRadius: '10px', backgroundColor: submit ? '#6f6' : '', maxWidth: 'fit-content', cursor: submit ? 'pointer' : 'default'}} onClick={() => {
+    <div className='active-nav-btn btn-hvr' style={{border: `${isSelected ? '2px solid #9df' : '1px solid #777'}`, padding: '2px', borderRadius: '10px', backgroundColor: submit ? '#6f6' : '', maxWidth: 'fit-content', cursor: submit ? 'pointer' : 'default'}} onClick={() => {
       if (target || submit) {
           console.log(target)
           setupEcosystem(target)

@@ -44,10 +44,8 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
     points_per_tip: 1,
     upvote_value: 1,
   }]
-  // const [ecoData, setEcoData] = useState(initEcosystems[0])
   const [ecoData, setEcoData] = useState(null)
   const [ecosystemsData, setEcosystemsData] = useState([])
-  // const [ecosystemsData, setEcosystemsData] = useState(initEcosystems)
   const initialEligibility = {
     badge: false,
     badgeReq: false,
@@ -190,7 +188,7 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
       }
     }
 
-    if (router.route !== "/~/ecosystems/[ecosystem]/tip" && router.route !== "/~/ecosystems/[ecosystem]/[eco]/[curators]/tip") {
+    if (router.route !== "/~/ecosystems/[ecosystem]/tip" && router.route !== "/~/ecosystems/[ecosystem]/[eco]/[curators]/tip" && router.route !== '/') {
       if (sched.login) {
         updateLogin()
         setSched(prev => ({...prev, login: false }))
@@ -274,9 +272,9 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
     store.setEcosystemData(system)
     setEcoData(system);
     setPrevPoints(null)
-    if (router.route == '/~/ecosystems/[ecosystem]' && router.asPath !== `/~/ecosystems/${system.ecosystem_handle}`) {
+    // if (router.route == '/~/ecosystems/[ecosystem]' && router.asPath !== `/~/ecosystems/${system.ecosystem_handle}`) {
       router.push(`/~/ecosystems/${system.ecosystem_handle}`)
-    }
+    // }
   };
 
   const changeEco = (system) => {

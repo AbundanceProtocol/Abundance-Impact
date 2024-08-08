@@ -117,6 +117,13 @@ export default function Ecosystem() {
     { value: 4, label: '4' },
   ]
 
+  useEffect(() => {
+    const { trigger } = router.query;
+
+    if (trigger === 'createEcosystem') {
+      setupEcosystem('start');
+    }
+  }, [router.query]);
 
   useEffect(() => {
     if (newEcosystem && formController) {
@@ -1173,7 +1180,7 @@ export default function Ecosystem() {
     <div style={{padding: '58px 0 0 0', width: feedMax}}>
     </div>
 
-    {!newEcosystem.nameField ? (<div style={{margin: '25px 0 0 0'}}><Button text={newEcosystem?.update ? 'Update Ecosystem' : 'Create Ecosystem'} size={'large'} prevIcon={FaPlus} setupEcosystem={setupEcosystem} target={'start'} isSelected={formController.nextCheck} /></div>) : (
+    {!newEcosystem.nameField ? (<div style={{margin: '25px 0 0 0'}}><Button {...{text: newEcosystem?.update ? 'Update Ecosystem' : 'Create Ecosystem', size: 'large', prevIcon: FaPlus, setupEcosystem, target: 'start', isSelected: formController.nextCheck}} /></div>) : (
       <div className='flex-row' style={{margin: '33px 3px 8px 3px', gap: '1rem', justifyContent: 'space-between', alignItems: 'center'}}>
         <Description show={true} text={newEcosystem?.update ? 'Update Ecosystem' : 'Create Ecosystem'} padding={'0px 0 4px 5px'} size={'large'} />
         <Button {...{text: 'Cancel', size: 'medium', setupEcosystem, target: 'cancel', isSelected: formController.nextCheck}} />
@@ -1357,7 +1364,7 @@ export default function Ecosystem() {
         <Spinner size={31} color={'#999'} />
       </div>
     ) : (userEcosystems?.length > 0 && isLogged) ? userEcosystems.map((ecosystem, index) => { return (
-    <div key={index} style={{border: '1px solid #777', padding: '8px', borderRadius: '10px', margin: '3px 3px 13px 3px', backgroundColor: '#eef6ff11', cursor: 'pointer'}}>
+    <div key={index} style={{border: '1px solid #777', padding: '8px', borderRadius: '10px', margin: '3px 3px 13px 3px', backgroundColor: '#22446688', cursor: 'pointer'}}>
     <div className="top-layer">
       <div className="flex-row" style={{padding: '0 10px', marginBottom: '0px', flexWrap: 'wrap', justifyContent: 'space-between', gap: '0rem', width: '100%', alignItems: 'center'}}>
         <div style={{fontSize: isMobile ? '18px' : '24px', fontWeight: '600', color: '#def', padding: '10px', width: 'auto', flexGrow: 1}} onClick={() => {goToEcosystem(event, ecosystem)}}>
@@ -1385,14 +1392,17 @@ export default function Ecosystem() {
         <Spinner size={31} color={'#999'} />
       </div>
     ) : (allEcosystems?.length > 0 && isLogged) ? allEcosystems.map((ecosystem, index) => { return (
-    <div key={index} style={{border: '1px solid #777', padding: '8px', borderRadius: '10px', margin: '3px 3px 13px 3px', backgroundColor: '#eef6ff11', justifyContent: 'fit-content', cursor: 'pointer'}} onClick={() => {goToEcosystem(event, ecosystem)}}>
+    <div key={index} style={{border: '1px solid #777', padding: '8px', borderRadius: '10px', margin: '3px 3px 13px 3px', backgroundColor: '#22446688', justifyContent: 'fit-content', cursor: 'pointer'}} onClick={() => {goToEcosystem(event, ecosystem)}}>
     <div className="top-layer">
       <div className="flex-col" style={{padding: '0 20px', marginBottom: '0px', flexWrap: 'wrap', justifyContent: 'space-between', gap: '0rem', width: '100%', alignItems: 'flex-start', width: 'auto', flexGrow: 1}}>
         <div style={{fontSize: isMobile ? '18px' : '24px', fontWeight: '600', color: '#def', padding: '0px'}}>
           {ecosystem.ecosystem_name} Ecosystem
         </div>
-        <div style={{fontSize: isMobile ? '10px' : '14px', fontWeight: '400', color: '#def', padding: '0px 0 5px 0'}}>
+        <div style={{fontSize: isMobile ? '9px' : '11px', fontWeight: '400', color: '#abc', padding: '0px 0 5px 0'}}>
           By @{ecosystem.owner_name}
+        </div>
+        <div style={{fontSize: isMobile ? '11px' : '14px', fontWeight: '400', color: '#def', padding: '4px 0 5px 0'}}>
+          {ecosystem?.ecosystem_rules[0]}
         </div>
       </div>
     </div>

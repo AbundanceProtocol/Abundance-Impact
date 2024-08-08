@@ -28,7 +28,7 @@ const Mobile = () => {
   return (
     isMobile && 
       (<React.Fragment key="top">
-        <MobileAppbar className='top-layer' position="fixed" elevation={0} sx={{paddingRight: 0}} style={{backgroundColor: '#2D4254'}}>
+        <MobileAppbar className='top-layer' position="fixed" elevation={0} sx={{paddingRight: 0}} style={{backgroundColor: '#22334488'}}>
           <nav className="nav-bar-mobile">
             <NavbarHeader>
               <div className="navbar-header">

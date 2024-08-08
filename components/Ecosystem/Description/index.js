@@ -15,6 +15,9 @@ const Description = ({ show, text, padding, size }) => {
   } else if (size && size == 'large') {
     mobileText = '22px'
     desktopText = '24px'
+  } else if (size && size == 'title') {
+    mobileText = '48px'
+    desktopText = '56px'
   }
 
 

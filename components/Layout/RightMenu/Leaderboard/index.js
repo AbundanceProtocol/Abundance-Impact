@@ -32,7 +32,7 @@ const Leaderboard = () => {
   }
 
   useEffect(() => {
-    if (router.route !== "/~/ecosystems/[ecosystem]/tip" && router.route !== "/~/ecosystems/[ecosystem]/[eco]/[curators]/tip") {
+    if (router.route == '/~/ecosystems/[ecosystem]') {
       if (sched.points) {
         getTopCreators()
         setSched(prev => ({...prev, points: false }))
@@ -47,7 +47,7 @@ const Leaderboard = () => {
   }, [points, sched.points]);
 
   return (
-    topCreators?.length > 0 && (
+    (router.route == '/~/ecosystems/[ecosystem]' && topCreators?.length > 0) && (
       <div style={{margin: '18px 0px 12px 20px', backgroundColor: '#334455ee', width: '380px', borderRadius: '20px', padding: '32px', border: '0px solid #678', color: '#fff', fontWeight: '700', alignItems:' center', fontSize: '20px'}}>
         <p style={{padding: '0 0 6px 0', fontSize: '20px', fontWeight: '600'}}>Creator & Builder Leaderboard: </p>
         <div className='flex-col' style={{gap: '0.5rem', marginTop: '10px'}}>

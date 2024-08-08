@@ -57,7 +57,7 @@ const button = {
         link: '/',
         menu: 'Home',
         description: 'Your feed',
-        account: true,
+        account: false,
         working: true,
         icon: AiFillHome
     },

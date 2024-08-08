@@ -1,279 +1,82 @@
 import Head from 'next/head';
 import React, { useContext, useState, useRef, useEffect } from 'react'
 import { AccountContext } from '../context'
-import useMatchBreakpoints from '../hooks/useMatchBreakpoints'
-import useStore from '../utils/store'
-import axios from 'axios';
 import { useRouter } from 'next/router';
-import Cast from '../components/Cast'
-import { formatNum, getTimeRange, checkEmbedType, populateCast, isCast } from '../utils/utils';
-import { IoShuffleOutline as Shuffle, IoPeople, IoPeopleOutline } from "react-icons/io5";
-import { HiRefresh } from "react-icons/hi";
-import { BsClock } from "react-icons/bs";
-import { GoTag } from "react-icons/go";
-import { AiOutlineBars } from "react-icons/ai";
-import Spinner from '../components/Common/Spinner';
 import { useInView } from 'react-intersection-observer'
 import ExpandImg from '../components/Cast/ExpandImg';
 import Modal from '../components/Layout/Modals/Modal';
-import FeedMenu from '../components/Common/FeedMenu';
-import TipScheduler from '../components/Common/TipScheduler';
-import HorizontalScale from '../components/Common/HorizontalScale';
-import TipAll from '../components/Common/TipAll';
+import Item from '../components/Ecosystem/ItemWrap/Item';
+import Description from '../components/Ecosystem/Description';
+import ItemWrap from '../components/Ecosystem/ItemWrap';
+import useMatchBreakpoints from '../hooks/useMatchBreakpoints';
+import { FaLock, FaUser, FaGlobe, FaPlus, FaRegStar, FaCoins, FaAngleDown, FaShareAlt as Share } from "react-icons/fa";
+import { HiOutlineAdjustmentsHorizontal as Adjust } from "react-icons/hi2";
+import { GrSchedulePlay as Sched } from "react-icons/gr";
+import { BiSolidDonateHeart as Donate } from "react-icons/bi";
+import { AiFillSafetyCertificate as Aligned } from "react-icons/ai";
+import { GiRibbonMedal as Medal } from "react-icons/gi";
+import { MdAdminPanelSettings as Mod } from "react-icons/md";
+import { FaArrowTrendUp as Grow } from "react-icons/fa6";
+import { RiVerifiedBadgeFill as Quality } from "react-icons/ri";
+import LoginButton from '../components/Layout/Modals/FrontSignin';
+import EcosystemMenu from '../components/Layout/EcosystemNav/EcosystemMenu';
+import { IoInformationCircleOutline as Info } from "react-icons/io5";
+import { PiSquaresFourLight as Actions } from "react-icons/pi";
+import { Logo } from './assets';
 
-export default function Home({ time, curators, channels, tags, shuffle, referrer, eco, ecosystem }) {
+
+export default function Home() {
   const ref2 = useRef(null)
   const [ref, inView] = useInView()
-  const [userFeed, setUserFeed] = useState([])
-  const { isMobile } = useMatchBreakpoints();
-  const { LoginPopup, ecoData, points, setPoints, isLogged, fid, userProfile, populate } = useContext(AccountContext)
+  const { LoginPopup, ecoData, points, setPoints, isLogged, showLogin, setShowLogin, setIsLogged, setFid } = useContext(AccountContext)
   const [screenWidth, setScreenWidth] = useState(undefined)
   const [screenHeight, setScreenHeight] = useState(undefined)
-  const store = useStore()
   const [textMax, setTextMax] = useState('562px')
   const [feedMax, setFeedMax ] = useState('620px')
-  const initialQuery = {shuffle: false, time: 'all', tags: [], channels: [], curators: []}
-  const [userQuery, setUserQuery] = useState(initialQuery)
   const [showPopup, setShowPopup] = useState({open: false, url: null})
   const router = useRouter()
-  const queryOptions = {
-    tags: [
-      {
-        text: 'All tags',
-        value: []
-      },
-      {
-        text: 'Art',
-        value: 'art'
-      },
-      {
-        text: 'Dev',
-        value: 'dev'
-      },        
-      {
-        text: 'Content',
-        value: 'content'
-      },
-      {
-        text: 'Vibes',
-        value: 'vibes'
-      },
-    ],
-    time: [
-      {
-        text: '24 hours',
-        value: '24hr'
-      },
-      {
-        text: '3 days',
-        value: '3days'
-      },
-      {
-        text: '7 days',
-        value: '7days'
-      },        
-      {
-        text: '30 days',
-        value: '30days'
-      },
-      {
-        text: 'All',
-        value: 'all'
-      },
-    ]
-  }
-  const [sched, setSched] = useState({userQuery: false, ecoData: false, login: false, searchSelect: false, inView: false})
-  const userButtons = ['Curation', 'Main', 'Recent']
-  const [searchSelect, setSearchSelect] = useState('Main')
-  const [channelSelect, setChannelSelect] = useState(null)
-  const initialState = { fid: null, signer: null, urls: [], channel: null, parentUrl: null, text: '' }
-	const [castData, setCastData] = useState(initialState)
-  const [loading, setLoading] = useState(false);
-  const tokenInfo = [{token: '$DEGEN', set: true}, {token: '$TN100x', set: false}, {token: '$FARTHER', set: false}]
-  const [tokenData, setTokenData] = useState(tokenInfo)
-  const [isSelected, setIsSelected] = useState('none')
-	const [userSearch, setUserSearch] = useState({ search: '' })
-  const [filterChannels, setFilterChannels] = useState([])
-  const [filterCurators, setFilterCurators] = useState([])
-  const [selectedCurators, setSelectedCurators] = useState([])
-  const [selectedChannels, setSelectedChannels] = useState([])
-  const [modal, setModal] = useState({on: false, success: false, text: ''})
-  const [initValue, setInitValue] = useState(50)
-  const [initHour, setInitHour] = useState('Hr')
-  const [initMinute, setInitMinute] = useState('0')
-  const [tokensSelected, setTokensSelected] = useState(['$DEGEN'])
-  const availableTokens = ['$DEGEN', '$TN100x', '$FARTHER']
-  const [noTip, setNoTip] = useState(true)
-  const [cursor, setCursor] = useState('')
-  const [prevCursor, setPrevCursor] = useState('')
-  const [tipPercent, setTipPercent] = useState(50)
-  
-  function btnText(type) {
-    if (type == 'tags' && (userQuery[type] == 'all' || userQuery[type].length == 0)) {
-      return 'All tags'
-    } else if (type == 'tags' && (userQuery[type].length > 1)) {
-      return 'Tags'
-    } else if (type == 'tags') {
-      const options = queryOptions[type];
-      const option = options.find(option => option.value === userQuery.tags[0]);
-      return option ? option.text : '';
-    } else {
-      const options = queryOptions[type];
-      const option = options.find(option => option.value === userQuery[type]);
-      return option ? option.text : '';
-    }
+  const { isMobile } = useMatchBreakpoints();
+  const [display, setDisplay] = useState({personal: false, ecosystem: false})
+
+  function toggleMenu(target) {
+    setDisplay(prev => ({...prev, [target]: !display[target] }))
   }
 
-  const handleSelect = async (type, selection) => {
-    console.log(type)
-    setPrevCursor('')
-    setCursor('')
-    if (type == 'shuffle') {
-      setUserQuery(prevState => ({
-        ...prevState, 
-        [type]: !userQuery[type] 
-      }));
-      setIsSelected('none')
-    } else if (type == 'time') {
-      setUserQuery(prevState => ({
-        ...prevState, 
-        [type]: selection 
-      }));
-      setIsSelected('none')
-    } else if (type == 'tags') {
-      if (selection == 'all') {
-        setUserQuery(prevState => ({
-          ...prevState, 
-          [type]: [] 
-        }));
-      } else {
-        setUserQuery(prevUserQuery => {
-          const tagIndex = prevUserQuery.tags.indexOf(selection);
-          if (tagIndex === -1) {
-            return {
-              ...prevUserQuery,
-              tags: [...prevUserQuery.tags, selection]
-            };
-          } else {
-            return {
-              ...prevUserQuery,
-              tags: prevUserQuery.tags.filter(item => item !== selection)
-            };
-          }
-        });
-      }
+  const createEcosystem = () => {
+    router.push({
+      pathname: '/~/ecosystems',
+      query: { trigger: 'createEcosystem' }
+    });
+  };
 
-    } else {
-      setIsSelected(type)
-    }
+  const lockedSelect = () => {
+    console.log('eab')
+    event.preventDefault()
+    LoginPopup()
+  };
 
-    if (type !== 'tags') {
-      setTimeout(() => {
-        setIsSelected('none')
-      }, 300);
-    }
-  }
+  const handleSignIn = async (loginData) => {
+    setFid(loginData.fid)
+    setIsLogged(true)
+    setShowLogin(false)
+  };
 
   useEffect(() => {
+    console.log('triggered')
 
-    const searchRouter = () => {
-      setCursor('')
-      setPrevCursor('')
-      if (isLogged && ecoData) {
-        console.log('triggered')
-        if (searchSelect == 'Curation') {
-          feedRouter()
-        } else if (searchSelect == 'Main' && ecoData?.channels?.length > 0) {
-          getFeed(fid, ecoData?.channels[0]?.name, true)
-        } else if (searchSelect == 'Recent' && ecoData?.channels?.length > 0) {
-          getFeed(fid, ecoData?.channels[0]?.name, false)
-        }
-      }
+    const handleResize = () => {
+      setScreenWidth(window.innerWidth)
+      setScreenHeight(window.innerHeight)
     }
-
-    if (sched.userQuery) {
-      searchRouter()
-      setSched(prev => ({...prev, userQuery: false }))
-    } else {
-      const timeoutId = setTimeout(() => {
-        searchRouter()
-        setSched(prev => ({...prev, userQuery: false }))
-      }, 300);
-      return () => clearTimeout(timeoutId);
-    }
+    handleResize()
+    window.addEventListener('resize', handleResize);
     
-  }, [userQuery, selectedChannels, selectedCurators, sched.userQuery]);
-
-  useEffect(() => {
-    const ecoRouter = () => {
-      if (populate && populate !== 0) {
-        if (ecoData?.channels?.length > 0) {
-          setUserFeed([])
-          setPrevCursor('')
-          setCursor('')
-          setChannelSelect(ecoData.channels[0].name)
-          setSearchSelect('Main')
-          getFeed(fid, ecoData?.channels[0]?.name, true)
-        } else {
-          setUserFeed([])
-          setPrevCursor('')
-          setCursor('')
-          setChannelSelect(null)
-          setSearchSelect('Curation')
-          feedRouter()
-        }
-      }
+    return () => {
+      window.removeEventListener('resize', handleResize);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
-    if (sched.ecoData) {
-      ecoRouter()
-      setSched(prev => ({...prev, ecoData: false }))
-    } else {
-      const timeoutId = setTimeout(() => {
-        ecoRouter()
-        setSched(prev => ({...prev, ecoData: false }))
-      }, 300);
-      return () => clearTimeout(timeoutId);
-    }
-  }, [populate, sched.ecoData]);
-
-  const handleSelection = (type) => {
-    if (type == 'shuffle') {
-      setIsSelected('none')
-    } else {
-      setIsSelected(type)
-    }
-  }
-
-  useEffect(() => {
-    setTokenData((prevTokenData) => {
-      let updatedTokenData = [...prevTokenData];
-
-      updatedTokenData.forEach((token) => {
-        if (token.allowance) {
-          return token.totalTip = Math.round((token.allowance * tipPercent) / 100)
-        }
-      })
-      return updatedTokenData
-    })
-    console.log(tokenData)
-
-  }, [tipPercent])
-
-  useEffect(() => {
-    for (const token of tokenData) {
-      if (token.set) {
-        if (token.token == '$TN100x' && token.totalTip >= 10) {
-          setNoTip(false)
-          return
-        } else if (token.totalTip > 0) {
-          setNoTip(false)
-          return
-        }
-      }
-    }
-    setNoTip(true)
-  }, [tokenData])
 
   useEffect(() => {
     if (screenWidth) {
@@ -296,801 +99,6 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
     }
   }, [screenWidth])
 
-  function closeImagePopup() {
-    setShowPopup({open: false, url: null})
-  }
-
-  function openImagePopup(embed) {
-    let newPopup = { ...showPopup }
-    newPopup.open = true
-    newPopup.url = embed.url
-    setShowPopup(newPopup)
-  }
-
-  async function getAllowance(token, fid) {
-    let getToken = 'degen'
-    if (token == '$DEGEN') {
-      getToken = 'degen'
-    } else if (token == '$TN100x') {
-      getToken = 'ham'
-    } else if (token == '$FARTHER') {
-      getToken = 'farther'
-    }
-
-    try {
-      const responseTotal = await axios.get(`/api/${getToken}/getUserAllowance`, {
-        params: { fid } })
-      let remaningAllowance = 0
-      let minTip = 1
-      if (responseTotal?.data) {
-        remaningAllowance = responseTotal?.data?.remaining
-        if (getToken == 'farther') {
-          minTip = responseTotal?.data?.minTip
-        }
-        return { allowance: remaningAllowance, minTip }
-      } else {
-        return { allowance: 0, minTip: 1 }
-      }
-    } catch (error) {
-      console.error('Error creating post:', error);
-      return { allowance: 0, minTip: 1 }
-    }
-  }
-
-  async function updateAllowances(tokens, fid) {
-    let updatedTokenData = [...tokenData]
-    for (const token of tokens) {
-      let { allowance, minTip } = await getAllowance(token, fid)
-      const tokenIndex = updatedTokenData.findIndex(currentToken => currentToken.token == token)
-      if (tokenIndex !== -1) {
-        if (!updatedTokenData[tokenIndex]?.set) {
-          updatedTokenData[tokenIndex].set = false
-        }
-        if (token == '$FARTHER') {
-          updatedTokenData[tokenIndex].min = minTip
-        }
-        updatedTokenData[tokenIndex].allowance = allowance
-        updatedTokenData[tokenIndex].totalTip = Math.round(allowance * tipPercent / 100)
-      } else if (token == '$FARTHER') {
-        const newToken = {
-          token: token,
-          set: false,
-          allowance: allowance,
-          min: minTip,
-          totalTip: Math.round(allowance * tipPercent / 100)
-        }
-        updatedTokenData.push(newToken)
-      } else {
-        const newToken = {
-          token: token,
-          set: false,
-          allowance: allowance,
-          totalTip: Math.round(allowance * tipPercent / 100)
-        }
-        updatedTokenData.push(newToken)
-      }
-      setTokenData(updatedTokenData)
-    }
-  }
-
-  useEffect(() => {
-
-    const allowanceUpdate = () => {
-      if (isLogged) {
-        updateAllowances(availableTokens, fid)
-      }
-    }
-
-    if (sched.login) {
-      allowanceUpdate()
-      setSched(prev => ({...prev, login: false }))
-    } else {
-      const timeoutId = setTimeout(() => {
-        allowanceUpdate()
-        setSched(prev => ({...prev, login: false }))
-      }, 300);
-      return () => clearTimeout(timeoutId);
-    }
-
-  }, [isLogged, sched.login])
-
-  const searchSelectRouter = () => {
-    console.log(searchSelect, ecoData, ecoData?.channels[0])
-    setLoading(false)
-    setPrevCursor('')
-    setCursor('')
-    if (isLogged && ecoData) {
-      if (searchSelect == 'Curation') {
-        feedRouter()
-      } else if (searchSelect == 'Main') {
-        getFeed(fid, ecoData?.channels[0]?.name, true)
-      } else if (searchSelect == 'Recent') {
-        getFeed(fid, ecoData?.channels[0]?.name, false)
-      }
-    }
-  }
-  useEffect(() => {
-    if (sched.searchSelect) {
-      searchSelectRouter()
-      setSched(prev => ({...prev, searchSelect: false }))
-    } else {
-      const timeoutId = setTimeout(() => {
-        searchSelectRouter()
-        setSched(prev => ({...prev, searchSelect: false }))
-      }, 300);
-      return () => clearTimeout(timeoutId);
-    }
-
-  }, [searchSelect, sched.searchSelect])
-  
-  useEffect(() => {
-
-    const inViewRouter = () => {
-      if (cursor !== prevCursor && cursor !== '' && isLogged) {
-        if (searchSelect == 'Main') {
-          setPrevCursor(cursor)
-          addToFeed(fid, channelSelect, true, cursor)
-        } else if (searchSelect == 'Recent') {
-          setPrevCursor(cursor)
-          addToFeed(fid, channelSelect, false, cursor)
-        } else if (searchSelect == 'Curation') {
-          setPrevCursor(cursor)
-          feedRouter()
-        }
-        console.log('trigger get additional casts', cursor, prevCursor, searchSelect)
-        
-      } else {
-        console.log('triggered, no new casts', cursor, prevCursor, searchSelect)
-      }
-    }
-
-    if (sched.inView) {
-      inViewRouter()
-      setSched(prev => ({...prev, inView: false }))
-    } else {
-      const timeoutId = setTimeout(() => {
-        inViewRouter()
-        setSched(prev => ({...prev, inView: false }))
-      }, 300);
-      return () => clearTimeout(timeoutId);
-    }
-  }, [inView, sched.inView])
-
-  async function getFeed(fid, channel, curated) {
-    const getChannelFeed = async (fid, channel, curated) => {
-      setLoading(true)
-      try {
-        const response = await axios.get('/api/ecosystem/getFeed', {
-          params: { fid, channel, curated } })
-        setLoading(false)
-        if (response?.data) {
-          console.log(response)
-          const casts = response?.data?.casts
-          let cursorData = ''
-          if (response?.data?.cursor) {
-            cursorData = response.data.cursor
-          }
-          console.log(casts, cursorData)
-          return {channelFeed: casts, cursorData}
-        } else {
-          return {channelFeed: [], cursorData: ''}
-        }
-      } catch (error) {
-        console.error('Error submitting data:', error)
-        return {channelFeed: [], cursorData: ''}
-      }
-    }
-
-    const {channelFeed, cursorData} = await getChannelFeed(fid, channel, curated)
-    
-    setUserFeed(channelFeed)
-    updateFeed([], channelFeed, fid)
-    
-    setPrevCursor(cursor)
-    setCursor(cursorData)
-
-  }
-
-  async function updateFeed(oldFeed, feed, fid) {
-    let combinedFeed = oldFeed.concat(feed)
-    console.log(combinedFeed)
-    if (oldFeed?.length > 0) {
-      setUserFeed((prevUserFeed) => prevUserFeed.concat(feed))
-    } else {
-      setUserFeed(feed)
-    }
-
-    async function checkEmbedTypeForCasts(casts) {
-      // Map over each cast and apply checkEmbedType function
-      const updatedCasts = await Promise.all(casts.map(async (cast) => {
-        return await checkEmbedType(cast);
-      }));
-    
-      return updatedCasts;
-    }
-    
-    const castsWithImages = await checkEmbedTypeForCasts(feed);
-
-    combinedFeed = oldFeed.concat(castsWithImages)
-    setUserFeed(combinedFeed)
-
-    async function getSubcast(hash, userFid) {
-      if (hash && userFid) {
-        try {
-          const response = await axios.get('/api/getCastByHash', {
-            params: { hash, userFid }
-          })
-          const castData = response?.data?.cast?.cast
-          if (castData) {
-            return castData
-          } else {
-            return null
-          }
-        } catch (error) {
-          console.error('Error submitting data:', error)
-          return null
-        }
-      }
-    }
-
-    async function populateSubcasts(cast, fid) {
-      const { embeds } = isCast(cast);
-      if (embeds?.length > 0) {
-        const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
-          if (embed?.type == 'subcast') {
-            const subcastData = await getSubcast(embed.cast_id.hash, fid)
-            const checkImages = await checkEmbedType(subcastData)
-            return { ...embed, subcast: checkImages };
-          } else {
-            return { ...embed }
-          }
-        }));
-        return { ...cast, embeds: updatedEmbeds };
-      }
-      return cast;
-    }
-    
-    async function populateEmbeds(cast) {
-      const { embeds } = isCast(cast);
-      if (embeds?.length > 0) {
-        const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
-          if (embed?.url && embed?.type == 'html') {
-            try {
-              const metaData = await axios.get('/api/getMetaTags', {
-                params: { url: embed.url } })
-              if (metaData?.data) {
-                return { ...embed, metadata: metaData.data };
-              } else {
-                return { ...embed }
-              }
-            } catch (error) {
-              return { ...embed }
-            }
-          } else {
-            return { ...embed }
-          }
-        }));
-        return { ...cast, embeds: updatedEmbeds };
-      }
-      return cast;
-    }
-
-    async function checkEmbeds(casts) {
-      const updatedCasts = await Promise.all(casts.map(async (cast) => {
-        return await populateEmbeds(cast);
-      }));
-      return updatedCasts;
-    }
-
-    async function checkSubcasts(casts, fid) {
-      const updatedCasts = await Promise.all(casts.map(async (cast) => {
-        return await populateSubcasts(cast, fid);
-      }));
-      return updatedCasts;
-    }
-
-    const castsWithSubcasts = await checkSubcasts(castsWithImages, fid)
-    console.log(castsWithSubcasts)
-    combinedFeed = oldFeed.concat(castsWithSubcasts)
-    setUserFeed(combinedFeed)
-
-    const castsWithEmbeds = await checkEmbeds(castsWithSubcasts)
-    console.log(castsWithEmbeds)
-    combinedFeed = oldFeed.concat(castsWithEmbeds)
-    setUserFeed(combinedFeed)
-
-  }
-
-  async function addToFeed(fid, channel, curated, cursor) {
-
-    const getChannelFeed = async (fid, channel, curated, cursor) => {
-      try {
-        const response = await axios.get('/api/ecosystem/getFeed', {
-          params: { fid, channel, curated, cursor } })
-        let casts = []
-        if (response?.data) {
-          casts = response?.data?.casts
-          let cursorData = ''
-          if (response?.data?.cursor) {
-            cursorData = response?.data?.cursor
-          }
-          return {channelFeed: casts, cursorData}
-        } else {
-          return {channelFeed: [], cursorData: ''}
-        }
-      } catch (error) {
-        console.error('Error submitting data:', error)
-        return {channelFeed: [], cursorData: ''}
-      }
-    }
-
-    const {channelFeed, cursorData} = await getChannelFeed(fid, channel, curated, cursor)
-    console.log(channelFeed)
-    updateFeed(userFeed, channelFeed, fid)
-    setCursor(cursorData)
-  }
-
-  useEffect(() => {
-    console.log('triggered []')
-
-    if (isLogged) {
-      updateAllowances(availableTokens, fid)
-    }
-
-    setUserQuery(updateUserQuery => {
-      return {time, channels, tags, shuffle, curators}
-    })
-
-    async function getCuratorsQuery(curators) {
-
-      const getCuratorData = async (name) => {
-        try {
-          const response = await axios.get('/api/curation/queryCurators', {
-            params: {
-              name: name,
-            }
-          })
-          if (response) {
-            const curatorsData = response?.data?.users
-            console.log(curatorsData)
-            return curatorsData
-          } else {
-            return null
-          }
-        } catch (error) {
-          console.error('Error submitting data:', error)
-          return null
-        }
-      }
-
-      for (const curator of curators) {
-        const curatorData = await getCuratorData(curator)
-        addCurator(curatorData)
-      }
-    }
-
-    if (curators && selectedCurators?.length == 0) {
-      getCuratorsQuery(curators)
-    }
-
-    const handleResize = () => {
-      setScreenWidth(window.innerWidth)
-      setScreenHeight(window.innerHeight)
-    }
-
-    handleResize()
-    window.addEventListener('resize', handleResize);
-    
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  useEffect(() => {
-    if (!isLogged) {
-      LoginPopup()
-    }
-  }, [router]);
-
-  function feedRouter() {
-    const { shuffle, time, tags, channels, curators } = userQuery
-    const timeRange = getTimeRange(time)
-    console.log(userQuery)
-    getUserSearch(timeRange, tags, channels, curators, null, shuffle)
-  }
-
-  async function getUserSearch(time, tags, channel, curator, text, shuffle) {
-    let page = null
-    if (!shuffle && typeof cursor !== 'number') {
-      page = 1
-      setPrevCursor(page)
-      setCursor(page+1)
-    } else if (!shuffle && typeof cursor == 'number') {
-      page = cursor
-      setPrevCursor(cursor)
-      setCursor(cursor+1)
-    }
-
-    async function getSearch(time, tags, channel, curator, text, shuffle) {
-      setLoading(true)
-      try {
-        const response = await axios.get('/api/curation/getUserSearch', {
-          params: { time, tags, channel, curator, text, shuffle, points, page }
-        })
-        setLoading(false)
-        let casts = []
-        let getPage = 1
-        let pages = 1
-        if (response?.data?.casts.length > 0) {
-          casts = response.data.casts
-        }
-        if (response?.data?.page) {
-          getPage = response?.data?.page
-        }
-        if (response?.data?.pages) {
-          pages = response?.data?.pages
-        }
-
-        if (getPage == pages) {
-          setPrevCursor('')
-          setCursor('')
-        } else {
-          setPrevCursor(cursor)
-          setCursor(getPage+1)
-        }
-        return {casts, getPage}
-      } catch (error) {
-        console.error('Error submitting data:', error)
-        setPrevCursor('')
-        setCursor('')
-        return { casts: null, getPage: 0 }
-      }
-    }
-
-    const {casts, getPage} = await getSearch(time, tags, channel, curator, text, shuffle, page)
-
-    let filteredCasts
-    let sortedCasts
-    if (!casts) {
-      setUserFeed([])
-    } else {
-
-      let oldFeed = []
-      if (getPage > 1) {
-        oldFeed = userFeed
-      }
-
-      console.log(casts)
-      filteredCasts = await casts.reduce((acc, current) => {
-        const existingItem = acc.find(item => item._id === current._id);
-        if (!existingItem) {
-          acc.push(current);
-        }
-        return acc;
-      }, [])
-
-      if (shuffle) {
-        sortedCasts = filteredCasts.sort((a, b) => b.impact_total - a.impact_total);
-      } else {
-        sortedCasts = filteredCasts
-      }
-
-      let displayedCasts = await populateCast(sortedCasts)
-      // setUserFeed(displayedCasts)
-  
-      let castString
-  
-      if (sortedCasts) {
-        const castHashes = sortedCasts.map(obj => obj.cast_hash)
-        castString = castHashes.join(',');
-      }
-
-      if (shuffle) {
-        setUserFeed(displayedCasts)
-      } else {
-        let combinedFeed = oldFeed.concat(displayedCasts)
-        setUserFeed(combinedFeed)
-      }
-
-      if (!fid) {
-        LoginPopup()
-      } else {
-        async function populateCasts(fid, castString) {
-          try {
-            const response = await axios.get('/api/curation/getCastsByHash', {
-              params: { fid, castString }
-            })
-            return response
-          } catch (error) {
-            console.error('Error submitting data:', error)
-            return null
-          }
-        }
-    
-        const populateResponse = await populateCasts(fid, castString)
-
-        let populatedCasts = []
-    
-        if (populateResponse) {
-          populatedCasts = populateResponse.data.casts
-          // setUserFeed(populatedCasts)
-        }
-
-        for (let i = 0; i < populatedCasts.length; i++) {
-          const obj2 = populatedCasts[i]
-          let obj1 = displayedCasts.find(cast => cast.hash === obj2.hash)
-          if (obj1) {
-            Object.keys(obj2).forEach(key => {
-              obj1[key] = obj2[key]
-            })
-          } else {
-            displayedCasts.push({...obj2})
-          }
-        }
-    
-        if (shuffle) {
-          setUserFeed(displayedCasts)
-        } else {
-          let combinedFeed = oldFeed.concat(displayedCasts)
-          setUserFeed(combinedFeed)
-        }
-        
-        async function checkEmbedTypeForCasts(casts) {
-          // Map over each cast and apply checkEmbedType function
-          const updatedCasts = await Promise.all(casts.map(async (cast) => {
-            return await checkEmbedType(cast);
-          }));
-        
-          return updatedCasts;
-        }
-        
-        const castsWithImages = await checkEmbedTypeForCasts(displayedCasts);
-
-        if (shuffle) {
-          setUserFeed(castsWithImages)
-        } else {
-          let combinedFeed = oldFeed.concat(castsWithImages)
-          setUserFeed(combinedFeed)
-        }
-
-
-        async function getSubcast(hash, userFid) {
-          if (hash && userFid) {
-            try {
-              const response = await axios.get('/api/getCastByHash', {
-                params: { hash, userFid }
-              })
-              const castData = response.data.cast.cast
-              if (castData) {
-                console.log(castData)
-                return castData
-              } else {
-                return null
-              }
-            } catch (error) {
-              console.error('Error submitting data:', error)
-              return null
-            }
-          }
-        }
-    
-        async function populateSubcasts(cast, fid) {
-          const { embeds } = isCast(cast);
-          if (embeds?.length > 0) {
-            const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
-              if (embed?.type == 'subcast') {
-                const subcastData = await getSubcast(embed.cast_id.hash, fid)
-                const checkImages = await checkEmbedType(subcastData)
-                return { ...embed, subcast: checkImages };
-              } else {
-                return { ...embed }
-              }
-            }));
-            return { ...cast, embeds: updatedEmbeds };
-          }
-          
-          return cast;
-        }
-        
-        async function populateEmbeds(cast) {
-          const { embeds } = isCast(cast);
-          if (embeds?.length > 0) {
-            const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
-              if (embed?.url && embed?.type == 'html') {
-                try {
-                  const metaData = await axios.get('/api/getMetaTags', {
-                    params: { url: embed.url } })
-                  if (metaData?.data) {
-                    return { ...embed, metadata: metaData.data };
-                  } else {
-                    return { ...embed }
-                  }
-                } catch (error) {
-                  return { ...embed }
-                }
-              } else {
-                return { ...embed }
-              }
-            }));
-            return { ...cast, embeds: updatedEmbeds };
-          }
-          return cast;
-        }
-    
-        async function checkEmbeds(casts) {
-          const updatedCasts = await Promise.all(casts.map(async (cast) => {
-            return await populateEmbeds(cast);
-          }));
-          return updatedCasts;
-        }
-    
-        async function checkSubcasts(casts, fid) {
-          const updatedCasts = await Promise.all(casts.map(async (cast) => {
-            return await populateSubcasts(cast, fid);
-          }));
-        
-          return updatedCasts;
-        }
-    
-        const castsWithSubcasts = await checkSubcasts(castsWithImages, fid)
-        console.log(castsWithSubcasts)
-
-        if (shuffle) {
-          setUserFeed(castsWithSubcasts)
-        } else {
-          let combinedFeed = oldFeed.concat(castsWithSubcasts)
-          setUserFeed(combinedFeed)
-        }
-      
-        const castsWithEmbeds = await checkEmbeds(castsWithSubcasts)
-        console.log(castsWithEmbeds)
-
-        if (shuffle) {
-          setUserFeed(castsWithEmbeds)
-        } else {
-          let combinedFeed = oldFeed.concat(castsWithEmbeds)
-          setUserFeed(combinedFeed)
-        }
-      }
-    }
-  }
-
-  const goToUserProfile = async (event, author) => {
-    event.preventDefault()
-    const username = author.username
-    await store.setUserData(author)
-    router.push(`/${username}`)
-  }
-
-  function clearCastText() {
-    setCastData({ ...castData, text: '', parentUrl: null });
-  }
-
-	function onChange(e) {
-		setCastData( () => ({ ...castData, [e.target.name]: e.target.value }) )
-	}
-
-  const searchOption = (e) => {
-    setSearchSelect(e.target.getAttribute('name'))
-  }
-
-  const updateCast = (index, newData) => {
-    const updatedFeed = [...userFeed]
-    updatedFeed[index] = newData
-    console.log(newData)
-    setUserFeed(updatedFeed)
-  }
-
-  const channelKeyDown = (event) => {
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      getChannels(userSearch.search)
-    }
-  }
-
-  const curatorKeyDown = (event) => {
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      getCurators(userSearch.search)
-    }
-  }
-
-  async function getChannels(name) {
-    console.log(name)
-    try {
-      const response = await axios.get('/api/getChannels', {
-        params: { name } })
-      if (response) {
-        const channelsData = response?.data?.channels?.channels
-        console.log(channelsData)
-        setFilterChannels(channelsData)
-      }
-    } catch (error) {
-      console.error('Error submitting data:', error)
-    }
-  }
-
-  async function getCurators(name) {
-    console.log(name)
-    try {
-      const response = await axios.get('/api/curation/getCurators', {
-        params: { name } })
-      if (response) {
-        const curatorsData = response?.data?.users
-        console.log(curatorsData)
-        setFilterCurators(curatorsData)
-      }
-    } catch (error) {
-      console.error('Error submitting data:', error)
-    }
-  }
-
-  function onChannelChange(e) {
-		setUserSearch( () => ({ ...userSearch, [e.target.name]: e.target.value }) )
-	}
-
-  function onCuratorSearch(e) {
-		setUserSearch( () => ({ ...userSearch, [e.target.name]: e.target.value }) )
-	}
-
-  function addCurator(curator) {
-    console.log(curator)
-    setUserQuery(prevUserQuery => {
-    const curatorIndex = prevUserQuery.curators.indexOf(curator?.fid);
-    if (curatorIndex === -1) {
-      return {
-        ...prevUserQuery,
-        curators: [...prevUserQuery.curators, curator?.fid]
-      };
-    } else {
-      // If the curator is found, remove it from the array
-      return {
-        ...prevUserQuery,
-        curators: prevUserQuery.curators.filter(item => item !== curator?.fid)
-        };
-      }
-    });
-
-    const isCuratorSelected = selectedCurators.some((c) => c.fid === curator?.fid);
-
-    if (isCuratorSelected) {
-      // If the curator is already selected, remove it from the state
-      setSelectedCurators(selectedCurators.filter((c) => c.fid !== curator?.fid));
-    } else {
-      // If the curator is not selected, add it to the state
-      setSelectedCurators([...selectedCurators, curator]);
-    }
-  }
-
-  function addChannel(channel) {
-    console.log(channel)
-    setUserQuery(prevUserQuery => {
-    const channelIndex = prevUserQuery.channels.indexOf(channel.url);
-    if (channelIndex === -1) {
-      return {
-        ...prevUserQuery,
-        channels: [...prevUserQuery.channels, channel.url]
-      };
-    } else {
-      // If the curator is found, remove it from the array
-      return {
-        ...prevUserQuery,
-        channels: prevUserQuery.channels.filter(item => item !== channel.url)
-        };
-      }
-    });
-
-    const isChannelSelected = selectedChannels.some((c) => c.url === channel.url);
-
-    if (isChannelSelected) {
-      // If the curator is already selected, remove it from the state
-      setSelectedChannels(selectedChannels.filter((c) => c.url !== channel.url));
-    } else {
-      // If the curator is not selected, add it to the state
-      setSelectedChannels([...selectedChannels, channel]);
-    }
-  }
 
   return (
   <div name='feed' style={{width: 'auto', maxWidth: '620px'}} ref={ref2}>
@@ -1098,250 +106,290 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
       <title>Impact App | Abundance Protocol</title>
       <meta name="description" content={`Building the global superalignment layer`} />
     </Head>
-    <div style={{padding: '58px 0 0 0', width: feedMax}}>
+    <div style={{padding: isMobile ? '58px 0 20px 0' : '58px 0 60px 0', width: feedMax}}>
     </div>
-    <div className="top-layer">
-      <div className="flex-row" style={{padding: '0', marginBottom: '10px', flexWrap: 'wrap', justifyContent: 'center'}}>
-        <div className='flex-row' style={{gap: '0.5rem', width: '100%', alignItems: 'center'}}>
-          {isLogged && userProfile && (
-            <a className="" title="" href={`/${userProfile.username}`} onClick={() => {goToUserProfile(event, store.userProfile)}}>
-              <img loading="lazy" src={userProfile.pfp_url} className="" alt={`${userProfile.display_name} avatar`} style={{width: '40px', height: '40px', maxWidth: '48px', maxHeight: '48px', borderRadius: '24px', border: '1px solid #abc', margin: '6px 0 2px 20px'}} />
-            </a>
-          )}
-          <HorizontalScale {...{ initValue, setTipPercent, tokenData, setTokenData, availableTokens, tokensSelected, setInitValue }} />
+
+    <div style={{padding: '0px 4px 0px 4px', width: feedMax}}>
+
+      <div className='flex-col' style={{width: '100%', justifyContent: 'center', alignItems: 'center'}}>
+        <Logo className='rotate' height={isMobile ? '95px' : '165px'} width={isMobile ? '95px' : '165px'} style={{fill: '#9ce'}} />
+        <Description {...{show: true, text: '/impact', padding: '30px 0 14px 5px', size: 'title'}} />
+
+
+        <div className='flex-row' style={{color: '#ace', width: '100%', fontSize: isMobile ? '24px' : '33px', padding: '0px 10px 35px 10px', textAlign: 'center', justifyContent: 'center'}}>boost & reward creators on farcaster</div>
+
+
+
+
+        <div className='flex-row' style={{color: '#ace', width: '90%', fontSize: isMobile ? '15px' : '22px', padding: '10px 10px 25px 10px', textAlign: 'center', fontWeight: '400'}}>/impact aims to accelerate Farcaster&apos;s transition from an Attention Economy to a Creation Economy</div>
+
+        <div className='flex-row' style={{color: '#8ac', width: '90%', fontSize: isMobile ? '14px' : '18px', padding: '0px 10px 5px 10px', textAlign: 'center', fontWeight: '400', justifyContent: 'center'}}>Currently building (alpha):</div>
+
+
+        <div className='flex-row' style={{gap: '0.75rem', margin: '8px', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center'}}>
+          <div onClick={() => document.getElementById('personal').scrollIntoView({ behavior: 'smooth' })}>
+            <div className='flex-row cast-act-lt' style={{borderRadius: '8px', padding: '8px 8px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
+              <FaUser size={14} />
+              <p style={{padding: '0px', fontSize: '15px', fontWeight: '500', textWrap: 'nowrap'}}>Personal /impact</p>
+            </div>
+          </div>
+
+          <div onClick={() => document.getElementById('ecosystem').scrollIntoView({ behavior: 'smooth' })}>
+            <div className='flex-row cast-act-lt' style={{borderRadius: '8px', padding: '8px 8px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
+              <FaGlobe size={14} />
+              <p style={{padding: '0px', fontSize: '15px', fontWeight: '500', textWrap: 'nowrap'}}>Ecosystem /impact</p>
+            </div>
+          </div>
         </div>
-        <div className='flex-row' style={{gap: '0.5rem'}}>
-          <TipAll {...{ tokenData, setTokenData, loading, setLoading, noTip, modal, setModal, userFeed, tipPercent }} />
-          <TipScheduler {...{ initHour, setInitHour, initMinute, setInitMinute, userQuery, tokenData, initValue, setLoading }}  />
+
+
+
+        <div className={isMobile ? 'flex-col' : 'flex-row'} style={{alignItems: 'center', gap: '1.5rem'}}>
+          <div className='flex-row' style={{color: '#579', width: isMobile ? '90%' : '50%', fontSize: isMobile ? '14px' : '15px', padding: isMobile ? '40px 10px 15px 10px' : '60px 10px 75px 10px', textAlign: 'center', fontWeight: '400'}}><p>In an <strong style={{color: '#8bf'}}>Attention Economy</strong> you build or create content or art, and then try to get attention for your work. The better you are at getting attention the more successful you are.</p></div>
+
+          <div className='flex-row' style={{color: '#68a', width: isMobile ? '90%' : '50%', fontSize: isMobile ? '14px' : '15px', padding: isMobile ? '0px 10px 65px 10px' : '60px 10px 75px 10px', textAlign: 'center', fontWeight: '400'}}><p>In a <strong style={{color: '#8bf'}}>Creation Economy</strong> users seek to fairly value your work in an Impact Market. More impact means more success, curators get rewarded for their effort, and the ecosystem grows</p></div>
+        </div>
+
+
+        {!isLogged && (<>
+          <div>
+            {showLogin ? (
+              <div className='frnt-nynr-btn' style={{color: 'white', fontSize: '18px', font: 'Ariel', textAlign: 'center', padding: '12px 12px 12px 32px', fontWeight: '600'}}>Connect Farcaster</div>
+            ) : (
+              <LoginButton onSignInSuccess={handleSignIn} />
+            )}
+          </div>
+          <div className='flex-row' style={{color: '#59b', width: isMobile ? '75%' : '50%', fontSize: isMobile ? '13px' : '15px', padding: '10px 10px 95px 10px', justifyContent: 'center', textAlign: 'center'}}>/impact needs your permission to create tipping casts and follows on your behalf</div>
+        </>)}
+      </div>
+
+
+      <div id="personal" style={{padding: isMobile ? '28px 0 20px 0' : '28px 0 20px 0', width: '40%'}}>
+      </div>
+
+      <div style={{padding: '8px', backgroundColor: '#22446688', borderRadius: '15px', border: '1px solid #11447799'}}>
+
+        <div className='flex-row' style={{width: '100%', justifyContent: 'center', alignItems: 'center'}}>
+          <FaUser style={{fill: '#cde'}} size={24} />
+          <Description {...{show: true, text: 'Personal /impact', padding: '4px 0 4px 10px', size: 'large' }} />
+        </div>
+
+        <div className='flex-row' style={{color: '#7bd', width: '100%', fontSize: isMobile ? '15px' : '17px', padding: '10px 10px 15px 10px', justifyContent: 'center'}}>Nominate your favorite creators. Calibrate distribution of tips. Schedule recurring tips or tip throughout the day. Share curation with your friends and earn rewards</div>
+
+        <div className='flex-row' style={{padding: '0px 0 0 0', width: '100%', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center'}}>
+
+          <ItemWrap>
+            <div className='flex-row' style={{justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer'}} onClick={() => {toggleMenu('personal')}}>
+              <Item {...{text: 'How it works'}} />
+              <FaAngleDown size={28} style={{margin: '5px 15px 5px 5px', transform: display.personal ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s ease'}} />
+            </div>
+            {display.personal && (<>
+              <Item {...{description: `1) Connect to Farcaster to enable multi-tipping`}} />
+              <Item {...{description: `2) Install Cast Actions (below) `}} />
+              <Item {...{description: `3a) Use $IMPACT Cast Actions to nominate your favorite creators, builders, etc.`}} />
+              <Item {...{description: `3b) Tips can be weighted by adding more $IMPACT points on a cast`}} />
+              <Item {...{description: `4a) Use Multi-tipping Frame to tip any of your token allowances (eg. 1000 $degen 700 $ham)`}} />
+              <Item {...{description: `4b) You can also schedule recurring tips on the app`}} />
+              <Item {...{description: `5) Share Multi-tipping Frame of your nominations with your friends. You get 10% of all tips`}} />
+            </>)}
+          </ItemWrap>
+
+          <ItemWrap>
+            <Item {...{icon: Medal, text: 'Nominate', description: 'Nominate your favorite creators with a Cast Action'}} />
+          </ItemWrap>
+
+          <ItemWrap>
+            <Item {...{icon: Adjust, text: 'Calibrate', description: 'Tips can be weighted based on a point system'}} />
+          </ItemWrap>
+
+          <ItemWrap>
+            <Item {...{icon: Sched, text: 'Auto-tip / Multi-tip', description: `Don't let your allowance go to waste. Schedule recurring tips, or multi-tip your nominees through a frame`}} />
+          </ItemWrap>
+
+          <ItemWrap>
+            <Item {...{icon: Share, text: 'Share', description: 'Share tipping frame of your nominations and let your friends tip also. You get 10% of tips'}} />
+          </ItemWrap>
+
+          <div className='flex-col' style={{margin: '15px 0 10px 0', gap: '0.25rem', alignItems: 'center'}}>
+            <div className='flex-row' style={{alignItems: 'center', gap: '0.5rem'}}>
+              <Actions size={28} color={'#9cf'} />
+              <div style={{fontSize: isMobile ? '15px' : '18px', fontWeight:'500', color: '#ace'}}>Get Cast Actions:</div>
+            </div>
+            <div className='flex-row' style={{gap: '0.5rem', margin: '8px', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center'}}>
+              {isLogged ? (<a className="" title={`+1 $IMPACT`} href={`https://warpcast.com/~/add-cast-act-ltion?name=%2B1+%24IMPACT&icon=star&actionType=post&postUrl=https%3A%2Fimpact.abundance.id%2Fapi%2Faction%2Fimpact1%3Fpoints=IMPACT&description=Curate+Casts+with+the+Impact+App`} target="_blank" rel="noopener noreferrer">
+                <div className='flex-row cast-act-lt' style={{borderRadius: '8px', padding: '8px 8px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
+                  <FaRegStar size={14} />
+                  <p style={{padding: '0px', fontSize: '12px', fontWeight: '500', textWrap: 'nowrap'}}>+1 $IMPACT</p>
+                </div>
+              </a>) : (
+                <div className={`flex-row`} onClick={LoginPopup}>
+                  <div>
+                    <div className='flex-row cast-act-lt' style={{borderRadius: '8px', padding: '8px 8px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', backgroundColor: '#bbb'}}>
+                      <FaRegStar size={14} />
+                      <p style={{padding: '0px', fontSize: '12px', fontWeight: '500', textWrap: 'nowrap', color: '#222'}}>+1 $IMPACT</p>
+                    </div>
+                  </div>
+                  <div style={{position: 'relative', fontSize: '0', width: '0', height: '100%'}}>
+                    <div className='top-layer' style={{position: 'absolute', top: 0, left: 0, transform: 'translate(-50%, -50%)' }}>
+                      <FaLock size={8} color='#999' />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {isLogged ? (<a className="" title={`+5 $IMPACT`} href={`https://warpcast.com/~/add-cast-act-ltion?name=%2B5+%24IMPACT&icon=star&actionType=post&postUrl=https%3A%2Fimpact.abundance.id%2Fapi%2Faction%2Fimpact5%3Fpoints=IMPACT&description=Curate+Casts+with+the+Impact+App`} target="_blank" rel="noopener noreferrer">
+                <div className='flex-row cast-act-lt' style={{borderRadius: '8px', padding: '8px 8px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
+                  <FaRegStar size={14} />
+                  <p style={{padding: '0px', fontSize: '12px', fontWeight: '500', textWrap: 'nowrap'}}>+5 $IMPACT</p>
+                </div>
+              </a>) : (
+                <div className={`flex-row`} onClick={LoginPopup}>
+                  <div>
+                    <div className='flex-row cast-act-lt' style={{borderRadius: '8px', padding: '8px 8px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', backgroundColor: '#bbb'}}>
+                      <FaRegStar size={14} />
+                      <p style={{padding: '0px', fontSize: '12px', fontWeight: '500', textWrap: 'nowrap', color: '#222'}}>+5 $IMPACT</p>
+                    </div>
+                  </div>
+                  <div style={{position: 'relative', fontSize: '0', width: '0', height: '100%'}}>
+                    <div className='top-layer' style={{position: 'absolute', top: 0, left: 0, transform: 'translate(-50%, -50%)' }}>
+                      <FaLock size={8} color='#999' />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {isLogged ? (<a className="" title={`$$IMPACT Balance`} href={`https://warpcast.com/~/add-cast-act-ltion?name=%24IMPACT+Stats&icon=info&actionType=post&postUrl=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Faction%2Fbalance?points=IMPACT&description=Get+Cast+Balance+for+Impact+App`} target="_blank" rel="noopener noreferrer">
+                <div className='flex-row cast-act-lt' style={{borderRadius: '8px', padding: '8px 4px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
+                  <div style={{width: '2px', fontSize: '0px'}}>&nbsp;</div>
+                  <Info size={14} />
+                  <p style={{padding: '0px', fontSize: '12px', fontWeight: '500', textWrap: 'nowrap'}}>$IMPACT Stats</p>
+                  <div style={{width: '2px', fontSize: '0px'}}>&nbsp;</div>
+                </div>
+              </a>) : (
+                <div className={`flex-row`} onClick={LoginPopup}>
+                  <div>
+                    <div className='flex-row cast-act-lt' style={{borderRadius: '8px', padding: '8px 8px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', backgroundColor: '#bbb'}}>
+                      <FaRegStar size={14} />
+                      <p style={{padding: '0px', fontSize: '12px', fontWeight: '500', textWrap: 'nowrap', color: '#222'}}>$IMPACT Stats</p>
+                      <div style={{width: '2px', fontSize: '0px'}}>&nbsp;</div>
+                    </div>
+                  </div>
+                  <div style={{position: 'relative', fontSize: '0', width: '0', height: '100%'}}>
+                    <div className='top-layer' style={{position: 'absolute', top: 0, left: 0, transform: 'translate(-50%, -50%)' }}>
+                      <FaLock size={8} color='#999' />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>
-    <div>
 
-    {(ecoData?.channels?.length > 0) && (<div className="top-layer flex-row" style={{padding: '10px 0 10px 0', alignItems: 'center', justifyContent: 'space-evenly', margin: '0', borderBottom: '1px solid #888'}}>
-      { userButtons.map((btn, index) => (
-        <FeedMenu {...{buttonName: btn, key: index, searchOption, searchSelect}} /> ))}
-    </div>)}
+    <div id="ecosystem" style={{padding: '60px 4px 80px 4px', width: feedMax}}>
 
-    <div className='flex-row' style={{justifyContent: 'space-between', margin: '15px 0 30px 0'}}>
-      <div className='flex-row' style={{gap: '0.5rem', marginLeft: '4px'}}>
-        <div className="flex-row" style={{border: '1px solid #abc', padding: '2px 6px 2px 6px', borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'center'}} onClick={() => {handleSelection('picks')}}>
-          <div className="flex-row" style={{alignItems: 'center', gap: '0.3rem'}}>
-            <span className="channel-font" style={{color: '#eee'}}>Top Picks</span>
-          </div>
+      <div style={{padding: '8px', backgroundColor: '#33557799', borderRadius: '15px', border: '1px solid #000'}}>
+        <div className='flex-row' style={{width: '100%', justifyContent: 'center', alignItems: 'center'}}>
+          <FaGlobe style={{fill: '#cde'}} size={24} />
+          <Description {...{show: true, text: 'Ecosystem /impact', padding: '4px 0 4px 10px', size: 'large' }} />
         </div>
 
-        <div className={`flex-row ${userQuery['shuffle'] ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{border: '1px solid #abc', padding: '2px 6px 2px 6px', borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'flex-start'}} onClick={() => {handleSelect('shuffle')}}>
-          <div className={`flex-row`} style={{alignItems: 'center', gap: '0.3rem'}}>
-            <Shuffle size={22} />
-          </div>
-        </div>
-      </div>
+        <div className='flex-row' style={{color: '#7bd', width: '100%', fontSize: isMobile ? '15px' : '17px', padding: '10px 10px 15px 10px', justifyContent: 'center'}}>Let your community curate your channel/ecosystem. Ensure quality curation. Reward contributors and curators. Grow your community</div>
 
-      <div style={{position: 'relative'}}>
-        <div className={`flex-row ${!isMobile ? 'active-nav-link btn-hvr' : ''}`} style={{border: '1px solid #abc', padding: `2px 6px 2px 6px`, borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'center', borderBottom: (isSelected == 'time') ? '2px solid #99ddff' : '1px solid #abc', height: '28px'}} onMouseEnter={() => {handleSelection('time')}} onMouseLeave={() => {handleSelection('none')}}>
-          <div className="flex-row" style={{alignItems: 'center', gap: isMobile ? '0' : '0.3rem', selection: 'none'}}>
-            <BsClock size={15} color='#eee' />
-            <span className={`${!isMobile ? 'selection-btn' : ''}`} style={{cursor: 'pointer', padding: '0'}}>{!isMobile && btnText('time')}</span>
-          </div>
-        </div>
-        {(isSelected == 'time') && (
-          <div className='top-layer' style={{position: 'absolute'}} onMouseEnter={() => {handleSelection('time')}} onMouseLeave={() => {handleSelection('none')}}>
-            <div className='flex-col' style={{gap: '0.25rem', padding: '6px 6px', borderRadius: '10px', backgroundColor: '#1D3244dd', border: '1px solid #abc', width: 'auto', marginTop: '10px', alignItems: 'flex-start'}}>
-              <div className={`selection-btn ${userQuery['time'] == '24hr' ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}} onClick={() => {handleSelect('time', '24hr')}}>{'24 hours'}</div>
-              <span className={`selection-btn ${userQuery['time'] == '3days' ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}} onClick={() => {handleSelect('time', '3days')}}>{'3 days'}</span>
-              <span className={`selection-btn ${userQuery['time'] == '7days' ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}} onClick={() => {handleSelect('time', '7days')}}>{'7 days'}</span>
-              <span className={`selection-btn ${userQuery['time'] == '30days' ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}} onClick={() => {handleSelect('time', '30days')}}>{'30 days'}</span>
-              <span className={`selection-btn ${userQuery['time'] == 'all' ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}} onClick={() => {handleSelect('time', 'all')}}>{'All'}</span>
+        <div className='flex-row' style={{padding: '0px 0 0 0', width: '100%', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center'}}>
+
+          <ItemWrap>
+            <div className='flex-row' style={{justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer'}} onClick={() => {toggleMenu('ecosystem')}}>
+              <Item {...{text: 'How it works'}} />
+              <FaAngleDown size={28} style={{margin: '5px 15px 5px 5px', transform: display.ecosystem ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s ease'}} />
             </div>
-          </div>
-        )}
-      </div>
+            {display.ecosystem && (<>
+              <Item {...{description: `1) Connect to Farcaster to enable multi-tipping & Ecosystem creation`}} />
+              <Item {...{description: `2) Create Ecosystem with rules, curator eligibility criteria, curator and contributor incentives, etc.`}} />
+              <Item {...{description: `3) Install Ecosystem Cast Actions`}} />
+              <Item {...{description: `4a) Eligible curators get daily point allowance they can 'stake' on casts thru Cast Actions`}} />
+              <Item {...{description: `4b) Curators get % of tips in proportion to 'staked' points`}} />
+              <Item {...{description: `4c) Other curators can up/downvote 'staked' casts, which results in increase/decrease to curator's daily allownance, and maintains quality of curation`}} />
+              <Item {...{description: `4d) Curator goal is to 'stake' points based on value of cast to the community - this maximizes daily allowance & expected tips`}} />
+              <Item {...{description: `5) Curations can be used to moderate channels`}} />
+              <Item {...{description: `6) Adjust incentives to promote contributions that better benefit the ecosystem`}} />
+            </>)}
+          </ItemWrap>
 
-      <div style={{position: 'relative'}}>
-        <div className={`flex-row ${!isMobile ? 'active-nav-link btn-hvr' : ''}`} style={{border: '1px solid #abc', padding: `2px 6px 2px 6px`, borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'center', borderBottom: (isSelected == 'tags') ? '2px solid #99ddff' : '1px solid #abc', height: '28px'}} onMouseEnter={() => {handleSelection('tags')}} onMouseLeave={() => {handleSelection('none')}}>
-          <div className="flex-row" style={{alignItems: 'center', gap: isMobile ? '0' : '0.3rem', selection: 'none'}}>
-            <GoTag size={23} color='#eee' />
-            <span className={`${!isMobile ? 'selection-btn' : ''}`} style={{cursor: 'pointer', padding: '0'}}>{!isMobile && btnText('tags')}</span>
-          </div>
-        </div>
-        {(isSelected == 'tags') && (
-          <div className=' top-layer' style={{position: 'absolute', right: '0'}} onMouseEnter={() => {handleSelection('tags')}} onMouseLeave={() => {handleSelection('none')}}>
-            <div className='flex-col' style={{gap: '0.25rem', padding: '6px 6px', borderRadius: '10px', backgroundColor: '#1D3244dd', border: '1px solid #abc', width: 'auto', marginTop: '10px', alignItems: 'flex-start'}}>
-              <div className={`selection-btn ${(userQuery['tags'] == 'all' || userQuery['tags'].length == 0) ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}} onClick={() => {handleSelect('tags', 'all')}}>{'All tags'}</div>
-              <span className={`selection-btn ${userQuery['tags'].includes('art') ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}} onClick={() => {handleSelect('tags', 'art')}}>{'Art'}</span>
-              <span className={`selection-btn ${userQuery['tags'].includes('dev') ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}} onClick={() => {handleSelect('tags', 'dev')}}>{'Dev'}</span>
-              <span className={`selection-btn ${userQuery['tags'].includes('vibes') ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}} onClick={() => {handleSelect('tags', 'vibes')}}>{'Vibes'}</span>
-            </div>
-          </div>
-        )}
-      </div>
+          <ItemWrap>
+            <Item {...{icon: Aligned, text: 'Aligned curators', description: 'Quality curation needs community alignment. Select criteria for who can curate (NFT, token-gating, channel follow, etc.)'}} />
+          </ItemWrap>
 
-      <div style={{position: 'relative'}}>
-        <div className={`flex-row ${!isMobile ? 'active-nav-link btn-hvr' : ''}`} style={{border: '1px solid #abc', padding: `2px 6px 2px 6px`, borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'center', borderBottom: (isSelected == 'channels') ? '2px solid #99ddff' : '1px solid #abc', height: '28px'}} onMouseEnter={() => {handleSelection('channels')}} onMouseLeave={() => {handleSelection('none')}}>
-          <div className="flex-row" style={{alignItems: 'center', gap: isMobile ? '0' : '0.3rem', selection: 'none'}}>
-            <AiOutlineBars size={15} color='#eee' />
-            <span className={`${!isMobile ? 'selection-btn' : ''}`} style={{cursor: 'pointer', padding: '0', color: userQuery['channels'].length == 0 ? '#aaa' : ''}}>{isMobile ? '' : userQuery['channels'].length == 0 ? 'All channels' : 'Channels'}</span>
-          </div>
-        </div>
-      </div>
+          <ItemWrap>
+            <Item {...{icon: FaCoins, text: 'Rewards & Incentives', description: 'Create incentives to drive growth in your channel & ecosystem, maintain curation quality. Curators can get % of tips'}} />
+          </ItemWrap>
 
-      <div style={{position: 'relative'}}>
-        <div className={`flex-row ${!isMobile ? 'active-nav-link btn-hvr' : ''}`} style={{border: '1px solid #abc', padding: `2px 6px 2px 6px`, borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'center', borderBottom: (isSelected == 'curators') ? '2px solid #99ddff' : '1px solid #abc', height: '28px', marginRight: '4px'}} onMouseEnter={() => {handleSelection('curators')}} onMouseLeave={() => {handleSelection('none')}}>
-          <div className="flex-row" style={{alignItems: 'center', gap: isMobile ? '0' : '0.3rem', selection: 'none'}}>
-            <IoPeopleOutline size={15} color='#eee' />
-            <span className={`${!isMobile ? 'selection-btn' : ''}`} style={{cursor: 'pointer', padding: '0', color: userQuery['curators'].length == 0 ? '#aaa' : ''}}>{isMobile ? '' : userQuery['curators'].length == 0 ? 'All curators' : 'Curators'}</span>
-          </div>
-        </div>
-      </div>
+          <ItemWrap>
+            <Item {...{icon: Quality, text: 'Quality control', description: `Built in incentives & mechanisms to ensure high-quality curation`}} />
+          </ItemWrap>
 
+          <ItemWrap>
+            <Item {...{icon: Mod, text: 'Channel mod', description: `Let your curators moderate your channel. Set channel rules, select moderators manually or based on criteria`}} />
+          </ItemWrap>
 
-      {(isSelected == 'curators') && (
-        <div className='' style={{position: 'absolute', width: feedMax, margin: 'auto', marginTop: '28px'}} onMouseEnter={() => {handleSelection('curators')}} onMouseLeave={() => {handleSelection('none')}}>
-          <div className='top-layer flex-col' style={{gap: '0.25rem', padding: '6px 6px', borderRadius: '10px', backgroundColor: '#1D3244dd', border: '1px solid #abc', width: 'auto', marginTop: '10px', alignItems: 'flex-start'}}>
-            <div className={`selection-btn ${(userQuery['curators'] == 'all' || userQuery['curators'].length == 0) ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}}>
-              <input onChange={onCuratorSearch} 
-                name='search' 
-                placeholder={`Search curators`} 
-                value={userSearch.search} 
-                className='srch-btn' 
-                style={{width: '100%', backgroundColor: '#234'}} 
-                onKeyDown={curatorKeyDown} />
-            </div>
-            <div className='flex-row' style={{gap: '0.5rem', padding: '0px 6px', flexWrap: 'wrap'}}>
-              {filterCurators && (
-                filterCurators.map((curator, index) => (
-                  <div key={`Cu2-${index}`} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addCurator(curator)}}>
-                    <img loading="lazy" src={curator.pfp} className="" alt={curator.display_name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
-                    <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>@{curator.username}</div>
+          <ItemWrap>
+            <Item {...{icon: Grow, text: 'Grow ecosystem', description: 'Capture and distribute value in your ecosystem.'}} />
+          </ItemWrap>
+
+          <div className='flex-col' style={{margin: '15px 0 10px 0', gap: '1rem', alignItems: 'center'}}>
+
+            <div className='flex-row' style={{alignItems: 'center', gap: '0.75rem'}}>
+              <div style={{fontSize: isMobile ? '15px' : '18px', fontWeight:'500', color: '#ace'}}>Choose ecosystem:</div>
+              {isLogged ? (
+                <EcosystemMenu size={'large'} />
+              ) : (
+                <div className={`flex-row`}>
+                  <div onClick={lockedSelect} style={{margin: '0', maxWidth: '237px', width: 'auto'}}>
+                    <div style={{backgroundColor: '#334455ee', borderRadius: '16px', padding: '0px', border: '0px solid #678', color: '#fff', fontWeight: '700', alignItems:' center', fontSize: '20px'}}>
+                      <div className='flex-row' style={{gap: '0.5rem', cursor: 'pointer'}}>
+                        <select id="minuteSelect" value={'Select'} style={{backgroundColor: '#bbb', borderRadius: '4px', fontSize: isMobile ? '15px' : '18px', fontWeight: '600', padding: isMobile ?  '4px 1px' : '4px 3px', pointerEvents: 'none', color: '#222'}}>
+                          <option key={'Select'} value={'Select'}>
+                            {'Select'}
+                          </option>
+                        </select>
+                      </div>
+                    </div>
                   </div>
-                )
-              ))}
+                  <div style={{position: 'relative', fontSize: '0', width: '0', height: '100%'}}>
+                    <div className='top-layer' style={{position: 'absolute', top: 0, left: 0, transform: 'translate(-50%, -50%)' }}>
+                      <FaLock size={8} color='#999' />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
-            {(selectedCurators && selectedCurators.length > 0) && (<div className='flex-row' style={{gap: '0.5rem', padding: '10px 6px 6px 6px', flexWrap: 'wrap', borderTop: '1px solid #888', width: '100%', alignItems: 'center'}}>
-              <div style={{color: '#ddd', fontWeight: '600', fontSize: '13px', padding: '0 0 3px 6px'}}>Selected:</div>
-              {(
-                selectedCurators.map((curator, index) => (
-                  <div key={`Cu-${index}`} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addCurator(curator)}}>
-                    <img loading="lazy" src={curator.pfp} className="" alt={curator.display_name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
-                    <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>@{curator.username}</div>
-                  </div>
-                )
-              ))}
+            {isLogged ? (<div onClick={createEcosystem}>
+              <div className='flex-row cast-act-lt' style={{borderRadius: '8px', padding: '8px 4px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
+                <div style={{width: '2px', fontSize: '0px'}}>&nbsp;</div>
+                <FaPlus size={14} />
+                <p style={{padding: '0px', fontSize: '14px', fontWeight: '500', textWrap: 'nowrap'}}>Create Ecosystem</p>
+                <div style={{width: '2px', fontSize: '0px'}}>&nbsp;</div>
+              </div>
+            </div>) : (<div className={`flex-row`} onClick={LoginPopup}>
+              <div className='flex-row cast-act-lt' style={{borderRadius: '8px', padding: '8px 4px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', backgroundColor: '#bbb'}}>
+                <div style={{width: '2px', fontSize: '0px'}}>&nbsp;</div>
+                <FaPlus size={14} />
+                <p style={{padding: '0px', fontSize: '14px', fontWeight: '500', textWrap: 'nowrap', color: '#222'}}>Create Ecosystem</p>
+                <div style={{width: '2px', fontSize: '0px'}}>&nbsp;</div>
+              </div>
+              <div style={{position: 'relative', fontSize: '0', width: '0', height: '100%'}}>
+                <div className='top-layer' style={{position: 'absolute', top: 0, left: 0, transform: 'translate(-50%, -50%)' }}>
+                  <FaLock size={8} color='#999' />
+                </div>
+              </div>
             </div>)}
           </div>
         </div>
-      )}
-
-      {(isSelected == 'channels') && (
-          <div className='' style={{position: 'absolute', width: feedMax, margin: 'auto', marginTop: '28px'}} onMouseEnter={() => {handleSelection('channels')}} onMouseLeave={() => {handleSelection('none')}}>
-            <div className='top-layer flex-col' style={{gap: '0.25rem', padding: '6px 6px', borderRadius: '10px', backgroundColor: '#1D3244dd', border: '1px solid #abc', width: 'auto', marginTop: '10px', alignItems: 'flex-start'}}>
-              <div className={`selection-btn ${(userQuery['channels'] == 'all' || userQuery['channels'].length == 0) ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}}>
-                <input onChange={onChannelChange} 
-                  name='search' 
-                  placeholder={`Search channels`} 
-                  value={userSearch.search} 
-                    className='srch-btn' 
-                  style={{width: '100%', backgroundColor: '#234'}} 
-                  onKeyDown={channelKeyDown} />
-              </div>
-              <div className='flex-row top-layer' style={{gap: '0.5rem', padding: '0px 6px', flexWrap: 'wrap'}}>
-                {filterChannels && (
-                  filterChannels.map((channel, index) => (
-                    <div key={`Ch2-${index}`} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addChannel(channel)}}>
-                      <img loading="lazy" src={channel.image_url} className="" alt={channel.name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
-                      <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>{channel.name}</div>
-                      <div style={{fontWeight: '400', fontSize: '10px', color: '#ccc'}}>{formatNum(channel.follower_count)}</div>
-                    </div>
-                  )
-                ))}
-              </div>
-
-              {(selectedChannels && selectedChannels.length > 0) && (<div className='flex-row' style={{gap: '0.5rem', padding: '10px 6px 6px 6px', flexWrap: 'wrap', borderTop: '1px solid #888', width: '100%', alignItems: 'center'}}>
-                <div style={{color: '#ddd', fontWeight: '600', fontSize: '13px', padding: '0 0 3px 6px'}}>Selected:</div>
-                {(
-                  selectedChannels.map((channel, index) => (
-                    <div key={`Ch-${index}`} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addChannel(channel)}}>
-                      <img loading="lazy" src={channel.image_url} className="" alt={channel.name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
-                      <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>{channel.name}</div>
-                    </div>
-                  )
-                ))}
-              </div>)}
-            </div>
-          </div>
-        )}
       </div>
     </div>
-
-    <div className='flex-col' style={{margin: '0 0 70px 0'}}>
-      {(!userFeed || userFeed.length == 0) ? (
-        <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
-          {loading ? (<Spinner size={31} color={'#999'} />) : (<div className='flex-row' style={{gap: '1rem', alignItems: 'center'}}>
-              <div style={{fontSize: '20px', color: '#def'}}>No casts found</div>
-              <div style={{cursor: 'pointer', margin: '3px 0 0 0'}} onClick={searchSelectRouter}>
-                <HiRefresh size={28} color='#fff' />
-              </div>
-            </div>
-            )}
-        </div>
-      ) : (userFeed.map((cast, index) => (<Cast key={index} {...{cast, index, updateCast, openImagePopup, ecosystem: points}} />)))}
-      {(cursor && cursor !== '') && (<div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
-        <Spinner size={31} color={'#999'} />
-      </div>)}
-    </div>
     <div ref={ref}>&nbsp;</div>
-    <ExpandImg {...{show: showPopup.open, closeImagePopup, embed: {showPopup}, screenWidth, screenHeight }} />
-    <Modal {...{modal}} />
   </div>
   )
-}
-
-
-export async function getServerSideProps(context) {
-  // Fetch dynamic parameters from the context object
-  const { query } = context;
-  const { time, curators, channels, tags, shuffle, referrer, eco } = query;
-  let setTime = 'all'
-  let setEco = null
-  if (eco) {
-    setEco = '$' + eco
-  }
-  if (time) {
-    setTime = time
-  }
-  let setCurators = []
-  if (curators) {
-    setCurators = Array.isArray(curators) ? curators : [curators]
-  }  
-  let setChannels = []
-  if (channels) {
-    setChannels = Array.isArray(channels) ? channels : [channels]
-  }
-  let setTags = []
-  if (tags) {
-    setTags = Array.isArray(tags) ? tags : [tags]
-  }
-  let setShuffle = false
-  if (shuffle) {
-    if (shuffle == 'true') {
-      setShuffle = true
-    } else if (shuffle == 'false') {
-      setShuffle = false
-    }
-  }
-  let setReferrer = referrer || null
-  console.log(setTime, setCurators, setChannels, setTags, setShuffle)
-  return {
-    props: {
-      time: setTime,
-      curators: setCurators,
-      channels: setChannels,
-      tags: setTags,
-      shuffle: setShuffle,
-      referrer: setReferrer,
-      eco: setEco
-    },
-  };
 }

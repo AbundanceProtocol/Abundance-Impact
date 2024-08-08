@@ -82,7 +82,7 @@ export default async function handler(req, res) {
         totalTip: combinedAmounts[coin],
         token: coin,
         set: true,
-        min: 180
+        min: 200
       }));
     
       return {result, text: sanitizedInput};
