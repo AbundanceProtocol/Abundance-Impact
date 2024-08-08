@@ -6,7 +6,7 @@ export default async function handler(req, res) {
   if (req.method === 'GET') {
     console.log(req.query);
     const page = parseInt(req.query.page) || 1;
-    const limit = 5;
+    const limit = 10;
     const skip = (page - 1) * limit;
 
     let query = {};
@@ -21,6 +21,10 @@ export default async function handler(req, res) {
         console.error("Error while fetching casts:", error);
         return null
       }   
+    }
+
+    if (req.query.points) {
+      query.points = req.query.points
     }
 
     if (req.query.time) {
@@ -49,9 +53,17 @@ export default async function handler(req, res) {
     //   query.cast_tags = { $in: [req.query['tags[]']] };
     // }
 
-    // if (req.query['channel[]'] && req.query['channel[]'].length > 0) {
-    //   query.cast_channel = { $in: [req.query['channel[]']] };
-    // }
+    if (req.query['channel[]'] && req.query['channel[]'].length > 0) {
+
+      if (typeof req.query['channel[]'] === 'string') {
+        query.cast_channel = { $in: [req.query['channel[]']]};
+      } else if (Array.isArray(req.query['channel[]']) && req.query['channel[]'].length > 0) {
+        query.cast_channel = { $in: req.query['channel[]']};
+      }
+
+
+      // query.cast_channel = { $in: [req.query['channel[]']] };
+    }
 
     // if (req.query.text) {
     //   query.cast_text = { $regex: req.query.text, $options: 'i' }; // Case-insensitive search
@@ -141,7 +153,7 @@ export default async function handler(req, res) {
         return null;
       }
     }
-    const { casts, totalCount } = await fetchCasts(query, req.query.shuffle === 'true');
+    const { casts, totalCount } = await fetchCasts(query, req.query.shuffle === 'true', page, limit);
     // console.log(casts)
     res.status(200).json({
       total: totalCount,

@@ -5,13 +5,14 @@ import { AccountContext } from '../../../context';
 import axios from 'axios';
 import useStore from '../../../utils/store';
 import Cast from '../../../components/Cast'
+import ExpandImg from '../../../components/Cast/ExpandImg';
 
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 
 export default function CastPage({username, castHash}) {
   const router = useRouter();
   const ref = useRef(null)
-  const account = useContext(AccountContext)
+  const { LoginPopup } = useContext(AccountContext)
   const [cast, setCast] = useState(null)
   const initialUser = {
     username: 'none',
@@ -28,6 +29,32 @@ export default function CastPage({username, castHash}) {
   const store = useStore()
   const [textMax, setTextMax] = useState('522px')
   const [feedMax, setFeedMax ] = useState('620px')
+  const initialEco = {
+    channels: [],
+    condition_channels: false,
+    condition_curators_threshold: 1,
+    condition_following_channel: false,
+    condition_following_owner: false,
+    condition_holding_erc20: false,
+    condition_holding_nft: false,
+    condition_points_threshold: 1,
+    condition_powerbadge: false,
+    createdAt: "2024-06-17T03:19:16.065Z",
+    downvote_value: 1,
+    ecosystem_moderators: [],
+    ecosystem_name: 'none',
+    ecosystem_handle: 'none',
+    ecosystem_points_name: '$IMPACT',
+    ecosystem_rules: [`Can't do evil`],
+    erc20s: [],
+    fid: 3,
+    nfts: [],
+    owner_name: 'none',
+    percent_tipped: 10,
+    points_per_tip: 1,
+    upvote_value: 1,
+  }
+  const [eco, setEco] = useState(initialEco)
   const [longcastLoaded, setLongcastLoaded] = useState(false)
   const [showPopup, setShowPopup] = useState({open: false, url: null})
   const [isLogged, setIsLogged] = useState(false)
@@ -101,7 +128,7 @@ export default function CastPage({username, castHash}) {
       getCast(castHash, store.fid)
     } else if (!isLogged && !store.isAuth) {
       console.log('triggered')
-      account.LoginPopup()
+      LoginPopup()
     }
   }, [isLogged, store.isAuth])
 
@@ -208,14 +235,7 @@ export default function CastPage({username, castHash}) {
     setShowPopup(newPopup)
   }
 
-  const ExpandImg = ({embed}) => {
-    return (
-      <>
-        <div className="overlay" onClick={closeImagePopup}></div>
-        <img loading="lazy" src={embed.showPopup.url} className='popupConainer' alt="Cast image embed" style={{aspectRatio: 'auto', maxWidth: screenWidth, maxHeight: screenHeight, cursor: 'pointer', position: 'fixed', borderRadius: '12px'}} onClick={closeImagePopup} />
-      </>
-    )
-  }
+
 
   return (
     <div className='flex-col' style={{width: 'auto', position: 'relative'}} ref={ref}>
@@ -225,10 +245,8 @@ export default function CastPage({username, castHash}) {
       </Head>
       <div className="" style={{padding: '58px 0 0 0'}}>
       </div>
-      { (cast) && <Cast cast={cast} key={0} index={0} openImagePopup={openImagePopup} /> }
-      <div>
-        {showPopup.open && (<ExpandImg embed={{showPopup}} />)}
-      </div>
+      { (cast) && <Cast cast={cast} key={0} index={0} openImagePopup={openImagePopup} ecosystem={eco.ecosystem_points_name} /> }
+      <ExpandImg  {...{show: showPopup.open, closeImagePopup, embed: {showPopup}, screenWidth, screenHeight }} />
     </div>
   );
 }

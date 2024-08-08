@@ -8,6 +8,9 @@ module.exports = {
   env: {
     ENVIRONMENT: process.env.ENVIRONMENT,
   },
+  experimental: {
+    serverActions: true,
+  },
   compiler: {
     emotion: true,
   },

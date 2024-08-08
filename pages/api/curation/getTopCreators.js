@@ -3,17 +3,17 @@ import Tip from '../../../models/Tip';
 import Cast from '../../../models/Cast';
 
 export default async function handler(req, res) {
-  console.log('6')
-  // const { name } = req.query
-  if (req.method !== 'GET') {
+  const { points } = req.query
+  if (req.method !== 'GET' || !points) {
     res.status(405).json({ error: 'Method not allowed' });
   } else {
 
-    async function getTopCreators() {
+    async function getTopCreators(points) {
       try {
         await connectToDatabase();
 
         const results = await Tip.aggregate([
+          { $match: { points: points } },
           { $unwind: "$tip" },
           { $group: {
             _id: "$receiver_fid",
@@ -47,7 +47,6 @@ export default async function handler(req, res) {
           { $sort: { totalAmount: -1 } }
         ]);
     
-        // console.log('Top 10 IDs by total value:', results);
         return results;
       } catch (err) {
         console.error('Error:', err);
@@ -56,7 +55,7 @@ export default async function handler(req, res) {
     };
 
     try {
-      const topCreators = await getTopCreators()
+      const topCreators = await getTopCreators(points)
       console.log(topCreators)
       res.status(200).json({ topCreators: topCreators });
     } catch (error) {

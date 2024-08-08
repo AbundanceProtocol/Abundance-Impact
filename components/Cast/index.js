@@ -14,24 +14,21 @@ import { ImArrowUp, ImArrowDown  } from "react-icons/im";
 import VideoPlayer from './VideoPlayer';
 import Images from './Images';
 
-export default function Cast({ cast, index, updateCast, openImagePopup }) {
+export default function Cast({ cast, index, updateCast, openImagePopup, ecosystem }) {
   const store = useStore()
   const router = useRouter();
   const [screenWidth, setScreenWidth] = useState(undefined)
-  const account = useContext(AccountContext)
+  const { LoginPopup, fid, userBalances, setUserBalances, isLogged } = useContext(AccountContext)
   const [textMax, setTextMax] = useState('522px')
   const [feedMax, setFeedMax ] = useState('620px')
   const likeRefs = useRef([])
   const recastRefs = useRef([])
   const [userFid, setUserFid] = useState(null)
   const [fail, setFail] = useState(false)
-  const userRemainingImpact = useStore(state => state.userRemainingImpact);
-  const userRemainingQuality = useStore(state => state.userRemainingQuality);
   const handleClick = (embed) => {
     openImagePopup(embed); 
   };
   const [hide, setHide] = useState(false)
-  const [isLogged, setIsLogged] = useState(false)
 
   function clickFailed() {
     setFail(true);
@@ -41,15 +38,12 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
   }
 
   async function boostQuality(cast, qualityAmount) {
-    const fid = store.fid
     const castHash = cast.hash
-    // console.log(fid, castHash, qualityAmount)
+    const castChannel = cast.root_parent_url
     
-    async function postQuality(fid, castHash, qualityAmount) {
-      // console.log(fid, castContext, impactAmount)
+    async function postQuality(fid, castHash, castChannel, qualityAmount) {
       try {
-        const response = await axios.post('/api/curation/postQuality', { fid, castHash, qualityAmount })
-        // console.log(response)
+        const response = await axios.post('/api/curation/postPointQuality', { fid, castHash, castChannel, qualityAmount, points: ecosystem })
         return response
       } catch (error) {
         console.error('Error creating post:', error);
@@ -57,23 +51,20 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
       }
     }
 
-
-    let qualityResponse
-    if (fid && fid !== '-' && qualityAmount && castHash && userRemainingQuality > 0 && (cast.impact_balance || cast.impact_balance == 0)  &&  !(cast.impact_balance == 0 && qualityAmount < 0)) {
-      qualityResponse = await postQuality(fid, castHash, qualityAmount)
+    if (fid && fid !== '-' && qualityAmount && castHash && userBalances.qdau > 0 && (cast.impact_balance || cast.impact_balance == 0)  &&  !(cast.impact_balance == 0 && qualityAmount < 0)) {
+      const qualityResponse = await postQuality(fid, castHash, castChannel, qualityAmount)
       console.log(qualityResponse)
-      if (qualityResponse && qualityResponse.data && qualityResponse.status == 201) {
-        let userBalance = qualityResponse.data.userBalance
-        let castAbsoluteQ = qualityResponse.data.castAbsoluteQ
-        let castTotalI = qualityResponse.data.castTotalI
-        let castBalanceQ = qualityResponse.data.castBalanceQ
+      if (qualityResponse?.data && qualityResponse?.status == 201) {
+        const qdauBalance = qualityResponse?.data?.userBalance
+        const castAbsoluteQ = qualityResponse?.data?.castAbsoluteQ
+        const castTotalI = qualityResponse?.data?.castTotalI
+        const castBalanceQ = qualityResponse?.data?.castBalanceQ
         const updatedCast = {...cast, impact_balance: castTotalI, quality_absolute: castAbsoluteQ, quality_balance: castBalanceQ}
         updateCast(index, updatedCast)
-        
-        // setPoints(castTotalI)
-        // setQuality(castBalanceQ)
-        // setQualityAbs(castAbsoluteQ)
-        store.setUserRemainingQuality(userBalance)
+        setUserBalances(prev => ({
+          ...prev,
+          qdau: qdauBalance
+        }))
       } else {
         console.log('fail')
         clickFailed()
@@ -85,15 +76,6 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
 
 
   async function boostImpact(cast, impactAmount) {
-    // let channel = null
-    // if (cast.root_parent_url) {
-    //   const isChannel = cast.root_parent_url.slice(0,31)
-    //   if (isChannel == 'https://warpcast.com/~/channel/') {
-    //     channel = cast.root_parent_url
-    //   }
-    // }
-    // const amount = 1
-    const fid = store.fid
     const castContext = {
       author_fid: cast.author.fid,
       author_pfp: cast.author.pfp_url,
@@ -103,12 +85,10 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
       cast_text: cast.text,
       cast_channel: cast.root_parent_url
     }
-    // console.log(castContext)
     
     async function postImpact(fid, castContext, impactAmount) {
-      // console.log(fid, castContext, impactAmount)
       try {
-        const response = await axios.post('/api/curation/postImpact', { fid, castContext, impactAmount })
+        const response = await axios.post('/api/curation/postPointImpact', { fid, castContext, impactAmount, points: ecosystem })
         return response
       } catch (error) {
         console.error('Error creating post:', error);
@@ -117,17 +97,18 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
     }
 
     let impactResponse
-    if (fid && fid !== '-' && impactAmount && castContext && userRemainingImpact > 0) {
+    if (fid && fid !== '-' && impactAmount && castContext && userBalances?.impact > 0) {
       impactResponse = await postImpact(fid, castContext, impactAmount)
-      // console.log(impactResponse)
-      if (impactResponse && impactResponse.data && impactResponse.status == 201) {
-        let returnedBalance = impactResponse.data.balance
+      if (impactResponse?.data && impactResponse.status == 201) {
+        let impactBalance = impactResponse?.data?.balance
         let currentImpact = cast.impact_balance || 0
         let addedPoints = impactResponse.data.points
         const updatedCast = {...cast, impact_balance: currentImpact + addedPoints}
         updateCast(index, updatedCast)
-        // setPoints(points + addedPoints)
-        store.setUserRemainingImpact(returnedBalance)
+        setUserBalances(prev => ({
+          ...prev,
+          impact: impactBalance
+        }))
       } else {
         console.log('fail')
         clickFailed()
@@ -135,9 +116,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
     } else {
       clickFailed()
     }
-    // console.log(impactResponse)
   }
-
 
   useEffect(() => {
     if (screenWidth) {
@@ -161,7 +140,9 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
   }, [screenWidth])
 
   useEffect(() => {
-    setIsLogged(store.isAuth)
+    if (isLogged) {
+      setUserFid(fid)
+    }
     const handleResize = () => {
       setScreenWidth(window.innerWidth)
     }
@@ -175,11 +156,10 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
   }, [])
 
   useEffect(() => {
-    setIsLogged(store.isAuth)
     if (isLogged) {
-      setUserFid(store.fid)
+      setUserFid(fid)
     }
-  }, [isLogged, store.isAuth])
+  }, [isLogged])
 
 
   const goToCast = async (event, cast) => {
@@ -270,7 +250,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
           <div className="" style={{margin: '0 10px 0 0'}}>
             <a className="" title="" href={`/${cast.author.username}`} onClick={(event) => {
                   if (!isLogged) {
-                    account.LoginPopup()
+                    LoginPopup()
                     event.preventDefault()
                   } else {
                     goToUserProfile(event, cast.author)
@@ -287,9 +267,9 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
             <div className={`impact-arrow ${fail ? 'flash-fail' : ''}`} onClick={
              () => {
                 if (!isLogged) {
-                  account.LoginPopup()
+                  LoginPopup()
                 } else {
-                  if(store.userRemainingImpact > 0) {
+                  if(userBalances.impact > 0) {
                     boostImpact(cast, 1)
                   } else { 
                     clickFailed()
@@ -309,7 +289,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
               <span className="">
                 <a href={`/${cast.author.username}`} className="fc-lnk" title={cast.author.display_name} style={{cursor: 'pointer'}} onClick={(event) => {
                   if (!isLogged) {
-                    account.LoginPopup()
+                    LoginPopup()
                     event.preventDefault()
                   } else {
                     goToUserProfile(event, cast.author)
@@ -326,7 +306,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
               <span className="user-font">
                 <a href={`/${cast.author.username}`} className="fc-lnk" title={cast.author.display_name} onClick={(event) => {
                   if (!isLogged) {
-                    account.LoginPopup()
+                    LoginPopup()
                     event.preventDefault()
                   } else {
                     goToUserProfile(event, cast.author)
@@ -336,7 +316,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
               <div className="">·</div>
               <a href={`/${cast.author.username}/casts/${cast.hash}`} className="fc-lnk" title="Navigate to cast" onClick={(event) => {
                   if (!isLogged) {
-                    account.LoginPopup()
+                    LoginPopup()
                     event.preventDefault()
                   } else {
                     goToCast(event, cast)
@@ -356,7 +336,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
               </div>
             {(cast.embeds.length > 0) && (cast.embeds.map((embed, subindex) => (
               
-            <div className='flex-col' style={{alignItems: 'center', display: hide ? 'flex' : 'flex'}}>
+            <div key={subindex} className='flex-col' style={{alignItems: 'center', display: hide ? 'flex' : 'flex'}}>
               {(embed && embed.type && (embed.type == 'image' || embed.type == 'other')) && (
                 <Images embed={embed} subindex={subindex} textMax={textMax} handleClick={handleClick} index={index} />
               )}
@@ -375,6 +355,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
               )}
             </div>
             )))}
+            {cast?.channel && (<div style={{alignSelf: 'flex-start', fontSize: '13px', margin: '10px 0 0 0', padding: '3px 6px', border: '1px solid #666', width: 'fit-content', borderRadius: '3px', backgroundColor: '#eff', fontWeight: '500', color: '#246'}}>/{cast?.channel?.id}</div>)}
           </div>
           {(typeof cast.channelName !== 'undefined') && (
             <div className="flex-row" style={{border: '1px solid #666', padding: '2px 4px', borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'flex-start'}}>
@@ -400,7 +381,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
                 style={{color: cast.viewer_context?.recasted ? '#191' : ''}}
                 onClick={() => {
                   if (!isLogged) {
-                    account.LoginPopup()
+                    LoginPopup()
                   } else {
                     postRecast(cast.hash, index, cast.reactions.recasts_count)
                   }
@@ -419,7 +400,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
                 style={{color: cast.viewer_context?.liked ? '#b33' : ''}}
                 onClick={() => {
                   if (!isLogged) {
-                    account.LoginPopup()
+                    LoginPopup()
                   } else {
                     postLike(cast.hash, index, cast.reactions.likes_count)
                   }
@@ -433,7 +414,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
             <div className="flex-row" style={{flex: 1, padding: '3px', gap: '0.5rem'}}>
               <div className={`impact-arrow ${fail ? 'flash-fail' : ''}`} style={{padding: '0px 1px 0 0px'}} onClick={() => {
                 if (!isLogged) {
-                  account.LoginPopup()
+                  LoginPopup()
                 } else {
                   boostQuality(cast, 1)
                 }
@@ -452,7 +433,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup }) {
 
               <div className={`like-btn ${fail ? 'flash-fail' : ''}`} style={{padding: '2px 0 0 0px'}} onClick={() => {
                 if (!isLogged) {
-                  account.LoginPopup()
+                  LoginPopup()
                 } else {
                   boostQuality(cast, -1)
                 }

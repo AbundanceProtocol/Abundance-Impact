@@ -4,6 +4,7 @@ const tipSchema = new mongoose.Schema({
   receiver_fid: Number,
   tipper_fid: Number,
   cast_hash: String,
+  points: String,
   tip: [{
     currency: String,
     amount: Number

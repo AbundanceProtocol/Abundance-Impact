@@ -1,5 +1,5 @@
 export const breakpointMap = {
-  mobile: 637,
+  mobile: 690,
   tablet: 1023,
   desktop: 2560,
 };

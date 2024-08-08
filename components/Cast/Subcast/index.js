@@ -15,8 +15,6 @@ export default function Subcast({ cast, index }) {
   const recastRefs = useRef([])
   const [userFid, setuserFid] = useState(null)
   const [fail, setFail] = useState(false)
-  const userRemainingImpact = useStore(state => state.userRemainingImpact);
-  const userRemainingQuality = useStore(state => state.userRemainingQuality);
 
   useEffect(() => {
     if (screenWidth) {
@@ -42,8 +40,6 @@ export default function Subcast({ cast, index }) {
   useEffect(() => {
     setuserFid(store.fid)
 
-    // console.log(cast)
-    // console.log(userFid, cast.author.fid, store.fid)
     const handleResize = () => {
       setScreenWidth(window.innerWidth)
     }
@@ -111,7 +107,7 @@ export default function Subcast({ cast, index }) {
             </div>
           {(cast.embeds.length > 0) && (cast.embeds.map((embed, subindex) => (
             
-          <div className='flex-col' style={{alignItems: 'center'}}>
+          <div key={subindex} className='flex-col' style={{alignItems: 'center'}}>
             {(embed.type && embed.type == 'image') && (
               <div className="" key={`${index}-${subindex}`}>
                 <div className="flex-col" style={{position: 'relative'}}>
@@ -133,7 +129,6 @@ export default function Subcast({ cast, index }) {
           </div>
           )))}
         </div>
-
       </div>
     </div>)}</>
   );

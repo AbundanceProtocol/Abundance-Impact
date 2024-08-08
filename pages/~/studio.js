@@ -2,29 +2,27 @@ import { useRouter } from 'next/router';
 import { useRef, useContext, useEffect, useState } from 'react';
 import useStore from '../../utils/store';
 import { AccountContext } from '../../context';
-import { ActiveUser, Degen, Logo } from '../assets';
-import { AiOutlineLoading3Quarters as Loading } from "react-icons/ai";
 import useMatchBreakpoints from '../../hooks/useMatchBreakpoints';
 import axios from 'axios';
 import Cast from '../../components/Cast'
-import DashboardBtn from '../../components/Panels/DashboardBtn'
-import { FaLock, FaPowerOff } from "react-icons/fa";
-import { formatNum, getCurrentDateUTC, getTimeRange, isYesterday, checkEmbedType, populateCast } from '../../utils/utils';
-import { FaRegStar } from 'react-icons/fa';
-import { IoDiamondOutline as Diamond } from "react-icons/io5";
-// import { MdOutlineRefresh } from "react-icons/md";
-import { HiRefresh } from "react-icons/hi";
-import { IoShuffleOutline as Shuffle, IoPeopleOutline } from "react-icons/io5";
+import { formatNum, getCurrentDateUTC, getTimeRange, isYesterday, checkEmbedType, populateCast, isCast } from '../../utils/utils';
 import { BsClock } from "react-icons/bs";
 import { GoTag } from "react-icons/go";
 import { AiOutlineBars } from "react-icons/ai";
-import Spinner from '../../components/Spinner';
+import Spinner from '../../components/Common/Spinner';
+import ExpandImg from '../../components/Cast/ExpandImg';
+import UserData from '../../components/Page/UserData';
+import FeedMenu from '../../components/Page/FeedMenu';
+import TopPicks from '../../components/Page/FilterMenu/TopPicks';
+import Shuffle from '../../components/Page/FilterMenu/Shuffle';
+import Time from '../../components/Page/FilterMenu/Time';
+import TagsDropdown from '../../components/Page/FilterMenu/Tags/TagsDropdown';
 
 export default function ProfilePage() {
   const router = useRouter();
   const store = useStore()
   const [user, setUser] = useState(null)
-  const account = useContext(AccountContext)
+  const { LoginPopup, isLogged } = useContext(AccountContext)
   const ref = useRef(null)
   const [textMax, setTextMax] = useState('430px')
   const [screenWidth, setScreenWidth ] = useState(undefined)
@@ -37,13 +35,34 @@ export default function ProfilePage() {
   const [showPopup, setShowPopup] = useState({open: false, url: null})
   const [userTips, setUserTips] = useState(null)
   const [userAllowance, setUserAllowance] = useState(null)
-  const [userAllowances, setUserAllowances] = useState({totalImpact: 0, totalQuality: 0, remainingImpact: 0, remainingQuality: 0})
-  const userTotalImpact = useStore(state => state.userTotalImpact);
-  const userTotalQuality = useStore(state => state.userTotalQuality);
-  const userRemainingImpact = useStore(state => state.userRemainingImpact);
-  const userRemainingQuality = useStore(state => state.userRemainingQuality);
   const [feedRouterScheduled, setFeedRouterScheduled] = useState(false);
   const [userRouterScheduled, setUserRouterScheduled] = useState(false);
+  const initialEco = {
+    channels: [],
+    condition_channels: false,
+    condition_curators_threshold: 1,
+    condition_following_channel: false,
+    condition_following_owner: false,
+    condition_holding_erc20: false,
+    condition_holding_nft: false,
+    condition_points_threshold: 1,
+    condition_powerbadge: false,
+    createdAt: "2024-06-17T03:19:16.065Z",
+    downvote_value: 1,
+    ecosystem_moderators: [],
+    ecosystem_name: 'none',
+    ecosystem_handle: 'none',
+    ecosystem_points_name: '$IMPACT',
+    ecosystem_rules: [`Can't do evil`],
+    erc20s: [],
+    fid: 3,
+    nfts: [],
+    owner_name: 'none',
+    percent_tipped: 10,
+    points_per_tip: 1,
+    upvote_value: 1,
+  }
+  const [eco, setEco] = useState(initialEco)
   const [isSelected, setIsSelected] = useState('none')
   const [userSearch, setUserSearch] = useState({ search: '' })
   const [selectedChannels, setSelectedChannels] = useState([])
@@ -116,7 +135,6 @@ export default function ProfilePage() {
       if (user && user.fid && user.fid !== '-') {
         console.log('2')
         feedRouter()
-
         getUserAllowance(user.fid)
         const currentDate = getCurrentDateUTC()
         if (store && store.userUpdateTime && isYesterday(store.userUpdateTime, currentDate)) {
@@ -130,7 +148,6 @@ export default function ProfilePage() {
         if (user && user.fid && user.fid !== '-') {
           console.log('3')
           feedRouter()
-
           getUserAllowance(user.fid)
           const currentDate = getCurrentDateUTC()
           if (store && store.userUpdateTime && isYesterday(store.userUpdateTime, currentDate)) {
@@ -144,7 +161,6 @@ export default function ProfilePage() {
       return () => clearTimeout(timeoutId);
     }
   }, [user, userRouterScheduled]);
-
 
   useEffect(() => {
     if (feedRouterScheduled) {
@@ -173,7 +189,6 @@ export default function ProfilePage() {
       getUserSearch(timeRange, tags, channels, curators, null, shuffle)
     }
   }
-
   
   async function getUserSearch(time, tags, channel, curator, text, shuffle) {
     const fid = await store.fid
@@ -187,8 +202,6 @@ export default function ProfilePage() {
         if (response && response.data && response.data.casts.length > 0) {
           casts = response.data.casts
         }
-        // console.log(casts)
-
         return casts
       } catch (error) {
         console.error('Error submitting data:', error)
@@ -230,7 +243,7 @@ export default function ProfilePage() {
       setUserFeed(displayedCasts)
 
       if (!fid) {
-        account.LoginPopup()
+        LoginPopup()
       } else {
           
         async function populateCasts(fid, castString) {
@@ -277,7 +290,6 @@ export default function ProfilePage() {
           return updatedCasts;
         }
         
-        // Usage
         const castsWithImages = await checkEmbedTypeForCasts(displayedCasts);
         setUserFeed(castsWithImages);
 
@@ -302,17 +314,12 @@ export default function ProfilePage() {
         }
 
         async function populateSubcasts(cast, fid) {
-          const { embeds } = cast;
-          // console.log(embeds)
-
+          const { embeds } = isCast(cast);
           if (embeds && embeds.length > 0) {
             const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
-              // console.log(embed)
               if (embed.type == 'subcast') {
-                // console.log(embed.cast_id.hash)
                 const subcastData = await getSubcast(embed.cast_id.hash, fid)
                 const checkImages = await checkEmbedType(subcastData)
-                // console.log(checkImages)
                 return { ...embed, subcast: checkImages };
               } else {
                 return { ...embed }
@@ -325,13 +332,10 @@ export default function ProfilePage() {
         }
 
         async function populateEmbeds(cast) {
-          const { embeds } = cast
-          // console.log(embeds)
+          const { embeds } = isCast(cast);
           if (embeds && embeds.length > 0) {
             const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
-              // console.log(embed.type)
               if (embed && embed.url && embed.type == 'html') {
-                // console.log(embed)
                 try {
                   const metaData = await axios.get('/api/getMetaTags', {
                     params: { url: embed.url } })
@@ -380,7 +384,6 @@ export default function ProfilePage() {
     }
   }
 
-
   async function getUserFeed(fid, recasts, userFid) {
     try {
       const response = await axios.get('/api/getUserCasts', {
@@ -397,7 +400,6 @@ export default function ProfilePage() {
     try {
       const response = await axios.get('/api/getLatestUserCasts', {
         params: { fid, userFid } })
-      // console.log(response)
       const feed = response.data.feed
       console.log(response.data.feed)
       setUserFeed(feed)
@@ -406,13 +408,9 @@ export default function ProfilePage() {
     }
   }
 
-
   async function getUserAllowance(fid) {
-    // console.log(fid, userFeed)
     if (user && !userAllowance && fid) {
-      // let totalAllowance = 0
       let remaningAllowance = 0
-      // let usedAllowance = 0
 
       try {
         const responseTotal = await axios.get('/api/degen/getUserAllowance', {
@@ -518,16 +516,6 @@ export default function ProfilePage() {
     setShowPopup(newPopup)
   }
 
-  const ExpandImg = ({embed}) => {
-    return (
-      <>
-        <div className="overlay" onClick={closeImagePopup}></div>
-        <img loading="lazy" src={embed.showPopup.url} className='popupConainer' alt="Cast image embed" style={{aspectRatio: 'auto', maxWidth: screenWidth, maxHeight: screenHeight, cursor: 'pointer', position: 'fixed', borderRadius: '12px'}} onClick={closeImagePopup} />
-      </>
-    )
-  }
-
-
   const handleSelect = async (type, selection) => {
     console.log(type)
     if (type == 'shuffle') {
@@ -628,7 +616,6 @@ export default function ProfilePage() {
       getChannels(userSearch.search)
     }
   }
-
   
   function addChannel(channel) {
     console.log(channel)
@@ -673,119 +660,8 @@ export default function ProfilePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const UserData = () => {
-    const [loading, setLoading] = useState(false);
-
-   return (
-    <div className="inner-container flex-col" style={{width: '100%', display: 'flex', flexDirection: 'col', justifyContent: 'space-between', backgroundColor: '#33445588', gap: '1rem'}}>
-      <div className='flex-row' style={{gap: '0.5rem'}}>
-
-        <div style={{width: '100%'}}>
-          <div>
-            <div>
-              <div>
-                <div className="flex-row">
-                  <span className="" datastate="closed" style={{margin: '0 10px 0 0'}}>
-                    <a className="" title="" href={`https://warpcast.com/${user.username}`}>
-                      <img loading="lazy" src={user.pfp_url} className="" alt={`${user.display_name} avatar`} style={{width: '48px', height: '48px', maxWidth: '48px', maxHeight: '48px', borderRadius: '24px', border: '1px solid #cdd'}} />
-                    </a>
-                  </span>
-                  <div className="flex-col" style={{width: '100%', gap: '1rem', alignItems: 'flex-start'}}>
-                    <div className="flex-row" style={{width: '100%', justifyContent: 'space-between', height: '', alignItems: 'flex-start'}}>
-                      <div className="flex-row" style={{alignItems: 'center', gap: '0.25rem', flexWrap: 'wrap'}}>
-                        <span className="">
-                          <a className="fc-lnk" title="" href={`https://warpcast.com/${user.username}`}>
-                            <div className="flex-row" style={{alignItems: 'center'}}>
-                              <span className="name-font" style={{color: '#cdd', fontSize: '18px'}}>{user.display_name}</span>
-                              <div className="" style={{margin: '0 0 0 3px'}}>
-                                {(user.power_badge) && (<ActiveUser />)}
-                              </div>
-                            </div>
-                          </a>
-                        </span>
-                        <span className="user-font">
-                          <a className="fc-lnk" title="" href={`https://warpcast.com/${user.username}`} style={{color: '#cdd'}}>@{user.username}</a>
-                        </span>
-                        <div className="">·</div>
-                        <a className="fc-lnk" title="Navigate to cast" href={`https://warpcast.com/${user.username}`}>
-                          <div className="fid-btn" style={{backgroundColor: '#355', color: '#cdd'}}>fid: {user.fid}</div>
-                        </a>
-                      </div>
-                    </div>
-                    <div className="">
-                      <div style={{wordWrap: 'break-word', maxWidth: textMax, color: '#cdd'}}>{user.profile.bio.text}</div>
-                    </div>
-                    <div className="flex-row" style={{width: '100%', justifyContent: 'space-evenly'}}>
-                    <div className="" style={{flex: 1}}>
-                        <div className="flex-row" style={{padding: '0 0 0 5px', fontSize: '12px', color: '#cdd', gap: '0.25rem', alignItems: 'center', cursor: 'default'}}>
-                          <div style={{fontWeight: '700', fontSize: '13px'}} title={user.following_count}>{formatNum(user.following_count)}</div>
-                          <div style={{fontWeight: '400'}}>following</div>
-                        </div>
-                      </div>
-                      <div className="flex-row" style={{flex: 2}}>
-                        <div className="flex-row" style={{padding: '0 0 0 5px', fontSize: '12px', color: '#cdd', gap: '0.25rem', alignItems: 'center', cursor: 'default'}}>
-                          <div style={{fontWeight: '700', fontSize: '13px'}} title={user.follower_count}>{formatNum(user.follower_count)}</div>
-                          <div style={{fontWeight: '400'}}>followed</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className='flex-col' style={{gap: '0.5rem', alignItems: 'center'}}>
-          
-          {store.isAuth ? (<div className='mini-out-btn' style={{height: 'max-content', textAlign: 'center', width: '30px', padding: '6px', alignItems: 'center', justifyContent: 'center'}} onClick={account.LogoutPopup}>
-            {/* Log out */}
-            <FaPowerOff size={20} color='#fff' />
-            </div>) : (<div className='logout-btn' style={{height: 'max-content', textAlign: 'center'}} onClick={account.LoginPopup}>Login</div>)}
-
-          <div className='follow-select' style={{width: 'auto', padding: '5px 5px 8px 5px', textAlign: 'center'}} onClick={() => getCurationAllowance(user.fid)}>
-            <HiRefresh size={22} color='#fff' />
-          </div>
-        </div>
-        
-        </div>
-        <div className='flex-row' style={{justifyContent: 'center', gap: '0.5rem'}}>
-          {/* <DashboardBtn amount={formatNum(userTips)} type={'received'} icon={Degen} /> */}
-          <DashboardBtn amount={formatNum(userAllowance)} type={'allowance'} icon={Degen} />
-          <DashboardBtn amount={formatNum(userRemainingImpact)} type={'impact'} icon={FaRegStar} />
-          <DashboardBtn amount={formatNum(userRemainingQuality)} type={'q/dau'} icon={Diamond} />
-        </div>
-    </div>)
-  }
-
   const searchOption = (e) => {
     setSearchSelect(e.target.getAttribute('name'))
-  }
-
-  const SearchOptionButton = (props) => {
-    const btn = props.buttonName
-    let isSearchable = true
-    let comingSoon = false
-    if ((props.buttonName == 'Casts' && !store.isAuth) || (props.buttonName == 'Casts + Replies' && !store.isAuth)) {
-      isSearchable = false
-    }
-    // if (props.buttonName == 'Channels' || props.buttonName == 'Media' || props.buttonName == 'Proposals') {
-    //   comingSoon = true
-    // }
-
-    return isSearchable ? (<>{comingSoon ? (<div className='flex-row' style={{position: 'relative'}}><div className={(searchSelect == btn) ? 'active-nav-link btn-hvr lock-btn-hvr' : 'nav-link btn-hvr lock-btn-hvr'} onClick={searchOption} name={btn} style={{fontWeight: '600', padding: '5px 14px', borderRadius: '14px', fontSize: isMobile ? '12px' : '15px'}}>{btn}</div>
-      <div className='top-layer' style={{position: 'absolute', top: 0, right: 0, transform: 'translate(20%, -50%)' }}>
-        <div className='soon-btn'>SOON</div>
-      </div>
-    </div>) : (
-      <div className={(searchSelect == btn) ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'} onClick={searchOption} name={btn} style={{fontWeight: '600', padding: '5px 14px', borderRadius: '14px', fontSize: isMobile ? '12px' : '15px'}}>{btn}</div>)}</>
-    ) : (
-      <div className='flex-row' style={{position: 'relative'}}>
-        <div className='lock-btn-hvr' name={btn} style={{color: '#bbb', fontWeight: '600', padding: '5px 14px', borderRadius: '14px', cursor: 'pointer', fontSize: isMobile ? '12px' : '15px'}} onClick={account.LoginPopup}>{btn}</div>
-        <div className='top-layer' style={{position: 'absolute', top: 0, right: 0, transform: 'translate(-20%, -50%)' }}>
-          <FaLock size={8} color='#999' />
-        </div>
-      </div>
-    )
   }
 
   const updateCast = (index, newData) => {
@@ -799,49 +675,21 @@ export default function ProfilePage() {
     <div className='flex-col' style={{width: 'auto', position: 'relative'}} ref={ref}>
       <div className="" style={{padding: '58px 0 0 0'}}>
       </div>
-      { (store.isAuth && user) && <UserData/> }
+      <UserData {...{ show: (isLogged && user), user, textMax, userAllowance, getCurationAllowance }} />
       <div className="top-layer flex-row" style={{padding: '10px 0 10px 0', alignItems: 'center', justifyContent: 'space-evenly', margin: '0', borderBottom: '1px solid #888'}}>
-        { userButtons.map((btn, index) => (
-          <SearchOptionButton buttonName={btn} key={index} /> ))}
+        {userButtons.map((btn, index) => (
+          <FeedMenu {...{buttonName: btn, searchSelect, searchOption, isMobile }} key={index} />))}
       </div>
-
 
       {searchSelect == 'Curation' && (
 
       <div className='flex-row' style={{justifyContent: 'space-between', marginTop: '15px', marginBottom: '30px'}}>
         <div className='flex-row' style={{gap: '0.5rem'}}>
-          <div className="flex-row" style={{border: '1px solid #abc', padding: '2px 6px 2px 6px', borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'center', marginLeft: '4px'}} onClick={() => {handleSelection('picks')}}>
-            <div className="flex-row" style={{alignItems: 'center', gap: '0.3rem'}}>
-              <span className="channel-font" style={{color: '#eee'}}>Top Picks</span>
-            </div>
-          </div>
-
-          <div className={`flex-row ${userQuery['shuffle'] ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{border: '1px solid #abc', padding: '2px 6px 2px 6px', borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'flex-start'}} onClick={() => {handleSelect('shuffle')}}>
-            <div className={`flex-row`} style={{alignItems: 'center', gap: '0.3rem'}}>
-              <Shuffle size={22} />
-            </div>
-          </div>
+          <TopPicks handleSelection={handleSelection} selection={'picks'} />
+          <Shuffle handleSelect={handleSelect} selection={'shuffle'} userQuery={userQuery} />
         </div>
 
-        <div style={{position: 'relative'}}>
-          <div className={`flex-row ${!isMobile ? 'active-nav-link btn-hvr' : ''}`} style={{border: '1px solid #abc', padding: `2px 6px 2px 6px`, borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'center', borderBottom: (isSelected == 'time') ? '2px solid #99ddff' : '1px solid #abc', height: '28px'}} onMouseEnter={() => {handleSelection('time')}} onMouseLeave={() => {handleSelection('none')}}>
-            <div className="flex-row" style={{alignItems: 'center', gap: isMobile ? '0' : '0.3rem', selection: 'none'}}>
-              <BsClock size={15} color='#eee' />
-              <span className={`${!isMobile ? 'selection-btn' : ''}`} style={{cursor: 'pointer', padding: '0'}}>{!isMobile && btnText('time')}</span>
-            </div>
-          </div>
-          {(isSelected == 'time') && (
-            <div className='top-layer' style={{position: 'absolute'}} onMouseEnter={() => {handleSelection('time')}} onMouseLeave={() => {handleSelection('none')}}>
-              <div className='flex-col' style={{gap: '0.25rem', padding: '6px 6px', borderRadius: '10px', backgroundColor: '#1D3244dd', border: '1px solid #abc', width: 'auto', marginTop: '10px', alignItems: 'flex-start'}}>
-                <div className={`selection-btn ${userQuery['time'] == '24hr' ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}} onClick={() => {handleSelect('time', '24hr')}}>{'24 hours'}</div>
-                <span className={`selection-btn ${userQuery['time'] == '3days' ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}} onClick={() => {handleSelect('time', '3days')}}>{'3 days'}</span>
-                <span className={`selection-btn ${userQuery['time'] == '7days' ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}} onClick={() => {handleSelect('time', '7days')}}>{'7 days'}</span>
-                <span className={`selection-btn ${userQuery['time'] == '30days' ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}} onClick={() => {handleSelect('time', '30days')}}>{'30 days'}</span>
-                <span className={`selection-btn ${userQuery['time'] == 'all' ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}} onClick={() => {handleSelect('time', 'all')}}>{'All'}</span>
-              </div>
-            </div>
-          )}
-        </div>
+        <Time handleSelection={handleSelection} handleSelect={handleSelect} userQuery={userQuery} options={queryOptions.time} selection={'time'} isSelected={isSelected} isMobile={isMobile} btnText={btnText} />
 
         <div style={{position: 'relative'}}>
           <div className={`flex-row ${!isMobile ? 'active-nav-link btn-hvr' : ''}`} style={{border: '1px solid #abc', padding: `2px 6px 2px 6px`, borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'center', borderBottom: (isSelected == 'tags') ? '2px solid #99ddff' : '1px solid #abc', height: '28px'}} onMouseEnter={() => {handleSelection('tags')}} onMouseLeave={() => {handleSelection('none')}}>
@@ -852,12 +700,9 @@ export default function ProfilePage() {
           </div>
           {(isSelected == 'tags') && (
             <div className=' top-layer' style={{position: 'absolute', right: '0'}} onMouseEnter={() => {handleSelection('tags')}} onMouseLeave={() => {handleSelection('none')}}>
-              <div className='flex-col' style={{gap: '0.25rem', padding: '6px 6px', borderRadius: '10px', backgroundColor: '#1D3244dd', border: '1px solid #abc', width: 'auto', marginTop: '10px', alignItems: 'flex-start'}}>
-                <div className={`selection-btn ${(userQuery['tags'] == 'all' || userQuery['tags'].length == 0) ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}} onClick={() => {handleSelect('tags', 'all')}}>{'All tags'}</div>
-                <span className={`selection-btn ${userQuery['tags'].includes('art') ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}} onClick={() => {handleSelect('tags', 'art')}}>{'Art'}</span>
-                <span className={`selection-btn ${userQuery['tags'].includes('dev') ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}} onClick={() => {handleSelect('tags', 'dev')}}>{'Dev'}</span>
-                <span className={`selection-btn ${userQuery['tags'].includes('vibes') ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}} onClick={() => {handleSelect('tags', 'vibes')}}>{'Vibes'}</span>
-              </div>
+
+              <TagsDropdown handleSelect={handleSelect} userQuery={userQuery} options={queryOptions.tags} selection={'tags'} />
+
             </div>
           )}
         </div>
@@ -869,50 +714,47 @@ export default function ProfilePage() {
               <span className={`${!isMobile ? 'selection-btn' : ''}`} style={{cursor: 'pointer', padding: '0', color: userQuery['channels'].length == 0 ? '#aaa' : ''}}>{isMobile ? '' : userQuery['channels'].length == 0 ? 'All channels' : 'Channels'}</span>
             </div>
           </div>
-
         </div>
 
-
-
         {(isSelected == 'channels') && (
-            <div className='' style={{position: 'absolute', width: '100%', margin: 'auto', marginTop: '28px'}} onMouseEnter={() => {handleSelection('channels')}} onMouseLeave={() => {handleSelection('none')}}>
-              <div className='top-layer flex-col' style={{gap: '0.25rem', padding: '6px 6px', borderRadius: '10px', backgroundColor: '#1D3244dd', border: '1px solid #abc', width: 'auto', marginTop: '10px', alignItems: 'flex-start'}}>
-                <div className={`selection-btn ${(userQuery['channels'] == 'all' || userQuery['channels'].length == 0) ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}}>
-                  <input onChange={onChannelChange} 
-                    name='search' 
-                    placeholder={`Search channels`} 
-                    value={userSearch.search} 
-                      className='srch-btn' 
-                    style={{width: '100%', backgroundColor: '#234'}} 
-                    onKeyDown={channelKeyDown} />
-                </div>
-                <div className='flex-row top-layer' style={{gap: '0.5rem', padding: '0px 6px', flexWrap: 'wrap'}}>
-                  {channels && (
-                    channels.map((channel, index) => (
-                      <div key={index} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addChannel(channel)}}>
-                        <img loading="lazy" src={channel.image_url} className="" alt={channel.name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
-                        <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>{channel.name}</div>
-                        <div style={{fontWeight: '400', fontSize: '10px', color: '#ccc'}}>{formatNum(channel.follower_count)}</div>
-                      </div>
-                    )
-                  ))}
-                </div>
+          <div className='' style={{position: 'absolute', width: '100%', margin: 'auto', marginTop: '28px'}} onMouseEnter={() => {handleSelection('channels')}} onMouseLeave={() => {handleSelection('none')}}>
+            <div className='top-layer flex-col' style={{gap: '0.25rem', padding: '6px 6px', borderRadius: '10px', backgroundColor: '#1D3244dd', border: '1px solid #abc', width: 'auto', marginTop: '10px', alignItems: 'flex-start'}}>
+              <div className={`selection-btn ${(userQuery['channels'] == 'all' || userQuery['channels'].length == 0) ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}}>
+                <input onChange={onChannelChange} 
+                  name='search' 
+                  placeholder={`Search channels`} 
+                  value={userSearch.search} 
+                  className='srch-btn' 
+                  style={{width: '100%', backgroundColor: '#234'}} 
+                  onKeyDown={channelKeyDown} />
+              </div>
+              <div className='flex-row top-layer' style={{gap: '0.5rem', padding: '0px 6px', flexWrap: 'wrap'}}>
+                {channels && (
+                  channels.map((channel, index) => (
+                    <div key={index} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addChannel(channel)}}>
+                      <img loading="lazy" src={channel.image_url} className="" alt={channel.name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
+                      <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>{channel.name}</div>
+                      <div style={{fontWeight: '400', fontSize: '10px', color: '#ccc'}}>{formatNum(channel.follower_count)}</div>
+                    </div>
+                  )
+                ))}
+              </div>
 
-                {(selectedChannels && selectedChannels.length > 0) && (<div className='flex-row' style={{gap: '0.5rem', padding: '10px 6px 6px 6px', flexWrap: 'wrap', borderTop: '1px solid #888', width: '100%', alignItems: 'center'}}>
-                  <div style={{color: '#ddd', fontWeight: '600', fontSize: '13px', padding: '0 0 3px 6px'}}>Selected:</div>
-                  {(
-                    selectedChannels.map((channel, index) => (
-                      <div key={index} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addChannel(channel)}}>
-                        <img loading="lazy" src={channel.image_url} className="" alt={channel.name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
-                        <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>{channel.name}</div>
-                      </div>
-                    )
-                  ))}
-                </div>)}
+              {(selectedChannels && selectedChannels.length > 0) && (<div className='flex-row' style={{gap: '0.5rem', padding: '10px 6px 6px 6px', flexWrap: 'wrap', borderTop: '1px solid #888', width: '100%', alignItems: 'center'}}>
+                <div style={{color: '#ddd', fontWeight: '600', fontSize: '13px', padding: '0 0 3px 6px'}}>Selected:</div>
+                {(
+                  selectedChannels.map((channel, index) => (
+                    <div key={index} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addChannel(channel)}}>
+                      <img loading="lazy" src={channel.image_url} className="" alt={channel.name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
+                      <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>{channel.name}</div>
+                    </div>
+                  )
+                ))}
+              </div>)}
               </div>
             </div>
           )}
-      </div>
+        </div>
       )}
 
       <div style={{margin: '0 0 70px 0'}}>
@@ -920,11 +762,9 @@ export default function ProfilePage() {
         <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
           <Spinner size={31} color={'#999'} />
         </div>
-        ) : (userFeed.map((cast, index) => (<Cast cast={cast} key={index} index={index} updateCast={updateCast} openImagePopup={openImagePopup} />)))}
+        ) : (userFeed.map((cast, index) => (<Cast cast={cast} key={index} index={index} updateCast={updateCast} openImagePopup={openImagePopup} ecosystem={eco.ecosystem_points_name} />)))}
       </div>
-      <div>
-        {showPopup.open && (<ExpandImg embed={{showPopup}} />)}
-      </div>
+      <ExpandImg  {...{show: showPopup.open, closeImagePopup, embed: {showPopup}, screenWidth, screenHeight }} />
     </div>
   );
 }

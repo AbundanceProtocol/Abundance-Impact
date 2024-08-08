@@ -332,7 +332,7 @@ export default function Search() {
     router.push(`/${username}`)
   }
 
-  const SearchOptionButton = (props) => {
+  const FeedMenu = (props) => {
     const btn = props.buttonName
     let isSearchable = true
     let comingSoon = false
@@ -366,7 +366,7 @@ export default function Search() {
     <div style={{padding: '12px 20px', backgroundColor: '#66666611', borderRadius: '10px', border: '1px solid #888', marginBottom: '16px', width: feedMax}}>
       <div className="top-layer flex-row" style={{padding: '10px 0 10px 0', alignItems: 'center', justifyContent: 'space-between', margin: '0', borderBottom: '1px solid #888'}}>
         { searchButtons.map((btn, index) => (
-          <SearchOptionButton buttonName={btn} key={index} /> ))}
+          <FeedMenu buttonName={btn} key={index} /> ))}
       </div>
       <div>
         <div className="flex-row" style={{padding: '10px 0 0 0'}}>

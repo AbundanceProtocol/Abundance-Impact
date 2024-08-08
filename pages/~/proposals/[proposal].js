@@ -10,7 +10,7 @@ import { IoMdArrowDropdown as Dropdown } from "react-icons/io";
 import { BsPatchCheckFill as Verified } from "react-icons/bs";
 import { MdError as Rejected } from "react-icons/md";
 import { shortenAddress, timePassed, formatNum } from '../../../utils/utils';
-import Spinner from '../../../components/Spinner'
+import Spinner from '../../../components/Common/Spinner';
 
 export default function ProposalPage() {
   const router = useRouter();

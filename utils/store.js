@@ -41,6 +41,7 @@ const useStore = create(persist((set, get) => {
         userRemainingQuality: null,
         userRemainingTips: [],
         userUpdateTime: null,
+        points: null,
 
         userTipPercent: 50,
 
@@ -72,6 +73,7 @@ const useStore = create(persist((set, get) => {
     
             userData: null,
             castData: null,
+            ecosystemData: null,
             proposalData: null,
     
             userTipsReceived: [],
@@ -107,6 +109,7 @@ const useStore = create(persist((set, get) => {
 
         setUserData: (userData) => set({ userData: userData }),
         setCastData: (castData) => set({ castData: castData }),
+        setEcosystemData: (ecosystemData) => set({ ecosystemData: ecosystemData }),
         setProposalData: (proposalData) => set({ proposalData: proposalData }),
 
         setUserTipsReceived: (userTipsReceived) => set({ userTipsReceived }),
@@ -116,6 +119,7 @@ const useStore = create(persist((set, get) => {
         setUserRemainingQuality: (userRemainingQuality) => set({ userRemainingQuality }),
         setUserRemainingTips: (userRemainingTips) => set({ userRemainingTips }),
         setUserUpdateTime: (userUpdateTime) => set({ userUpdateTime }),
+        setPoints: (points) => set({ points }),
 
         setUserTipPercent: (userTipPercent) => set({ userTipPercent }),
 
@@ -143,6 +147,7 @@ const useStore = create(persist((set, get) => {
         userEthVerAddresses: state.userEthVerAddresses,
         userSolVerAddresses: state.userSolVerAddresses,
         userProfile: state.userProfile,
+        points: store.points,
         }),
         onRehydrate: (state) => {
           // This callback is called when the store is rehydrated

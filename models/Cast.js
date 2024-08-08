@@ -8,6 +8,7 @@ const castSchema = new mongoose.Schema({
   author_username: String,
   author_display_name: String,
   author: {type: Schema.Types.ObjectId, ref: 'User'},
+  points: String,
   cast_hash: String,
   cast_text: String,
   cast_channel: String,

@@ -5,6 +5,7 @@ import Cast from '../../../models/Cast';
 import Impact from '../../../models/Impact';
 import User from '../../../models/User';
 import Tip from '../../../models/Tip';
+import EcosystemRules from '../../../models/EcosystemRules';
 import { getTimeRange, processTips, populateCast } from '../../../utils/utils';
 
 const secretKey = process.env.SECRET_KEY
@@ -23,7 +24,7 @@ export default async function handler(req, res) {
       try {
         await connectToDatabase();
 
-        const schedule = await ScheduleTip.findOne({ code: code }).exec();
+        const schedule = await ScheduleTip.findOne({ code: code }).select('search_shuffle search_time search_tags points search_channels search_curators percent_tip ecosystem_name currencies uuid').exec();
         console.log(schedule)
         if (schedule) {
           const decryptedUuid = decryptPassword(schedule.uuid, secretKey);
@@ -31,9 +32,11 @@ export default async function handler(req, res) {
             shuffle: schedule.search_shuffle,
             timeRange: schedule.search_time,
             tags: schedule.search_tags,
+            points: schedule.points,
             channels: schedule.search_channels,
             curators: schedule.search_curators,
             percent: schedule.percent_tip,
+            ecosystem: schedule.ecosystem_name,
             currencies: schedule.currencies,
             decryptedUuid: decryptedUuid
           }
@@ -42,9 +45,11 @@ export default async function handler(req, res) {
             shuffle: null,
             timeRange: null,
             tags: null,
+            points: null, 
             channels: null,
             curators: null,
             percent: null,
+            ecosystem: null,
             currencies: null,
             decryptedUuid: null
           }
@@ -55,21 +60,45 @@ export default async function handler(req, res) {
           shuffle: null,
           timeRange: null,
           tags: null,
+          points: null, 
           channels: null,
           curators: null,
           percent: null,
+          ecosystem: null,
           currencies: null,
           decryptedUuid: null
         }
       }
     }
-
-    const { shuffle, timeRange, tags, channels, curators, percent, currencies, decryptedUuid } = await getSchedule(code)
-    console.log('47', shuffle, timeRange, tags, channels, curators, percent, currencies)
-
+    
+    const { shuffle, timeRange, tags, points, channels, curators, percent, ecosystem, currencies, decryptedUuid } = await getSchedule(code)
+    
+    console.log('47', shuffle, timeRange, tags, points, channels, curators, percent, ecosystem, currencies)
+    
     if (!percent || !decryptedUuid) {
       res.status(500).json({ error: 'Internal Server Error' });
     } else {
+      
+      async function getCuratorPercent(points) {
+        try {
+          await connectToDatabase();
+  
+          const curatorPercentData = await EcosystemRules.findOne({ ecosystem_points_name: points }).select('percent_tipped').exec();
+          console.log(curatorPercentData)
+          if (curatorPercentData) {
+            return {
+              curatorPercent: curatorPercentData.percent_tipped }
+          } else {
+            return { curatorPercent: 10 }
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          return { curatorPercent: 10 }
+        }
+      }
+  
+      const curatorPercent = await getCuratorPercent(points)
+      console.log(curatorPercent)
 
       let time = null
       if (timeRange) {
@@ -80,6 +109,8 @@ export default async function handler(req, res) {
         try {
           const remainingBase = "https://www.degentip.me/";
           const remainingUrl = `${remainingBase}api/get_allowance?fid=${fid}`;
+          // const remainingBase = "https://www.degen.tips/";
+          // const remainingUrl = `${remainingBase}api/airdrop2/tip-allowance?fid=${fid}`;
           const remainingBalance = await fetch(remainingUrl, {
             headers: {
               accept: "application/json",
@@ -89,7 +120,13 @@ export default async function handler(req, res) {
           let remaining = 0
     
           if (getRemaining) {
-            remaining = getRemaining.allowance.remaining_allowance
+            remaining = getRemaining?.allowance?.remaining_allowance
+            total = getRemaining?.allowance?.tip_allowance
+            // remaining = parseInt(getRemaining[0]?.remaining_allowance)
+            // total = parseInt(getRemaining[0]?.tip_allowance)
+          }
+          if (!remaining && remaining !== 0) {
+            remaining = total
           }
           return remaining
         } catch (error) {
@@ -108,17 +145,51 @@ export default async function handler(req, res) {
           });
           const getRemaining = await remainingBalance.json()
           let remaining = 0
-          let total = 0
     
           if (getRemaining) {
             console.log(getRemaining)
             remaining = Number(getRemaining.allowance) - Number(getRemaining.used)
-            total = Number(getRemaining.allowance)
           }
           return remaining
         } catch (error) {
           console.error('Error handling GET request:', error);
           return 0
+        }
+      }
+
+      async function getFartherAllowance(fid) {
+        try {
+          const input = encodeURIComponent(JSON.stringify({ fid: fid }))
+          const remainingUrl = `https://farther.social/api/v1/public.user.byFid?input=${input}`;
+          const fartherData = await fetch(remainingUrl, {
+            headers: {
+              accept: "application/json",
+            },
+          });
+          let allowance = 0
+          let remainingAllowance = 0
+          let tipMin = 0
+          if (fartherData?.status == 200) {
+            const fartherInfo = await fartherData.json()
+            allowance = fartherInfo?.result?.data?.tips?.currentCycle?.allowance
+            tipMin = fartherInfo?.result?.data?.tips?.currentCycle?.tipMinimum
+            remainingAllowance = fartherInfo?.result?.data?.tips?.currentCycle?.remainingAllowance
+            if (!remainingAllowance) {
+              remainingAllowance = allowance
+            }
+          }
+          let remaining = 0
+          let minTip = 1
+          if (remainingAllowance) {
+            remaining = Number(remainingAllowance)
+          }
+          if (tipMin) {
+            minTip = Number(tipMin)
+          }
+          return { allowance: remaining, minTip }
+        } catch (error) {
+          console.error('Error handling GET request:', error);
+          return { allowance: 0, minTip: 1 }
         }
       }
 
@@ -134,6 +205,11 @@ export default async function handler(req, res) {
           const tip = Math.round(allowance * percent / 100)
           const allowanceData = {token: coin, set: true, allowance: tip, totalTip: tip}
           allowances.push(allowanceData)
+        } else if (coin == '$FARTHER') {
+          const {allowance, minTip} = await getFartherAllowance(fid)
+          const tip = Math.round(allowance * percent / 100)
+          const allowanceData = {token: coin, set: true, allowance: tip, totalTip: tip, min: minTip}
+          allowances.push(allowanceData)
         }
       }
 
@@ -143,10 +219,10 @@ export default async function handler(req, res) {
         res.status(500).json({ error: 'Internal Server Error' });
       } else {
 
-        async function getUserSearch(time, tags, channel, curator, shuffle) {
+        async function getUserSearch(time, tags, channel, curator, shuffle, points) {
       
           const page = 1;
-          const limit = 5;
+          const limit = 10;
           const skip = (page - 1) * limit;
       
           let query = {};
@@ -154,7 +230,7 @@ export default async function handler(req, res) {
           async function getCuratorIds(fids) {
             try {
               await connectToDatabase();
-              const impacts = await Impact.find({ curator_fid: { $in: fids } });
+              const impacts = await Impact.find({ curator_fid: { $in: fids }, points }).select('_id');
               const impactIds = impacts.map(impact => impact._id);
               return impactIds
             } catch (error) {
@@ -165,6 +241,10 @@ export default async function handler(req, res) {
             
           if (time) {
             query.createdAt = { $gte: time } ;
+          }
+
+          if (points) {
+            query.points = points
           }
           
           if (curator && curator.length > 0) {
@@ -282,7 +362,7 @@ export default async function handler(req, res) {
           return { casts, totalCount }
         }  
       
-        const { casts, totalCount } = await getUserSearch(time, tags, channels, curators, shuffle)
+        const { casts, totalCount } = await getUserSearch(time, tags, channels, curators, shuffle, points)
       
         console.log(casts)
         // console.log(casts[0].impact_points)
@@ -299,7 +379,7 @@ export default async function handler(req, res) {
 
         let displayedCasts = await populateCast(sortedCasts)
 
-        const { castData, coinTotals } = await processTips(displayedCasts, fid, allowances)
+        const { castData, coinTotals } = await processTips(displayedCasts, fid, allowances, ecosystem, curatorPercent)
 
         async function sendRequests(data, signer, apiKey) {
           const base = "https://api.neynar.com/";
@@ -350,6 +430,7 @@ export default async function handler(req, res) {
               await Tip.create({
                 receiver_fid: cast.fid,
                 tipper_fid: fid,
+                points: points, 
                 cast_hash: cast.castHash,
                 tip: tips,
               });

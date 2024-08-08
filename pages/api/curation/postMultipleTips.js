@@ -3,8 +3,8 @@ import Tip from '../../../models/Tip';
 
 export default async function handler(req, res) {
   const apiKey = process.env.NEYNAR_API_KEY;
-  const { signer, fid, data } = req.body;
-  if (req.method !== 'POST' || !signer || !fid || !data || !Array.isArray(data)) {
+  const { signer, fid, data, points } = req.body;
+  if (req.method !== 'POST' || !signer || !fid || !data || !points || !Array.isArray(data)) {
     return res.status(405).json({ error: 'Method Not Allowed' });
   } else {
 
@@ -57,6 +57,7 @@ export default async function handler(req, res) {
           await Tip.create({
             receiver_fid: cast.fid,
             tipper_fid: fid,
+            points: points,
             cast_hash: cast.castHash,
             tip: tips,
           });

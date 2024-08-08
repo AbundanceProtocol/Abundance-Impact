@@ -1,19 +1,26 @@
 import axios from 'axios';
 import CryptoJS from 'crypto-js';
+import { ethers } from 'ethers';
+import Moralis from 'moralis';
+const apiKey = process.env.MORALIS_API_KEY
 
 // shorten a hash address
 export function shortenAddress(input, long) {
-  let address = input
-  let shortenedAddress = ''
-  if (long) {
-    const parts = input.split(':');
-    address = parts[2].substring(2);
-  } 
-  if (address.length <= 8) {
-    return address
+  if (!input) {
+    return ''
   } else {
-    shortenedAddress = `${address.substring(0, 4)}...${address.substring(address.length - 4)}`;
-    return shortenedAddress;
+    let address = input
+    let shortenedAddress = ''
+    if (long) {
+      const parts = input.split(':');
+      address = parts[2].substring(2);
+    } 
+    if (address && address.length <= 8) {
+      return address
+    } else {
+      shortenedAddress = `${address.substring(0, 4)}...${address.substring(address.length - 4)}`;
+      return shortenedAddress;
+    }
   }
 
   // } else {
@@ -128,7 +135,9 @@ export function isYesterday(previous, current) {
 export function getTimeRange(time) {
 
   let timeRange = null
-  if (time === '24hr') {
+  if (time == '1hr') {
+    timeRange = new Date(Date.now() - 1 * 60 * 60 * 1000);
+  } else if (time === '24hr') {
     timeRange = new Date(Date.now() - 24 * 60 * 60 * 1000);
   } else if (time === '3days') {
     timeRange = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
@@ -172,27 +181,36 @@ async function isImage(url) {
 }
 
 async function getEmbeds(url) {
-  // console.log(url)
-  try {
-    const embedType = await axios.get('/api/getEmbeds', {
-      params: { url }
-    })
-    // console.log(embedType)
-    // console.log(embedType.data)
-    if (embedType && embedType.data) {
-      return embedType.data.embed
-    } else {
+  if (typeof url == 'undefined') {
+    return 'other'
+  } else {
+    try {
+      const embedType = await axios.get('/api/getEmbeds', {
+        params: { url }
+      })
+      if (embedType?.data) {
+        return embedType?.data?.embed
+      } else {
+        return 'other'
+      }
+    } catch (error) {
+      console.error('Error handling GET request:', error);
       return 'other'
     }
-  } catch (error) {
-    console.error('Error handling GET request:', error);
-    return 'other'
   }
 }
 
+export const isCast = (cast) => {
+  if (cast) {
+    const { embeds } = cast
+    return { embeds }
+  } else {
+    return { embeds: [] }
+  }
+}
 
 export async function checkEmbedType(cast) {
-  const { embeds } = cast;
+  const { embeds } = isCast(cast);
 
   if (embeds && embeds.length > 0) {
     const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
@@ -291,7 +309,16 @@ export function filterObjects(castArray, filterFid) {
 }
 
 
-export async function processTips(userFeed, userFid, tokenData) {
+export async function processTips(userFeed, userFid, tokenData, ecosystem, curatorPercent) {
+  // console.log('313', userFeed, userFid, tokenData, ecosystem, curatorPercent)
+  let curatorTip = 10
+  if (curatorPercent) {
+    curatorTip = curatorPercent
+  }
+  let ecosystemName = ''
+  if (ecosystem) {
+    ecosystemName = ecosystem + ' Ecosystem on '
+  }
 
   if (!userFeed || !userFid || !tokenData) {
 
@@ -316,7 +343,7 @@ export async function processTips(userFeed, userFid, tokenData) {
     for (const cast of casts) {
       let tipRatio = 1
       if (cast.impact_points && cast.impact_points.length > 0) {
-        tipRatio = 0.92
+        tipRatio = (100 - curatorTip) / 100
       }
       let castImpact = cast.impact_balance - cast.quality_balance
       let tipWeight = tipRatio * castImpact / totalImpact
@@ -333,7 +360,7 @@ export async function processTips(userFeed, userFid, tokenData) {
     for (const cast of casts) {
       if (cast.impact_points && cast.impact_points.length > 0) {
         for (const subCast of cast.impact_points) {
-          let subTipWeight = 0.08 * subCast.impact_points / totalImpact
+          let subTipWeight = (curatorTip / 100) * subCast.impact_points / totalImpact
           let subCastSchema = {
             castWeight: subTipWeight,
             castHash: subCast.target_cast_hash,
@@ -361,6 +388,8 @@ export async function processTips(userFeed, userFid, tokenData) {
           let tip = 0
           if (coin.token == '$TN100x') {
             tip = Math.floor(tipCast.castWeight * coin.totalTip / 10)
+          } else if (coin.token == '$FARTHER') {
+            tip = Math.floor(tipCast.castWeight * coin.totalTip / coin.min) * coin.min
           } else {
             tip = Math.floor(tipCast.castWeight * coin.totalTip)
           }
@@ -388,21 +417,35 @@ export async function processTips(userFeed, userFid, tokenData) {
     // console.log(coinTotals)
   
     for (const tipCast of tipCasts) {
-      if (tipCast.allCoins && tipCast.allCoins.length > 0) {
+      if (tipCast?.allCoins?.length > 0) {
         for (const coin of tipCast.allCoins) {
           coinTotals[coin.coin].usedTip += coin.tip
         }
       }
     }
   
+    let count = 0
+    for (const cast of tipCasts) {
+      for (const coin of cast.allCoins) {
+        if (coin.coin == '$FARTHER' && coin.tip > 0) {
+          count++
+        }
+      }
+    }
+    // console.log('count', count)
+
     for (const coin of tokenData) {
       if (coin.set) {
         coinTotals[coin.token].remaining = coinTotals[coin.token].totalTip - coinTotals[coin.token].usedTip
-  
+        // console.log('tipCasts', tipCasts)
         if (tipCasts.length > 0) {
-          coinTotals[coin.token].mod = coinTotals[coin.token].remaining % tipCasts.length
-  
-          coinTotals[coin.token].div = Math.floor(coinTotals[coin.token].remaining / tipCasts.length)
+          if (coin.token !== '$FARTHER') {
+            coinTotals[coin.token].mod = coinTotals[coin.token].remaining % tipCasts.length
+            coinTotals[coin.token].div = Math.floor(coinTotals[coin.token].remaining / tipCasts.length)
+          } else if (coin.token == '$FARTHER' && count > 0) {
+            coinTotals[coin.token].mod = coinTotals[coin.token].remaining % count
+            coinTotals[coin.token].div = Math.floor(coinTotals[coin.token].remaining / count)
+          }
         }
       }
     }
@@ -411,7 +454,11 @@ export async function processTips(userFeed, userFid, tokenData) {
       if (cast.allCoins && cast.allCoins.length > 0) {
         for (const coin of cast.allCoins) {
           if (coinTotals[coin.coin].div > 0) {
-            coin.tip += coinTotals[coin.coin].div
+            if (coin.coin !== '$FARTHER') {
+              coin.tip += coinTotals[coin.coin].div
+            } else if (coin.coin == '$FARTHER' && coin.tip > 0) {
+              coin.tip += coinTotals[coin.coin].div
+            }
           }
         }
       }
@@ -437,7 +484,7 @@ export async function processTips(userFeed, userFid, tokenData) {
       }
     }
   
-    // console.log(tipCasts)
+    // console.log('tipCasts', tipCasts)
   
     for (const cast of tipCasts) {
       if (cast.allCoins && cast.allCoins.length > 0) {
@@ -452,12 +499,12 @@ export async function processTips(userFeed, userFid, tokenData) {
           }
         }
         if (cast.text.length > 0) {
-          cast.text += 'tipped via /impact'
+          cast.text += `tipped via ${ecosystemName}/impact\n\n/impact lets you easily multi-tip your favorite artists & builders, schedule tips & share curations with frens`
         }
       }
     }
   
-    console.log(coinTotals)
+    // console.log('coinTotals', coinTotals)
   
     // console.log(tipCasts)
   
@@ -467,12 +514,50 @@ export async function processTips(userFeed, userFid, tokenData) {
   
     let finalTips = cleanTips.filter(cast => cast.text.length > 0)
   
-    console.log(finalTips)
+    // console.log('finalTips', finalTips)
+
+    const circle = finalTips.map(finalTip => {
+      const feedItem = userFeed.find(feedItem => feedItem.author.fid === finalTip.fid);
+      if (feedItem) {
+        return finalTip.fid
+      }
+      return null
+    }).filter(item => item !== null)
+
+    console.log('circle', circle)
   
-    return { castData: finalTips, coinTotals: coinTotals }
+    return { castData: finalTips, coinTotals: coinTotals, circle }
   }
 }
 
+
+export function numToText(number) {
+  if (number == 0) {
+    return 'zero'
+  } else if (number == 1) {
+    return 'one'
+  } else if (number == 2) {
+    return 'two'
+  } else if (number == 3) {
+    return 'three'
+  } else if (number == 4) {
+    return 'four'
+  } else if (number == 5) {
+    return 'five'
+  } else if (number == 6) {
+    return 'six'
+  } else if (number == 7) {
+    return 'seven'
+  } else if (number == 8) {
+    return 'eight'
+  } else if (number == 9) {
+    return 'nine'
+  } else if (number == 10) {
+    return 'ten'
+  } else {
+    return number
+  }
+}
 
 export function generateRandomString(length) {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -484,4 +569,99 @@ export function generateRandomString(length) {
   }
   
   return result;
+}
+
+
+export const isAlphanumeric = (str) => {
+  const regex = /^[a-zA-Z0-9]*$/;
+  return regex.test(str);
+};
+
+
+const ERC20_ABI = [
+  "function balanceOf(address owner) view returns (uint256)"
+];
+
+export const getTokenBalance = async (walletAddress, tokenAddress, provider) => {
+  try {
+    const tokenContract = new ethers.Contract(tokenAddress, ERC20_ABI, provider);
+    const balance = await tokenContract.balanceOf(walletAddress);
+    return balance;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+};
+
+
+let moralisInitialized = false;
+
+export const initializeMoralis = async () => {
+  if (!moralisInitialized) {
+    await Moralis.start({ apiKey });
+    moralisInitialized = true;
+  }
+};
+
+export const getTokenAddress = (chain, address, tokenType) => {
+  if (!chain || !address || !tokenType) {
+    return ''
+  } else {
+    let chainString = 'https://etherscan.io/'
+    if (chain == 'eip155:8453') {
+      chainString = 'https://basescan.org/'
+    } else if (chain == 'eip155:42161') {
+      chainString = 'https://arbiscan.io/'
+    } else if (chain == 'eip155:10') {
+      chainString = 'https://optimistic.etherscan.io/'
+    } else if (chain == 'eip155:1') {
+      chainString = 'https://etherscan.io/'
+    }
+    let tokenAddress = chainString + tokenType + '/' + address
+    return tokenAddress
+  }
+}
+
+
+export function getToken(address) {
+  if (address == '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2') {
+    return '1'
+  } else if (address == '0x4200000000000000000000000000000000000042') {
+    return '2'
+  } else if (address == '0x4ed4e862860bed51a9570b96d89af5e1b0efefed') {
+    return '3'
+  } else if (address == '0x5b5dee44552546ecea05edea01dcd7be7aa6144a') {
+    return '4'
+  } else if (address == '0xa6b280b42cb0b7c4a4f789ec6ccc3a7609a1bc39') {
+    return '5'
+  } else if (address == '0x7DD9c5Cba05E151C895FDe1CF355C9A1D5DA6429') {
+    return '6'
+  } else if (address == '0xba5BDe662c17e2aDFF1075610382B9B691296350') {
+    return '7'
+  } else {
+    return null
+  }
+}
+
+
+export function getChain(chain) {
+  if (chain == 'eip155:1') {
+    return '1'
+  } else if (chain == 'eip155:10') {
+    return '2'
+  } else if (chain == 'eip155:8453') {
+    return '3'
+  } else if (chain == 'eip155:42161') {
+    return '4'
+  } else if (chain == 'eip155:7777777') {
+    return '5'
+  } else if (chain == 'eip155:137') {
+    return '6'
+  } else if (chain == 'eip155:666666666') {
+    return '7'
+  } else if (chain == 'eip155:5112') {
+    return '8'
+  } else {
+    return '1'
+  }
 }

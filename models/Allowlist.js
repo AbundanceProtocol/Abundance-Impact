@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 
 const allowlistSchema = new mongoose.Schema({
   fid: Number,
+  points: String,
   createdAt: { type: Date, default: () => new Date() }
 });
 

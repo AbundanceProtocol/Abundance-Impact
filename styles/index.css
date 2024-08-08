@@ -11,7 +11,8 @@ html, body {
     margin: 0;
     height: 100%;
     padding: 0;
-    background-color: #1D3244;
+    background-color: #012;
+    /* background-color: #1D3244; */
 }
 
 ::-webkit-scrollbar-track {
@@ -23,12 +24,12 @@ html, body {
     border-radius: 5px;
 }
 
-@media only screen and (min-width: 680px) {
+@media only screen and (min-width: 690.001px) {
     ::-webkit-scrollbar {
         width: 10px;
     }
 }
-@media only screen and (max-width: 679.999px) {
+@media only screen and (max-width: 690px) {
     ::-webkit-scrollbar {
         width: 0px;
     }
@@ -42,6 +43,16 @@ html, body {
 .cast-act:hover {
     background-color: #234;
 }
+
+.cast-act-lt {
+    background-color: #8cf;
+    cursor: pointer;
+}
+
+.cast-act-lt:hover {
+    background-color: #6ad;
+}
+
 
 @media only screen and (min-width: 1380px) {
     .top-left {
@@ -123,7 +134,7 @@ html, body {
     } */
 }
 
-@media only screen and (min-width: 680px) and (max-width: 1023.999px) {
+@media only screen and (min-width: 690px) and (max-width: 1023.999px) {
     /* .cast-area {
         width: 620px;
     } */
@@ -135,7 +146,7 @@ html, body {
     }
 } */
 
-@media only screen and (min-width: 637px) and (max-width: 1023.999px) {
+@media only screen and (min-width: 690.001px) and (max-width: 1023.999px) {
     .top-logo {
         justify-content: center !important;
     }
@@ -178,7 +189,7 @@ html, body {
     } */
 }
 
-@media only screen and (max-width: 636.999px) {
+@media only screen and (max-width: 690px) {
     .top-logo {
         justify-content: center !important;
     }
@@ -297,6 +308,25 @@ html, body {
     cursor: pointer;
 }
 
+.frnt-nynr-btn {
+    background-color: #123 !important;
+    height: 48px !important;
+    width: 280px !important;
+    padding: 7px;
+    min-width: 250px !important;
+    border: 2px solid #8ad;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 18px !important;
+}
+
+.frnt-nynr-btn button {
+    min-width: 80px !important;
+    width: 250px !important;
+    height: 32px !important;
+    padding: 4px 14px !important;
+    word-wrap: break-word !important;
+}
 
 .nynr-btn {
     background-color: #345 !important;
@@ -309,7 +339,7 @@ html, body {
     cursor: pointer;
 }
 
-.nynr-btn:hover {
+.nynr-btn:hover, .frnt-nynr-btn:hover {
     background-color: #169 !important;
 }
 
@@ -505,13 +535,13 @@ html, body {
       transform: scale(1);
     }
     10% {
-      transform: scale(1.03);
+      transform: scale(1.18); fill: #4987f8;
     }
     20% {
       transform: scale(1);
     }
     30% {
-      transform: scale(1.01);
+      transform: scale(1.04); fill: #739cf5;
     }
     100% {
       transform: scale(1);
@@ -739,7 +769,7 @@ blockquote {
     flex-direction: row;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 690px) {
     .flex-dir {
         flex-direction: column;
     }
@@ -925,6 +955,21 @@ blockquote {
     border: 2px solid #38b;
     color: #fff;
     background-color: #169;
+}
+
+.frame-btn {
+    color: #def;
+    cursor: pointer;
+    margin: 0px;
+    padding: 8px;
+    border-radius: 5px;
+    background-color: #345;
+    text-align: center;
+    font-weight: 500;
+}
+
+.frame-btn:hover {
+    background-color: #456;
 }
 
 .unfollow-select {
@@ -1135,7 +1180,7 @@ blockquote {
     border-radius: 20px;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 690px) {
     .article-img {
         width: 100%;
         border-radius: 20px;
@@ -1809,6 +1854,24 @@ blockquote {
     word-wrap: break-word;
 }
 
+.btn-empty {
+    color: grey;
+    border: 1px solid grey;
+    cursor: default;
+}
+
+.btn-error {
+    color: #ff9999;
+    border: 1px solid #ff9999;
+    cursor: default;
+}
+
+.btn-set {
+    color: #00ff00;
+    border: 1px solid #00ff00;
+    cursor: default;
+}
+
 .input-toggle-button-r {
     outline: none;
     width: fit-content;
@@ -2294,6 +2357,18 @@ blockquote {
 }
 
 
+.active-nav-btn {
+    background-color: #22446688;
+    color: #ddeeff;
+    display: flex;
+    cursor: pointer;
+    justify-content: center;
+}
+
+.active-nav-btn:hover {
+    background-color: #22446644;
+    color: #eeffff;
+}
 
 
 .active-nav-link {
