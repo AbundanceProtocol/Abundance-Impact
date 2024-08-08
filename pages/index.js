@@ -121,7 +121,7 @@ export default function Home() {
 
 
 
-        <div className='flex-row' style={{color: '#ace', width: '90%', fontSize: isMobile ? '15px' : '22px', padding: '10px 10px 25px 10px', textAlign: 'center', fontWeight: '400'}}>/impact aims to accelerate Farcaster&apos;s transition from an Attention Economy to a Creation Economy</div>
+        <div className='flex-row' style={{color: '#ace', width: '95%', fontSize: isMobile ? '17px' : '22px', padding: '10px 10px 25px 10px', textAlign: 'center', fontWeight: '400'}}><p>/impact aims to accelerate Farcaster&apos;s transition from an <strong>Attention Economy</strong> to a <strong>Creation Economy</strong></p></div>
 
         <div className='flex-row' style={{color: '#8ac', width: '90%', fontSize: isMobile ? '14px' : '18px', padding: '0px 10px 5px 10px', textAlign: 'center', fontWeight: '400', justifyContent: 'center'}}>Currently building (alpha):</div>
 
@@ -167,14 +167,13 @@ export default function Home() {
       <div id="personal" style={{padding: isMobile ? '28px 0 20px 0' : '28px 0 20px 0', width: '40%'}}>
       </div>
 
-      <div style={{padding: '8px', backgroundColor: '#22446688', borderRadius: '15px', border: '1px solid #11447799'}}>
-
-        <div className='flex-row' style={{width: '100%', justifyContent: 'center', alignItems: 'center'}}>
+      <div style={{padding: '8px', backgroundColor: '#11448888', borderRadius: '15px', border: '1px solid #11447799'}}>
+        <div className='flex-row' style={{width: '100%', justifyContent: 'center', alignItems: 'center', padding: '16px 0 0 0'}}>
           <FaUser style={{fill: '#cde'}} size={24} />
           <Description {...{show: true, text: 'Personal /impact', padding: '4px 0 4px 10px', size: 'large' }} />
         </div>
 
-        <div className='flex-row' style={{color: '#7bd', width: '100%', fontSize: isMobile ? '15px' : '17px', padding: '10px 10px 15px 10px', justifyContent: 'center'}}>Nominate your favorite creators. Calibrate distribution of tips. Schedule recurring tips or tip throughout the day. Share curation with your friends and earn rewards</div>
+        <div className='flex-row' style={{color: '#9df', width: '100%', fontSize: isMobile ? '15px' : '17px', padding: '10px 10px 15px 10px', justifyContent: 'center'}}>Nominate your favorite creators. Calibrate distribution of tips. Schedule recurring tips or tip throughout the day. Share curation with your friends and earn rewards</div>
 
         <div className='flex-row' style={{padding: '0px 0 0 0', width: '100%', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center'}}>
 
@@ -287,15 +286,15 @@ export default function Home() {
       </div>
     </div>
 
-    <div id="ecosystem" style={{padding: '60px 4px 80px 4px', width: feedMax}}>
+    <div id="ecosystem" style={{padding: '120px 4px 80px 4px', width: feedMax}}>
 
-      <div style={{padding: '8px', backgroundColor: '#33557799', borderRadius: '15px', border: '1px solid #000'}}>
-        <div className='flex-row' style={{width: '100%', justifyContent: 'center', alignItems: 'center'}}>
+      <div style={{padding: '8px', backgroundColor: '#335566aa', borderRadius: '15px', border: '1px solid #000'}}>
+        <div className='flex-row' style={{width: '100%', justifyContent: 'center', alignItems: 'center', padding: '16px 0 0 0'}}>
           <FaGlobe style={{fill: '#cde'}} size={24} />
           <Description {...{show: true, text: 'Ecosystem /impact', padding: '4px 0 4px 10px', size: 'large' }} />
         </div>
 
-        <div className='flex-row' style={{color: '#7bd', width: '100%', fontSize: isMobile ? '15px' : '17px', padding: '10px 10px 15px 10px', justifyContent: 'center'}}>Let your community curate your channel/ecosystem. Ensure quality curation. Reward contributors and curators. Grow your community</div>
+        <div className='flex-row' style={{color: '#9df', width: '100%', fontSize: isMobile ? '15px' : '17px', padding: '10px 10px 15px 10px', justifyContent: 'center'}}>Let your community curate your channel/ecosystem. Ensure quality curation. Reward contributors and curators. Grow your community</div>
 
         <div className='flex-row' style={{padding: '0px 0 0 0', width: '100%', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center'}}>
 
