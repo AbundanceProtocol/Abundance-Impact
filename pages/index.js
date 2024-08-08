@@ -216,7 +216,7 @@ export default function Home() {
               <div style={{fontSize: isMobile ? '15px' : '18px', fontWeight:'500', color: '#ace'}}>Get Cast Actions:</div>
             </div>
             <div className='flex-row' style={{gap: '0.5rem', margin: '8px', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center'}}>
-              {isLogged ? (<a className="" title={`+1 $IMPACT`} href={`https://warpcast.com/~/add-cast-act-ltion?name=%2B1+%24IMPACT&icon=star&actionType=post&postUrl=https%3A%2Fimpact.abundance.id%2Fapi%2Faction%2Fimpact1%3Fpoints=IMPACT&description=Curate+Casts+with+the+Impact+App`} target="_blank" rel="noopener noreferrer">
+              {isLogged ? (<a className="" title={`+1 $IMPACT`} href={`https://warpcast.com/~/add-cast-action?name=%2B1+%24IMPACT&icon=star&actionType=post&postUrl=https%3A%2Fimpact.abundance.id%2Fapi%2Faction%2Fimpact1%3Fpoints=IMPACT&description=Curate+Casts+with+the+Impact+App`} target="_blank" rel="noopener noreferrer">
                 <div className='flex-row cast-act-lt' style={{borderRadius: '8px', padding: '8px 8px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
                   <FaRegStar size={14} />
                   <p style={{padding: '0px', fontSize: '12px', fontWeight: '500', textWrap: 'nowrap'}}>+1 $IMPACT</p>
@@ -237,7 +237,7 @@ export default function Home() {
                 </div>
               )}
 
-              {isLogged ? (<a className="" title={`+5 $IMPACT`} href={`https://warpcast.com/~/add-cast-act-ltion?name=%2B5+%24IMPACT&icon=star&actionType=post&postUrl=https%3A%2Fimpact.abundance.id%2Fapi%2Faction%2Fimpact5%3Fpoints=IMPACT&description=Curate+Casts+with+the+Impact+App`} target="_blank" rel="noopener noreferrer">
+              {isLogged ? (<a className="" title={`+5 $IMPACT`} href={`https://warpcast.com/~/add-cast-action?name=%2B5+%24IMPACT&icon=star&actionType=post&postUrl=https%3A%2Fimpact.abundance.id%2Fapi%2Faction%2Fimpact5%3Fpoints=IMPACT&description=Curate+Casts+with+the+Impact+App`} target="_blank" rel="noopener noreferrer">
                 <div className='flex-row cast-act-lt' style={{borderRadius: '8px', padding: '8px 8px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
                   <FaRegStar size={14} />
                   <p style={{padding: '0px', fontSize: '12px', fontWeight: '500', textWrap: 'nowrap'}}>+5 $IMPACT</p>
@@ -258,7 +258,7 @@ export default function Home() {
                 </div>
               )}
 
-              {isLogged ? (<a className="" title={`$$IMPACT Balance`} href={`https://warpcast.com/~/add-cast-act-ltion?name=%24IMPACT+Stats&icon=info&actionType=post&postUrl=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Faction%2Fbalance?points=IMPACT&description=Get+Cast+Balance+for+Impact+App`} target="_blank" rel="noopener noreferrer">
+              {isLogged ? (<a className="" title={`$$IMPACT Balance`} href={`https://warpcast.com/~/add-cast-action?name=%24IMPACT+Stats&icon=info&actionType=post&postUrl=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Faction%2Fbalance?points=IMPACT&description=Get+Cast+Balance+for+Impact+App`} target="_blank" rel="noopener noreferrer">
                 <div className='flex-row cast-act-lt' style={{borderRadius: '8px', padding: '8px 4px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
                   <div style={{width: '2px', fontSize: '0px'}}>&nbsp;</div>
                   <Info size={14} />
