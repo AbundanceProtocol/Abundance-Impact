@@ -109,22 +109,17 @@ export default function Home() {
     <div style={{padding: isMobile ? '58px 0 20px 0' : '58px 0 60px 0', width: feedMax}}>
     </div>
 
-    <div style={{padding: '0px 4px 0px 4px', width: feedMax}}>
+    <div style={{padding: '0px 4px 80px 4px', width: feedMax}}>
 
       <div className='flex-col' style={{width: '100%', justifyContent: 'center', alignItems: 'center'}}>
         <Logo className='rotate' height={isMobile ? '95px' : '165px'} width={isMobile ? '95px' : '165px'} style={{fill: '#9ce'}} />
         <Description {...{show: true, text: '/impact', padding: '30px 0 14px 5px', size: 'title'}} />
 
-
         <div className='flex-row' style={{color: '#ace', width: '100%', fontSize: isMobile ? '24px' : '33px', padding: '0px 10px 35px 10px', textAlign: 'center', justifyContent: 'center'}}>boost & reward creators on farcaster</div>
-
-
-
 
         <div className='flex-row' style={{color: '#ace', width: '95%', fontSize: isMobile ? '17px' : '22px', padding: '10px 10px 25px 10px', textAlign: 'center', fontWeight: '400'}}><p>/impact aims to accelerate Farcaster&apos;s transition from an <strong>Attention Economy</strong> to a <strong>Creation Economy</strong></p></div>
 
         <div className='flex-row' style={{color: '#8ac', width: '90%', fontSize: isMobile ? '14px' : '18px', padding: '0px 10px 5px 10px', textAlign: 'center', fontWeight: '400', justifyContent: 'center'}}>Currently building (alpha):</div>
-
 
         <div className='flex-row' style={{gap: '0.75rem', margin: '8px', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center'}}>
           <div onClick={() => document.getElementById('personal').scrollIntoView({ behavior: 'smooth' })}>
@@ -141,8 +136,6 @@ export default function Home() {
             </div>
           </div>
         </div>
-
-
 
         <div className={isMobile ? 'flex-col' : 'flex-row'} style={{alignItems: 'center', gap: '1.5rem'}}>
           <div className='flex-row' style={{color: '#579', width: isMobile ? '90%' : '50%', fontSize: isMobile ? '14px' : '15px', padding: isMobile ? '40px 10px 15px 10px' : '60px 10px 75px 10px', textAlign: 'center', fontWeight: '400'}}><p>In an <strong style={{color: '#8bf'}}>Attention Economy</strong> you build or create content or art, and then try to get attention for your work. The better you are at getting attention the more successful you are.</p></div>
@@ -286,7 +279,7 @@ export default function Home() {
       </div>
     </div>
 
-    <div id="ecosystem" style={{padding: '120px 4px 80px 4px', width: feedMax}}>
+    <div id="ecosystem" style={{padding: '40px 4px 80px 4px', width: feedMax}}>
 
       <div style={{padding: '8px', backgroundColor: '#335566aa', borderRadius: '15px', border: '1px solid #000'}}>
         <div className='flex-row' style={{width: '100%', justifyContent: 'center', alignItems: 'center', padding: '16px 0 0 0'}}>

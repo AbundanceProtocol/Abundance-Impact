@@ -285,33 +285,31 @@ export default function Tips() {
 
   return (
     <div className='flex-col' style={{width: 'auto', position: 'relative'}} ref={ref}>
-            
-    {/* {queryData && ( */}
-      <Head>
-        <title>Tips | Impact App</title>
-        <meta name="description" content={`Support builder and creators with Impact App`} />
-        <meta name="viewport" content="width=device-width"/>
-        <meta property="og:title" content="Personal /impact" />
-        <meta property='og:image' content={`${baseURL}/images/personal.png`} />
-        <meta property="fc:frame" content="vNext" />
-        <meta property="fc:frame:image" content={`${baseURL}/images/personal.png`} />
-        <meta property="fc:frame:image:aspect_ratio" content="1:1" />
 
-        <meta property="fc:frame:button:1" content={`Login`} />
-        <meta property="fc:frame:button:1:action" content="link" />
-        <meta property="fc:frame:button:1:target" content={`https://impact.abundance.id`} />
-        <meta property="fc:frame:button:2" content={`How it works`} />
-        <meta property="fc:frame:button:2:action" content="post" />
+    <Head>
+      <title>Tips | Impact App</title>
+      <meta name="description" content={`Support builder and creators with Impact App`} />
+      <meta name="viewport" content="width=device-width"/>
+      <meta property="og:title" content="Personal /impact" />
+      <meta property='og:image' content={`${baseURL}/images/personal.png`} />
+      <meta property="fc:frame" content="vNext" />
+      <meta property="fc:frame:image" content={`${baseURL}/images/personal.png`} />
+      <meta property="fc:frame:image:aspect_ratio" content="1:1" />
 
-        <meta property="fc:frame:button:2:target" content={`${baseURL}/api/frames/personal/how-to`} />
+      <meta property="fc:frame:button:1" content={`Login`} />
+      <meta property="fc:frame:button:1:action" content="link" />
+      <meta property="fc:frame:button:1:target" content={`https://impact.abundance.id`} />
+      <meta property="fc:frame:button:2" content={`How it works`} />
+      <meta property="fc:frame:button:2:action" content="post" />
 
-        <meta property="fc:frame:button:3" content='Cast Action' />
-        <meta property="fc:frame:button:3:action" content="link" />
+      <meta property="fc:frame:button:2:target" content={`${baseURL}/api/frames/personal/how-to`} />
 
-        <meta property="fc:frame:button:3:target" content={`https://warpcast.com/~/add-cast-action?name=%2B1+%24IMPACT&icon=star&actionType=post&postUrl=https%3A%2Fimpact.abundance.id%2Fapi%2Faction%2Fimpact1%3Fpoints=IMPACT&description=Curate+Casts+with+the+Impact+App`} />
-        <meta name="fc:frame:post_url" content={`https://impact.abundance.id`} />
-      </Head>
-    {/* )} */}
+      <meta property="fc:frame:button:3" content='Cast Action' />
+      <meta property="fc:frame:button:3:action" content="link" />
+
+      <meta property="fc:frame:button:3:target" content={`https://warpcast.com/~/add-cast-action?name=%2B1+%24IMPACT&icon=star&actionType=post&postUrl=https%3A%2Fimpact.abundance.id%2Fapi%2Faction%2Fimpact1%3Fpoints=IMPACT&description=Curate+Casts+with+the+Impact+App`} />
+      <meta name="fc:frame:post_url" content={`https://impact.abundance.id`} />
+    </Head>
 
     <div className="" style={{padding: '58px 0 0 0'}}>
     </div>
