@@ -16,8 +16,7 @@ export default async function handler(req, res) {
     try {
 
       let metatags = `
-        <meta property="fc:frame:image" content={'${baseURL}/images/personal.png' />
-        <meta property="fc:frame:image:aspect_ratio" content="1:1" />
+        <meta property="fc:frame:image" content='${baseURL}/images/personal.png' />
 
         <meta property="fc:frame:button:1" content='Login' />
         <meta property="fc:frame:button:1:action" content="link" />
@@ -55,8 +54,7 @@ export default async function handler(req, res) {
     } catch (error) {
 
       let metatags = `
-        <meta property="fc:frame:image" content={'${baseURL}/images/personal.png' />
-        <meta property="fc:frame:image:aspect_ratio" content="1:1" />
+        <meta property="fc:frame:image" content='${baseURL}/images/personal.png' />
 
         <meta property="fc:frame:button:1" content='Login' />
         <meta property="fc:frame:button:1:action" content="link" />
