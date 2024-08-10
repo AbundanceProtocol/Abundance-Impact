@@ -7,49 +7,43 @@ import fetch from 'isomorphic-unfetch';
 import NodeCache from 'node-cache';
 import Tip from "../../../../models/Tip";
 import Cast from "../../../../models/Cast";
+import Circle from "../../../../models/Circle";
 import connectToDatabase from "../../../../libs/mongodb";
 import { numToText } from "../../../../utils/utils";
+import mongoose from 'mongoose';
 
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 const cache = new NodeCache({ stdTTL: 60 });
 
 
 export default async function handler(req, res) {
-  const { text, username, fids } = req.query
+  const { id } = req.query
 
-  console.log('fids', fids)
-  console.log('text', text)
+  console.log('id', id)
   try {
     const fontPath = path.join(process.cwd(), 'public', 'Inter-SemiBold.ttf');
     const fontData = fs.readFileSync(fontPath);
 
-    async function getPFPs(fids) {
+    async function getCircle(id) {
       try {
-        const fidsArray = Array.isArray(fids) ? fids : fids.split(',').map(fid => parseInt(fid.trim(), 10));
-
+        const objectId = new mongoose.Types.ObjectId(id)
+        console.log(id)
         await connectToDatabase();
-        const result = await Cast.find({ author_fid: { $in: fidsArray } }, {author_fid: 1, author_pfp: 1, _id: 0} ).limit(40)
-
-        if (result) {
-          const uniqueUsers = result.reduce((acc, current) => {
-            if (!acc.find(item => item.author_fid === current.author_fid)) {
-              acc.push(current);
-            }
-            return acc;
-          }, []);
-          return uniqueUsers
+        let circle = await Circle.findOne({ _id: objectId }).exec();
+        if (circle) {
+          return {circles: circle.circles, text: circle.text, username: circle.username}
         } else {
-          return []
+          return {circles: [], text: '', username: ''}
         }
       } catch (error) {
-        console.error('Error getting PFPs:', error)
-        return []
-      }
+        console.error("Error while fetching casts:", error);
+        return {circles: [], text: '', username: ''}
+      }  
     }
 
-    const circlePFPs = await getPFPs(fids);
+    const {circles, text, username} = await getCircle(id);
 
-    const splitArray = (arr) => {
+    const splitCircles = (arr) => {
       // Calculate the midpoint
       const midpoint = Math.ceil(arr.length / 2);
     
@@ -60,16 +54,11 @@ export default async function handler(req, res) {
       return [firstHalf, secondHalf];
     };
 
-    const [firstHalf, secondHalf] = splitArray(circlePFPs);
+    const [firstHalf, secondHalf] = splitCircles(circles);
 
-    console.log(circlePFPs)
-    console.log(firstHalf)
-    console.log(secondHalf)
 
     const backgroundImg = `https://impact.abundance.id/images/background.jpg`
-    // if (articleData.username) {
-    //   username = '@' + articleData.username
-    // }
+
     const svg = await satori(
       <div style={{
         width: '100%',
@@ -85,17 +74,17 @@ export default async function handler(req, res) {
         alignItems: 'center', 
       }}>
         <div style={{gap: '0.5rem', display: 'flex', flexDirection: 'row'}}>
-          {(secondHalf?.length > 0) ? (firstHalf.map((creator, index) => <img key={index} src={creator.author_pfp} width={90} height={90} style={{borderRadius: '80px', border: '2px solid #eee', backgroundColor: '#8363ca'}} />)) : (<div style={{height: '90px'}}>&nbsp;</div>)}
+          {(firstHalf?.length > 0) ? (firstHalf.map((creator, index) => <img key={index} src={creator} width={90} height={90} style={{borderRadius: '80px', border: '2px solid #eee', backgroundColor: '#8363ca'}} />)) : (<div style={{height: '90px'}}>&nbsp;</div>)}
         </div>
         <div style={{display: 'flex', flexDirection: 'column', color: 'white', 
         fontSize: '22px', alignItems: 'center', justifyContent: 'center'}}>
           <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '30px', margin: '75px 20px 5px 20px'}}>{`@${username} contributed`}</div>
-          <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '28px', margin: '5px 20px 5px 20px'}}>{`to ${numToText(circlePFPs?.length)} artists and builders`}</div>
+          <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '28px', margin: '5px 20px 5px 20px'}}>{`to ${numToText(circles?.length)} artists and builders`}</div>
           <div style={{display: 'flex', textAlign: 'center', color: '#cde', fontSize: '24px', margin: '5px 20px 5px 20px'}}>{text}</div>
           <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '26px', margin: '5px 20px 75px 20px'}}>{`via /impact`}</div>
         </div>
         <div style={{gap: '0.5rem', display: 'flex', flexDirection: 'row'}}>
-          {(secondHalf?.length > 0) ? (secondHalf.map((creator, index) => <img key={index} src={creator.author_pfp} width={90} height={90} style={{borderRadius: '50px', border: '2px solid #eee'}} />)) : (<div style={{height: '90px'}}>&nbsp;</div>)}
+          {(secondHalf?.length > 0) ? (secondHalf.map((creator, index) => <img key={index} src={creator} width={90} height={90} style={{borderRadius: '50px', border: '2px solid #eee'}} />)) : (<div style={{height: '90px'}}>&nbsp;</div>)}
         </div>
       </div>
       ,

@@ -232,7 +232,7 @@ export default async function handler(req, res) {
                   
                         let body = {
                           signer_uuid: signer,
-                          text: `@${user} has been nominated by @${curator} for contributing to the ${ecosystem} Ecosystem on /impact\n\nHelp support @${curator}'s nominees:`,
+                          text: `@${user} has been nominated by @${curator} to the ${ecosystem} Ecosystem on /impact\n\nHelp support @${curator}'s nominees:`,
                         };
                         
                         const frameUrl = `https://impact.abundance.id/~/ecosystems/${handle}/tip?time=all&shuffle=true&curators=${fid}&eco=${eco}&referrer=${fid}`

@@ -3,6 +3,7 @@ import connectToDatabase from "../../../../libs/mongodb";
 import User from "../../../../models/User";
 import Tip from  "../../../../models/Tip";
 import Cast from  "../../../../models/Cast";
+import Circle from  "../../../../models/Circle";
 import Impact from  "../../../../models/Impact";
 import EcosystemRules from  "../../../../models/EcosystemRules";
 import { decryptPassword, getTimeRange, processTips, populateCast } from "../../../../utils/utils";
@@ -149,6 +150,21 @@ export default async function handler(req, res) {
       } catch (error) {
         console.error('Error getting PFPs:', error)
         return []
+      }
+    }
+
+    async function createCircle(fid, time, curators, text, ecosystem, username, points, circles) {
+      try {
+        await connectToDatabase();
+        let circle = new Circle({ 
+          fid, time, curators, text, ecosystem, username, points, circles
+        });
+        await circle.save()
+        const objectIdString = circle._id.toString();
+        return objectIdString
+      } catch (error) {
+        console.error("Error while fetching circles:", error);
+        return null
       }
     }
 
@@ -510,11 +526,9 @@ export default async function handler(req, res) {
       
             let displayedCasts = await populateCast(sortedCasts)
       
-            const { castData, circle } = await processTips(displayedCasts, fid, allowances, ecoName, curatorPercent)
-          
+            const { castData, circle, pfps } = await processTips(displayedCasts, fid, allowances, ecoName, curatorPercent)
+            console.log('pfps', pfps)
             const jointFids = circle.join(',')
-
-            circlesImg = `${baseURL}/api/frames/tip/circle?${qs.stringify({ text: tipText, username, fids: jointFids })}`
 
             async function sendRequests(data, signer, apiKey) {
               const base = "https://api.neynar.com/";
@@ -580,11 +594,15 @@ export default async function handler(req, res) {
               return tipCounter
             }
 
-            const remainingTip = await sendRequests(castData, decryptedUuid, apiKey);
-            // const remainingTip = 0 
+            const circleId = await createCircle(fid, time, curators, tipText, eco, username, points, pfps)
+
+            circlesImg = `${baseURL}/api/frames/tip/circle?${qs.stringify({ id: circleId })}`
+
+            // const remainingTip = await sendRequests(castData, decryptedUuid, apiKey);
+            const remainingTip = 0 
 
             shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share?${qs.stringify({    
-              text: tipText, fids: jointFids, username, eco, time, curators })}`
+              id: circleId })}`
         
             encodedShareUrl = encodeURIComponent(shareUrl); 
             shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`

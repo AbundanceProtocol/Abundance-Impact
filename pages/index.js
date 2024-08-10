@@ -3,8 +3,6 @@ import React, { useContext, useState, useRef, useEffect } from 'react'
 import { AccountContext } from '../context'
 import { useRouter } from 'next/router';
 import { useInView } from 'react-intersection-observer'
-import ExpandImg from '../components/Cast/ExpandImg';
-import Modal from '../components/Layout/Modals/Modal';
 import Item from '../components/Ecosystem/ItemWrap/Item';
 import Description from '../components/Ecosystem/Description';
 import ItemWrap from '../components/Ecosystem/ItemWrap';
@@ -12,7 +10,6 @@ import useMatchBreakpoints from '../hooks/useMatchBreakpoints';
 import { FaLock, FaUser, FaGlobe, FaPlus, FaRegStar, FaCoins, FaAngleDown, FaShareAlt as Share } from "react-icons/fa";
 import { HiOutlineAdjustmentsHorizontal as Adjust } from "react-icons/hi2";
 import { GrSchedulePlay as Sched } from "react-icons/gr";
-import { BiSolidDonateHeart as Donate } from "react-icons/bi";
 import { AiFillSafetyCertificate as Aligned } from "react-icons/ai";
 import { GiRibbonMedal as Medal } from "react-icons/gi";
 import { MdAdminPanelSettings as Mod } from "react-icons/md";
@@ -23,7 +20,6 @@ import EcosystemMenu from '../components/Layout/EcosystemNav/EcosystemMenu';
 import { IoInformationCircleOutline as Info } from "react-icons/io5";
 import { PiSquaresFourLight as Actions } from "react-icons/pi";
 import { Logo } from './assets';
-
 
 export default function Home() {
   const ref2 = useRef(null)
@@ -76,7 +72,6 @@ export default function Home() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-
 
   useEffect(() => {
     if (screenWidth) {
@@ -280,7 +275,6 @@ export default function Home() {
     </div>
 
     <div id="ecosystem" style={{padding: '40px 4px 80px 4px', width: feedMax}}>
-
       <div style={{padding: '8px', backgroundColor: '#335566aa', borderRadius: '15px', border: '1px solid #000'}}>
         <div className='flex-row' style={{width: '100%', justifyContent: 'center', alignItems: 'center', padding: '16px 0 0 0'}}>
           <FaGlobe style={{fill: '#cde'}} size={24} />

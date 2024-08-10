@@ -524,9 +524,11 @@ export async function processTips(userFeed, userFid, tokenData, ecosystem, curat
       return null
     }).filter(item => item !== null)
 
-    console.log('circle', circle)
-  
-    return { castData: finalTips, coinTotals: coinTotals, circle }
+    const pfps = userFeed
+    .filter(feed => circle.includes(feed.author.fid))
+    .map(feed => feed.author.pfp_url);
+
+     return { castData: finalTips, coinTotals: coinTotals, circle, pfps }
   }
 }
 

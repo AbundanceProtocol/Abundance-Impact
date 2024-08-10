@@ -3,6 +3,7 @@ import connectToDatabase from "../../../../libs/mongodb";
 import User from "../../../../models/User";
 import Tip from  "../../../../models/Tip";
 import Cast from  "../../../../models/Cast";
+import Circle from  "../../../../models/Circle";
 import Impact from  "../../../../models/Impact";
 import EcosystemRules from  "../../../../models/EcosystemRules";
 import { decryptPassword, getTimeRange, processTips, populateCast } from "../../../../utils/utils";
@@ -130,25 +131,22 @@ export default async function handler(req, res) {
     async function getFids(fid, startTime, endTime, points) {
       try {
         await connectToDatabase();
-        const result = await Tip.find(
+        const result = await Circle.findOne(
         {
-          tipper_fid: fid,
+          fid: fid,
           points: points,
           createdAt: {
             $gte: startTime,
           }
-        }, {receiver_fid: 1, _id: 0}).limit(15).lean()
+        }, {_id: 1}).lean()
         if (result) {
-          const tippedFids = result.map(doc => doc.receiver_fid);
-          const uniqueFids = [...new Set(tippedFids)]; 
-          console.log(uniqueFids)
-          return uniqueFids
+          return result
         } else {
-          return []
+          return null
         }
       } catch (error) {
         console.error('Error getting PFPs:', error)
-        return []
+        return null
       }
     }
 
@@ -204,11 +202,11 @@ export default async function handler(req, res) {
 
         const {text} = formatStringToArray(inputText);
 
-        const jointFids = circleFids.join(',')
+        // const jointFids = circleFids.join(',')
 
-        circlesImg = `${baseURL}/api/frames/tip/circle?${qs.stringify({ text, username, fids: jointFids })}`
+        circlesImg = `${baseURL}/api/frames/tip/circle?${qs.stringify({ id: circleFids })}`
 
-        shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share?${qs.stringify({ text, fids: circleFids, username, eco, time, curators })}`
+        shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share?${qs.stringify({ id: circleFids })}`
     
         encodedShareUrl = encodeURIComponent(shareUrl); 
         shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`

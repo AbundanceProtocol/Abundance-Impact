@@ -11,11 +11,12 @@ import { AccountContext } from '../../../../context';
 import cheerio from 'cheerio'
 import FrameButton from '../../../../components/Cast/Frame/Button';
 import qs from "querystring";
+import Circle from '../../../../models/Circle';
 
 // import useStore from '../../../utils/store';
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 
-export default function Tips({time, curators, channels, tags, eco, ecosystem, fids, text, username}) {
+export default function Tips({time, curators, channels, tags, eco, ecosystem, fids, text, username, id}) {
   const { LoginPopup, fid, userBalances, isLogged } = useContext(AccountContext)
   const index = 0
   const router = useRouter();
@@ -91,7 +92,7 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem, fi
     quality_balance: 0
   }
   const [cast, setCast] = useState(initCast)
-  const initQuery = {time: '&time=all', curators: '', channels: '', tags: '', shuffle: '&shuffle=true', referrer: '', eco: '&eco=IMPACT', ecosystem: '&ecosystem=abundance'}
+  const initQuery = {time: 'all', curators: [], channels: [], tags: [], shuffle: true, referrer: null, eco: null, ecosystem: null}
   const [queryData, setQueryData] = useState(initQuery)
 
   useEffect(() => {
@@ -157,8 +158,7 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem, fi
       time, curators, eco, ecosystem, start: true
     })}`
 
-    updatedFrameData.image = `${baseURL}/api/frames/tip/circle?${qs.stringify({    
-      text, username, fids })}`
+    updatedFrameData.image = `${baseURL}/api/frames/tip/circle?${qs.stringify({ id })}`
 
     setFrameData(updatedFrameData)
   }, [queryData]);
@@ -292,10 +292,10 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem, fi
         <meta name="viewport" content="width=device-width"/>
         <meta property="og:title" content="Multi-Tip" />
         <meta property='og:image' content={`${baseURL}/api/frames/tip/circle?${qs.stringify({    
-          text, username, fids })}`} />
+          id })}`} />
         <meta property="fc:frame" content="vNext" />
         <meta property="fc:frame:image" content={`${baseURL}/api/frames/tip/circle?${qs.stringify({    
-          text, username, fids })}`} />
+          id })}`} />
         <meta property="fc:frame:image:aspect_ratio" content="1:1" />
         <meta property="fc:frame:button:1" content='Multi-tip >' />
         <meta property="fc:frame:button:1:action" content="post" />
@@ -311,9 +311,9 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem, fi
         <meta name="fc:frame:input:text" content="Eg.: 1000 $Degen, 500 $FARTHER" />
       </Head>
     )}
-
     <div className="" style={{padding: '58px 0 0 0'}}>
     </div>
+
 
     <>{
     cast && (<div className="inner-container" style={{width: '100%', display: 'flex', flexDirection: 'row'}}>
@@ -517,39 +517,61 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem, fi
                 }}>
                 <ImArrowDown />
               </div>
-
             </div>
           </div>
         </div>
       </div>
     </div>)}</>
-
-
-
     </div>
   );
 }
 
 
 export async function getServerSideProps(context) {
-  // Fetch dynamic parameters from the context object
   const { query, params } = context;
-  const { time, curators, channels, tags, eco, text, username, fids } = query;
+  const { id } = query;
   const { ecosystem } = params;
-  console.log(time, curators, channels, tags, eco, text, username, fids )
-  let setTime = 'all'
-  let setEco = null
-  let setText = ''
-  if (text) {
-    setText = text
+  
+  async function getCircle(id) {
+    if (id) {
+      try {
+        const objectId = new mongoose.Types.ObjectId(id)
+        console.log(id)
+        await connectToDatabase();
+        let circle = await Circle.findOne({ _id: objectId }).exec();
+        if (circle) {
+          let eco = ''
+          if (circle.points) {
+            eco = circle?.points?.substring(1)
+          }
+          return { time: circle?.time, curators: circle?.curators, channels: circle?.channels, eco, username: circle?.username }
+        } else {
+          return { time: 'all', curators: [], channels: [], eco: null, username: '' }
+        }
+      } catch (error) {
+        console.error("Error while fetching casts:", error);
+        return { time: 'all', curators: [], channels: [], eco: null, username: '' }
+      }  
+    } else {
+      return { time: 'all', curators: [], channels: [], eco: null, username: '' }
+    }
+  }
+  
+  const { time, curators, channels, eco, username } = await getCircle(id)
+  
+  let setId = ''
+  if (id) {
+    setId = id
   }
   let setUsername = ''
   if (username) {
     setUsername = username
   }
+  let setEco = null
   if (eco) {
     setEco = eco
   }
+  let setTime = 'all'
   if (time) {
     setTime = time
   }
@@ -561,36 +583,16 @@ export async function getServerSideProps(context) {
   if (channels) {
     setChannels = Array.isArray(channels) ? channels : [channels]
   }
-  fids
-  let setTags = []
-  if (tags) {
-    setTags = Array.isArray(tags) ? tags : [tags]
-  }
-  let setFids = []
-  if (fids) {
-    setFids = Array.isArray(fids) ? fids : [fids]
-  }
-  // let setShuffle = false
-  // if (shuffle || shuffle == false) {
-  //   if (shuffle == 'true') {
-  //     setShuffle = true
-  //   } else if (shuffle == 'false') {
-  //     setShuffle = false
-  //   }
-  // }
-  // let setReferrer = referrer || null
-  console.log('192:', setTime, setCurators, setEco, ecosystem)
+
   return {
     props: {
       time: setTime,
       curators: setCurators,
       channels: setChannels,
-      tags: setTags,
       eco: setEco,
       ecosystem: ecosystem,
-      text: setText,
       username: setUsername,
-      fids: setFids
+      id: setId
     },
   };
 }
