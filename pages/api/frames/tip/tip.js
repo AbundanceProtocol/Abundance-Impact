@@ -598,8 +598,8 @@ export default async function handler(req, res) {
 
             circlesImg = `${baseURL}/api/frames/tip/circle?${qs.stringify({ id: circleId })}`
 
-            // const remainingTip = await sendRequests(castData, decryptedUuid, apiKey);
-            const remainingTip = 0 
+            const remainingTip = await sendRequests(castData, decryptedUuid, apiKey);
+            // const remainingTip = 0 
 
             shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share?${qs.stringify({    
               id: circleId })}`
