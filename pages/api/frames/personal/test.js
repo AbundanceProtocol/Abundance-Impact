@@ -1,11 +1,14 @@
+import { getSSLHubRpcClient, Message } from "@farcaster/hub-nodejs";
 import { Button, Frog, TextInput } from "frog";
 import { devtools } from "frog/dev";
 import { serveStatic } from "frog/serve-static";
 import { neynar } from "frog/hubs";
 const HubURL = process.env.NEYNAR_HUB
+const apiKey = process.env.NEYNAR_API_KEY
+const client = HubURL ? getSSLHubRpcClient(HubURL) : undefined;
 
 export const app = new Frog({
-  hub: neynar({ apiKey: HubURL }),
+  hub: neynar({ apiKey: apiKey }),
 });
 
 app.frame("/", (c) => {
