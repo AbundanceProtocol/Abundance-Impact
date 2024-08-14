@@ -27,8 +27,8 @@ export default async function handler(req, res) {
     try {
       console.log('test2')
 
-      res.setHeader('Content-Type', 'text/html');
-      res.status(200).json({
+      // res.setHeader('Content-Type', 'text/html');
+      res.json({
         "type": "frame",
         "frameUrl": "https://impact.abundance.id/~/personal/frame"
       });
