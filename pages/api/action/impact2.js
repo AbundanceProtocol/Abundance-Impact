@@ -36,7 +36,7 @@ export default async function handler(req, res) {
 
       res.status(200).json({
         "type": "frame",
-        "frameUrl": "https://impact.abundance.id/~/personal/frame"
+        "frameUrl": "https://impact.abundance.id/api/frames/personal/install"
       })
     } catch (error) {
       console.error(error);
