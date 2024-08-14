@@ -28,11 +28,14 @@ export default async function handler(req, res) {
       console.log('test2')
 
       // res.setHeader('Content-Type', 'text/html');
-      const frameData = {
+      // const frameData = {
+      //   "type": "frame",
+      //   "frameUrl": "https://impact.abundance.id/~/personal/frame"
+      // }
+      return res.json({
         "type": "frame",
         "frameUrl": "https://impact.abundance.id/~/personal/frame"
-      }
-      return res.json(frameData)
+      })
     } catch (error) {
       console.error(error);
       console.log('test3')
