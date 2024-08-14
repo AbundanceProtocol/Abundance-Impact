@@ -25,13 +25,16 @@ export default async function handler(req, res) {
 
 
     try {
+      console.log('test2')
+
       res.setHeader('Content-Type', 'text/html');
       res.status(200).json({
-        type: "frame",
-        frameUrl: "https://impact.abundance.id/~/personal/frame"
+        "type": "frame",
+        "frameUrl": "https://impact.abundance.id/~/personal/frame"
       });
     } catch (error) {
       console.error(error);
+      console.log('test3')
       res.setHeader('Allow', ['POST']);
       res.status(200).send(`Request failed`);
     }
@@ -39,6 +42,7 @@ export default async function handler(req, res) {
 
 
   } else {
+    console.log('test4')
     res.setHeader('Allow', ['POST']);
     res.status(401).send(`Request failed`);
   }
