@@ -6,9 +6,7 @@ const handleRequest = frames(async (ctx) => {
   return {
     image: (
       <span>
-        {ctx.pressedButton
-          ? `I clicked ${ctx.searchParams.value}`
-          : `Click some button`}
+        I clicked
       </span>
     ),
     buttons: [
