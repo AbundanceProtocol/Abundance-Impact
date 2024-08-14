@@ -14,26 +14,32 @@ const client = HubURL ? getSSLHubRpcClient(HubURL) : undefined;
 const apiKey = process.env.NEYNAR_API_KEY
 // const encryptedBotUuid = process.env.ENCRYPTED_BOT_UUID
 // const secretKey = process.env.SECRET_KEY
-const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 
-export  async function POST(req, res) {
-  return Response.json({
-    type: 'form',
-    title: `Create a Frame`,
-    url: `https://impact.abundance.id/~/personal/frame`
-});
-}
+export default async function handler(req, res) {
+  if (req.method === 'POST') {
 
 
-export async function GET(request) {
-  return Response.json({
-      'type': 'composer',
-      'name': 'Test',
-      'icon': 'plus', 
-      'description': 'Test Action',
-      'imageUrl': `${baseURL}/images/personal.png`,
-      'action': {
-          'type': 'post',
-      },
-  });
+
+    console.log('test')
+
+
+
+    try {
+      res.setHeader('Content-Type', 'text/html');
+      res.status(200).json({
+        type: "frame",
+        frameUrl: "https://impact.abundance.id/~/personal/frame"
+      });
+    } catch (error) {
+      console.error(error);
+      res.setHeader('Allow', ['POST']);
+      res.status(200).send(`Request failed`);
+    }
+
+
+
+  } else {
+    res.setHeader('Allow', ['POST']);
+    res.status(401).send(`Request failed`);
+  }
 }
