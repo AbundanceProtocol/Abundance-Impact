@@ -32,7 +32,9 @@ export default async function handler(req, res) {
       //   "type": "frame",
       //   "frameUrl": "https://impact.abundance.id/~/personal/frame"
       // }
-      return res.status(200).json({
+      res.setHeader('Content-Type', 'application/json');
+
+      res.status(200).json({
         "type": "frame",
         "frameUrl": "https://impact.abundance.id/~/personal/frame"
       })
