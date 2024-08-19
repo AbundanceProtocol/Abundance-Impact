@@ -58,7 +58,7 @@ export default async function handler(req, res) {
 
     let needLogin = false
 
-    let { impactAllowance, qualityAllowance, ecoName, curator } = await getCuratorBalances(castHash, points)
+    let { impactAllowance, qualityAllowance, ecoName, curator } = await getCuratorBalances(curatorFid, points)
 
     console.log('62', impactAllowance, qualityAllowance, ecoName, curator)
 
