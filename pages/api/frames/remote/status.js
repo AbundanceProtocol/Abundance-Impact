@@ -24,7 +24,7 @@ export default async function handler(req, res) {
     let textField = ''
     let postUrl = `<meta name="fc:frame:post_url" content='https://impact.abundance.id' />`
 
-    if (login) {
+    if (login == true) {
       button1 = `<meta property="fc:frame:button:1" content='Login' />
       <meta property="fc:frame:button:1:action" content="link" />
       <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/?eco=${pt}' />`
