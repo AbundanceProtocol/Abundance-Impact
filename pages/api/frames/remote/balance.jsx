@@ -22,6 +22,7 @@ export default async function handler(req, res) {
   const { iB, qB, qT, author, iA, qA, ecosystem, login, pt, cu  } = req.query;
 
   console.log('24', iB, qB, qT, author, iA, qA, ecosystem, login, pt, cu)
+  
   try {
     const fontPath = path.join(process.cwd(), 'public', 'Inter-SemiBold.ttf');
     const fontData = fs.readFileSync(fontPath);

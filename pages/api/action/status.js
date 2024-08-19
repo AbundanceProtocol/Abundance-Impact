@@ -62,7 +62,7 @@ export default async function handler(req, res) {
 
     console.log('62', impactAllowance, qualityAllowance, ecoName, curator)
 
-    if (!impactAllowance || !qualityAllowance || !ecoName) {
+    if ((!impactAllowance && impactAllowance !== 0) || (!qualityAllowance && qualityAllowance !== 0) || !ecoName) {
       needLogin = true
       impactAllowance = 0
       qualityAllowance = 0
@@ -124,7 +124,7 @@ export default async function handler(req, res) {
 
     console.log('124', impactBalance, qualityBalance, qualityTotal, author, castImpact)
 
-    if (!impactBalance || !qualityBalance || !qualityTotal) {
+    if ((!impactBalance && impactBalance !== 0) || (!qualityBalance && qualityBalance !== 0) || (!qualityTotal && qualityTotal !== 0)) {
       impactBalance = 0
       qualityBalance = 0
       qualityTotal = 0
