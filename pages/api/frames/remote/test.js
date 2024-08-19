@@ -14,8 +14,13 @@ export default async function handler(req, res) {
     res.setHeader('Allow', ['POST']);
     res.status(405).end(`Method ${req.method} Not Allowed`);
   } else {
-    console.log('17', iB, qB, qT, author, iA, qA, ecosystem, login, pt, cu, impact, quality, cI)
-    console.log('18', typeof iB, typeof cI, typeof impact, typeof quality)
+    const curatorFid = req.body.untrustedData.fid
+    const castHash = req.body.untrustedData.castId.hash
+
+    console.log('20', curatorFid, castHash)
+
+    console.log('22', iB, qB, qT, author, iA, qA, ecosystem, login, pt, cu, impact, quality, cI)
+    console.log('23', typeof iB, typeof cI, typeof impact, typeof quality)
 
     let balanceImg = `${baseURL}/api/frames/remote/balance?${qs.stringify({ iB, qB, qT, author, iA, qA, ecosystem, login, pt, cu })}`
 
@@ -32,7 +37,6 @@ export default async function handler(req, res) {
     console.log('3', parseInt(cI) !== 0, parseInt(impact) == 0, parseInt(quality) == 0, cI, impact, quality)
     console.log('4', parseInt(impact) !== 0, impact)
     console.log('5', parseInt(quality) !== 0, quality)
-
 
 
     if (login == true) {
