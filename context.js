@@ -152,7 +152,7 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
         setPopulate(populate+1)
         setPoints(ecoData?.ecosystem_points_name)
         if (router.route == '/') {
-          getRemainingBalances(store.fid, '$IMPACT', store.signer_uuid)
+          getRemainingBalances(store.fid, points, store.signer_uuid)
         } else {
           getRemainingBalances(store.fid, ecoData?.ecosystem_points_name, store.signer_uuid)
         }

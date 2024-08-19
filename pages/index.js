@@ -21,7 +21,7 @@ import { IoInformationCircleOutline as Info } from "react-icons/io5";
 import { PiSquaresFourLight as Actions } from "react-icons/pi";
 import { Logo } from './assets';
 
-export default function Home() {
+export default function Home({eco}) {
   const ref2 = useRef(null)
   const [ref, inView] = useInView()
   const { LoginPopup, ecoData, points, setPoints, isLogged, showLogin, setShowLogin, setIsLogged, setFid } = useContext(AccountContext)
@@ -93,6 +93,10 @@ export default function Home() {
       setFeedMax(`100%`)
     }
   }, [screenWidth])
+
+  useEffect(() => {
+    setPoints(eco)
+  }, [eco])
 
 
   return (
@@ -378,4 +382,16 @@ export default function Home() {
     <div ref={ref}>&nbsp;</div>
   </div>
   )
+}
+
+
+export async function getServerSideProps(context) {
+  const { query } = context;
+  const { eco } = query;
+
+  let setEco = eco || '$IMPACT'
+
+  return {
+    props: { eco: setEco }
+  };
 }
