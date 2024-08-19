@@ -198,7 +198,8 @@ export default async function handler(req, res) {
           await connectToDatabase();
   
           let impact = await Impact.countDocuments({ target_cast_hash: castHash, curator_fid: curatorFid, points })
-     
+          console.log('impact', impact)
+
           if (impact) {
             return impact
           } else {
@@ -212,6 +213,7 @@ export default async function handler(req, res) {
       }
 
       impact = await getUserImpact(castHash, curatorFid, points)
+      console.log('impact2', impact)
 
       if (impact !== 0) {
 
@@ -220,7 +222,7 @@ export default async function handler(req, res) {
             await connectToDatabase();
     
             let quality = await Quality.countDocuments({ target_cast_hash: castHash, curator_fid: curatorFid, points })
-       
+            console.log('quality', quality)
             if (quality) {
               return quality
             } else {
@@ -234,6 +236,7 @@ export default async function handler(req, res) {
         }
   
         quality = await getUserQuality(castHash, curatorFid, points)
+        console.log('quality2', quality)
 
       }
 
