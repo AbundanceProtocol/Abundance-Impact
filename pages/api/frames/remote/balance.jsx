@@ -21,7 +21,7 @@ export default async function handler(req, res) {
   // const { id } = req.query
   const { iB, qB, qT, author, iA, qA, ecosystem, login, pt, cu  } = req.query;
 
-  // console.log('id', id)
+  console.log('24', iB, qB, qT, author, iA, qA, ecosystem, login, pt, cu)
   try {
     const fontPath = path.join(process.cwd(), 'public', 'Inter-SemiBold.ttf');
     const fontData = fs.readFileSync(fontPath);
@@ -52,7 +52,7 @@ export default async function handler(req, res) {
         <div style={{display: 'flex', flexDirection: 'column', color: 'white', alignItems: 'center', justifyContent: 'center'}}>
           <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '24px', margin: '5px 20px 15px 30px', padding: '0 0 10px 0'}}>{`${ecosystemName} Ecosystem`}</div>
 
-          {login ? (
+          {(login == true) ? (
             <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', border: '2px solid #ccc', background: '#33333355', padding: '15px 50px 20px 50px', borderRadius: '16px'}}>
 
               <div style={{display: 'flex', flexDirection: 'column', color: 'white', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
