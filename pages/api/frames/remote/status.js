@@ -8,7 +8,7 @@ const client = HubURL ? getSSLHubRpcClient(HubURL) : undefined;
 export default async function handler(req, res) {
 
   const { untrustedData } = req.body
-  const { iB, qB, qT, author, iA, qA, ecosystem, login, pt, cu, impact, quality, cI } = req.query;
+  const { iB, qB, qT, author, iA, qA, ecosystem, login, pt, cu, impact, quality, cI, hash } = req.query;
 
   if (req.method !== 'POST') {
     res.setHeader('Allow', ['POST']);
@@ -25,10 +25,15 @@ export default async function handler(req, res) {
     let postUrl = `<meta name="fc:frame:post_url" content='https://impact.abundance.id' />`
 
     if (login == true) {
+      console.log('1')
       button1 = `<meta property="fc:frame:button:1" content='Login' />
       <meta property="fc:frame:button:1:action" content="link" />
       <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/?eco=${pt}' />`
+      button2 = `<meta property="fc:frame:button:2" content='Refresh' />
+      <meta property="fc:frame:button:2:action" content="post" />
+      <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/?eco=${pt}' />`
     } else if (cI == 0 && impact == 0 && quality == 0) {
+      console.log('2')
       button1 = `<meta property="fc:frame:button:1" content='+1 ${pt}' />
       <meta property="fc:frame:button:1:action" content="post" />
       <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/?eco=${pt}' />`
@@ -40,6 +45,7 @@ export default async function handler(req, res) {
       <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/?eco=${pt}' />`
       textField = `<meta name="fc:frame:input:text" content="Add comment to nomination" />`
     } else if (cI !== 0 && impact == 0 && quality == 0) {
+      console.log('3')
       button1 = `<meta property="fc:frame:button:1" content='+1 ${pt}' />
       <meta property="fc:frame:button:1:action" content="post" />
       <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/?eco=${pt}' />`
@@ -53,6 +59,7 @@ export default async function handler(req, res) {
       <meta property="fc:frame:button:4:action" content="post" />
       <meta property="fc:frame:button:4:target" content='https://impact.abundance.id/?eco=${pt}' />`
     } else if (impact !== 0) {
+      console.log('4')
       button1 = `<meta property="fc:frame:button:1" content='+1 ${pt}' />
       <meta property="fc:frame:button:1:action" content="post" />
       <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/?eco=${pt}' />`
@@ -63,6 +70,7 @@ export default async function handler(req, res) {
       <meta property="fc:frame:button:3:action" content="post" />
       <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/?eco=${pt}' />`
     } else if (quality !== 0) {
+      console.log('5')
       button1 = `<meta property="fc:frame:button:1" content='Upvote' />
       <meta property="fc:frame:button:1:action" content="post" />
       <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/?eco=${pt}' />`
