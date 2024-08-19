@@ -14,7 +14,7 @@ export default async function handler(req, res) {
     res.setHeader('Allow', ['POST']);
     res.status(405).end(`Method ${req.method} Not Allowed`);
   } else {
-    
+    console.log('17', iB, qB, qT, author, iA, qA, ecosystem, login, pt, cu, impact, quality, cI)
     let balanceImg = `${baseURL}/api/frames/remote/balance?${qs.stringify({ iB, qB, qT, author, iA, qA, ecosystem, login, pt, cu })}`
 
     let button1 = ''
