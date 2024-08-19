@@ -27,8 +27,8 @@ export default async function handler(req, res) {
     // const authorFid = req.body.untrustedData.castId.fid
     console.log('28', points, curatorFid, castHash)
 
-    let quality = 1
-    let impact = 1
+    let quality = 0
+    let impact = 0
 
     async function getCuratorBalances(curatorFid, points) {
       try {
@@ -191,7 +191,7 @@ export default async function handler(req, res) {
 
     }
 
-    if (needLogin == true) {
+    if (needLogin !== true) {
 
       async function getUserImpact(castHash, curatorFid, points) {
         try {
