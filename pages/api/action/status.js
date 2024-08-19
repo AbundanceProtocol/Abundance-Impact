@@ -25,6 +25,7 @@ export default async function handler(req, res) {
     const curatorFid = req.body.untrustedData.fid
     const castHash = req.body.untrustedData.castId.hash
     // const authorFid = req.body.untrustedData.castId.fid
+    console.log('28', points, curatorFid, castHash)
 
     let quality = 1
     let impact = 1
@@ -34,7 +35,7 @@ export default async function handler(req, res) {
         await connectToDatabase();
 
         let user = await User.findOne({ fid: curatorFid, points }).exec();
-
+        console.log('37', user, curatorFid, points)
         let impactAllowance = null
         let qualityAllowance = null
         let ecoName = null
@@ -58,6 +59,8 @@ export default async function handler(req, res) {
     let needLogin = false
 
     let { impactAllowance, qualityAllowance, ecoName, curator } = await getCuratorBalances(castHash, points)
+
+    console.log('62', impactAllowance, qualityAllowance, ecoName, curator)
 
     if (!impactAllowance || !qualityAllowance || !ecoName) {
       needLogin = true
@@ -118,6 +121,8 @@ export default async function handler(req, res) {
     }
 
     let { impactBalance, qualityBalance, qualityTotal, author, castImpact } = await getCastBalances(castHash, points)
+
+    console.log('124', impactBalance, qualityBalance, qualityTotal, author, castImpact)
 
     if (!impactBalance || !qualityBalance || !qualityTotal) {
       impactBalance = 0
