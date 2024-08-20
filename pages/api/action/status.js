@@ -34,7 +34,7 @@ export default async function handler(req, res) {
       try {
         await connectToDatabase();
 
-        let user = await User.findOne({ fid: curatorFid, ecosystem_points: points }).exec();
+        let user = await User.findOne({ fid: curatorFid, ecosystem_points: points }).select('remaining_i_allowance remaining_q_allowance ecosystem_name username').exec();
         console.log('37', user, curatorFid, points)
         let impactAllowance = null
         let qualityAllowance = null

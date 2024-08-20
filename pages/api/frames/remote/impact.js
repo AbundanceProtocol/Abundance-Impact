@@ -138,7 +138,7 @@ export default async function handler(req, res) {
                   
     
                   const saveAll = async (user, impactDoc, cast) => {
-
+                    console.log(user, impactDoc, cast)
                     try {
                       const [savedUser, savedImpact, savedCast] = await Promise.all([
                         user.save(),
@@ -232,6 +232,7 @@ export default async function handler(req, res) {
                       user.impact_reviews.push(impactDoc)
                       let impactTotal = cast.impact_total
                       let curatorCount = cast.impact_points.length
+                      console.log('impactDoc', impactDoc)
                       const { balance, castImpact } = await saveAll(user, impactDoc, cast)
                       return { balance, castImpact, impactTotal, curatorCount, qualityBalance: cast.quality_balance, qualityTotal: cast.quality_absolute }
                     }
