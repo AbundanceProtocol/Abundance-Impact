@@ -106,7 +106,6 @@ export default async function handler(req, res) {
         }
     
         const userRemainingImpact = await postUserStatus(fid, points)
-        // console.log('5', fid, points)
 
         if (userRemainingImpact || userRemainingImpact !== 0) {
     
@@ -133,16 +132,13 @@ export default async function handler(req, res) {
                       creator_fid: authorFid,
                       impact_points: impactAmount
                     });
-                    console.log('newImpact', newImpact)
                     newImpact.points = points
-                    console.log('newImpact2', newImpact)
 
                     return newImpact
                   }
                   
     
                   const saveAll = async (user, impactDoc, cast) => {
-                    console.log(user, impactDoc, cast)
                     try {
                       const [savedUser, savedImpact, savedCast] = await Promise.all([
                         user.save(),
@@ -237,7 +233,6 @@ export default async function handler(req, res) {
                       user.impact_reviews.push(impactDoc)
                       let impactTotal = cast.impact_total
                       let curatorCount = cast.impact_points.length
-                      console.log('impactDoc', impactDoc)
                       const { balance, castImpact } = await saveAll(user, impactDoc, cast)
                       return { balance, castImpact, impactTotal, curatorCount, qualityBalance: cast.quality_balance, qualityTotal: cast.quality_absolute }
                     }
@@ -259,10 +254,8 @@ export default async function handler(req, res) {
             const { balance, castImpact, impactTotal, curatorCount, qualityBalance, qualityTotal } = await updateListings(fid, impactAmount, points)
     
             if ((balance || balance == 0) && castImpact) {
-              // console.log('19')
               return { balance, castImpact, impactTotal, curatorCount, qualityBalance, qualityTotal }
             } else {
-              // console.log('20')
               return { balance: null, castImpact: null, impactTotal: null, curatorCount: null, qualityBalance: null, qualityTotal: null }
             }
           } else {
