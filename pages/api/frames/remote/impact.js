@@ -126,13 +126,14 @@ export default async function handler(req, res) {
                   let cast = await Cast.findOne({ cast_hash: castHash, points: points }).exec();
     
                   function createdImpact(fid, impactAmount, points) {
-                    const newImpact = new Impact({
+                    let newImpact = new Impact({
                       curator_fid: fid,
                       target_cast_hash: castHash,
                       points: points,
                       creator_fid: authorFid,
                       impact_points: impactAmount
                     });
+                    newImpact.points = points
                     return newImpact
                   }
                   
