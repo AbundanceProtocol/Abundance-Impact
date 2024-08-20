@@ -208,7 +208,7 @@ export default async function handler(req, res) {
                       }
                     }
   
-                    if (ecosystem.bot_reply && existImpact > 0) {
+                    if (ecosystem.bot_reply && existImpact == 0) {
                       nominationCast(cast.author_username, user.username, ecosystem.ecosystem_name, castHash, signer, ecosystem.ecosystem_handle, fid, eco)
                     }
 
