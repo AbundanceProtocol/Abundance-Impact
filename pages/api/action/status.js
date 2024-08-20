@@ -197,8 +197,8 @@ export default async function handler(req, res) {
         try {
           await connectToDatabase();
   
-          let impact = await Impact.countDocuments({ target_cast_hash: castHash, curator_fid: curatorFid, points })
-          console.log('impact data', castHash, curatorFid, points)
+          let impact = await Impact.countDocuments({ target_cast_hash: castHash, curator_fid: parseInt(curatorFid), points })
+          console.log('impact data', castHash, curatorFid, points, typeof curatorFid)
           console.log('impact', impact)
 
           if (impact) {
