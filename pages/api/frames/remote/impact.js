@@ -28,6 +28,7 @@ export default async function handler(req, res) {
     const impactAmount = parseInt(addImpact)
     const eco = points?.substring(1)
     // const points = '$' + eco
+    const inputText = req.body.untrustedData?.inputText
     const curatorFid = req.body.untrustedData.fid
     const castHash = req.body.untrustedData.castId.hash
     const authorFid = req.body.untrustedData.castId.fid
@@ -169,13 +170,17 @@ export default async function handler(req, res) {
                     impactDoc = await Impact.findOne({ target_cast_hash: castHash, points }).sort({ createdAt: -1 }).exec();
 
                     async function nominationCast(user, curator, ecosystem, hash, signer, handle, fid, eco) {
+                      let text = ''
+                      if (inputText && inputText !== '') {
+                        text = `@${curator} comment: "${inputText}"\n\n`
+                      }
                       try {
                         const base = "https://api.neynar.com/";
                         const url = `${base}v2/farcaster/cast`;
-                  
+                        
                         let body = {
                           signer_uuid: signer,
-                          text: `@${user} has been nominated by @${curator} to the ${ecosystem} Ecosystem on /impact\n\nHelp support @${curator}'s nominees:`,
+                          text: `${text}@${user} has been nominated by @${curator} to the ${ecosystem} Ecosystem on /impact\n\nHelp support @${curator}'s nominees:`,
                         };
                         
                         const frameUrl = `https://impact.abundance.id/~/ecosystems/${handle}/tip?time=all&shuffle=true&curators=${fid}&eco=${eco}&referrer=${fid}`
