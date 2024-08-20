@@ -61,13 +61,13 @@ export default async function handler(req, res) {
 
       button1 = `<meta property="fc:frame:button:1" content='+1 ${pt}' />
       <meta property="fc:frame:button:1:action" content="post" />
-      <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/remote/test?${qs.stringify({ iB, qB, qT, author, iA, qA, ecosystem, login, pt, cu, impact, quality, cI, hash })}' />`
+      <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/remote/impact?${qs.stringify({ addImpact: 1, iB, qB, qT, author, iA, qA, ec: ecosystem, login, pt, cu, impact, ql: quality, cI, hash })}' />`
       button2 = `<meta property="fc:frame:button:2" content='Upvote' />
       <meta property="fc:frame:button:2:action" content="post" />
-      <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/remote/test?${qs.stringify({ iB, qB, qT, author, iA, qA, ecosystem, login, pt, cu, impact, quality, cI, hash })}' />`
+      <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/remote/quality?${qs.stringify({ addQuality: 1, iB, qB, qT, author, iA, qA, ec: ecosystem, login, pt, cu, impact, ql: quality, cI, hash })}' />`
       button3 = `<meta property="fc:frame:button:3" content='Downvote' />
       <meta property="fc:frame:button:3:action" content="post" />
-      <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/remote/test?${qs.stringify({ iB, qB, qT, author, iA, qA, ecosystem, login, pt, cu, impact, quality, cI, hash })}' />`
+      <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/remote/quality?${qs.stringify({ addQuality: -1, iB, qB, qT, author, iA, qA, ec: ecosystem, login, pt, cu, impact, ql: quality, cI, hash })}' />`
       button4 = `<meta property="fc:frame:button:4" content='More >' />
       <meta property="fc:frame:button:4:action" content="post" />
       <meta property="fc:frame:button:4:target" content='https://impact.abundance.id/api/frames/remote/test?${qs.stringify({ iB, qB, qT, author, iA, qA, ecosystem, login, pt, cu, impact, quality, cI, hash })}' />`
@@ -75,10 +75,10 @@ export default async function handler(req, res) {
       console.log('4')
       button1 = `<meta property="fc:frame:button:1" content='+1 ${pt}' />
       <meta property="fc:frame:button:1:action" content="post" />
-      <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/remote/test?${qs.stringify({ iB, qB, qT, author, iA, qA, ecosystem, login, pt, cu, impact, quality, cI, hash })}' />`
+      <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/remote/impact?${qs.stringify({ addImpact: 1, iB, qB, qT, author, iA, qA, ec: ecosystem, login, pt, cu, impact, ql: quality, cI, hash })}' />`
       button2 = `<meta property="fc:frame:button:2" content='+5 ${pt}' />
       <meta property="fc:frame:button:2:action" content="post" />
-      <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/remote/test?${qs.stringify({ iB, qB, qT, author, iA, qA, ecosystem, login, pt, cu, impact, quality, cI, hash })}' />`
+      <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/remote/impact?${qs.stringify({ addImpact: 5, iB, qB, qT, author, iA, qA, ec: ecosystem, login, pt, cu, impact, ql: quality, cI, hash })}' />`
       button3 = `<meta property="fc:frame:button:3" content='More >' />
       <meta property="fc:frame:button:3:action" content="post" />
       <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/remote/test?${qs.stringify({ iB, qB, qT, author, iA, qA, ecosystem, login, pt, cu, impact, quality, cI, hash })}' />`
@@ -86,10 +86,10 @@ export default async function handler(req, res) {
       console.log('5')
       button1 = `<meta property="fc:frame:button:1" content='Upvote' />
       <meta property="fc:frame:button:1:action" content="post" />
-      <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/remote/test?${qs.stringify({ iB, qB, qT, author, iA, qA, ecosystem, login, pt, cu, impact, quality, cI, hash })}' />`
+      <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/remote/quality?${qs.stringify({ addQuality: 1, iB, qB, qT, author, iA, qA, ec: ecosystem, login, pt, cu, impact, ql: quality, cI, hash })}' />`
       button2 = `<meta property="fc:frame:button:2" content='Downvote' />
       <meta property="fc:frame:button:2:action" content="post" />
-      <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/remote/test?${qs.stringify({ iB, qB, qT, author, iA, qA, ecosystem, login, pt, cu, impact, quality, cI, hash })}' />`
+      <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/remote/quality?${qs.stringify({ addQuality: -1, iB, qB, qT, author, iA, qA, ec: ecosystem, login, pt, cu, impact, ql: quality, cI, hash })}' />`
       button3 = `<meta property="fc:frame:button:3" content='More >' />
       <meta property="fc:frame:button:3:action" content="post" />
       <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/remote/test?${qs.stringify({ iB, qB, qT, author, iA, qA, ecosystem, login, pt, cu, impact, quality, cI, hash })}' />`
