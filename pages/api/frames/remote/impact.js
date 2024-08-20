@@ -231,6 +231,7 @@ export default async function handler(req, res) {
     
                     } else {
                       impactDoc = createdImpact(fid, impactAmount)
+                      impactDoc.points = points
                       cast.impact_total += impactAmount
                       cast.impact_points.push(impactDoc)
                       user.impact_reviews.push(impactDoc)
