@@ -133,7 +133,10 @@ export default async function handler(req, res) {
                       creator_fid: authorFid,
                       impact_points: impactAmount
                     });
+                    console.log('newImpact', newImpact)
                     newImpact.points = points
+                    console.log('newImpact2', newImpact)
+
                     return newImpact
                   }
                   
