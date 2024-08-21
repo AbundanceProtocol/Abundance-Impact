@@ -1,12 +1,12 @@
 import { getSSLHubRpcClient, Message } from "@farcaster/hub-nodejs";
 import qs from "querystring";
 
-import connectToDatabase from "../../../libs/mongodb";
-import User from '../../../models/User';
-import Impact from '../../../models/Impact';
-import Quality from '../../../models/Quality';
-import Cast from "../../../models/Cast";
-import EcosystemRules from "../../../models/EcosystemRules";
+import connectToDatabase from "../../../../libs/mongodb";
+import User from '../../../../models/User';
+import Impact from '../../../../models/Impact';
+import Quality from '../../../../models/Quality';
+import Cast from "../../../../models/Cast";
+import EcosystemRules from "../../../../models/EcosystemRules";
 
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 const HubURL = process.env.NEYNAR_HUB
