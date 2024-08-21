@@ -264,9 +264,9 @@ export default async function handler(req, res) {
           button2 = `<meta property="fc:frame:button:2" content='Downvote' />
           <meta property="fc:frame:button:2:action" content="post" />
           <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/remote/quality?${qs.stringify({ addQuality: -1, iB: impactTotal, qB: qualityBalance, qT: qualityTotal, author, iA, qA: userBalance, ec, login, pt, cu, impact: 0, ql: 1, cI, hash: castHash })}' />`
-          button3 = `<meta property="fc:frame:button:3" content='More >' />
-          <meta property="fc:frame:button:3:action" content="post" />
-          <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/remote/test?${qs.stringify({ iB: impactTotal, qB: qualityBalance, qT: qualityTotal, author, iA, qA: userBalance, ecosystem, login, pt, cu, impact: 0, quality: 1, cI, hash: castHash })}' />`
+          // button3 = `<meta property="fc:frame:button:3" content='More >' />
+          // <meta property="fc:frame:button:3:action" content="post" />
+          // <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/remote/test?${qs.stringify({ iB: impactTotal, qB: qualityBalance, qT: qualityTotal, author, iA, qA: userBalance, ecosystem, login, pt, cu, impact: 0, quality: 1, cI, hash: castHash })}' />`
       
           metatags = button1 + button2 + button3 + button4 + textField + postUrl
 

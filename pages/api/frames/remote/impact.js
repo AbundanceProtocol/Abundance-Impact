@@ -319,9 +319,9 @@ export default async function handler(req, res) {
         button2 = `<meta property="fc:frame:button:2" content='+5 ${pt}' />
         <meta property="fc:frame:button:2:action" content="post" />
         <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/remote/impact?${qs.stringify({ addImpact: 5, iB: castImpact, qB: qualityBalance, qT: qualityTotal, author, iA: balance, qA, ec, login, pt, cu, impact, ql, cI, hash: castHash })}' />`
-        button3 = `<meta property="fc:frame:button:3" content='More >' />
-        <meta property="fc:frame:button:3:action" content="post" />
-        <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/remote/test?${qs.stringify({ iB: castImpact, qB: qualityBalance, qT: qualityTotal, author, iA: balance, qA, ecosystem, login, pt, cu, impact, quality, cI, hash: castHash })}' />`
+        // button3 = `<meta property="fc:frame:button:3" content='More >' />
+        // <meta property="fc:frame:button:3:action" content="post" />
+        // <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/remote/test?${qs.stringify({ iB: castImpact, qB: qualityBalance, qT: qualityTotal, author, iA: balance, qA, ecosystem, login, pt, cu, impact, quality, cI, hash: castHash })}' />`
         
     
         metatags = button1 + button2 + button3 + button4 + textField + postUrl
