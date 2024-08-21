@@ -256,7 +256,7 @@ export default async function handler(req, res) {
           }
 
 
-          balanceImg = `${baseURL}/api/frames/remote/balance?${qs.stringify({ iB: impactTotal, qB: qualityBalance, qT: qualityTotal, author, iA: balance, qA: userBalance, ecosystem: ec, login, pt, cu })}`
+          balanceImg = `${baseURL}/api/frames/remote/balance?${qs.stringify({ iB: impactTotal, qB: qualityBalance, qT: qualityTotal, author, iA, qA: userBalance, ecosystem: ec, login, pt, cu })}`
 
           button1 = `<meta property="fc:frame:button:1" content='Upvote' />
           <meta property="fc:frame:button:1:action" content="post" />
