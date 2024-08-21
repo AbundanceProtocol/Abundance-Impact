@@ -32,11 +32,11 @@ export default async function handler(req, res) {
     const signer = decryptPassword(encryptedBotUuid, secretKey)
 
 
-    let balanceImg = `${baseURL}/api/frames/remote/balance?${qs.stringify({ iB, qB, qT, author, iA, qA, ecosystem: ec, login, pt, cu })}`
+    let balanceImg = `${baseURL}/api/frames/console/balance?${qs.stringify({ iB, qB, qT, author, iA, qA, ecosystem: ec, login, pt, cu })}`
 
     let button1 = `<meta property="fc:frame:button:2" content='Refresh' />
       <meta property="fc:frame:button:2:action" content="post" />
-      <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/remote/test?${qs.stringify({ iB, qB, qT, author, iA, qA, ecosystem: ec, login, pt, cu, impact: 0, quality: 1, cI, hash })}' />`
+      <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/console/test?${qs.stringify({ iB, qB, qT, author, iA, qA, ecosystem: ec, login, pt, cu, impact: 0, quality: 1, cI, hash })}' />`
     let button2 = ''
     let button3 = ''
     let button4 = ''
@@ -256,17 +256,17 @@ export default async function handler(req, res) {
           }
 
 
-          balanceImg = `${baseURL}/api/frames/remote/balance?${qs.stringify({ iB: impactTotal, qB: qualityBalance, qT: qualityTotal, author, iA, qA: userBalance, ecosystem: ec, login, pt, cu })}`
+          balanceImg = `${baseURL}/api/frames/console/balance?${qs.stringify({ iB: impactTotal, qB: qualityBalance, qT: qualityTotal, author, iA, qA: userBalance, ecosystem: ec, login, pt, cu })}`
 
           button1 = `<meta property="fc:frame:button:1" content='Upvote' />
           <meta property="fc:frame:button:1:action" content="post" />
-          <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/remote/quality?${qs.stringify({ addQuality: 1, iB: impactTotal, qB: qualityBalance, qT: qualityTotal, author, iA, qA: userBalance, ec, login, pt, cu, impact: 0, ql: 1, cI, hash: castHash })}' />`
+          <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/console/quality?${qs.stringify({ addQuality: 1, iB: impactTotal, qB: qualityBalance, qT: qualityTotal, author, iA, qA: userBalance, ec, login, pt, cu, impact: 0, ql: 1, cI, hash: castHash })}' />`
           button2 = `<meta property="fc:frame:button:2" content='Downvote' />
           <meta property="fc:frame:button:2:action" content="post" />
-          <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/remote/quality?${qs.stringify({ addQuality: -1, iB: impactTotal, qB: qualityBalance, qT: qualityTotal, author, iA, qA: userBalance, ec, login, pt, cu, impact: 0, ql: 1, cI, hash: castHash })}' />`
+          <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/console/quality?${qs.stringify({ addQuality: -1, iB: impactTotal, qB: qualityBalance, qT: qualityTotal, author, iA, qA: userBalance, ec, login, pt, cu, impact: 0, ql: 1, cI, hash: castHash })}' />`
           // button3 = `<meta property="fc:frame:button:3" content='More >' />
           // <meta property="fc:frame:button:3:action" content="post" />
-          // <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/remote/test?${qs.stringify({ iB: impactTotal, qB: qualityBalance, qT: qualityTotal, author, iA, qA: userBalance, ecosystem, login, pt, cu, impact: 0, quality: 1, cI, hash: castHash })}' />`
+          // <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/test?${qs.stringify({ iB: impactTotal, qB: qualityBalance, qT: qualityTotal, author, iA, qA: userBalance, ecosystem, login, pt, cu, impact: 0, quality: 1, cI, hash: castHash })}' />`
       
           metatags = button1 + button2 + button3 + button4 + textField + postUrl
 
