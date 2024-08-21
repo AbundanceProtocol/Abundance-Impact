@@ -3,20 +3,19 @@ import { useRouter } from 'next/router';
 import { useRef, useEffect, useState, useContext } from 'react';
 import axios from 'axios';
 import { FaStar, FaExternalLinkAlt } from "react-icons/fa"
-import { Like, LikeOn, Recast, Message, Kebab, ActiveUser } from '../../../assets'
-import { timePassed } from '../../../../utils/utils';
+import { Like, LikeOn, Recast, Message, Kebab, ActiveUser } from '../../assets'
+import { timePassed } from '../../../utils/utils';
 import { IoDiamondOutline as Diamond } from "react-icons/io5";
 import { ImArrowUp, ImArrowDown  } from "react-icons/im";
-import { AccountContext } from '../../../../context';
+import { AccountContext } from '../../../context';
 import cheerio from 'cheerio'
-import FrameButton from '../../../../components/Cast/Frame/Button';
+import FrameButton from '../../../components/Cast/Frame/Button';
 import qs from "querystring";
-import Circle from '../../../../models/Circle';
 
 // import useStore from '../../../utils/store';
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 
-export default function Tips({time, curators, channels, tags, eco, ecosystem, fids, text, username, id}) {
+export default function Tips() {
   const { LoginPopup, fid, userBalances, isLogged } = useContext(AccountContext)
   const index = 0
   const router = useRouter();
@@ -43,28 +42,32 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem, fi
   const initFrame = 
     {
       version: "vNext",
-      title: "Multi-Tip",
-      image: `${baseURL}/images/tips.jpg`,
+      title: "Personal /impact",
+      image: `${baseURL}/images/personal.png`,
       image_aspect_ratio: "1:1",
       buttons: [
         {
           index: 1,
-          title: "Multi tip >",
-          action_type: "post",
-          target: `${baseURL}/api/frames/tips/tip?tip=0`
+          title: "Login",
+          action_type: "link",
+          target: `https://impact.abundance.id`
         },
         {
           index: 2,
-          title: "What's /impact?",
-          action_type: "link",
-          target: `https://warpcast.com/abundance/0x43ddd672`
+          title: "How it works",
+          action_type: "post",
+          target: `${baseURL}/api/frames/personal/how-to`
         },
+        {
+          index: 3,
+          title: "Cast Action",
+          action_type: "link",
+          target: `https://warpcast.com/~/add-cast-action?name=%2B1+%24IMPACT&icon=star&actionType=post&postUrl=https%3A%2Fimpact.abundance.id%2Fapi%2Faction%2Fimpact1%3Fpoints=IMPACT&description=Curate+Casts+with+the+Impact+App`
+        }
       ],
-      input: {
-        text: "Eg.: 1000 $Degen, 500 $FARTHER"
-      },
+      input: {},
       state: {},
-      frames_url: `${baseURL}/~/ecosystems/${ecosystem}/tips`
+      frames_url: `https://impact.abundance.id`
     }
   const [frameData, setFrameData] = useState(initFrame)
   const initCast = {
@@ -92,49 +95,47 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem, fi
     quality_balance: 0
   }
   const [cast, setCast] = useState(initCast)
-  const initQuery = {time: 'all', curators: [], channels: [], tags: [], shuffle: true, referrer: null, eco: null, ecosystem: null}
-  const [queryData, setQueryData] = useState(initQuery)
+  // const initQuery = {time: '&time=all', curators: '', channels: '', tags: '', shuffle: '&shuffle=true', referrer: '', eco: '&eco=IMPACT', ecosystem: '&ecosystem=abundance'}
+  // const [queryData, setQueryData] = useState(initQuery)
 
   useEffect(() => {
-    // console.log(time, curators, shuffle, referrer, eco, ecosystem)
+    // console.log(time, curators, eco, ecosystem)
 
-    let timeQuery = '&time=all'
-    let curatorsQuery = ''
+    // let timeQuery = '&time=all'
+    // let curatorsQuery = ''
     // let shuffleQuery = '&shuffle=true'
     // let referrerQuery = ''
-    let ecoQuery = '&eco=IMPACT'
-    let ecosystemQuery = '&ecosystem=abundance'
-    if (time) {
-      timeQuery = '&time=' + time
-    }
-    if (curators) {
-      console.log(curators)
-      for (const curator of curators) {
-        curatorsQuery += '&curators=' + parseInt(curator)
-      }
-    }
+    // let ecoQuery = '&eco=IMPACT'
+    // let ecosystemQuery = '&ecosystem=abundance'
+    // if (time) {
+      // timeQuery = '&time=' + time
+    // }
+    // if (curators) {
+      // console.log(curators)
+      // for (const curator of curators) {
+        // curatorsQuery += '&curators=' + parseInt(curator)
+      // }
+    // }
     // if (shuffle || shuffle == false) {
     //   shuffleQuery = '&shuffle=' + shuffle
     // }
     // if (referrer) {
     //   referrerQuery = '&referrer=' + referrer
     // }
-    if (eco) {
-      ecoQuery = '&eco=' + eco
-    }
-    if (ecosystem) {
-      ecosystemQuery = '&ecosystem=' + ecosystem
-    }
+    // if (eco) {
+    //   ecoQuery = '&eco=' + eco
+    // }
+    // if (ecosystem) {
+    //   ecosystemQuery = '&ecosystem=' + ecosystem
+    // }
 
-    setQueryData(prev => ({ 
-      ...prev, 
-      time: timeQuery, 
-      curators: curatorsQuery, 
-      // shuffle: shuffleQuery, 
-      // referrer: referrerQuery, 
-      eco: ecoQuery, 
-      ecosystem: ecosystemQuery
-    }))
+    // setQueryData(prev => ({ 
+    //   ...prev, 
+    //   time: timeQuery, 
+    //   curators: curatorsQuery, 
+    //   eco: ecoQuery, 
+    //   ecosystem: ecosystemQuery
+    // }))
 
     const handleResize = () => {
       setScreenWidth(window.innerWidth)
@@ -150,18 +151,18 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem, fi
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router]);
 
-  useEffect(() => {
-    console.log(queryData)
+  // useEffect(() => {
+  //   console.log(queryData)
 
-    const updatedFrameData = {...frameData}
-    updatedFrameData.buttons[0].target = `${baseURL}/api/frames/tip/tip?${qs.stringify({    
-      time, curators, eco, ecosystem, start: true
-    })}`
+  //   const updatedFrameData = {...frameData}
+  //   updatedFrameData.buttons[0].target = `https://impact.abundance.id`
 
-    updatedFrameData.image = `${baseURL}/api/frames/tip/circle?${qs.stringify({ id })}`
+  //   updatedFrameData.buttons[1].target = `${baseURL}/api/frames/personal/how-to`
 
-    setFrameData(updatedFrameData)
-  }, [queryData]);
+  //   updatedFrameData.buttons[3].target = `https://warpcast.com/~/add-cast-action?name=%2B1+%24IMPACT&icon=star&actionType=post&postUrl=https%3A%2Fimpact.abundance.id%2Fapi%2Faction%2Fimpact1%3Fpoints=IMPACT&description=Curate+Casts+with+the+Impact+App`
+
+  //   setFrameData(updatedFrameData)
+  // }, [queryData]);
 
 
   function growPoints(points) {
@@ -206,7 +207,7 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem, fi
   }, [screenWidth])
   
   const buttonAction = async (button) => {
-    console.log(queryData.time + queryData.curators + queryData.points + queryData.ecosystem)
+    // console.log(queryData.time + queryData.curators + queryData.points + queryData.ecosystem)
     const updatedPayload = {...payload}
     updatedPayload.buttonIndex = button.index
     updatedPayload.inputText = inputText
@@ -284,36 +285,34 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem, fi
 
   return (
     <div className='flex-col' style={{width: 'auto', position: 'relative'}} ref={ref}>
-            
-    {queryData && (
-      <Head>
-        <title>Tips | Impact App</title>
-        <meta name="description" content={`Support builder and creators with Impact App`} />
-        <meta name="viewport" content="width=device-width"/>
-        <meta property="og:title" content="Multi-Tip" />
-        <meta property='og:image' content={`${baseURL}/api/frames/tip/circle?${qs.stringify({    
-          id })}`} />
-        <meta property="fc:frame" content="vNext" />
-        <meta property="fc:frame:image" content={`${baseURL}/api/frames/tip/circle?${qs.stringify({    
-          id })}`} />
-        <meta property="fc:frame:image:aspect_ratio" content="1:1" />
-        <meta property="fc:frame:button:1" content='Multi-tip >' />
-        <meta property="fc:frame:button:1:action" content="post" />
 
-        <meta property="fc:frame:button:1:target" content={`${baseURL}/api/frames/tip/tip?${qs.stringify({    
-          time, curators, eco, ecosystem, start: true
-        })}`} />
+    <Head>
+      <title>Tips | Impact App</title>
+      <meta name="description" content={`Support builder and creators with Impact App`} />
+      <meta name="viewport" content="width=device-width"/>
+      <meta property="og:title" content="Personal /impact" />
+      <meta property='og:image' content={`${baseURL}/images/personal.png`} />
+      <meta property="fc:frame" content="vNext" />
+      <meta property="fc:frame:image" content={`${baseURL}/images/personal.png`} />
+      <meta property="fc:frame:image:aspect_ratio" content="1:1" />
 
-        <meta property="fc:frame:button:2" content={`What's /impact?`} />
-        <meta property="fc:frame:button:2:action" content="link" />
-        <meta property="fc:frame:button:2:target" content={`https://warpcast.com/abundance/0x43ddd672`} />
+      <meta property="fc:frame:button:1" content={`Login`} />
+      <meta property="fc:frame:button:1:action" content="link" />
+      <meta property="fc:frame:button:1:target" content={`https://impact.abundance.id`} />
+      <meta property="fc:frame:button:2" content={`How it works`} />
+      <meta property="fc:frame:button:2:action" content="post" />
 
-        <meta name="fc:frame:input:text" content="Eg.: 1000 $Degen, 500 $FARTHER" />
-      </Head>
-    )}
+      <meta property="fc:frame:button:2:target" content={`${baseURL}/api/frames/personal/how-to`} />
+
+      <meta property="fc:frame:button:3" content='Cast Action' />
+      <meta property="fc:frame:button:3:action" content="link" />
+
+      <meta property="fc:frame:button:3:target" content={`https://warpcast.com/~/add-cast-action?name=%2B1+%24IMPACT&icon=star&actionType=post&postUrl=https%3A%2Fimpact.abundance.id%2Fapi%2Faction%2Fimpact1%3Fpoints=IMPACT&description=Curate+Casts+with+the+Impact+App`} />
+      <meta name="fc:frame:post_url" content={`https://impact.abundance.id`} />
+    </Head>
+
     <div className="" style={{padding: '58px 0 0 0'}}>
     </div>
-
 
     <>{
     cast && (<div className="inner-container" style={{width: '100%', display: 'flex', flexDirection: 'row'}}>
@@ -517,82 +516,13 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem, fi
                 }}>
                 <ImArrowDown />
               </div>
+
             </div>
           </div>
         </div>
       </div>
     </div>)}</>
+
     </div>
   );
-}
-
-
-export async function getServerSideProps(context) {
-  const { query, params } = context;
-  const { id } = query;
-  const { ecosystem } = params;
-  
-  async function getCircle(id) {
-    if (id) {
-      try {
-        const objectId = new mongoose.Types.ObjectId(id)
-        console.log(id)
-        await connectToDatabase();
-        let circle = await Circle.findOne({ _id: objectId }).exec();
-        if (circle) {
-          let eco = ''
-          if (circle.points) {
-            eco = circle?.points?.substring(1)
-          }
-          return { time: circle?.time, curators: circle?.curators, channels: circle?.channels, eco, username: circle?.username }
-        } else {
-          return { time: 'all', curators: [], channels: [], eco: null, username: '' }
-        }
-      } catch (error) {
-        console.error("Error while fetching casts:", error);
-        return { time: 'all', curators: [], channels: [], eco: null, username: '' }
-      }  
-    } else {
-      return { time: 'all', curators: [], channels: [], eco: null, username: '' }
-    }
-  }
-  
-  const { time, curators, channels, eco, username } = await getCircle(id)
-  
-  let setId = ''
-  if (id) {
-    setId = id
-  }
-  let setUsername = ''
-  if (username) {
-    setUsername = username
-  }
-  let setEco = null
-  if (eco) {
-    setEco = eco
-  }
-  let setTime = 'all'
-  if (time) {
-    setTime = time
-  }
-  let setCurators = []
-  if (curators) {
-    setCurators = Array.isArray(curators) ? parseInt(curators) : [parseInt(curators)]
-  }  
-  let setChannels = []
-  if (channels) {
-    setChannels = Array.isArray(channels) ? channels : [channels]
-  }
-
-  return {
-    props: {
-      time: setTime,
-      curators: setCurators,
-      channels: setChannels,
-      eco: setEco,
-      ecosystem: ecosystem,
-      username: setUsername,
-      id: setId
-    },
-  };
 }

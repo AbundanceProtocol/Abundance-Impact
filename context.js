@@ -151,7 +151,11 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
       if (isLogged && ecoData) {
         setPopulate(populate+1)
         setPoints(ecoData?.ecosystem_points_name)
-        getRemainingBalances(store.fid, ecoData?.ecosystem_points_name, store.signer_uuid)
+        if (router.route == '/') {
+          getRemainingBalances(store.fid, points, store.signer_uuid)
+        } else {
+          getRemainingBalances(store.fid, ecoData?.ecosystem_points_name, store.signer_uuid)
+        }
       }
     }
 
@@ -184,11 +188,13 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
         setFid(null)
         setUserBalances({impact: 0, qdau: 0})
         setUserProfile(null)
-        LoginPopup()
+        if (router.route !== '/') {
+          LoginPopup()
+        }
       }
     }
 
-    if (router.route !== "/~/ecosystems/[ecosystem]/tip" && router.route !== "/~/ecosystems/[ecosystem]/[eco]/[curators]/tip" && router.route !== '/') {
+    if (router.route !== "/~/ecosystems/[ecosystem]/tip" && router.route !== "/~/ecosystems/[ecosystem]/[eco]/[curators]/tip") {
       if (sched.login) {
         updateLogin()
         setSched(prev => ({...prev, login: false }))
@@ -208,6 +214,7 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
       const response = await axios.get('/api/ecosystem/getBalances', {
         params: { fid, points } })
       if (response?.data?.user) {
+        console.log(response?.data?.user)
         const remainingImpact = response?.data?.user?.remaining_i_allowance || 0
         const remainingQuality = response?.data?.user?.remaining_q_allowance || 0
         setUserBalances(prev => ({
@@ -292,6 +299,7 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
     LogoutPopup,
     changeEco,
     getEcosystems,
+    getRemainingBalances,
     fid, setFid,
     points, setPoints,
     ecoData, setEcoData,

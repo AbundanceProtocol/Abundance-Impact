@@ -89,7 +89,7 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
   const initialState = { fid: null, signer: null, urls: [], channel: null, parentUrl: null, text: '' }
 	const [castData, setCastData] = useState(initialState)
   const [loading, setLoading] = useState(false);
-  const tokenInfo = [{token: '$DEGEN', set: true}, {token: '$TN100x', set: false}, {token: '$FARTHER', set: false}]
+  const tokenInfo = [{token: '$DEGEN', set: true}, {token: '$TN100x', set: false}]
   const [tokenData, setTokenData] = useState(tokenInfo)
   const [isSelected, setIsSelected] = useState('none')
 	const [userSearch, setUserSearch] = useState({ search: '' })

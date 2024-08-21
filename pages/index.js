@@ -3,8 +3,6 @@ import React, { useContext, useState, useRef, useEffect } from 'react'
 import { AccountContext } from '../context'
 import { useRouter } from 'next/router';
 import { useInView } from 'react-intersection-observer'
-import ExpandImg from '../components/Cast/ExpandImg';
-import Modal from '../components/Layout/Modals/Modal';
 import Item from '../components/Ecosystem/ItemWrap/Item';
 import Description from '../components/Ecosystem/Description';
 import ItemWrap from '../components/Ecosystem/ItemWrap';
@@ -12,7 +10,6 @@ import useMatchBreakpoints from '../hooks/useMatchBreakpoints';
 import { FaLock, FaUser, FaGlobe, FaPlus, FaRegStar, FaCoins, FaAngleDown, FaShareAlt as Share } from "react-icons/fa";
 import { HiOutlineAdjustmentsHorizontal as Adjust } from "react-icons/hi2";
 import { GrSchedulePlay as Sched } from "react-icons/gr";
-import { BiSolidDonateHeart as Donate } from "react-icons/bi";
 import { AiFillSafetyCertificate as Aligned } from "react-icons/ai";
 import { GiRibbonMedal as Medal } from "react-icons/gi";
 import { MdAdminPanelSettings as Mod } from "react-icons/md";
@@ -24,8 +21,7 @@ import { IoInformationCircleOutline as Info } from "react-icons/io5";
 import { PiSquaresFourLight as Actions } from "react-icons/pi";
 import { Logo } from './assets';
 
-
-export default function Home() {
+export default function Home({eco}) {
   const ref2 = useRef(null)
   const [ref, inView] = useInView()
   const { LoginPopup, ecoData, points, setPoints, isLogged, showLogin, setShowLogin, setIsLogged, setFid } = useContext(AccountContext)
@@ -77,7 +73,6 @@ export default function Home() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-
   useEffect(() => {
     if (screenWidth) {
       if (screenWidth > 680) {
@@ -99,6 +94,10 @@ export default function Home() {
     }
   }, [screenWidth])
 
+  useEffect(() => {
+    setPoints(eco)
+  }, [eco])
+
 
   return (
   <div name='feed' style={{width: 'auto', maxWidth: '620px'}} ref={ref2}>
@@ -109,22 +108,17 @@ export default function Home() {
     <div style={{padding: isMobile ? '58px 0 20px 0' : '58px 0 60px 0', width: feedMax}}>
     </div>
 
-    <div style={{padding: '0px 4px 0px 4px', width: feedMax}}>
+    <div style={{padding: '0px 4px 80px 4px', width: feedMax}}>
 
       <div className='flex-col' style={{width: '100%', justifyContent: 'center', alignItems: 'center'}}>
         <Logo className='rotate' height={isMobile ? '95px' : '165px'} width={isMobile ? '95px' : '165px'} style={{fill: '#9ce'}} />
         <Description {...{show: true, text: '/impact', padding: '30px 0 14px 5px', size: 'title'}} />
 
-
         <div className='flex-row' style={{color: '#ace', width: '100%', fontSize: isMobile ? '24px' : '33px', padding: '0px 10px 35px 10px', textAlign: 'center', justifyContent: 'center'}}>boost & reward creators on farcaster</div>
-
-
-
 
         <div className='flex-row' style={{color: '#ace', width: '95%', fontSize: isMobile ? '17px' : '22px', padding: '10px 10px 25px 10px', textAlign: 'center', fontWeight: '400'}}><p>/impact aims to accelerate Farcaster&apos;s transition from an <strong>Attention Economy</strong> to a <strong>Creation Economy</strong></p></div>
 
         <div className='flex-row' style={{color: '#8ac', width: '90%', fontSize: isMobile ? '14px' : '18px', padding: '0px 10px 5px 10px', textAlign: 'center', fontWeight: '400', justifyContent: 'center'}}>Currently building (alpha):</div>
-
 
         <div className='flex-row' style={{gap: '0.75rem', margin: '8px', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center'}}>
           <div onClick={() => document.getElementById('personal').scrollIntoView({ behavior: 'smooth' })}>
@@ -141,8 +135,6 @@ export default function Home() {
             </div>
           </div>
         </div>
-
-
 
         <div className={isMobile ? 'flex-col' : 'flex-row'} style={{alignItems: 'center', gap: '1.5rem'}}>
           <div className='flex-row' style={{color: '#579', width: isMobile ? '90%' : '50%', fontSize: isMobile ? '14px' : '15px', padding: isMobile ? '40px 10px 15px 10px' : '60px 10px 75px 10px', textAlign: 'center', fontWeight: '400'}}><p>In an <strong style={{color: '#8bf'}}>Attention Economy</strong> you build or create content or art, and then try to get attention for your work. The better you are at getting attention the more successful you are.</p></div>
@@ -215,6 +207,28 @@ export default function Home() {
               <div style={{fontSize: isMobile ? '15px' : '18px', fontWeight:'500', color: '#ace'}}>Get Cast Actions:</div>
             </div>
             <div className='flex-row' style={{gap: '0.5rem', margin: '8px', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center'}}>
+
+              {isLogged ? (<a className="" title={`$IMPACT Dashboard`} href={`https://warpcast.com/~/add-cast-action?name=%24IMPACT+Console&icon=star&actionType=post&postUrl=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Faction%2Fstatus%3Fpoints=IMPACT&description=Curate+Casts+with+the+Impact+App`} target="_blank" rel="noopener noreferrer">
+                <div className='flex-row cast-act-lt' style={{borderRadius: '8px', padding: '8px 8px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
+                  <FaRegStar size={14} />
+                  <p style={{padding: '0px', fontSize: '12px', fontWeight: '500', textWrap: 'nowrap'}}>$IMPACT Console</p>
+                </div>
+              </a>) : (
+                <div className={`flex-row`} onClick={LoginPopup}>
+                  <div>
+                    <div className='flex-row cast-act-lt' style={{borderRadius: '8px', padding: '8px 8px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', backgroundColor: '#bbb'}}>
+                      <FaRegStar size={14} />
+                      <p style={{padding: '0px', fontSize: '12px', fontWeight: '500', textWrap: 'nowrap', color: '#222'}}>$IMPACT Console</p>
+                    </div>
+                  </div>
+                  <div style={{position: 'relative', fontSize: '0', width: '0', height: '100%'}}>
+                    <div className='top-layer' style={{position: 'absolute', top: 0, left: 0, transform: 'translate(-50%, -50%)' }}>
+                      <FaLock size={8} color='#999' />
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {isLogged ? (<a className="" title={`+1 $IMPACT`} href={`https://warpcast.com/~/add-cast-action?name=%2B1+%24IMPACT&icon=star&actionType=post&postUrl=https%3A%2Fimpact.abundance.id%2Fapi%2Faction%2Fimpact1%3Fpoints=IMPACT&description=Curate+Casts+with+the+Impact+App`} target="_blank" rel="noopener noreferrer">
                 <div className='flex-row cast-act-lt' style={{borderRadius: '8px', padding: '8px 8px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
                   <FaRegStar size={14} />
@@ -236,7 +250,7 @@ export default function Home() {
                 </div>
               )}
 
-              {isLogged ? (<a className="" title={`+5 $IMPACT`} href={`https://warpcast.com/~/add-cast-action?name=%2B5+%24IMPACT&icon=star&actionType=post&postUrl=https%3A%2Fimpact.abundance.id%2Fapi%2Faction%2Fimpact5%3Fpoints=IMPACT&description=Curate+Casts+with+the+Impact+App`} target="_blank" rel="noopener noreferrer">
+              {/* {isLogged ? (<a className="" title={`+5 $IMPACT`} href={`https://warpcast.com/~/add-cast-action?name=%2B5+%24IMPACT&icon=star&actionType=post&postUrl=https%3A%2Fimpact.abundance.id%2Fapi%2Faction%2Fimpact5%3Fpoints=IMPACT&description=Curate+Casts+with+the+Impact+App`} target="_blank" rel="noopener noreferrer">
                 <div className='flex-row cast-act-lt' style={{borderRadius: '8px', padding: '8px 8px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
                   <FaRegStar size={14} />
                   <p style={{padding: '0px', fontSize: '12px', fontWeight: '500', textWrap: 'nowrap'}}>+5 $IMPACT</p>
@@ -255,9 +269,9 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-              )}
+              )} */}
 
-              {isLogged ? (<a className="" title={`$$IMPACT Balance`} href={`https://warpcast.com/~/add-cast-action?name=%24IMPACT+Stats&icon=info&actionType=post&postUrl=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Faction%2Fbalance?points=IMPACT&description=Get+Cast+Balance+for+Impact+App`} target="_blank" rel="noopener noreferrer">
+              {/* {isLogged ? (<a className="" title={`$$IMPACT Balance`} href={`https://warpcast.com/~/add-cast-action?name=%24IMPACT+Stats&icon=info&actionType=post&postUrl=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Faction%2Fbalance?points=IMPACT&description=Get+Cast+Balance+for+Impact+App`} target="_blank" rel="noopener noreferrer">
                 <div className='flex-row cast-act-lt' style={{borderRadius: '8px', padding: '8px 4px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
                   <div style={{width: '2px', fontSize: '0px'}}>&nbsp;</div>
                   <Info size={14} />
@@ -279,15 +293,14 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-              )}
+              )} */}
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <div id="ecosystem" style={{padding: '120px 4px 80px 4px', width: feedMax}}>
-
+    <div id="ecosystem" style={{padding: '40px 4px 80px 4px', width: feedMax}}>
       <div style={{padding: '8px', backgroundColor: '#335566aa', borderRadius: '15px', border: '1px solid #000'}}>
         <div className='flex-row' style={{width: '100%', justifyContent: 'center', alignItems: 'center', padding: '16px 0 0 0'}}>
           <FaGlobe style={{fill: '#cde'}} size={24} />
@@ -391,4 +404,16 @@ export default function Home() {
     <div ref={ref}>&nbsp;</div>
   </div>
   )
+}
+
+
+export async function getServerSideProps(context) {
+  const { query } = context;
+  const { eco } = query;
+
+  let setEco = eco || '$IMPACT'
+
+  return {
+    props: { eco: setEco }
+  };
 }
