@@ -307,7 +307,7 @@ export default function Tips() {
       <meta property="fc:frame:button:3" content='Cast Action' />
       <meta property="fc:frame:button:3:action" content="link" />
 
-      <meta property="fc:frame:button:3:target" content={`https://warpcast.com/~/add-cast-action?name=%2B1+%24IMPACT&icon=star&actionType=post&postUrl=https%3A%2Fimpact.abundance.id%2Fapi%2Faction%2Fimpact1%3Fpoints=IMPACT&description=Curate+Casts+with+the+Impact+App`} />
+      <meta property="fc:frame:button:3:target" content={`https://warpcast.com/~/add-cast-action?name=%24IMPACT+Console&icon=star&actionType=post&postUrl=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Faction%2Fstatus%3Fpoints=IMPACT&description=Curate+Casts+with+the+Impact+App`} />
       <meta name="fc:frame:post_url" content={`https://impact.abundance.id`} />
     </Head>
 
