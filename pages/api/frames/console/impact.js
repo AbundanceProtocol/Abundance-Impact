@@ -18,7 +18,7 @@ const secretKey = process.env.SECRET_KEY
 
 export default async function handler(req, res) {
 
-  const { addImpact, iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash } = req.query;
+  const { addImpact, iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle } = req.query;
 
   if (req.method !== 'POST') {
     res.setHeader('Allow', ['POST']);
@@ -39,7 +39,7 @@ export default async function handler(req, res) {
 
     let button1 = `<meta property="fc:frame:button:2" content='Refresh' />
       <meta property="fc:frame:button:2:action" content="post" />
-      <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/console/test?${qs.stringify({ iB, qB, qT, author, iA, qA, ecosystem: ec, login, pt, cu, impact, quality: ql, cI, hash })}' />`
+      <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/console/test?${qs.stringify({ iB, qB, qT, author, iA, qA, ecosystem: ec, login, pt, cu, impact, quality: ql, cI, hash, handle })}' />`
     let button2 = ''
     let button3 = ''
     let button4 = ''
@@ -315,13 +315,14 @@ export default async function handler(req, res) {
 
         button1 = `<meta property="fc:frame:button:1" content='+1 ${pt}' />
         <meta property="fc:frame:button:1:action" content="post" />
-        <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/console/impact?${qs.stringify({ addImpact: 1, iB: castImpact, qB: qualityBalance, qT: qualityTotal, author, iA: balance, qA, ec, login, pt, cu, impact, ql, cI, hash: castHash })}' />`
+        <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/console/impact?${qs.stringify({ addImpact: 1, iB: castImpact, qB: qualityBalance, qT: qualityTotal, author, iA: balance, qA, ec, login, pt, cu, impact, ql, cI, hash: castHash, handle })}' />`
         button2 = `<meta property="fc:frame:button:2" content='+5 ${pt}' />
         <meta property="fc:frame:button:2:action" content="post" />
-        <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/console/impact?${qs.stringify({ addImpact: 5, iB: castImpact, qB: qualityBalance, qT: qualityTotal, author, iA: balance, qA, ec, login, pt, cu, impact, ql, cI, hash: castHash })}' />`
-        // button3 = `<meta property="fc:frame:button:3" content='More >' />
-        // <meta property="fc:frame:button:3:action" content="post" />
-        // <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/test?${qs.stringify({ iB: castImpact, qB: qualityBalance, qT: qualityTotal, author, iA: balance, qA, ecosystem, login, pt, cu, impact, quality, cI, hash: castHash })}' />`
+        <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/console/impact?${qs.stringify({ addImpact: 5, iB: castImpact, qB: qualityBalance, qT: qualityTotal, author, iA: balance, qA, ec, login, pt, cu, impact, ql, cI, hash: castHash, handle })}' />`
+        button3 = `<meta property="fc:frame:button:3" content='More >' />
+        <meta property="fc:frame:button:3:action" content="post" />
+        <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/more?${qs.stringify({ iB: castImpact, qB: qualityBalance, qT: qualityTotal, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash: castHash, handle })}' />`
+        textField = `<meta name="fc:frame:input:text" content="Add comment to nomination" />`
         
     
         metatags = button1 + button2 + button3 + button4 + textField + postUrl
