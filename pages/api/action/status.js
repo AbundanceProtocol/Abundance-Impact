@@ -57,6 +57,7 @@ export default async function handler(req, res) {
     }
 
     let needLogin = false
+    let ecoHandle = ''
 
     let { impactAllowance, qualityAllowance, ecoName, curator } = await getCuratorBalances(curatorFid, points)
 
@@ -73,23 +74,53 @@ export default async function handler(req, res) {
         try {
           await connectToDatabase();
   
-          let eco = await EcosystemRules.findOne({ ecosystem_points_name: points }).exec();
+          let eco = await EcosystemRules.findOne({ ecosystem_points_name: points }).select('ecosystem_name ecosystem_handle').exec();
   
-          let ecoName = ''
+          let name = ''
+          let handle = ''
   
           if (eco) {
-            ecoName = eco.ecosystem_name
+            name = eco.ecosystem_name
+            handle = eco.ecosystem_handle
           }
   
-          return { ecoName }
+          return { name, handle }
       
         } catch (error) {
           console.error("Error getting data:", error);
-          return { ecoName: '' }
+          return { ecoName: '', handle: '' }
         }
       }
 
-      ecoName = await getEcosystem(points)
+      const { name, handle } = await getEcosystem(points)
+      ecoName = name
+      ecoHandle = handle
+      console.log('ecoHandle1', ecoHandle)
+    } else {
+
+      async function getHandle(points) {
+        try {
+          await connectToDatabase();
+  
+          let eco = await EcosystemRules.findOne({ ecosystem_points_name: points }).select('ecosystem_handle').exec();
+  
+          let ecoHandle = ''
+  
+          if (eco) {
+            ecoHandle = eco.ecosystem_handle
+          }
+  
+          return ecoHandle
+      
+        } catch (error) {
+          console.error("Error getting data:", error);
+          let ecoHandle = ''
+          return ecoHandle
+        }
+      }
+
+      ecoHandle = await getHandle(points)
+      console.log('ecoHandle2', ecoHandle)
     }
 
     async function getCastBalances(castHash, points) {
@@ -253,7 +284,7 @@ export default async function handler(req, res) {
 
       res.status(200).json({
         "type": "frame",
-        "frameUrl": `https://impact.abundance.id/api/frames/console/status?${qs.stringify({ iB: impactBalance, qB: qualityBalance, qT: qualityTotal, author, iA: impactAllowance, qA: qualityAllowance, ecosystem: ecoName, login: needLogin, pt: points, cu: curator, impact, quality, cI: castImpact, hash: castHash })}`
+        "frameUrl": `https://impact.abundance.id/api/frames/console/status?${qs.stringify({ iB: impactBalance, qB: qualityBalance, qT: qualityTotal, author, iA: impactAllowance, qA: qualityAllowance, ecosystem: ecoName, login: needLogin, pt: points, cu: curator, impact, quality, cI: castImpact, hash: castHash, handle: ecoHandle })}`
       })
     } catch (error) {
       console.error(error);

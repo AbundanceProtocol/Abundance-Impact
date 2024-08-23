@@ -28,20 +28,14 @@ export default async function handler(req, res) {
     let textField = ''
     let postUrl = `<meta name="fc:frame:post_url" content='https://impact.abundance.id' />`
 
-    // shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share?${qs.stringify({    
-    //   id: circleId })}`
 
     const shareText = 'I just nominated great builders and creators on /impact. Help support them here:'
 
     let shareUrl = `https://impact.abundance.id/~/ecosystems/${handle}/tip-basic?${qs.stringify({ curators: curatorFid, eco: pt?.substring(1) })}`
     
-
-
     const encodedShareText = encodeURIComponent(shareText); 
     let encodedShareUrl = encodeURIComponent(shareUrl); 
     let shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
-
-
 
 
     button1 = `<meta property="fc:frame:button:1" content='Multi-tip' />
