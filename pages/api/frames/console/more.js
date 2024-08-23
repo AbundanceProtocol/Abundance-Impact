@@ -33,7 +33,7 @@ export default async function handler(req, res) {
 
     const shareText = 'I just nominated great builders and creators on /impact. Help support them here:'
 
-    let shareUrl = `https://impact.abundance.id/~/ecosystems/${handle}/tip?${qs.stringify({ time: 'all', shuffle: true, curators: curatorFid, eco: pt?.substring(1), referrer: curatorFid })}`
+    let shareUrl = `https://impact.abundance.id/~/ecosystems/${handle}/tip-basic?${qs.stringify({ curators: curatorFid, eco: pt?.substring(1) })}`
     
 
 

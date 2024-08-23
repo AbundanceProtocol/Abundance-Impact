@@ -95,7 +95,7 @@ export default async function handler(req, res) {
       const { name, handle } = await getEcosystem(points)
       ecoName = name
       ecoHandle = handle
-
+      console.log('ecoHandle1', ecoHandle)
     } else {
 
       async function getHandle(points) {
@@ -119,7 +119,7 @@ export default async function handler(req, res) {
       }
 
       ecoHandle = await getHandle(points)
-
+      console.log('ecoHandle2', ecoHandle)
     }
 
     async function getCastBalances(castHash, points) {
