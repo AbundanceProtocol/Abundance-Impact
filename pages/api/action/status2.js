@@ -110,11 +110,12 @@ export default async function handler(req, res) {
             ecoHandle = eco.ecosystem_handle
           }
   
-          return { ecoHandle }
+          return ecoHandle
       
         } catch (error) {
           console.error("Error getting data:", error);
-          return { ecoHandle: '' }
+          let ecoHandle = ''
+          return ecoHandle
         }
       }
 
