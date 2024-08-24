@@ -20,7 +20,7 @@ export default async function handler(req, res) {
       let metatags = `
         <meta property="fc:frame:image" content='${baseURL}/images/personal-how-to.png' />
 
-        <meta property="fc:frame:button:1" content='What's /impact' />
+        <meta property="fc:frame:button:1" content="What's /impact?" />
         <meta property="fc:frame:button:1:action" content="post" />
         <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/console/install?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle })}' />
 
@@ -54,7 +54,7 @@ export default async function handler(req, res) {
       let metatags = `
         <meta property="fc:frame:image" content='${baseURL}/images/personal-how-to.png' />
 
-        <meta property="fc:frame:button:1" content='What's /impact' />
+        <meta property="fc:frame:button:1" content="What's /impact?" />
         <meta property="fc:frame:button:1:action" content="post" />
         <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/console/install?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle })}' />
 
