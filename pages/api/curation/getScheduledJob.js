@@ -379,6 +379,66 @@ export default async function handler(req, res) {
 
         let displayedCasts = await populateCast(sortedCasts)
 
+        let curatorHashes = []
+
+        async function getHash(fid) {
+          try {
+            await connectToDatabase();
+            const user = await User.findOne({ fid }).select('set_cast_hash').exec();
+            if (user) {
+              const castHash = user.set_cast_hash
+              return castHash
+            } else {
+              return null
+            }
+          } catch (error) {
+            console.error('Error getting User:', error)
+            return null
+          }
+        }
+
+        for (const cast of displayedCasts) {
+          if (cast.impact_points && cast.impact_points.length > 0) {
+            for (const subCast of cast.impact_points) {
+              let fidExists = curatorHashes.some(item => item.fid == subCast.curator_fid)
+              if (subCast.curator_fid !== fid && !fidExists) {
+                let curatorHash = await getHash(subCast.curator_fid)
+                let hash = {fid: subCast.curator_fid, hash: curatorHash, impact_points: subCast.impact_points}
+                curatorHashes.push(hash)
+                subCast.target_cast_hash = curatorHash
+              } else if (fidExists) {
+                const curatorIndex = curatorHashes.findIndex(item => item.fid == subCast.curator_fid);
+                if (curatorIndex !== -1) {
+                  subCast.target_cast_hash = curatorHashes[curatorIndex].hash
+                  curatorHashes[curatorIndex].impact_points += subCast.impact_points
+                }
+              }
+            }
+          }
+        }
+
+        for (const cast of displayedCasts) {
+          if (cast.impact_points && cast.impact_points.length > 0) {
+            for (const subCast of cast.impact_points) {
+              subCast.impact_points = 0
+            }
+          }
+        }
+        
+        if (curatorHashes && curatorHashes.length > 0) {
+          let i = 0
+          for (const cast of displayedCasts) {
+            if (cast.impact_points && cast.impact_points.length > 0) {
+              for (const subCast of cast.impact_points) {
+                if (curatorHashes.length > i && subCast.curator_fid == curatorHashes[i].fid) {
+                  subCast.impact_points = curatorHashes[i].impact_points;
+                  i++;
+                }
+              }
+            }
+          }
+        }
+        
         const { castData, coinTotals } = await processTips(displayedCasts, fid, allowances, ecosystem, curatorPercent)
 
         async function sendRequests(data, signer, apiKey) {
