@@ -65,7 +65,7 @@ export default async function handler(req, res) {
         // Check if the item matches the pattern 🍖x<number>
         else if (/🍖x\d+/i.test(items[i])) {
           const match = items[i].match(/🍖x(\d+)/i);
-          const amount = parseInt(match[1], 10) * 10;
+          const amount = parseInt(match[1], 10);
           const coin = '$TN100x';
     
           // Combine amounts for the same coin

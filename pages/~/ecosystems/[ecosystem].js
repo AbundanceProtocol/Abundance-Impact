@@ -263,7 +263,7 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
   useEffect(() => {
     for (const token of tokenData) {
       if (token.set) {
-        if (token.token == '$TN100x' && token.totalTip >= 10) {
+        if (token.token == '$TN100x' && token.totalTip >= 1) {
           setNoTip(false)
           return
         } else if (token.totalTip > 0) {

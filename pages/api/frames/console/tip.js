@@ -9,7 +9,6 @@ import EcosystemRules from  "../../../../models/EcosystemRules";
 import { decryptPassword, getTimeRange, processTips, populateCast } from "../../../../utils/utils";
 import _ from "lodash";
 import qs from "querystring";
-// import { createCircle } from "./circle2";
 
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 const HubURL = process.env.NEYNAR_HUB
@@ -65,7 +64,7 @@ export default async function handler(req, res) {
         // Check if the item matches the pattern 🍖x<number>
         else if (/🍖x\d+/i.test(items[i])) {
           const match = items[i].match(/🍖x(\d+)/i);
-          const amount = parseInt(match[1], 10) * 10;
+          const amount = parseInt(match[1], 10);
           const coin = '$TN100x';
     
           // Combine amounts for the same coin
@@ -525,6 +524,66 @@ export default async function handler(req, res) {
             let sortedCasts = filteredCasts.sort((a, b) => b.impact_total - a.impact_total);
       
             let displayedCasts = await populateCast(sortedCasts)
+
+            let curatorHashes = []
+
+            async function getHash(fid) {
+              try {
+                await connectToDatabase();
+                const user = await User.findOne({ fid }).select('set_cast_hash').exec();
+                if (user) {
+                  const castHash = user.set_cast_hash
+                  return castHash
+                } else {
+                  return null
+                }
+              } catch (error) {
+                console.error('Error getting User:', error)
+                return null
+              }
+            }
+
+            for (const cast of displayedCasts) {
+              if (cast.impact_points && cast.impact_points.length > 0) {
+                for (const subCast of cast.impact_points) {
+                  let fidExists = curatorHashes.some(item => item.fid == subCast.curator_fid)
+                  if (subCast.curator_fid !== fid && !fidExists) {
+                    let curatorHash = await getHash(subCast.curator_fid)
+                    let hash = {fid: subCast.curator_fid, hash: curatorHash, impact_points: subCast.impact_points}
+                    curatorHashes.push(hash)
+                    subCast.target_cast_hash = curatorHash
+                  } else if (fidExists) {
+                    const curatorIndex = curatorHashes.findIndex(item => item.fid == subCast.curator_fid);
+                    if (curatorIndex !== -1) {
+                      subCast.target_cast_hash = curatorHashes[curatorIndex].hash
+                      curatorHashes[curatorIndex].impact_points += subCast.impact_points
+                    }
+                  }
+                }
+              }
+            }
+
+            for (const cast of displayedCasts) {
+              if (cast.impact_points && cast.impact_points.length > 0) {
+                for (const subCast of cast.impact_points) {
+                  subCast.impact_points = 0
+                }
+              }
+            }
+            
+            if (curatorHashes && curatorHashes.length > 0) {
+              let i = 0
+              for (const cast of displayedCasts) {
+                if (cast.impact_points && cast.impact_points.length > 0) {
+                  for (const subCast of cast.impact_points) {
+                    if (curatorHashes.length > i && subCast.curator_fid == curatorHashes[i].fid) {
+                      subCast.impact_points = curatorHashes[i].impact_points;
+                      i++;
+                    }
+                  }
+                }
+              }
+            }
       
             const { castData, circle, pfps } = await processTips(displayedCasts, fid, allowances, ecoName, curatorPercent)
             console.log('pfps', pfps)
@@ -566,7 +625,7 @@ export default async function handler(req, res) {
                   for (const coin of cast.allCoins) {
                     let amount = 0
                     if (coin.coin == '$TN100x' && coin.tip > 0) {
-                      amount = coin.tip * 10
+                      amount = coin.tip
                     } else if (coin.tip > 0) {
                       amount = coin.tip
                     }

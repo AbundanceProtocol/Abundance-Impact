@@ -44,7 +44,7 @@ export default async function handler(req, res) {
           for (const coin of cast.allCoins) {
             let amount = 0
             if (coin.coin == '$TN100x' && coin.tip > 0) {
-              amount = coin.tip * 10
+              amount = coin.tip
             } else if (coin.tip > 0) {
               amount = coin.tip
             }

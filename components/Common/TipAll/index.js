@@ -35,7 +35,7 @@ const TipAll = ({ tokenData, setTokenData, loading, setLoading, noTip, modal, se
           for (const token of updatedTokenData) {
             if (token.set) {
               if (token.token == '$TN100x') {
-                token.allowance = token.allowance - (coinTotals[token.token].totalTip * 10)
+                token.allowance = token.allowance - (coinTotals[token.token].totalTip)
               } else {
                 token.allowance = token.allowance - coinTotals[token.token].totalTip
               }

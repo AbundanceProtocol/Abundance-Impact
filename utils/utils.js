@@ -3,6 +3,7 @@ import CryptoJS from 'crypto-js';
 import { ethers } from 'ethers';
 import Moralis from 'moralis';
 const apiKey = process.env.MORALIS_API_KEY
+const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 
 // shorten a hash address
 export function shortenAddress(input, long) {
@@ -308,7 +309,6 @@ export function filterObjects(castArray, filterFid) {
   });
 }
 
-
 export async function processTips(userFeed, userFid, tokenData, ecosystem, curatorPercent) {
   // console.log('313', userFeed, userFid, tokenData, ecosystem, curatorPercent)
   let curatorTip = 10
@@ -330,7 +330,7 @@ export async function processTips(userFeed, userFid, tokenData, ecosystem, curat
   
     let casts = filterObjects(userFeed, userFid)
   
-    // console.log(casts)
+    // console.log('casts 333', casts)
   
     let totalImpact = casts.reduce((total, cast) => {
       return total + cast.impact_balance - cast.quality_balance;
@@ -387,7 +387,7 @@ export async function processTips(userFeed, userFid, tokenData, ecosystem, curat
         for (const tipCast of tipCasts) {
           let tip = 0
           if (coin.token == '$TN100x') {
-            tip = Math.floor(tipCast.castWeight * coin.totalTip / 10)
+            tip = Math.floor(tipCast.castWeight * coin.totalTip)
           } else if (coin.token == '$FARTHER') {
             tip = Math.floor(tipCast.castWeight * coin.totalTip / coin.min) * coin.min
           } else {
@@ -402,7 +402,7 @@ export async function processTips(userFeed, userFid, tokenData, ecosystem, curat
       }
       coinTotals[coin.token] = {totalTip: 0, usedTip: 0, remaining: 0, mod: 0, div: 0}
       if (coin.token == '$TN100x') {
-        coinTotals[coin.token].totalTip = Math.floor(coin.totalTip / 10)
+        coinTotals[coin.token].totalTip = Math.floor(coin.totalTip)
       } else {
         coinTotals[coin.token].totalTip = coin.totalTip
       }
@@ -499,7 +499,7 @@ export async function processTips(userFeed, userFid, tokenData, ecosystem, curat
           }
         }
         if (cast.text.length > 0) {
-          cast.text += `tipped via ${ecosystemName}/impact\n\n/impact lets you easily multi-tip your favorite artists & builders, schedule tips & share curations with frens`
+          cast.text = `I'm tipping:\n${cast.text}\n via ${ecosystemName}/impact\n\n/impact lets you easily multi-tip your favorite artists & builders, schedule tips & share curations with frens`
         }
       }
     }
@@ -514,7 +514,7 @@ export async function processTips(userFeed, userFid, tokenData, ecosystem, curat
   
     let finalTips = cleanTips.filter(cast => cast.text.length > 0)
   
-    // console.log('finalTips', finalTips)
+    console.log('finalTips', finalTips)
 
     const circle = finalTips.map(finalTip => {
       const feedItem = userFeed.find(feedItem => feedItem.author.fid === finalTip.fid);
@@ -528,7 +528,9 @@ export async function processTips(userFeed, userFid, tokenData, ecosystem, curat
     .filter(feed => circle.includes(feed.author.fid))
     .map(feed => feed.author.pfp_url);
 
-     return { castData: finalTips, coinTotals: coinTotals, circle, pfps }
+    let uniquePfPs = pfps.filter((pfp, index, self) => self.indexOf(pfp) === index);
+
+    return { castData: finalTips, coinTotals: coinTotals, circle, pfps: uniquePfPs }
   }
 }
 
