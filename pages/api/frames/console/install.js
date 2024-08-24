@@ -21,7 +21,7 @@ export default async function handler(req, res) {
 
         <meta property="fc:frame:button:1" content='How it works' />
         <meta property="fc:frame:button:1:action" content="post" />
-        <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/console/install?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle })}' />
+        <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/console/how-to?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle })}' />
 
         <meta property="fc:frame:button:2" content='< Back' />
         <meta property="fc:frame:button:2:action" content="post" />
