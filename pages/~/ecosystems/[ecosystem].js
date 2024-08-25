@@ -1131,7 +1131,7 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
         </div>
         <div className='flex-row' style={{gap: '0.5rem'}}>
           <TipAll {...{ tokenData, setTokenData, loading, setLoading, noTip, modal, setModal, userFeed, tipPercent }} />
-          <TipScheduler {...{ initHour, setInitHour, initMinute, setInitMinute, userQuery, tokenData, initValue, setLoading }}  />
+          <TipScheduler {...{ initHour, setInitHour, initMinute, setInitMinute, userQuery, tokenData, initValue, setLoading, setModal }}  />
         </div>
       </div>
     </div>

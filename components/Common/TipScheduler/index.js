@@ -2,9 +2,10 @@ import React, { useContext, useState } from 'react';
 import { AccountContext } from '../../../context';
 import { FaLock } from 'react-icons/fa';
 import useStore from '../../../utils/store';
+import axios from 'axios';
 
-const TipScheduler = ({ initHour, setInitHour, initMinute, setInitMinute, userQuery, tokenData, initValue, setLoading, type }) => {
-  const { LoginPopup, isLogged, fid, ecoData } = useContext(AccountContext)
+const TipScheduler = ({ initHour, setInitHour, initMinute, setInitMinute, userQuery, tokenData, initValue, setLoading, type, setModal }) => {
+  const { LoginPopup, isLogged, fid, ecoData, points } = useContext(AccountContext)
   const [hour, setHour] = useState(initHour);
   const [minute, setMinute] = useState(initMinute);
   const store = useStore()
