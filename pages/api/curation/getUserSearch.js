@@ -4,7 +4,7 @@ import Impact from '../../../models/Impact';
 
 export default async function handler(req, res) {
   if (req.method === 'GET') {
-    console.log(req.query);
+    console.log('getUserSerach 7', req.query);
     const page = parseInt(req.query.page) || 1;
     const limit = 10;
     const skip = (page - 1) * limit;
@@ -154,7 +154,7 @@ export default async function handler(req, res) {
       }
     }
     const { casts, totalCount } = await fetchCasts(query, req.query.shuffle === 'true', page, limit);
-    // console.log(casts)
+    console.log('casts 157', casts)
     res.status(200).json({
       total: totalCount,
       page: page,

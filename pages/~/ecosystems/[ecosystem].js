@@ -175,7 +175,6 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
   }
 
   useEffect(() => {
-
     const searchRouter = () => {
       setCursor('')
       setPrevCursor('')
@@ -374,6 +373,16 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
   }
 
   useEffect(() => {
+    if (isLogged && ecoData && cursor == 'x') {
+      if (searchSelect == 'Curation') {
+        console.log(cursor)
+        feedRouter()
+      }
+    }
+  }, [cursor])
+
+
+  useEffect(() => {
 
     const allowanceUpdate = () => {
       if (isLogged) {
@@ -401,7 +410,9 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
     setCursor('')
     if (isLogged && ecoData) {
       if (searchSelect == 'Curation') {
-        feedRouter()
+        console.log(cursor)
+        setPrevCursor('x')
+        setCursor('x')
       } else if (searchSelect == 'Main') {
         getFeed(fid, ecoData?.channels[0]?.name, true)
       } else if (searchSelect == 'Recent') {
@@ -425,23 +436,24 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
   }, [searchSelect, sched.searchSelect])
   
   useEffect(() => {
-
     const inViewRouter = () => {
-      if (cursor !== prevCursor && cursor !== '' && isLogged) {
-        if (searchSelect == 'Main') {
-          setPrevCursor(cursor)
-          addToFeed(fid, channelSelect, true, cursor)
-        } else if (searchSelect == 'Recent') {
-          setPrevCursor(cursor)
-          addToFeed(fid, channelSelect, false, cursor)
-        } else if (searchSelect == 'Curation') {
-          setPrevCursor(cursor)
-          feedRouter()
+      if (userFeed && (userFeed.length % 10 == 0)) {
+        if (cursor !== prevCursor && cursor !== '' && isLogged) {
+          if (searchSelect == 'Main') {
+            setPrevCursor(cursor)
+            addToFeed(fid, channelSelect, true, cursor)
+          } else if (searchSelect == 'Recent') {
+            setPrevCursor(cursor)
+            addToFeed(fid, channelSelect, false, cursor)
+          } else if (searchSelect == 'Curation') {
+            setPrevCursor(cursor)
+            feedRouter()
+          }
+          console.log('trigger get additional casts', cursor, prevCursor, searchSelect)
+          
+        } else {
+          console.log('triggered, no new casts', cursor, prevCursor, searchSelect)
         }
-        console.log('trigger get additional casts', cursor, prevCursor, searchSelect)
-        
-      } else {
-        console.log('triggered, no new casts', cursor, prevCursor, searchSelect)
       }
     }
 
@@ -630,6 +642,12 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
     updateFeed(userFeed, channelFeed, fid)
     setCursor(cursorData)
   }
+
+  useEffect(() => {
+    setUserQuery(updateUserQuery => {
+      return {time, channels, tags, shuffle, curators}
+    })
+  }, [time, curators, channels, tags, shuffle])
 
   useEffect(() => {
     console.log('triggered []')
