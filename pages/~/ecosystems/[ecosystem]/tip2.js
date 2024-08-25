@@ -319,7 +319,7 @@ export default function Tips({time, curators, channels, tags, shuffle, referrer,
         <meta property="fc:frame:button:2:action" content="link" />
 
         <meta property="fc:frame:button:2:target" content={`${baseURL}/~/ecosystems/${ecosystem}?${qs.stringify({    
-          time, curators, shuffle: false, referrer, eco, ecosystem })}`} />
+          time, curators })}`} />
         <meta property="fc:frame:button:3" content={`What's /impact?`} />
         <meta property="fc:frame:button:3:action" content="link" />
         <meta property="fc:frame:button:3:target" content={`https://warpcast.com/abundance/0x43ddd672`} />

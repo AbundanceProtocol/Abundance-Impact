@@ -107,31 +107,19 @@ export default async function handler(req, res) {
 
       async function getDegenAllowance(fid) {
         try {
-          const remainingBase = "https://www.degentip.me/";
-          const remainingUrl = `${remainingBase}api/get_allowance?fid=${fid}`;
-          // const remainingBase = "https://www.degen.tips/";
-          // const remainingUrl = `${remainingBase}api/airdrop2/tip-allowance?fid=${fid}`;
-          const remainingBalance = await fetch(remainingUrl, {
-            headers: {
-              accept: "application/json",
-            },
-          });
-          const getRemaining = await remainingBalance.json()
-          let remaining = 0
-    
-          if (getRemaining) {
-            remaining = getRemaining?.allowance?.remaining_allowance
-            total = getRemaining?.allowance?.tip_allowance
-            // remaining = parseInt(getRemaining[0]?.remaining_allowance)
-            // total = parseInt(getRemaining[0]?.tip_allowance)
+          const response = await fetch(`https://api.degen.tips/airdrop2/allowances?fid=${fid}`);
+          const data = await response.json();
+          
+          if (data?.length > 0) {
+            const remainingAllowance = data[0].remaining_tip_allowance;
+            console.log('Latest remaining_tip_allowance:', remainingAllowance);
+            return remainingAllowance;
+          } else {
+            console.log('No data found.');
+            return 0;
           }
-          if (!remaining && remaining !== 0) {
-            remaining = total
-          }
-          return remaining
         } catch (error) {
-          console.error('Error handling GET request:', error);
-          return 0
+          return 0;
         }
       }
 
