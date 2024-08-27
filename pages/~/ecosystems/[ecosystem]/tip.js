@@ -72,7 +72,7 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem}) {
         }
       ],
       input: {
-        text: "Eg.: 1000 $Degen, 500 $FARTHER"
+        text: "Eg.: 1000 $Degen, 500 $HAM"
       },
       state: {},
       frames_url: `${baseURL}/~/ecosystems/${ecosystem}/tip`
@@ -327,7 +327,7 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem}) {
         <meta property="fc:frame:button:4:target" content={`${baseURL}/api/frames/tip/tip?${qs.stringify({    
           time, curators, eco, ecosystem })}`} />
 
-        <meta name="fc:frame:input:text" content="Eg.: 1000 $Degen, 500 $FARTHER" />
+        <meta name="fc:frame:input:text" content="Eg.: 1000 $Degen, 500 $HAM" />
       </Head>
     )}
 

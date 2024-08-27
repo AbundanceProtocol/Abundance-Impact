@@ -47,11 +47,10 @@ export default async function handler(req, res) {
     button3 = `<meta property="fc:frame:button:3" content="What's /impact?" />
     <meta property="fc:frame:button:3:action" content="post" />
     <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/install?${qs.stringify({ iB, qB, qT, author, iA, qA, ecosystem: ec, login, pt, cu, impact, quality: ql, cI, hash, handle })}' />`
-    textField = `<meta name="fc:frame:input:text" content="Eg.: 1000 $Degen, 500 $FARTHER" />`
     button4 = `<meta property="fc:frame:button:4" content='< Back' />
     <meta property="fc:frame:button:4:action" content="post" />
     <meta property="fc:frame:button:4:target" content='https://impact.abundance.id/api/frames/console/status?${qs.stringify({ iB, qB, qT, author, iA, qA, ecosystem: ec, login, pt, cu, impact, quality: ql, cI, hash, handle })}' />`
-    textField = `<meta name="fc:frame:input:text" content="Eg.: 1000 $Degen, 500 $FARTHER" />`
+    textField = `<meta name="fc:frame:input:text" content="Eg.: 1000 $Degen, 500 $HAM" />`
 
     let metatags = button1 + button2 + button3 + button4 + textField + postUrl
 

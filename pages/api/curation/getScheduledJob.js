@@ -25,7 +25,7 @@ export default async function handler(req, res) {
         await connectToDatabase();
 
         const schedule = await ScheduleTip.findOne({ code: code }).select('search_shuffle search_time search_tags points search_channels search_curators percent_tip ecosystem_name currencies uuid').exec();
-        console.log(schedule)
+        console.log('schedule 28', schedule)
         if (schedule) {
           const decryptedUuid = decryptPassword(schedule.uuid, secretKey);
           return {
@@ -73,7 +73,7 @@ export default async function handler(req, res) {
     
     const { shuffle, timeRange, tags, points, channels, curators, percent, ecosystem, currencies, decryptedUuid } = await getSchedule(code)
     
-    console.log('47', shuffle, timeRange, tags, points, channels, curators, percent, ecosystem, currencies)
+    console.log('schedule 47', shuffle, timeRange, tags, points, channels, curators, percent, ecosystem, currencies)
     
     if (!percent || !decryptedUuid) {
       res.status(500).json({ error: 'Internal Server Error' });
@@ -86,14 +86,14 @@ export default async function handler(req, res) {
           const curatorPercentData = await EcosystemRules.findOne({ ecosystem_points_name: points }).select('percent_tipped').exec();
           console.log(curatorPercentData)
           if (curatorPercentData) {
-            return {
-              curatorPercent: curatorPercentData.percent_tipped }
+            const curatorPercent = curatorPercentData?.percent_tipped
+            return curatorPercent
           } else {
-            return { curatorPercent: 10 }
+            return 10
           }
         } catch (error) {
           console.error('Error:', error);
-          return { curatorPercent: 10 }
+          return 10
         }
       }
   
@@ -104,6 +104,7 @@ export default async function handler(req, res) {
       if (timeRange) {
         time = getTimeRange(timeRange)
       }
+      console.log(time)
 
       async function getDegenAllowance(fid) {
         try {
@@ -207,7 +208,7 @@ export default async function handler(req, res) {
         res.status(500).json({ error: 'Internal Server Error' });
       } else {
 
-        async function getUserSearch(time, tags, channel, curator, shuffle, points) {
+        async function getUserSearch(time, tags, channel, curator, points) {
       
           const page = 1;
           const limit = 10;
@@ -226,18 +227,25 @@ export default async function handler(req, res) {
               return null
             }   
           }
-            
+          
           if (time) {
             query.createdAt = { $gte: time } ;
           }
-
+  
           if (points) {
             query.points = points
           }
-          
+        
           if (curator && curator.length > 0) {
             let curatorFids
-            curatorFids = curator.map(fid => parseInt(fid));
+
+            if (typeof curator === 'string') {
+              curatorFids = [parseInt(curator)];
+            } else if (Array.isArray(curator) && curator.length > 0) {
+              curatorFids = curator.map(fid => parseInt(fid));
+            }
+
+            // curatorFids = curator.map(fid => parseInt(fid));
       
             let impactIds
             if (curatorFids) {
@@ -247,19 +255,26 @@ export default async function handler(req, res) {
               query['impact_points'] = { $in: impactIds }
             }
           }
-            
+          
           // if (tags && tags.length > 0) {
           //   query.cast_tags = { $in: [tags] };
           // }
       
-          // if (channel && channel.length > 0) {
-          //   query.cast_channel = { $in: [channel] };
-          // }
+          if (req.query['channel[]'] && req.query['channel[]'].length > 0) {
+
+            if (typeof req.query['channel[]'] === 'string') {
+              query.cast_channel = { $in: [req.query['channel[]']]};
+            } else if (Array.isArray(req.query['channel[]']) && req.query['channel[]'].length > 0) {
+              query.cast_channel = { $in: req.query['channel[]']};
+            }
+                  
+            // query.cast_channel = { $in: [req.query['channel[]']] };
+          }
       
           // if (text) {
           //   query.cast_text = { $regex: text, $options: 'i' }; // Case-insensitive search
           // }
-            
+          
           function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
               const j = Math.floor(Math.random() * (i + 1));
@@ -267,90 +282,90 @@ export default async function handler(req, res) {
             }
             return array;
           }
-      
-          async function fetchCasts(query, shuffle, page, limit) {
-            try {
-              await connectToDatabase();
-          
-              let totalCount;
-              let returnedCasts = []
-          
-              if (!shuffle) {
-                totalCount = await Cast.countDocuments(query);
-                returnedCasts = await Cast.find(query)
-                  .sort({ impact_total: -1 })
-                  .populate('impact_points')
-                  .skip((page - 1) * limit)
-                  .limit(limit)
-                  .exec();
-                // console.log('63', returnedCasts)
-              } else {
-      
-                totalCount = await Cast.countDocuments(query);
-          
-                // Calculate the number of documents to be sampled from each range
-                const top20PercentCount = Math.ceil(totalCount * 0.2);
-                const middle40PercentCount = Math.ceil(totalCount * 0.4);
-                const bottom40PercentCount = totalCount - top20PercentCount - middle40PercentCount;
-          
-                // Fetch documents from each range
-                const top20PercentCasts = await Cast.find(query)
-                  .sort({ impact_total: -1 })
-                  .populate('impact_points')
-                  .limit(top20PercentCount)
-                  .exec();
-                const middle40PercentCasts = await Cast.find(query)
-                  .sort({ impact_total: -1 })
-                  .populate('impact_points')
-                  .skip(top20PercentCount)
-                  .limit(middle40PercentCount)
-                  .exec();
-                const bottom40PercentCasts = await Cast.find(query)
-                  .sort({ impact_total: -1 })
-                  .populate('impact_points')
-                  .skip(top20PercentCount + middle40PercentCount)
-                  .limit(bottom40PercentCount)
-                  .exec();
-          
-                returnedCasts = top20PercentCasts.concat(middle40PercentCasts, bottom40PercentCasts);
-          
-                returnedCasts.sort((a, b) => b.impact_total - a.impact_total);
-          
-                returnedCasts = returnedCasts.reduce((acc, current) => {
-                  const existingItem = acc.find(item => item._id === current._id);
-                  if (!existingItem) {
-                    acc.push(current);
-                  }
-                  return acc;
-                }, [])
-      
-                returnedCasts = shuffleArray(returnedCasts);
-          
-                returnedCasts = returnedCasts.slice(0, limit);
-              }
-          
-              if (returnedCasts && returnedCasts.length > 10) {
-                returnedCasts = returnedCasts.slice(0, 10);
-              }
-          
-              // console.log('113', returnedCasts)
-              if (!returnedCasts) {
-                returnedCasts = []
-              }
-              return { casts: returnedCasts, totalCount };
-            } catch (err) {
-              console.error(err);
-              return { casts: null, totalCount: null};
+    
+        async function fetchCasts(query, page, limit) {
+          try {
+            await connectToDatabase();
+        
+            let totalCount;
+            let returnedCasts = []
+            let shuffle = true
+            if (!shuffle) {
+              totalCount = await Cast.countDocuments(query);
+              returnedCasts = await Cast.find(query)
+                .sort({ impact_total: -1 })
+                .populate('impact_points')
+                .skip((page - 1) * limit)
+                .limit(limit)
+                .exec();
+              // console.log('63', returnedCasts)
+            } else {
+    
+              totalCount = await Cast.countDocuments(query);
+        
+              // Calculate the number of documents to be sampled from each range
+              const top20PercentCount = Math.ceil(totalCount * 0.2);
+              const middle40PercentCount = Math.ceil(totalCount * 0.4);
+              const bottom40PercentCount = totalCount - top20PercentCount - middle40PercentCount;
+        
+              // Fetch documents from each range
+              const top20PercentCasts = await Cast.find(query)
+                .sort({ impact_total: -1 })
+                .populate('impact_points')
+                .limit(top20PercentCount)
+                .exec();
+              const middle40PercentCasts = await Cast.find(query)
+                .sort({ impact_total: -1 })
+                .populate('impact_points')
+                .skip(top20PercentCount)
+                .limit(middle40PercentCount)
+                .exec();
+              const bottom40PercentCasts = await Cast.find(query)
+                .sort({ impact_total: -1 })
+                .populate('impact_points')
+                .skip(top20PercentCount + middle40PercentCount)
+                .limit(bottom40PercentCount)
+                .exec();
+        
+              returnedCasts = top20PercentCasts.concat(middle40PercentCasts, bottom40PercentCasts);
+        
+              returnedCasts.sort((a, b) => b.impact_total - a.impact_total);
+        
+              returnedCasts = returnedCasts.reduce((acc, current) => {
+                const existingItem = acc.find(item => item._id === current._id);
+                if (!existingItem) {
+                  acc.push(current);
+                }
+                return acc;
+              }, [])
+    
+              returnedCasts = shuffleArray(returnedCasts);
+        
+              returnedCasts = returnedCasts.slice(0, limit);
             }
+        
+            if (returnedCasts && returnedCasts.length > 10) {
+              returnedCasts = returnedCasts.slice(0, 10);
+            }
+        
+            // console.log('113', returnedCasts)
+            if (!returnedCasts) {
+              returnedCasts = []
+            }
+            return { casts: returnedCasts, totalCount };
+          } catch (err) {
+            console.error(err);
+            return { casts: null, totalCount: null};
           }
-          
-          const { casts, totalCount } = await fetchCasts(query, shuffle === true);
-          // console.log('223', casts, totalCount)
+        }
+        
+        const { casts, totalCount } = await fetchCasts(query);
+        // console.log('223', casts, totalCount)
 
-          return { casts, totalCount }
+        return { casts, totalCount }
         }  
-      
-        const { casts, totalCount } = await getUserSearch(time, tags, channels, curators, shuffle, points)
+    
+        const { casts } = await getUserSearch(time, tags, channels, curators, points)
       
         console.log(casts)
         // console.log(casts[0].impact_points)
@@ -364,7 +379,7 @@ export default async function handler(req, res) {
         }, [])
 
         let sortedCasts = filteredCasts.sort((a, b) => b.impact_total - a.impact_total);
-
+      
         let displayedCasts = await populateCast(sortedCasts)
 
         let curatorHashes = []
@@ -429,6 +444,8 @@ export default async function handler(req, res) {
         
         const { castData, coinTotals } = await processTips(displayedCasts, fid, allowances, ecosystem, curatorPercent)
 
+        console.log('castData', castData)
+
         async function sendRequests(data, signer, apiKey) {
           const base = "https://api.neynar.com/";
           const url = `${base}v2/farcaster/cast`;
@@ -456,9 +473,9 @@ export default async function handler(req, res) {
               });
     
               if (!response.ok) {
-                console.error(`Failed to send request for ${castText}`);
+                // console.error(`Failed to send request for ${castText}`);
               } else {
-                console.log(`Request sent successfully for ${castText}`);
+                // console.log(`Request sent successfully for ${castText}`);
               }
               let tips = []
     
@@ -488,13 +505,14 @@ export default async function handler(req, res) {
               console.error(`Error occurred while sending request for ${castText}:`, error);
             }
     
-            await new Promise(resolve => setTimeout(resolve, 500));
+            await new Promise(resolve => setTimeout(resolve, 60));
           }
           return tipCounter
         }
     
         try {
           const remainingTip = await sendRequests(castData, decryptedUuid, apiKey);
+          // const remainingTip = 0
           res.status(200).json({ message: 'All casts tipped successfully', tip: remainingTip });
         } catch (error) {
           console.error('Error sending requests:', error);

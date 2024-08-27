@@ -83,7 +83,7 @@ export default async function handler(req, res) {
       <meta property="og:image" content="${tipsImg}">
       <meta name="fc:frame:image" content="${tipsImg}">
       <meta name="fc:frame:post_url" content="${postUrl}">
-      <meta name="fc:frame:input:text" content="Eg.: 1000 $Degen, 500 $FARTHER" />`
+      <meta name="fc:frame:input:text" content="Eg.: 1000 $Degen, 500 $HAM" />`
 
       res.setHeader('Content-Type', 'text/html');
       res.status(200)

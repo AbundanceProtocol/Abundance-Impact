@@ -61,7 +61,7 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem, fi
         },
       ],
       input: {
-        text: "Eg.: 1000 $Degen, 500 $FARTHER"
+        text: "Eg.: 1000 $Degen, 500 $HAM"
       },
       state: {},
       frames_url: `${baseURL}/~/ecosystems/${ecosystem}/tips`
@@ -308,7 +308,7 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem, fi
         <meta property="fc:frame:button:2:action" content="link" />
         <meta property="fc:frame:button:2:target" content={`https://warpcast.com/abundance/0x43ddd672`} />
 
-        <meta name="fc:frame:input:text" content="Eg.: 1000 $Degen, 500 $FARTHER" />
+        <meta name="fc:frame:input:text" content="Eg.: 1000 $Degen, 500 $HAM" />
       </Head>
     )}
     <div className="" style={{padding: '58px 0 0 0'}}>
