@@ -499,7 +499,7 @@ export async function processTips(userFeed, userFid, tokenData, ecosystem, curat
           }
         }
         if (cast.text.length > 0) {
-          cast.text = `I'm tipping:\n ${cast.text} via ${ecosystemName}/impact\n\n/impact lets you earn rewards while supporting your favorite creators & builders on Farcaster`
+          cast.text = `I'm tipping:\n ${cast.text} via ${ecosystemName}/impact\n\n/impact lets you earn curator rewards while supporting your favorite creators & builders on Farcaster`
         }
       }
     }
