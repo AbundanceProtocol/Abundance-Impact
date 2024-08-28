@@ -14,10 +14,12 @@ const HubURL = process.env.NEYNAR_HUB
 const client = HubURL ? getSSLHubRpcClient(HubURL) : undefined;
 // const apiKey = process.env.NEYNAR_API_KEY
 
-const { untrustedData } = req.body
-const { iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle } = req.query;
 
 export default async function handler(req, res) {
+  
+  const { untrustedData } = req.body
+  const { iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle } = req.query;
+
   if (req.method === 'POST') {
     const points = pt
     const eco = points?.substring(1)
