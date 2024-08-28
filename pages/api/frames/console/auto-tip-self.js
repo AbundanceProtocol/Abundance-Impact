@@ -59,21 +59,19 @@ export default async function handler(req, res) {
       try {
         await connectToDatabase();
         let userData = await User.findOne({ fid, ecosystem_points: points }).select('uuid ecosystem_name').exec();
-
-        let ecoData = await EcosystemRules.findOne({ ecosystem_points_name: points }).select('percent_tipped').exec();
         
         if (userData && ecoData) {
-          return {uuid: userData.uuid, ecosystem: userData.ecosystem_name, percent: ecoData.percent_tipped}
+          return {uuid: userData.uuid, ecosystem: userData.ecosystem_name}
         } else {
-          return {uuid: null, ecosystem: null, percent: null}
+          return {uuid: null, ecosystem: null}
         }
       } catch (error) {
         console.error("Error while fetching data:", error);
-        return {uuid: null, ecosystem: null, percent: null}
+        return {uuid: null, ecosystem: null}
       }  
     }
 
-    const {uuid, ecosystem, percent} = await getUuid(curatorFid, pt)
+    const {uuid, ecosystem} = await getUuid(curatorFid, pt)
 
     if (!uuid) {
 
@@ -96,7 +94,7 @@ export default async function handler(req, res) {
       const encryptedUuid = encryptPassword(uuid, secretKey);
       const code = generateRandomString(12)
     
-      async function setSchedule(fid, code, points, ecosystem, encryptedUuid, percent) {
+      async function setSchedule(fid, code, points, ecosystem, encryptedUuid) {
         let schedule = null
         try {
           await connectToDatabase();
@@ -124,7 +122,7 @@ export default async function handler(req, res) {
               search_channels: [],
               search_curators: [fid],
               points: points,
-              percent_tip: percent,
+              percent_tip: 100,
               ecosystem_name: ecosystem,
               currencies: ['$DEGEN'],
               schedule_time: "45 18 * * *",
@@ -167,7 +165,7 @@ export default async function handler(req, res) {
         return schedule
       }
   
-      const schedule = await setSchedule(curatorFid, code, pt, ecosystem, encryptedUuid, percent)
+      const schedule = await setSchedule(curatorFid, code, pt, ecosystem, encryptedUuid)
   
       if (schedule) {
 
