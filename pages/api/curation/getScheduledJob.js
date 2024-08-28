@@ -213,7 +213,7 @@ async function runAutoTipping(fid, code) {
     console.log('141', allowances)
 
     if (allowances.length == 0) {
-      res.status(500).json({ error: 'Internal Server Error' });
+      console.log('Internal Server Error');
     } else {
 
       async function getUserSearch(time, tags, channel, curator, points) {
@@ -521,10 +521,9 @@ async function runAutoTipping(fid, code) {
       try {
         const remainingTip = await sendRequests(castData, decryptedUuid, apiKey);
         // const remainingTip = 0
-        res.status(200).json({ message: 'All casts tipped successfully', tip: remainingTip });
+        console.log('All casts tipped successfully', remainingTip );
       } catch (error) {
         console.error('Error sending requests:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
       }
     }
   }
