@@ -17,8 +17,8 @@ export default async function handler(req, res) {
   if (req.method !== 'GET' || !fid || !code) {
     res.status(405).json({ error: 'Method Not Allowed', message: 'Failed to provide required data' });
   } else {
+    console.log('20 process')
     res.status(202).json({ message: 'Processing started' });
-
     setImmediate(async () => {
       await runAutoTipping(fid, code, req);
     });
@@ -27,7 +27,7 @@ export default async function handler(req, res) {
 
 
 async function runAutoTipping(fid, code, req) {
-  console.log('triggered')
+  console.log('30 triggered')
   async function getSchedule(code) {
     try {
       await connectToDatabase();
