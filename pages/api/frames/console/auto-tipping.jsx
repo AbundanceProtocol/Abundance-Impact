@@ -61,7 +61,7 @@ export default async function handler(req, res) {
     // const [firstHalf, secondHalf] = splitCircles(circles);
 
 
-    const backgroundImg = `https://impact.abundance.id/images/background.jpg`
+    // const backgroundImg = `https://impact.abundance.id/images/background.jpg`
 
     const svg = await satori(
       <div style={{
@@ -70,10 +70,7 @@ export default async function handler(req, res) {
         padding: 30,
         display: 'flex',
         flexDirection: 'column',
-        backgroundImage: `url(${backgroundImg})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundColor: '#43238a',
+        background: `linear-gradient(135deg, #001144, #556699)`,
         justifyContent: 'center',
         alignItems: 'center', 
       }}>
@@ -82,7 +79,6 @@ export default async function handler(req, res) {
         </div> */}
         <div style={{display: 'flex', flexDirection: 'column', color: 'white', 
         fontSize: '22px', alignItems: 'center', justifyContent: 'center'}}>
-          <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '30px', margin: '75px 20px 5px 20px'}}>{`contributed`}</div>
           <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '28px', margin: '5px 20px 5px 20px'}}>{`Auto-tip: automatically distribute your tip allowance to your nominees`}</div>
           <div style={{display: 'flex', textAlign: 'center', color: '#cde', fontSize: '24px', margin: '5px 20px 5px 20px'}}>{`Auto-tip all: automatically distribute allowance to nominees throughout the ecosystem`}</div>
           <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '26px', margin: '5px 20px 75px 20px'}}>{`Add curator: auto distribute allowance to nominees of selected curators. Stop distribution to ecosystem if previously turned on`}</div>

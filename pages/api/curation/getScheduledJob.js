@@ -20,7 +20,7 @@ export default async function handler(req, res) {
     res.status(202).json({ message: 'Processing started' });
 
     setImmediate(async () => {
-      await runAutoTipping(fid, code);
+      await runAutoTipping(fid, code, req);
     });
   }
 }
