@@ -473,9 +473,9 @@ export default async function handler(req, res) {
               });
     
               if (!response.ok) {
-                // console.error(`Failed to send request for ${castText}`);
+                console.error(`Failed to send request for ${castText}`);
               } else {
-                // console.log(`Request sent successfully for ${castText}`);
+                console.log(`Request sent successfully for ${castText}`);
               }
               let tips = []
     
