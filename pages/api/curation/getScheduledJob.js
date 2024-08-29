@@ -26,7 +26,7 @@ export default async function handler(req, res) {
 }
 
 
-async function runAutoTipping(fid, code) {
+async function runAutoTipping(fid, code, req) {
 
   async function getSchedule(code) {
     try {
