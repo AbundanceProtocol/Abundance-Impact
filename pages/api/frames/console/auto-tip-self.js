@@ -60,20 +60,20 @@ export default async function handler(req, res) {
         await connectToDatabase();
         let userData = await User.findOne({ fid, ecosystem_points: points }).select('uuid ecosystem_name').exec();
         
-        if (userData && ecoData) {
-          return {uuid: userData.uuid, ecosystem: userData.ecosystem_name}
+        if (userData) {
+          return {encryptedUuid: userData.uuid, ecosystem: userData.ecosystem_name}
         } else {
-          return {uuid: null, ecosystem: null}
+          return {encryptedUuid: null, ecosystem: null}
         }
       } catch (error) {
         console.error("Error while fetching data:", error);
-        return {uuid: null, ecosystem: null}
+        return {encryptedUuid: null, ecosystem: null}
       }  
     }
 
-    const {uuid, ecosystem} = await getUuid(curatorFid, pt)
+    const {encryptedUuid, ecosystem} = await getUuid(curatorFid, pt)
 
-    if (!uuid) {
+    if (!encryptedUuid) {
 
       button1 = `<meta property="fc:frame:button:1" content='Login' />
       <meta property="fc:frame:button:1:action" content="link" />
@@ -91,7 +91,6 @@ export default async function handler(req, res) {
 
     } else {
 
-      const encryptedUuid = encryptPassword(uuid, secretKey);
       const code = generateRandomString(12)
     
       async function setSchedule(fid, code, points, ecosystem, encryptedUuid) {
