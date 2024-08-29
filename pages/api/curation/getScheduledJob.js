@@ -27,7 +27,7 @@ export default async function handler(req, res) {
 
 
 async function runAutoTipping(fid, code, req) {
-
+  console.log('triggered')
   async function getSchedule(code) {
     try {
       await connectToDatabase();
