@@ -511,8 +511,8 @@ export default async function handler(req, res) {
         }
     
         try {
-          // const remainingTip = await sendRequests(castData, decryptedUuid, apiKey);
-          const remainingTip = 0
+          const remainingTip = await sendRequests(castData, decryptedUuid, apiKey);
+          // const remainingTip = 0
           res.status(200).json({ message: 'All casts tipped successfully', tip: remainingTip });
         } catch (error) {
           console.error('Error sending requests:', error);
