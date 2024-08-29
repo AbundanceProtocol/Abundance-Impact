@@ -79,7 +79,7 @@ async function runAutoTipping(fid, code, req) {
     }
   }
   
-  console.log('req 82', fid, code, req)
+  console.log('req 82', fid, code, req.query)
 
   const { shuffle, timeRange, tags, points, channels, curators, percent, ecosystem, currencies, decryptedUuid } = await getSchedule(code)
   
