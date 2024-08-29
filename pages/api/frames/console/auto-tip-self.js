@@ -101,6 +101,7 @@ export default async function handler(req, res) {
           schedule = await ScheduleTip.findOne({ fid }).exec();
           if (schedule) {
             schedule.code = code
+            schedule.uuid = encryptedUuid
             schedule.search_shuffle = true
             schedule.search_time = 'all'
             schedule.search_tags = []
