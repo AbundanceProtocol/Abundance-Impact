@@ -28,6 +28,7 @@ export default async function handler(req, res) {
         console.log('schedule 28', schedule)
         if (schedule) {
           const decryptedUuid = decryptPassword(schedule.uuid, secretKey);
+          console.log(decryptedUuid)
           return {
             shuffle: schedule.search_shuffle,
             timeRange: schedule.search_time,
@@ -447,7 +448,6 @@ export default async function handler(req, res) {
         // console.log('castData', castData)
 
         async function sendRequests(data, signer, apiKey) {
-          console.log('450 data', data, signer.length, apiKey.length)
           const base = "https://api.neynar.com/";
           const url = `${base}v2/farcaster/cast`;
           let tipCounter = 0;
@@ -461,7 +461,6 @@ export default async function handler(req, res) {
     
             if (parentUrl) {
               body.parent = parentUrl;
-              console.log(body.parent)
             }
             try {
               const response = await fetch(url, {
@@ -472,11 +471,11 @@ export default async function handler(req, res) {
                 },
                 body: JSON.stringify(body),
               });
-    
+              // console.log(response)
               if (!response.ok) {
-                console.error(`Failed to send request for ${castText}`);
+                // console.error(`Failed to send request for ${body}`);
               } else {
-                console.log(`Request sent successfully for ${castText}`);
+                // console.log(`Request sent successfully for ${body}`);
               }
               let tips = []
     
