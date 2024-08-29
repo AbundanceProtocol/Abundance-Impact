@@ -447,6 +447,7 @@ export default async function handler(req, res) {
         // console.log('castData', castData)
 
         async function sendRequests(data, signer, apiKey) {
+          console.log('450 data', data, typeof signer, typeof apiKey)
           const base = "https://api.neynar.com/";
           const url = `${base}v2/farcaster/cast`;
           let tipCounter = 0;
@@ -460,8 +461,8 @@ export default async function handler(req, res) {
     
             if (parentUrl) {
               body.parent = parentUrl;
+              console.log(body.parent)
             }
-    
             try {
               const response = await fetch(url, {
                 method: 'POST',
