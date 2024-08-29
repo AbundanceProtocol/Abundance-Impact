@@ -20,13 +20,13 @@ export default async function handler(req, res) {
     console.log('20 process')
     res.status(202).json({ message: 'Processing started' });
     setImmediate(async () => {
-      await runAutoTipping(fid, code, req);
+      await runAutoTipping(fid, code);
     });
   }
 }
 
 
-async function runAutoTipping(fid, code, req) {
+async function runAutoTipping(fid, code) {
   console.log('30 triggered')
   async function getSchedule(code) {
     try {
@@ -79,7 +79,7 @@ async function runAutoTipping(fid, code, req) {
     }
   }
   
-  console.log('req 82', fid, code, req.query)
+  console.log('req 82', fid, code)
 
   const { shuffle, timeRange, tags, points, channels, curators, percent, ecosystem, currencies, decryptedUuid } = await getSchedule(code)
   
@@ -270,15 +270,15 @@ async function runAutoTipping(fid, code, req) {
         //   query.cast_tags = { $in: [tags] };
         // }
     
-        if (req.query['channel[]'] && req.query['channel[]'].length > 0) {
+        if (channel?.length > 0) {
 
-          if (typeof req.query['channel[]'] === 'string') {
-            query.cast_channel = { $in: [req.query['channel[]']]};
-          } else if (Array.isArray(req.query['channel[]']) && req.query['channel[]'].length > 0) {
-            query.cast_channel = { $in: req.query['channel[]']};
+          if (typeof channel === 'string') {
+            query.cast_channel = { $in: [channel]};
+          } else if (Array.isArray(channel) && channel.length > 0) {
+            query.cast_channel = { $in: channel};
           }
                 
-          // query.cast_channel = { $in: [req.query['channel[]']] };
+          // query.cast_channel = { $in: [channel] };
         }
     
         // if (text) {
