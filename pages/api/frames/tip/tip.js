@@ -199,7 +199,7 @@ export default async function handler(req, res) {
 
     const postUrl = `${baseURL}/~/ecosystems/${ecosystem}/tip-login?${qs.stringify({ time, curators, eco })}`
     
-    const shareText = 'I just multi-tipped builders and creators on /impact. Try it out here:'
+    let shareText = 'I just multi-tipped builders and creators on /impact. Try it out here:'
 
     let shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share?${qs.stringify({ time, curators, eco })}`
 
@@ -696,8 +696,6 @@ export default async function handler(req, res) {
                   curatorFids = curator.map(fid => parseInt(fid));
                 }
   
-                // curatorFids = curator.map(fid => parseInt(fid));
-          
                 let usernames = null
                 if (curatorFids) {
                   usernames = await getUsername(curatorFids, points)
