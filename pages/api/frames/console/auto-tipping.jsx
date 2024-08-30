@@ -79,10 +79,10 @@ export default async function handler(req, res) {
         </div> */}
         <div style={{display: 'flex', flexDirection: 'column', color: 'white', 
         fontSize: '22px', alignItems: 'center', justifyContent: 'center'}}>
-          <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '28px', margin: '5px 20px 5px 20px'}}>{`Auto-tip: automatically distribute your tip allowance to your nominees`}</div>
-          <div style={{display: 'flex', textAlign: 'center', color: '#cde', fontSize: '24px', margin: '5px 20px 5px 20px'}}>{`Auto-tip all: automatically distribute allowance to nominees throughout the ecosystem`}</div>
-          <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '26px', margin: '5px 20px 75px 20px'}}>{`Add curator: auto distribute allowance to nominees of selected curators. Stop distribution to ecosystem if previously turned on`}</div>
-          <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '26px', margin: '5px 20px 75px 20px'}}>{`Stop auto-tip: stops automatic allowance distribution`}</div>
+          <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '28px', margin: '5px 20px 40px 20px'}}>{`Auto-tip: automatically distribute your tip allowance to your nominees`}</div>
+          <div style={{display: 'flex', textAlign: 'center', color: '#cde', fontSize: '24px', margin: '5px 20px 40px 20px'}}>{`Auto-tip all: automatically distribute allowance to nominees throughout the ecosystem`}</div>
+          <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '26px', margin: '5px 20px 40px 20px'}}>{`Add curator: auto distribute allowance to nominees of selected curators. Stop distribution to ecosystem if previously turned on`}</div>
+          <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '26px', margin: '5px 20px 40px 20px'}}>{`Stop auto-tip: stops automatic allowance distribution`}</div>
         </div>
         {/* <div style={{gap: '0.5rem', display: 'flex', flexDirection: 'row'}}>
           {(secondHalf?.length > 0) ? (secondHalf.map((creator, index) => <img key={index} src={creator} width={90} height={90} style={{borderRadius: '50px', border: '2px solid #eee'}} />)) : (<div style={{height: '90px'}}>&nbsp;</div>)}

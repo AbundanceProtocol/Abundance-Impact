@@ -38,11 +38,11 @@ export default async function handler(req, res) {
     <meta property="fc:frame:button:1:action" content="post" />
     <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/console/auto-tip-stop?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle })}' />`
 
-    let button2 = `<meta property="fc:frame:button:2" content='Auto-tip all' />
+    let button2 = `<meta property="fc:frame:button:2" content='Auto-tip' />
     <meta property="fc:frame:button:2:action" content="post" />
-    <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/console/auto-tip-all?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle })}' />`
+    <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/console/auto-tip-self?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle })}' />`
 
-    let button3 = `<meta property="fc:frame:button:3" content='Add curator' />
+    let button3 = `<meta property="fc:frame:button:3" content='Find curator' />
     <meta property="fc:frame:button:3:action" content="post" />
     <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/auto-tip-search?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle })}' />`
 
@@ -52,8 +52,6 @@ export default async function handler(req, res) {
 
     let textField = `<meta name="fc:frame:input:text" content="Search for curator" />`
     let postUrl = `<meta name="fc:frame:post_url" content='https://impact.abundance.id' />`
-    textField = ``
-
 
     async function getUuid(fid) {
       try {
@@ -87,6 +85,8 @@ export default async function handler(req, res) {
       <meta property="fc:frame:button:3:action" content="post" />
       <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/more?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle })}' />`
 
+      textField = ``
+
     } else {
 
       const code = generateRandomString(12)
@@ -102,7 +102,7 @@ export default async function handler(req, res) {
             schedule.search_time = 'all'
             schedule.search_tags = []
             schedule.search_channels = []
-            schedule.search_curators = [fid]
+            schedule.search_curators = []
             schedule.points = points
             schedule.percent_tip = 100
             schedule.ecosystem_name = ecosystem
@@ -118,7 +118,7 @@ export default async function handler(req, res) {
               search_time: 'all',
               search_tags: [],
               search_channels: [],
-              search_curators: [fid],
+              search_curators: [],
               points: points,
               percent_tip: 100,
               ecosystem_name: ecosystem,
@@ -172,11 +172,11 @@ export default async function handler(req, res) {
         <meta property="fc:frame:button:1:action" content="post" />
         <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/console/auto-tip-stop?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle })}' />`
   
-        button2 = `<meta property="fc:frame:button:2" content='Auto-tip all' />
+        button2 = `<meta property="fc:frame:button:2" content='Auto-tip' />
         <meta property="fc:frame:button:2:action" content="post" />
-        <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/console/auto-tip-all?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle })}' />`
+        <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/console/auto-tip-self?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle })}' />`
 
-        button3 = `<meta property="fc:frame:button:3" content='Add curator' />
+        button3 = `<meta property="fc:frame:button:3" content='Find curator' />
         <meta property="fc:frame:button:3:action" content="post" />
         <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/auto-tip-search?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle })}' />`
 
