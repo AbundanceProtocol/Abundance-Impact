@@ -662,7 +662,66 @@ export default async function handler(req, res) {
 
             shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share?${qs.stringify({    
               id: circleId })}`
-        
+            
+            async function getCurator(curator, points) {
+
+              async function getUsername(fids, points) {
+                try {
+                  await connectToDatabase();
+                  const users = await User.find({ fid: { $in: fids }, ecosystem_points: points }).select('username').exec();
+                  if (users?.length == 1) {
+                    let usernames = `@${users[0].username}`
+                    return usernames
+                  } else if (users?.length == 2) {
+                    let usernames = `@${users[0].username} & @${users[1].username}`
+                    return usernames
+                  } else if (users?.length > 2) {
+                    let usernames = `@${users[0].username}, @${users[1].username} & co`
+                    return usernames
+                  } else {
+                    return null
+                  }
+                } catch (error) {
+                  console.error("Error while fetching casts:", error);
+                  return null
+                }   
+              }
+
+              if (curator && curator.length > 0) {
+                let curatorFids
+  
+                if (typeof curator === 'string') {
+                  curatorFids = [parseInt(curator)];
+                } else if (Array.isArray(curator) && curator.length > 0) {
+                  curatorFids = curator.map(fid => parseInt(fid));
+                }
+  
+                // curatorFids = curator.map(fid => parseInt(fid));
+          
+                let usernames = null
+                if (curatorFids) {
+                  usernames = await getUsername(curatorFids, points)
+                }
+                return usernames
+              } else {
+                return null
+              }
+            }
+
+            if (curators && fid == curators) {
+              shareText = 'I just multi-tipped builders & creators on /impact.\n\nSupport my nominees here:'
+            } else if (curators?.length > 0) {
+              const curatorName = await getCurator(curators, points)
+              if (curatorName) {
+                shareText = `I just multi-tipped ${curatorName}'s curation of builders & creators thru /impact.\n\nSupport ${curatorName}'s nominees here:`
+              } else {
+                shareText = 'I just multi-tipped builders & creators on /impact. Try it out here:'
+              }
+            } else {
+              shareText = 'I just multi-tipped builders & creators on /impact. Try it out here:'
+            }
+            encodedShareText = encodeURIComponent(shareText)
+
             encodedShareUrl = encodeURIComponent(shareUrl); 
             shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
 
