@@ -203,7 +203,7 @@ export default async function handler(req, res) {
 
     let shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share?${qs.stringify({ time, curators, eco })}`
 
-    const encodedShareText = encodeURIComponent(shareText); 
+    let encodedShareText = encodeURIComponent(shareText); 
     let encodedShareUrl = encodeURIComponent(shareUrl); 
     let shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
     
