@@ -57,7 +57,7 @@ export default async function handler(req, res) {
       async function getSchedule(fid) {
         try {
           await connectToDatabase();
-          schedule = await ScheduleTip.findOne({ fid }).exec();
+          let schedule = await ScheduleTip.findOne({ fid }).exec();
           if (schedule) {
             schedule.active_cron = false
             schedule.save()
