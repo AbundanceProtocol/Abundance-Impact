@@ -151,12 +151,36 @@ export default async function handler(req, res) {
           cron_job_name: `${fid}ScheduledTips`,
         })}`;
     
-    
+        async function updateCron(cronId) {
+          try {
+            const updatedCron = `https://www.easycron.com/rest/enable?${qs.stringify({
+              token: easyCronKey,
+              id: cronId,
+            })}`;
+      
+            const cronResponse = await fetch(updatedCron)
+      
+            if (cronResponse) {
+              const cronData = await cronResponse.json()
+              console.log('89', cronData)
+              if (cronData.status == 'success') {
+                console.log('91', cronData)
+                return true
+              }
+            }
+            return null
+          } catch (error) {
+            console.error('Error:', error);
+            return null
+          }
+        }
+
         const cronResponse = await fetch(cronUrl)
         console.log(cronResponse)
         if (cronResponse) {
           const getCron = await cronResponse.json()
           console.log(getCron)
+          const updatedCron = await updateCron(cronId)
           schedule.cron_job_id = getCron.cron_job_id
         }
         schedule.active_cron = true
