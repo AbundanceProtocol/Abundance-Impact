@@ -46,13 +46,13 @@ export default async function handler(req, res) {
         fontSize: '22px', alignItems: 'center', justifyContent: 'center'}}>
 
 
-          <div style={{display: 'flex', flexDirection: 'column', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', border: (status == 'curators') ? '1px solid #686cae99' : 'none', borderRadius: '16px', padding: '10px', margin: '15px', background: (status == 'curators') ? '#220a4dbb' : 'none', width: '500px'}}>
+          <div style={{display: 'flex', flexDirection: 'column', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', border: (status == 'curators') ? '1px solid #686cae99' : '#eeeeee00', borderRadius: '16px', padding: '10px', margin: '15px', background: (status == 'curators') ? '#220a4dbb' : '#eeeeee00', width: '500px'}}>
 
             <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '28px', margin: '5px 20px 5px 20px'}}>{`Auto-tip: automatically distribute your tip allowance to your nominees`}</div>
 
           </div>
 
-          <div style={{display: 'flex', flexDirection: 'column', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', border: (status == 'all') ? '1px solid #686cae99' : 'none', borderRadius: '16px', padding: '10px', margin: '15px', background: (status == 'all') ? '#220a4dbb' : 'none', width: '500px'}}>
+          <div style={{display: 'flex', flexDirection: 'column', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', border: (status == 'all') ? '1px solid #686cae99' : '#eeeeee00', borderRadius: '16px', padding: '10px', margin: '15px', background: (status == 'all') ? '#220a4dbb' : '#eeeeee00', width: '500px'}}>
 
             <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '24px', margin: '5px 20px 5px 20px'}}>{`Auto-tip all: automatically distribute allowance to nominees throughout the ecosystem`}</div>
 
@@ -64,7 +64,7 @@ export default async function handler(req, res) {
 
           </div>
 
-          <div style={{display: 'flex', flexDirection: 'column', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', border: (status == 'off') ? '1px solid #686cae99' : 'none', borderRadius: '16px', padding: '10px', margin: '15px', background: (status == 'off') ? '#220a4dbb' : 'none ', width: '500px'}}>
+          <div style={{display: 'flex', flexDirection: 'column', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', border: (status == 'off') ? '1px solid #686cae99' : '#eeeeee00', borderRadius: '16px', padding: '10px', margin: '15px', background: (status == 'off') ? '#220a4dbb' : '#eeeeee00', width: '500px'}}>
 
             <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '26px', margin: '5px 20px 5px 20px'}}>{`Stop auto-tip: stops automatic allowance distribution`}</div>
 
