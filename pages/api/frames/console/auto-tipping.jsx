@@ -19,7 +19,7 @@ const cache = new NodeCache({ stdTTL: 60 });
 export default async function handler(req, res) {
   const { status, curators } = req.query
 
-  // console.log('id', id)
+  console.log('status', status)
   try {
     const fontPath = path.join(process.cwd(), 'public', 'Inter-SemiBold.ttf');
     const fontData = fs.readFileSync(fontPath);
