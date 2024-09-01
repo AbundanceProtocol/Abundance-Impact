@@ -29,7 +29,7 @@ export default async function handler(req, res) {
     const eco = points?.substring(1)
     const curatorFid = req.body.untrustedData.fid
 
-    let autoTipImg = `${baseURL}/api/frames/console/auto-tipping`
+    let autoTipImg = `${baseURL}/api/frames/console/auto-tipping?${qs.stringify({ status: 'all', curators: [] })}`
 
     let button1 = `<meta property="fc:frame:button:1" content='Auto-tip' />
     <meta property="fc:frame:button:1:action" content="post" />
@@ -61,7 +61,7 @@ export default async function handler(req, res) {
           if (schedule) {
             schedule.active_cron = false
             schedule.save()
-            return schedule.cron_job_id
+            return schedule
           } else {
             return null
           }
@@ -97,24 +97,30 @@ export default async function handler(req, res) {
         }
       }
 
-      const cronId = await getSchedule(fid)
+      const schedule = await getSchedule(fid)
 
-      if (cronId) {
-        const updatedCron = await updateCron(cronId)
+      if (schedule?.cron_job_id) {
+        const updatedCron = await updateCron(schedule?.cron_job_id)
         if (updatedCron) {
-          return true
+          return {curators: schedule.curators, isPaused: true}
         } else {
-          return null
+          return {curators: schedule.curators, isPaused: null}
         }
       } else {
-        return null
+        return {curators: [], isPaused: null}
       }
     }
 
-    const isPaused = await pauseSchedule(curatorFid)
+    const {curators, isPaused} = await pauseSchedule(curatorFid)
 
 
     if (!isPaused) {
+
+      if (curators) {
+        autoTipImg = `${baseURL}/api/frames/console/auto-tipping?${qs.stringify({ status: 'curators', curators: curators })}`
+      } else {
+        autoTipImg = `${baseURL}/api/frames/console/auto-tipping?${qs.stringify({ status: 'all', curators: [] })}`
+      }
 
       button1 = `<meta property="fc:frame:button:1" content='Stop auto-tip' />
       <meta property="fc:frame:button:1:action" content="post" />
@@ -135,6 +141,8 @@ export default async function handler(req, res) {
       textField = `<meta name="fc:frame:input:text" content="Search for curator" />`
 
     } else {
+
+      autoTipImg = `${baseURL}/api/frames/console/auto-tipping?${qs.stringify({ status: 'off', curators: [] })}`
 
       button1 = `<meta property="fc:frame:button:1" content='Auto-tip' />
       <meta property="fc:frame:button:1:action" content="post" />
