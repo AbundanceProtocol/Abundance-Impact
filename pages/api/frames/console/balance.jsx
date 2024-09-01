@@ -38,7 +38,7 @@ export default async function handler(req, res) {
     let castQdauCount = qT || 0
     let castQdauBalance = qB || 0
 
-    const backgroundImg = `https://impact.abundance.id/images/backgroundframe2.jpg`
+    const backgroundImg = `https://impact.abundance.id/images/backgroundframe.jpg`
 
     const svg = await satori(
       <div style={{
@@ -134,7 +134,7 @@ export default async function handler(req, res) {
 
     // Set the content type to PNG and send the response
     res.setHeader('Content-Type', 'image/png');
-    res.setHeader('Cache-Control', 'max-age=10');
+    res.setHeader('Cache-Control', 'no-store, max-age=0');
     res.send(pngBuffer);
   } catch (error) {
     console.error(error);

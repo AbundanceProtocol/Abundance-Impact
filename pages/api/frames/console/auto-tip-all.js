@@ -32,7 +32,7 @@ export default async function handler(req, res) {
     // const authorFid = req.body.untrustedData.castId.fid
     // console.log('28', points, curatorFid, castHash)
 
-    let autoTipImg = `${baseURL}/api/frames/console/auto-tipping`
+    let autoTipImg = `${baseURL}/api/frames/console/auto-tipping?${qs.stringify({ status: 'all', curators: [] })}`
 
     let button1 = `<meta property="fc:frame:button:1" content='Stop auto-tip' />
     <meta property="fc:frame:button:1:action" content="post" />
@@ -72,6 +72,8 @@ export default async function handler(req, res) {
     const {encryptedUuid, ecosystem} = await getUuid(curatorFid, pt)
 
     if (!encryptedUuid) {
+
+      autoTipImg = `${baseURL}/api/frames/console/auto-tipping?${qs.stringify({ status: 'off', curators: [] })}`
 
       button1 = `<meta property="fc:frame:button:1" content='Login' />
       <meta property="fc:frame:button:1:action" content="link" />
@@ -192,6 +194,12 @@ export default async function handler(req, res) {
   
       if (schedule) {
 
+        if (schedule?.search_curators.length > 0) {
+          autoTipImg = `${baseURL}/api/frames/console/auto-tipping?${qs.stringify({ status: 'curators', curators: schedule?.search_curators })}`
+        } else {
+          autoTipImg = `${baseURL}/api/frames/console/auto-tipping?${qs.stringify({ status: 'all', curators: [] })}`
+        }
+
         button1 = `<meta property="fc:frame:button:1" content='Stop auto-tip' />
         <meta property="fc:frame:button:1:action" content="post" />
         <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/console/auto-tip-stop?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle })}' />`
@@ -211,6 +219,8 @@ export default async function handler(req, res) {
         textField = `<meta name="fc:frame:input:text" content="Search for curator" />`
 
       } else {
+
+        autoTipImg = `${baseURL}/api/frames/console/auto-tipping?${qs.stringify({ status: 'off', curators: [] })}`
 
         button1 = `<meta property="fc:frame:button:1" content='Auto-tip' />
         <meta property="fc:frame:button:1:action" content="post" />

@@ -17,51 +17,16 @@ const cache = new NodeCache({ stdTTL: 60 });
 
 
 export default async function handler(req, res) {
-  // const { id } = req.query
+  const { status, curators } = req.query
 
   // console.log('id', id)
   try {
     const fontPath = path.join(process.cwd(), 'public', 'Inter-SemiBold.ttf');
     const fontData = fs.readFileSync(fontPath);
 
-    // async function getCircle(id) {
-    //   try {
-    //     const objectId = new mongoose.Types.ObjectId(id)
-    //     console.log(id)
-    //     await connectToDatabase();
-    //     let circle = await Circle.findOne({ _id: objectId }).exec();
-    //     if (circle) {
-    //       return {circles: circle.circles, text: circle.text, username: circle.username}
-    //     } else {
-    //       return {circles: [], text: '', username: ''}
-    //     }
-    //   } catch (error) {
-    //     console.error("Error while fetching casts:", error);
-    //     return {circles: [], text: '', username: ''}
-    //   }  
-    // }
-
-    // let {circles, text, username} = await getCircle(id);
-
-    // if (circles?.length > 10) {
-    //   circles = circles.slice(0, 10)
-    // }
-
-    // const splitCircles = (arr) => {
-    //   // Calculate the midpoint
-    //   const midpoint = Math.ceil(arr.length / 2);
-    
-    //   // Split the array into two parts
-    //   const firstHalf = arr.slice(0, midpoint);
-    //   const secondHalf = arr.slice(midpoint);
-    
-    //   return [firstHalf, secondHalf];
-    // };
-
-    // const [firstHalf, secondHalf] = splitCircles(circles);
 
 
-    // const backgroundImg = `https://impact.abundance.id/images/background.jpg`
+    const backgroundImg = `https://impact.abundance.id/images/backgroundframe.jpg`
 
     const svg = await satori(
       <div style={{
@@ -70,23 +35,42 @@ export default async function handler(req, res) {
         padding: 30,
         display: 'flex',
         flexDirection: 'column',
-        background: `linear-gradient(135deg, #001144, #556699)`,
+        backgroundImage: `url(${backgroundImg})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundColor: '#43238a',
         justifyContent: 'center',
         alignItems: 'center', 
       }}>
-        {/* <div style={{gap: '0.5rem', display: 'flex', flexDirection: 'row'}}>
-          {(firstHalf?.length > 0) ? (firstHalf.map((creator, index) => <img key={index} src={creator} width={90} height={90} style={{borderRadius: '80px', border: '2px solid #eee', backgroundColor: '#8363ca'}} />)) : (<div style={{height: '90px'}}>&nbsp;</div>)}
-        </div> */}
         <div style={{display: 'flex', flexDirection: 'column', color: 'white', 
         fontSize: '22px', alignItems: 'center', justifyContent: 'center'}}>
-          <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '28px', margin: '5px 20px 40px 20px'}}>{`Auto-tip: automatically distribute your tip allowance to your nominees`}</div>
-          <div style={{display: 'flex', textAlign: 'center', color: '#cde', fontSize: '24px', margin: '5px 20px 40px 20px'}}>{`Auto-tip all: automatically distribute allowance to nominees throughout the ecosystem`}</div>
-          <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '26px', margin: '5px 20px 40px 20px'}}>{`Add curator: auto distribute allowance to nominees of selected curators. Stop distribution to ecosystem if previously turned on`}</div>
-          <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '26px', margin: '5px 20px 40px 20px'}}>{`Stop auto-tip: stops automatic allowance distribution`}</div>
+
+
+          <div style={{display: 'flex', flexDirection: 'column', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', border: (status == 'curators') ? '1px solid #686cae99' : 'none', borderRadius: '16px', padding: '10px', margin: '15px', background: (status == 'curators') ? '#220a4dbb' : 'none', width: '500px'}}>
+
+            <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '28px', margin: '5px 20px 5px 20px'}}>{`Auto-tip: automatically distribute your tip allowance to your nominees`}</div>
+
+          </div>
+
+          <div style={{display: 'flex', flexDirection: 'column', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', border: (status == 'all') ? '1px solid #686cae99' : 'none', borderRadius: '16px', padding: '10px', margin: '15px', background: (status == 'all') ? '#220a4dbb' : 'none', width: '500px'}}>
+
+            <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '24px', margin: '5px 20px 5px 20px'}}>{`Auto-tip all: automatically distribute allowance to nominees throughout the ecosystem`}</div>
+
+          </div>
+
+          <div style={{display: 'flex', flexDirection: 'column', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', border: '1px solid #686cae99', borderRadius: '16px', padding: '10px', margin: '15px', background: '#220a4dbb', width: '500px'}}>
+
+            <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '26px', margin: '5px 20px 5px 20px'}}>{`Add curator: auto distribute allowance to nominees of selected curators. Stop distribution to ecosystem if previously turned on`}</div>
+
+          </div>
+
+          <div style={{display: 'flex', flexDirection: 'column', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', border: (status == 'off') ? '1px solid #686cae99' : 'none', borderRadius: '16px', padding: '10px', margin: '15px', background: (status == 'off') ? '#220a4dbb' : 'none ', width: '500px'}}>
+
+            <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '26px', margin: '5px 20px 5px 20px'}}>{`Stop auto-tip: stops automatic allowance distribution`}</div>
+
+          </div>
+        
         </div>
-        {/* <div style={{gap: '0.5rem', display: 'flex', flexDirection: 'row'}}>
-          {(secondHalf?.length > 0) ? (secondHalf.map((creator, index) => <img key={index} src={creator} width={90} height={90} style={{borderRadius: '50px', border: '2px solid #eee'}} />)) : (<div style={{height: '90px'}}>&nbsp;</div>)}
-        </div> */}
       </div>
       ,
       {
@@ -106,7 +90,7 @@ export default async function handler(req, res) {
 
     // Set the content type to PNG and send the response
     res.setHeader('Content-Type', 'image/png');
-    res.setHeader('Cache-Control', 'max-age=10');
+    res.setHeader('Cache-Control', 'no-store, max-age=0');
     res.send(pngBuffer);
   } catch (error) {
     console.error(error);
