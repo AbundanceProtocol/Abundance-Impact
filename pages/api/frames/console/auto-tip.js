@@ -224,6 +224,8 @@ export default async function handler(req, res) {
 
     try {
 
+      console.log('autoTipImg1', autoTipImg)
+
       res.setHeader('Content-Type', 'text/html');
       res.status(200)
       .send(`
@@ -246,6 +248,8 @@ export default async function handler(req, res) {
       return;
 
     } catch (error) {
+
+      console.log('autoTipImg2', autoTipImg)
 
       res.setHeader('Content-Type', 'text/html');
       res.status(500).send(`
