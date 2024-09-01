@@ -40,7 +40,7 @@ export default async function handler(req, res) {
 
             <div style={{display: 'flex', textAlign: 'left', color:  (status == 'all') ? '#eff' : '#220a4d', fontSize: '17px', margin: '5px 10px 5px 10px', width: '180px'}}>Auto-tip all:</div>
 
-            <div style={{display: 'flex', textAlign: 'left', color:  (status == 'all') ? '#eff' : '#220a4d', fontSize: '15px', margin: '5px 10px 5px 0px', width: '100%'}}>automatically distribute leftover $degen allowance to nominees throughout the ecosystem</div>
+            <div style={{display: 'flex', textAlign: 'left', color:  (status == 'all') ? '#eff' : '#220a4d', fontSize: '16px', margin: '5px 10px 5px 0px', width: '100%'}}>automatically distribute leftover $degen allowance to nominees throughout the ecosystem</div>
 
           </div>
 
@@ -48,7 +48,7 @@ export default async function handler(req, res) {
 
             <div style={{display: 'flex', textAlign: 'left', color:  (status == 'curators') ? '#eff' : '#220a4d', fontSize: '17px', margin: '5px 10px 5px 10px', width: '180px'}}>Auto-tip:</div>
 
-            <div style={{display: 'flex', textAlign: 'left', color:  (status == 'curators') ? '#eff' : '#220a4d', fontSize: '15px', margin: '5px 10px 5px 0px', width: '100%'}}>automatically distribute your tip allowance to your nominees</div>
+            <div style={{display: 'flex', textAlign: 'left', color:  (status == 'curators') ? '#eff' : '#220a4d', fontSize: '16px', margin: '5px 10px 5px 0px', width: '100%'}}>automatically distribute your tip allowance to your nominees</div>
 
           </div>
 
@@ -56,7 +56,7 @@ export default async function handler(req, res) {
 
             <div style={{display: 'flex', textAlign: 'left', color:  (status == 'add') ? '#eff' : '#220a4d', fontSize: '17px', margin: '5px 10px 5px 10px', width: '180px'}}>Add curator:</div>
 
-            <div style={{display: 'flex', textAlign: 'left', color:  (status == 'add') ? '#eff' : '#220a4d', fontSize: '15px', margin: '5px 10px 5px 0px', width: '100%'}}>find and add curator to your auto-tip distribution. stops distribution to ecosystem if previously turned on</div>
+            <div style={{display: 'flex', textAlign: 'left', color:  (status == 'add') ? '#eff' : '#220a4d', fontSize: '16px', margin: '5px 10px 5px 0px', width: '100%'}}>find and add curator to your auto-tip distribution. stops distribution to ecosystem if previously turned on</div>
 
           </div>
 
@@ -64,7 +64,7 @@ export default async function handler(req, res) {
 
             <div style={{display: 'flex', textAlign: 'left', color:  (status == 'off') ? '#eff' : '#220a4d', fontSize: '17px', margin: '5px 10px 5px 10px', width: '180px'}}>Stop Auto-tip:</div>
 
-            <div style={{display: 'flex', textAlign: 'left', color:  (status == 'off') ? '#eff' : '#220a4d', fontSize: '15px', margin: '5px 10px 5px 0px', width: '100%'}}>stop automatic allowance distribution</div>
+            <div style={{display: 'flex', textAlign: 'left', color:  (status == 'off') ? '#eff' : '#220a4d', fontSize: '16px', margin: '5px 10px 5px 0px', width: '100%'}}>stop automatic allowance distribution</div>
 
           </div>
         
