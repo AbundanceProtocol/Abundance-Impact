@@ -53,7 +53,7 @@ export default async function handler(req, res) {
     let textField = `<meta name="fc:frame:input:text" content="Search for curator" />`
     let postUrl = `<meta name="fc:frame:post_url" content='https://impact.abundance.id' />`
 
-    async function getUuid(fid) {
+    async function getUuid(fid, points) {
       try {
         await connectToDatabase();
         let userData = await User.findOne({ fid, ecosystem_points: points }).select('uuid ecosystem_name').exec();
