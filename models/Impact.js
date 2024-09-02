@@ -3,6 +3,9 @@ import mongoose from 'mongoose';
 const impactSchema = new mongoose.Schema({
   curator_fid: Number,
   target_cast_hash: String,
+  parent_hash: String,
+  author_pfp: String,
+  creator_username: String,
   creator_fid: Number,
   points: String,
   impact_points: { type: Number, default: 0 },

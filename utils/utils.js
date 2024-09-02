@@ -298,6 +298,44 @@ export async function populateCast(casts) {
   return displayedCasts
 }
 
+export async function populateImpactCast(casts) {
+  let displayedCasts = []
+  
+  if (casts) {
+    casts.forEach(cast => {
+      let newCast = {
+        author: {
+          fid: cast.creator_fid,
+          pfp_url: cast.author_pfp,
+          username: cast.creator_username,
+          display_name: '',
+          power_badge: false,
+        },
+        hash: cast.target_cast_hash,
+        timestamp: cast.createdAt,
+        text: '',
+        impact_points: cast.impact_points,
+        embeds: [],
+        mentioned_profiles: [],
+        replies: {
+          count: 0
+        },
+        reactions: {
+          recasts: [],
+          likes: []
+        },
+        impact_balance: cast.impact_points,
+        quality_absolute: 0,
+        quality_balance: 0
+      }
+
+      displayedCasts.push(newCast)
+    });
+  }
+  return displayedCasts
+}
+
+
 
 export function filterObjects(castArray, filterFid) {
   return castArray.filter(obj => {
