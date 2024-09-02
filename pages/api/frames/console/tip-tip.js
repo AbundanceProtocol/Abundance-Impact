@@ -25,6 +25,7 @@ export default async function handler(req, res) {
     res.status(405).end(`Method ${req.method} Not Allowed`);
   } else {
     const parentHash = hash ? hash : req.body.untrustedData.castId.hash
+    console.log('parentHash', parentHash, hash, req.body.untrustedData.castId.hash)
 
     function sanitizeInput(input) {
       input = _.trim(input);
