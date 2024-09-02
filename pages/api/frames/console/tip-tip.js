@@ -20,6 +20,7 @@ export default async function handler(req, res) {
   const { time, curators, channels, tags, eco, ecosystem, time1, hash } = req.query;
   const { untrustedData } = req.body
   const parentHash = hash ? hash : req.body.untrustedData.castId.hash
+  console.log('parentHash-23', parentHash, hash, req.body.untrustedData.castId.hash)
 
   if (req.method !== 'POST' || !ecosystem || !eco) {
     res.setHeader('Allow', ['POST']);

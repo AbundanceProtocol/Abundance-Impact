@@ -19,6 +19,7 @@ export default async function handler(req, res) {
     // console.log('18', typeof iB, typeof cI, typeof impact, typeof quality)
     const curatorFid = req.body.untrustedData.fid
     const castHash = hash ? hash : req.body.untrustedData.castId.hash
+    console.log('castHash 22', castHash, hash, req.body.untrustedData.castId.hash)
 
     let balanceImg = `${baseURL}/api/frames/console/balance?${qs.stringify({ iB, qB, qT, author, iA, qA, ecosystem: ec, login, pt, cu })}`
 
