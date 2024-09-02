@@ -28,7 +28,7 @@ export default async function handler(req, res) {
     let postUrl = `<meta name="fc:frame:post_url" content='https://impact.abundance.id' />`
 
 
-    console.log('1', login == true, login)
+    console.log('1', login === true, login == true, login)
     console.log('2', parseInt(cI) == 0, parseInt(impact) == 0, parseInt(quality) == 0, cI, impact, quality)
     console.log('3', parseInt(cI) !== 0, parseInt(impact) == 0, parseInt(quality) == 0, cI, impact, quality)
     console.log('4', parseInt(impact) !== 0, impact)
@@ -36,7 +36,7 @@ export default async function handler(req, res) {
 
 
 
-    if (login == true) {
+    if (login === true) {
       console.log('1')
       button1 = `<meta property="fc:frame:button:1" content='Login' />
       <meta property="fc:frame:button:1:action" content="link" />
