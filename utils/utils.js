@@ -314,7 +314,7 @@ export async function populateImpactCast(casts) {
         hash: cast.target_cast_hash,
         timestamp: cast.createdAt,
         text: '',
-        impact_points: cast.impact_points,
+        impact_points: cast,
         embeds: [],
         mentioned_profiles: [],
         replies: {
@@ -324,7 +324,7 @@ export async function populateImpactCast(casts) {
           recasts: [],
           likes: []
         },
-        impact_balance: cast,
+        impact_balance: cast.impact_points,
         quality_absolute: 0,
         quality_balance: 0
       }
