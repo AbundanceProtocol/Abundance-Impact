@@ -357,6 +357,7 @@ export default async function handler(req, res) {
               try {
                 await connectToDatabase();
                 const impacts = await Impact.find({ curator_fid: { $in: curators }, points, parent_hash: hash }).exec();
+                console.log('impacts', impacts)
                 if (impacts) {
                   return impacts
                 } else {
@@ -369,7 +370,8 @@ export default async function handler(req, res) {
             }
 
             const { casts } = await getSubcasts(curator, points, parentHash)
-    
+            
+            console.log('casts', casts)
             let filteredCasts = await casts.reduce((acc, current) => {
               const existingItem = acc.find(item => item._id === current._id);
               if (!existingItem) {

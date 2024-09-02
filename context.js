@@ -152,6 +152,7 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
         setPopulate(populate+1)
         setPoints(ecoData?.ecosystem_points_name)
         if (router.route == '/') {
+          console.log('points', store.fid, points)
           getRemainingBalances(store.fid, points, store.signer_uuid)
         } else {
           getRemainingBalances(store.fid, ecoData?.ecosystem_points_name, store.signer_uuid)
@@ -172,6 +173,37 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
       }
     }
   }, [ecoData, isLogged, sched.ecoData])
+
+  // useEffect(() => {
+  //   console.log(' triggered [ecoData]')
+  //   console.log(isLogged, ecoData, points)
+  //   const updateEcoData = () => {
+  //     if (isLogged && ecoData) {
+  //       setPopulate(populate+1)
+  //       setPoints(ecoData?.ecosystem_points_name)
+  //       if (router.route == '/') {
+  //         console.log('points', store.fid, points)
+  //         getRemainingBalances(store.fid, points, store.signer_uuid)
+  //       } else {
+  //         getRemainingBalances(store.fid, ecoData?.ecosystem_points_name, store.signer_uuid)
+  //       }
+  //     }
+  //   }
+
+  //   if (router.route !== "/~/ecosystems/[ecosystem]/tip" && router.route !== "/~/ecosystems/[ecosystem]/[eco]/[curators]/tip") {
+  //     if (sched.ecoData) {
+  //       updateEcoData()
+  //       setSched(prev => ({...prev, ecoData: false }))
+  //     } else {
+  //       const timeoutId = setTimeout(() => {
+  //         updateEcoData()
+  //         setSched(prev => ({...prev, ecoData: false }))
+  //       }, 300);
+  //       return () => clearTimeout(timeoutId);
+  //     }
+  //   }
+  // }, [points])
+
 
   useEffect(() => {
     console.log(' triggered [store.isAuth]')
