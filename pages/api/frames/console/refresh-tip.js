@@ -246,8 +246,8 @@ export default async function handler(req, res) {
 
 
     // console.log('1', login == true, login)
-    console.log('2', parseInt(cI) == 0, parseInt(impact) == 0, parseInt(quality) == 0, cI, impact, quality)
-    console.log('3', parseInt(cI) !== 0, parseInt(impact) == 0, parseInt(quality) == 0, cI, impact, quality)
+    console.log('2', parseInt(castImpact) == 0, parseInt(impact) == 0, parseInt(quality) == 0, castImpact, impact, quality)
+    console.log('3', parseInt(castImpact) !== 0, parseInt(impact) == 0, parseInt(quality) == 0, castImpact, impact, quality)
     console.log('4', parseInt(impact) !== 0, impact)
     console.log('5', parseInt(quality) !== 0, quality)
 
