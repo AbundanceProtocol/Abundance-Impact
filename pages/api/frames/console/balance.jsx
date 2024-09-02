@@ -58,7 +58,7 @@ export default async function handler(req, res) {
         <div style={{display: 'flex', flexDirection: 'column', color: 'black', alignItems: 'center', justifyContent: 'center'}}>
           <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '24px', margin: '5px 20px 15px 30px', padding: '0 0 10px 0'}}>{`${ecosystemName} Ecosystem`}</div>
 
-          {(Boolean(login) == true) ? (
+          {(Boolean(login) === true) ? (
             <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', border: '1px solid #686cae99', background: '#321a5dbb', padding: '15px 50px 20px 50px', borderRadius: '16px'}}>
 
               <div style={{display: 'flex', flexDirection: 'column', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
