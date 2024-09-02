@@ -18,7 +18,6 @@ export default async function handler(req, res) {
     console.log('17', iB, qB, qT, author, iA, qA, ecosystem, login, pt, cu, impact, quality, cI)
     console.log('18', typeof iB, typeof cI, typeof impact, typeof quality, typeof login)
     const needLogin = login == 'true'
-    console.log('20', needLogin, typeof needLogin, needLogin == true, needLogin == 'true', needLogin == 'false', login == 'true', login == 'false')
     
     let balanceImg = `${baseURL}/api/frames/console/balance?${qs.stringify({ iB, qB, qT, author, iA, qA, ecosystem, login, pt, cu })}`
 
@@ -30,7 +29,7 @@ export default async function handler(req, res) {
     let postUrl = `<meta name="fc:frame:post_url" content='https://impact.abundance.id' />`
 
 
-    console.log('1', login == true, login)
+    console.log('1', needLogin)
     console.log('2', parseInt(cI) == 0, parseInt(impact) == 0, parseInt(quality) == 0, cI, impact, quality)
     console.log('3', parseInt(cI) !== 0, parseInt(impact) == 0, parseInt(quality) == 0, cI, impact, quality)
     console.log('4', parseInt(impact) !== 0, impact)
