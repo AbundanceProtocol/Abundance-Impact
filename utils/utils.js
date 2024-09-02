@@ -324,7 +324,7 @@ export async function populateImpactCast(casts) {
           recasts: [],
           likes: []
         },
-        impact_balance: cast.impact_points,
+        impact_balance: cast,
         quality_absolute: 0,
         quality_balance: 0
       }
