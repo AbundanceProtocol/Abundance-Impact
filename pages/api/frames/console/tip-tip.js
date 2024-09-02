@@ -476,7 +476,7 @@ export default async function handler(req, res) {
             const remainingTip = await sendRequests(castData, decryptedUuid, apiKey);
             // const remainingTip = 0 
 
-            shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share?${qs.stringify({ id: circleId })}`
+            shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tipper-share?${qs.stringify({ id: circleId })}`
           
             async function getCurator(curator, points) {
 
