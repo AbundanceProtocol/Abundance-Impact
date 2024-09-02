@@ -15,7 +15,7 @@ import qs from "querystring";
 // import useStore from '../../../utils/store';
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 
-export default function Tips({time, curators, channels, tags, eco, ecosystem}) {
+export default function Tips({time, curators, channels, tags, eco, ecosystem, hash}) {
   const { LoginPopup, fid, userBalances, isLogged } = useContext(AccountContext)
   const index = 0
   const router = useRouter();
@@ -163,14 +163,14 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem}) {
     console.log(queryData)
 
     const updatedFrameData = {...frameData}
-    updatedFrameData.buttons[0].target = `${baseURL}/api/frames/tip/tip?${qs.stringify({    
-      time, curators, eco, ecosystem })}`
+    updatedFrameData.buttons[0].target = `${baseURL}/api/frames/console/tip-tip?${qs.stringify({    
+      time, curators, eco, ecosystem, hash })}`
 
     updatedFrameData.buttons[1].target = `${baseURL}/~/ecosystems/${ecosystem}?${qs.stringify({    
       time, curators })}`
 
-    updatedFrameData.buttons[3].target = `${baseURL}/api/frames/tip/refresh?${qs.stringify({    
-      time, curators, eco, ecosystem })}`
+    updatedFrameData.buttons[3].target = `${baseURL}/api/frames/console/refresh-tip?${qs.stringify({    
+      time, curators, eco, ecosystem, hash })}`
 
     setFrameData(updatedFrameData)
   }, [queryData]);
@@ -310,22 +310,22 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem}) {
         <meta property="fc:frame:button:1" content='Tip Nominees' />
         <meta property="fc:frame:button:1:action" content="post" />
 
-        <meta property="fc:frame:button:1:target" content={`${baseURL}/api/frames/tip/tip?${qs.stringify({    
-          time, curators, eco, ecosystem })}`} />
+        <meta property="fc:frame:button:1:target" content={`${baseURL}/api/frames/console/tip-tip?${qs.stringify({    
+          time, curators, eco, ecosystem, hash })}`} />
 
         <meta property="fc:frame:button:2" content={`Explore curation`} />
         <meta property="fc:frame:button:2:action" content="link" />
 
         <meta property="fc:frame:button:2:target" content={`${baseURL}/~/ecosystems/${ecosystem}?${qs.stringify({    
-          time, curators })}`} />
+          time, curators, hash })}`} />
         <meta property="fc:frame:button:3" content={`What's /impact?`} />
         <meta property="fc:frame:button:3:action" content="link" />
         <meta property="fc:frame:button:3:target" content={`https://warpcast.com/abundance/0x43ddd672`} />
         <meta property="fc:frame:button:4" content='Refresh' />
         <meta property="fc:frame:button:4:action" content="post" />
 
-        <meta property="fc:frame:button:4:target" content={`${baseURL}/api/frames/tip/refresh?${qs.stringify({    
-          time, curators, eco, ecosystem })}`} />
+        <meta property="fc:frame:button:4:target" content={`${baseURL}/api/frames/console/refresh-tip?${qs.stringify({    
+          time, curators, eco, ecosystem, hash })}`} />
 
         <meta name="fc:frame:input:text" content="Eg.: 1000 $Degen, 500 $HAM" />
       </Head>
@@ -553,11 +553,15 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem}) {
 export async function getServerSideProps(context) {
   // Fetch dynamic parameters from the context object
   const { query, params } = context;
-  const { curators, eco } = query;
+  const { curators, eco, hash } = query;
   const { ecosystem } = params;
   let setEco = null
   if (eco) {
     setEco = eco
+  }
+  let setHash = null
+  if (hash) {
+    setHash = hash
   }
   let setCurators = []
   if (curators) {
@@ -571,7 +575,8 @@ export async function getServerSideProps(context) {
       channels: [],
       tags: [],
       eco: setEco,
-      ecosystem: ecosystem
+      ecosystem: ecosystem,
+      hash: setHash
     },
   };
 }
