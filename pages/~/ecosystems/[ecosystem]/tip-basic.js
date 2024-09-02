@@ -50,13 +50,13 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem}) {
           index: 1,
           title: "Tip Nominees",
           action_type: "post",
-          target: `${baseURL}/api/frames/tip/tip?tip=0`
+          target: `${baseURL}/api/frames/console/tip-tip?tip=0`
         },
         {
           index: 2,
           title: "Explore curation",
           action_type: "link",
-          target: `${baseURL}/api/frames/tip/tip?tip=0`
+          target: `${baseURL}/api/frames/console/tip-tip?tip=0`
         },
         {
           index: 3,
@@ -68,7 +68,7 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem}) {
           index: 4,
           title: "Refresh",
           action_type: "post",
-          target: `${baseURL}/api/frames/tip/refresh?tip=0`
+          target: `${baseURL}/api/frames/console/refresh-tip?tip=0`
         }
       ],
       input: {
