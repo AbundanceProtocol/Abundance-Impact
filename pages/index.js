@@ -20,11 +20,12 @@ import EcosystemMenu from '../components/Layout/EcosystemNav/EcosystemMenu';
 import { IoInformationCircleOutline as Info } from "react-icons/io5";
 import { PiSquaresFourLight as Actions } from "react-icons/pi";
 import { Logo } from './assets';
+import useStore from '../utils/store';
 
 export default function Home() {
   const ref2 = useRef(null)
   const [ref, inView] = useInView()
-  const { LoginPopup, ecoData, points, setPoints, isLogged, showLogin, setShowLogin, setIsLogged, setFid } = useContext(AccountContext)
+  const { LoginPopup, ecoData, points, setPoints, isLogged, showLogin, setShowLogin, setIsLogged, setFid, getRemainingBalances } = useContext(AccountContext)
   const [screenWidth, setScreenWidth] = useState(undefined)
   const [screenHeight, setScreenHeight] = useState(undefined)
   const [textMax, setTextMax] = useState('562px')
@@ -34,6 +35,7 @@ export default function Home() {
   const { eco } = router.query
   const { isMobile } = useMatchBreakpoints();
   const [display, setDisplay] = useState({personal: false, ecosystem: false})
+  const store = useStore()
 
   function toggleMenu(target) {
     setDisplay(prev => ({...prev, [target]: !display[target] }))
@@ -96,10 +98,13 @@ export default function Home() {
   }, [screenWidth])
 
   useEffect(() => {
-    let setEco = eco || '$IMPACT'
-    console.log('setEco', setEco)
-    setPoints(setEco)
-  }, [eco])
+    if (isLogged) {
+      let setEco = eco || '$IMPACT'
+      console.log('setEco', setEco)
+      setPoints(setEco)
+      getRemainingBalances(store.fid, setEco, store.signer_uuid)
+    }
+  }, [eco, isLogged])
 
 
   return (
