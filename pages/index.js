@@ -97,6 +97,7 @@ export default function Home() {
 
   useEffect(() => {
     let setEco = eco || '$IMPACT'
+    console.log('setEco', setEco)
     setPoints(setEco)
   }, [eco])
 
