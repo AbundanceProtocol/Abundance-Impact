@@ -16,9 +16,11 @@ const apiKey = process.env.NEYNAR_API_KEY
 export default async function handler(req, res) {
   if (req.method === 'POST') {
     const points = req.query.pt
+    const hash = req.query.hash
     const eco = points?.substring(1)
     const curatorFid = req.body.untrustedData.fid
-    const castHash = req.body.untrustedData.castId.hash
+    const castHash = hash ? hash : req.body.untrustedData.castId.hash
+
     // const authorFid = req.body.untrustedData.castId.fid
     console.log('28', points, curatorFid, castHash)
 

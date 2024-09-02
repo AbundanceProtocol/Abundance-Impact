@@ -18,6 +18,7 @@ export default async function handler(req, res) {
     // console.log('17', iB, qB, qT, author, iA, qA, ecosystem, login, pt, cu, impact, quality, cI)
     // console.log('18', typeof iB, typeof cI, typeof impact, typeof quality)
     const curatorFid = req.body.untrustedData.fid
+    const castHash = hash ? hash : req.body.untrustedData.castId.hash
 
     let balanceImg = `${baseURL}/api/frames/console/balance?${qs.stringify({ iB, qB, qT, author, iA, qA, ecosystem: ec, login, pt, cu })}`
 
@@ -31,7 +32,7 @@ export default async function handler(req, res) {
 
     const shareText = 'I just nominated great builders and creators on /impact. Help support them here:'
 
-    let shareUrl = `https://impact.abundance.id/~/ecosystems/${handle}/tip-basic?${qs.stringify({ curators: curatorFid, eco: pt?.substring(1) })}`
+    let shareUrl = `https://impact.abundance.id/~/ecosystems/${handle}/tipper-basic?${qs.stringify({ curators: curatorFid, eco: pt?.substring(1), hash: castHash })}`
     
     const encodedShareText = encodeURIComponent(shareText); 
     let encodedShareUrl = encodeURIComponent(shareUrl); 

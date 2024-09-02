@@ -17,15 +17,14 @@ const secretKey = process.env.SECRET_KEY
 const apiKey = process.env.NEYNAR_API_KEY
 
 export default async function handler(req, res) {
-  const { time, curators, channels, tags, eco, ecosystem, time1 } = req.query;
+  const { time, curators, channels, tags, eco, ecosystem, time1, hash } = req.query;
   const { untrustedData } = req.body
 
   if (req.method !== 'POST' || !ecosystem || !eco) {
     res.setHeader('Allow', ['POST']);
     res.status(405).end(`Method ${req.method} Not Allowed`);
   } else {
-
-    const parentHash = req.body.untrustedData.castId.hash
+    const parentHash = hash ? hash : req.body.untrustedData.castId.hash
 
     function sanitizeInput(input) {
       input = _.trim(input);
@@ -203,7 +202,7 @@ export default async function handler(req, res) {
     
     let shareText = 'I just multi-tipped builders and creators on /impact. Try it out here:'
 
-    let shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share?${qs.stringify({ time, curators, eco })}`
+    let shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tipper-share?${qs.stringify({ time, curators, eco, hash: parentHash })}`
 
     let encodedShareText = encodeURIComponent(shareText); 
     let encodedShareUrl = encodeURIComponent(shareUrl); 
