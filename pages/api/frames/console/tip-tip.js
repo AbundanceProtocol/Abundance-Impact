@@ -357,15 +357,16 @@ export default async function handler(req, res) {
               try {
                 await connectToDatabase();
                 const casts = await Impact.find({ curator_fid: { $in: curators }, points, parent_hash: hash }).exec();
-                console.log('impacts', casts)
                 if (casts) {
-                  return casts
+                  console.log('casts1', casts)
+                  return { casts }
                 } else {
-                  return []
+                  console.log('casts2')
+                  return { casts: [] }
                 }
               } catch (error) {
                 console.error("Error while fetching casts:", error);
-                return []
+                return {casts: []}
               }
             }
 
