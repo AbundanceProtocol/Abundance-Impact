@@ -19,13 +19,12 @@ const apiKey = process.env.NEYNAR_API_KEY
 export default async function handler(req, res) {
   const { time, curators, channels, tags, eco, ecosystem, time1, hash } = req.query;
   const { untrustedData } = req.body
+  const parentHash = hash ? hash : req.body.untrustedData.castId.hash
 
   if (req.method !== 'POST' || !ecosystem || !eco) {
     res.setHeader('Allow', ['POST']);
     res.status(405).end(`Method ${req.method} Not Allowed`);
   } else {
-    const parentHash = hash ? hash : req.body.untrustedData.castId.hash
-    console.log('parentHash', parentHash, hash, req.body.untrustedData.castId.hash)
 
     function sanitizeInput(input) {
       input = _.trim(input);
@@ -183,7 +182,7 @@ export default async function handler(req, res) {
     const issueImg = `${baseURL}/images/issue.jpg`;
     let circlesImg = ''
     
-    console.log('14:', req.query)
+    console.log('14-2:', req.query)
 
     const exploreLink = `${baseURL}/~/ecosystems/${ecosystem}?${qs.stringify({ time: 'all', curators, eco })}`
 
@@ -540,6 +539,7 @@ export default async function handler(req, res) {
 
             if (remainingTip || remainingTip == 0) {
               console.log('e')
+              console.log('parentHash', parentHash, hash, req.body.untrustedData.castId.hash)
 
               let metatags = `
               <meta name="fc:frame:button:1" content="Share contribution">
