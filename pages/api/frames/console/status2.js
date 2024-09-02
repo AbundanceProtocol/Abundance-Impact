@@ -36,7 +36,7 @@ export default async function handler(req, res) {
 
 
 
-    if (login == true) {
+    if (Boolean(login) == true) {
       console.log('1')
       button1 = `<meta property="fc:frame:button:1" content='Login' />
       <meta property="fc:frame:button:1:action" content="link" />
