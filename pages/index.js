@@ -21,7 +21,7 @@ import { IoInformationCircleOutline as Info } from "react-icons/io5";
 import { PiSquaresFourLight as Actions } from "react-icons/pi";
 import { Logo } from './assets';
 
-export default function Home({eco}) {
+export default function Home() {
   const ref2 = useRef(null)
   const [ref, inView] = useInView()
   const { LoginPopup, ecoData, points, setPoints, isLogged, showLogin, setShowLogin, setIsLogged, setFid } = useContext(AccountContext)
@@ -31,6 +31,7 @@ export default function Home({eco}) {
   const [feedMax, setFeedMax ] = useState('620px')
   const [showPopup, setShowPopup] = useState({open: false, url: null})
   const router = useRouter()
+  const { eco } = router.query
   const { isMobile } = useMatchBreakpoints();
   const [display, setDisplay] = useState({personal: false, ecosystem: false})
 
@@ -95,7 +96,8 @@ export default function Home({eco}) {
   }, [screenWidth])
 
   useEffect(() => {
-    setPoints(eco)
+    let setEco = eco || '$IMPACT'
+    setPoints(setEco)
   }, [eco])
 
 
@@ -250,50 +252,6 @@ export default function Home({eco}) {
                 </div>
               )}
 
-              {/* {isLogged ? (<a className="" title={`+5 $IMPACT`} href={`https://warpcast.com/~/add-cast-action?name=%2B5+%24IMPACT&icon=star&actionType=post&postUrl=https%3A%2Fimpact.abundance.id%2Fapi%2Faction%2Fimpact5%3Fpoints=IMPACT&description=Curate+Casts+with+the+Impact+App`} target="_blank" rel="noopener noreferrer">
-                <div className='flex-row cast-act-lt' style={{borderRadius: '8px', padding: '8px 8px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
-                  <FaRegStar size={14} />
-                  <p style={{padding: '0px', fontSize: '12px', fontWeight: '500', textWrap: 'nowrap'}}>+5 $IMPACT</p>
-                </div>
-              </a>) : (
-                <div className={`flex-row`} onClick={LoginPopup}>
-                  <div>
-                    <div className='flex-row cast-act-lt' style={{borderRadius: '8px', padding: '8px 8px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', backgroundColor: '#bbb'}}>
-                      <FaRegStar size={14} />
-                      <p style={{padding: '0px', fontSize: '12px', fontWeight: '500', textWrap: 'nowrap', color: '#222'}}>+5 $IMPACT</p>
-                    </div>
-                  </div>
-                  <div style={{position: 'relative', fontSize: '0', width: '0', height: '100%'}}>
-                    <div className='top-layer' style={{position: 'absolute', top: 0, left: 0, transform: 'translate(-50%, -50%)' }}>
-                      <FaLock size={8} color='#999' />
-                    </div>
-                  </div>
-                </div>
-              )} */}
-
-              {/* {isLogged ? (<a className="" title={`$$IMPACT Balance`} href={`https://warpcast.com/~/add-cast-action?name=%24IMPACT+Stats&icon=info&actionType=post&postUrl=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Faction%2Fbalance?points=IMPACT&description=Get+Cast+Balance+for+Impact+App`} target="_blank" rel="noopener noreferrer">
-                <div className='flex-row cast-act-lt' style={{borderRadius: '8px', padding: '8px 4px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
-                  <div style={{width: '2px', fontSize: '0px'}}>&nbsp;</div>
-                  <Info size={14} />
-                  <p style={{padding: '0px', fontSize: '12px', fontWeight: '500', textWrap: 'nowrap'}}>$IMPACT Stats</p>
-                  <div style={{width: '2px', fontSize: '0px'}}>&nbsp;</div>
-                </div>
-              </a>) : (
-                <div className={`flex-row`} onClick={LoginPopup}>
-                  <div>
-                    <div className='flex-row cast-act-lt' style={{borderRadius: '8px', padding: '8px 8px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', backgroundColor: '#bbb'}}>
-                      <FaRegStar size={14} />
-                      <p style={{padding: '0px', fontSize: '12px', fontWeight: '500', textWrap: 'nowrap', color: '#222'}}>$IMPACT Stats</p>
-                      <div style={{width: '2px', fontSize: '0px'}}>&nbsp;</div>
-                    </div>
-                  </div>
-                  <div style={{position: 'relative', fontSize: '0', width: '0', height: '100%'}}>
-                    <div className='top-layer' style={{position: 'absolute', top: 0, left: 0, transform: 'translate(-50%, -50%)' }}>
-                      <FaLock size={8} color='#999' />
-                    </div>
-                  </div>
-                </div>
-              )} */}
             </div>
           </div>
         </div>
@@ -404,16 +362,4 @@ export default function Home({eco}) {
     <div ref={ref}>&nbsp;</div>
   </div>
   )
-}
-
-
-export async function getServerSideProps(context) {
-  const { query } = context;
-  const { eco } = query;
-
-  let setEco = eco || '$IMPACT'
-
-  return {
-    props: { eco: setEco }
-  };
 }
