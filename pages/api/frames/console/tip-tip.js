@@ -369,7 +369,7 @@ export default async function handler(req, res) {
               }
             }
 
-            const { casts } = await getSubcasts(curator, points, parentHash)
+            const casts = await getSubcasts(curator, points, parentHash)
             
             console.log('casts', casts)
             let filteredCasts = await casts.reduce((acc, current) => {
