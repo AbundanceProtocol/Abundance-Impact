@@ -17,8 +17,8 @@ export default async function handler(req, res) {
   } else {
     console.log('17', iB, qB, qT, author, iA, qA, ecosystem, login, pt, cu, impact, quality, cI)
     console.log('18', typeof iB, typeof cI, typeof impact, typeof quality, typeof login)
-    const logged = Boolean(login)
-    console.log('20', logged, typeof logged, logged == true, logged == 'true', logged == 'false')
+    const needLogin = login == 'true'
+    console.log('20', needLogin, typeof needLogin, needLogin == true, needLogin == 'true', needLogin == 'false', login == 'true', login == 'false')
     
     let balanceImg = `${baseURL}/api/frames/console/balance?${qs.stringify({ iB, qB, qT, author, iA, qA, ecosystem, login, pt, cu })}`
 
@@ -38,7 +38,7 @@ export default async function handler(req, res) {
 
 
 
-    if (logged) {
+    if (needLogin) {
       console.log('1')
       button1 = `<meta property="fc:frame:button:1" content='Login' />
       <meta property="fc:frame:button:1:action" content="link" />
