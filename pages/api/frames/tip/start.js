@@ -39,7 +39,7 @@ export default async function handler(req, res) {
     const issueImg = `${baseURL}/images/issue.jpg`;
     let circlesImg = ''
     
-    console.log('14:', req.query, refresh)
+    console.log('14-3:', req.query, refresh)
 
     const exploreLink = `${baseURL}/~/ecosystems/${ecosystem}?${qs.stringify({ time: 'all', curators })}`
 
