@@ -356,10 +356,10 @@ export default async function handler(req, res) {
             async function getSubcasts(curators, points, hash) {
               try {
                 await connectToDatabase();
-                const impacts = await Impact.find({ curator_fid: { $in: curators }, points, parent_hash: hash }).exec();
-                console.log('impacts', impacts)
-                if (impacts) {
-                  return impacts
+                const casts = await Impact.find({ curator_fid: { $in: curators }, points, parent_hash: hash }).exec();
+                console.log('impacts', casts)
+                if (casts) {
+                  return casts
                 } else {
                   return []
                 }
@@ -369,7 +369,7 @@ export default async function handler(req, res) {
               }
             }
 
-            const casts = await getSubcasts(curator, points, parentHash)
+            const { casts } = await getSubcasts(curator, points, parentHash)
             
             console.log('casts', casts)
             let filteredCasts = await casts.reduce((acc, current) => {
