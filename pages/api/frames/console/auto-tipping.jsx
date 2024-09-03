@@ -10,8 +10,8 @@ import User from '../../../../models/User';
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 
 export default async function handler(req, res) {
-  // const { status, curators, points } = req.query
-  const { status, curators, points } = { status: 'curators', curators: ['512380', '9326', 327034, 256500], points: '$IMPACT' }
+  const { status, curators, points } = req.query
+  // const { status, curators, points } = { status: 'curators', curators: ['512380', '9326', 327034, 256500], points: '$IMPACT' }
 
   console.log('status', status)
   try {
@@ -69,8 +69,6 @@ export default async function handler(req, res) {
 
           <div style={{display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', border: (status == 'curators') ? '2px solid #686cae99' : '1px solid #eeeeeeaa', borderRadius: '16px', padding: '10px', margin: '15px', background: (status == 'curators') ? '#220a4dbb' : '#eeeeeeaa', width: '500px'}}>
             <div style={{display: 'flex', textAlign: 'left', color:  (status == 'curators') ? '#eff' : '#220a4d', fontSize: '17px', margin: '5px 10px 5px 10px', width: '140px'}}>Auto-tip:</div>
-
-            {/* <div style={{display: 'flex', textAlign: 'left', color:  (status == 'curators') ? '#eff' : '#220a4d', fontSize: '16px', margin: '5px 10px 5px 0px', width: '360px'}}>automatically distribute leftover $degen allowance to nominees throughout the ecosystem</div> */}
 
             <div style={{display: 'flex', flexDirection: 'column', color:  (status == 'curators') ? '#eff' : '#220a4d', fontSize: '16px', margin: '5px 10px 5px 0px', width: '320px'}}>
               <div style={{width: '320px'}}>automatically distribute your tip allowance to your nominees</div>
