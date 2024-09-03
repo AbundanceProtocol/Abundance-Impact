@@ -29,7 +29,7 @@ export default async function handler(req, res) {
     const eco = points?.substring(1)
     const curatorFid = req.body.untrustedData.fid
 
-    let autoTipImg = `${baseURL}/api/frames/console/auto-tipping?${qs.stringify({ status: 'all', curators: [] })}`
+    let autoTipImg = `${baseURL}/api/frames/console/auto-tipping?${qs.stringify({ status: 'all', curators: [], points: pt })}`
 
     let button1 = `<meta property="fc:frame:button:1" content='Auto-tip' />
     <meta property="fc:frame:button:1:action" content="post" />
@@ -117,9 +117,9 @@ export default async function handler(req, res) {
     if (!isPaused) {
 
       if (curators) {
-        autoTipImg = `${baseURL}/api/frames/console/auto-tipping?${qs.stringify({ status: 'curators', curators: curators })}`
+        autoTipImg = `${baseURL}/api/frames/console/auto-tipping?${qs.stringify({ status: 'curators', curators: curators, points: pt })}`
       } else {
-        autoTipImg = `${baseURL}/api/frames/console/auto-tipping?${qs.stringify({ status: 'all', curators: [] })}`
+        autoTipImg = `${baseURL}/api/frames/console/auto-tipping?${qs.stringify({ status: 'all', curators: [], points: pt })}`
       }
 
       button1 = `<meta property="fc:frame:button:1" content='Stop auto-tip' />
@@ -142,7 +142,7 @@ export default async function handler(req, res) {
 
     } else {
 
-      autoTipImg = `${baseURL}/api/frames/console/auto-tipping?${qs.stringify({ status: 'off', curators: [] })}`
+      autoTipImg = `${baseURL}/api/frames/console/auto-tipping?${qs.stringify({ status: 'off', curators: [], points: pt })}`
 
       button1 = `<meta property="fc:frame:button:1" content='Auto-tip' />
       <meta property="fc:frame:button:1:action" content="post" />

@@ -32,7 +32,7 @@ export default async function handler(req, res) {
     // const authorFid = req.body.untrustedData.castId.fid
     // console.log('28', points, curatorFid, castHash)
 
-    let autoTipImg = `${baseURL}/api/frames/console/auto-tipping?${qs.stringify({ status: 'off', curators: [] })}`
+    let autoTipImg = `${baseURL}/api/frames/console/auto-tipping?${qs.stringify({ status: 'off', curators: [], points: pt })}`
 
     let button1 = `<meta property="fc:frame:button:1" content='Stop auto-tip' />
     <meta property="fc:frame:button:1:action" content="post" />
@@ -73,7 +73,7 @@ export default async function handler(req, res) {
 
     if (!encryptedUuid) {
 
-      autoTipImg = `${baseURL}/api/frames/console/auto-tipping?${qs.stringify({ status: 'off', curators: [] })}`
+      autoTipImg = `${baseURL}/api/frames/console/auto-tipping?${qs.stringify({ status: 'off', curators: [], points: pt })}`
       console.log('77', autoTipImg)
 
       button1 = `<meta property="fc:frame:button:1" content='Login' />
@@ -188,10 +188,10 @@ export default async function handler(req, res) {
       if (schedule?.active_cron) {
 
         if (schedule?.search_curators?.length > 0) {
-          autoTipImg = `${baseURL}/api/frames/console/auto-tipping?${qs.stringify({ status: 'curators', curators: schedule?.search_curators })}`
+          autoTipImg = `${baseURL}/api/frames/console/auto-tipping?${qs.stringify({ status: 'curators', curators: schedule?.search_curators, points: pt })}`
           console.log('191', autoTipImg)
         } else {
-          autoTipImg = `${baseURL}/api/frames/console/auto-tipping?${qs.stringify({ status: 'all', curators: [] })}`
+          autoTipImg = `${baseURL}/api/frames/console/auto-tipping?${qs.stringify({ status: 'all', curators: [], points: pt })}`
           console.log('193', autoTipImg)
         }
 
@@ -215,7 +215,7 @@ export default async function handler(req, res) {
 
       } else {
 
-        autoTipImg = `${baseURL}/api/frames/console/auto-tipping?${qs.stringify({ status: 'off', curators: [] })}`
+        autoTipImg = `${baseURL}/api/frames/console/auto-tipping?${qs.stringify({ status: 'off', curators: [], points: pt })}`
         console.log('216', autoTipImg)
         button1 = `<meta property="fc:frame:button:1" content='Auto-tip' />
         <meta property="fc:frame:button:1:action" content="post" />
