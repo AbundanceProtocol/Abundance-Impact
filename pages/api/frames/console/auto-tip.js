@@ -93,80 +93,96 @@ export default async function handler(req, res) {
 
       const code = generateRandomString(12)
     
-      async function setSchedule(fid, code, points, ecosystem, encryptedUuid) {
-        let schedule = null
+      async function getSchedule(fid) {
         try {
           await connectToDatabase();
-          schedule = await ScheduleTip.findOne({ fid }).exec();
+          const schedule = await ScheduleTip.findOne({ fid }).select('search_curators').exec();
           if (schedule) {
-            schedule.code = code
-            schedule.search_shuffle = true
-            schedule.search_time = 'all'
-            schedule.search_tags = []
-            schedule.search_channels = []
-            schedule.search_curators = []
-            schedule.points = points
-            schedule.percent_tip = 100
-            schedule.ecosystem_name = ecosystem
-            schedule.currencies = ['$DEGEN']
-            schedule.schedule_time = "45 18 * * *"
-            schedule.active_cron = true
+            return schedule;
           } else {
-            schedule = new ScheduleTip({ 
-              fid: fid,
-              uuid: encryptedUuid,
-              code: code,
-              search_shuffle: true,
-              search_time: 'all',
-              search_tags: [],
-              search_channels: [],
-              search_curators: [],
-              points: points,
-              percent_tip: 100,
-              ecosystem_name: ecosystem,
-              currencies: ['$DEGEN'],
-              schedule_time: "45 18 * * *",
-              schedule_count: 1,
-              schedule_total: 1,
-              active_cron: true
-            });
+            return null
           }
-  
         } catch (error) {
-          console.error("Error while fetching data:", error);
-          return null
-        }  
-  
-        let cronId = null
-        if (schedule.cron_job_id) {
-          console.log(schedule.cron_job_id)
-          cronId = schedule.cron_job_id
+          console.error("Error while fetching schedule:", error);
+          return null;  
         }
-  
-        const cronUrl = `https://www.easycron.com/rest/${cronId ? 'edit' : 'add'}?${qs.stringify({
-          token: easyCronKey,
-          url: `${baseURL}/api/curation/getScheduledJob?${qs.stringify({ fid, code })}`,
-          id: cronId,
-          cron_expression: "45 18 * * *",
-          timezone_from: 2,
-          timezone: 'America/New_York',
-          cron_job_name: `${fid}ScheduledTips`,
-        })}`;
-    
-    
-        const cronResponse = await fetch(cronUrl)
-        console.log(cronResponse)
-        if (cronResponse) {
-          const getCron = await cronResponse.json()
-          console.log(getCron)
-          schedule.cron_job_id = getCron.cron_job_id
-        }
-        schedule.active_cron = true
-        await schedule.save()
-        return schedule
       }
+
+      const schedule = await getSchedule(curatorFid)
+      // async function setSchedule(fid, code, points, ecosystem, encryptedUuid) {
+      //   let schedule = null
+      //   try {
+      //     await connectToDatabase();
+      //     schedule = await ScheduleTip.findOne({ fid }).exec();
+      //     if (schedule) {
+      //       schedule.code = code
+      //       schedule.search_shuffle = true
+      //       schedule.search_time = 'all'
+      //       schedule.search_tags = []
+      //       schedule.search_channels = []
+      //       schedule.search_curators = []
+      //       schedule.points = points
+      //       schedule.percent_tip = 100
+      //       schedule.ecosystem_name = ecosystem
+      //       schedule.currencies = ['$DEGEN']
+      //       schedule.schedule_time = "45 18 * * *"
+      //       schedule.active_cron = true
+      //     } else {
+      //       schedule = new ScheduleTip({ 
+      //         fid: fid,
+      //         uuid: encryptedUuid,
+      //         code: code,
+      //         search_shuffle: true,
+      //         search_time: 'all',
+      //         search_tags: [],
+      //         search_channels: [],
+      //         search_curators: [],
+      //         points: points,
+      //         percent_tip: 100,
+      //         ecosystem_name: ecosystem,
+      //         currencies: ['$DEGEN'],
+      //         schedule_time: "45 18 * * *",
+      //         schedule_count: 1,
+      //         schedule_total: 1,
+      //         active_cron: true
+      //       });
+      //     }
   
-      const schedule = await setSchedule(curatorFid, code, pt, ecosystem, encryptedUuid)
+      //   } catch (error) {
+      //     console.error("Error while fetching data:", error);
+      //     return null
+      //   }  
+  
+      //   let cronId = null
+      //   if (schedule.cron_job_id) {
+      //     console.log(schedule.cron_job_id)
+      //     cronId = schedule.cron_job_id
+      //   }
+  
+      //   const cronUrl = `https://www.easycron.com/rest/${cronId ? 'edit' : 'add'}?${qs.stringify({
+      //     token: easyCronKey,
+      //     url: `${baseURL}/api/curation/getScheduledJob?${qs.stringify({ fid, code })}`,
+      //     id: cronId,
+      //     cron_expression: "45 18 * * *",
+      //     timezone_from: 2,
+      //     timezone: 'America/New_York',
+      //     cron_job_name: `${fid}ScheduledTips`,
+      //   })}`;
+    
+    
+      //   const cronResponse = await fetch(cronUrl)
+      //   console.log(cronResponse)
+      //   if (cronResponse) {
+      //     const getCron = await cronResponse.json()
+      //     console.log(getCron)
+      //     schedule.cron_job_id = getCron.cron_job_id
+      //   }
+      //   schedule.active_cron = true
+      //   await schedule.save()
+      //   return schedule
+      // }
+  
+      // const schedule = await setSchedule(curatorFid, code, pt, ecosystem, encryptedUuid)
   
       if (schedule) {
 
