@@ -97,7 +97,7 @@ export default async function handler(req, res) {
       async function getSchedule(fid) {
         try {
           await connectToDatabase();
-          const schedule = await ScheduleTip.findOne({ fid }).select('search_curators').exec();
+          const schedule = await ScheduleTip.findOne({ fid }).select('search_curators active_cron').exec();
           if (schedule) {
             return schedule;
           } else {
@@ -185,9 +185,9 @@ export default async function handler(req, res) {
   
       // const schedule = await setSchedule(curatorFid, code, pt, ecosystem, encryptedUuid)
   
-      if (schedule) {
+      if (schedule?.active_cron) {
 
-        if (schedule?.search_curators.length > 0) {
+        if (schedule?.search_curators?.length > 0) {
           autoTipImg = `${baseURL}/api/frames/console/auto-tipping?${qs.stringify({ status: 'curators', curators: schedule?.search_curators })}`
           console.log('191', autoTipImg)
         } else {

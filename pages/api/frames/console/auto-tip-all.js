@@ -192,9 +192,9 @@ export default async function handler(req, res) {
   
       const schedule = await setSchedule(curatorFid, code, pt, ecosystem, encryptedUuid)
   
-      if (schedule) {
+      if (schedule?.active_cron) {
 
-        if (schedule?.search_curators.length > 0) {
+        if (schedule?.search_curators?.length > 0) {
           autoTipImg = `${baseURL}/api/frames/console/auto-tipping?${qs.stringify({ status: 'curators', curators: schedule?.search_curators })}`
         } else {
           autoTipImg = `${baseURL}/api/frames/console/auto-tipping?${qs.stringify({ status: 'all', curators: [] })}`
