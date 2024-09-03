@@ -33,7 +33,7 @@ export default async function handler(req, res) {
 
     const shareText = 'I just nominated great builders and creators on /impact. Help support them here:'
 
-    let shareUrl = `https://impact.abundance.id/~/ecosystems/${handle}/tipper-basic?${qs.stringify({ curators: curatorFid, eco: pt?.substring(1), hash: castHash })}`
+    let shareUrl = `https://impact.abundance.id/~/ecosystems/${handle}/basic-tipper?${qs.stringify({ curators: curatorFid, eco: pt?.substring(1), hash: castHash })}`
     
     const encodedShareText = encodeURIComponent(shareText); 
     let encodedShareUrl = encodeURIComponent(shareUrl); 
