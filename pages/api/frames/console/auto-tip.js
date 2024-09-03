@@ -32,7 +32,7 @@ export default async function handler(req, res) {
     // const authorFid = req.body.untrustedData.castId.fid
     // console.log('28', points, curatorFid, castHash)
 
-    let autoTipImg = `${baseURL}/api/frames/console/auto-tipping?${qs.stringify({ status: 'all', curators: [] })}`
+    let autoTipImg = `${baseURL}/api/frames/console/auto-tipping?${qs.stringify({ status: 'off', curators: [] })}`
 
     let button1 = `<meta property="fc:frame:button:1" content='Stop auto-tip' />
     <meta property="fc:frame:button:1:action" content="post" />
@@ -74,6 +74,7 @@ export default async function handler(req, res) {
     if (!encryptedUuid) {
 
       autoTipImg = `${baseURL}/api/frames/console/auto-tipping?${qs.stringify({ status: 'off', curators: [] })}`
+      console.log('77', autoTipImg)
 
       button1 = `<meta property="fc:frame:button:1" content='Login' />
       <meta property="fc:frame:button:1:action" content="link" />
@@ -188,8 +189,10 @@ export default async function handler(req, res) {
 
         if (schedule?.search_curators.length > 0) {
           autoTipImg = `${baseURL}/api/frames/console/auto-tipping?${qs.stringify({ status: 'curators', curators: schedule?.search_curators })}`
+          console.log('191', autoTipImg)
         } else {
           autoTipImg = `${baseURL}/api/frames/console/auto-tipping?${qs.stringify({ status: 'all', curators: [] })}`
+          console.log('193', autoTipImg)
         }
 
         button1 = `<meta property="fc:frame:button:1" content='Stop auto-tip' />
@@ -213,7 +216,7 @@ export default async function handler(req, res) {
       } else {
 
         autoTipImg = `${baseURL}/api/frames/console/auto-tipping?${qs.stringify({ status: 'off', curators: [] })}`
-
+        console.log('216', autoTipImg)
         button1 = `<meta property="fc:frame:button:1" content='Auto-tip' />
         <meta property="fc:frame:button:1:action" content="post" />
         <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/console/auto-tip-self?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle })}' />`
