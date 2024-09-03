@@ -41,12 +41,18 @@ export default async function handler(req, res) {
     button1 = `<meta property="fc:frame:button:1" content='Multi-tip' />
     <meta property="fc:frame:button:1:action" content="post" />
     <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/console/tip?${qs.stringify({ time: 'all', curators: curatorFid, eco: pt?.substring(1), ecosystem: handle })}' />`
+
     button2 = `<meta property="fc:frame:button:2" content='Share Multi-tip' />
     <meta property="fc:frame:button:2:action" content="link" />
     <meta property="fc:frame:button:2:target" content='${shareLink}' />`
-    button3 = `<meta property="fc:frame:button:3" content="What's /impact?" />
+
+    button3 = `<meta property="fc:frame:button:3" content="Auto-tip" />
     <meta property="fc:frame:button:3:action" content="post" />
-    <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/install?${qs.stringify({ iB, qB, qT, author, iA, qA, ecosystem: ec, login, pt, cu, impact, quality: ql, cI, hash, handle })}' />`
+    <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/auto-tip?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle })}' />`
+
+    // button3 = `<meta property="fc:frame:button:3" content="What's /impact?" />
+    // <meta property="fc:frame:button:3:action" content="post" />
+    // <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/install?${qs.stringify({ iB, qB, qT, author, iA, qA, ecosystem: ec, login, pt, cu, impact, quality: ql, cI, hash, handle })}' />`
     button4 = `<meta property="fc:frame:button:4" content='< Back' />
     <meta property="fc:frame:button:4:action" content="post" />
     <meta property="fc:frame:button:4:target" content='https://impact.abundance.id/api/frames/console/status?${qs.stringify({ iB, qB, qT, author, iA, qA, ecosystem: ec, login, pt, cu, impact, quality: ql, cI, hash, handle })}' />`
