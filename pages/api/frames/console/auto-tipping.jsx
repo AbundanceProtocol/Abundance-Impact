@@ -11,7 +11,6 @@ const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_
 
 export default async function handler(req, res) {
   const { status, curators, points } = req.query
-  // const { status, curators, points } = { status: 'curators', curators: ['512380', '9326', 327034, 256500], points: '$IMPACT' }
 
   console.log('status', status)
   try {
@@ -32,7 +31,6 @@ export default async function handler(req, res) {
         return []
       }
     }
-
 
     let usernames = []
     if (curators) {

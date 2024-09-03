@@ -324,7 +324,7 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem}) {
         <meta property="fc:frame:button:4" content='Refresh' />
         <meta property="fc:frame:button:4:action" content="post" />
 
-        <meta property="fc:frame:button:4:target" content={`${baseURL}/api/frames/tip/tip?${qs.stringify({    
+        <meta property="fc:frame:button:4:target" content={`${baseURL}/api/frames/tip/refresh?${qs.stringify({    
           time, curators, eco, ecosystem })}`} />
 
         <meta name="fc:frame:input:text" content="Eg.: 1000 $Degen, 500 $HAM" />
