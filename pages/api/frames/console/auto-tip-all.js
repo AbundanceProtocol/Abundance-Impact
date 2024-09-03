@@ -42,15 +42,18 @@ export default async function handler(req, res) {
     <meta property="fc:frame:button:2:action" content="post" />
     <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/console/auto-tip-self?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle })}' />`
 
-    let button3 = `<meta property="fc:frame:button:3" content='Find curator' />
+    // let button3 = `<meta property="fc:frame:button:3" content='Find curator' />
+    // <meta property="fc:frame:button:3:action" content="post" />
+    // <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/auto-tip-search?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle })}' />`
+
+    let button3 = `<meta property="fc:frame:button:3" content='< Back' />
     <meta property="fc:frame:button:3:action" content="post" />
-    <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/auto-tip-search?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle })}' />`
+    <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/more?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle })}' />`
 
-    let button4 = `<meta property="fc:frame:button:4" content='< Back' />
-    <meta property="fc:frame:button:4:action" content="post" />
-    <meta property="fc:frame:button:4:target" content='https://impact.abundance.id/api/frames/console/more?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle })}' />`
+    let button4 = ''
 
-    let textField = `<meta name="fc:frame:input:text" content="Search for curator" />`
+    // let textField = `<meta name="fc:frame:input:text" content="Search for curator" />`
+    let textField = ''
     let postUrl = `<meta name="fc:frame:post_url" content='https://impact.abundance.id' />`
 
     async function getUuid(fid) {
@@ -208,15 +211,15 @@ export default async function handler(req, res) {
         <meta property="fc:frame:button:2:action" content="post" />
         <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/console/auto-tip-self?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle })}' />`
 
-        button3 = `<meta property="fc:frame:button:3" content='Find curator' />
+        // button3 = `<meta property="fc:frame:button:3" content='Find curator' />
+        // <meta property="fc:frame:button:3:action" content="post" />
+        // <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/auto-tip-search?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle })}' />`
+
+        button3 = `<meta property="fc:frame:button:3" content='< Back' />
         <meta property="fc:frame:button:3:action" content="post" />
-        <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/auto-tip-search?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle })}' />`
+        <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/more?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle })}' />`
 
-        button4 = `<meta property="fc:frame:button:4" content='< Back' />
-        <meta property="fc:frame:button:4:action" content="post" />
-        <meta property="fc:frame:button:4:target" content='https://impact.abundance.id/api/frames/console/more?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle })}' />`
-
-        textField = `<meta name="fc:frame:input:text" content="Search for curator" />`
+        // textField = `<meta name="fc:frame:input:text" content="Search for curator" />`
 
       } else {
 
@@ -230,15 +233,15 @@ export default async function handler(req, res) {
         <meta property="fc:frame:button:2:action" content="post" />
         <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/console/auto-tip-all?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle })}' />`
 
-        button3 = `<meta property="fc:frame:button:3" content='Find curator' />
+        // button3 = `<meta property="fc:frame:button:3" content='Find curator' />
+        // <meta property="fc:frame:button:3:action" content="post" />
+        // <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/auto-tip-search?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle })}' />`
+
+        button3 = `<meta property="fc:frame:button:3" content='< Back' />
         <meta property="fc:frame:button:3:action" content="post" />
-        <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/auto-tip-search?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle })}' />`
+        <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/more?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle })}' />`
 
-        button4 = `<meta property="fc:frame:button:4" content='< Back' />
-        <meta property="fc:frame:button:4:action" content="post" />
-        <meta property="fc:frame:button:4:target" content='https://impact.abundance.id/api/frames/console/more?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle })}' />`
-
-        textField = `<meta name="fc:frame:input:text" content="Search for curator" />`
+        // textField = `<meta name="fc:frame:input:text" content="Search for curator" />`
 
       }
 

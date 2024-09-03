@@ -79,10 +79,10 @@ export default async function handler(req, res) {
 
           </div>
 
-          <div style={{display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', border: (status == 'add') ? '2px solid #686cae99' : '1px solid #eeeeeeaa', borderRadius: '16px', padding: '10px', margin: '15px', background: (status == 'add') ? '#220a4dbb' : '#eeeeeeaa', width: '500px'}}>
+          {/* <div style={{display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', border: (status == 'add') ? '2px solid #686cae99' : '1px solid #eeeeeeaa', borderRadius: '16px', padding: '10px', margin: '15px', background: (status == 'add') ? '#220a4dbb' : '#eeeeeeaa', width: '500px'}}>
             <div style={{display: 'flex', textAlign: 'left', color:  (status == 'add') ? '#eff' : '#220a4d', fontSize: '17px', margin: '5px 10px 5px 10px', width: '140px'}}>Add curator:</div>
             <div style={{display: 'flex', textAlign: 'left', color:  (status == 'add') ? '#eff' : '#220a4d', fontSize: '16px', margin: '5px 10px 5px 0px', width: '360px'}}>find and add curator to your auto-tip distribution. stops distribution to ecosystem if previously turned on</div>
-          </div>
+          </div> */}
 
           <div style={{display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', border: (status == 'off') ? '2px solid #686cae99' : '1px solid #eeeeeeaa', borderRadius: '16px', padding: '10px', margin: '15px', background: (status == 'off') ? '#220a4dbb' : '#eeeeeeaa', width: '500px'}}>
             <div style={{display: 'flex', textAlign: 'left', color:  (status == 'off') ? '#eff' : '#220a4d', fontSize: '17px', margin: '5px 10px 5px 10px', width: '140px'}}>Stop Auto-tip:</div>
