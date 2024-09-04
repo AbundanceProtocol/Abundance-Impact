@@ -237,7 +237,7 @@ export default async function handler(req, res) {
 
     console.log('242', impactBalance, qualityBalance, qualityTotal, author, impactAllowance,  qualityAllowance, ecoName, needLogin, points, curator, impact, quality, castImpact)
 
-    let balanceImg = `${baseURL}/api/frames/console/balance?${qs.stringify({ iB: impactBalance, qB: qualityBalance, qT: qualityTotal, author, iA: impactAllowance, qA: qualityAllowance, ecosystem: ecoName, login: needLogin, pt: points, cu: curator })}`
+    let balanceImg = `${baseURL}/api/frames/console/balance-tip?${qs.stringify({ iB: impactBalance, qB: qualityBalance, qT: qualityTotal, author, iA: impactAllowance, qA: qualityAllowance, ecosystem: ecoName, login: needLogin, pt: points, cu: curator })}`
 
     let button1 = ''
     let button2 = ''

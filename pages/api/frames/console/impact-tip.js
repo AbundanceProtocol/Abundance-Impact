@@ -35,7 +35,7 @@ export default async function handler(req, res) {
     const signer = decryptPassword(encryptedBotUuid, secretKey)
 
 
-    let balanceImg = `${baseURL}/api/frames/console/balance?${qs.stringify({ iB, qB, qT, author, iA, qA, ecosystem: ec, login, pt, cu })}`
+    let balanceImg = `${baseURL}/api/frames/console/balance-tip?${qs.stringify({ iB, qB, qT, author, iA, qA, ecosystem: ec, login, pt, cu })}`
 
     let button1 = `<meta property="fc:frame:button:2" content='Refresh' />
       <meta property="fc:frame:button:2:action" content="post" />
@@ -301,7 +301,7 @@ export default async function handler(req, res) {
         // }
 
 
-        balanceImg = `${baseURL}/api/frames/console/balance?${qs.stringify({ iB: castImpact, qB: qualityBalance, qT: qualityTotal, author, iA: balance, qA, ecosystem: ec, login, pt, cu })}`
+        balanceImg = `${baseURL}/api/frames/console/balance-tip?${qs.stringify({ iB: castImpact, qB: qualityBalance, qT: qualityTotal, author, iA: balance, qA, ecosystem: ec, login, pt, cu })}`
 
         button1 = `<meta property="fc:frame:button:1" content='+1 ${pt}' />
         <meta property="fc:frame:button:1:action" content="post" />

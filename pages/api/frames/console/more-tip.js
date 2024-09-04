@@ -21,7 +21,7 @@ export default async function handler(req, res) {
     const castHash = hash ? hash : req.body.untrustedData.castId.hash
     console.log('castHash 22', castHash, hash, req.body.untrustedData.castId.hash)
 
-    let balanceImg = `${baseURL}/api/frames/console/balance?${qs.stringify({ iB, qB, qT, author, iA, qA, ecosystem: ec, login, pt, cu })}`
+    let balanceImg = `${baseURL}/api/frames/console/balance-tip?${qs.stringify({ iB, qB, qT, author, iA, qA, ecosystem: ec, login, pt, cu })}`
 
     let button1 = ''
     let button2 = ''

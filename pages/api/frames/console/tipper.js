@@ -19,7 +19,7 @@ export default async function handler(req, res) {
     console.log('18', typeof iB, typeof cI, typeof impact, typeof quality)
     const needLogin = login == 'true'
 
-    let balanceImg = `${baseURL}/api/frames/console/balance?${qs.stringify({ iB, qB, qT, author, iA, qA, ecosystem, login, pt, cu })}`
+    let balanceImg = `${baseURL}/api/frames/console/balance-tip?${qs.stringify({ iB, qB, qT, author, iA, qA, ecosystem, login, pt, cu })}`
 
     let button1 = ''
     let button2 = ''
