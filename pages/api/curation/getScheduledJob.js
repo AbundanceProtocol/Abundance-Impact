@@ -44,14 +44,14 @@ export default async function handler(req, res) {
     const tipQueue = new Queue(1, 100); // Process 1 tip at a time, with a 100ms delay between each
     let tipCounter = 0;
 
-    for (const cast of castData) {
-      await tipQueue.run(async () => {
+    const tipPromises = castData.map(cast => 
+      tipQueue.run(async () => {
         const result = await sendTip(cast, schedule.decryptedUuid, fid, schedule.points);
         tipCounter += result;
-      });
-    }
+      })
+    );
 
-    await tipQueue.waitForAll();
+    await Promise.all(tipPromises);
 
     res.status(200).json({ message: 'All casts tipped successfully', tip: tipCounter });
   } catch (error) {
