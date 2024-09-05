@@ -16,7 +16,7 @@ const Leaderboard = () => {
         // await setPaused(true)
         const response = await axios.get('/api/curation/getTopCreators', {
           params: { points } })
-        console.log(response)
+        // console.log(response)
         if (response?.data?.topCreators?.length > 0) {
           const receiverFids = response.data.topCreators
           console.log(receiverFids)

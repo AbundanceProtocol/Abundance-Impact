@@ -463,7 +463,7 @@ export default function Schedule() {
           cronId: cronId, fid
         }
       })
-      console.log(response)
+      // console.log(response)
 
       if (response && response.data) {
         const curators = response.data

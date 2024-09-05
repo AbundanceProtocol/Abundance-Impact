@@ -477,7 +477,7 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
           params: { fid, channel, curated } })
         setLoading(false)
         if (response?.data) {
-          console.log(response)
+          // console.log(response)
           const casts = response?.data?.casts
           let cursorData = ''
           if (response?.data?.cursor) {

@@ -64,14 +64,14 @@ const TipScheduler = ({ initHour, setInitHour, initMinute, setInitMinute, userQu
 
         if (response?.status !== 200) {
           setLoading(false)
-          console.log(response)
+          // console.log(response)
           setModal({on: true, success: false, text: 'Tip scheduling failed'});
           setTimeout(() => {
             setModal({on: false, success: false, text: ''});
           }, 2500);
         } else {
           setLoading(false)
-          console.log(response)
+          // console.log(response)
 
           setModal({on: true, success: true, text: response?.data?.message});
           setTimeout(() => {

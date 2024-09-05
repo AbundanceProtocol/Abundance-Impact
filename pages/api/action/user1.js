@@ -193,7 +193,7 @@ export default async function handler(req, res) {
                         },
                         body: JSON.stringify(body),
                       });
-                      console.log(response)
+                      // console.log(response)
                       if (!response.ok) {
                         console.error(`Failed to send nomination`);
                         return false

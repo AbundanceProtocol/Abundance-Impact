@@ -101,7 +101,7 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
     console.log(points)
     try {
       const response = await axios.get('/api/ecosystem/getEcosystems')
-      console.log(response)
+      // console.log(response)
       if (response?.data?.ecosystems?.length > 0) {
         const ecosystems = response?.data?.ecosystems
         let ecoIndex = -1
@@ -242,7 +242,7 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
       try {
         const response = await axios.get('/api/ecosystem/checkUserEligibility', {
           params: { fid, points, uuid } })
-        console.log(response)
+        // console.log(response)
         if (response?.data?.eligibilityData) {
           let eligibilityData = response?.data?.eligibilityData
           setEligibility(eligibilityData)

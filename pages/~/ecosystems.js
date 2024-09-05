@@ -487,7 +487,7 @@ export default function Ecosystem() {
         }
       })
       if (response) {
-        console.log(response)
+        // console.log(response)
         const moderators = response.data.users
         console.log(moderators)
         setFilterModerators(moderators)
@@ -863,7 +863,7 @@ export default function Ecosystem() {
       const response = await axios.get('/api/ecosystem/checkPoints', { params: {      
         points }})
       if (response && response.data && response.data?.ecoPoints) {
-        console.log(response)
+        // console.log(response)
         return response.data?.ecoPoints
       } else {
         return false
@@ -1032,7 +1032,7 @@ export default function Ecosystem() {
       const response = await axios.get('/api/ecosystem/checkHandle', { params: {      
         handle }})
       if (response && response.data && response.data?.ecoHandle) {
-        console.log(response)
+        // console.log(response)
         return response.data?.ecoHandle
       } else {
         return false

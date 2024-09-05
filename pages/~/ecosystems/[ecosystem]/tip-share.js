@@ -221,7 +221,7 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem, fi
     async function postFrame(url, untrustedData) {
       try {
         const response = await axios.post(url, {untrustedData})
-        console.log(response)
+        // console.log(response)
   
         if (response.headers['content-type'].includes('text/html')) {
           const $ = cheerio.load(response.data);
