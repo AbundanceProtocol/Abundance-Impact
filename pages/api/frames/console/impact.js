@@ -33,7 +33,7 @@ export default async function handler(req, res) {
     const castHash = req.body.untrustedData.castId.hash
     const authorFid = req.body.untrustedData.castId.fid
     const signer = decryptPassword(encryptedBotUuid, secretKey)
-
+    console.log(inputText)
 
     let balanceImg = `${baseURL}/api/frames/console/balance?${qs.stringify({ iB, qB, qT, author, iA, qA, ecosystem: ec, login, pt, cu })}`
 
@@ -210,7 +210,7 @@ export default async function handler(req, res) {
                           },
                           body: JSON.stringify(body),
                         });
-                        console.log(response)
+                        // console.log(response)
                         if (!response.ok) {
                           console.error(`Failed to send nomination`);
                           return false
