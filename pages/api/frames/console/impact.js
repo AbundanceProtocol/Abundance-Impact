@@ -44,6 +44,18 @@ export default async function handler(req, res) {
     let button3 = ''
     let button4 = ''
     let textField = ''
+    balanceImg = `${baseURL}/api/frames/console/balance?${qs.stringify({ iB, qB, qT, author, iA, qA, ecosystem: ec, login, pt, cu })}`
+
+    button1 = `<meta property="fc:frame:button:1" content='+1 ${pt}' />
+    <meta property="fc:frame:button:1:action" content="post" />
+    <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/console/impact?${qs.stringify({ addImpact: 1, iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle })}' />`
+    button2 = `<meta property="fc:frame:button:2" content='+5 ${pt}' />
+    <meta property="fc:frame:button:2:action" content="post" />
+    <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/console/impact?${qs.stringify({ addImpact: 5, iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle })}' />`
+    button3 = `<meta property="fc:frame:button:3" content='More >' />
+    <meta property="fc:frame:button:3:action" content="post" />
+    <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/more?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle })}' />`
+
     let postUrl = `<meta name="fc:frame:post_url" content='https://impact.abundance.id' />`
 
     let metatags = button1 + button2 + button3 + button4 + textField + postUrl
@@ -322,7 +334,7 @@ export default async function handler(req, res) {
         button3 = `<meta property="fc:frame:button:3" content='More >' />
         <meta property="fc:frame:button:3:action" content="post" />
         <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/more?${qs.stringify({ iB: castImpact, qB: qualityBalance, qT: qualityTotal, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash: castHash, handle })}' />`
-        textField = `<meta name="fc:frame:input:text" content="Add comment to nomination" />`
+        textField = ``
         
     
         metatags = button1 + button2 + button3 + button4 + textField + postUrl
@@ -351,9 +363,9 @@ export default async function handler(req, res) {
           return;
 
         } catch (error) {
-
+          console.log('error', error)
           res.setHeader('Content-Type', 'text/html');
-          res.status(500).send(`
+          res.status(200).send(`
             <!DOCTYPE html>
             <html>
               <head>

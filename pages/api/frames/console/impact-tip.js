@@ -312,8 +312,7 @@ export default async function handler(req, res) {
         button3 = `<meta property="fc:frame:button:3" content='More >' />
         <meta property="fc:frame:button:3:action" content="post" />
         <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/more-tip?${qs.stringify({ iB: castImpact, qB: qualityBalance, qT: qualityTotal, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash: castHash, handle })}' />`
-        textField = `<meta name="fc:frame:input:text" content="Add comment to nomination" />`
-        
+        textField = ``
     
         metatags = button1 + button2 + button3 + button4 + textField + postUrl
 
