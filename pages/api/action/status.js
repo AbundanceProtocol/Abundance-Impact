@@ -29,6 +29,7 @@ export default async function handler(req, res) {
 
     let quality = 0
     let impact = 0
+    let removeStake = false
 
     async function getCuratorBalances(curatorFid, points) {
       try {
@@ -69,6 +70,7 @@ export default async function handler(req, res) {
       qualityAllowance = 0
       quality = 0
       impact = 0
+      removeStake = false
 
       async function getEcosystem(points) {
         try {
@@ -228,7 +230,7 @@ export default async function handler(req, res) {
         try {
           await connectToDatabase();
   
-          let impact = await Impact.countDocuments({ target_cast_hash: castHash, curator_fid: parseInt(curatorFid), points })
+          let impact = await Impact.findOne({ target_cast_hash: castHash, curator_fid: parseInt(curatorFid), points }).select('impact_points').exec();
           console.log('impact data', castHash, curatorFid, points, typeof curatorFid)
           console.log('impact', impact)
 
@@ -248,6 +250,15 @@ export default async function handler(req, res) {
       console.log('impact2', impact)
 
       if (impact !== 0) {
+
+        if (qualityTotal > 0) {
+          removeStake = false
+        } else {
+          removeStake = true
+        }
+        
+      } else {
+        removeStake = false
 
         async function getUserQuality(castHash, curatorFid, points) {
           try {
@@ -274,7 +285,7 @@ export default async function handler(req, res) {
 
     }
 
-    console.log('242', impactBalance, qualityBalance, qualityTotal, author, impactAllowance,  qualityAllowance, ecoName, needLogin, points, curator, impact, quality, castImpact)
+    console.log('242', impactBalance, qualityBalance, qualityTotal, author, impactAllowance,  qualityAllowance, ecoName, needLogin, points, curator, impact, quality, castImpact, removeStake)
 
     console.log('test')
 
@@ -284,7 +295,7 @@ export default async function handler(req, res) {
 
       res.status(200).json({
         "type": "frame",
-        "frameUrl": `https://impact.abundance.id/api/frames/console/status?${qs.stringify({ iB: impactBalance, qB: qualityBalance, qT: qualityTotal, author, iA: impactAllowance, qA: qualityAllowance, ecosystem: ecoName, login: needLogin, pt: points, cu: curator, impact, quality, cI: castImpact, hash: castHash, handle: ecoHandle })}`
+        "frameUrl": `https://impact.abundance.id/api/frames/console/status?${qs.stringify({ iB: impactBalance, qB: qualityBalance, qT: qualityTotal, author, iA: impactAllowance, qA: qualityAllowance, ecosystem: ecoName, login: needLogin, pt: points, cu: curator, impact, quality, cI: castImpact, hash: castHash, handle: ecoHandle, rS: removeStake })}`
       })
     } catch (error) {
       console.error(error);

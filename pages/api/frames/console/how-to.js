@@ -8,7 +8,7 @@ const client = HubURL ? getSSLHubRpcClient(HubURL) : undefined;
 
 export default async function handler(req, res) {
 
-  const { iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle } = req.query;
+  const { iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle, rS } = req.query;
 
   if (req.method !== 'POST') {
     res.setHeader('Allow', ['POST']);
@@ -22,11 +22,11 @@ export default async function handler(req, res) {
 
         <meta property="fc:frame:button:1" content="What's /impact?" />
         <meta property="fc:frame:button:1:action" content="post" />
-        <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/console/install?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle })}' />
+        <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/console/install?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle, rS })}' />
 
         <meta property="fc:frame:button:2" content='< Back' />
         <meta property="fc:frame:button:2:action" content="post" />
-        <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/console/more?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle })}' />
+        <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/console/more?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle, rS })}' />
 
         <meta name="fc:frame:post_url" content='https://impact.abundance.id' />`
 
@@ -56,11 +56,11 @@ export default async function handler(req, res) {
 
         <meta property="fc:frame:button:1" content="What's /impact?" />
         <meta property="fc:frame:button:1:action" content="post" />
-        <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/console/install?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle })}' />
+        <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/console/install?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle, rS })}' />
 
         <meta property="fc:frame:button:2" content='< Back' />
         <meta property="fc:frame:button:2:action" content="post" />
-        <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/console/more?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle })}' />
+        <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/console/more?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle, rS })}' />
 
         <meta name="fc:frame:post_url" content='https://impact.abundance.id' />`
 

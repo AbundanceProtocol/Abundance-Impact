@@ -63,6 +63,7 @@ export default async function handler(req, res) {
       qualityAllowance = 0
       quality = 0
       impact = 0
+      removeStake = false
 
       async function getEcosystem(points) {
         try {
@@ -192,7 +193,7 @@ export default async function handler(req, res) {
         try {
           await connectToDatabase();
   
-          let impact = await Impact.countDocuments({ target_cast_hash: castHash, curator_fid: parseInt(curatorFid), points })
+          let impact = await Impact.findOne({ target_cast_hash: castHash, curator_fid: parseInt(curatorFid), points }).select('impact_points').exec()
           console.log('impact data', castHash, curatorFid, points, typeof curatorFid)
           console.log('impact', impact)
 
@@ -212,6 +213,15 @@ export default async function handler(req, res) {
       console.log('impact2', impact)
 
       if (impact !== 0) {
+
+        if (qualityTotal > 0) {
+          removeStake = false
+        } else {
+          removeStake = true
+        }
+        
+      } else {
+        removeStake = false
 
         async function getUserQuality(castHash, curatorFid, points) {
           try {
@@ -238,7 +248,7 @@ export default async function handler(req, res) {
 
     }
 
-    console.log('242', impactBalance, qualityBalance, qualityTotal, author, impactAllowance,  qualityAllowance, ecoName, needLogin, points, curator, impact, quality, castImpact)
+    console.log('242', impactBalance, qualityBalance, qualityTotal, author, impactAllowance,  qualityAllowance, ecoName, needLogin, points, curator, impact, quality, castImpact, removeStake)
 
     let balanceImg = `${baseURL}/api/frames/console/balance?${qs.stringify({ iB: impactBalance, qB: qualityBalance, qT: qualityTotal, author, iA: impactAllowance, qA: qualityAllowance, ecosystem: ecoName, login: needLogin, pt: points, cu: curator })}`
 
@@ -271,51 +281,65 @@ export default async function handler(req, res) {
 
       button1 = `<meta property="fc:frame:button:1" content='+1 ${points}' />
       <meta property="fc:frame:button:1:action" content="post" />
-      <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/console/impact?${qs.stringify({ addImpact: 1, iB: impactBalance, qB: qualityBalance, qT: qualityTotal, author, iA: impactAllowance, qA: qualityAllowance, ec: ecoName, login: needLogin, pt: points, cu: curator, impact, ql: quality, cI: castImpact, hash: castHash })}' />`
+      <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/console/impact?${qs.stringify({ addImpact: 1, iB: impactBalance, qB: qualityBalance, qT: qualityTotal, author, iA: impactAllowance, qA: qualityAllowance, ec: ecoName, login: needLogin, pt: points, cu: curator, impact, ql: quality, cI: castImpact, hash: castHash, rS: removeStake })}' />`
       button2 = `<meta property="fc:frame:button:2" content='+5 ${points}' />
       <meta property="fc:frame:button:2:action" content="post" />
-      <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/console/impact?${qs.stringify({ addImpact: 5, iB: impactBalance, qB: qualityBalance, qT: qualityTotal, author, iA: impactAllowance, qA: qualityAllowance, ec: ecoName, login: needLogin, pt: points, cu: curator, impact, ql: quality, cI: castImpact, hash: castHash })}' />`
-      // button3 = `<meta property="fc:frame:button:3" content='More >' />
-      // <meta property="fc:frame:button:3:action" content="post" />
-      // <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/test?${qs.stringify({ iB, qB, qT, author, iA, qA, ecosystem, login, pt, cu, impact, quality, cI, hash })}' />`
+      <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/console/impact?${qs.stringify({ addImpact: 5, iB: impactBalance, qB: qualityBalance, qT: qualityTotal, author, iA: impactAllowance, qA: qualityAllowance, ec: ecoName, login: needLogin, pt: points, cu: curator, impact, ql: quality, cI: castImpact, hash: castHash, rS: removeStake })}' />`
+      button3 = `<meta property="fc:frame:button:3" content='More >' />
+      <meta property="fc:frame:button:3:action" content="post" />
+      <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/more?${qs.stringify({ iB: impactBalance, qB: qualityBalance, qT: qualityTotal, author, iA: impactAllowance, qA: qualityAllowance, ec: ecoName, login: needLogin, pt: points, cu: curator, impact, ql: quality, cI: castImpact, hash: castHash, rS: removeStake })}' />`
       textField = `<meta name="fc:frame:input:text" content="Add comment to nomination" />`
     } else if (parseInt(castImpact) !== 0 && parseInt(impact) == 0 && parseInt(quality) == 0) {
       console.log('3')
 
       button1 = `<meta property="fc:frame:button:1" content='+1 ${points}' />
       <meta property="fc:frame:button:1:action" content="post" />
-      <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/console/impact?${qs.stringify({ addImpact: 1, iB: impactBalance, qB: qualityBalance, qT: qualityTotal, author, iA: impactAllowance, qA: qualityAllowance, ec: ecoName, login: needLogin, pt: points, cu: curator, impact, ql: quality, cI: castImpact, hash: castHash })}' />`
+      <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/console/impact?${qs.stringify({ addImpact: 1, iB: impactBalance, qB: qualityBalance, qT: qualityTotal, author, iA: impactAllowance, qA: qualityAllowance, ec: ecoName, login: needLogin, pt: points, cu: curator, impact, ql: quality, cI: castImpact, hash: castHash, rS: removeStake })}' />`
       button2 = `<meta property="fc:frame:button:2" content='Upvote' />
       <meta property="fc:frame:button:2:action" content="post" />
-      <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/console/quality?${qs.stringify({ addQuality: 1, iB: impactBalance, qB: qualityBalance, qT: qualityTotal, author, iA: impactAllowance, qA: qualityAllowance, ec: ecoName, login: needLogin, pt: points, cu: curator, impact, ql: quality, cI: castImpact, hash: castHash })}' />`
+      <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/console/quality?${qs.stringify({ addQuality: 1, iB: impactBalance, qB: qualityBalance, qT: qualityTotal, author, iA: impactAllowance, qA: qualityAllowance, ec: ecoName, login: needLogin, pt: points, cu: curator, impact, ql: quality, cI: castImpact, hash: castHash, rS: removeStake })}' />`
       button3 = `<meta property="fc:frame:button:3" content='Downvote' />
       <meta property="fc:frame:button:3:action" content="post" />
-      <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/quality?${qs.stringify({ addQuality: -1, iB: impactBalance, qB: qualityBalance, qT: qualityTotal, author, iA: impactAllowance, qA: qualityAllowance, ec: ecoName, login: needLogin, pt: points, cu: curator, impact, ql: quality, cI: castImpact, hash: castHash })}' />`
-      // button4 = `<meta property="fc:frame:button:4" content='More >' />
-      // <meta property="fc:frame:button:4:action" content="post" />
-      // <meta property="fc:frame:button:4:target" content='https://impact.abundance.id/api/frames/console/test?${qs.stringify({ iB, qB, qT, author, iA, qA, ecosystem, login, pt, cu, impact, quality, cI, hash })}' />`
+      <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/quality?${qs.stringify({ addQuality: -1, iB: impactBalance, qB: qualityBalance, qT: qualityTotal, author, iA: impactAllowance, qA: qualityAllowance, ec: ecoName, login: needLogin, pt: points, cu: curator, impact, ql: quality, cI: castImpact, hash: castHash, rS: removeStake })}' />`
+      button4 = `<meta property="fc:frame:button:4" content='More >' />
+      <meta property="fc:frame:button:4:action" content="post" />
+      <meta property="fc:frame:button:4:target" content='https://impact.abundance.id/api/frames/console/more?${qs.stringify({ iB: impactBalance, qB: qualityBalance, qT: qualityTotal, author, iA: impactAllowance, qA: qualityAllowance, ec: ecoName, login: needLogin, pt: points, cu: curator, impact, ql: quality, cI: castImpact, hash: castHash, rS: removeStake })}' />`
+    } else if (parseInt(impact) !== 0 && removeStake == true) {
+      console.log('4')
+      button1 = `<meta property="fc:frame:button:1" content='+1 ${points}' />
+      <meta property="fc:frame:button:1:action" content="post" />
+      <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/console/impact?${qs.stringify({ addImpact: 1, iB: impactBalance, qB: qualityBalance, qT: qualityTotal, author, iA: impactAllowance, qA: qualityAllowance, ec: ecoName, login: needLogin, pt: points, cu: curator, impact, ql: quality, cI: castImpact, hash: castHash, rS: removeStake })}' />`
+      button2 = `<meta property="fc:frame:button:2" content='+5 ${points}' />
+      <meta property="fc:frame:button:2:action" content="post" />
+      <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/console/impact?${qs.stringify({ addImpact: 5, iB: impactBalance, qB: qualityBalance, qT: qualityTotal, author, iA: impactAllowance, qA: qualityAllowance, ec: ecoName, login: needLogin, pt: points, cu: curator, impact, ql: quality, cI: castImpact, hash: castHash, rS: removeStake })}' />`
+      button3 = `<meta property="fc:frame:button:3" content='-1 Unstake' />
+      <meta property="fc:frame:button:3:action" content="post" />
+      <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/unstake?${qs.stringify({ removeImpact: 1, iB: impactBalance, qB: qualityBalance, qT: qualityTotal, author, iA: impactAllowance, qA: qualityAllowance, ec: ecoName, login: needLogin, pt: points, cu: curator, impact, ql: quality, cI: castImpact, hash: castHash, rS: removeStake })}' />`
+      button4 = `<meta property="fc:frame:button:4" content='More >' />
+      <meta property="fc:frame:button:4:action" content="post" />
+      <meta property="fc:frame:button:4:target" content='https://impact.abundance.id/api/frames/console/more?${qs.stringify({ iB: impactBalance, qB: qualityBalance, qT: qualityTotal, author, iA: impactAllowance, qA: qualityAllowance, ec: ecoName, login: needLogin, pt: points, cu: curator, impact, ql: quality, cI: castImpact, hash: castHash, rS: removeStake })}' />`
     } else if (parseInt(impact) !== 0) {
       console.log('4')
       button1 = `<meta property="fc:frame:button:1" content='+1 ${points}' />
       <meta property="fc:frame:button:1:action" content="post" />
-      <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/console/impact?${qs.stringify({ addImpact: 1, iB: impactBalance, qB: qualityBalance, qT: qualityTotal, author, iA: impactAllowance, qA: qualityAllowance, ec: ecoName, login: needLogin, pt: points, cu: curator, impact, ql: quality, cI: castImpact, hash: castHash })}' />`
+      <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/console/impact?${qs.stringify({ addImpact: 1, iB: impactBalance, qB: qualityBalance, qT: qualityTotal, author, iA: impactAllowance, qA: qualityAllowance, ec: ecoName, login: needLogin, pt: points, cu: curator, impact, ql: quality, cI: castImpact, hash: castHash, rS: removeStake })}' />`
       button2 = `<meta property="fc:frame:button:2" content='+5 ${points}' />
       <meta property="fc:frame:button:2:action" content="post" />
-      <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/console/impact?${qs.stringify({ addImpact: 5, iB: impactBalance, qB: qualityBalance, qT: qualityTotal, author, iA: impactAllowance, qA: qualityAllowance, ec: ecoName, login: needLogin, pt: points, cu: curator, impact, ql: quality, cI: castImpact, hash: castHash })}' />`
-      // button3 = `<meta property="fc:frame:button:3" content='More >' />
-      // <meta property="fc:frame:button:3:action" content="post" />
-      // <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/test?${qs.stringify({ iB, qB, qT, author, iA, qA, ecosystem, login, pt, cu, impact, quality, cI, hash })}' />`
+      <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/console/impact?${qs.stringify({ addImpact: 5, iB: impactBalance, qB: qualityBalance, qT: qualityTotal, author, iA: impactAllowance, qA: qualityAllowance, ec: ecoName, login: needLogin, pt: points, cu: curator, impact, ql: quality, cI: castImpact, hash: castHash, rS: removeStake })}' />`
+      button3 = `<meta property="fc:frame:button:3" content='More >' />
+      <meta property="fc:frame:button:3:action" content="post" />
+      <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/more?${qs.stringify({ iB: impactBalance, qB: qualityBalance, qT: qualityTotal, author, iA: impactAllowance, qA: qualityAllowance, ec: ecoName, login: needLogin, pt: points, cu: curator, impact, ql: quality, cI: castImpact, hash: castHash, rS: removeStake })}' />`
     } else if (parseInt(quality) !== 0) {
       console.log('5')
       button1 = `<meta property="fc:frame:button:1" content='Upvote' />
       <meta property="fc:frame:button:1:action" content="post" />
-      <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/console/quality?${qs.stringify({ addQuality: 1, iB: impactBalance, qB: qualityBalance, qT: qualityTotal, author, iA: impactAllowance, qA: qualityAllowance, ec: ecoName, login: needLogin, pt: points, cu: curator, impact, ql: quality, cI: castImpact, hash: castHash })}' />`
+      <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/console/quality?${qs.stringify({ addQuality: 1, iB: impactBalance, qB: qualityBalance, qT: qualityTotal, author, iA: impactAllowance, qA: qualityAllowance, ec: ecoName, login: needLogin, pt: points, cu: curator, impact, ql: quality, cI: castImpact, hash: castHash, rS: removeStake })}' />`
       button2 = `<meta property="fc:frame:button:2" content='Downvote' />
       <meta property="fc:frame:button:2:action" content="post" />
-      <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/console/quality?${qs.stringify({ addQuality: -1, iB: impactBalance, qB: qualityBalance, qT: qualityTotal, author, iA: impactAllowance, qA: qualityAllowance, ec: ecoName, login: needLogin, pt: points, cu: curator, impact, ql: quality, cI: castImpact, hash: castHash })}' />`
-      // button3 = `<meta property="fc:frame:button:3" content='More >' />
-      // <meta property="fc:frame:button:3:action" content="post" />
-      // <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/test?${qs.stringify({ iB, qB, qT, author, iA, qA, ecosystem, login, pt, cu, impact, quality, cI, hash })}' />`
+      <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/console/quality?${qs.stringify({ addQuality: -1, iB: impactBalance, qB: qualityBalance, qT: qualityTotal, author, iA: impactAllowance, qA: qualityAllowance, ec: ecoName, login: needLogin, pt: points, cu: curator, impact, ql: quality, cI: castImpact, hash: castHash, rS: removeStake })}' />`
+      button3 = `<meta property="fc:frame:button:3" content='More >' />
+      <meta property="fc:frame:button:3:action" content="post" />
+      <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/more?${qs.stringify({ iB: impactBalance, qB: qualityBalance, qT: qualityTotal, author, iA: impactAllowance, qA: qualityAllowance, ec: ecoName, login: needLogin, pt: points, cu: curator, impact, ql: quality, cI: castImpact, hash: castHash, rS: removeStake })}' />`
     }
 
     let metatags = button1 + button2 + button3 + button4 + textField + postUrl

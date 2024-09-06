@@ -22,7 +22,7 @@ const client = HubURL ? getSSLHubRpcClient(HubURL) : undefined;
 export default async function handler(req, res) {
   
   const { untrustedData } = req.body
-  const { iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle } = req.query;
+  const { iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle, rS } = req.query;
 
   if (req.method === 'POST') {
     const points = pt
@@ -36,19 +36,19 @@ export default async function handler(req, res) {
 
     let button1 = `<meta property="fc:frame:button:1" content='Stop auto-tip' />
     <meta property="fc:frame:button:1:action" content="post" />
-    <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/console/auto-tip-stop?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle })}' />`
+    <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/console/auto-tip-stop?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle, rS })}' />`
 
     let button2 = `<meta property="fc:frame:button:2" content='Auto-tip all' />
     <meta property="fc:frame:button:2:action" content="post" />
-    <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/console/auto-tip-all?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle })}' />`
+    <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/console/auto-tip-all?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle, rS })}' />`
 
     // let button3 = `<meta property="fc:frame:button:3" content='Add curator' />
     // <meta property="fc:frame:button:3:action" content="post" />
-    // <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/auto-tip-search?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle })}' />`
+    // <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/auto-tip-search?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle, rS })}' />`
 
     let button3 = `<meta property="fc:frame:button:3" content='< Back' />
     <meta property="fc:frame:button:3:action" content="post" />
-    <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/more?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle })}' />`
+    <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/more?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle, rS })}' />`
 
     let button4 = ''
 
@@ -89,7 +89,7 @@ export default async function handler(req, res) {
 
       button3 = `<meta property="fc:frame:button:3" content='< Back' />
       <meta property="fc:frame:button:3:action" content="post" />
-      <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/more?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle })}' />`
+      <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/more?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle, rS })}' />`
 
       textField = ``
 
@@ -113,80 +113,6 @@ export default async function handler(req, res) {
       }
 
       const schedule = await getSchedule(curatorFid)
-      // async function setSchedule(fid, code, points, ecosystem, encryptedUuid) {
-      //   let schedule = null
-      //   try {
-      //     await connectToDatabase();
-      //     schedule = await ScheduleTip.findOne({ fid }).exec();
-      //     if (schedule) {
-      //       schedule.code = code
-      //       schedule.search_shuffle = true
-      //       schedule.search_time = 'all'
-      //       schedule.search_tags = []
-      //       schedule.search_channels = []
-      //       schedule.search_curators = []
-      //       schedule.points = points
-      //       schedule.percent_tip = 100
-      //       schedule.ecosystem_name = ecosystem
-      //       schedule.currencies = ['$DEGEN']
-      //       schedule.schedule_time = "45 18 * * *"
-      //       schedule.active_cron = true
-      //     } else {
-      //       schedule = new ScheduleTip({ 
-      //         fid: fid,
-      //         uuid: encryptedUuid,
-      //         code: code,
-      //         search_shuffle: true,
-      //         search_time: 'all',
-      //         search_tags: [],
-      //         search_channels: [],
-      //         search_curators: [],
-      //         points: points,
-      //         percent_tip: 100,
-      //         ecosystem_name: ecosystem,
-      //         currencies: ['$DEGEN'],
-      //         schedule_time: "45 18 * * *",
-      //         schedule_count: 1,
-      //         schedule_total: 1,
-      //         active_cron: true
-      //       });
-      //     }
-  
-      //   } catch (error) {
-      //     console.error("Error while fetching data:", error);
-      //     return null
-      //   }  
-  
-      //   let cronId = null
-      //   if (schedule.cron_job_id) {
-      //     console.log(schedule.cron_job_id)
-      //     cronId = schedule.cron_job_id
-      //   }
-  
-      //   const cronUrl = `https://www.easycron.com/rest/${cronId ? 'edit' : 'add'}?${qs.stringify({
-      //     token: easyCronKey,
-      //     url: `${baseURL}/api/curation/getScheduledJob?${qs.stringify({ fid, code })}`,
-      //     id: cronId,
-      //     cron_expression: "45 18 * * *",
-      //     timezone_from: 2,
-      //     timezone: 'America/New_York',
-      //     cron_job_name: `${fid}ScheduledTips`,
-      //   })}`;
-    
-    
-      //   const cronResponse = await fetch(cronUrl)
-      //   console.log(cronResponse)
-      //   if (cronResponse) {
-      //     const getCron = await cronResponse.json()
-      //     console.log(getCron)
-      //     schedule.cron_job_id = getCron.cron_job_id
-      //   }
-      //   schedule.active_cron = true
-      //   await schedule.save()
-      //   return schedule
-      // }
-  
-      // const schedule = await setSchedule(curatorFid, code, pt, ecosystem, encryptedUuid)
   
       if (schedule?.active_cron) {
 
@@ -200,19 +126,19 @@ export default async function handler(req, res) {
 
         button1 = `<meta property="fc:frame:button:1" content='Stop auto-tip' />
         <meta property="fc:frame:button:1:action" content="post" />
-        <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/console/auto-tip-stop?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle })}' />`
+        <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/console/auto-tip-stop?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle, rS })}' />`
   
         button2 = `<meta property="fc:frame:button:2" content='Auto-tip all' />
         <meta property="fc:frame:button:2:action" content="post" />
-        <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/console/auto-tip-all?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle })}' />`
+        <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/console/auto-tip-all?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle, rS })}' />`
 
         // button3 = `<meta property="fc:frame:button:3" content='Add curator' />
         // <meta property="fc:frame:button:3:action" content="post" />
-        // <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/auto-tip-search?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle })}' />`
+        // <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/auto-tip-search?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle, rS })}' />`
 
         button3 = `<meta property="fc:frame:button:3" content='< Back' />
         <meta property="fc:frame:button:3:action" content="post" />
-        <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/more?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle })}' />`
+        <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/more?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle, rS })}' />`
 
         // textField = `<meta name="fc:frame:input:text" content="Search for curator" />`
 
@@ -222,19 +148,19 @@ export default async function handler(req, res) {
         console.log('216', autoTipImg)
         button1 = `<meta property="fc:frame:button:1" content='Auto-tip' />
         <meta property="fc:frame:button:1:action" content="post" />
-        <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/console/auto-tip-self?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle })}' />`
+        <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/console/auto-tip-self?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle, rS })}' />`
 
         button2 = `<meta property="fc:frame:button:2" content='Auto-tip all' />
         <meta property="fc:frame:button:2:action" content="post" />
-        <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/console/auto-tip-all?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle })}' />`
+        <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/console/auto-tip-all?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle, rS })}' />`
 
         // button3 = `<meta property="fc:frame:button:3" content='Find curator' />
         // <meta property="fc:frame:button:3:action" content="post" />
-        // <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/auto-tip-search?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle })}' />`
+        // <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/auto-tip-search?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle, rS })}' />`
 
         button3 = `<meta property="fc:frame:button:3" content='< Back' />
         <meta property="fc:frame:button:3:action" content="post" />
-        <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/more?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle })}' />`
+        <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/more?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle, rS })}' />`
 
         // textField = `<meta name="fc:frame:input:text" content="Search for curator" />`
 
