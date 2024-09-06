@@ -9,16 +9,17 @@ const client = HubURL ? getSSLHubRpcClient(HubURL) : undefined;
 export default async function handler(req, res) {
 
   const { untrustedData } = req.body
-  const { iB, qB, qT, author, iA, qA, ecosystem, login, pt, cu, impact, quality, cI, hash, handle } = req.query;
+  const { iB, qB, qT, author, iA, qA, ecosystem, login, pt, cu, impact, quality, cI, hash, handle, rS } = req.query;
 
   if (req.method !== 'POST') {
     res.setHeader('Allow', ['POST']);
     res.status(405).end(`Method ${req.method} Not Allowed`);
   } else {
     console.log('17', iB, qB, qT, author, iA, qA, ecosystem, login, pt, cu, impact, quality, cI)
-    console.log('18', typeof iB, typeof cI, typeof impact, typeof quality)
+    console.log('18', typeof iB, typeof cI, typeof impact, typeof quality, typeof login)
     const needLogin = login == 'true'
-
+    const unstake = rS == 'true'
+    
     let balanceImg = `${baseURL}/api/frames/console/balance?${qs.stringify({ iB, qB, qT, author, iA, qA, ecosystem, login, pt, cu })}`
 
     let button1 = ''
@@ -36,6 +37,7 @@ export default async function handler(req, res) {
     console.log('5', parseInt(quality) !== 0, quality)
 
 
+
     if (needLogin) {
       console.log('1')
       button1 = `<meta property="fc:frame:button:1" content='Login' />
@@ -49,51 +51,65 @@ export default async function handler(req, res) {
 
       button1 = `<meta property="fc:frame:button:1" content='+1 ${pt}' />
       <meta property="fc:frame:button:1:action" content="post" />
-      <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/console/impact?${qs.stringify({ addImpact: 1, iB, qB, qT, author, iA, qA, ec: ecosystem, login, pt, cu, impact, ql: quality, cI, hash, handle })}' />`
+      <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/console/impact?${qs.stringify({ addImpact: 1, iB, qB, qT, author, iA, qA, ec: ecosystem, login, pt, cu, impact, ql: quality, cI, hash, handle, rS })}' />`
       button2 = `<meta property="fc:frame:button:2" content='+5 ${pt}' />
       <meta property="fc:frame:button:2:action" content="post" />
-      <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/console/impact?${qs.stringify({ addImpact: 5, iB, qB, qT, author, iA, qA, ec: ecosystem, login, pt, cu, impact, ql: quality, cI, hash, handle })}' />`
+      <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/console/impact?${qs.stringify({ addImpact: 5, iB, qB, qT, author, iA, qA, ec: ecosystem, login, pt, cu, impact, ql: quality, cI, hash, handle, rS })}' />`
       button3 = `<meta property="fc:frame:button:3" content='More >' />
       <meta property="fc:frame:button:3:action" content="post" />
-      <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/more2?${qs.stringify({ iB, qB, qT, author, iA, qA, ec: ecosystem, login, pt, cu, impact, ql: quality, cI, hash, handle })}' />`
+      <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/more?${qs.stringify({ iB, qB, qT, author, iA, qA, ec: ecosystem, login, pt, cu, impact, ql: quality, cI, hash, handle, rS })}' />`
       textField = `<meta name="fc:frame:input:text" content="Add comment to nomination" />`
     } else if (parseInt(cI) !== 0 && parseInt(impact) == 0 && parseInt(quality) == 0) {
       console.log('3')
 
       button1 = `<meta property="fc:frame:button:1" content='+1 ${pt}' />
       <meta property="fc:frame:button:1:action" content="post" />
-      <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/console/impact?${qs.stringify({ addImpact: 1, iB, qB, qT, author, iA, qA, ec: ecosystem, login, pt, cu, impact, ql: quality, cI, hash, handle })}' />`
+      <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/console/impact?${qs.stringify({ addImpact: 1, iB, qB, qT, author, iA, qA, ec: ecosystem, login, pt, cu, impact, ql: quality, cI, hash, handle, rS })}' />`
       button2 = `<meta property="fc:frame:button:2" content='Upvote' />
       <meta property="fc:frame:button:2:action" content="post" />
-      <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/console/quality?${qs.stringify({ addQuality: 1, iB, qB, qT, author, iA, qA, ec: ecosystem, login, pt, cu, impact, ql: quality, cI, hash, handle })}' />`
+      <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/console/quality?${qs.stringify({ addQuality: 1, iB, qB, qT, author, iA, qA, ec: ecosystem, login, pt, cu, impact, ql: quality, cI, hash, handle, rS })}' />`
       button3 = `<meta property="fc:frame:button:3" content='Downvote' />
       <meta property="fc:frame:button:3:action" content="post" />
-      <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/quality?${qs.stringify({ addQuality: -1, iB, qB, qT, author, iA, qA, ec: ecosystem, login, pt, cu, impact, ql: quality, cI, hash, handle })}' />`
+      <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/quality?${qs.stringify({ addQuality: -1, iB, qB, qT, author, iA, qA, ec: ecosystem, login, pt, cu, impact, ql: quality, cI, hash, handle, rS })}' />`
       button4 = `<meta property="fc:frame:button:4" content='More >' />
       <meta property="fc:frame:button:4:action" content="post" />
-      <meta property="fc:frame:button:4:target" content='https://impact.abundance.id/api/frames/console/more2?${qs.stringify({ iB, qB, qT, author, iA, qA, ec: ecosystem, login, pt, cu, impact, ql: quality, cI, hash, handle })}' />`
+      <meta property="fc:frame:button:4:target" content='https://impact.abundance.id/api/frames/console/more?${qs.stringify({ iB, qB, qT, author, iA, qA, ec: ecosystem, login, pt, cu, impact, ql: quality, cI, hash, handle, rS })}' />`
+    } else if (parseInt(impact) !== 0 && unstake) {
+      console.log('4')
+      button1 = `<meta property="fc:frame:button:1" content='+1 ${pt}' />
+      <meta property="fc:frame:button:1:action" content="post" />
+      <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/console/impact?${qs.stringify({ addImpact: 1, iB, qB, qT, author, iA, qA, ec: ecosystem, login, pt, cu, impact, ql: quality, cI, hash, handle, rS })}' />`
+      button2 = `<meta property="fc:frame:button:2" content='+5 ${pt}' />
+      <meta property="fc:frame:button:2:action" content="post" />
+      <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/console/impact?${qs.stringify({ addImpact: 5, iB, qB, qT, author, iA, qA, ec: ecosystem, login, pt, cu, impact, ql: quality, cI, hash, handle, rS })}' />`
+      button3 = `<meta property="fc:frame:button:3" content='-1 Unstake' />
+      <meta property="fc:frame:button:3:action" content="post" />
+      <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/unstake?${qs.stringify({ removeImpact: 1, iB, qB, qT, author, iA, qA, ec: ecosystem, login, pt, cu, impact, ql: quality, cI, hash, handle, rS })}' />`
+      button4 = `<meta property="fc:frame:button:4" content='More >' />
+      <meta property="fc:frame:button:4:action" content="post" />
+      <meta property="fc:frame:button:4:target" content='https://impact.abundance.id/api/frames/console/more?${qs.stringify({ iB, qB, qT, author, iA, qA, ec: ecosystem, login, pt, cu, impact, ql: quality, cI, hash, handle, rS })}' />`
     } else if (parseInt(impact) !== 0) {
       console.log('4')
       button1 = `<meta property="fc:frame:button:1" content='+1 ${pt}' />
       <meta property="fc:frame:button:1:action" content="post" />
-      <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/console/impact?${qs.stringify({ addImpact: 1, iB, qB, qT, author, iA, qA, ec: ecosystem, login, pt, cu, impact, ql: quality, cI, hash, handle })}' />`
+      <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/console/impact?${qs.stringify({ addImpact: 1, iB, qB, qT, author, iA, qA, ec: ecosystem, login, pt, cu, impact, ql: quality, cI, hash, handle, rS })}' />`
       button2 = `<meta property="fc:frame:button:2" content='+5 ${pt}' />
       <meta property="fc:frame:button:2:action" content="post" />
-      <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/console/impact?${qs.stringify({ addImpact: 5, iB, qB, qT, author, iA, qA, ec: ecosystem, login, pt, cu, impact, ql: quality, cI, hash, handle })}' />`
+      <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/console/impact?${qs.stringify({ addImpact: 5, iB, qB, qT, author, iA, qA, ec: ecosystem, login, pt, cu, impact, ql: quality, cI, hash, handle, rS })}' />`
       button3 = `<meta property="fc:frame:button:3" content='More >' />
       <meta property="fc:frame:button:3:action" content="post" />
-      <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/more2?${qs.stringify({ iB, qB, qT, author, iA, qA, ec: ecosystem, login, pt, cu, impact, ql: quality, cI, hash, handle })}' />`
+      <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/more?${qs.stringify({ iB, qB, qT, author, iA, qA, ec: ecosystem, login, pt, cu, impact, ql: quality, cI, hash, handle, rS })}' />`
     } else if (parseInt(quality) !== 0) {
       console.log('5')
       button1 = `<meta property="fc:frame:button:1" content='Upvote' />
       <meta property="fc:frame:button:1:action" content="post" />
-      <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/console/quality?${qs.stringify({ addQuality: 1, iB, qB, qT, author, iA, qA, ec: ecosystem, login, pt, cu, impact, ql: quality, cI, hash, handle })}' />`
+      <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/console/quality?${qs.stringify({ addQuality: 1, iB, qB, qT, author, iA, qA, ec: ecosystem, login, pt, cu, impact, ql: quality, cI, hash, handle, rS })}' />`
       button2 = `<meta property="fc:frame:button:2" content='Downvote' />
       <meta property="fc:frame:button:2:action" content="post" />
-      <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/console/quality?${qs.stringify({ addQuality: -1, iB, qB, qT, author, iA, qA, ec: ecosystem, login, pt, cu, impact, ql: quality, cI, hash, handle })}' />`
+      <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/console/quality?${qs.stringify({ addQuality: -1, iB, qB, qT, author, iA, qA, ec: ecosystem, login, pt, cu, impact, ql: quality, cI, hash, handle, rS })}' />`
       button3 = `<meta property="fc:frame:button:3" content='More >' />
       <meta property="fc:frame:button:3:action" content="post" />
-      <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/more2?${qs.stringify({ iB, qB, qT, author, iA, qA, ec: ecosystem, login, pt, cu, impact, ql: quality, cI, hash, handle })}' />`
+      <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/more?${qs.stringify({ iB, qB, qT, author, iA, qA, ec: ecosystem, login, pt, cu, impact, ql: quality, cI, hash, handle, rS })}' />`
     }
 
     let metatags = button1 + button2 + button3 + button4 + textField + postUrl
