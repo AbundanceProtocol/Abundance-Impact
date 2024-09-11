@@ -48,7 +48,7 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem}) {
       buttons: [
         {
           index: 1,
-          title: "Tip Nominees",
+          title: "Multi-Tip >",
           action_type: "post",
           target: `${baseURL}/api/frames/tip/tip?tip=0`
         },
@@ -309,7 +309,7 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem}) {
         <meta property="fc:frame:image" content={`${baseURL}/images/tips.jpg`} />
         <meta property="fc:frame:image:aspect_ratio" content="1:1" />
 
-        <meta property="fc:frame:button:1" content='Tip Nominees' />
+        <meta property="fc:frame:button:1" content='Multi-Tip >' />
         <meta property="fc:frame:button:1:action" content="post" />
         <meta property="fc:frame:button:1:target" content={`${baseURL}/api/frames/tip/tip?${qs.stringify({ time, curators, eco, ecosystem })}`} />
 

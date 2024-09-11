@@ -48,21 +48,21 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem}) {
       buttons: [
         {
           index: 1,
-          title: "Tip Nominees",
+          title: "Multi-tip >",
           action_type: "post",
           target: `${baseURL}/api/frames/tip/tip?tip=0`
         },
         {
           index: 2,
-          title: "Explore curation",
-          action_type: "link",
-          target: `${baseURL}/api/frames/tip/tip?tip=0`
+          title: "Menu",
+          action_type: "post",
+          target: `${baseURL}/api/frames/tip/menu?`
         },
         {
           index: 3,
-          title: "What's /impact?",
-          action_type: "link",
-          target: `https://warpcast.com/abundance/0x43ddd672`
+          title: "Auto-tip >",
+          action_type: "post",
+          target: `${baseURL}/api/frames/tip/auto-tip?`
         },
         {
           index: 4,
@@ -166,11 +166,11 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem}) {
     updatedFrameData.buttons[0].target = `${baseURL}/api/frames/tip/tip?${qs.stringify({    
       time, curators, eco, ecosystem })}`
 
-    updatedFrameData.buttons[1].target = `${baseURL}/~/ecosystems/${ecosystem}?${qs.stringify({    
-      time, curators })}`
+    updatedFrameData.buttons[1].target = `${baseURL}/api/frames/tip/menu?${qs.stringify({ time, curators, eco, ecosystem })}`
 
-    updatedFrameData.buttons[3].target = `${baseURL}/api/frames/tip/refresh?${qs.stringify({    
-      time, curators, eco, ecosystem })}`
+    updatedFrameData.buttons[2].target = `${baseURL}/api/frames/tip/auto-tip?${qs.stringify({ time, curators, eco, ecosystem })}`
+
+    updatedFrameData.buttons[3].target = `${baseURL}/api/frames/tip/refresh?${qs.stringify({ time, curators, eco, ecosystem })}`
 
     setFrameData(updatedFrameData)
   }, [queryData]);
@@ -307,20 +307,19 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem}) {
         <meta property="fc:frame" content="vNext" />
         <meta property="fc:frame:image" content={`${baseURL}/images/tips.jpg`} />
         <meta property="fc:frame:image:aspect_ratio" content="1:1" />
-        <meta property="fc:frame:button:1" content='Tip Nominees' />
+        <meta property="fc:frame:button:1" content='Multi-tip >' />
         <meta property="fc:frame:button:1:action" content="post" />
 
         <meta property="fc:frame:button:1:target" content={`${baseURL}/api/frames/tip/tip?${qs.stringify({    
           time, curators, eco, ecosystem })}`} />
 
-        <meta property="fc:frame:button:2" content={`Explore curation`} />
-        <meta property="fc:frame:button:2:action" content="link" />
+        <meta property="fc:frame:button:2" content={'Menu'} />
+        <meta property="fc:frame:button:2:action" content="post" />
 
-        <meta property="fc:frame:button:2:target" content={`${baseURL}/~/ecosystems/${ecosystem}?${qs.stringify({    
-          time, curators })}`} />
-        <meta property="fc:frame:button:3" content={`What's /impact?`} />
-        <meta property="fc:frame:button:3:action" content="link" />
-        <meta property="fc:frame:button:3:target" content={`https://warpcast.com/abundance/0x43ddd672`} />
+        <meta property="fc:frame:button:2:target" content={`${baseURL}/api/frames/tip/menu?${qs.stringify({ time, curators, eco, ecosystem })}`} />
+        <meta property="fc:frame:button:3" content={'Auto-tip >'} />
+        <meta property="fc:frame:button:3:action" content="post" />
+        <meta property="fc:frame:button:3:target" content={`${baseURL}/api/frames/tip/auto-tip?${qs.stringify({ time, curators, eco, ecosystem })}`} />
         <meta property="fc:frame:button:4" content='Refresh' />
         <meta property="fc:frame:button:4:action" content="post" />
 

@@ -70,7 +70,7 @@ export default async function handler(req, res) {
     try {
 
       let metatags = `
-      <meta name="fc:frame:button:1" content="Tip Nominees">
+      <meta name="fc:frame:button:1" content="Multi-Tip >">
       <meta name="fc:frame:button:1:action" content="post">
       <meta name="fc:frame:button:1:target" content="${sendPost}" />
       <meta name="fc:frame:button:2" content="Menu">
