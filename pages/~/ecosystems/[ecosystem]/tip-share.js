@@ -57,9 +57,15 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem, fi
         },
         {
           index: 2,
-          title: "What's /impact?",
-          action_type: "link",
-          target: `https://warpcast.com/abundance/0x43ddd672`
+          title: "Menu",
+          action_type: "post",
+          target: `${baseURL}/api/frames/tip/menu?`
+        },
+        {
+          index: 3,
+          title: "Auto-tip >",
+          action_type: "post",
+          target: `${baseURL}/api/frames/tip/auto-tip?`
         },
       ],
       input: {
@@ -156,9 +162,11 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem, fi
     console.log(queryData)
 
     const updatedFrameData = {...frameData}
-    updatedFrameData.buttons[0].target = `${baseURL}/api/frames/console/tip-tip?${qs.stringify({    
-      time, curators, eco, ecosystem, start: true
-    })}`
+    updatedFrameData.buttons[0].target = `${baseURL}/api/frames/console/tip-tip?${qs.stringify({ time, curators, eco, ecosystem, start: true })}`
+
+    updatedFrameData.buttons[1].target = `${baseURL}/api/frames/tip/menu?${qs.stringify({ time, curators, eco, ecosystem })}`
+
+    updatedFrameData.buttons[2].target = `${baseURL}/api/frames/tip/auto-tip?${qs.stringify({ time, curators, eco, ecosystem })}`
 
     updatedFrameData.image = `${baseURL}/api/frames/tip/circle?${qs.stringify({ id })}`
 
@@ -306,9 +314,13 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem, fi
           time, curators, eco, ecosystem, start: true
         })}`} />
 
-        <meta property="fc:frame:button:2" content={`What's /impact?`} />
-        <meta property="fc:frame:button:2:action" content="link" />
-        <meta property="fc:frame:button:2:target" content={`https://warpcast.com/abundance/0x43ddd672`} />
+        <meta property="fc:frame:button:2" content={'Menu'} />
+        <meta property="fc:frame:button:2:action" content="post" />
+        <meta property="fc:frame:button:2:target" content={`${baseURL}/api/frames/tip/menu?${qs.stringify({ time, curators, eco, ecosystem })}`} />
+
+        <meta property="fc:frame:button:3" content={'Auto-tip >'} />
+        <meta property="fc:frame:button:3:action" content="post" />
+        <meta property="fc:frame:button:3:target" content={`${baseURL}/api/frames/tip/auto-tip?${qs.stringify({ time, curators, eco, ecosystem })}`} />
 
         <meta name="fc:frame:input:text" content="Eg.: 1000 $Degen, 500 $HAM" />
       </Head>

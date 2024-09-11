@@ -178,7 +178,7 @@ export default async function handler(req, res) {
                         text: `@${user} has been nominated by @${curator} to the ${ecosystem} Ecosystem on /impact\n\nHelp support @${curator}'s nominees:`,
                       };
                       
-                      const frameUrl = `https://impact.abundance.id/~/ecosystems/${handle}/tip?time=all&shuffle=true&curators=${fid}&eco=${eco}&referrer=${fid}`
+                      const frameUrl = `https://impact.abundance.id/~/ecosystems/${handle}/tip2?time=all&shuffle=true&curators=${fid}&eco=${eco}&referrer=${fid}`
 
                       body.parent = hash;
 
@@ -290,7 +290,7 @@ export default async function handler(req, res) {
           text: `@${user} has been nominated by @${curator} to the ${ecosystem} Ecosystem on /impact`,
         };
         
-        // const frameUrl = `https://impact.abundance.id/~/ecosystems/${handle}/tip?time=all&shuffle=true&curators=${fid}&eco=${eco}&referrer=${fid}`
+        // const frameUrl = `https://impact.abundance.id/~/ecosystems/${handle}/tip2?time=all&shuffle=true&curators=${fid}&eco=${eco}&referrer=${fid}`
 
         body.parent = channel;
 
