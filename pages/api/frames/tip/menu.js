@@ -8,7 +8,7 @@ import EcosystemRules from  "../../../../models/EcosystemRules";
 import { decryptPassword, getTimeRange, processTips, populateCast } from "../../../../utils/utils";
 import _ from "lodash";
 import qs from "querystring";
-// import { createCircle } from "./circle2";
+import { metaButton } from "../../../../utils/frames";
 
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 const HubURL = process.env.NEYNAR_HUB
@@ -24,7 +24,7 @@ export default async function handler(req, res) {
     res.setHeader('Allow', ['POST']);
     res.status(405).end(`Method ${req.method} Not Allowed`);
   } else {
-
+    const params = { time, curators, eco, ecosystem }
     let tipText = ''
 
     const now = new Date();
@@ -39,54 +39,52 @@ export default async function handler(req, res) {
     const issueImg = `${baseURL}/images/issue.jpg`;
     let circlesImg = ''
     
-    console.log('14-3:', req.query, refresh)
+    console.log('14-3:', req.query)
 
     const exploreLink = `${baseURL}/~/ecosystems/${ecosystem}?${qs.stringify({ time: 'all', curators })}`
 
-    const impactLink = `https://warpcast.com/abundance/0x43ddd672`
+    // const impactLink = `https://warpcast.com/abundance/0x43ddd672`
 
     const retryPost = `${baseURL}/api/frames/tip/start?${qs.stringify({ time, curators, eco, ecosystem })}`
 
-    const refreshPost = `${baseURL}/api/frames/tip/refresh?${qs.stringify({ time, curators, eco, ecosystem, time1: timeMinus3 })}`
+    // const refreshPost = `${baseURL}/api/frames/tip/refresh?${qs.stringify({ time, curators, eco, ecosystem, time1: timeMinus3 })}`
 
-    const startPost = `${baseURL}/api/frames/tip/start?${qs.stringify({ time, curators, eco, ecosystem })}`
+    // const startPost = `${baseURL}/api/frames/tip/start?${qs.stringify({ time, curators, eco, ecosystem })}`
 
-    const loginUrl = `${baseURL}/?${qs.stringify({ eco: points })}`
+    // const loginUrl = `${baseURL}/?${qs.stringify({ eco: points })}`
 
-    const sendPost = `${baseURL}/api/frames/tip/tip?${qs.stringify({ time, curators, eco, ecosystem })}`
+    // const sendPost = `${baseURL}/api/frames/tip/tip?${qs.stringify({ time, curators, eco, ecosystem })}`
 
-    const postUrl = `${baseURL}/~/ecosystems/${ecosystem}/tip-login?${qs.stringify({ time, curators, eco })}`
+    const postLink = `${baseURL}/~/ecosystems/${ecosystem}/tip-login?${qs.stringify({ time, curators, eco })}`
     
-    const shareText = 'I just multi-tipped builders and creators on /impact. Try it out here:'
+    // const shareText = 'I just multi-tipped builders and creators on /impact. Try it out here:'
 
-    const autoTipPost = `${baseURL}/api/frames/tip/auto-tip?${qs.stringify({ time, curators, eco, ecosystem })}`
+    // const autoTipPost = `${baseURL}/api/frames/tip/auto-tip?${qs.stringify({ time, curators, eco, ecosystem })}`
 
-    let shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share?${qs.stringify({ time, curators, eco })}`
+    const getCastActionPost = `https://warpcast.com/~/add-cast-action?name=%24${eco}+Console&icon=star&actionType=post&postUrl=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Faction%2Fstatus%3Fpoints=${eco}&description=Curate+Casts+with+the+Impact+App`
 
-    const encodedShareText = encodeURIComponent(shareText); 
-    let encodedShareUrl = encodeURIComponent(shareUrl); 
-    let shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
-    
+    // let shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share?${qs.stringify({ time, curators, eco })}`
+
+    // const encodedShareText = encodeURIComponent(shareText); 
+    // let encodedShareUrl = encodeURIComponent(shareUrl); 
+    // let shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
+
+    let button1 = `<meta name="fc:frame:button:1" content="What's /impact?">
+    <meta name="fc:frame:button:1:action" content="post">
+    <meta name="fc:frame:button:1:target" content="${baseURL}/api/frames/tip/install?${qs.stringify({ time, curators, eco, ecosystem })}" />`
+    let button2 = `<meta name="fc:frame:button:2" content="Explore curation">
+    <meta name="fc:frame:button:2:action" content="link">
+    <meta name="fc:frame:button:2:target" content="${exploreLink}" />`
+    let button3 = `<meta name="fc:frame:button:3" content="Get Cast Action">
+    <meta name="fc:frame:button:3:action" content="link">
+    <meta name="fc:frame:button:3:target" content="${getCastActionPost}" />`
+    let button4 = metaButton(4, 'back', params)
+    let postUrl = `<meta name="fc:frame:post_url" content='https://impact.abundance.id' />`
+    let textField = ''
+    console.log(button1 + button2 + button3 + button4 + textField + postUrl)
     try {
-
-      let metatags = `
-      <meta name="fc:frame:button:1" content="Tip Nominees">
-      <meta name="fc:frame:button:1:action" content="post">
-      <meta name="fc:frame:button:1:target" content="${sendPost}" />
-      <meta name="fc:frame:button:2" content="Menu">
-      <meta name="fc:frame:button:2:action" content="post">
-      <meta name="fc:frame:button:2:target" content="${baseURL}/api/frames/tip/menu?${qs.stringify({ time, curators, eco, ecosystem })}" />
-      <meta name="fc:frame:button:3" content="Auto-tip >">
-      <meta name="fc:frame:button:3:action" content="post">
-      <meta name="fc:frame:button:3:target" content="${autoTipPost}" />
-      <meta name="fc:frame:button:4" content="Refresh">
-      <meta name="fc:frame:button:4:action" content="post">
-      <meta name="fc:frame:button:4:target" content="${refreshPost}" />
-      <meta property="og:image" content="${tipsImg}">
-      <meta name="fc:frame:image" content="${tipsImg}">
-      <meta name="fc:frame:post_url" content="${postUrl}">
-      <meta name="fc:frame:input:text" content="Eg.: 1000 $Degen, 500 $HAM" />`
-
+      let metatags = button1 + button2 + button3 + button4 + textField + postUrl
+      
       res.setHeader('Content-Type', 'text/html');
       res.status(200)
       .send(`
@@ -96,6 +94,8 @@ export default async function handler(req, res) {
             <title>Tips | Impact App</title>
             <meta name="fc:frame" content="vNext">
             <meta property="og:title" content="Multi-Tip">
+            <meta property="og:image" content="${tipsImg}">
+            <meta name="fc:frame:image" content="${tipsImg}">
             <meta property="fc:frame:image:aspect_ratio" content="1:1" />
             ${metatags}
           </head>
@@ -114,7 +114,7 @@ export default async function handler(req, res) {
       <meta name="fc:frame:button:1:target" content="${retryPost}" />
       <meta property="og:image" content="${issueImg}">
       <meta name="fc:frame:image" content="${issueImg}">
-      <meta name="fc:frame:post_url" content="${postUrl}">`
+      <meta name="fc:frame:post_url" content="${postLink}">`
 
       res.setHeader('Content-Type', 'text/html');
       res.status(500).send(`

@@ -182,6 +182,8 @@ export default async function handler(req, res) {
 
     const postUrl = `${baseURL}/~/ecosystems/${ecosystem}/tip-login?${qs.stringify({ time, curators, eco })}`
     
+    const autoTipPost = `${baseURL}/api/frames/tip/auto-tip?${qs.stringify({ time, curators, eco, ecosystem })}`
+
     const shareText = 'I just multi-tipped builders and creators on /impact. Try it out here:'
 
     let shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share?${qs.stringify({ time, curators, eco })}`
@@ -218,9 +220,9 @@ export default async function handler(req, res) {
         <meta name="fc:frame:button:2" content="Tip more >">
         <meta name="fc:frame:button:2:action" content="post">
         <meta name="fc:frame:button:2:target" content="${startPost}" />
-        <meta name="fc:frame:button:3" content="What's /impact">
-        <meta name="fc:frame:button:3:action" content="link">
-        <meta name="fc:frame:button:3:target" content="${impactLink}" />
+        <meta name="fc:frame:button:3" content="Auto-tip">
+        <meta name="fc:frame:button:3:action" content="post">
+        <meta name="fc:frame:button:3:target" content="${autoTipPost}" />
         <meta name="fc:frame:button:4" content="Refresh">
         <meta name="fc:frame:button:4:action" content="post">
         <meta name="fc:frame:button:4:target" content="${refreshPost}" />
@@ -254,9 +256,9 @@ export default async function handler(req, res) {
         <meta name="fc:frame:button:2" content="Explore curation">
         <meta name="fc:frame:button:2:action" content="link">
         <meta name="fc:frame:button:2:target" content="${exploreLink}" />
-        <meta name="fc:frame:button:3" content="What's /impact">
-        <meta name="fc:frame:button:3:action" content="link">
-        <meta name="fc:frame:button:3:target" content="${impactLink}" />
+        <meta name="fc:frame:button:3" content="Auto-tip">
+        <meta name="fc:frame:button:3:action" content="post">
+        <meta name="fc:frame:button:3:target" content="${autoTipPost}" />
         <meta name="fc:frame:button:4" content="Refresh">
         <meta name="fc:frame:button:4:action" content="post">
         <meta name="fc:frame:button:4:target" content="${refreshPost}" />
