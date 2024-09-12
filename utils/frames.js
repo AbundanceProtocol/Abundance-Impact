@@ -38,6 +38,14 @@ export function metaButton(i, type, params, points) {
     return `<meta property="fc:frame:button:${i}" content='Remove 👤' />
     <meta property="fc:frame:button:${i}:action" content="post" />
     <meta property="fc:frame:button:${i}:target" content='${baseURL}/api/frames/tip/auto-tip-remove?${qs.stringify(params)}' />`
+  } else if (type === 'auto-tip-stop') {
+    return `<meta property="fc:frame:button:${i}" content='Stop auto-tip' />
+    <meta property="fc:frame:button:${i}:action" content="post" />
+    <meta property="fc:frame:button:${i}:target" content='${baseURL}/api/frames/tip/auto-tip-stop?${qs.stringify(params)}' />`
+  } else {
+    return `<meta property="fc:frame:button:${i}" content='Menu' />
+    <meta property="fc:frame:button:${i}:action" content="post" />
+    <meta property="fc:frame:button:${i}:target" content='${baseURL}/api/frames/tip/menu?${qs.stringify(params)}' />`
   }
 
 }
