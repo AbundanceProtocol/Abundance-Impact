@@ -12,7 +12,7 @@ const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_
 export default async function handler(req, res) {
   const { status, curators, points } = req.query
 
-  console.log('status', status)
+  console.log('at1-1status', status, curators, typeof curators)
   try {
     const fontPath = path.join(process.cwd(), 'public', 'Inter-SemiBold.ttf');
     const fontData = fs.readFileSync(fontPath);
@@ -36,7 +36,7 @@ export default async function handler(req, res) {
     if (curators) {
       usernames = await getUsernames(curators, points)
     }
-    console.log('usernames', usernames)
+    console.log('at3-1 usernames', usernames)
 
 
     const backgroundImg = `https://impact.abundance.id/images/backgroundframe.jpg`

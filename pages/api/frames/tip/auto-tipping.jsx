@@ -12,12 +12,12 @@ const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_
 export default async function handler(req, res) {
   const { status, curators, points, add, remove, needLogin } = req.query
 
-  console.log('status', status, curators, points)
+  console.log('at1 status', status, curators, points, typeof curators)
   try {
     const fontPath = path.join(process.cwd(), 'public', 'Inter-SemiBold.ttf');
     const fontData = fs.readFileSync(fontPath);
     const login = needLogin == 'true'
-    console.log('login', login, needLogin)
+    console.log('at2 login', login, needLogin)
     
     async function getUsernames(curators, points) {
       try {
@@ -49,7 +49,7 @@ export default async function handler(req, res) {
       addedUsernames = await getUsernames(add, points)
     }
 
-    console.log('usernames', usernames, removeUsernames, addedUsernames)
+    console.log('at3 usernames', usernames, removeUsernames, addedUsernames)
 
 
     const backgroundImg = `https://impact.abundance.id/images/backgroundframe.jpg`
