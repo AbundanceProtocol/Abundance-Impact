@@ -20,9 +20,10 @@ export default async function handler(req, res) {
     console.log('at2 login', login, needLogin)
     
     async function getUsernames(curators, points) {
+      const curatorsArray = curators.split(',').map(curator => Number(curator.trim()))
       try {
         await connectToDatabase()
-        const usernames = await User.find({ fid: { $in: curators }, ecosystem_points: points }).select('username').exec();
+        const usernames = await User.find({ fid: { $in: curatorsArray }, ecosystem_points: points }).select('username').exec();
         if (usernames) {
           return usernames
         } else {
