@@ -13,7 +13,7 @@ export default async function handler(req, res) {
         await connectToDatabase();
         const user = await User.findOne({fid: fid, ecosystem_points: points}).select('remaining_i_allowance remaining_q_allowance').exec()
         if (user) {
-          console.log(user)
+          console.log('b1', user)
           return user
         } else {
           return null

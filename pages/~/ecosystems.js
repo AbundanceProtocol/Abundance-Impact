@@ -306,7 +306,7 @@ export default function Ecosystem() {
   }
 
   async function sendEcosystemRules() {
-    console.log(fid, ecosystemData)
+    console.log('309 fid:', fid, ecosystemData)
     try {
       const response = await axios.post('/api/ecosystem/postEcosystemRules', {       
         fid: fid,
@@ -411,7 +411,7 @@ export default function Ecosystem() {
         const ecosystemsData = await axios.get('/api/ecosystem/getUserEcosystems', { params: { fid } })
         if (ecosystemsData) {
           const ecosystems = ecosystemsData.data.ecosystems
-          console.log(ecosystems)
+          console.log('e1', ecosystems)
           setUserEcosystems(ecosystems)
           setLoadedSchedule(true)
         }
@@ -423,7 +423,7 @@ export default function Ecosystem() {
   }
 
   useEffect(() => {
-    console.log('triggered')
+    console.log('e2 triggered')
     // if (!isLogged) {
     //   setIsLogged(store.isAuth)
     // }
@@ -442,7 +442,7 @@ export default function Ecosystem() {
   }, [])
 
   async function getChannels(name) {
-    console.log(name)
+    console.log('e3', name)
     setLoadingChannel(true)
     setFilterChannels([])
     try {
@@ -455,15 +455,15 @@ export default function Ecosystem() {
       if (response?.data) {
         const channels = response?.data?.channels
         const channelsData = response?.data?.channels
-        console.log(channels)
+        console.log('e4', channels)
         setChannels(channels)
         setFilterChannels(channelsData)
         setChannelSearched(true)
-        console.log(channelSearched, filterChannels.length)
+        console.log('e5', channelSearched, filterChannels.length)
       } else {
         setFilterChannels([])
         setChannelSearched(true)
-        console.log(channelSearched, filterChannels.length)
+        console.log('e6', channelSearched, filterChannels.length)
       }
       setLoadingChannel(false)
     } catch (error) {
@@ -471,12 +471,12 @@ export default function Ecosystem() {
       setFilterChannels([])
       setLoadingChannel(false)
       setChannelSearched(true)
-      console.log(channelSearched, filterChannels.length)
+      console.log('e7', channelSearched, filterChannels.length)
     }
   }
 
   async function getModerators(name) {
-    console.log(name)
+    console.log('e8', name)
     setLoadingMod(true)
     setFilterModerators([])
     try {
@@ -489,7 +489,7 @@ export default function Ecosystem() {
       if (response) {
         // console.log(response)
         const moderators = response.data.users
-        console.log(moderators)
+        console.log('e9', moderators)
         setFilterModerators(moderators)
         setModSearched(true)
       } else {
@@ -506,7 +506,7 @@ export default function Ecosystem() {
   }
 
   function addModerator(moderator) {
-    console.log(moderator)
+    console.log('e10', moderator)
 
     const isModeratorSelected = selectedModerators.some((c) => c.fid === moderator.fid);
 
@@ -518,7 +518,7 @@ export default function Ecosystem() {
   }
 
   function addChannel(channel) {
-    console.log(channel)
+    console.log('e11', channel)
 
     const isChannelSelected = selectedChannels.some((c) => c.url === channel.url);
 
@@ -530,7 +530,7 @@ export default function Ecosystem() {
   }
 
   function setupEcosystem(target) {
-    console.log(newEcosystem)
+    console.log('e12', newEcosystem)
     let updatedNewEcosystem = {...newEcosystem}
     if (target == 'start') {
       updatedNewEcosystem.nameField = true
@@ -545,7 +545,7 @@ export default function Ecosystem() {
       updatedNewEcosystem.pointsField = true
       setNewEcosystem(updatedNewEcosystem)
     } else if (target == 'channels') {
-      console.log(newEcosystem.channels)
+      console.log('e13', newEcosystem.channels)
       getChannels(newEcosystem.channels)
     } else if (target == 'moderators') {
       getModerators(newEcosystem.moderators)
@@ -570,13 +570,13 @@ export default function Ecosystem() {
       } else {
         updatedNewEcosystem.botReply = true
       }
-      console.log(updatedNewEcosystem.botReply)
+      console.log('e14', updatedNewEcosystem.botReply)
       setNewEcosystem(updatedNewEcosystem)
     } else if (target == 'submit') {
-      console.log('submitted')
+      console.log('e15 submitted')
       sendEcosystemRules()
     }
-    console.log(newEcosystem)
+    console.log('e16', newEcosystem)
   }
 
   function clearInput(target) {
@@ -677,7 +677,7 @@ export default function Ecosystem() {
     } else {
       updatedNewEcosystem.eligibility = eligibility.filter((_, i) => i !== target)
     }
-    console.log(updatedNewEcosystem.eligibility)
+    console.log('e17', updatedNewEcosystem.eligibility)
 
     setNewEcosystem(updatedNewEcosystem)
   }
@@ -713,7 +713,7 @@ export default function Ecosystem() {
       if (state) {
         updatedNewEcosystem.incentives[target].state = {...updatedNewEcosystem.incentives[target].state, ...state}
         if (state && (state.qdauUp <= 0 || isNaN(state.qdauUp))) {
-          console.log(state.qdauUp)
+          console.log('e18', state.qdauUp)
           updatedNewEcosystem.incentives[target].state.qdauUp = 0
         }
         updatedNewEcosystem.incentives[target].isSet = 'working'
@@ -731,7 +731,7 @@ export default function Ecosystem() {
     } else {
       updatedNewEcosystem.incentives[target].isSet = 'empty'
     }
-    console.log(updatedNewEcosystem)
+    console.log('e19', updatedNewEcosystem)
     setNewEcosystem(updatedNewEcosystem)
   }
   
@@ -769,7 +769,7 @@ export default function Ecosystem() {
           updatedNewEcosystem.eligibility[target].isSet = 'empty'
         }
       }
-      console.log(updatedNewEcosystem.eligibility[target])
+      console.log('e20', updatedNewEcosystem.eligibility[target])
     } else if (value == 'nft-address') {
       if (state) {
         updatedNewEcosystem.eligibility[target].state = {...updatedNewEcosystem.eligibility[target].state, ...state}
@@ -803,7 +803,7 @@ export default function Ecosystem() {
         updatedNewEcosystem.eligibility[target].state = {...updatedNewEcosystem.eligibility[target].state, ...state}
         updatedNewEcosystem.eligibility[target].condition = 'erc20'
         const currentState = updatedNewEcosystem.eligibility[target].state
-        console.log((state.token !== '0' && state.token !== '8' && currentState.tokenMinValue && currentState.tokenMinValue >= 0))
+        console.log(('e21', state.token !== '0' && state.token !== '8' && currentState.tokenMinValue && currentState.tokenMinValue >= 0))
         if (state && (currentState.erc20Address && currentState.erc20Address.length == 42 && currentState.erc20Address.slice(0,2) == '0x' && currentState.token && state.token == '8' && currentState.chain && currentState.chain !== '0') || (state.token !== '0' && state.token !== '8' && currentState.tokenMinValue && currentState.tokenMinValue >= 0)) {
           updatedNewEcosystem.eligibility[target].isSet = 'working'
         } else {
@@ -854,7 +854,7 @@ export default function Ecosystem() {
     } else {
       updatedNewEcosystem.eligibility[target].isSet = 'empty'
     }
-    console.log(updatedNewEcosystem)
+    console.log('e22', updatedNewEcosystem)
     setNewEcosystem(updatedNewEcosystem)
   }
 
@@ -881,7 +881,7 @@ export default function Ecosystem() {
     } else if (fids?.length == 1) {
       jointFids = fids[0]
     }
-    console.log(fids, jointFids)
+    console.log('e23', fids, jointFids)
     try {
       const response = await axios.get('/api/getUserProfile', {
         params: {
@@ -907,7 +907,7 @@ export default function Ecosystem() {
     setSelectedModerators([])
     let updatedformController = {...formController}
     let updatedNewEcosystem = {...newEcosystem}
-    console.log(ecosystem)
+    console.log('e24', ecosystem)
     updatedNewEcosystem.eligibility = []
     updatedNewEcosystem.ecoRules = []
     updatedNewEcosystem.incentives = []
@@ -930,7 +930,7 @@ export default function Ecosystem() {
     updatedNewEcosystem.fid = ecosystem.fid
     updatedNewEcosystem.botReply = ecosystem.bot_reply
 
-    console.log(ecosystem.condition_curators_threshold)
+    console.log('e25', ecosystem.condition_curators_threshold)
     if (ecosystem.condition_curators_threshold) {
 
       updatedNewEcosystem.channelCuratorThreshold = ecosystem.condition_curators_threshold
@@ -1009,7 +1009,7 @@ export default function Ecosystem() {
     if (ecosystem?.channels?.length > 0) {
       let channels = []
       for (const channel of ecosystem?.channels) {
-        console.log(channel)
+        console.log('e26', channel)
         let addChannel = {name: channel.name, id: channel.name, parent_url: channel.url, image_url: channel.img}
         channels.push(addChannel)
       }
@@ -1046,7 +1046,7 @@ export default function Ecosystem() {
   async function onInput(event) {
     if (event.target.name == 'points') {
       const inputValue = event.target.value
-      console.log(inputValue.startsWith('$'))
+      console.log('e27', inputValue.startsWith('$'))
       if (inputValue.startsWith('$')) {
         setNewEcosystem( () => ({ ...newEcosystem, [event.target.name]: event.target.value }) )
       } else {
@@ -1137,7 +1137,7 @@ export default function Ecosystem() {
       const inputValue = Number(event.target.value)
       let updatedNewEcosystem = {...newEcosystem}
       updatedNewEcosystem.channelCuratorThreshold = inputValue
-      console.log(updatedNewEcosystem.channelCuratorThreshold)
+      console.log('e28', updatedNewEcosystem.channelCuratorThreshold)
       setNewEcosystem(updatedNewEcosystem)
     } else if (event.target.name == 'channel points') {
       let inputValue = Number(event.target.value)
@@ -1146,12 +1146,12 @@ export default function Ecosystem() {
       }
       let updatedNewEcosystem = {...newEcosystem}
       updatedNewEcosystem.channelPointThreshold = inputValue
-      console.log(updatedNewEcosystem.channelPointThreshold)
+      console.log('e29', updatedNewEcosystem.channelPointThreshold)
       setNewEcosystem(updatedNewEcosystem)
     }
     setFormController(updatedformController)
-    console.log(newEcosystem)
-    console.log(formController)
+    console.log('e30', newEcosystem)
+    console.log('e31', formController)
     updateEcosystemData()
 	}
 

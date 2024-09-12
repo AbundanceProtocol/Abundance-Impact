@@ -5,7 +5,7 @@ export default async function handler(req, res) {
   if (req.method !== 'GET' || !fid) {
     res.status(405).json({ error: 'Method Not Allowed' });
   } else {
-    console.log(fid)
+    console.log('p1',fid)
     try {
       // console.log(fid)
       // console.log(typeof fid)

@@ -199,7 +199,6 @@ export default async function handler(req, res) {
     }  
     
     let metatags = button1 + button2 + button3 + button4 + textField + postUrl
-    console.log('202:', metatags)
 
     try {
 

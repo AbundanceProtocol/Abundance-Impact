@@ -81,7 +81,7 @@ export default async function handler(req, res) {
     let button4 = metaButton(4, 'back', params)
     let postUrl = `<meta name="fc:frame:post_url" content='https://impact.abundance.id' />`
     let textField = ''
-    console.log(button1 + button2 + button3 + button4 + textField + postUrl)
+
     try {
       let metatags = button1 + button2 + button3 + button4 + textField + postUrl
       

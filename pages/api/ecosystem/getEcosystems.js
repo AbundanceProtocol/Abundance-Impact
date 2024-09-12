@@ -12,7 +12,7 @@ export default async function handler(req, res) {
         await connectToDatabase();
         const ecosystems = await EcosystemRules.find({}).exec()
         if (ecosystems) {
-          console.log(ecosystems)
+          console.log('g1', ecosystems)
           return ecosystems
         } else {
           return null
