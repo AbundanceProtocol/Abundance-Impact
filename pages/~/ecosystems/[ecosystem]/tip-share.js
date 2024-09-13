@@ -310,7 +310,7 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem, fi
         <meta property="fc:frame:button:1" content='Multi-tip >' />
         <meta property="fc:frame:button:1:action" content="post" />
 
-        <meta property="fc:frame:button:1:target" content={`${baseURL}/api/frames/console/tip-tip?${qs.stringify({    
+        <meta property="fc:frame:button:1:target" content={`${baseURL}/api/frames/tip/tip?${qs.stringify({    
           time, curators, eco, ecosystem, start: true
         })}`} />
 
