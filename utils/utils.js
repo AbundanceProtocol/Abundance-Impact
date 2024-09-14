@@ -552,7 +552,7 @@ export async function processTips(userFeed, userFid, tokenData, ecosystem, curat
   
     let finalTips = cleanTips.filter(cast => cast.text.length > 0)
   
-    console.log('finalTips', finalTips)
+    console.log('finalTips', userFid, finalTips)
 
     const circle = finalTips.map(finalTip => {
       const feedItem = userFeed.find(feedItem => feedItem.author.fid === finalTip.fid);

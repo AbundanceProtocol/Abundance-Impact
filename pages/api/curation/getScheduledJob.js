@@ -17,52 +17,90 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
-  const { fid, code } = req.query;
-  if (!fid || !code) {
+  // const { fid, code } = req.query;
+  const { code } = req.query;
+  // if (!fid || !code) {
+  console.log('code', code);
+  if (!code) {
     return res.status(400).json({ error: 'Bad Request', message: 'Missing required parameters' });
   }
 
   try {
     await connectToDatabase();
-    const schedule = await getSchedule(code);
-    if (!schedule.percent || !schedule.decryptedUuid) {
+    const scheduled = await getScheduled(code);
+    console.log('scheduled', scheduled, !scheduled);
+    if (!scheduled) {
       return res.status(500).json({ error: 'Internal Server Error' });
+    } else {
+
+      const uniquePoints = await getUniquePoints();
+  
+      for (const points of uniquePoints) {
+  
+        const curatorPercent = await getCuratorPercent(points);
+           
+        const uniqueFids = await getUniqueFids(points);
+        
+        for (const fid of uniqueFids) {
+          console.log('fid', fid);
+          
+          const schedule = await getSchedule(fid, points);
+          const time = schedule.timeRange ? getTimeRange(schedule.timeRange) : null;
+          const allowances = await getAllowances(fid, schedule.currencies, schedule.percent);
+          if (!schedule.percent || !schedule.decryptedUuid || allowances.length === 0) {
+            console.log(`Skipping fid ${fid} due to missing percent or decryptedUuid`);
+            continue;
+          }
+  
+          const { casts } = await getUserSearch(time, schedule.tags, schedule.channels, schedule.curators, points);
+          const displayedCasts = await processCasts(casts, fid);
+          const { castData, coinTotals } = await processTips(displayedCasts, fid, allowances, schedule.ecosystem, curatorPercent);
+  
+          const tipQueue = new Queue(1, 100); // Process 1 tip at a time, with a 100ms delay between each
+          let tipCounter = 0;
+      
+          const tipPromises = castData.map(cast => 
+            tipQueue.run(async () => {
+              const result = await sendTip(cast, schedule.decryptedUuid, fid, schedule.points);
+              console.log('cast', fid, cast);
+              // const result = 1;
+              tipCounter += result;
+            })
+          );
+  
+          console.log('tipPromises', tipCounter);
+          await Promise.all(tipPromises);
+        }
+      }
+      res.status(200).json({ message: 'All casts tipped successfully'});
     }
 
-    const curatorPercent = await getCuratorPercent(schedule.points);
-    const time = schedule.timeRange ? getTimeRange(schedule.timeRange) : null;
-    const allowances = await getAllowances(fid, schedule.currencies, schedule.percent);
-
-    if (allowances.length === 0) {
-      return res.status(500).json({ error: 'Internal Server Error' });
-    }
-
-    const { casts } = await getUserSearch(time, schedule.tags, schedule.channels, schedule.curators, schedule.points);
-    const displayedCasts = await processCasts(casts, fid);
-    const { castData, coinTotals } = await processTips(displayedCasts, fid, allowances, schedule.ecosystem, curatorPercent);
-
-    const tipQueue = new Queue(1, 100); // Process 1 tip at a time, with a 100ms delay between each
-    let tipCounter = 0;
-
-    const tipPromises = castData.map(cast => 
-      tipQueue.run(async () => {
-        const result = await sendTip(cast, schedule.decryptedUuid, fid, schedule.points);
-        tipCounter += result;
-      })
-    );
-
-    await Promise.all(tipPromises);
-
-    res.status(200).json({ message: 'All casts tipped successfully', tip: tipCounter });
   } catch (error) {
     console.error('Error in handler:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 }
 
-async function getSchedule(code) {
+async function getScheduled(code) {
+  console.log('getScheduled1', code);
   try {
-    const schedule = await ScheduleTip.findOne({ code: code }).select('search_shuffle search_time search_tags points search_channels search_curators percent_tip ecosystem_name currencies uuid').exec();
+    const schedule = await ScheduleTip.findOne({ code: code, fid: 9326 }).select('fid').exec();
+    if (schedule) {
+      // const decryptedUuid = decryptPassword(schedule.uuid, secretKey);
+      return {
+        fid: schedule.fid,
+      };
+    }
+    return null;
+  } catch (error) {
+    console.error('Error in getSchedule:', error);
+    return null;
+  }
+}
+
+async function getSchedule(fid, points) {
+  try {
+    const schedule = await ScheduleTip.findOne({ fid, points, active_cron: true }).select('search_shuffle search_time search_tags points search_channels search_curators percent_tip ecosystem_name currencies uuid').exec();
     if (schedule) {
       const decryptedUuid = decryptPassword(schedule.uuid, secretKey);
       return {
@@ -82,6 +120,26 @@ async function getSchedule(code) {
   } catch (error) {
     console.error('Error in getSchedule:', error);
     return {};
+  }
+}
+
+async function getUniquePoints() {
+  try {
+    const uniquePoints = await ScheduleTip.distinct('points');
+    return uniquePoints;
+  } catch (error) {
+    console.error('Error in getUniquePoints:', error);
+    return [];
+  }
+}
+
+async function getUniqueFids(points) {
+  try {
+    const uniqueFids = await ScheduleTip.distinct('fid', { points: points });
+    return uniqueFids;
+  } catch (error) {
+    console.error('Error in getUniqueFids:', error);
+    return [];
   }
 }
 
@@ -197,15 +255,73 @@ async function getCuratorIds(fids, points) {
   }   
 }
 
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
 async function fetchCasts(query, limit) {
   try {
-    const totalCount = await Cast.countDocuments(query);
-    const casts = await Cast.find(query)
+    await connectToDatabase();
+
+    let totalCount;
+    let returnedCasts = []
+
+    totalCount = await Cast.countDocuments(query);
+
+    // Calculate the number of documents to be sampled from each range
+    const top20PercentCount = Math.ceil(totalCount * 0.2);
+    const middle40PercentCount = Math.ceil(totalCount * 0.4);
+    const bottom40PercentCount = totalCount - top20PercentCount - middle40PercentCount;
+
+    // Fetch documents from each range
+    const top20PercentCasts = await Cast.find(query)
       .sort({ impact_total: -1 })
       .populate('impact_points')
-      .limit(limit)
+      .limit(top20PercentCount)
       .exec();
-    return { casts: casts.slice(0, 10), totalCount };
+    const middle40PercentCasts = await Cast.find(query)
+      .sort({ impact_total: -1 })
+      .populate('impact_points')
+      .skip(top20PercentCount)
+      .limit(middle40PercentCount)
+      .exec();
+    const bottom40PercentCasts = await Cast.find(query)
+      .sort({ impact_total: -1 })
+      .populate('impact_points')
+      .skip(top20PercentCount + middle40PercentCount)
+      .limit(bottom40PercentCount)
+      .exec();
+
+    returnedCasts = top20PercentCasts.concat(middle40PercentCasts, bottom40PercentCasts);
+
+    returnedCasts.sort((a, b) => b.impact_total - a.impact_total);
+
+    returnedCasts = returnedCasts.reduce((acc, current) => {
+      const existingItem = acc.find(item => item._id === current._id);
+      if (!existingItem) {
+        acc.push(current);
+      }
+      return acc;
+    }, [])
+
+    returnedCasts = shuffleArray(returnedCasts);
+
+    returnedCasts = returnedCasts.slice(0, limit);
+    
+
+    if (returnedCasts && returnedCasts.length > 10) {
+      returnedCasts = returnedCasts.slice(0, 10);
+    }
+
+    // console.log('113', returnedCasts)
+    if (!returnedCasts) {
+      returnedCasts = []
+    }
+    return { casts: returnedCasts, totalCount };
   } catch (err) {
     console.error('Error in fetchCasts:', err);
     return { casts: null, totalCount: null };

@@ -55,67 +55,23 @@ export default async function handler(req, res) {
     textField = ``
 
     async function pauseSchedule(fid) {
-
-    
-      async function getSchedule(fid) {
-        try {
-          await connectToDatabase();
-          let schedule = await ScheduleTip.findOne({ fid }).exec();
-          if (schedule) {
-            schedule.active_cron = false
-            schedule.save()
-            return schedule
-          } else {
-            return null
-          }
-
-        } catch (error) {
-          console.error("Error while fetching data:", error);
-          return null
-        }
-      }
-
-
-      async function updateCron(cronId) {
-        try {
-          const updatedCron = `https://www.easycron.com/rest/disable?${qs.stringify({
-            token: easyCronKey,
-            id: cronId,
-          })}`;
-    
-          const cronResponse = await fetch(updatedCron)
-    
-          if (cronResponse) {
-            const cronData = await cronResponse.json()
-            console.log('89', cronData)
-            if (cronData.status == 'success') {
-              console.log('91', cronData)
-              return true
-            }
-          }
-          return null
-        } catch (error) {
-          console.error('Error:', error);
-          return null
-        }
-      }
-
-      const schedule = await getSchedule(fid)
-
-      if (schedule?.cron_job_id) {
-        const updatedCron = await updateCron(schedule?.cron_job_id)
-        if (updatedCron) {
+      try {
+        await connectToDatabase();
+        let schedule = await ScheduleTip.findOne({ fid }).exec();
+        if (schedule) {
+          schedule.active_cron = false
+          schedule.save()
           return {curators: schedule.curators, isPaused: true}
         } else {
-          return {curators: schedule.curators, isPaused: null}
+          return {curators: [], isPaused: null}
         }
-      } else {
+      } catch (error) {
+        console.error("Error while fetching data:", error);
         return {curators: [], isPaused: null}
       }
     }
 
     const {curators, isPaused} = await pauseSchedule(curatorFid)
-
 
     if (!isPaused) {
 

@@ -91,16 +91,13 @@ export default async function handler(req, res) {
       <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/more?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle, rS })}' />`
 
     } else {
-
-      const code = generateRandomString(12)
-    
-      async function setSchedule(fid, code, points, ecosystem, encryptedUuid) {
+   
+      async function setSchedule(fid, points, ecosystem, encryptedUuid) {
         let schedule = null
         try {
           await connectToDatabase();
           schedule = await ScheduleTip.findOne({ fid }).exec();
           if (schedule) {
-            schedule.code = code
             schedule.search_shuffle = true
             schedule.search_time = 'all'
             schedule.search_tags = []
@@ -116,7 +113,6 @@ export default async function handler(req, res) {
             schedule = new ScheduleTip({ 
               fid: fid,
               uuid: encryptedUuid,
-              code: code,
               search_shuffle: true,
               search_time: 'all',
               search_tags: [],
@@ -132,66 +128,15 @@ export default async function handler(req, res) {
               active_cron: true
             });
           }
-  
+          await schedule.save()
+          return schedule
         } catch (error) {
           console.error("Error while fetching data:", error);
           return null
-        }  
-  
-        let cronId = null
-        if (schedule.cron_job_id) {
-          console.log(schedule.cron_job_id)
-          cronId = schedule.cron_job_id
-        }
-  
-        const cronUrl = `https://www.easycron.com/rest/${cronId ? 'edit' : 'add'}?${qs.stringify({
-          token: easyCronKey,
-          url: `${baseURL}/api/curation/getScheduledJob?${qs.stringify({ fid, code })}`,
-          id: cronId,
-          cron_expression: "45 18 * * *",
-          timezone_from: 2,
-          timezone: 'America/New_York',
-          cron_job_name: `${fid}ScheduledTips`,
-        })}`;
-    
-        async function updateCron(cronId) {
-          try {
-            const updatedCron = `https://www.easycron.com/rest/enable?${qs.stringify({
-              token: easyCronKey,
-              id: cronId,
-            })}`;
-      
-            const cronResponse = await fetch(updatedCron)
-      
-            if (cronResponse) {
-              const cronData = await cronResponse.json()
-              console.log('89', cronData)
-              if (cronData.status == 'success') {
-                console.log('91', cronData)
-                return true
-              }
-            }
-            return null
-          } catch (error) {
-            console.error('Error:', error);
-            return null
-          }
-        }
-
-        const cronResponse = await fetch(cronUrl)
-        console.log(cronResponse)
-        if (cronResponse) {
-          const getCron = await cronResponse.json()
-          console.log(getCron)
-          const updatedCron = await updateCron(cronId)
-          schedule.cron_job_id = getCron.cron_job_id
-        }
-        schedule.active_cron = true
-        await schedule.save()
-        return schedule
+        } 
       }
   
-      const schedule = await setSchedule(curatorFid, code, pt, ecosystem, encryptedUuid)
+      const schedule = await setSchedule(curatorFid, pt, ecosystem, encryptedUuid)
   
       if (schedule?.active_cron) {
 
