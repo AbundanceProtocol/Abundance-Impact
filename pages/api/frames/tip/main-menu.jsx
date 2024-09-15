@@ -36,7 +36,7 @@ export default async function handler(req, res) {
 
           <div style={{display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', border: '1px solid #eeeeeeaa', borderRadius: '16px', padding: '10px', margin: '15px', background: '#eeeeeeaa', width: '500px'}}>
             <div style={{display: 'flex', textAlign: 'left', color:  '#220a4d', fontSize: '17px', margin: '5px 10px 5px 10px', width: '140px'}}>What&apos;s /impact:</div>
-            <div style={{display: 'flex', textAlign: 'left', color: '#220a4d', fontSize: '16px', margin: '5px 10px 5px 0px', width: '360px'}}>What is /impact and it works</div>
+            <div style={{display: 'flex', textAlign: 'left', color: '#220a4d', fontSize: '16px', margin: '5px 10px 5px 0px', width: '360px'}}>What is /impact & how it works</div>
           </div>
 
           <div style={{display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', border: '1px solid #eeeeeeaa', borderRadius: '16px', padding: '10px', margin: '15px', background: '#eeeeeeaa', width: '500px'}}>
