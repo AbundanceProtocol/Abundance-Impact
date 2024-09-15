@@ -38,6 +38,7 @@ export default async function handler(req, res) {
     const inputImg = `${baseURL}/images/input.jpg`;
     const issueImg = `${baseURL}/images/issue.jpg`;
     let circlesImg = ''
+    const menuImg = `${baseURL}/api/frames/tip/menu?${qs.stringify({ points })}`
     
     console.log('14-3:', req.query)
 
@@ -94,8 +95,8 @@ export default async function handler(req, res) {
             <title>Tips | Impact App</title>
             <meta name="fc:frame" content="vNext">
             <meta property="og:title" content="Multi-Tip">
-            <meta property="og:image" content="${tipsImg}">
-            <meta name="fc:frame:image" content="${tipsImg}">
+            <meta property="og:image" content="${menuImg}">
+            <meta name="fc:frame:image" content="${menuImg}">
             <meta property="fc:frame:image:aspect_ratio" content="1:1" />
             ${metatags}
           </head>
