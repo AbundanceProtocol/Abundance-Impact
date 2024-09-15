@@ -38,37 +38,17 @@ export default async function handler(req, res) {
     const inputImg = `${baseURL}/images/input.jpg`;
     const issueImg = `${baseURL}/images/issue.jpg`;
     let circlesImg = ''
-    const menuImg = `${baseURL}/api/frames/tip/menu?${qs.stringify({ points })}`
+    const menuImg = `${baseURL}/api/frames/tip/main-menu?${qs.stringify({ points })}`
     
     console.log('14-3:', req.query)
 
     const exploreLink = `${baseURL}/~/ecosystems/${ecosystem}?${qs.stringify({ time: 'all', curators })}`
 
-    // const impactLink = `https://warpcast.com/abundance/0x43ddd672`
-
     const retryPost = `${baseURL}/api/frames/tip/start?${qs.stringify({ time, curators, eco, ecosystem })}`
 
-    // const refreshPost = `${baseURL}/api/frames/tip/refresh?${qs.stringify({ time, curators, eco, ecosystem, time1: timeMinus3 })}`
-
-    // const startPost = `${baseURL}/api/frames/tip/start?${qs.stringify({ time, curators, eco, ecosystem })}`
-
-    // const loginUrl = `${baseURL}/?${qs.stringify({ eco: points })}`
-
-    // const sendPost = `${baseURL}/api/frames/tip/tip?${qs.stringify({ time, curators, eco, ecosystem })}`
-
     const postLink = `${baseURL}/~/ecosystems/${ecosystem}/tip-login?${qs.stringify({ time, curators, eco })}`
-    
-    // const shareText = 'I just multi-tipped builders and creators on /impact. Try it out here:'
-
-    // const autoTipPost = `${baseURL}/api/frames/tip/auto-tip?${qs.stringify({ time, curators, eco, ecosystem })}`
 
     const getCastActionPost = `https://warpcast.com/~/add-cast-action?name=%24${eco}+Console&icon=star&actionType=post&postUrl=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Faction%2Fstatus%3Fpoints=${eco}&description=Curate+Casts+with+the+Impact+App`
-
-    // let shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share?${qs.stringify({ time, curators, eco })}`
-
-    // const encodedShareText = encodeURIComponent(shareText); 
-    // let encodedShareUrl = encodeURIComponent(shareUrl); 
-    // let shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
 
     let button1 = `<meta name="fc:frame:button:1" content="What's /impact?">
     <meta name="fc:frame:button:1:action" content="post">

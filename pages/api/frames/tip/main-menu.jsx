@@ -4,9 +4,6 @@ import fs from 'fs';
 import { promisify } from 'util';
 import svg2img from 'svg2img';
 
-import connectToDatabase from "../../../../libs/mongodb";
-import User from '../../../../models/User';
-
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 
 export default async function handler(req, res) {
@@ -15,7 +12,7 @@ export default async function handler(req, res) {
   try {
     const fontPath = path.join(process.cwd(), 'public', 'Inter-SemiBold.ttf');
     const fontData = fs.readFileSync(fontPath);
-    
+
     const backgroundImg = `https://impact.abundance.id/images/backgroundframe.jpg`
 
     const svg = await satori(
