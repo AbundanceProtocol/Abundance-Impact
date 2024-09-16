@@ -349,8 +349,10 @@ export default async function handler(req, res) {
         }
 
       } else {
-        res.setHeader('Allow', ['POST']);
-        res.status(200).send(`Request failed`);
+        res.setHeader('Content-Type', 'text/html');
+        res.status(200).send({
+          message: `Cannot stake points`
+        });
       }
     } else {
       res.setHeader('Content-Type', 'text/html');
