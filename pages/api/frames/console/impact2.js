@@ -271,8 +271,8 @@ export default async function handler(req, res) {
               return { balance: null, castImpact: null, impactTotal: null, curatorCount: null, qualityBalance: null, qualityTotal: null }
             }
           } else {
-            res.setHeader('Content-Type', 'text/html');
-            res.status(200).send({
+            res.setHeader('Content-Type', 'application/json');
+            res.status(400).send({
               message: `Not enough points`
             });
             return { balance: null, castImpact: null, impactTotal: null, curatorCount: null, qualityBalance: null, qualityTotal: null }
