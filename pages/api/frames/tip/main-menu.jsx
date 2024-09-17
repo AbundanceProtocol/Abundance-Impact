@@ -103,19 +103,19 @@ export default async function handler(req, res) {
           <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '24px', margin: '5px 20px 5px 20px', padding: '0'}}>Main Menu</div>
 
           <div style={{display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', border: '1px solid #eeeeeeaa', borderRadius: '16px', padding: '10px', margin: '15px', background: '#eeeeeeaa', width: '500px'}}>
-            <div style={{display: 'flex', textAlign: 'left', color:  '#220a4d', fontSize: '18px', margin: '5px 10px 5px 10px', width: '140px'}}>What&apos;s /impact:</div>
+            <div style={{display: 'flex', textAlign: 'left', color:  '#220a4d', fontSize: '18px', margin: '5px 10px 5px 10px', width: '100px'}}>What&apos;s /impact:</div>
             <div style={{display: 'flex', textAlign: 'left', color: '#220a4d', fontSize: '17px', margin: '5px 10px 5px 0px', width: '360px'}}>What is /impact & how it works</div>
           </div>
 
           <div style={{display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', border: '1px solid #eeeeeeaa', borderRadius: '16px', padding: '10px', margin: '15px', background: '#eeeeeeaa', width: '500px'}}>
-            <div style={{display: 'flex', textAlign: 'left', color:  '#220a4d', fontSize: '18px', margin: '5px 10px 5px 10px', width: '140px'}}>Explore curation:</div>
+            <div style={{display: 'flex', textAlign: 'left', color:  '#220a4d', fontSize: '18px', margin: '5px 10px 5px 10px', width: '100px'}}>Explore curation:</div>
             <div style={{display: 'flex', textAlign: 'left', color: '#220a4d', fontSize: '17px', margin: '5px 10px 5px 0px', width: '360px'}}>See curator&apos;s cast nominations</div>
           </div>
 
 
 
           <div style={{display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', border: '1px solid #eeeeeeaa', borderRadius: '16px', padding: '10px', margin: '15px', background: '#eeeeeeaa', width: '500px'}}>
-            <div style={{display: 'flex', textAlign: 'left', color:  '#220a4d', fontSize: '18px', margin: '5px 10px 5px 10px', width: '140px'}}>Get Cast Action:</div>
+            <div style={{display: 'flex', textAlign: 'left', color:  '#220a4d', fontSize: '18px', margin: '5px 10px 5px 10px', width: '100px'}}>Get Cast Action:</div>
             <div style={{display: 'flex', textAlign: 'left', color: '#220a4d', fontSize: '17px', margin: '5px 10px 5px 0px', width: '360px'}}>Install /impact&apos;s {points} Console in your Farcaster client</div>
           </div>
         
@@ -125,7 +125,7 @@ export default async function handler(req, res) {
 
           <div style={{display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', borderRadius: '0px', padding: '0px', margin: '15px', width: '500px'}}>
 
-            {allowances.map((allowance, index) => (<div key={index} style={{display: 'flex', flexDirection: 'column', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.15rem', border: '1px solid #eeeeeeaa', borderRadius: '16px', padding: '3px', margin: '0 0 3px 0', background: '#eeeeeeaa', width: '110px', justifyContent: 'center', alignItems: 'center'}}>
+            {allowances.map((allowance, index) => (<div key={index} style={{display: 'flex', flexDirection: 'column', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '1px solid #eeeeeeaa', borderRadius: '16px', padding: '3px', margin: '0 5px 3px 5px', background: '#eeeeeeaa', width: '110px', justifyContent: 'center', alignItems: 'center'}}>
               <div style={{display: 'flex', textAlign: 'center', color:  '#220a4d', fontSize: '19px', margin: '2px 0px', width: '110px', justifyContent: 'center', alignItems: 'center'}}>{allowance.remaining}</div>
               <div style={{display: 'flex', textAlign: 'center', color: '#220a4d', fontSize: '15px', margin: '2px 0px', width: '110px', justifyContent: 'center', alignItems: 'center'}}>{allowance.coin}</div>
             </div>))}
