@@ -18,7 +18,7 @@ export default async function handler(req, res) {
   }
 
   // const { fid, code } = req.query;
-  const { code } = req.query;
+  const { code, tipTime } = req.query;
   // if (!fid || !code) {
   console.log('code', code);
   if (!code) {
@@ -46,7 +46,7 @@ export default async function handler(req, res) {
           
           const schedule = await getSchedule(fid, points);
           const time = schedule.timeRange ? getTimeRange(schedule.timeRange) : null;
-          const allowances = await getAllowances(fid, schedule.currencies, schedule.percent);
+          const allowances = await getAllowances(fid, schedule.currencies, schedule.percent, tipTime);
           if (!schedule.percent || !schedule.decryptedUuid || allowances.length === 0) {
             console.log(`Skipping fid ${fid} due to missing percent or decryptedUuid`);
             continue;
@@ -153,26 +153,30 @@ async function getCuratorPercent(points) {
   }
 }
 
-async function getAllowances(fid, currencies, percent) {
+async function getAllowances(fid, currencies, percent, tipTime) {
   const allowances = [];
   for (const coin of currencies) {
     let allowance, tip, minTip;
-    switch (coin) {
-      case '$TN100x':
-        allowance = await getHamAllowance(fid);
-        tip = Math.floor(allowance * percent / 100);
-        allowances.push({token: coin, set: true, allowance: tip, totalTip: tip});
-        break;
-      case '$DEGEN':
-        allowance = await getDegenAllowance(fid);
-        tip = Math.round(allowance * percent / 100);
-        allowances.push({token: coin, set: true, allowance: tip, totalTip: tip});
-        break;
-      case '$FARTHER':
-        ({allowance, minTip} = await getFartherAllowance(fid));
-        tip = Math.round(allowance * percent / 100);
-        allowances.push({token: coin, set: true, allowance: tip, totalTip: tip, min: minTip});
-        break;
+    if (coin == '$TN100x' && tipTime == '12am') {
+      allowance = await getHamAllowance(fid);
+      console.log('$TN100x', allowance)
+      tip = Math.floor(allowance * percent / 100);
+      allowances.push({token: coin, set: true, allowance: tip, totalTip: tip});
+    } else if (coin == '$DEGEN' && tipTime == '7pm') {
+      allowance = await getDegenAllowance(fid);
+      console.log('$DEGEN', allowance)
+      tip = Math.round(allowance * percent / 100);
+      allowances.push({token: coin, set: true, allowance: tip, totalTip: tip});
+    } else if (coin == '$WILD' && tipTime == '7pm') {
+      allowance = await getWildAllowance(fid);
+      console.log('$WILD', allowance)
+      tip = Math.round(allowance * percent / 100);
+      allowances.push({token: coin, set: true, allowance: tip, totalTip: tip});
+    } else if (coin == '$HUNT' && tipTime == '7pm') {
+      allowance = await getHuntAllowance(fid);
+      console.log('$HUNT', allowance)
+      tip = Math.round(allowance * percent / 100);
+      allowances.push({token: coin, set: true, allowance: tip, totalTip: tip});
     }
   }
   return allowances;
@@ -180,12 +184,12 @@ async function getAllowances(fid, currencies, percent) {
 
 async function getHamAllowance(fid) {
   try {
-    const remainingUrl = `https://farcaster.dep.dev/lp/tips/${fid}`;
+    const remainingUrl = `https://farcaster.dep.dev/ham/user/${fid}`;
     const remainingBalance = await fetch(remainingUrl, {
       headers: { accept: "application/json" },
     });
     const getRemaining = await remainingBalance.json();
-    return getRemaining ? Number(getRemaining.allowance) - Number(getRemaining.used) : 0;
+    return getRemaining ? Math.floor((Number(getRemaining?.todaysAllocation) - Number(getRemaining?.totalTippedToday))/1e18) : 0;
   } catch (error) {
     console.error('Error in getHamAllowance:', error);
     return 0;
@@ -203,24 +207,31 @@ async function getDegenAllowance(fid) {
   }
 }
 
-async function getFartherAllowance(fid) {
+async function getWildAllowance(fid) {
   try {
-    const input = encodeURIComponent(JSON.stringify({ fid: fid }));
-    const remainingUrl = `https://farther.social/api/v1/public.user.byFid?input=${input}`;
-    const fartherData = await fetch(remainingUrl, {
+    const remainingUrl = `https://sys.wildcard.lol/tip/public/v1/token/balance/${fid}?currency=WILD`;
+    const remainingBalance = await fetch(remainingUrl, {
       headers: { accept: "application/json" },
     });
-    if (fartherData?.status == 200) {
-      const fartherInfo = await fartherData.json();
-      const allowance = fartherInfo?.result?.data?.tips?.currentCycle?.allowance || 0;
-      const remainingAllowance = fartherInfo?.result?.data?.tips?.currentCycle?.remainingAllowance || allowance;
-      const tipMin = fartherInfo?.result?.data?.tips?.currentCycle?.tipMinimum || 1;
-      return { allowance: Number(remainingAllowance), minTip: Number(tipMin) };
-    }
-    return { allowance: 0, minTip: 1 };
+    const getRemaining = await remainingBalance.json();
+    return getRemaining ? Math.floor(Number(getRemaining?.allowance_remaining)) : 0;
   } catch (error) {
-    console.error('Error in getFartherAllowance:', error);
-    return { allowance: 0, minTip: 1 };
+    console.error('Error in getWildAllowance:', error);
+    return 0;
+  }
+}
+
+async function getHuntAllowance(fid) {
+  try {
+    const remainingUrl = `https://tip.hunt.town/api/stats/fid/${fid}`;
+    const remainingBalance = await fetch(remainingUrl, {
+      headers: { accept: "application/json" },
+    });
+    const getRemaining = await remainingBalance.json();
+    return getRemaining ? Math.floor(Number(getRemaining?.remaining_allowance)) : 0;
+  } catch (error) {
+    console.error('Error in getWildAllowance:', error);
+    return 0;
   }
 }
 

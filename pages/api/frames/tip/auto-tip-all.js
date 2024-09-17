@@ -101,7 +101,7 @@ export default async function handler(req, res) {
               points: points,
               percent_tip: 100,
               ecosystem_name: ecoName,
-              currencies: ['$DEGEN'],
+              currencies: ['$DEGEN', '$TN100x', '$HUNT', '$WILD'],
               schedule_time: "45 18 * * *",
               schedule_count: 1,
               schedule_total: 1,
