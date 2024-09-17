@@ -30,7 +30,7 @@ export default async function handler(req, res) {
     let textField = ''
     let postUrl = `<meta name="fc:frame:post_url" content='https://impact.abundance.id' />`
 
-    const menuImg = `${baseURL}/api/frames/console/main-menu?${qs.stringify({ points, fid: curatorFid })}`
+    const menuImg = `${baseURL}/api/frames/console/main-menu?${qs.stringify({ points: pt, fid: curatorFid })}`
 
     const shareText = 'I just nominated great builders and creators on /impact. Help support them here:'
 
