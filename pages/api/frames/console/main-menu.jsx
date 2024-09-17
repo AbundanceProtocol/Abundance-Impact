@@ -100,7 +100,7 @@ export default async function handler(req, res) {
         <div style={{display: 'flex', flexDirection: 'column', color: 'white', 
         fontSize: '22px', alignItems: 'center', justifyContent: 'center'}}>
 
-          <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '24px', margin: '5px 20px 5px 20px', padding: '0'}}>Main Menu</div>
+          <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '24px', margin: '5px 20px 5px 20px', padding: '0'}}>Console Menu</div>
 
           <div style={{display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', border: '1px solid #eeeeeeaa', borderRadius: '16px', padding: '10px', margin: '15px', background: '#eeeeeeaa', width: '500px'}}>
             <div style={{display: 'flex', textAlign: 'left', color:  '#220a4d', fontSize: '18px', margin: '5px 10px 5px 10px', width: '100px'}}>Multi-tip:</div>
