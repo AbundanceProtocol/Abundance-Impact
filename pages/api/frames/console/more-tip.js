@@ -30,6 +30,7 @@ export default async function handler(req, res) {
     let textField = ''
     let postUrl = `<meta name="fc:frame:post_url" content='https://impact.abundance.id' />`
 
+    const menuImg = `${baseURL}/api/frames/console/main-menu?${qs.stringify({ points, fid: curatorFid })}`
 
     const shareText = 'I just nominated great builders and creators on /impact. Help support them here:'
 
@@ -67,9 +68,9 @@ export default async function handler(req, res) {
             <title>Impact Nav</title>
             <meta name="fc:frame" content="vNext">
             <meta property="og:title" content="Impact Nav">
-            <meta property='og:image' content='${balanceImg}' />
+            <meta property='og:image' content='${menuImg}' />
             <meta property="fc:frame:image:aspect_ratio" content="1:1" />
-            <meta property="fc:frame:image" content='${balanceImg}' />
+            <meta property="fc:frame:image" content='${menuImg}' />
             ${metatags}
           </head>
           <body>
@@ -89,9 +90,9 @@ export default async function handler(req, res) {
             <title>Impact Nav</title>
             <meta name="fc:frame" content="vNext">
             <meta property="og:title" content="Impact Nav">
-            <meta property='og:image' content='${balanceImg}' />
+            <meta property='og:image' content='${menuImg}' />
             <meta property="fc:frame:image:aspect_ratio" content="1:1" />
-            <meta property="fc:frame:image" content='${balanceImg}' />
+            <meta property="fc:frame:image" content='${menuImg}' />
             ${metatags}
           </head>
           <body>

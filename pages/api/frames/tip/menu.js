@@ -38,7 +38,7 @@ export default async function handler(req, res) {
     const inputImg = `${baseURL}/images/input.jpg`;
     const issueImg = `${baseURL}/images/issue.jpg`;
     let circlesImg = ''
-    const menuImg = `${baseURL}/api/frames/tip/main-menu?${qs.stringify({ points })}`
+    const menuImg = `${baseURL}/api/frames/tip/main-menu?${qs.stringify({ points, fid })}`
     
     console.log('14-3:', req.query)
 

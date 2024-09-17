@@ -295,7 +295,7 @@ export default async function handler(req, res) {
 
       res.status(200).json({
         "type": "frame",
-        "frameUrl": `https://impact.abundance.id/api/frames/console/status2?${qs.stringify({ iB: impactBalance, qB: qualityBalance, qT: qualityTotal, author, iA: impactAllowance, qA: qualityAllowance, ecosystem: ecoName, login: needLogin, pt: points, cu: curator, impact, quality, cI: castImpact, hash: castHash, handle: ecoHandle, rS: removeStake })}`
+        "frameUrl": `https://impact.abundance.id/api/frames/console/status?${qs.stringify({ iB: impactBalance, qB: qualityBalance, qT: qualityTotal, author, iA: impactAllowance, qA: qualityAllowance, ecosystem: ecoName, login: needLogin, pt: points, cu: curator, impact, quality, cI: castImpact, hash: castHash, handle: ecoHandle, rS: removeStake })}`
       })
     } catch (error) {
       console.error(error);
