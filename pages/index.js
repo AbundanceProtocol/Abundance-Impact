@@ -132,14 +132,14 @@ export default function Home() {
           <div onClick={() => document.getElementById('personal').scrollIntoView({ behavior: 'smooth' })}>
             <div className='flex-row cast-act-lt' style={{borderRadius: '8px', padding: '8px 8px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
               <FaUser size={14} />
-              <p style={{padding: '0px', fontSize: '15px', fontWeight: '500', textWrap: 'nowrap'}}>Personal /impact</p>
+              <p style={{padding: '0px', fontSize: '15px', fontWeight: '500', textWrap: 'nowrap'}}>Abundance Ecosystem</p>
             </div>
           </div>
 
           <div onClick={() => document.getElementById('ecosystem').scrollIntoView({ behavior: 'smooth' })}>
             <div className='flex-row cast-act-lt' style={{borderRadius: '8px', padding: '8px 8px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
               <FaGlobe size={14} />
-              <p style={{padding: '0px', fontSize: '15px', fontWeight: '500', textWrap: 'nowrap'}}>Ecosystem /impact</p>
+              <p style={{padding: '0px', fontSize: '15px', fontWeight: '500', textWrap: 'nowrap'}}>[Your] Ecosystem</p>
             </div>
           </div>
         </div>
@@ -170,7 +170,7 @@ export default function Home() {
       <div style={{padding: '8px', backgroundColor: '#11448888', borderRadius: '15px', border: '1px solid #11447799'}}>
         <div className='flex-row' style={{width: '100%', justifyContent: 'center', alignItems: 'center', padding: '16px 0 0 0'}}>
           <FaUser style={{fill: '#cde'}} size={24} />
-          <Description {...{show: true, text: 'Personal /impact', padding: '4px 0 4px 10px', size: 'large' }} />
+          <Description {...{show: true, text: 'Abundance Ecosystem', padding: '4px 0 4px 10px', size: 'large' }} />
         </div>
 
         <div className='flex-row' style={{color: '#9df', width: '100%', fontSize: isMobile ? '15px' : '17px', padding: '10px 10px 15px 10px', justifyContent: 'center'}}>Nominate your favorite creators. Calibrate distribution of tips. Schedule recurring tips or tip throughout the day. Share curation with your friends and earn rewards</div>
@@ -268,7 +268,7 @@ export default function Home() {
       <div style={{padding: '8px', backgroundColor: '#335566aa', borderRadius: '15px', border: '1px solid #000'}}>
         <div className='flex-row' style={{width: '100%', justifyContent: 'center', alignItems: 'center', padding: '16px 0 0 0'}}>
           <FaGlobe style={{fill: '#cde'}} size={24} />
-          <Description {...{show: true, text: 'Ecosystem /impact', padding: '4px 0 4px 10px', size: 'large' }} />
+          <Description {...{show: true, text: '[Your] Ecosystem', padding: '4px 0 4px 10px', size: 'large' }} />
         </div>
 
         <div className='flex-row' style={{color: '#9df', width: '100%', fontSize: isMobile ? '15px' : '17px', padding: '10px 10px 15px 10px', justifyContent: 'center'}}>Let your community curate your channel/ecosystem. Ensure quality curation. Reward contributors and curators. Grow your community</div>
