@@ -43,7 +43,7 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem}) {
     {
       version: "vNext",
       title: "Multi-Tip",
-      image: `${baseURL}/images/tips.jpg`,
+      image: `${baseURL}/images/frame36.gif`,
       image_aspect_ratio: "1:1",
       buttons: [
         {
@@ -304,9 +304,9 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem}) {
         <meta name="description" content={`Support builder and creators with Impact App`} />
         <meta name="viewport" content="width=device-width"/>
         <meta property="og:title" content="Multi-Tip" />
-        <meta property='og:image' content={`${baseURL}/images/tips.jpg`} />
+        <meta property='og:image' content={`${baseURL}/images/frame36.gif`} />
         <meta property="fc:frame" content="vNext" />
-        <meta property="fc:frame:image" content={`${baseURL}/images/tips.jpg`} />
+        <meta property="fc:frame:image" content={`${baseURL}/images/frame36.gif`} />
         <meta property="fc:frame:image:aspect_ratio" content="1:1" />
 
         <meta property="fc:frame:button:1" content='Multi-Tip >' />

@@ -176,7 +176,7 @@ export default async function handler(req, res) {
 
     const fid = untrustedData?.fid
     const loginImg = `${baseURL}/images/login.jpg`;
-    const tipsImg = `${baseURL}/images/tips.jpg`
+    const tipsImg = `${baseURL}/images/frame36.gif`
     const inputImg = `${baseURL}/images/input.jpg`;
     const issueImg = `${baseURL}/images/issue.jpg`;
     let circlesImg = ''
