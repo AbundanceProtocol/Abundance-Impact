@@ -502,7 +502,7 @@ export async function processTips(userFeed, userFid, tokenData, ecosystem, curat
       }
     }
   
-    // console.log(tipCasts)
+    // console.log('tipCasts', tipCasts)
   
     for (const token of tokenData) {
       if (token.set) {
@@ -522,9 +522,34 @@ export async function processTips(userFeed, userFid, tokenData, ecosystem, curat
       }
     }
   
-    // console.log('tipCasts', tipCasts)
-  
-    for (const cast of tipCasts) {
+    // const newCasts = [...tipCasts]
+
+    const combinedTipCasts = Object.values(
+      tipCasts.reduce((acc, curr) => {
+        const { fid, castWeight, allCoins } = curr;
+    
+        if (acc[fid]) {
+          acc[fid].castWeight += castWeight;
+    
+          allCoins.forEach(({ coin, tip }) => {
+            const existingCoin = acc[fid].allCoins.find(c => c.coin === coin);
+            if (existingCoin) {
+              existingCoin.tip += tip;
+            } else {
+              acc[fid].allCoins.push({ coin, tip });
+            }
+          });
+        } else {
+          acc[fid] = { ...curr, allCoins: [...allCoins] };
+        }
+    
+        return acc;
+      }, {})
+    );
+
+    // console.log('combinedTipCasts3', combinedTipCasts)
+
+    for (const cast of combinedTipCasts) {
       if (cast.allCoins && cast.allCoins.length > 0) {
         for (const coin of cast.allCoins) {
           let coinText = ''
@@ -537,7 +562,7 @@ export async function processTips(userFeed, userFid, tokenData, ecosystem, curat
           }
         }
         if (cast.text.length > 0) {
-          cast.text = `I'm tipping:\n ${cast.text} via ${ecosystemName}/impact\n\n/impact lets you earn curator rewards while supporting your favorite creators & builders on Farcaster`
+          cast.text = `I'm tipping:\n${cast.text}via ${ecosystemName}/impact\n\n/impact lets you earn curator rewards while supporting your favorite creators & builders on Farcaster`
         }
       }
     }
@@ -546,9 +571,9 @@ export async function processTips(userFeed, userFid, tokenData, ecosystem, curat
   
     // console.log(tipCasts)
   
-    let cleanTips = tipCasts.map(({ castWeight, ...rest }) => rest)
+    let cleanTips = combinedTipCasts.map(({ castWeight, ...rest }) => rest)
   
-    // console.log(cleanTips)
+    // console.log('cleanTips', cleanTips)
   
     let finalTips = cleanTips.filter(cast => cast.text.length > 0)
   
