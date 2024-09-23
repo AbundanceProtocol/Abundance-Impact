@@ -72,9 +72,15 @@ export default function Tips({eco, ecosystem}) {
         },
         {
           index: 3,
-          title: "Get Cast Action",
+          title: "Cast Action",
           action_type: "link",
           target: `https://warpcast.com/~/add-cast-action?name=%24${eco?.substring(1)}+Console&icon=star&actionType=post&postUrl=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Faction%2Fstatus%3Fpoints=${eco?.substring(1)}&description=Curate+Casts+with+the+Impact+App`
+        },
+        {
+          index: 4,
+          title: "What's /Impact?",
+          action_type: "link",
+          target: `https://paragraph.xyz/@abundance/what-is-impact`
         },
       ],
       input: {
@@ -330,9 +336,14 @@ export default function Tips({eco, ecosystem}) {
         <meta property="fc:frame:button:2:action" content="link" />
         <meta property="fc:frame:button:2:target" content={shareLink} />
 
-        <meta property="fc:frame:button:3" content={`Get Cast Action`} />
+        <meta property="fc:frame:button:3" content={`Cast Action`} />
         <meta property="fc:frame:button:3:action" content="link" />
         <meta property="fc:frame:button:3:target" content={`https://warpcast.com/~/add-cast-action?name=%24${eco?.substring(1)}+Console&icon=star&actionType=post&postUrl=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Faction%2Fstatus%3Fpoints=${eco?.substring(1)}&description=Curate+Casts+with+the+Impact+App`} />
+
+        <meta property="fc:frame:button:4" content={`What's /impact?`} />
+        <meta property="fc:frame:button:4:action" content="link" />
+        <meta property="fc:frame:button:4:target" content={`https://paragraph.xyz/@abundance/what-is-impact`} />
+
       </Head>
     )}
     <div className="" style={{padding: '58px 0 0 0'}}>
