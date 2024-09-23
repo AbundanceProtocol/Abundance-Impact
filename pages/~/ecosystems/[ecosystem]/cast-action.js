@@ -55,7 +55,7 @@ export default function Tips({eco, ecosystem}) {
     {
       version: "vNext",
       title: "/impact Cast Action",
-      image: `${baseURL}/images/frame36.gif`,
+      image: `${baseURL}/images/frame.gif`,
       image_aspect_ratio: "1:1",
       buttons: [
         {
@@ -191,7 +191,7 @@ export default function Tips({eco, ecosystem}) {
     // updatedFrameData.buttons[2].target = `https://warpcast.com/~/add-cast-action?name=%24${eco?.substring(1)}+Console&icon=star&actionType=post&postUrl=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Faction%2Fstatus%3Fpoints=${eco?.substring(1)}&description=Curate+Casts+with+the+Impact+App`
 
 
-    // updatedFrameData.image = `${baseURL}/images/frame36.gif`
+    // updatedFrameData.image = `${baseURL}/images/frame40.gif`
 
     // setFrameData(updatedFrameData)
   // }, [queryData]);
@@ -324,9 +324,9 @@ export default function Tips({eco, ecosystem}) {
         <meta name="description" content={`Support builder and creators with Impact App`} />
         <meta name="viewport" content="width=device-width"/>
         <meta property="og:title" content="/impact Cast Action" />
-        <meta property='og:image' content={`${baseURL}/images/frame36.gif`} />
+        <meta property='og:image' content={`${baseURL}/images/frame40.gif`} />
         <meta property="fc:frame" content="vNext" />
-        <meta property="fc:frame:image" content={`${baseURL}/images/frame36.gif`} />
+        <meta property="fc:frame:image" content={`${baseURL}/images/frame40.gif`} />
         <meta property="fc:frame:image:aspect_ratio" content="1:1" />
         <meta property="fc:frame:button:1" content='Login' />
         <meta property="fc:frame:button:1:action" content="link" />
