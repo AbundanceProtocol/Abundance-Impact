@@ -6,6 +6,7 @@ import User from '../../../models/User';
 import Impact from '../../../models/Impact';
 import Quality from '../../../models/Quality';
 import Cast from "../../../models/Cast";
+import OptOut from "../../../models/OptOut";
 import EcosystemRules from "../../../models/EcosystemRules";
 // import Allowlist from '../../../models/Allowlist';
 
@@ -24,13 +25,33 @@ export default async function handler(req, res) {
     const points = '$' + eco
     const curatorFid = req.body.untrustedData.fid
     const castHash = req.body.untrustedData.castId.hash
-    // const authorFid = req.body.untrustedData.castId.fid
+    const authorFid = req.body.untrustedData.castId.fid
     console.log('28', points, curatorFid, castHash)
 
     let quality = 0
     let impact = 0
     let removeStake = false
 
+    async function checkOptOut(authorFid, points) {
+      try {
+        await connectToDatabase();
+        let optOut = await OptOut.findOne({ fid: authorFid }).exec();
+        if (optOut) {
+          if (!optOut.opt_in) {
+            return true;
+          } else if (optOut.points.includes(points)) {
+            return true;
+          }
+        }
+        return false;
+      } catch (error) {
+        console.error("Error checking opt out:", error);
+        return false;
+      }
+    }
+
+    const authorOptedOut = await checkOptOut(authorFid, points)
+    
     async function getCuratorBalances(curatorFid, points) {
       try {
         await connectToDatabase();
@@ -153,11 +174,15 @@ export default async function handler(req, res) {
       }
     }
 
-    let { impactBalance, qualityBalance, qualityTotal, author, castImpact } = await getCastBalances(castHash, points)
+    let impactBalance = 0, qualityBalance = 0, qualityTotal = 0, author = '', castImpact = 0
+    
+    if (!authorOptedOut) {
+      ({ impactBalance, qualityBalance, qualityTotal, author, castImpact } = await getCastBalances(castHash, points))
+    }
 
     console.log('124', impactBalance, qualityBalance, qualityTotal, author, castImpact)
 
-    if ((!impactBalance && impactBalance !== 0) || (!qualityBalance && qualityBalance !== 0) || (!qualityTotal && qualityTotal !== 0)) {
+    if (!authorOptedOut && ((!impactBalance && impactBalance !== 0) || (!qualityBalance && qualityBalance !== 0) || (!qualityTotal && qualityTotal !== 0))) {
       impactBalance = 0
       qualityBalance = 0
       qualityTotal = 0
@@ -224,7 +249,7 @@ export default async function handler(req, res) {
 
     }
 
-    if (needLogin !== true) {
+    if (needLogin !== true && !authorOptedOut) {
 
       async function getUserImpact(castHash, curatorFid, points) {
         try {
@@ -295,7 +320,7 @@ export default async function handler(req, res) {
 
       res.status(200).json({
         "type": "frame",
-        "frameUrl": `https://impact.abundance.id/api/frames/console/status?${qs.stringify({ iB: impactBalance, qB: qualityBalance, qT: qualityTotal, author, iA: impactAllowance, qA: qualityAllowance, ecosystem: ecoName, login: needLogin, pt: points, cu: curator, impact, quality, cI: castImpact, hash: castHash, handle: ecoHandle, rS: removeStake })}`
+        "frameUrl": `https://impact.abundance.id/api/frames/console/status2?${qs.stringify({ iB: impactBalance, qB: qualityBalance, qT: qualityTotal, author, iA: impactAllowance, qA: qualityAllowance, ecosystem: ecoName, login: needLogin, pt: points, cu: curator, impact, quality, cI: castImpact, hash: castHash, handle: ecoHandle, rS: removeStake, oO: authorOptedOut })}`
       })
     } catch (error) {
       console.error(error);

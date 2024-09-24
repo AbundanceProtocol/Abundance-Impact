@@ -19,7 +19,7 @@ const cache = new NodeCache({ stdTTL: 60 });
 
 export default async function handler(req, res) {
   // const { id } = req.query
-  const { iB, qB, qT, author, iA, qA, ecosystem, login, pt, cu  } = req.query;
+  const { iB, qB, qT, author, iA, qA, ecosystem, login, pt, cu, oO  } = req.query;
 
   console.log('24', iB, qB, qT, author, iA, qA, ecosystem, login, pt, cu)
   
@@ -27,6 +27,7 @@ export default async function handler(req, res) {
     const fontPath = path.join(process.cwd(), 'public', 'Inter-SemiBold.ttf');
     const fontData = fs.readFileSync(fontPath);
     const needLogin = login == 'true'
+    const optOut = oO == 'true'
 
     let ecosystemName = ecosystem || ''
     let username =  author || ''
@@ -87,33 +88,40 @@ export default async function handler(req, res) {
             </div>
           )}
 
-          <div style={{display: 'flex', flexDirection: 'column', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', border: '2px solid #686cae99', borderRadius: '16px', padding: '10px 0 20px 0', margin: '45px 0 30px 0', background: '#220a4dbb', width: '500px'}}>
+          {(optOut) ? (
+            <div style={{display: 'flex', flexDirection: 'column', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', border: '2px solid #686cae99', borderRadius: '16px', padding: '10px 0 20px 0', margin: '45px 0 30px 0', background: '#220a4dbb', width: '500px'}}>
 
-            <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '25px', margin: '5px 20px 5px 20px', padding: '5px 15px'}}>{`@${username}'s cast`}</div>
+              <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '25px', margin: '5px 20px 5px 20px', padding: '5px 15px'}}>{`User opted out of /impact`}</div>
+            </div>
+          ) : (
+            <div style={{display: 'flex', flexDirection: 'column', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', border: '2px solid #686cae99', borderRadius: '16px', padding: '10px 0 20px 0', margin: '45px 0 30px 0', background: '#220a4dbb', width: '500px'}}>
 
-            <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '2rem', padding: '5px 30px 20px 30px'}}>
+              <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '25px', margin: '5px 20px 5px 20px', padding: '5px 15px'}}>{`@${username}'s cast`}</div>
 
-              <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', background: '#eeeeee22', borderRadius: '10px', padding: '10px 20px', border: '1px solid #ccc', width: '200px'}}>
+              <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '2rem', padding: '5px 30px 20px 30px'}}>
 
-                <div style={{display: 'flex', flexDirection: 'row', color: 'white', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
+                <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', background: '#eeeeee22', borderRadius: '10px', padding: '10px 20px', border: '1px solid #ccc', width: '200px'}}>
 
-                  <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '30px', margin: '0px'}}>&#9733;</div>
+                  <div style={{display: 'flex', flexDirection: 'row', color: 'white', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
 
-                  <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '30px', margin: '0px'}}>{castImpact}</div>
+                    <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '30px', margin: '0px'}}>&#9733;</div>
+
+                    <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '30px', margin: '0px'}}>{castImpact}</div>
+                  </div>
+
+                  <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '20px', margin: '0px', padding: '0 0 5px 0'}}>{points}</div>
                 </div>
 
-                <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '20px', margin: '0px', padding: '0 0 5px 0'}}>{points}</div>
-              </div>
+                <div style={{display: 'flex', flexDirection: 'column', color: 'white', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', background: '#eeeeee44', borderRadius: '10px', padding: '10px 20px', border: '1px solid #ccc', width: '200px'}}>
 
-              <div style={{display: 'flex', flexDirection: 'column', color: 'white', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', background: '#eeeeee44', borderRadius: '10px', padding: '10px 20px', border: '1px solid #ccc', width: '200px'}}>
+                  <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '30px', margin: '0px'}}>{`${castQdauBalance} (${castQdauCount})`}</div>
 
-                <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '30px', margin: '0px'}}>{`${castQdauBalance} (${castQdauCount})`}</div>
+                  <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '20px', margin: '0px', padding: '0 0 5px 0'}}>{`qDAU`}</div>
 
-                <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '20px', margin: '0px', padding: '0 0 5px 0'}}>{`qDAU`}</div>
-
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
       ,
