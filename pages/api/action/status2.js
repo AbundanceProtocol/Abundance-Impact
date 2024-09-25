@@ -310,7 +310,7 @@ export default async function handler(req, res) {
 
     }
 
-    console.log('242', impactBalance, qualityBalance, qualityTotal, author, impactAllowance,  qualityAllowance, ecoName, needLogin, points, curator, impact, quality, castImpact, removeStake)
+    console.log('242-1', impactBalance, qualityBalance, qualityTotal, author, impactAllowance,  qualityAllowance, ecoName, needLogin, points, curator, impact, quality, castImpact, removeStake)
 
     console.log('test')
 

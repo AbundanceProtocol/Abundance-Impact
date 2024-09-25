@@ -31,15 +31,12 @@ export default async function handler(req, res) {
     let textField = ''
     let postUrl = `<meta name="fc:frame:post_url" content='https://impact.abundance.id' />`
 
-
     console.log('1', needLogin)
     console.log('2', parseInt(cI) == 0, parseInt(impact) == 0, parseInt(quality) == 0, cI, impact, quality)
     console.log('3', parseInt(cI) !== 0, parseInt(impact) == 0, parseInt(quality) == 0, cI, impact, quality)
     console.log('4', parseInt(impact) !== 0, impact, unstake)
     console.log('5', parseInt(impact) !== 0, impact)
     console.log('6', parseInt(quality) !== 0, quality)
-
-
 
     if (needLogin) {
       console.log('1')
@@ -62,7 +59,7 @@ export default async function handler(req, res) {
       console.log('2')
       button1 = `<meta property="fc:frame:button:1" content='+1 ${pt}' />
       <meta property="fc:frame:button:1:action" content="post" />
-      <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/console/impact?${qs.stringify({ addImpact: 1, iB, qB, qT, author, iA, qA, ec: ecosystem, login, pt, cu, impact, ql: quality, cI, hash, handle, rS, oO })}' />`
+      <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/console/impact2?${qs.stringify({ addImpact: 1, iB, qB, qT, author, iA, qA, ec: ecosystem, login, pt, cu, impact, ql: quality, cI, hash, handle, rS, oO })}' />`
       button2 = `<meta property="fc:frame:button:2" content='+5 ${pt}' />
       <meta property="fc:frame:button:2:action" content="post" />
       <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/console/impact?${qs.stringify({ addImpact: 5, iB, qB, qT, author, iA, qA, ec: ecosystem, login, pt, cu, impact, ql: quality, cI, hash, handle, rS, oO })}' />`
