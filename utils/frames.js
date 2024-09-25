@@ -47,7 +47,7 @@ export function metaButton(i, type, params, points) {
     <meta property="fc:frame:button:${i}:action" content="post" />
     <meta property="fc:frame:button:${i}:target" content='${baseURL}/api/frames/tip/opt-in?${qs.stringify(params)}' />`
   } else if (type === 'opt-out') {
-    return `<meta property="fc:frame:button:${i}" content='Confirm' />
+    return `<meta property="fc:frame:button:${i}" content='Confirm opt-out' />
     <meta property="fc:frame:button:${i}:action" content="post" />
     <meta property="fc:frame:button:${i}:target" content='${baseURL}/api/frames/tip/opt-out?${qs.stringify(params)}' />`
   } else {
