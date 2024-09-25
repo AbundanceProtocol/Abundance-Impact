@@ -1,6 +1,6 @@
 import { getSSLHubRpcClient, Message } from "@farcaster/hub-nodejs";
 import qs from "querystring";
-
+import OptOut from "../../../../models/OptOut";
 import connectToDatabase from "../../../../libs/mongodb";
 import User from '../../../../models/User';
 import Impact from '../../../../models/Impact';
@@ -25,6 +25,26 @@ export default async function handler(req, res) {
     let quality = 0
     let impact = 0
 
+    async function checkOptOut(authorFid, points) {
+      try {
+        await connectToDatabase();
+        let optOut = await OptOut.findOne({ fid: authorFid }).exec();
+        if (optOut) {
+          if (!optOut.opt_in) {
+            return true;
+          } else if (optOut.points.includes(points)) {
+            return true;
+          }
+        }
+        return false;
+      } catch (error) {
+        console.error("Error checking opt out:", error);
+        return false;
+      }
+    }
+
+    const authorOptedOut = await checkOptOut(authorFid, points)
+    
     async function getCuratorBalances(curatorFid, points) {
       try {
         await connectToDatabase();
@@ -116,11 +136,15 @@ export default async function handler(req, res) {
       }
     }
 
-    let { impactBalance, qualityBalance, qualityTotal, author, castImpact } = await getCastBalances(castHash, points)
+    let impactBalance = 0, qualityBalance = 0, qualityTotal = 0, author = '', castImpact = 0
+    
+    if (!authorOptedOut) {
+      ({ impactBalance, qualityBalance, qualityTotal, author, castImpact } = await getCastBalances(castHash, points))
+    }
 
     console.log('124', impactBalance, qualityBalance, qualityTotal, author, castImpact)
 
-    if ((!impactBalance && impactBalance !== 0) || (!qualityBalance && qualityBalance !== 0) || (!qualityTotal && qualityTotal !== 0)) {
+    if (!authorOptedOut && ((!impactBalance && impactBalance !== 0) || (!qualityBalance && qualityBalance !== 0) || (!qualityTotal && qualityTotal !== 0))) {
       impactBalance = 0
       qualityBalance = 0
       qualityTotal = 0
@@ -187,7 +211,7 @@ export default async function handler(req, res) {
 
     }
 
-    if (needLogin !== true) {
+    if (needLogin !== true && !authorOptedOut) {
 
       async function getUserImpact(castHash, curatorFid, points) {
         try {
@@ -248,7 +272,7 @@ export default async function handler(req, res) {
 
     }
 
-    console.log('242', impactBalance, qualityBalance, qualityTotal, author, impactAllowance,  qualityAllowance, ecoName, needLogin, points, curator, impact, quality, castImpact, removeStake)
+    console.log('242-2', impactBalance, qualityBalance, qualityTotal, author, impactAllowance,  qualityAllowance, ecoName, needLogin, points, curator, impact, quality, castImpact, removeStake)
 
     let balanceImg = `${baseURL}/api/frames/console/balance?${qs.stringify({ iB: impactBalance, qB: qualityBalance, qT: qualityTotal, author, iA: impactAllowance, qA: qualityAllowance, ecosystem: ecoName, login: needLogin, pt: points, cu: curator })}`
 
@@ -269,13 +293,22 @@ export default async function handler(req, res) {
 
 
     if (needLogin == true) {
-      console.log('1')
+      console.log('1a')
       button1 = `<meta property="fc:frame:button:1" content='Login' />
       <meta property="fc:frame:button:1:action" content="link" />
       <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/?eco=${points}' />`
       button2 = `<meta property="fc:frame:button:2" content='Refresh' />
       <meta property="fc:frame:button:2:action" content="post" />
       <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/console/refresh?${qs.stringify({ pt: points })}' />`
+    } else if (authorOptedOut) {
+      console.log('1b')
+      button1 = `<meta property="fc:frame:button:1" content='More >' />
+      <meta property="fc:frame:button:1:action" content="post" />
+      <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/console/more?${qs.stringify({ iB, qB, qT, author, iA, qA, ec: ecosystem, login, pt, cu, impact, ql: quality, cI, hash, handle, rS, oO })}' />`
+      button2 = ''
+      button3 = ''
+      button4 = ''
+      textField = ''
     } else if (parseInt(castImpact) == 0 && parseInt(impact) == 0 && parseInt(quality) == 0) {
       console.log('2')
 

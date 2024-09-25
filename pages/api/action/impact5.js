@@ -6,7 +6,7 @@ import Quality from '../../../models/Quality';
 import Cast from "../../../models/Cast";
 import EcosystemRules from "../../../models/EcosystemRules";
 import Allowlist from '../../../models/Allowlist';
-
+import OptOut from "../../../models/OptOut";
 import { decryptPassword } from "../../../utils/utils"; 
 
 const HubURL = process.env.NEYNAR_HUB
@@ -24,6 +24,34 @@ export default async function handler(req, res) {
     const castHash = req.body.untrustedData.castId.hash
     // const authorFid = req.body.untrustedData.castId.fid
     const signer = decryptPassword(encryptedBotUuid, secretKey)
+
+    async function checkOptOut(authorFid, points) {
+      try {
+        await connectToDatabase();
+        let optOut = await OptOut.findOne({ fid: authorFid }).exec();
+        if (optOut) {
+          if (!optOut.opt_in) {
+            return true;
+          } else if (optOut.points.includes(points)) {
+            return true;
+          }
+        }
+        return false;
+      } catch (error) {
+        console.error("Error checking opt out:", error);
+        return false;
+      }
+    }
+
+    const authorOptedOut = await checkOptOut(authorFid, points)
+
+    if (authorOptedOut) {
+      res.setHeader('Content-Type', 'text/html');
+      res.status(200).send({
+        message: `User opted-out of /impact`
+      });
+      return;
+    }
 
     async function getEcosystem(points) {
       try {
@@ -232,10 +260,10 @@ export default async function handler(req, res) {
                   
                         let body = {
                           signer_uuid: signer,
-                          text: `@${user} has been nominated by @${curator} to the ${ecosystem} Ecosystem on /impact\n\nHelp support @${curator}'s nominees:`,
+                          text: `@${user} has been nominated by @${curator} to the ${ecosystem} Ecosystem on /impact\n\nHelp support @${curator}'s nominees.\n\nOpt out of /impact nominations in frame`,
                         };
                         
-                        const frameUrl = `https://impact.abundance.id/~/ecosystems/${handle}/tip2?time=all&shuffle=true&curators=${fid}&eco=${eco}&referrer=${fid}`
+                        const frameUrl = `https://impact.abundance.id/~/ecosystems/${handle}/tip-v3?time=all&shuffle=true&curators=${fid}&eco=${eco}&referrer=${fid}`
 
                         body.parent = hash;
 

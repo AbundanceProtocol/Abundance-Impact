@@ -61,6 +61,8 @@ export default async function handler(req, res) {
 
     const autoTipPost = `${baseURL}/api/frames/tip/auto-tip?${qs.stringify({ time, curators, eco, ecosystem })}`
 
+    const optOutPost = `${baseURL}/api/frames/tip/opt-out-menu?${qs.stringify({ time, curators, eco, ecosystem })}`
+
     let shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share?${qs.stringify({ time, curators, eco })}`
 
     const encodedShareText = encodeURIComponent(shareText); 
@@ -79,9 +81,9 @@ export default async function handler(req, res) {
       <meta name="fc:frame:button:3" content="Auto-tip >">
       <meta name="fc:frame:button:3:action" content="post">
       <meta name="fc:frame:button:3:target" content="${autoTipPost}" />
-      <meta name="fc:frame:button:4" content="Refresh">
+      <meta name="fc:frame:button:4" content="Opt-out?">
       <meta name="fc:frame:button:4:action" content="post">
-      <meta name="fc:frame:button:4:target" content="${refreshPost}" />
+      <meta name="fc:frame:button:4:target" content="${optOutPost}" />
       <meta property="og:image" content="${tipsImg}">
       <meta name="fc:frame:image" content="${tipsImg}">
       <meta name="fc:frame:post_url" content="${postUrl}">

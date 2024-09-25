@@ -18,7 +18,7 @@ const secretKey = process.env.SECRET_KEY
 
 export default async function handler(req, res) {
 
-  const { addImpact, iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle, rS } = req.query;
+  const { addImpact, iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle, rS, oO } = req.query;
 
   if (req.method !== 'POST') {
     res.setHeader('Allow', ['POST']);
@@ -39,7 +39,7 @@ export default async function handler(req, res) {
 
     let button1 = `<meta property="fc:frame:button:2" content='Refresh' />
       <meta property="fc:frame:button:2:action" content="post" />
-      <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/console/test?${qs.stringify({ iB, qB, qT, author, iA, qA, ecosystem: ec, login, pt, cu, impact, quality: ql, cI, hash, handle, rS })}' />`
+      <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/console/test?${qs.stringify({ iB, qB, qT, author, iA, qA, ecosystem: ec, login, pt, cu, impact, quality: ql, cI, hash, handle, rS, oO })}' />`
     let button2 = ''
     let button3 = ''
     let button4 = ''
@@ -48,13 +48,13 @@ export default async function handler(req, res) {
 
     button1 = `<meta property="fc:frame:button:1" content='+1 ${pt}' />
     <meta property="fc:frame:button:1:action" content="post" />
-    <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/console/impact?${qs.stringify({ addImpact: 1, iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle, rS })}' />`
+    <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/console/impact?${qs.stringify({ addImpact: 1, iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle, rS, oO })}' />`
     button2 = `<meta property="fc:frame:button:2" content='+5 ${pt}' />
     <meta property="fc:frame:button:2:action" content="post" />
-    <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/console/impact?${qs.stringify({ addImpact: 5, iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle, rS })}' />`
+    <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/console/impact?${qs.stringify({ addImpact: 5, iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle, rS, oO })}' />`
     button3 = `<meta property="fc:frame:button:3" content='More >' />
     <meta property="fc:frame:button:3:action" content="post" />
-    <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/more?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle, rS })}' />`
+    <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/more?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle, rS, oO })}' />`
 
     let postUrl = `<meta name="fc:frame:post_url" content='https://impact.abundance.id' />`
 
@@ -192,10 +192,10 @@ export default async function handler(req, res) {
                         
                         let body = {
                           signer_uuid: signer,
-                          text: `${text}@${user} has been nominated by @${curator} to the ${ecosystem} Ecosystem on /impact\n\nHelp support @${curator}'s nominees:`,
+                          text: `${text}@${user} has been nominated by @${curator} to the ${ecosystem} Ecosystem on /impact\n\nHelp support @${curator}'s nominees.\n\nOpt out of /impact nominations in frame`,
                         };
                         
-                        const frameUrl = `https://impact.abundance.id/~/ecosystems/${handle}/tip2?time=all&shuffle=true&curators=${fid}&eco=${eco}&referrer=${fid}`
+                        const frameUrl = `https://impact.abundance.id/~/ecosystems/${handle}/tip-v3?time=all&shuffle=true&curators=${fid}&eco=${eco}&referrer=${fid}`
 
                         body.parent = hash;
 
