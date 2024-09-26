@@ -2,6 +2,8 @@ import connectToDatabase from '../../../libs/mongodb';
 import Impact from '../../../models/Impact';
 import User from '../../../models/User';
 import Tip from '../../../models/Tip';
+import Quality from '../../../models/Quality';
+import OptOut from '../../../models/OptOut';
 
 const dataCode = process.env.DATA_CODE
 const wcApiKey = process.env.WC_API_KEY
@@ -13,17 +15,17 @@ export default async function handler(req, res) {
     res.status(405).json({ error: 'Method Not Allowed', message: 'Failed to provide required data' });
   } else {
 
+    const oneDay = new Date();
+    oneDay.setHours(oneDay.getHours() - 24);
 
     async function getTopCuratorsByImpactPoints() {
       await connectToDatabase();
-      const oneDay = new Date();
-      oneDay.setHours(oneDay.getHours() - 24);
 
       const result = await Impact.aggregate([
         { $match: { createdAt: { $gte: oneDay } } },
         { $group: { _id: "$curator_fid", totalImpactPoints: { $sum: "$impact_points" } } },
         { $sort: { totalImpactPoints: -1 } },
-        { $limit: 8 }
+        { $limit: 15 }
       ]);
 
       return result
@@ -35,7 +37,7 @@ export default async function handler(req, res) {
       const result = await Tip.aggregate([
         { $group: { _id: "$tipper_fid", totalTips: { $sum: 1 } } },
         { $sort: { totalTips: -1 } },
-        { $limit: 8 }
+        { $limit: 15 }
       ]);
 
       return result;
@@ -57,7 +59,32 @@ export default async function handler(req, res) {
         return {username: user ? user.username : 'Unknown User', tip: tip.totalTips};
       }));
   
-      console.log('nominations, tips', tipperUsernames, impactUsernames)
+
+
+      const uniqueCuratorsCount = await Impact.distinct("curator_fid", { createdAt: { $gte: oneDay } });
+      console.log(`Number of unique 'curator_fid's that created Impact docs in the past 24 hours: ${uniqueCuratorsCount.length}`);
+
+      const newUserCount = await User.countDocuments({ createdAt: { $gte: oneDay } });
+      console.log(`Number of new User docs created in the last 24 hours: ${newUserCount}`);
+
+      const uniqueQualityCuratorsCount = await Quality.distinct("curator_fid", { createdAt: { $gte: oneDay } });
+      console.log(`Number of unique 'curator_fid's that created Quality docs in the past 24 hours: ${uniqueQualityCuratorsCount.length}`);
+
+
+      const newOptOutCount = await OptOut.countDocuments({ createdAt: { $gte: oneDay } });
+      console.log(`Number of new OptOut docs created in the last 24 hours: ${newOptOutCount}`);
+
+      const uniqueTipperCount = await Tip.distinct("tipper_fid", { createdAt: { $gte: oneDay } });
+      console.log(`Number of unique 'tipper_fid's that created new Tip docs in the past 24 hours: ${uniqueTipperCount.length}`);
+
+      const totalDegenAmount = await Tip.aggregate([
+        { $match: { createdAt: { $gte: oneDay }, 'tip.currency': { $regex: /degen/i } } },
+        { $unwind: '$tip' },
+        { $match: { 'tip.currency': { $regex: /degen/i } } },
+        { $group: { _id: null, totalAmount: { $sum: '$tip.amount' } } }
+      ]);
+      console.log(`Total 'amount' of '$degen' 'currency' in Tip documents created in the past 24 hours: ${totalDegenAmount[0].totalAmount}`);
+
 
       let dcText = ''
 
@@ -68,6 +95,13 @@ export default async function handler(req, res) {
       for (const tipper of impactUsernames) {
         dcText += '@' + tipper.username + ' - points: ' + tipper.points + '\n'
       }
+
+      dcText += '\nCurators staking: ' + uniqueCuratorsCount.length + '\n'
+      dcText += 'New users: ' + newUserCount + '\n'
+      dcText += 'Curators qDAU: ' + uniqueQualityCuratorsCount.length + '\n'
+      dcText += 'New opt outs: ' + newOptOutCount + '\n'
+      dcText += 'Users tipping: ' + uniqueTipperCount.length + '\n'
+      dcText += 'Total $degen: ' + totalDegenAmount[0].totalAmount + '\n'
 
       async function sendDc() {
         const response = await fetch(
@@ -89,7 +123,10 @@ export default async function handler(req, res) {
       
       sendDc();
 
-      res.status(200).json({ message: 'nominations, tips', tipperUsernames, impactUsernames });
+      console.log('nominations, tips', tipperUsernames, impactUsernames, uniqueCuratorsCount, newUserCount, uniqueQualityCuratorsCount, newOptOutCount, uniqueTipperCount, totalDegenAmount)
+
+
+      res.status(200).json({ message: 'nominations, tips', tipperUsernames, impactUsernames, uniqueCuratorsCount, newUserCount, uniqueQualityCuratorsCount, newOptOutCount, uniqueTipperCount, totalDegenAmount });
     } catch (error) {
       console.error('Error handling GET request:', error);
       res.status(500).json({ error: 'Internal Server Error' });
