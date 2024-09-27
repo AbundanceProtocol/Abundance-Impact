@@ -12,6 +12,7 @@ const CheckButton = ({ isMobile }) => {
       if (isLogged) {
         checkEcoEligibility(fid, points, store?.signer_uuid)
       } else {
+        console.log('cb1')
         LoginPopup()
       }
     }}>

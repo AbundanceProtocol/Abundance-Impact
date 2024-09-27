@@ -166,7 +166,12 @@ export default async function handler(req, res) {
     
     console.log('14-2:', req.query, refresh)
 
-    const exploreLink = `${baseURL}/~/ecosystems/${ecosystem}?${qs.stringify({ time: 'all', curators })}`
+    let exploreLink = `${baseURL}/~/ecosystems/${ecosystem}?${qs.stringify({ time: 'all', curators })}`
+
+    if (curators) {
+      let curatorId = Array.isArray(curators) ? curators[0] : Number(curators);
+      exploreLink = `${baseURL}/~/curator/${curatorId}`
+    }
 
     const impactLink = `https://warpcast.com/abundance/0x43ddd672`
 

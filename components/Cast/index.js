@@ -268,6 +268,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
           <div className="" style={{margin: '0 10px 0 0'}}>
             <a className="" title="" href={`/${cast.author.username}`} onClick={(event) => {
                   if (!isLogged) {
+                    console.log('ca1')
                     LoginPopup()
                     event.preventDefault()
                   } else {
@@ -285,6 +286,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
             <div className={`impact-arrow ${fail ? 'flash-fail' : ''}`} onClick={
              () => {
                 if (!isLogged) {
+                  console.log('ca2')
                   LoginPopup()
                 } else {
                   if(userBalances.impact > 0) {
@@ -301,6 +303,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
             {(self && cast.impact_balance >= 1) && (<div className={`like-btn ${fail ? 'flash-fail' : ''}`} onClick={
              () => {
                 if (!isLogged) {
+                  console.log('ca3')
                   LoginPopup()
                 } else {
                   unstakePoint(cast)
@@ -319,6 +322,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
               <span className="">
                 <a href={`/${cast.author.username}`} className="fc-lnk" title={cast.author.display_name} style={{cursor: 'pointer'}} onClick={(event) => {
                   if (!isLogged) {
+                    console.log('ca4')
                     LoginPopup()
                     event.preventDefault()
                   } else {
@@ -336,6 +340,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
               <span className="user-font">
                 <a href={`/${cast.author.username}`} className="fc-lnk" title={cast.author.display_name} onClick={(event) => {
                   if (!isLogged) {
+                    console.log('ca5')
                     LoginPopup()
                     event.preventDefault()
                   } else {
@@ -346,6 +351,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
               <div className="">·</div>
               <a href={`/${cast.author.username}/casts/${cast.hash}`} className="fc-lnk" title="Navigate to cast" onClick={(event) => {
                   if (!isLogged) {
+                    console.log('ca6')
                     LoginPopup()
                     event.preventDefault()
                   } else {
@@ -411,6 +417,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
                 style={{color: cast.viewer_context?.recasted ? '#191' : ''}}
                 onClick={() => {
                   if (!isLogged) {
+                    console.log('ca7')
                     LoginPopup()
                   } else {
                     postRecast(cast.hash, index, cast.reactions.recasts_count)
@@ -430,6 +437,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
                 style={{color: cast.viewer_context?.liked ? '#b33' : ''}}
                 onClick={() => {
                   if (!isLogged) {
+                    console.log('ca8')
                     LoginPopup()
                   } else {
                     postLike(cast.hash, index, cast.reactions.likes_count)
@@ -444,6 +452,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
             <div className="flex-row" style={{flex: 1, padding: '3px', gap: '0.5rem'}}>
               <div className={`impact-arrow ${fail ? 'flash-fail' : ''}`} style={{padding: '0px 1px 0 0px'}} onClick={() => {
                 if (!isLogged) {
+                  console.log('ca9')
                   LoginPopup()
                 } else {
                   boostQuality(cast, 1)
@@ -463,6 +472,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
 
               <div className={`like-btn ${fail ? 'flash-fail' : ''}`} style={{padding: '2px 0 0 0px'}} onClick={() => {
                 if (!isLogged) {
+                  console.log('ca10')
                   LoginPopup()
                 } else {
                   boostQuality(cast, -1)

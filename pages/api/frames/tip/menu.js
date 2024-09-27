@@ -41,8 +41,13 @@ export default async function handler(req, res) {
     const menuImg = `${baseURL}/api/frames/tip/main-menu?${qs.stringify({ points, fid })}`
     
     console.log('14-3:', req.query)
+    
+    let exploreLink = `${baseURL}/~/ecosystems/${ecosystem}?${qs.stringify({ time: 'all', curators })}`
 
-    const exploreLink = `${baseURL}/~/ecosystems/${ecosystem}?${qs.stringify({ time: 'all', curators })}`
+    if (curators) {
+      let curatorId = Array.isArray(curators) ? curators[0] : Number(curators);
+      exploreLink = `${baseURL}/~/curator/${curatorId}`
+    }
 
     const retryPost = `${baseURL}/api/frames/tip/start?${qs.stringify({ time, curators, eco, ecosystem })}`
 

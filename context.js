@@ -151,14 +151,14 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
       if (isLogged && ecoData) {
         setPopulate(populate+1)
         setPoints(ecoData?.ecosystem_points_name)
-        if (router.route !== '/') {
+        if (router.route !== '/' && router.route !== '/~/curator/[fid]') {
           console.log('c10 points', store.fid, points)
           getRemainingBalances(store.fid, ecoData?.ecosystem_points_name, store.signer_uuid)
         }
       }
     }
 
-    if (router.route !== "/~/ecosystems/[ecosystem]/tip" && router.route !== "/~/ecosystems/[ecosystem]/[eco]/[curators]/tip" && router.route !== "/~/ecosystems/[ecosystem]/tip-basic" && router.route !== "/~/ecosystems/[ecosystem]/tip-share") {
+    if (router.route !== "/~/ecosystems/[ecosystem]/tip" && router.route !== "/~/ecosystems/[ecosystem]/[eco]/[curators]/tip" && router.route !== "/~/ecosystems/[ecosystem]/tip-basic" && router.route !== "/~/ecosystems/[ecosystem]/tip-share" && router.route !== '/~/curator/[fid]') {
       if (sched.ecoData) {
         updateEcoData()
         setSched(prev => ({...prev, ecoData: false }))
@@ -187,7 +187,8 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
         setFid(null)
         setUserBalances({impact: 0, qdau: 0})
         setUserProfile(null)
-        if (router.route !== '/') {
+        if (router.route !== '/' && router.route !== '/~/curator/[fid]') {
+          console.log('c13-1')
           LoginPopup()
         }
       }
