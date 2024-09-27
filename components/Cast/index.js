@@ -4,6 +4,7 @@ import useStore from '../../utils/store';
 import { AccountContext } from '../../context';
 import { Like, LikeOn, Recast, Message, Kebab, ActiveUser } from '../../pages/assets'
 import { FaSearch, FaLock, FaRegStar, FaStar, FaArrowUp, FaArrowDown } from "react-icons/fa"
+import { BiSolidDownArrow as ArrowDown } from "react-icons/bi";
 import axios from 'axios';
 import { timePassed } from '../../utils/utils';
 import CastText from './Text'
@@ -14,7 +15,7 @@ import { ImArrowUp, ImArrowDown  } from "react-icons/im";
 import VideoPlayer from './VideoPlayer';
 import Images from './Images';
 
-export default function Cast({ cast, index, updateCast, openImagePopup, ecosystem }) {
+export default function Cast({ cast, index, updateCast, openImagePopup, ecosystem, self }) {
   const store = useStore()
   const router = useRouter();
   const [screenWidth, setScreenWidth] = useState(undefined)
@@ -70,6 +71,23 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
         clickFailed()
       }
     } else {
+      clickFailed()
+    }
+  }
+
+  async function unstakePoint(cast) {
+    try {
+      const response = await axios.post('/api/curation/postUnstake', { castHash: cast.hash, fid, points: ecosystem })
+      if (response?.data?.castImpact) {
+        console.log(response?.data?.castImpact)
+        const impactBalance = response?.data?.castImpact
+        const updatedCast = {...cast, impact_balance: impactBalance}
+        updateCast(index, updatedCast)
+      } else {
+        clickFailed()
+      }
+    } catch (error) {
+      console.error('Error creating post:', error);
       clickFailed()
     }
   }
@@ -279,6 +297,18 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
             } style={{margin: `${shrinkMargin(cast.impact_balance)}px 0 ${shrinkMargin(cast.impact_balance)}px 0`}}>
               <FaStar size={growPoints(cast.impact_balance)} className='' style={{fontSize: '25px'}} />
             </div>
+
+            {(self && cast.impact_balance >= 1) && (<div className={`like-btn ${fail ? 'flash-fail' : ''}`} onClick={
+             () => {
+                if (!isLogged) {
+                  LoginPopup()
+                } else {
+                  unstakePoint(cast)
+                }
+              }
+            } style={{margin: `${shrinkMargin(cast.impact_balance)}px 0 ${shrinkMargin(cast.impact_balance)}px 0`}}>
+              <ArrowDown size={growPoints(cast.impact_balance)} className='' style={{fontSize: '25px'}} />
+            </div>)}
           </div>
           )}
         </div>
