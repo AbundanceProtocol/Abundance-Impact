@@ -320,7 +320,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
           <div className="flex-row" style={{width: '100%', justifyContent: 'space-between', height: '', alignItems: 'flex-start', flexWrap: 'wrap'}}>
             <div className="flex-row" style={{alignItems: 'center', gap: '0.25rem', flexWrap: 'wrap', userSelect: 'none'}}>
               <span className="">
-                <a href={`/${cast.author.username}`} className="fc-lnk" title={cast.author.display_name} style={{cursor: 'pointer'}} onClick={(event) => {
+                {/* <a href={`/${cast.author.username}`} className="fc-lnk" title={cast.author.display_name} style={{cursor: 'pointer'}} onClick={(event) => {
                   if (!isLogged) {
                     console.log('ca4')
                     LoginPopup()
@@ -328,7 +328,8 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
                   } else {
                     goToUserProfile(event, cast.author)
                   }
-                }}>
+                }}> */}
+                <a href={`https://warpcast.com/${cast?.author?.username}`} className="fc-lnk" title={cast?.author?.display_name} style={{cursor: 'pointer'}}>
                   <div className="flex-row" style={{alignItems: 'center'}}>
                     <span className="name-font">{cast.author.display_name}</span>
                     <div className="" style={{margin: '0 0 0 3px'}}>
@@ -338,7 +339,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
                 </a>
               </span>
               <span className="user-font">
-                <a href={`/${cast.author.username}`} className="fc-lnk" title={cast.author.display_name} onClick={(event) => {
+                {/* <a href={`/${cast.author.username}`} className="fc-lnk" title={cast.author.display_name} onClick={(event) => {
                   if (!isLogged) {
                     console.log('ca5')
                     LoginPopup()
@@ -346,10 +347,13 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
                   } else {
                     goToUserProfile(event, cast.author)
                   }
-                }}>@{cast.author.username}</a>
+                }}>@{cast.author.username}</a> */}
+                <a href={`https://warpcast.com/${cast.author.username}`} className="fc-lnk" title={cast.author.display_name}>@{cast.author.username}</a>
               </span>
               <div className="">·</div>
-              <a href={`/${cast.author.username}/casts/${cast.hash}`} className="fc-lnk" title="Navigate to cast" onClick={(event) => {
+
+              {/* <a href={`/${cast.author.username}/casts/${cast.hash}`} className="fc-lnk" title="Navigate to cast"
+               onClick={(event) => {
                   if (!isLogged) {
                     console.log('ca6')
                     LoginPopup()
@@ -357,7 +361,10 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
                   } else {
                     goToCast(event, cast)
                   }
-                }}>
+                }}
+                ></a> */}
+
+              <a href={`https://warpcast.com/${cast?.author?.username}/${cast?.hash?.substring(0, 10)}`} className="fc-lnk" title="Navigate to cast">
                 <div className="user-font">{timePassed(cast.timestamp)}</div>
               </a>
             </div>
