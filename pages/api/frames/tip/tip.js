@@ -209,61 +209,61 @@ export default async function handler(req, res) {
     
     try {
 
-      // const isTipped = await checkTips(fid, points, timeMinus3, timePlus1)
+      const isTipped = await checkTips(fid, points, timeMinus3, timePlus1)
 
-      // if (isTipped) {
+      if (isTipped) {
 
-      //   const circleFids = await getFids(fid, time1, timePlus1, points)
+        const circleFids = await getFids(fid, time1, timePlus1, points)
 
-      //   const {username} = await getSigner(fid)
+        const {username} = await getSigner(fid)
 
-      //   const {text} = formatStringToArray(inputText);
+        const {text} = formatStringToArray(inputText);
 
-      //   // const jointFids = circleFids.join(',')
+        // const jointFids = circleFids.join(',')
 
-      //   circlesImg = `${baseURL}/api/frames/tip/circle?${qs.stringify({ id: circleFids })}`
+        circlesImg = `${baseURL}/api/frames/tip/circle?${qs.stringify({ id: circleFids })}`
 
-      //   shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share?${qs.stringify({ id: circleFids })}`
+        shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share?${qs.stringify({ id: circleFids })}`
     
-      //   encodedShareUrl = encodeURIComponent(shareUrl); 
-      //   shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
+        encodedShareUrl = encodeURIComponent(shareUrl); 
+        shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
 
-      //   let metatags = `
-      //   <meta name="fc:frame:button:1" content="Share contribution">
-      //   <meta name="fc:frame:button:1:action" content="link">
-      //   <meta name="fc:frame:button:1:target" content="${shareLink}" />
-      //   <meta name="fc:frame:button:2" content="Tip more >">
-      //   <meta name="fc:frame:button:2:action" content="post">
-      //   <meta name="fc:frame:button:2:target" content="${startPost}" />
-      //   <meta name="fc:frame:button:3" content="Auto-tip">
-      //   <meta name="fc:frame:button:3:action" content="post">
-      //   <meta name="fc:frame:button:3:target" content="${autoTipPost}" />
-      //   <meta name="fc:frame:button:4" content="Refresh">
-      //   <meta name="fc:frame:button:4:action" content="post">
-      //   <meta name="fc:frame:button:4:target" content="${refreshPost}" />
-      //   <meta property="og:image" content="${circlesImg}">
-      //   <meta name="fc:frame:image" content="${circlesImg}">
-      //   <meta name="fc:frame:post_url" content="${postUrl}">`
+        let metatags = `
+        <meta name="fc:frame:button:1" content="Share contribution">
+        <meta name="fc:frame:button:1:action" content="link">
+        <meta name="fc:frame:button:1:target" content="${shareLink}" />
+        <meta name="fc:frame:button:2" content="Tip more >">
+        <meta name="fc:frame:button:2:action" content="post">
+        <meta name="fc:frame:button:2:target" content="${startPost}" />
+        <meta name="fc:frame:button:3" content="Auto-tip">
+        <meta name="fc:frame:button:3:action" content="post">
+        <meta name="fc:frame:button:3:target" content="${autoTipPost}" />
+        <meta name="fc:frame:button:4" content="Refresh">
+        <meta name="fc:frame:button:4:action" content="post">
+        <meta name="fc:frame:button:4:target" content="${refreshPost}" />
+        <meta property="og:image" content="${circlesImg}">
+        <meta name="fc:frame:image" content="${circlesImg}">
+        <meta name="fc:frame:post_url" content="${postUrl}">`
   
-      //   res.setHeader('Content-Type', 'text/html');
-      //   res.status(200)
-      //   .send(`
-      //     <!DOCTYPE html>
-      //     <html>
-      //       <head>
-      //         <title>Tips | Impact App</title>
-      //         <meta name="fc:frame" content="vNext">
-      //         <meta property="og:title" content="Multi-Tip">
-      //         <meta property="fc:frame:image:aspect_ratio" content="1:1" />
-      //         ${metatags}
-      //       </head>
-      //       <body>
-      //         <div>Tip frame</div>
-      //       </body>
-      //     </html>
-      //   `);
-      //   return;
-      // } else {
+        res.setHeader('Content-Type', 'text/html');
+        res.status(200)
+        .send(`
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <title>Tips | Impact App</title>
+              <meta name="fc:frame" content="vNext">
+              <meta property="og:title" content="Multi-Tip">
+              <meta property="fc:frame:image:aspect_ratio" content="1:1" />
+              ${metatags}
+            </head>
+            <body>
+              <div>Tip frame</div>
+            </body>
+          </html>
+        `);
+        return;
+      } else {
 
         const inputText = untrustedData?.inputText
         console.log('inputText', inputText)
@@ -713,8 +713,8 @@ export default async function handler(req, res) {
   
               circlesImg = `${baseURL}/api/frames/tip/circle?${qs.stringify({ id: circleId })}`
   
-              // const remainingTip = await sendRequests(castData, decryptedUuid, apiKey);
-              const remainingTip = 0 
+              const remainingTip = await sendRequests(castData, decryptedUuid, apiKey);
+              // const remainingTip = 0 
   
               shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share?${qs.stringify({    
                 id: circleId })}`
