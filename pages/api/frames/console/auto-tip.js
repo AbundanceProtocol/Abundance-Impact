@@ -21,7 +21,7 @@ const client = HubURL ? getSSLHubRpcClient(HubURL) : undefined;
 
 export default async function handler(req, res) {
   init(process.env.AIRSTACK_API_KEY ?? '')
-  const body = await req.json()
+  const body = await req.body;
   const {isValid} = await validateFramesMessage(body)
   console.log('isValid:', isValid)
   const { untrustedData } = req.body

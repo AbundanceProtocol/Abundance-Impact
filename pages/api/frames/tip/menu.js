@@ -19,7 +19,7 @@ const apiKey = process.env.NEYNAR_API_KEY
 
 export default async function handler(req, res) {
   init(process.env.AIRSTACK_API_KEY ?? '')
-  const body = await req.json()
+  const body = await req.body;
   const {isValid} = await validateFramesMessage(body)
   console.log('isValid:', isValid)
   const { time, curators, channels, tags, eco, ecosystem, refresh, retry, start } = req.query;
