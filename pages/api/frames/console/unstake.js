@@ -5,8 +5,9 @@ import Quality from '../../../../models/Quality';
 import Cast from "../../../../models/Cast";
 import EcosystemRules from "../../../../models/EcosystemRules";
 import qs from "querystring";
-
+import { init, validateFramesMessage } from "@airstack/frames";
 import { decryptPassword } from "../../../../utils/utils"; 
+
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 const HubURL = process.env.NEYNAR_HUB
 const client = HubURL ? getSSLHubRpcClient(HubURL) : undefined;
@@ -15,7 +16,10 @@ const encryptedBotUuid = process.env.ENCRYPTED_BOT_UUID
 const secretKey = process.env.SECRET_KEY
 
 export default async function handler(req, res) {
-
+  init(process.env.AIRSTACK_API_KEY ?? '')
+  const body = await req.json()
+  const {isValid} = await validateFramesMessage(body)
+  console.log('isValid:', isValid)
   const { removeImpact, iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle, rS, oO } = req.query;
 
   if (req.method !== 'POST') {

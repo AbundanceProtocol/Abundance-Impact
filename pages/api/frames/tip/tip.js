@@ -9,7 +9,7 @@ import EcosystemRules from  "../../../../models/EcosystemRules";
 import { decryptPassword, getTimeRange, processTips, populateCast } from "../../../../utils/utils";
 import _ from "lodash";
 import qs from "querystring";
-// import { createCircle } from "./circle2";
+import { init, validateFramesMessage } from "@airstack/frames";
 
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 const HubURL = process.env.NEYNAR_HUB
@@ -18,6 +18,10 @@ const secretKey = process.env.SECRET_KEY
 const apiKey = process.env.NEYNAR_API_KEY
 
 export default async function handler(req, res) {
+  init(process.env.AIRSTACK_API_KEY ?? '')
+  const body = await req.json()
+  const {isValid} = await validateFramesMessage(body)
+  console.log('isValid:', isValid)
   const { time, curators, channels, tags, eco, ecosystem, refresh, time1 } = req.query;
   const { untrustedData } = req.body
 

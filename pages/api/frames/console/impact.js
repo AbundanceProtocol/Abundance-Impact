@@ -5,7 +5,7 @@ import Impact from '../../../../models/Impact';
 import Quality from '../../../../models/Quality';
 import Cast from "../../../../models/Cast";
 import EcosystemRules from "../../../../models/EcosystemRules";
-// import Allowlist from '../../../../models/Allowlist';
+import { init, validateFramesMessage } from "@airstack/frames";
 import qs from "querystring";
 
 import { decryptPassword } from "../../../../utils/utils"; 
@@ -17,7 +17,10 @@ const encryptedBotUuid = process.env.ENCRYPTED_BOT_UUID
 const secretKey = process.env.SECRET_KEY
 
 export default async function handler(req, res) {
-
+  init(process.env.AIRSTACK_API_KEY ?? '')
+  const body = await req.json()
+  const {isValid} = await validateFramesMessage(body)
+  console.log('isValid:', isValid)
   const { addImpact, iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle, rS, oO } = req.query;
 
   if (req.method !== 'POST') {

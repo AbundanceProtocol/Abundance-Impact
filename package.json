@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@airstack/airstack-react": "^0.6.3",
+    "@airstack/frames": "^1.2.0",
     "@ceramicnetwork/blockchain-utils-linking": "^2.0.6",
     "@ceramicnetwork/http-client": "^2.2.1",
     "@emotion/react": "^11.9.3",

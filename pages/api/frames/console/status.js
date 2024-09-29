@@ -1,5 +1,6 @@
 import { getSSLHubRpcClient, Message } from "@farcaster/hub-nodejs";
 import qs from "querystring";
+import { init, validateFramesMessage } from "@airstack/frames";
 
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 const HubURL = process.env.NEYNAR_HUB
@@ -7,7 +8,10 @@ const client = HubURL ? getSSLHubRpcClient(HubURL) : undefined;
 
 
 export default async function handler(req, res) {
-
+  init(process.env.AIRSTACK_API_KEY ?? '')
+  const body = await req.json()
+  const {isValid} = await validateFramesMessage(body)
+  console.log('isValid:', isValid)
   const { untrustedData } = req.body
   const { iB, qB, qT, author, iA, qA, ecosystem, login, pt, cu, impact, quality, cI, hash, handle, rS, oO } = req.query;
 

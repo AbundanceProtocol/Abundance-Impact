@@ -9,7 +9,7 @@ import Cast from "../../../../models/Cast";
 import EcosystemRules from "../../../../models/EcosystemRules";
 import ScheduleTip from "../../../../models/ScheduleTip";
 import { encryptPassword, generateRandomString } from '../../../../utils/utils'
-
+import { init, validateFramesMessage } from "@airstack/frames";
 
 const easyCronKey = process.env.EASYCRON_API_KEY;
 const baseURL = process.env.NEXT_PUBLIC_BASE_URL_PROD;
@@ -20,7 +20,10 @@ const client = HubURL ? getSSLHubRpcClient(HubURL) : undefined;
 // const apiKey = process.env.NEYNAR_API_KEY
 
 export default async function handler(req, res) {
-  
+  init(process.env.AIRSTACK_API_KEY ?? '')
+  const body = await req.json()
+  const {isValid} = await validateFramesMessage(body)
+  console.log('isValid:', isValid)
   const { untrustedData } = req.body
   const { iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle, rS, oO } = req.query;
 
