@@ -69,7 +69,7 @@ export default async function handler(req, res) {
           await connectToDatabase();
           const impact = await Impact.findOne({ curator_fid: curatorFid, target_cast_hash: castHash, points }).exec()
           const cast = await Cast.findOne({ cast_hash: castHash, points }).exec()
-
+          // console.log('us1 impact_points', impact?.impact_points, impactAmount, cast?.impact_total, impact)
           if (impact?.impact_points >= impactAmount && cast?.impact_total >= impactAmount) {
             cast.impact_total -= impactAmount
             impact.impact_points -= impactAmount

@@ -30,7 +30,6 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
     openImagePopup(embed); 
   };
   const [hide, setHide] = useState(false)
-
   function clickFailed() {
     setFail(true);
     setTimeout(() => {
@@ -38,6 +37,10 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
     }, 1000);
   }
 
+  function isCurator(fid, cast) {
+    return cast.impact_points.some(point => point.curator_fid == fid);
+  }
+  
   async function boostQuality(cast, qualityAmount) {
     const castHash = cast.hash
     const castChannel = cast.root_parent_url
@@ -267,14 +270,14 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
 
           <div className="" style={{margin: '0 10px 0 0'}}>
             <a className="" title="" href={`/${cast.author.username}`} onClick={(event) => {
-                  if (!isLogged) {
-                    console.log('ca1')
-                    LoginPopup()
-                    event.preventDefault()
-                  } else {
-                    goToUserProfile(event, cast.author)
-                  }
-                }}>
+              if (!isLogged) {
+                console.log('ca1')
+                LoginPopup()
+                event.preventDefault()
+              } else {
+                goToUserProfile(event, cast.author)
+              }
+            }}>
               <img loading="lazy" src={cast.author.pfp_url} className="" alt={`${cast.author.display_name} avatar`} style={{width: '48px', height: '48px', maxWidth: '48px', maxHeight: '48px', borderRadius: '24px', border: '1px solid #000'}} />
             </a>
           </div>
@@ -300,7 +303,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
               <FaStar size={growPoints(cast.impact_balance)} className='' style={{fontSize: '25px'}} />
             </div>
 
-            {(self && cast.impact_balance >= 1) && (<div className={`like-btn ${fail ? 'flash-fail' : ''}`} onClick={
+            {((self && cast?.impact_balance >= 1) || (isCurator(fid, cast))) && (<div className={`like-btn ${fail ? 'flash-fail' : ''}`} onClick={
              () => {
                 if (!isLogged) {
                   console.log('ca3')
@@ -380,9 +383,12 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
             {(cast.embeds.length > 0) && (cast.embeds.map((embed, subindex) => (
               
             <div key={subindex} className='flex-col' style={{alignItems: 'center', display: hide ? 'flex' : 'flex'}}>
-              {(embed && embed.type && (embed.type == 'image' || embed.type == 'other')) && (
-                <Images embed={embed} subindex={subindex} textMax={textMax} handleClick={handleClick} index={index} />
+              {(embed?.metadata?.content_type && embed?.metadata?.content_type?.startsWith('image/')) && (
+                <Images image={embed?.url} subindex={subindex} textMax={textMax} handleClick={handleClick} index={index} />
               )}
+              {/* {(embed && embed.type && (embed.type == 'image' || embed.type == 'other')) && (
+                <Images embed={embed} subindex={subindex} textMax={textMax} handleClick={handleClick} index={index} />
+              )} */}
               {(embed && embed.type && embed.type == 'subcast') && (
                 <div className="" key={`${index}-${subindex}`} style={{marginTop: '10px'}}>
                   <Subcast cast={embed.subcast} key={subindex} index={subindex} />
@@ -398,6 +404,15 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
               )}
             </div>
             )))}
+
+            {(cast?.frames?.length > 0) && (cast?.frames?.map((frame, subindex) => (
+              <div key={subindex} className='flex-col' style={{alignItems: 'center', display: hide ? 'flex' : 'flex'}}>
+                {(frame?.image) && (
+                  <Images {...{image: frame?.image, subindex, textMax, handleClick, index}} />
+                )}
+              </div>
+            )))}
+
             {cast?.channel && (<div style={{alignSelf: 'flex-start', fontSize: '13px', margin: '10px 0 0 0', padding: '3px 6px', border: '1px solid #666', width: 'fit-content', borderRadius: '3px', backgroundColor: '#eff', fontWeight: '500', color: '#246'}}>/{cast?.channel?.id}</div>)}
           </div>
           {(typeof cast.channelName !== 'undefined') && (

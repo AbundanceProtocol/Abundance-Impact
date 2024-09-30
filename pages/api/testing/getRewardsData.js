@@ -31,6 +31,19 @@ export default async function handler(req, res) {
       return result
     }
 
+
+    async function getUniqueCuratorsQualityCount() {
+      await connectToDatabase();
+
+      const result = await Quality.aggregate([
+        { $match: { createdAt: { $gte: oneDay } } },
+        { $group: { _id: "$curator_fid", totalQualityPoints: { $sum: 1 } } },
+      ]);
+
+      return result
+    }
+
+
     async function getTop5UsersByTips() {
       await connectToDatabase();
 
@@ -46,12 +59,19 @@ export default async function handler(req, res) {
     
     try {
       const getTopNominations = await getTopCuratorsByImpactPoints()
+      const getTopQDAU = await getUniqueCuratorsQualityCount()
       const getTopTips = await getTop5UsersByTips()
 
       const impactUsernames = await Promise.all(getTopNominations.map(async (tip) => {
         const user = await User.findOne({ fid: tip._id.toString() });
         return {username: user ? user.username : 'Unknown User', points: tip.totalImpactPoints};
       }));
+
+      const qualityUsernames = await Promise.all(getTopQDAU.map(async (tip) => {
+        const user = await User.findOne({ fid: tip._id.toString() });
+        return {username: user ? user.username : 'Unknown User', points: tip.totalQualityPoints};
+      }));
+
 
 
       const tipperUsernames = await Promise.all(getTopTips.map(async (tip) => {
@@ -87,13 +107,17 @@ export default async function handler(req, res) {
 
 
       let dcText = ''
-
+      
       for (const tipper of tipperUsernames) {
         dcText += '@' + tipper.username + ' - tip: ' + tipper.tip + '\n'
       }
       dcText += '\n'
-      for (const tipper of impactUsernames) {
-        dcText += '@' + tipper.username + ' - points: ' + tipper.points + '\n'
+      for (const impact of impactUsernames) {
+        dcText += '@' + impact.username + ' - points: ' + impact.points + '\n'
+      }
+      dcText += '\n'
+      for (const quality of qualityUsernames) {
+        dcText += '@' + quality.username + ' - tip: ' + quality.points + '\n'
       }
 
       dcText += '\nCurators staking: ' + uniqueCuratorsCount.length + '\n'
@@ -123,10 +147,10 @@ export default async function handler(req, res) {
       
       sendDc();
 
-      console.log('nominations, tips', tipperUsernames, impactUsernames, uniqueCuratorsCount, newUserCount, uniqueQualityCuratorsCount, newOptOutCount, uniqueTipperCount, totalDegenAmount)
+      console.log('nominations, tips', tipperUsernames, impactUsernames, uniqueCuratorsCount, newUserCount, uniqueQualityCuratorsCount, newOptOutCount, uniqueTipperCount, totalDegenAmount, qualityUsernames)
 
 
-      res.status(200).json({ message: 'nominations, tips', tipperUsernames, impactUsernames, uniqueCuratorsCount, newUserCount, uniqueQualityCuratorsCount, newOptOutCount, uniqueTipperCount, totalDegenAmount });
+      res.status(200).json({ message: 'nominations, tips', tipperUsernames, impactUsernames, uniqueCuratorsCount, newUserCount, uniqueQualityCuratorsCount, newOptOutCount, uniqueTipperCount, totalDegenAmount, qualityUsernames });
     } catch (error) {
       console.error('Error handling GET request:', error);
       res.status(500).json({ error: 'Internal Server Error' });
