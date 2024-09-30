@@ -5,6 +5,8 @@ import Rules from '../EcoRules/Rules';
 import Criteria from '../EcoRules/Criteria';
 import CheckButton from '../EcoRules/CheckButton';
 import CastActions from '../CastActionNav/CastActions';
+import CreatorNav from '../CastActionNav/CreatorNav';
+import CuratorNav from '../CastActionNav/CuratorNav';
 import useMatchBreakpoints from '../../../hooks/useMatchBreakpoints';
 
 const ShowActionNav = () => {
@@ -30,6 +32,10 @@ const ShowActionNav = () => {
         ))}
         {(ecoButton == 'actions') && (
           <CastActions />)}
+        {(ecoButton == 'curators') && (
+          <CuratorNav />)}
+        {(ecoButton == 'creators') && (
+          <CreatorNav />)}
       </div>
     </div>
     )

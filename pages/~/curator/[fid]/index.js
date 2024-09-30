@@ -116,6 +116,7 @@ export default function ProfilePage() {
       },
     ]
   }
+  console.log('updated', fid)
 
   useEffect(() => {
     // if (store.userProfile) {
@@ -129,7 +130,9 @@ export default function ProfilePage() {
     //   getUserAllowance(fid)
     //   getCurationAllowance(fid)
     // }
-  }, []);
+    console.log('trigger', fid)
+  }, [fid]);
+
 
   useEffect(() => {
     if (userRouterScheduled) {
@@ -164,6 +167,7 @@ export default function ProfilePage() {
   }, [user, userRouterScheduled]);
 
   useEffect(() => {
+    console.log('updated', userQuery)
     if (feedRouterScheduled) {
       feedRouter();
       setFeedRouterScheduled(false);
