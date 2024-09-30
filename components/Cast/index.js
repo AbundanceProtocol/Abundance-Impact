@@ -383,12 +383,12 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
             {(cast.embeds.length > 0) && (cast.embeds.map((embed, subindex) => (
               
             <div key={subindex} className='flex-col' style={{alignItems: 'center', display: hide ? 'flex' : 'flex'}}>
-              {(embed?.metadata?.content_type && embed?.metadata?.content_type?.startsWith('image/')) && (
+              {/* {(embed?.metadata?.content_type && embed?.metadata?.content_type?.startsWith('image/')) && (
+                <Images image={embed?.url} subindex={subindex} textMax={textMax} handleClick={handleClick} index={index} />
+              )} */}
+              {(embed && embed.type && (embed.type == 'image' || embed.type == 'other')) && (
                 <Images image={embed?.url} subindex={subindex} textMax={textMax} handleClick={handleClick} index={index} />
               )}
-              {/* {(embed && embed.type && (embed.type == 'image' || embed.type == 'other')) && (
-                <Images embed={embed} subindex={subindex} textMax={textMax} handleClick={handleClick} index={index} />
-              )} */}
               {(embed && embed.type && embed.type == 'subcast') && (
                 <div className="" key={`${index}-${subindex}`} style={{marginTop: '10px'}}>
                   <Subcast cast={embed.subcast} key={subindex} index={subindex} />
