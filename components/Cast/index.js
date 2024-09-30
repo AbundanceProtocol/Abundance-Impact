@@ -81,7 +81,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
   async function unstakePoint(cast) {
     try {
       const response = await axios.post('/api/curation/postUnstake', { castHash: cast.hash, fid, points: ecosystem })
-      if (response?.data?.castImpact) {
+      if (response?.data?.castImpact || response?.data?.castImpact == 0) {
         console.log(response?.data?.castImpact)
         const impactBalance = response?.data?.castImpact
         const updatedCast = {...cast, impact_balance: impactBalance}
@@ -399,7 +399,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
                   <VideoPlayer width={textMax} src={embed.url} />
                 </div>
               )}
-              {(embed && embed.url && embed.type && (embed.type == 'html') && embed.metadata && embed.metadata.title) && (
+              {(embed && embed?.url && embed?.type && (embed?.type == 'html') && embed?.metadata && embed?.metadata?.title) && (
                 <Embed embed={embed} index={index} subindex={subindex} textMax={textMax} />
               )}
             </div>
