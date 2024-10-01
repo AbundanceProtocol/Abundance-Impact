@@ -12,7 +12,7 @@ export default function Images({ image, index, subindex, textMax, handleClick })
           src={image} 
           alt="Cast image embed" 
           style={{
-            maxWidth: textMax, 
+            maxWidth: textMax || '300px', 
             maxHeight: '500px', 
             marginTop: '10px', 
             cursor: 'pointer', 

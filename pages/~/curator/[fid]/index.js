@@ -1,26 +1,20 @@
 import { useRouter } from 'next/router';
 import { useRef, useContext, useEffect, useState } from 'react';
-import useStore from '../../../../utils/store';
 import { AccountContext } from '../../../../context';
 import useMatchBreakpoints from '../../../../hooks/useMatchBreakpoints';
 import axios from 'axios';
 import Cast from '../../../../components/Cast'
 import { formatNum, getCurrentDateUTC, getTimeRange, isYesterday, checkEmbedType, populateCast, isCast } from '../../../../utils/utils';
-import { BsClock } from "react-icons/bs";
-import { GoTag } from "react-icons/go";
 import { AiOutlineBars } from "react-icons/ai";
 import Spinner from '../../../../components/Common/Spinner';
 import ExpandImg from '../../../../components/Cast/ExpandImg';
-import UserData from '../../../../components/Page/UserData';
-import FeedMenu from '../../../../components/Page/FeedMenu';
+import CuratorData from '../../../../components/Page/CuratorData';
 import TopPicks from '../../../../components/Page/FilterMenu/TopPicks';
 import Shuffle from '../../../../components/Page/FilterMenu/Shuffle';
 import Time from '../../../../components/Page/FilterMenu/Time';
-import TagsDropdown from '../../../../components/Page/FilterMenu/Tags/TagsDropdown';
 
 export default function ProfilePage() {
   const router = useRouter();
-  const store = useStore()
   const { fid } = router.query
   const [user, setUser] = useState(null)
   const { LoginPopup, isLogged } = useContext(AccountContext)
@@ -34,8 +28,6 @@ export default function ProfilePage() {
   const { isMobile } = useMatchBreakpoints();
   const [userFeed, setUserFeed] = useState(null)
   const [showPopup, setShowPopup] = useState({open: false, url: null})
-  const [userTips, setUserTips] = useState(null)
-  const [userAllowance, setUserAllowance] = useState(null)
   const [feedRouterScheduled, setFeedRouterScheduled] = useState(false);
   const [userRouterScheduled, setUserRouterScheduled] = useState(false);
   const initialEco = {
@@ -116,22 +108,32 @@ export default function ProfilePage() {
       },
     ]
   }
-  console.log('updated', fid)
+  // console.log('updated', fid)
 
   useEffect(() => {
-    // if (store.userProfile) {
-      // setUser(store.userProfile)
+
       setUserQuery({
         ...userQuery,
         curators: [fid]
       })
-    // }
-    // if (user && fid) {
-    //   getUserAllowance(fid)
-    //   getCurationAllowance(fid)
-    // }
-    console.log('trigger', fid)
+    getUser(fid)
   }, [fid]);
+
+  async function getUser(fid) {
+    try {
+      const response = await axios.get('/api/getUserByFid', {
+        params: { fid }
+      })
+      if (response?.data) {
+        setUser(response?.data)
+      } else {
+        setUser(null)
+      }
+    } catch (error) {
+      console.error('Error submitting data:', error)
+      setUser(null)
+    }
+  }
 
 
   useEffect(() => {
@@ -139,12 +141,7 @@ export default function ProfilePage() {
       if (user && fid && fid !== '-') {
         console.log('2')
         feedRouter()
-        // getUserAllowance(fid)
-        // const currentDate = getCurrentDateUTC()
-        // if (store && store.userUpdateTime && isYesterday(store.userUpdateTime, currentDate)) {
-        //   console.log('1')
-        //   getCurationAllowance(fid)
-        // }
+
       }
       setUserRouterScheduled(false);
     } else {
@@ -152,12 +149,6 @@ export default function ProfilePage() {
         if (user && fid && fid !== '-') {
           console.log('3')
           feedRouter()
-          // getUserAllowance(fid)
-          // const currentDate = getCurrentDateUTC()
-          // if (store && store.userUpdateTime && isYesterday(store.userUpdateTime, currentDate)) {
-          //   console.log('1')
-          //   getCurationAllowance(fid)
-          // }
         }
         setUserRouterScheduled(false);
       }, 300);
@@ -167,7 +158,7 @@ export default function ProfilePage() {
   }, [user, userRouterScheduled]);
 
   useEffect(() => {
-    console.log('updated', userQuery)
+    // console.log('updated', userQuery)
     if (feedRouterScheduled) {
       feedRouter();
       setFeedRouterScheduled(false);
@@ -389,102 +380,7 @@ export default function ProfilePage() {
     }
   }
 
-  async function getUserFeed(fid, recasts, userFid) {
-    try {
-      const response = await axios.get('/api/getUserCasts', {
-        params: { fid, recasts, userFid }})
-      const feed = response.data.feed
-      console.log(response.data.feed)
-      setUserFeed(feed)
-    } catch (error) {
-      console.error('Error submitting data:', error)
-    }
-  }
 
-  async function getLatestUserCasts(fid, userFid) {
-    try {
-      const response = await axios.get('/api/getLatestUserCasts', {
-        params: { fid, userFid } })
-      const feed = response.data.feed
-      console.log(response.data.feed)
-      setUserFeed(feed)
-    } catch (error) {
-      console.error('Error submitting data:', error)
-    }
-  }
-
-  async function getUserAllowance(fid) {
-    if (user && !userAllowance && fid) {
-      let remaningAllowance = 0
-
-      try {
-        const responseTotal = await axios.get('/api/degen/getUserAllowance', {
-          params: {
-            fid: fid,
-          }
-        })
-
-        if (responseTotal?.data) {
-          console.log(responseTotal.data.total)
-          // totalAllowance = await responseTotal.data.total
-          remaningAllowance = await responseTotal.data.remaining
-        }
-
-        console.log(remaningAllowance)
-        if (!isNaN(remaningAllowance)) {
-          console.log(remaningAllowance)
-          setUserAllowance(remaningAllowance)
-        } else {
-          console.log(0)
-          setUserAllowance(0)
-        }
-      } catch (error) {
-        console.error('Error creating post:', error);
-        setUserAllowance(0)
-      }
-
-    }
-  }
-
-  async function getCurationAllowance(fid) {
-    try {
-      const response = await axios.post('/api/curation/postUserStatus', {fid: fid })
-      if (response.data) {
-        const { impact_allowance, quality_allowance, remaining_i_allowance, remaining_q_allowance } = response.data
-        store.setUserTotalImpact(impact_allowance)
-        store.setUserTotalQuality(quality_allowance)
-        store.setUserRemainingImpact(remaining_i_allowance)
-        store.setUserRemainingQuality(remaining_q_allowance)
-        const currentDate = getCurrentDateUTC()
-        store.setUserUpdateTime(currentDate)
-      }
-      console.log('Post created:', response.data.impact_allowance);
-      // console.log('Post created:', response.data);
-      return response;
-    } catch (error) {
-      console.error('Error creating post:', error);
-    }
-  }
-
-  async function getUserTipsReceived(fid) {
-    // console.log(fid, userFeed)
-    if (user && !userTips) {
-      try {
-        const response = await axios.get('/api/degen/getUserTipsReceived', {
-          params: { fid }
-        })
-        const tips = response.data.tips
-        if (tips) {
-          setUserTips(tips)
-        }
-        console.log(tips)
-        // console.log(response.data.feed)
-        // setUserFeed(feed)
-      } catch (error) {
-        console.error('Error submitting data:', error)
-      }
-    }
-  }
 
   useEffect(() => {
     if (screenWidth) {
@@ -680,7 +576,7 @@ export default function ProfilePage() {
     <div className='flex-col' style={{width: 'auto', position: 'relative'}} ref={ref}>
       <div className="" style={{padding: '58px 0 0 0'}}>
       </div>
-      {/* <UserData {...{ show: (isLogged && user), user, textMax, userAllowance, getCurationAllowance }} /> */}
+      {user && (<CuratorData {...{ show: (isLogged && user), user, textMax }} />)}
       {/* <div className="top-layer flex-row" style={{padding: '10px 0 10px 0', alignItems: 'center', justifyContent: 'space-evenly', margin: '0', borderBottom: '1px solid #888'}}>
         {userButtons.map((btn, index) => (
           <FeedMenu {...{buttonName: btn, searchSelect, searchOption, isMobile }} key={index} />))}
