@@ -20,19 +20,22 @@ import EcosystemMenu from '../components/Layout/EcosystemNav/EcosystemMenu';
 import { IoInformationCircleOutline as Info } from "react-icons/io5";
 import { PiSquaresFourLight as Actions } from "react-icons/pi";
 import { Logo } from './assets';
+import useStore from '../utils/store';
 
-export default function Home({eco}) {
+export default function Home() {
   const ref2 = useRef(null)
   const [ref, inView] = useInView()
-  const { LoginPopup, ecoData, points, setPoints, isLogged, showLogin, setShowLogin, setIsLogged, setFid } = useContext(AccountContext)
+  const { LoginPopup, ecoData, points, setPoints, isLogged, showLogin, setShowLogin, setIsLogged, setFid, getRemainingBalances } = useContext(AccountContext)
   const [screenWidth, setScreenWidth] = useState(undefined)
   const [screenHeight, setScreenHeight] = useState(undefined)
   const [textMax, setTextMax] = useState('562px')
   const [feedMax, setFeedMax ] = useState('620px')
   const [showPopup, setShowPopup] = useState({open: false, url: null})
   const router = useRouter()
+  const { eco } = router.query
   const { isMobile } = useMatchBreakpoints();
   const [display, setDisplay] = useState({personal: false, ecosystem: false})
+  const store = useStore()
 
   function toggleMenu(target) {
     setDisplay(prev => ({...prev, [target]: !display[target] }))
@@ -95,8 +98,13 @@ export default function Home({eco}) {
   }, [screenWidth])
 
   useEffect(() => {
-    setPoints(eco)
-  }, [eco])
+    if (isLogged) {
+      let setEco = eco || '$IMPACT'
+      console.log('setEco', setEco)
+      setPoints(setEco)
+      getRemainingBalances(store.fid, setEco, store.signer_uuid)
+    }
+  }, [eco, isLogged])
 
 
   return (
@@ -124,14 +132,14 @@ export default function Home({eco}) {
           <div onClick={() => document.getElementById('personal').scrollIntoView({ behavior: 'smooth' })}>
             <div className='flex-row cast-act-lt' style={{borderRadius: '8px', padding: '8px 8px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
               <FaUser size={14} />
-              <p style={{padding: '0px', fontSize: '15px', fontWeight: '500', textWrap: 'nowrap'}}>Personal /impact</p>
+              <p style={{padding: '0px', fontSize: '15px', fontWeight: '500', textWrap: 'nowrap'}}>Abundance Ecosystem</p>
             </div>
           </div>
 
           <div onClick={() => document.getElementById('ecosystem').scrollIntoView({ behavior: 'smooth' })}>
             <div className='flex-row cast-act-lt' style={{borderRadius: '8px', padding: '8px 8px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
               <FaGlobe size={14} />
-              <p style={{padding: '0px', fontSize: '15px', fontWeight: '500', textWrap: 'nowrap'}}>Ecosystem /impact</p>
+              <p style={{padding: '0px', fontSize: '15px', fontWeight: '500', textWrap: 'nowrap'}}>[Your] Ecosystem</p>
             </div>
           </div>
         </div>
@@ -162,7 +170,7 @@ export default function Home({eco}) {
       <div style={{padding: '8px', backgroundColor: '#11448888', borderRadius: '15px', border: '1px solid #11447799'}}>
         <div className='flex-row' style={{width: '100%', justifyContent: 'center', alignItems: 'center', padding: '16px 0 0 0'}}>
           <FaUser style={{fill: '#cde'}} size={24} />
-          <Description {...{show: true, text: 'Personal /impact', padding: '4px 0 4px 10px', size: 'large' }} />
+          <Description {...{show: true, text: 'Abundance Ecosystem', padding: '4px 0 4px 10px', size: 'large' }} />
         </div>
 
         <div className='flex-row' style={{color: '#9df', width: '100%', fontSize: isMobile ? '15px' : '17px', padding: '10px 10px 15px 10px', justifyContent: 'center'}}>Nominate your favorite creators. Calibrate distribution of tips. Schedule recurring tips or tip throughout the day. Share curation with your friends and earn rewards</div>
@@ -208,7 +216,7 @@ export default function Home({eco}) {
             </div>
             <div className='flex-row' style={{gap: '0.5rem', margin: '8px', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center'}}>
 
-              {isLogged ? (<a className="" title={`$IMPACT Dashboard`} href={`https://warpcast.com/~/add-cast-action?name=%24IMPACT+Console&icon=star&actionType=post&postUrl=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Faction%2Fstatus%3Fpoints=IMPACT&description=Curate+Casts+with+the+Impact+App`} target="_blank" rel="noopener noreferrer">
+              {isLogged ? (<a className="" title={`$IMPACT Console`} href={`https://warpcast.com/~/add-cast-action?name=%24IMPACT+Console&icon=star&actionType=post&postUrl=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Faction%2Fstatus%3Fpoints=IMPACT&description=Curate+Casts+with+the+Impact+App`} target="_blank" rel="noopener noreferrer">
                 <div className='flex-row cast-act-lt' style={{borderRadius: '8px', padding: '8px 8px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
                   <FaRegStar size={14} />
                   <p style={{padding: '0px', fontSize: '12px', fontWeight: '500', textWrap: 'nowrap'}}>$IMPACT Console</p>
@@ -250,50 +258,6 @@ export default function Home({eco}) {
                 </div>
               )}
 
-              {/* {isLogged ? (<a className="" title={`+5 $IMPACT`} href={`https://warpcast.com/~/add-cast-action?name=%2B5+%24IMPACT&icon=star&actionType=post&postUrl=https%3A%2Fimpact.abundance.id%2Fapi%2Faction%2Fimpact5%3Fpoints=IMPACT&description=Curate+Casts+with+the+Impact+App`} target="_blank" rel="noopener noreferrer">
-                <div className='flex-row cast-act-lt' style={{borderRadius: '8px', padding: '8px 8px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
-                  <FaRegStar size={14} />
-                  <p style={{padding: '0px', fontSize: '12px', fontWeight: '500', textWrap: 'nowrap'}}>+5 $IMPACT</p>
-                </div>
-              </a>) : (
-                <div className={`flex-row`} onClick={LoginPopup}>
-                  <div>
-                    <div className='flex-row cast-act-lt' style={{borderRadius: '8px', padding: '8px 8px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', backgroundColor: '#bbb'}}>
-                      <FaRegStar size={14} />
-                      <p style={{padding: '0px', fontSize: '12px', fontWeight: '500', textWrap: 'nowrap', color: '#222'}}>+5 $IMPACT</p>
-                    </div>
-                  </div>
-                  <div style={{position: 'relative', fontSize: '0', width: '0', height: '100%'}}>
-                    <div className='top-layer' style={{position: 'absolute', top: 0, left: 0, transform: 'translate(-50%, -50%)' }}>
-                      <FaLock size={8} color='#999' />
-                    </div>
-                  </div>
-                </div>
-              )} */}
-
-              {/* {isLogged ? (<a className="" title={`$$IMPACT Balance`} href={`https://warpcast.com/~/add-cast-action?name=%24IMPACT+Stats&icon=info&actionType=post&postUrl=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Faction%2Fbalance?points=IMPACT&description=Get+Cast+Balance+for+Impact+App`} target="_blank" rel="noopener noreferrer">
-                <div className='flex-row cast-act-lt' style={{borderRadius: '8px', padding: '8px 4px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
-                  <div style={{width: '2px', fontSize: '0px'}}>&nbsp;</div>
-                  <Info size={14} />
-                  <p style={{padding: '0px', fontSize: '12px', fontWeight: '500', textWrap: 'nowrap'}}>$IMPACT Stats</p>
-                  <div style={{width: '2px', fontSize: '0px'}}>&nbsp;</div>
-                </div>
-              </a>) : (
-                <div className={`flex-row`} onClick={LoginPopup}>
-                  <div>
-                    <div className='flex-row cast-act-lt' style={{borderRadius: '8px', padding: '8px 8px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', backgroundColor: '#bbb'}}>
-                      <FaRegStar size={14} />
-                      <p style={{padding: '0px', fontSize: '12px', fontWeight: '500', textWrap: 'nowrap', color: '#222'}}>$IMPACT Stats</p>
-                      <div style={{width: '2px', fontSize: '0px'}}>&nbsp;</div>
-                    </div>
-                  </div>
-                  <div style={{position: 'relative', fontSize: '0', width: '0', height: '100%'}}>
-                    <div className='top-layer' style={{position: 'absolute', top: 0, left: 0, transform: 'translate(-50%, -50%)' }}>
-                      <FaLock size={8} color='#999' />
-                    </div>
-                  </div>
-                </div>
-              )} */}
             </div>
           </div>
         </div>
@@ -304,7 +268,7 @@ export default function Home({eco}) {
       <div style={{padding: '8px', backgroundColor: '#335566aa', borderRadius: '15px', border: '1px solid #000'}}>
         <div className='flex-row' style={{width: '100%', justifyContent: 'center', alignItems: 'center', padding: '16px 0 0 0'}}>
           <FaGlobe style={{fill: '#cde'}} size={24} />
-          <Description {...{show: true, text: 'Ecosystem /impact', padding: '4px 0 4px 10px', size: 'large' }} />
+          <Description {...{show: true, text: '[Your] Ecosystem', padding: '4px 0 4px 10px', size: 'large' }} />
         </div>
 
         <div className='flex-row' style={{color: '#9df', width: '100%', fontSize: isMobile ? '15px' : '17px', padding: '10px 10px 15px 10px', justifyContent: 'center'}}>Let your community curate your channel/ecosystem. Ensure quality curation. Reward contributors and curators. Grow your community</div>
@@ -404,16 +368,4 @@ export default function Home({eco}) {
     <div ref={ref}>&nbsp;</div>
   </div>
   )
-}
-
-
-export async function getServerSideProps(context) {
-  const { query } = context;
-  const { eco } = query;
-
-  let setEco = eco || '$IMPACT'
-
-  return {
-    props: { eco: setEco }
-  };
 }

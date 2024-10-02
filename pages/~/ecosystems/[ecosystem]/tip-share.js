@@ -12,6 +12,8 @@ import cheerio from 'cheerio'
 import FrameButton from '../../../../components/Cast/Frame/Button';
 import qs from "querystring";
 import Circle from '../../../../models/Circle';
+import connectToDatabase from '../../../../libs/mongodb';
+import mongoose from "mongoose";
 
 // import useStore from '../../../utils/store';
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
@@ -44,7 +46,7 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem, fi
     {
       version: "vNext",
       title: "Multi-Tip",
-      image: `${baseURL}/images/tips.jpg`,
+      image: `${baseURL}/images/frame36.gif`,
       image_aspect_ratio: "1:1",
       buttons: [
         {
@@ -55,13 +57,19 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem, fi
         },
         {
           index: 2,
-          title: "What's /impact?",
-          action_type: "link",
-          target: `https://warpcast.com/abundance/0x43ddd672`
+          title: "Menu",
+          action_type: "post",
+          target: `${baseURL}/api/frames/tip/menu?`
+        },
+        {
+          index: 3,
+          title: "Auto-tip >",
+          action_type: "post",
+          target: `${baseURL}/api/frames/tip/auto-tip?`
         },
       ],
       input: {
-        text: "Eg.: 1000 $Degen, 500 $FARTHER"
+        text: "Eg.: 1000 $Degen, 500 $HAM"
       },
       state: {},
       frames_url: `${baseURL}/~/ecosystems/${ecosystem}/tips`
@@ -154,9 +162,11 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem, fi
     console.log(queryData)
 
     const updatedFrameData = {...frameData}
-    updatedFrameData.buttons[0].target = `${baseURL}/api/frames/tip/tip?${qs.stringify({    
-      time, curators, eco, ecosystem, start: true
-    })}`
+    updatedFrameData.buttons[0].target = `${baseURL}/api/frames/console/tip-tip?${qs.stringify({ time, curators, eco, ecosystem, start: true })}`
+
+    updatedFrameData.buttons[1].target = `${baseURL}/api/frames/tip/menu?${qs.stringify({ time, curators, eco, ecosystem })}`
+
+    updatedFrameData.buttons[2].target = `${baseURL}/api/frames/tip/auto-tip?${qs.stringify({ time, curators, eco, ecosystem })}`
 
     updatedFrameData.image = `${baseURL}/api/frames/tip/circle?${qs.stringify({ id })}`
 
@@ -219,7 +229,7 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem, fi
     async function postFrame(url, untrustedData) {
       try {
         const response = await axios.post(url, {untrustedData})
-        console.log(response)
+        // console.log(response)
   
         if (response.headers['content-type'].includes('text/html')) {
           const $ = cheerio.load(response.data);
@@ -304,11 +314,15 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem, fi
           time, curators, eco, ecosystem, start: true
         })}`} />
 
-        <meta property="fc:frame:button:2" content={`What's /impact?`} />
-        <meta property="fc:frame:button:2:action" content="link" />
-        <meta property="fc:frame:button:2:target" content={`https://warpcast.com/abundance/0x43ddd672`} />
+        <meta property="fc:frame:button:2" content={'Menu'} />
+        <meta property="fc:frame:button:2:action" content="post" />
+        <meta property="fc:frame:button:2:target" content={`${baseURL}/api/frames/tip/menu?${qs.stringify({ time, curators, eco, ecosystem })}`} />
 
-        <meta name="fc:frame:input:text" content="Eg.: 1000 $Degen, 500 $FARTHER" />
+        <meta property="fc:frame:button:3" content={'Auto-tip >'} />
+        <meta property="fc:frame:button:3:action" content="post" />
+        <meta property="fc:frame:button:3:target" content={`${baseURL}/api/frames/tip/auto-tip?${qs.stringify({ time, curators, eco, ecosystem })}`} />
+
+        <meta name="fc:frame:input:text" content="Eg.: 1000 $Degen, 500 $HAM" />
       </Head>
     )}
     <div className="" style={{padding: '58px 0 0 0'}}>

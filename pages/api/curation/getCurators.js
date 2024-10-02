@@ -19,8 +19,16 @@ export default async function handler(req, res) {
           ]
         }).select('fid username display_name pfp').sort({ display_name: 1 }).exec();
 
-        console.log('Users:', users);
-        return users;
+        const uniqueFids = new Set();
+        const uniqueUsers = users.filter(user => {
+          if (!uniqueFids.has(user.fid)) {
+            uniqueFids.add(user.fid);
+            return true;
+          }
+          return false;
+        });
+
+        return uniqueUsers;
       } catch (error) {
         console.error('Error:', error);
         return null;

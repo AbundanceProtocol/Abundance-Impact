@@ -23,7 +23,7 @@ export default async function handler(req, res) {
         await connectToDatabase();
         const ecosystem = await EcosystemRules.findOne({ ecosystem_points_name: points }).exec()
         if (ecosystem) {
-          console.log(ecosystem)
+          console.log('ce1', ecosystem)
           return ecosystem
         } else {
           return null
@@ -117,7 +117,7 @@ export default async function handler(req, res) {
 
         channelFollower = await getChannel(user.fid, ecosystem.channels)
       }
-      console.log('channelFollower', channelFollower)
+      console.log('ce2channelFollower', channelFollower)
 
       if (user.verifications && user.verifications.length > 0) {
         hasWallet = true
@@ -162,14 +162,14 @@ export default async function handler(req, res) {
 
         ownerFollower = await getOwner(fid, ecosystem.fid)
       }
-      console.log('ownerFollower', ownerFollower)
+      console.log('ce3 ownerFollower', ownerFollower)
 
 
       if (ecosystem.condition_powerbadge) {
         badgeReq = true
         badge = user.power_badge
       }
-      console.log('badge', badge)
+      console.log('ce4 badge', badge)
 
 
       if (ecosystem.condition_holding_nft) {
@@ -292,7 +292,7 @@ export default async function handler(req, res) {
                     const decimal = BigInt(`0x${cleanHexValue}`).toString();
                     const dividedDecimal = decimal / 1000000000000000000;
                     const tokenAmount = Number(dividedDecimal).toFixed(4);
-                    console.log('value', parseFloat(tokenAmount))
+                    console.log('ce5 value', parseFloat(tokenAmount))
                     return parseFloat(tokenAmount)
                   } else {
                     return 0
@@ -349,7 +349,7 @@ export default async function handler(req, res) {
         let balance = eligibility ? 69 : 0
 
         createUser = await User.findOne({ fid: fid, ecosystem_name: ecosystem.ecosystem_name }).select('remaining_i_allowance remaining_q_allowance').exec();
-        console.log(createUser)
+        console.log('ce6 createUser', createUser)
 
         if (!createUser) {
 
@@ -411,9 +411,9 @@ export default async function handler(req, res) {
             next_update: midnight
           });
 
-          console.log('createUser', createUser)
+          console.log('ce7 createUser', createUser)
         } else if (createUser) {
-          console.log(typeof createUser?.uuid == 'undefined')
+          console.log('ce8', typeof createUser?.uuid == 'undefined')
           if (typeof createUser.uuid == 'undefined') {
             createUser.uuid = encryptedUuid
           }

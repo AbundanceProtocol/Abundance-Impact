@@ -25,7 +25,7 @@ const TipAll = ({ tokenData, setTokenData, loading, setLoading, noTip, modal, se
         })
         if (response?.status !== 200) {
           setLoading(false)
-          console.log(response)
+          // console.log(response)
           setModal({on: true, success: false, text: 'Tipping all casts failed'});
           setTimeout(() => {
             setModal({on: false, success: false, text: ''});
@@ -35,7 +35,7 @@ const TipAll = ({ tokenData, setTokenData, loading, setLoading, noTip, modal, se
           for (const token of updatedTokenData) {
             if (token.set) {
               if (token.token == '$TN100x') {
-                token.allowance = token.allowance - (coinTotals[token.token].totalTip * 10)
+                token.allowance = token.allowance - (coinTotals[token.token].totalTip)
               } else {
                 token.allowance = token.allowance - coinTotals[token.token].totalTip
               }
@@ -44,7 +44,7 @@ const TipAll = ({ tokenData, setTokenData, loading, setLoading, noTip, modal, se
           }
           setTokenData(updatedTokenData)
           setLoading(false)
-          console.log(response)
+          // console.log(response)
           setModal({on: true, success: true, text: response.data.message});
           setTimeout(() => {
             setModal({on: false, success: false, text: ''});

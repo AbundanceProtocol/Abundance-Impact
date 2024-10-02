@@ -98,10 +98,10 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
   }
 
   const getEcosystems = async (points) => {
-    console.log(points)
+    console.log('c1', points)
     try {
       const response = await axios.get('/api/ecosystem/getEcosystems')
-      console.log(response)
+      // console.log(response)
       if (response?.data?.ecosystems?.length > 0) {
         const ecosystems = response?.data?.ecosystems
         let ecoIndex = -1
@@ -112,19 +112,19 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
         }
         
         if (ecoIndex !== -1) { 
-          console.log(ecosystems[ecoIndex])
+          console.log('c2', ecosystems[ecoIndex])
           setEcoData(ecosystems[ecoIndex])
           store.setPoints(ecosystems[ecoIndex].ecosystem_points_name)
           setPoints(ecosystems[ecoIndex].ecosystem_points_name)
         } else {
-          console.log(ecosystems[0])
+          console.log('c3', ecosystems[0])
           setEcoData(ecosystems[0])
           store.setPoints(ecosystems[0].ecosystem_points_name)
           setPoints(ecosystems[0].ecosystem_points_name)
         }
         setEcosystemsData(ecosystems)
       } else {
-        console.log(initEcosystems)
+        console.log('c4', initEcosystems)
         setEcosystemsData(initEcosystems)
         setEcoData(initEcosystems[0])
       }
@@ -136,30 +136,29 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
   }
 
   useEffect(() => {
-    if (router.route !== "/~/ecosystems/[ecosystem]/tip" && router.route !== "/~/ecosystems/[ecosystem]/[eco]/[curators]/tip") {
-      console.log(' triggered []')
-      console.log(store.points, points)
+    if (router.route !== "/~/ecosystems/[ecosystem]/tip" && router.route !== "/~/ecosystems/[ecosystem]/[eco]/[curators]/tip" && router.route !== "/~/ecosystems/[ecosystem]/tip-basic" && router.route !== "/~/ecosystems/[ecosystem]/tip-share") {
+      console.log('c5 triggered []')
+      console.log('c6', store.points, points)
       getEcosystems(store.points || points)
-      console.log(router)
+      console.log('c7', router)
     }
   }, [])
 
   useEffect(() => {
-    console.log(' triggered [ecoData]')
-    console.log(isLogged, ecoData)
+    console.log('c8 triggered [ecoData]')
+    console.log('c9', isLogged, ecoData)
     const updateEcoData = () => {
       if (isLogged && ecoData) {
         setPopulate(populate+1)
         setPoints(ecoData?.ecosystem_points_name)
-        if (router.route == '/') {
-          getRemainingBalances(store.fid, points, store.signer_uuid)
-        } else {
+        if (router.route !== '/' && router.route !== '/~/curator/[fid]') {
+          console.log('c10 points', store.fid, points)
           getRemainingBalances(store.fid, ecoData?.ecosystem_points_name, store.signer_uuid)
         }
       }
     }
 
-    if (router.route !== "/~/ecosystems/[ecosystem]/tip" && router.route !== "/~/ecosystems/[ecosystem]/[eco]/[curators]/tip") {
+    if (router.route !== "/~/ecosystems/[ecosystem]/tip" && router.route !== "/~/ecosystems/[ecosystem]/[eco]/[curators]/tip" && router.route !== "/~/ecosystems/[ecosystem]/tip-basic" && router.route !== "/~/ecosystems/[ecosystem]/tip-share" && router.route !== '/~/curator/[fid]') {
       if (sched.ecoData) {
         updateEcoData()
         setSched(prev => ({...prev, ecoData: false }))
@@ -174,10 +173,10 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
   }, [ecoData, isLogged, sched.ecoData])
 
   useEffect(() => {
-    console.log(' triggered [store.isAuth]')
+    console.log('c11 triggered [store.isAuth]')
 
     const updateLogin = () => {
-      console.log('store triggered', store.isAuth)
+      console.log('c12 store triggered', store.isAuth)
       if (store.isAuth) {
         setIsLogged(true);
         setFid(store.fid)
@@ -188,13 +187,15 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
         setFid(null)
         setUserBalances({impact: 0, qdau: 0})
         setUserProfile(null)
-        if (router.route !== '/') {
+        if (router.route !== '/' && router.route !== '/~/curator/[fid]') {
+          console.log('c13-1')
           LoginPopup()
         }
       }
     }
 
-    if (router.route !== "/~/ecosystems/[ecosystem]/tip" && router.route !== "/~/ecosystems/[ecosystem]/[eco]/[curators]/tip") {
+    console.log('c13-2', router.route, router.route !== "/~/ecosystems/[ecosystem]/tip-basic")
+    if (router.route !== "/~/ecosystems/[ecosystem]/tip" && router.route !== "/~/ecosystems/[ecosystem]/[eco]/[curators]/tip" && router.route !== "/~/ecosystems/[ecosystem]/tip-basic" && router.route !== "/~/ecosystems/[ecosystem]/tip-share") {
       if (sched.login) {
         updateLogin()
         setSched(prev => ({...prev, login: false }))
@@ -214,7 +215,7 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
       const response = await axios.get('/api/ecosystem/getBalances', {
         params: { fid, points } })
       if (response?.data?.user) {
-        console.log(response?.data?.user)
+        console.log('c13', response?.data?.user)
         const remainingImpact = response?.data?.user?.remaining_i_allowance || 0
         const remainingQuality = response?.data?.user?.remaining_q_allowance || 0
         setUserBalances(prev => ({
@@ -235,7 +236,7 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
   }
 
   const checkEcoEligibility = async (fid, points, uuid) => {
-    console.log(fid, points, prevPoints)
+    console.log('c14', fid, points, prevPoints)
     if (!fid) {
       LoginPopup()
     } else if (points !== prevPoints) {
@@ -243,7 +244,7 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
       try {
         const response = await axios.get('/api/ecosystem/checkUserEligibility', {
           params: { fid, points, uuid } })
-        console.log(response)
+        // console.log(response)
         if (response?.data?.eligibilityData) {
           let eligibilityData = response?.data?.eligibilityData
           setEligibility(eligibilityData)
@@ -275,7 +276,7 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
 
   const handleEcoChange = (event) => {
     const system = ecosystemsData.find(eco => eco.ecosystem_points_name == event.target.value)
-    console.log(event.target.value)
+    console.log('c15', event.target.value)
     store.setEcosystemData(system)
     setEcoData(system);
     setPrevPoints(null)
@@ -285,7 +286,7 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
   };
 
   const changeEco = (system) => {
-    console.log('system', system)
+    console.log('c16 system', system)
     store.setEcosystemData(system)
     setEcoData(system);
   };

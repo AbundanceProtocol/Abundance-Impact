@@ -18,7 +18,7 @@ const secretKey = process.env.SECRET_KEY
 
 export default async function handler(req, res) {
 
-  const { addImpact, iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash } = req.query;
+  const { addImpact, iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle, rS, oO } = req.query;
 
   if (req.method !== 'POST') {
     res.setHeader('Allow', ['POST']);
@@ -35,11 +35,11 @@ export default async function handler(req, res) {
     const signer = decryptPassword(encryptedBotUuid, secretKey)
 
 
-    let balanceImg = `${baseURL}/api/frames/remote/balance?${qs.stringify({ iB, qB, qT, author, iA, qA, ecosystem: ec, login, pt, cu })}`
+    let balanceImg = `${baseURL}/api/frames/console/balance-tip?${qs.stringify({ iB, qB, qT, author, iA, qA, ecosystem: ec, login, pt, cu })}`
 
     let button1 = `<meta property="fc:frame:button:2" content='Refresh' />
       <meta property="fc:frame:button:2:action" content="post" />
-      <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/remote/test?${qs.stringify({ iB, qB, qT, author, iA, qA, ecosystem: ec, login, pt, cu, impact, quality: ql, cI, hash })}' />`
+      <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/console/test?${qs.stringify({ iB, qB, qT, author, iA, qA, ecosystem: ec, login, pt, cu, impact, quality: ql, cI, hash, handle, rS, oO })}' />`
     let button2 = ''
     let button3 = ''
     let button4 = ''
@@ -122,31 +122,16 @@ export default async function handler(req, res) {
                   
                   let existImpact = 0
 
-                  let cast = await Cast.findOne({ cast_hash: castHash, points: points }).exec();
+                  let impact = await Impact.findOne({ target_cast_hash: castHash, points: points, curator_fid: fid }).exec();
     
-                  function createdImpact(fid, impactAmount, points) {
-                    let newImpact = new Impact({
-                      curator_fid: fid,
-                      target_cast_hash: castHash,
-                      points: points,
-                      creator_fid: authorFid,
-                      impact_points: impactAmount
-                    });
-                    newImpact.points = points
-
-                    return newImpact
-                  }
-                  
-    
-                  const saveAll = async (user, impactDoc, cast) => {
+                  const saveAll = async (user, impact) => {
                     try {
-                      const [savedUser, savedImpact, savedCast] = await Promise.all([
+                      const [savedUser, savedImpact] = await Promise.all([
                         user.save(),
-                        impactDoc.save(),
-                        cast.save()
+                        impact.save(),
                       ]);
 
-                      return { balance: savedUser.remaining_i_allowance, castImpact: cast.impact_total }
+                      return { balance: savedUser.remaining_i_allowance, castImpact: savedImpact.impact_points }
                       
                     } catch (error) {
                       console.error("Error saving lists:", error);
@@ -154,87 +139,18 @@ export default async function handler(req, res) {
                     }
                   }
 
-                  if (cast) {
-                    existImpact = cast.impact_points.length
-                    let castChannel = cast.cast_channel
-                    let impactDoc
+                  if (impact) {
+                    existImpact = impact.impact_points
 
-                    if (ecosystem?.channels?.length > 0 && castChannel) {
-                      for (const channel of ecosystem.channels) {
-                        if (channel.url == castChannel) {
-                          channelCuration = true
-                        }
-                      }
-                    }
-
-                    impactDoc = await Impact.findOne({ target_cast_hash: castHash, points }).sort({ createdAt: -1 }).exec();
-
-                    async function nominationCast(user, curator, ecosystem, hash, signer, handle, fid, eco) {
-                      let text = ''
-                      if (inputText && inputText !== '') {
-                        text = `@${curator} comment: "${inputText}"\n\n`
-                      }
-                      try {
-                        const base = "https://api.neynar.com/";
-                        const url = `${base}v2/farcaster/cast`;
-                        
-                        let body = {
-                          signer_uuid: signer,
-                          text: `${text}@${user} has been nominated by @${curator} to the ${ecosystem} Ecosystem on /impact\n\nHelp support @${curator}'s nominees:`,
-                        };
-                        
-                        const frameUrl = `https://impact.abundance.id/~/ecosystems/${handle}/tip?time=all&shuffle=true&curators=${fid}&eco=${eco}&referrer=${fid}`
-
-                        body.parent = hash;
-
-                        if (!body.embeds) { body.embeds = []; }
-                        body.embeds.push({ url: frameUrl });
-
-                        const response = await fetch(url, {
-                          method: 'POST',
-                          headers: {
-                            'Content-Type': 'application/json',
-                            'api_key': apiKey,
-                          },
-                          body: JSON.stringify(body),
-                        });
-                        console.log(response)
-                        if (!response.ok) {
-                          console.error(`Failed to send nomination`);
-                          return false
-                        } else {
-                          console.log(`Nomination sent successfully`);
-                          return true
-                        }
-  
-                      } catch (error) {
-                        console.error('Error handling GET request:', error);
-                        return false
-                      }
-                    }
-  
-                    if (ecosystem.bot_reply && existImpact == 0) {
-                      nominationCast(cast.author_username, user.username, ecosystem.ecosystem_name, castHash, signer, ecosystem.ecosystem_handle, fid, eco)
-                    }
-
-                    if (impactDoc && impactDoc.curator_fid == fid) {
-                      impactDoc.impact_points += impactAmount
-                      cast.impact_total += impactAmount
-                      let impactTotal = cast.impact_total
-                      let curatorCount = cast.impact_points.length
-                      const { balance, castImpact } = await saveAll(user, impactDoc, cast)
-                      return { balance, castImpact, impactTotal, curatorCount, qualityBalance: cast.quality_balance, qualityTotal: cast.quality_absolute }
+                    if (impact?.curator_fid == fid) {
+                      impact.impact_points += impactAmount
+                      let impactTotal = impact.impact_points
+                      let curatorCount = 1
+                      const { balance, castImpact } = await saveAll(user, impact)
+                      return { balance, castImpact, impactTotal, curatorCount, qualityBalance: 0, qualityTotal: 0 }
     
                     } else {
-                      impactDoc = createdImpact(fid, impactAmount)
-                      impactDoc.points = points
-                      cast.impact_total += impactAmount
-                      cast.impact_points.push(impactDoc)
-                      user.impact_reviews.push(impactDoc)
-                      let impactTotal = cast.impact_total
-                      let curatorCount = cast.impact_points.length
-                      const { balance, castImpact } = await saveAll(user, impactDoc, cast)
-                      return { balance, castImpact, impactTotal, curatorCount, qualityBalance: cast.quality_balance, qualityTotal: cast.quality_absolute }
+                      return { balance: null, castImpact: null, impactTotal: null, curatorCount: null, qualityBalance: null, qualityTotal: null }
                     }
 
     
@@ -277,52 +193,52 @@ export default async function handler(req, res) {
 
       if ((balance || balance == 0) && castImpact) {
 
-        let curatedCast = null
+        // let curatedCast = null
 
-        if (channelCuration) {
-          if (impactTotal >= ecosystem.condition_points_threshold &&  curatorCount >= ecosystem.condition_curators_threshold) {
+        // if (channelCuration) {
+        //   if (impactTotal >= ecosystem.condition_points_threshold &&  curatorCount >= ecosystem.condition_curators_threshold) {
 
-            async function curateCast(hash) {
-              try {
-                const base = "https://api.neynar.com/";
-                const url = `${base}v2/farcaster/reaction`;
-                const response = await fetch(url, {
-                  method: 'POST',
-                  headers: {
-                    accept: "application/json",
-                    api_key: apiKey,
-                    'content-type': 'application/json',
-                  },
-                  body: JSON.stringify({
-                    'signer_uuid': signer,
-                    target: hash,
-                    reaction_type: 'like'
-                  })})
+        //     async function curateCast(hash) {
+        //       try {
+        //         const base = "https://api.neynar.com/";
+        //         const url = `${base}v2/farcaster/reaction`;
+        //         const response = await fetch(url, {
+        //           method: 'POST',
+        //           headers: {
+        //             accept: "application/json",
+        //             api_key: apiKey,
+        //             'content-type': 'application/json',
+        //           },
+        //           body: JSON.stringify({
+        //             'signer_uuid': signer,
+        //             target: hash,
+        //             reaction_type: 'like'
+        //           })})
                   
-                const cast = await response.json();
-                return cast
-              } catch (error) {
-                console.error('Error handling POST request:', error);
-                return null
-              }
-            }
-            curatedCast = await curateCast(castHash)
-          }
-        }
+        //         const cast = await response.json();
+        //         return cast
+        //       } catch (error) {
+        //         console.error('Error handling POST request:', error);
+        //         return null
+        //       }
+        //     }
+        //     curatedCast = await curateCast(castHash)
+        //   }
+        // }
 
 
-        balanceImg = `${baseURL}/api/frames/remote/balance?${qs.stringify({ iB: castImpact, qB: qualityBalance, qT: qualityTotal, author, iA: balance, qA, ecosystem: ec, login, pt, cu })}`
+        balanceImg = `${baseURL}/api/frames/console/balance-tip?${qs.stringify({ iB: castImpact, qB: qualityBalance, qT: qualityTotal, author, iA: balance, qA, ecosystem: ec, login, pt, cu })}`
 
         button1 = `<meta property="fc:frame:button:1" content='+1 ${pt}' />
         <meta property="fc:frame:button:1:action" content="post" />
-        <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/remote/impact?${qs.stringify({ addImpact: 1, iB: castImpact, qB: qualityBalance, qT: qualityTotal, author, iA: balance, qA, ec, login, pt, cu, impact, ql, cI, hash: castHash })}' />`
+        <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/console/impact-tip?${qs.stringify({ addImpact: 1, iB: castImpact, qB: qualityBalance, qT: qualityTotal, author, iA: balance, qA, ec, login, pt, cu, impact, ql, cI, hash: castHash, handle, rS, oO })}' />`
         button2 = `<meta property="fc:frame:button:2" content='+5 ${pt}' />
         <meta property="fc:frame:button:2:action" content="post" />
-        <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/remote/impact?${qs.stringify({ addImpact: 5, iB: castImpact, qB: qualityBalance, qT: qualityTotal, author, iA: balance, qA, ec, login, pt, cu, impact, ql, cI, hash: castHash })}' />`
-        // button3 = `<meta property="fc:frame:button:3" content='More >' />
-        // <meta property="fc:frame:button:3:action" content="post" />
-        // <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/remote/test?${qs.stringify({ iB: castImpact, qB: qualityBalance, qT: qualityTotal, author, iA: balance, qA, ecosystem, login, pt, cu, impact, quality, cI, hash: castHash })}' />`
-        
+        <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/console/impact-tip?${qs.stringify({ addImpact: 5, iB: castImpact, qB: qualityBalance, qT: qualityTotal, author, iA: balance, qA, ec, login, pt, cu, impact, ql, cI, hash: castHash, handle, rS, oO })}' />`
+        button3 = `<meta property="fc:frame:button:3" content='More >' />
+        <meta property="fc:frame:button:3:action" content="post" />
+        <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/more-tip?${qs.stringify({ iB: castImpact, qB: qualityBalance, qT: qualityTotal, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash: castHash, handle, rS, oO })}' />`
+        textField = ``
     
         metatags = button1 + button2 + button3 + button4 + textField + postUrl
 

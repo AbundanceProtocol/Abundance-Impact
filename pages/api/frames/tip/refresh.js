@@ -65,7 +65,7 @@ export default async function handler(req, res) {
         // Check if the item matches the pattern 🍖x<number>
         else if (/🍖x\d+/i.test(items[i])) {
           const match = items[i].match(/🍖x(\d+)/i);
-          const amount = parseInt(match[1], 10) * 10;
+          const amount = parseInt(match[1], 10);
           const coin = '$TN100x';
     
           // Combine amounts for the same coin
@@ -159,14 +159,19 @@ export default async function handler(req, res) {
 
     const fid = untrustedData?.fid
     const loginImg = `${baseURL}/images/login.jpg`;
-    const tipsImg = `${baseURL}/images/tips.jpg`
+    const tipsImg = `${baseURL}/images/frame36.gif`
     const inputImg = `${baseURL}/images/input.jpg`;
     const issueImg = `${baseURL}/images/issue.jpg`;
     let circlesImg = ''
     
-    console.log('14:', req.query, refresh)
+    console.log('14-2:', req.query, refresh)
 
-    const exploreLink = `${baseURL}/~/ecosystems/${ecosystem}?${qs.stringify({ time: 'all', curators, eco })}`
+    let exploreLink = `${baseURL}/~/ecosystems/${ecosystem}?${qs.stringify({ time: 'all', curators })}`
+
+    if (curators) {
+      let curatorId = Array.isArray(curators) ? curators[0] : Number(curators);
+      exploreLink = `${baseURL}/~/curator/${curatorId}`
+    }
 
     const impactLink = `https://warpcast.com/abundance/0x43ddd672`
 
@@ -176,12 +181,14 @@ export default async function handler(req, res) {
 
     const startPost = `${baseURL}/api/frames/tip/start?${qs.stringify({ time, curators, eco, ecosystem })}`
 
-    const loginUrl = `${baseURL}/~/ecosystems/${ecosystem}/tip-login?${qs.stringify({ time, curators, eco })}`
+    const loginUrl = `${baseURL}/?${qs.stringify({ eco: points })}`
 
     const sendPost = `${baseURL}/api/frames/tip/tip?${qs.stringify({ time, curators, eco, ecosystem })}`
 
     const postUrl = `${baseURL}/~/ecosystems/${ecosystem}/tip-login?${qs.stringify({ time, curators, eco })}`
     
+    const autoTipPost = `${baseURL}/api/frames/tip/auto-tip?${qs.stringify({ time, curators, eco, ecosystem })}`
+
     const shareText = 'I just multi-tipped builders and creators on /impact. Try it out here:'
 
     let shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share?${qs.stringify({ time, curators, eco })}`
@@ -218,9 +225,9 @@ export default async function handler(req, res) {
         <meta name="fc:frame:button:2" content="Tip more >">
         <meta name="fc:frame:button:2:action" content="post">
         <meta name="fc:frame:button:2:target" content="${startPost}" />
-        <meta name="fc:frame:button:3" content="What's /impact">
-        <meta name="fc:frame:button:3:action" content="link">
-        <meta name="fc:frame:button:3:target" content="${impactLink}" />
+        <meta name="fc:frame:button:3" content="Auto-tip">
+        <meta name="fc:frame:button:3:action" content="post">
+        <meta name="fc:frame:button:3:target" content="${autoTipPost}" />
         <meta name="fc:frame:button:4" content="Refresh">
         <meta name="fc:frame:button:4:action" content="post">
         <meta name="fc:frame:button:4:target" content="${refreshPost}" />
@@ -248,22 +255,22 @@ export default async function handler(req, res) {
         return;
       } else {
         let metatags = `
-        <meta name="fc:frame:button:1" content="Tip Nominees">
+        <meta name="fc:frame:button:1" content="Multi-Tip >">
         <meta name="fc:frame:button:1:action" content="post">
         <meta name="fc:frame:button:1:target" content="${sendPost}" />
         <meta name="fc:frame:button:2" content="Explore curation">
         <meta name="fc:frame:button:2:action" content="link">
         <meta name="fc:frame:button:2:target" content="${exploreLink}" />
-        <meta name="fc:frame:button:3" content="What's /impact">
-        <meta name="fc:frame:button:3:action" content="link">
-        <meta name="fc:frame:button:3:target" content="${impactLink}" />
+        <meta name="fc:frame:button:3" content="Auto-tip">
+        <meta name="fc:frame:button:3:action" content="post">
+        <meta name="fc:frame:button:3:target" content="${autoTipPost}" />
         <meta name="fc:frame:button:4" content="Refresh">
         <meta name="fc:frame:button:4:action" content="post">
         <meta name="fc:frame:button:4:target" content="${refreshPost}" />
         <meta property="og:image" content="${tipsImg}">
         <meta name="fc:frame:image" content="${tipsImg}">
         <meta name="fc:frame:post_url" content="${postUrl}">
-        <meta name="fc:frame:input:text" content="Eg.: 1000 $Degen, 500 $FARTHER" />`
+        <meta name="fc:frame:input:text" content="Eg.: 1000 $Degen, 500 $HAM" />`
   
         res.setHeader('Content-Type', 'text/html');
         res.status(200)

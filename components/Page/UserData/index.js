@@ -10,9 +10,9 @@ import DashboardBtn from "../../Panels/DashboardBtn";
 
 const UserData = ({ user, textMax, userAllowance, getCurationAllowance, show }) => {
   const store = useStore()
-  const { LoginPopup, LogoutPopup } = useContext(AccountContext)
-  const userRemainingImpact = useStore(state => state.userRemainingImpact);
-  const userRemainingQuality = useStore(state => state.userRemainingQuality);
+  const { LoginPopup, LogoutPopup, userBalance } = useContext(AccountContext)
+  // const userRemainingImpact = useStore(state => state.userRemainingImpact);
+  // const userRemainingQuality = useStore(state => state.userRemainingQuality);
 
  return (
   show && (
@@ -78,8 +78,8 @@ const UserData = ({ user, textMax, userAllowance, getCurationAllowance, show }) 
         </div>
         <div className='flex-row' style={{justifyContent: 'center', gap: '0.5rem'}}>
           <DashboardBtn amount={formatNum(userAllowance)} type={'allowance'} icon={Degen} />
-          <DashboardBtn amount={formatNum(userRemainingImpact)} type={'impact'} icon={FaRegStar} />
-          <DashboardBtn amount={formatNum(userRemainingQuality)} type={'q/dau'} icon={Diamond} />
+          <DashboardBtn amount={formatNum(userBalance?.impact || 0)} type={'impact'} icon={FaRegStar} />
+          <DashboardBtn amount={formatNum(userBalance?.qdau || 0)} type={'q/dau'} icon={Diamond} />
         </div>
       </div>
     )

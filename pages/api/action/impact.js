@@ -6,7 +6,7 @@ import Impact from '../../../models/Impact';
 import Quality from '../../../models/Quality';
 import Cast from "../../../models/Cast";
 import Allowlist from '../../../models/Allowlist';
-
+import OptOut from "../../../models/OptOut";
 import { getCurrentDateUTC } from "../../../utils/utils"; 
 
 const HubURL = process.env.NEYNAR_HUB
@@ -18,6 +18,34 @@ export default async function handler(req, res) {
     const curatorFid = req.body.untrustedData.fid
     const castHash = req.body.untrustedData.castId.hash
     const authorFid = req.body.untrustedData.castId.fid
+
+    async function checkOptOut(authorFid, points) {
+      try {
+        await connectToDatabase();
+        let optOut = await OptOut.findOne({ fid: authorFid }).exec();
+        if (optOut) {
+          if (!optOut.opt_in) {
+            return true;
+          } else if (optOut.points.includes(points)) {
+            return true;
+          }
+        }
+        return false;
+      } catch (error) {
+        console.error("Error checking opt out:", error);
+        return false;
+      }
+    }
+
+    const authorOptedOut = await checkOptOut(authorFid, points)
+
+    if (authorOptedOut) {
+      res.setHeader('Content-Type', 'text/html');
+      res.status(200).send({
+        message: `User opted-out of /impact`
+      });
+      return;
+    }
 
     async function getQuality(curatorFid, castHash) {
       try {

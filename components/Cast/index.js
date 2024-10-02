@@ -4,6 +4,7 @@ import useStore from '../../utils/store';
 import { AccountContext } from '../../context';
 import { Like, LikeOn, Recast, Message, Kebab, ActiveUser } from '../../pages/assets'
 import { FaSearch, FaLock, FaRegStar, FaStar, FaArrowUp, FaArrowDown } from "react-icons/fa"
+import { BiSolidDownArrow as ArrowDown } from "react-icons/bi";
 import axios from 'axios';
 import { timePassed } from '../../utils/utils';
 import CastText from './Text'
@@ -14,7 +15,7 @@ import { ImArrowUp, ImArrowDown  } from "react-icons/im";
 import VideoPlayer from './VideoPlayer';
 import Images from './Images';
 
-export default function Cast({ cast, index, updateCast, openImagePopup, ecosystem }) {
+export default function Cast({ cast, index, updateCast, openImagePopup, ecosystem, self }) {
   const store = useStore()
   const router = useRouter();
   const [screenWidth, setScreenWidth] = useState(undefined)
@@ -29,7 +30,6 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
     openImagePopup(embed); 
   };
   const [hide, setHide] = useState(false)
-
   function clickFailed() {
     setFail(true);
     setTimeout(() => {
@@ -37,6 +37,10 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
     }, 1000);
   }
 
+  function isCurator(fid, cast) {
+    return cast?.impact_points?.some(point => point.curator_fid == fid);
+  }
+  
   async function boostQuality(cast, qualityAmount) {
     const castHash = cast.hash
     const castChannel = cast.root_parent_url
@@ -70,6 +74,23 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
         clickFailed()
       }
     } else {
+      clickFailed()
+    }
+  }
+
+  async function unstakePoint(cast) {
+    try {
+      const response = await axios.post('/api/curation/postUnstake', { castHash: cast.hash, fid, points: ecosystem })
+      if (response?.data?.castImpact || response?.data?.castImpact == 0) {
+        console.log(response?.data?.castImpact)
+        const impactBalance = response?.data?.castImpact
+        const updatedCast = {...cast, impact_balance: impactBalance}
+        updateCast(index, updatedCast)
+      } else {
+        clickFailed()
+      }
+    } catch (error) {
+      console.error('Error creating post:', error);
       clickFailed()
     }
   }
@@ -249,13 +270,14 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
 
           <div className="" style={{margin: '0 10px 0 0'}}>
             <a className="" title="" href={`/${cast.author.username}`} onClick={(event) => {
-                  if (!isLogged) {
-                    LoginPopup()
-                    event.preventDefault()
-                  } else {
-                    goToUserProfile(event, cast.author)
-                  }
-                }}>
+              if (!isLogged) {
+                console.log('ca1')
+                LoginPopup()
+                event.preventDefault()
+              } else {
+                goToUserProfile(event, cast.author)
+              }
+            }}>
               <img loading="lazy" src={cast.author.pfp_url} className="" alt={`${cast.author.display_name} avatar`} style={{width: '48px', height: '48px', maxWidth: '48px', maxHeight: '48px', borderRadius: '24px', border: '1px solid #000'}} />
             </a>
           </div>
@@ -267,6 +289,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
             <div className={`impact-arrow ${fail ? 'flash-fail' : ''}`} onClick={
              () => {
                 if (!isLogged) {
+                  console.log('ca2')
                   LoginPopup()
                 } else {
                   if(userBalances.impact > 0) {
@@ -279,6 +302,19 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
             } style={{margin: `${shrinkMargin(cast.impact_balance)}px 0 ${shrinkMargin(cast.impact_balance)}px 0`}}>
               <FaStar size={growPoints(cast.impact_balance)} className='' style={{fontSize: '25px'}} />
             </div>
+
+            {((self && cast?.impact_balance >= 1) || (fid && cast && isCurator(fid, cast))) && (<div className={`like-btn ${fail ? 'flash-fail' : ''}`} onClick={
+             () => {
+                if (!isLogged) {
+                  console.log('ca3')
+                  LoginPopup()
+                } else {
+                  unstakePoint(cast)
+                }
+              }
+            } style={{margin: `${shrinkMargin(cast.impact_balance)}px 0 ${shrinkMargin(cast.impact_balance)}px 0`}}>
+              <ArrowDown size={growPoints(cast.impact_balance)} className='' style={{fontSize: '25px'}} />
+            </div>)}
           </div>
           )}
         </div>
@@ -287,14 +323,16 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
           <div className="flex-row" style={{width: '100%', justifyContent: 'space-between', height: '', alignItems: 'flex-start', flexWrap: 'wrap'}}>
             <div className="flex-row" style={{alignItems: 'center', gap: '0.25rem', flexWrap: 'wrap', userSelect: 'none'}}>
               <span className="">
-                <a href={`/${cast.author.username}`} className="fc-lnk" title={cast.author.display_name} style={{cursor: 'pointer'}} onClick={(event) => {
+                {/* <a href={`/${cast.author.username}`} className="fc-lnk" title={cast.author.display_name} style={{cursor: 'pointer'}} onClick={(event) => {
                   if (!isLogged) {
+                    console.log('ca4')
                     LoginPopup()
                     event.preventDefault()
                   } else {
                     goToUserProfile(event, cast.author)
                   }
-                }}>
+                }}> */}
+                <a href={`https://warpcast.com/${cast?.author?.username}`} className="fc-lnk" title={cast?.author?.display_name} style={{cursor: 'pointer'}}>
                   <div className="flex-row" style={{alignItems: 'center'}}>
                     <span className="name-font">{cast.author.display_name}</span>
                     <div className="" style={{margin: '0 0 0 3px'}}>
@@ -304,24 +342,32 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
                 </a>
               </span>
               <span className="user-font">
-                <a href={`/${cast.author.username}`} className="fc-lnk" title={cast.author.display_name} onClick={(event) => {
+                {/* <a href={`/${cast.author.username}`} className="fc-lnk" title={cast.author.display_name} onClick={(event) => {
                   if (!isLogged) {
+                    console.log('ca5')
                     LoginPopup()
                     event.preventDefault()
                   } else {
                     goToUserProfile(event, cast.author)
                   }
-                }}>@{cast.author.username}</a>
+                }}>@{cast.author.username}</a> */}
+                <a href={`https://warpcast.com/${cast.author.username}`} className="fc-lnk" title={cast.author.display_name}>@{cast.author.username}</a>
               </span>
               <div className="">·</div>
-              <a href={`/${cast.author.username}/casts/${cast.hash}`} className="fc-lnk" title="Navigate to cast" onClick={(event) => {
+
+              {/* <a href={`/${cast.author.username}/casts/${cast.hash}`} className="fc-lnk" title="Navigate to cast"
+               onClick={(event) => {
                   if (!isLogged) {
+                    console.log('ca6')
                     LoginPopup()
                     event.preventDefault()
                   } else {
                     goToCast(event, cast)
                   }
-                }}>
+                }}
+                ></a> */}
+
+              <a href={`https://warpcast.com/${cast?.author?.username}/${cast?.hash?.substring(0, 10)}`} className="fc-lnk" title="Navigate to cast">
                 <div className="user-font">{timePassed(cast.timestamp)}</div>
               </a>
             </div>
@@ -337,8 +383,11 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
             {(cast.embeds.length > 0) && (cast.embeds.map((embed, subindex) => (
               
             <div key={subindex} className='flex-col' style={{alignItems: 'center', display: hide ? 'flex' : 'flex'}}>
+              {/* {(embed?.metadata?.content_type && embed?.metadata?.content_type?.startsWith('image/')) && (
+                <Images image={embed?.url} subindex={subindex} textMax={textMax} handleClick={handleClick} index={index} />
+              )} */}
               {(embed && embed.type && (embed.type == 'image' || embed.type == 'other')) && (
-                <Images embed={embed} subindex={subindex} textMax={textMax} handleClick={handleClick} index={index} />
+                <Images image={embed?.url} subindex={subindex} textMax={textMax} handleClick={handleClick} index={index} />
               )}
               {(embed && embed.type && embed.type == 'subcast') && (
                 <div className="" key={`${index}-${subindex}`} style={{marginTop: '10px'}}>
@@ -350,11 +399,20 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
                   <VideoPlayer width={textMax} src={embed.url} />
                 </div>
               )}
-              {(embed && embed.url && embed.type && (embed.type == 'html') && embed.metadata && embed.metadata.title) && (
+              {(embed && embed?.url && embed?.type && (embed?.type == 'html') && embed?.metadata && embed?.metadata?.title) && (
                 <Embed embed={embed} index={index} subindex={subindex} textMax={textMax} />
               )}
             </div>
             )))}
+
+            {(cast?.frames?.length > 0) && (cast?.frames?.map((frame, subindex) => (
+              <div key={subindex} className='flex-col' style={{alignItems: 'center', display: hide ? 'flex' : 'flex'}}>
+                {(frame?.image) && (
+                  <Images {...{image: frame?.image, subindex, textMax, handleClick, index}} />
+                )}
+              </div>
+            )))}
+
             {cast?.channel && (<div style={{alignSelf: 'flex-start', fontSize: '13px', margin: '10px 0 0 0', padding: '3px 6px', border: '1px solid #666', width: 'fit-content', borderRadius: '3px', backgroundColor: '#eff', fontWeight: '500', color: '#246'}}>/{cast?.channel?.id}</div>)}
           </div>
           {(typeof cast.channelName !== 'undefined') && (
@@ -381,6 +439,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
                 style={{color: cast.viewer_context?.recasted ? '#191' : ''}}
                 onClick={() => {
                   if (!isLogged) {
+                    console.log('ca7')
                     LoginPopup()
                   } else {
                     postRecast(cast.hash, index, cast.reactions.recasts_count)
@@ -400,6 +459,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
                 style={{color: cast.viewer_context?.liked ? '#b33' : ''}}
                 onClick={() => {
                   if (!isLogged) {
+                    console.log('ca8')
                     LoginPopup()
                   } else {
                     postLike(cast.hash, index, cast.reactions.likes_count)
@@ -414,6 +474,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
             <div className="flex-row" style={{flex: 1, padding: '3px', gap: '0.5rem'}}>
               <div className={`impact-arrow ${fail ? 'flash-fail' : ''}`} style={{padding: '0px 1px 0 0px'}} onClick={() => {
                 if (!isLogged) {
+                  console.log('ca9')
                   LoginPopup()
                 } else {
                   boostQuality(cast, 1)
@@ -433,6 +494,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
 
               <div className={`like-btn ${fail ? 'flash-fail' : ''}`} style={{padding: '2px 0 0 0px'}} onClick={() => {
                 if (!isLogged) {
+                  console.log('ca10')
                   LoginPopup()
                 } else {
                   boostQuality(cast, -1)
