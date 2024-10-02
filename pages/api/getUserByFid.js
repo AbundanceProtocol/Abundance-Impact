@@ -1,5 +1,3 @@
-import cheerio from 'cheerio';
-
 export default async function handler(req, res) {
   const { fid } = req.query;
   if (req.method !== 'GET' || !fid) {
@@ -11,7 +9,6 @@ export default async function handler(req, res) {
         try {
           const base = "https://client.warpcast.com/";
           const url = `${base}v2/user-by-fid?fid=${fid}`;
-    
           const response = await fetch(url, {
             headers: {
               accept: "application/json",
@@ -22,7 +19,6 @@ export default async function handler(req, res) {
             const user = await response.json()
             if (user) {
               const userProfile = user?.result?.user
-              // console.log(userProfile, userProfile.pfp, userProfile.profile, userProfile.viewerContext)
               console.log('userProfile', userProfile)
               return userProfile
             }

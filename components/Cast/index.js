@@ -38,7 +38,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
   }
 
   function isCurator(fid, cast) {
-    return cast.impact_points.some(point => point.curator_fid == fid);
+    return cast?.impact_points?.some(point => point.curator_fid == fid);
   }
   
   async function boostQuality(cast, qualityAmount) {
@@ -303,7 +303,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
               <FaStar size={growPoints(cast.impact_balance)} className='' style={{fontSize: '25px'}} />
             </div>
 
-            {((self && cast?.impact_balance >= 1) || (isCurator(fid, cast))) && (<div className={`like-btn ${fail ? 'flash-fail' : ''}`} onClick={
+            {((self && cast?.impact_balance >= 1) || (fid && cast && isCurator(fid, cast))) && (<div className={`like-btn ${fail ? 'flash-fail' : ''}`} onClick={
              () => {
                 if (!isLogged) {
                   console.log('ca3')

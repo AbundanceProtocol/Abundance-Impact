@@ -8,6 +8,7 @@ const impactSchema = new mongoose.Schema({
   creator_username: String,
   creator_fid: Number,
   points: String,
+  quality_adjusted: { type: Number, default: 0 },
   impact_points: { type: Number, default: 0 },
   createdAt: { type: Date, default: () => new Date() }
 });

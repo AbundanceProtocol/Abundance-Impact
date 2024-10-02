@@ -13,6 +13,7 @@ export default function Embed({ embed, index, subindex, textMax }) {
           style={{
             width: textMax, 
             maxHeight: '500px', 
+            maxWidth: '500px', 
             cursor: 'pointer', 
             position: 'relative',
             border: '1px solid #888', 
