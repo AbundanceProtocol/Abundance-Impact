@@ -11,6 +11,10 @@ const castSchema = new mongoose.Schema({
   points: String,
   cast_hash: String,
   cast_text: String,
+  cast_media: [{
+    url: String,
+    type: String,
+  }],
   cast_channel: String,
   cast_tags: [String],
   quality_balance: Number,
