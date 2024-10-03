@@ -12,8 +12,8 @@ const castSchema = new mongoose.Schema({
   cast_hash: String,
   cast_text: String,
   cast_media: [{
-    url: String,
-    media_type: String,
+    url: { type: String, required: true },
+    content_type: { type: String, required: true },
   }],
   cast_channel: String,
   cast_tags: [String],
