@@ -222,7 +222,7 @@ export default async function handler(req, res) {
         async function getCastMedia(cast) {
           try {
           
-            if (neynarCast) {
+            if (cast) {
               let embeds = cast?.embeds || []
               let frames = cast?.frames || []
               let media = []
@@ -251,7 +251,7 @@ export default async function handler(req, res) {
             }
           } catch (error) {
             console.error('Error handling GET request:', error);
-            return null
+            return []
           }
         }
 
@@ -281,6 +281,7 @@ export default async function handler(req, res) {
           impact_total: 0,
           impact_points: [],
         });
+        
         cast.cast_media = [...castMedia]
 
         await cast.save()
