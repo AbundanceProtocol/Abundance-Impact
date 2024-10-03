@@ -216,14 +216,55 @@ export default async function handler(req, res) {
       let castContext
 
       if (getCastData) {
+
+        let castMedia = []
+
+        async function getCastMedia(cast) {
+          try {
+          
+            if (neynarCast) {
+              let embeds = cast?.embeds || []
+              let frames = cast?.frames || []
+              let media = []
+    
+    
+              for (const embed of embeds) {
+                if (embed?.metadata?.content_type) {
+                  let image = {url: embed?.url, content_type: embed?.metadata?.content_type}
+                  media.push(image)
+                } else if (embed?.cast_id) {
+                  let quote = {url: embed?.cast_id?.hash, content_type: 'quotecast'}
+                  media.push(quote)
+                }
+              }
+
+              for (const frame of frames) {
+                if (frame?.image) {
+                  let frameImage = {url: frame?.image, content_type: 'frame'}
+                  media.push(frameImage)
+                }
+              }
+    
+              return media
+            } else {
+              return []
+            }
+          } catch (error) {
+            console.error('Error handling GET request:', error);
+            return null
+          }
+        }
+
+        castMedia = await getCastMedia(getCastData)
+
         castContext = {
-          author_fid: getCastData.author.fid,
-          author_pfp: getCastData.author.pfp_url,
-          author_username: getCastData.author.username,
-          author_display_name: getCastData.author.display_name,
-          cast_hash: getCastData.hash,
-          cast_text: getCastData.text,
-          cast_channel: getCastData.root_parent_url
+          author_fid: getCastData?.author.fid,
+          author_pfp: getCastData?.author.pfp_url,
+          author_username: getCastData?.author.username,
+          author_display_name: getCastData?.author.display_name,
+          cast_hash: getCastData?.hash,
+          cast_text: getCastData?.text,
+          cast_channel: getCastData?.root_parent_url
         }
 
         let cast = new Cast({
@@ -240,7 +281,8 @@ export default async function handler(req, res) {
           impact_total: 0,
           impact_points: [],
         });
-  
+        cast.cast_media = [...castMedia]
+
         await cast.save()
   
         author = castContext.author_username

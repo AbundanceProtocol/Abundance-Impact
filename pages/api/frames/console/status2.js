@@ -1,5 +1,6 @@
 import { getSSLHubRpcClient, Message } from "@farcaster/hub-nodejs";
 import qs from "querystring";
+import { init, validateFramesMessage } from "@airstack/frames";
 
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 const HubURL = process.env.NEYNAR_HUB
@@ -7,7 +8,10 @@ const client = HubURL ? getSSLHubRpcClient(HubURL) : undefined;
 
 
 export default async function handler(req, res) {
-
+  init(process.env.AIRSTACK_API_KEY ?? '')
+  const body = await req.body;
+  const {isValid} = await validateFramesMessage(body)
+  console.log('isValid:', isValid)
   const { untrustedData } = req.body
   const { iB, qB, qT, author, iA, qA, ecosystem, login, pt, cu, impact, quality, cI, hash, handle, rS, oO } = req.query;
 
@@ -59,7 +63,7 @@ export default async function handler(req, res) {
       console.log('2')
       button1 = `<meta property="fc:frame:button:1" content='+1 ${pt}' />
       <meta property="fc:frame:button:1:action" content="post" />
-      <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/console/impact2?${qs.stringify({ addImpact: 1, iB, qB, qT, author, iA, qA, ec: ecosystem, login, pt, cu, impact, ql: quality, cI, hash, handle, rS, oO })}' />`
+      <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/console/impact?${qs.stringify({ addImpact: 1, iB, qB, qT, author, iA, qA, ec: ecosystem, login, pt, cu, impact, ql: quality, cI, hash, handle, rS, oO })}' />`
       button2 = `<meta property="fc:frame:button:2" content='+5 ${pt}' />
       <meta property="fc:frame:button:2:action" content="post" />
       <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/console/impact?${qs.stringify({ addImpact: 5, iB, qB, qT, author, iA, qA, ec: ecosystem, login, pt, cu, impact, ql: quality, cI, hash, handle, rS, oO })}' />`
