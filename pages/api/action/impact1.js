@@ -112,8 +112,48 @@ export default async function handler(req, res) {
       const getCastData = await populateCast(curatorFid, castHash)
 
       let castContext
+      let castMedia = []
 
       if (getCastData) {
+
+        async function getCastMedia(cast) {
+          try {
+          
+            if (cast) {
+              let embeds = cast?.embeds || []
+              let frames = cast?.frames || []
+              let media = []
+    
+    
+              for (const embed of embeds) {
+                if (embed?.metadata?.content_type) {
+                  let image = {url: embed?.url, content_type: embed?.metadata?.content_type}
+                  media.push(image)
+                } else if (embed?.cast_id) {
+                  let quote = {url: embed?.cast_id?.hash, content_type: 'quotecast'}
+                  media.push(quote)
+                }
+              }
+
+              for (const frame of frames) {
+                if (frame?.image) {
+                  let frameImage = {url: frame?.image, content_type: 'frame'}
+                  media.push(frameImage)
+                }
+              }
+    
+              return media
+            } else {
+              return []
+            }
+          } catch (error) {
+            console.error('Error handling GET request:', error);
+            return []
+          }
+        }
+
+        castMedia = await getCastMedia(getCastData)
+
         castContext = {
           author_fid: getCastData.author.fid,
           author_pfp: getCastData.author.pfp_url,
@@ -247,6 +287,7 @@ export default async function handler(req, res) {
                       impact_points: [impact],
                     });
 
+                    cast.cast_media = [...castMedia]
                     cast.points = points
 
                     const { balance, castImpact } = await saveAll(user, impact, cast)
