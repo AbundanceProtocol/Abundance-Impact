@@ -13,7 +13,7 @@ const castSchema = new mongoose.Schema({
   cast_text: String,
   cast_media: [{
     url: String,
-    type: String,
+    media_type: String,
   }],
   cast_channel: String,
   cast_tags: [String],
