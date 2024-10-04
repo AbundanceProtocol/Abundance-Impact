@@ -154,7 +154,7 @@ export default async function handler(req, res) {
       }
     }
     const { casts, totalCount } = await fetchCasts(query, req.query.shuffle === 'true', page, limit);
-    console.log('casts 157', casts)
+    // console.log('casts 157', casts)
     res.status(200).json({
       total: totalCount,
       page: page,
