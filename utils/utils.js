@@ -275,6 +275,7 @@ export async function populateCast(casts) {
           power_badge: false,
         },
         hash: cast.cast_hash,
+        cast_media: cast.cast_media,
         timestamp: cast.createdAt,
         text: cast.cast_text,
         impact_points: cast.impact_points,
