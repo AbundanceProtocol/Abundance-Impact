@@ -8,7 +8,7 @@ import Quality from '../../../models/Quality';
 import Cast from "../../../models/Cast";
 import OptOut from "../../../models/OptOut";
 import EcosystemRules from "../../../models/EcosystemRules";
-// import Allowlist from '../../../models/Allowlist';
+import { init, validateFramesMessage } from "@airstack/frames";
 
 // import { decryptPassword } from "../../../utils/utils"; 
 
@@ -19,6 +19,12 @@ const apiKey = process.env.NEYNAR_API_KEY
 // const secretKey = process.env.SECRET_KEY
 
 export default async function handler(req, res) {
+  init(process.env.AIRSTACK_API_KEY ?? '')
+  const body = await req.body;
+  const {isValid, message} = await validateFramesMessage(body)
+  console.log(message, message?.data?.fid, message?.data?.frameActionBody)
+
+
   if (req.method === 'POST') {
     // const impactAmount = 1
     const eco = req.query.points
