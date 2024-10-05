@@ -17,102 +17,52 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
-  const { code, tipTime } = req.query;
-  console.log('code', code);
-  if (!code) {
+  const { fid, code } = req.query;
+  if (!fid || !code) {
     return res.status(400).json({ error: 'Bad Request', message: 'Missing required parameters' });
   }
 
   try {
     await connectToDatabase();
-    const scheduled = await getScheduled(code);
-    console.log('scheduled', scheduled, !scheduled);
-    if (!scheduled) {
+    const schedule = await getSchedule(code);
+    if (!schedule.percent || !schedule.decryptedUuid) {
       return res.status(500).json({ error: 'Internal Server Error' });
-    } else {
-      const uniquePoints = await getUniquePoints();
-
-      for (const points of uniquePoints) {
-        const curatorPercent = await getCuratorPercent(points);
-        const uniqueFids = await getUniqueFids(points);
-
-        for (const fid of uniqueFids) {
-          console.log('fid', fid);
-          
-          const schedule = await getSchedule(fid, points);
-          const time = schedule.timeRange ? getTimeRange(schedule.timeRange) : null;
-
-          let allowances = [];
-          let casts = [];
-          try {
-            allowances = await getAllowances(fid, schedule.currencies, schedule.percent, tipTime);
-            casts = await getUserSearch(time, schedule.tags, schedule.channels, schedule.curators, points);
-          } catch (error) {
-            console.error(`Error fetching allowances or user search for fid ${fid}:`, error);
-            continue; // Skip to the next fid
-          }
-
-          if (!schedule.percent || !schedule.decryptedUuid || allowances.length === 0) {
-            console.log(`Skipping fid ${fid} due to missing percent or decryptedUuid`);
-            continue;
-          }
-          console.log('casts 59', casts)
-          const displayedCasts = await processCasts(casts, fid);
-          const { castData, coinTotals } = await processTips(displayedCasts, fid, allowances, schedule.ecosystem, curatorPercent);
-
-          const tipQueue = new Queue(1, 100);
-          let tipCounter = 0;
-
-          const tipPromises = castData.map(cast => 
-            tipQueue.run(async () => {
-              try {
-                // const result = await sendTip(cast, schedule.decryptedUuid, fid, schedule.points);
-                console.log('cast', fid, cast);
-                const result = 1
-                tipCounter += result;
-              } catch (error) {
-                console.error(`Error sending tip for fid ${fid} and cast ${cast}:`, error);
-                return tipCounter; 
-              }
-            }).catch(error => {
-              console.error(`Error in tipQueue for fid ${fid} and cast ${cast}:`, error);
-              return tipCounter; 
-            })
-          );
-          
-          console.log('tipPromises', tipCounter);
-          await Promise.all(tipPromises);
-        }
-      }
-      res.status(200).json({ message: 'All casts tipped successfully' });
     }
 
+    const curatorPercent = await getCuratorPercent(schedule.points);
+    const time = schedule.timeRange ? getTimeRange(schedule.timeRange) : null;
+    const allowances = await getAllowances(fid, schedule.currencies, schedule.percent);
+
+    if (allowances.length === 0) {
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
+
+    const { casts } = await getUserSearch(time, schedule.tags, schedule.channels, schedule.curators, schedule.points);
+    const displayedCasts = await processCasts(casts, fid);
+    const { castData, coinTotals } = await processTips(displayedCasts, fid, allowances, schedule.ecosystem, curatorPercent);
+
+    const tipQueue = new Queue(1, 100); // Process 1 tip at a time, with a 100ms delay between each
+    let tipCounter = 0;
+
+    for (const cast of castData) {
+      await tipQueue.run(async () => {
+        const result = await sendTip(cast, schedule.decryptedUuid, fid, schedule.points);
+        tipCounter += result;
+      });
+    }
+
+    await tipQueue.waitForAll();
+
+    res.status(200).json({ message: 'All casts tipped successfully', tip: tipCounter });
   } catch (error) {
     console.error('Error in handler:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 }
 
-async function getScheduled(code) {
-  console.log('getScheduled1', code);
+async function getSchedule(code) {
   try {
-    const schedule = await ScheduleTip.findOne({ code: code, fid: 9326 }).select('fid').exec();
-    if (schedule) {
-      // const decryptedUuid = decryptPassword(schedule.uuid, secretKey);
-      return {
-        fid: schedule.fid,
-      };
-    }
-    return null;
-  } catch (error) {
-    console.error('Error in getSchedule:', error);
-    return null;
-  }
-}
-
-async function getSchedule(fid, points) {
-  try {
-    const schedule = await ScheduleTip.findOne({ fid, points, active_cron: true }).select('search_shuffle search_time search_tags points search_channels search_curators percent_tip ecosystem_name currencies uuid').exec();
+    const schedule = await ScheduleTip.findOne({ code: code }).select('search_shuffle search_time search_tags points search_channels search_curators percent_tip ecosystem_name currencies uuid').exec();
     if (schedule) {
       const decryptedUuid = decryptPassword(schedule.uuid, secretKey);
       return {
@@ -135,26 +85,6 @@ async function getSchedule(fid, points) {
   }
 }
 
-async function getUniquePoints() {
-  try {
-    const uniquePoints = await ScheduleTip.distinct('points');
-    return uniquePoints;
-  } catch (error) {
-    console.error('Error in getUniquePoints:', error);
-    return [];
-  }
-}
-
-async function getUniqueFids(points) {
-  try {
-    const uniqueFids = await ScheduleTip.distinct('fid', { points: points });
-    return uniqueFids;
-  } catch (error) {
-    console.error('Error in getUniqueFids:', error);
-    return [];
-  }
-}
-
 async function getCuratorPercent(points) {
   try {
     const curatorPercentData = await EcosystemRules.findOne({ ecosystem_points_name: points }).select('percent_tipped').exec();
@@ -165,30 +95,26 @@ async function getCuratorPercent(points) {
   }
 }
 
-async function getAllowances(fid, currencies, percent, tipTime) {
+async function getAllowances(fid, currencies, percent) {
   const allowances = [];
   for (const coin of currencies) {
     let allowance, tip, minTip;
-    if (coin == '$TN100x' && tipTime == '12am') {
-      allowance = await getHamAllowance(fid);
-      console.log('$TN100x', allowance)
-      tip = Math.floor(allowance * percent / 100);
-      allowances.push({token: coin, set: true, allowance: tip, totalTip: tip});
-    } else if (coin == '$DEGEN' && tipTime == '7pm') {
-      allowance = await getDegenAllowance(fid);
-      console.log('$DEGEN', allowance)
-      tip = Math.round(allowance * percent / 100);
-      allowances.push({token: coin, set: true, allowance: tip, totalTip: tip});
-    } else if (coin == '$WILD' && tipTime == '7pm') {
-      allowance = await getWildAllowance(fid);
-      console.log('$WILD', allowance)
-      tip = Math.round(allowance * percent / 100);
-      allowances.push({token: coin, set: true, allowance: tip, totalTip: tip});
-    } else if (coin == '$HUNT' && tipTime == '7pm') {
-      allowance = await getHuntAllowance(fid);
-      console.log('$HUNT', allowance)
-      tip = Math.round(allowance * percent / 100);
-      allowances.push({token: coin, set: true, allowance: tip, totalTip: tip});
+    switch (coin) {
+      case '$TN100x':
+        allowance = await getHamAllowance(fid);
+        tip = Math.floor(allowance * percent / 100);
+        allowances.push({token: coin, set: true, allowance: tip, totalTip: tip});
+        break;
+      case '$DEGEN':
+        allowance = await getDegenAllowance(fid);
+        tip = Math.round(allowance * percent / 100);
+        allowances.push({token: coin, set: true, allowance: tip, totalTip: tip});
+        break;
+      case '$FARTHER':
+        ({allowance, minTip} = await getFartherAllowance(fid));
+        tip = Math.round(allowance * percent / 100);
+        allowances.push({token: coin, set: true, allowance: tip, totalTip: tip, min: minTip});
+        break;
     }
   }
   return allowances;
@@ -196,12 +122,12 @@ async function getAllowances(fid, currencies, percent, tipTime) {
 
 async function getHamAllowance(fid) {
   try {
-    const remainingUrl = `https://farcaster.dep.dev/ham/user/${fid}`;
+    const remainingUrl = `https://farcaster.dep.dev/lp/tips/${fid}`;
     const remainingBalance = await fetch(remainingUrl, {
       headers: { accept: "application/json" },
     });
     const getRemaining = await remainingBalance.json();
-    return getRemaining ? Math.floor((Number(getRemaining?.todaysAllocation) - Number(getRemaining?.totalTippedToday))/1e18) : 0;
+    return getRemaining ? Number(getRemaining.allowance) - Number(getRemaining.used) : 0;
   } catch (error) {
     console.error('Error in getHamAllowance:', error);
     return 0;
@@ -219,31 +145,24 @@ async function getDegenAllowance(fid) {
   }
 }
 
-async function getWildAllowance(fid) {
+async function getFartherAllowance(fid) {
   try {
-    const remainingUrl = `https://sys.wildcard.lol/tip/public/v1/token/balance/${fid}?currency=WILD`;
-    const remainingBalance = await fetch(remainingUrl, {
+    const input = encodeURIComponent(JSON.stringify({ fid: fid }));
+    const remainingUrl = `https://farther.social/api/v1/public.user.byFid?input=${input}`;
+    const fartherData = await fetch(remainingUrl, {
       headers: { accept: "application/json" },
     });
-    const getRemaining = await remainingBalance.json();
-    return getRemaining ? Math.floor(Number(getRemaining?.allowance_remaining)) : 0;
+    if (fartherData?.status == 200) {
+      const fartherInfo = await fartherData.json();
+      const allowance = fartherInfo?.result?.data?.tips?.currentCycle?.allowance || 0;
+      const remainingAllowance = fartherInfo?.result?.data?.tips?.currentCycle?.remainingAllowance || allowance;
+      const tipMin = fartherInfo?.result?.data?.tips?.currentCycle?.tipMinimum || 1;
+      return { allowance: Number(remainingAllowance), minTip: Number(tipMin) };
+    }
+    return { allowance: 0, minTip: 1 };
   } catch (error) {
-    console.error('Error in getWildAllowance:', error);
-    return 0;
-  }
-}
-
-async function getHuntAllowance(fid) {
-  try {
-    const remainingUrl = `https://tip.hunt.town/api/stats/fid/${fid}`;
-    const remainingBalance = await fetch(remainingUrl, {
-      headers: { accept: "application/json" },
-    });
-    const getRemaining = await remainingBalance.json();
-    return getRemaining ? Math.floor(Number(getRemaining?.remaining_allowance)) : 0;
-  } catch (error) {
-    console.error('Error in getWildAllowance:', error);
-    return 0;
+    console.error('Error in getFartherAllowance:', error);
+    return { allowance: 0, minTip: 1 };
   }
 }
 
@@ -265,7 +184,7 @@ async function getUserSearch(time, tags, channel, curator, points) {
   }
 
   const { casts, totalCount } = await fetchCasts(query, limit);
-  return { casts: casts || [], totalCount };
+  return { casts, totalCount };
 }
 
 async function getCuratorIds(fids, points) {
@@ -278,73 +197,15 @@ async function getCuratorIds(fids, points) {
   }   
 }
 
-function shuffleArray(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-  return array;
-}
-
 async function fetchCasts(query, limit) {
   try {
-    await connectToDatabase();
-
-    let totalCount;
-    let returnedCasts = []
-
-    totalCount = await Cast.countDocuments(query);
-
-    // Calculate the number of documents to be sampled from each range
-    const top20PercentCount = Math.ceil(totalCount * 0.2);
-    const middle40PercentCount = Math.ceil(totalCount * 0.4);
-    const bottom40PercentCount = totalCount - top20PercentCount - middle40PercentCount;
-
-    // Fetch documents from each range
-    const top20PercentCasts = await Cast.find(query)
+    const totalCount = await Cast.countDocuments(query);
+    const casts = await Cast.find(query)
       .sort({ impact_total: -1 })
       .populate('impact_points')
-      .limit(top20PercentCount)
+      .limit(limit)
       .exec();
-    const middle40PercentCasts = await Cast.find(query)
-      .sort({ impact_total: -1 })
-      .populate('impact_points')
-      .skip(top20PercentCount)
-      .limit(middle40PercentCount)
-      .exec();
-    const bottom40PercentCasts = await Cast.find(query)
-      .sort({ impact_total: -1 })
-      .populate('impact_points')
-      .skip(top20PercentCount + middle40PercentCount)
-      .limit(bottom40PercentCount)
-      .exec();
-
-    returnedCasts = top20PercentCasts.concat(middle40PercentCasts, bottom40PercentCasts);
-
-    returnedCasts.sort((a, b) => b.impact_total - a.impact_total);
-
-    returnedCasts = returnedCasts.reduce((acc, current) => {
-      const existingItem = acc.find(item => item._id === current._id);
-      if (!existingItem) {
-        acc.push(current);
-      }
-      return acc;
-    }, [])
-
-    returnedCasts = shuffleArray(returnedCasts);
-
-    returnedCasts = returnedCasts.slice(0, limit);
-    
-
-    if (returnedCasts && returnedCasts.length > 10) {
-      returnedCasts = returnedCasts.slice(0, 10);
-    }
-
-    // console.log('113', returnedCasts)
-    if (!returnedCasts) {
-      returnedCasts = []
-    }
-    return { casts: returnedCasts, totalCount };
+    return { casts: casts.slice(0, 10), totalCount };
   } catch (err) {
     console.error('Error in fetchCasts:', err);
     return { casts: null, totalCount: null };
@@ -352,8 +213,7 @@ async function fetchCasts(query, limit) {
 }
 
 async function processCasts(casts, fid) {
-  console.log(casts)
-  let filteredCasts = (casts || []).reduce((acc, current) => {
+  let filteredCasts = casts.reduce((acc, current) => {
     const existingItem = acc.find(item => item._id === current._id);
     if (!existingItem) {
       acc.push(current);
