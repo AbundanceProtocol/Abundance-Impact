@@ -1,3 +1,4 @@
+import qs from "querystring";
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 
 export default function handler(req, res) {
@@ -21,7 +22,7 @@ export default function handler(req, res) {
         "name": "Curator page",
         "icon": "person",
         "description": "Curator",
-        "aboutUrl": `https://impact.abundance.id/~/curator/${curatorFid}`,
+        "aboutUrl": `https://impact.abundance.id/~/curator/3`,
         "imageUrl": `${baseURL}/images/input.jpg`,
         "action": {
           "type": "post",
