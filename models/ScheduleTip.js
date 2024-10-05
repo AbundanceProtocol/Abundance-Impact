@@ -11,7 +11,7 @@ const scheduleTipSchema = new mongoose.Schema({
   search_curators: { type: [Number], default: []},
   percent_tip: Number,
   points: String,
-  currencies: { type: [String], default: ['$DEGEN']},
+  currencies: { type: [String], default: ['$DEGEN', '$TN100x', '$HUNT', '$WILD']},
   schedule_time: String,
   schedule_count: Number,
   schedule_total: Number,
