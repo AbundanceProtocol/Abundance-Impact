@@ -17,7 +17,9 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
+  // const { fid, code } = req.query;
   const { code, tipTime } = req.query;
+  // if (!fid || !code) {
   console.log('code', code);
   if (!code) {
     return res.status(400).json({ error: 'Bad Request', message: 'Missing required parameters' });
@@ -30,61 +32,47 @@ export default async function handler(req, res) {
     if (!scheduled) {
       return res.status(500).json({ error: 'Internal Server Error' });
     } else {
+
       const uniquePoints = await getUniquePoints();
-
+  
       for (const points of uniquePoints) {
+  
         const curatorPercent = await getCuratorPercent(points);
+           
         const uniqueFids = await getUniqueFids(points);
-
+        
         for (const fid of uniqueFids) {
           console.log('fid', fid);
           
           const schedule = await getSchedule(fid, points);
           const time = schedule.timeRange ? getTimeRange(schedule.timeRange) : null;
-
-          let allowances = [];
-          let casts = [];
-          try {
-            allowances = await getAllowances(fid, schedule.currencies, schedule.percent, tipTime);
-            casts = await getUserSearch(time, schedule.tags, schedule.channels, schedule.curators, points);
-          } catch (error) {
-            console.error(`Error fetching allowances or user search for fid ${fid}:`, error);
-            continue; // Skip to the next fid
-          }
-
+          const allowances = await getAllowances(fid, schedule.currencies, schedule.percent, tipTime);
           if (!schedule.percent || !schedule.decryptedUuid || allowances.length === 0) {
             console.log(`Skipping fid ${fid} due to missing percent or decryptedUuid`);
             continue;
           }
-          console.log('casts 59', casts)
+  
+          const { casts } = await getUserSearch(time, schedule.tags, schedule.channels, schedule.curators, points);
           const displayedCasts = await processCasts(casts, fid);
           const { castData, coinTotals } = await processTips(displayedCasts, fid, allowances, schedule.ecosystem, curatorPercent);
-
-          const tipQueue = new Queue(1, 100);
+  
+          const tipQueue = new Queue(1, 100); // Process 1 tip at a time, with a 100ms delay between each
           let tipCounter = 0;
-
+      
           const tipPromises = castData.map(cast => 
             tipQueue.run(async () => {
-              try {
-                // const result = await sendTip(cast, schedule.decryptedUuid, fid, schedule.points);
-                console.log('cast', fid, cast);
-                const result = 1
-                tipCounter += result;
-              } catch (error) {
-                console.error(`Error sending tip for fid ${fid} and cast ${cast}:`, error);
-                return tipCounter; 
-              }
-            }).catch(error => {
-              console.error(`Error in tipQueue for fid ${fid} and cast ${cast}:`, error);
-              return tipCounter; 
+              // const result = await sendTip(cast, schedule.decryptedUuid, fid, schedule.points);
+              console.log('cast', fid, cast);
+              const result = 1;
+              tipCounter += result;
             })
           );
-          
+  
           console.log('tipPromises', tipCounter);
           await Promise.all(tipPromises);
         }
       }
-      res.status(200).json({ message: 'All casts tipped successfully' });
+      res.status(200).json({ message: 'All casts tipped successfully'});
     }
 
   } catch (error) {
@@ -168,7 +156,7 @@ async function getCuratorPercent(points) {
 async function getAllowances(fid, currencies, percent, tipTime) {
   const allowances = [];
   for (const coin of currencies) {
-    let allowance, tip, minTip;
+    let allowance, tip;
     if (coin == '$TN100x' && tipTime == '12am') {
       allowance = await getHamAllowance(fid);
       console.log('$TN100x', allowance)
@@ -233,6 +221,7 @@ async function getWildAllowance(fid) {
   }
 }
 
+
 async function getHuntAllowance(fid) {
   try {
     const remainingUrl = `https://tip.hunt.town/api/stats/fid/${fid}`;
@@ -246,6 +235,7 @@ async function getHuntAllowance(fid) {
     return 0;
   }
 }
+
 
 async function getUserSearch(time, tags, channel, curator, points) {
   const limit = 10;
@@ -265,7 +255,7 @@ async function getUserSearch(time, tags, channel, curator, points) {
   }
 
   const { casts, totalCount } = await fetchCasts(query, limit);
-  return { casts: casts || [], totalCount };
+  return { casts, totalCount };
 }
 
 async function getCuratorIds(fids, points) {
@@ -352,8 +342,7 @@ async function fetchCasts(query, limit) {
 }
 
 async function processCasts(casts, fid) {
-  console.log(casts)
-  let filteredCasts = (casts || []).reduce((acc, current) => {
+  let filteredCasts = casts.reduce((acc, current) => {
     const existingItem = acc.find(item => item._id === current._id);
     if (!existingItem) {
       acc.push(current);

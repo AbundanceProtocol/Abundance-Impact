@@ -54,7 +54,30 @@ export default async function handler(req, res) {
     if (!impact) {
 
       await connectToDatabase();
-        
+
+      // async function getCuratorFid(castHash, points, amount) {
+      //   let created = 1
+      //   if (amount > 0) {
+      //     created = -1
+      //   }
+
+      //   try {
+      //     await connectToDatabase();
+      //     const latestImpact = await Impact.findOne({ target_cast_hash: castHash, points }).sort({ createdAt: created }).exec();
+      //     if (latestImpact) {
+      //       return latestImpact?.curator_fid;
+      //     } else {
+      //       return null
+      //     }
+      //   } catch(error) {
+      //     console.error("Error getting curator fid:", error);
+      //     return null
+      //   }
+      // }
+
+      // const castCurator = await getCuratorFid(castHash, points, qualityAmount)
+      
+      
       const user = await User.findOne({ fid, ecosystem_points: points }).exec();
 
       if (!user) {

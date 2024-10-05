@@ -39,14 +39,18 @@ export default async function handler(req, res) {
         for (const fid of uniqueFids) {
           console.log('fid', fid);
           
+          await new Promise(resolve => setTimeout(resolve, 100));
           const schedule = await getSchedule(fid, points);
           const time = schedule.timeRange ? getTimeRange(schedule.timeRange) : null;
 
           let allowances = [];
           let casts = [];
           try {
-            allowances = await getAllowances(fid, schedule.currencies, schedule.percent, tipTime);
-            casts = await getUserSearch(time, schedule.tags, schedule.channels, schedule.curators, points);
+            console.log('currencies:', fid, schedule.currencies)
+            allowances = await getAllowances(fid, schedule.currencies || [], schedule.percent, tipTime);
+            console.log('at1 allowances', fid, allowances);
+
+            // casts = await getUserSearch(time, schedule.tags, schedule.channels, schedule.curators, points);
           } catch (error) {
             console.error(`Error fetching allowances or user search for fid ${fid}:`, error);
             continue; // Skip to the next fid
@@ -56,32 +60,34 @@ export default async function handler(req, res) {
             console.log(`Skipping fid ${fid} due to missing percent or decryptedUuid`);
             continue;
           }
-          console.log('casts 59', casts)
-          const displayedCasts = await processCasts(casts, fid);
-          const { castData, coinTotals } = await processTips(displayedCasts, fid, allowances, schedule.ecosystem, curatorPercent);
 
-          const tipQueue = new Queue(1, 100);
-          let tipCounter = 0;
 
-          const tipPromises = castData.map(cast => 
-            tipQueue.run(async () => {
-              try {
-                // const result = await sendTip(cast, schedule.decryptedUuid, fid, schedule.points);
-                console.log('cast', fid, cast);
-                const result = 1
-                tipCounter += result;
-              } catch (error) {
-                console.error(`Error sending tip for fid ${fid} and cast ${cast}:`, error);
-                return tipCounter; 
-              }
-            }).catch(error => {
-              console.error(`Error in tipQueue for fid ${fid} and cast ${cast}:`, error);
-              return tipCounter; 
-            })
-          );
+          // console.log('casts 59', casts)
+          // const displayedCasts = await processCasts(casts, fid);
+          // const { castData, coinTotals } = await processTips(displayedCasts, fid, allowances, schedule.ecosystem, curatorPercent);
+
+          // const tipQueue = new Queue(1, 100);
+          // let tipCounter = 0;
+
+          // const tipPromises = castData.map(cast => 
+          //   tipQueue.run(async () => {
+          //     try {
+          //       // const result = await sendTip(cast, schedule.decryptedUuid, fid, schedule.points);
+          //       console.log('cast', fid, cast);
+          //       const result = 1
+          //       tipCounter += result;
+          //     } catch (error) {
+          //       console.error(`Error sending tip for fid ${fid} and cast ${cast}:`, error);
+          //       return tipCounter; 
+          //     }
+          //   }).catch(error => {
+          //     console.error(`Error in tipQueue for fid ${fid} and cast ${cast}:`, error);
+          //     return tipCounter; 
+          //   })
+          // );
           
-          console.log('tipPromises', tipCounter);
-          await Promise.all(tipPromises);
+          // console.log('tipPromises', tipCounter);
+          // await Promise.all(tipPromises);
         }
       }
       res.status(200).json({ message: 'All casts tipped successfully' });
@@ -212,7 +218,7 @@ async function getDegenAllowance(fid) {
   try {
     const response = await fetch(`https://api.degen.tips/airdrop2/allowances?fid=${fid}`);
     const data = await response.json();
-    return data?.length > 0 ? data[0].remaining_tip_allowance : 0;
+    return data?.length > 0 ? Math.floor(data[0].remaining_tip_allowance) : 0;
   } catch (error) {
     console.error('Error in getDegenAllowance:', error);
     return 0;

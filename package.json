@@ -11,6 +11,7 @@
   "dependencies": {
     "@airstack/airstack-react": "^0.6.3",
     "@airstack/frames": "^1.2.0",
+    "@babel/traverse": "^7.25.7",
     "@ceramicnetwork/blockchain-utils-linking": "^2.0.6",
     "@ceramicnetwork/http-client": "^2.2.1",
     "@emotion/react": "^11.9.3",
@@ -44,6 +45,7 @@
     "dotenv": "^16.0.1",
     "dotenv-webpack": "^8.0.1",
     "easymde": "^2.16.1",
+    "ejs": "^3.1.10",
     "ethereum-waffle": "^3.4.0",
     "ethers": "^6.13.2",
     "graphql": "^16.5.0",
@@ -63,6 +65,7 @@
     "node-cache": "^5.1.2",
     "postcss": "^8.4.35",
     "postcss-loader": "^8.1.1",
+    "protobufjs": "^7.4.0",
     "querystring": "^0.2.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -73,6 +76,7 @@
     "react-simplemde-editor": "^5.0.2",
     "satori": "^0.10.14",
     "svg2img": "^1.0.0-beta.2",
+    "underscore": "^1.13.7",
     "web3modal": "^1.9.5",
     "xml2js": "^0.5.0",
     "zustand": "^4.0.0-rc.1"

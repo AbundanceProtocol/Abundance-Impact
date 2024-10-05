@@ -9,7 +9,7 @@ const client = HubURL ? getSSLHubRpcClient(HubURL) : undefined;
 export default async function handler(req, res) {
 
   const { untrustedData } = req.body
-  const { iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle, rS } = req.query;
+  const { iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle, rS, oO } = req.query;
   
   if (req.method !== 'POST') {
     res.setHeader('Allow', ['POST']);
@@ -17,7 +17,7 @@ export default async function handler(req, res) {
   } else {
     // console.log('17', iB, qB, qT, author, iA, qA, ecosystem, login, pt, cu, impact, quality, cI)
     // console.log('18', typeof iB, typeof cI, typeof impact, typeof quality)
-    const curatorFid = req.body.untrustedData.fid
+    const curatorFid = req.body.untrustedData?.fid
 
     let balanceImg = `${baseURL}/api/frames/console/balance?${qs.stringify({ iB, qB, qT, author, iA, qA, ecosystem: ec, login, pt, cu })}`
 
@@ -28,6 +28,7 @@ export default async function handler(req, res) {
     let textField = ''
     let postUrl = `<meta name="fc:frame:post_url" content='https://impact.abundance.id' />`
 
+    const menuImg = `${baseURL}/api/frames/console/main-menu?${qs.stringify({ points: pt, fid: curatorFid })}`
 
     const shareText = 'I just nominated great builders and creators on /impact. Help support them here:'
 
@@ -48,14 +49,14 @@ export default async function handler(req, res) {
 
     button3 = `<meta property="fc:frame:button:3" content="Auto-tip" />
     <meta property="fc:frame:button:3:action" content="post" />
-    <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/auto-tip?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle, rS })}' />`
+    <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/auto-tip?${qs.stringify({ iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle, rS, oO })}' />`
 
     // button3 = `<meta property="fc:frame:button:3" content="What's /impact?" />
     // <meta property="fc:frame:button:3:action" content="post" />
-    // <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/install?${qs.stringify({ iB, qB, qT, author, iA, qA, ecosystem: ec, login, pt, cu, impact, quality: ql, cI, hash, handle, rS })}' />`
+    // <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/console/install?${qs.stringify({ iB, qB, qT, author, iA, qA, ecosystem: ec, login, pt, cu, impact, quality: ql, cI, hash, handle, rS, oO })}' />`
     button4 = `<meta property="fc:frame:button:4" content='< Back' />
     <meta property="fc:frame:button:4:action" content="post" />
-    <meta property="fc:frame:button:4:target" content='https://impact.abundance.id/api/frames/console/status?${qs.stringify({ iB, qB, qT, author, iA, qA, ecosystem: ec, login, pt, cu, impact, quality: ql, cI, hash, handle, rS })}' />`
+    <meta property="fc:frame:button:4:target" content='https://impact.abundance.id/api/frames/console/status?${qs.stringify({ iB, qB, qT, author, iA, qA, ecosystem: ec, login, pt, cu, impact, quality: ql, cI, hash, handle, rS, oO })}' />`
     textField = `<meta name="fc:frame:input:text" content="Eg.: 1000 $Degen, 500 $HAM" />`
 
     let metatags = button1 + button2 + button3 + button4 + textField + postUrl
@@ -71,9 +72,9 @@ export default async function handler(req, res) {
             <title>Impact Nav</title>
             <meta name="fc:frame" content="vNext">
             <meta property="og:title" content="Impact Nav">
-            <meta property='og:image' content='${balanceImg}' />
+            <meta property='og:image' content='${menuImg}' />
             <meta property="fc:frame:image:aspect_ratio" content="1:1" />
-            <meta property="fc:frame:image" content='${balanceImg}' />
+            <meta property="fc:frame:image" content='${menuImg}' />
             ${metatags}
           </head>
           <body>
@@ -93,9 +94,9 @@ export default async function handler(req, res) {
             <title>Impact Nav</title>
             <meta name="fc:frame" content="vNext">
             <meta property="og:title" content="Impact Nav">
-            <meta property='og:image' content='${balanceImg}' />
+            <meta property='og:image' content='${menuImg}' />
             <meta property="fc:frame:image:aspect_ratio" content="1:1" />
-            <meta property="fc:frame:image" content='${balanceImg}' />
+            <meta property="fc:frame:image" content='${menuImg}' />
             ${metatags}
           </head>
           <body>
@@ -107,13 +108,3 @@ export default async function handler(req, res) {
     }
   }
 }
-
-
-
-
-
-
-
-
-
-

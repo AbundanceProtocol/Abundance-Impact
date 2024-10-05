@@ -7,6 +7,8 @@
 
 # testing
 /pages/archive
+/pages/api/curation/getAllowlist.js
+/pages/api/curation/postAllowlist.js
 /coverage
 temp.js
 pages/temp.js
