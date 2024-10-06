@@ -15,7 +15,7 @@ import Time from '../../../../components/Page/FilterMenu/Time';
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { fid, points } = router.query
+  const { fid, points, app } = router.query
   const [user, setUser] = useState(null)
   const { LoginPopup, isLogged, setPoints } = useContext(AccountContext)
   const ref = useRef(null)
@@ -515,7 +515,7 @@ export default function ProfilePage() {
         <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
           <Spinner size={31} color={'#999'} />
         </div>
-        ) : (userFeed.map((cast, index) => (<Cast {...{cast, key: index, index, updateCast, openImagePopup, ecosystem: eco.ecosystem_points_name, self: false}} />)))}
+        ) : (userFeed.map((cast, index) => (<Cast {...{cast, key: index, index, updateCast, openImagePopup, ecosystem: eco.ecosystem_points_name, self: false, app}} />)))}
       </div>
       <ExpandImg  {...{show: showPopup.open, closeImagePopup, embed: {showPopup}, screenWidth, screenHeight }} />
     </div>

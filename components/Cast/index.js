@@ -15,7 +15,7 @@ import { ImArrowUp, ImArrowDown  } from "react-icons/im";
 import VideoPlayer from './VideoPlayer';
 import Images from './Images';
 
-export default function Cast({ cast, index, updateCast, openImagePopup, ecosystem, self }) {
+export default function Cast({ cast, index, updateCast, openImagePopup, ecosystem, self, app }) {
   const store = useStore()
   const router = useRouter();
   const [screenWidth, setScreenWidth] = useState(undefined)
@@ -274,7 +274,9 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
             <a className="" title="" href={`/${cast.author.username}`} onClick={(event) => {
               if (!isLogged) {
                 console.log('ca1')
-                LoginPopup()
+                if (!app) {
+                  LoginPopup()
+                }
                 event.preventDefault()
               } else {
                 goToUserProfile(event, cast.author)
@@ -292,7 +294,9 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
              () => {
                 if (!isLogged) {
                   console.log('ca2')
-                  LoginPopup()
+                  if (!app) {
+                    LoginPopup()
+                  }
                 } else {
                   if(userBalances.impact > 0) {
                     boostImpact(cast, 1)
@@ -309,7 +313,9 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
              () => {
                 if (!isLogged) {
                   console.log('ca3')
-                  LoginPopup()
+                  if (!app) {
+                    LoginPopup()
+                  }
                 } else {
                   unstakePoint(cast)
                 }
@@ -447,7 +453,9 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
                 onClick={() => {
                   if (!isLogged) {
                     console.log('ca7')
-                    LoginPopup()
+                    if (!app) {
+                      LoginPopup()
+                    }
                   } else {
                     postRecast(cast.hash, index, cast.reactions.recasts_count)
                   }
@@ -467,7 +475,9 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
                 onClick={() => {
                   if (!isLogged) {
                     console.log('ca8')
-                    LoginPopup()
+                    if (!app) {
+                      LoginPopup()
+                    }
                   } else {
                     postLike(cast.hash, index, cast.reactions.likes_count)
                   }
@@ -482,7 +492,9 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
               <div className={`impact-arrow ${fail ? 'flash-fail' : ''}`} style={{padding: '0px 1px 0 0px'}} onClick={() => {
                 if (!isLogged) {
                   console.log('ca9')
-                  LoginPopup()
+                  if (!app) {
+                    LoginPopup()
+                  }
                 } else {
                   boostQuality(cast, 1)
                 }
@@ -502,7 +514,9 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
               <div className={`like-btn ${fail ? 'flash-fail' : ''}`} style={{padding: '2px 0 0 0px'}} onClick={() => {
                 if (!isLogged) {
                   console.log('ca10')
-                  LoginPopup()
+                  if (!app) {
+                    LoginPopup()
+                  }
                 } else {
                   boostQuality(cast, -1)
                 }
