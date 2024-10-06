@@ -46,7 +46,7 @@ export default function Subcast({ castHash, index }) {
           params: { hash, userFid } })
         const castData = response.data.cast.cast
         if (castData) {
-          console.log('castData', castData)
+          // console.log('castData', castData)
           setCast(castData)
         } else {
           return null
