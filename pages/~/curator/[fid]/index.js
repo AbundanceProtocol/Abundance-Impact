@@ -110,25 +110,26 @@ export default function ProfilePage() {
   }
   // console.log('updated', fid)
 
-  useEffect(() => {
-    // console.log(fid, points)
-    if (points) {
-      setPoints(points)
-    }
-    setUserQuery({
-      ...userQuery,
-      curators: [fid], points: points || null
-    })
-    getUser(fid)
-  }, [fid]);
-
-  async function getUser(fid) {
+  async function getCuratorData(fid) {
     try {
-      const response = await axios.get('/api/getUserByFid', {
+      const response = await axios.get('/api/getCuratorProfile', {
         params: { fid }
       })
       if (response?.data) {
-        setUser(response?.data)
+        const profile = response?.data?.data?.Socials?.Social[0] || null
+        const populatedProfile = {
+          username: profile?.profileName,
+          pfp: {
+            url: profile?.profileImage,
+          },
+          displayName: profile?.profileDisplayName,
+          activeOnFcNetwork: true,
+          profile: { bio: { text: profile?.profileBio } },
+          followingCount: profile?.followingCount,
+          followerCount: profile?.followerCount,
+          fid
+        }
+        setUser(populatedProfile)
       } else {
         setUser(null)
       }
@@ -137,6 +138,36 @@ export default function ProfilePage() {
       setUser(null)
     }
   }
+
+  useEffect(() => {
+    if (fid) {
+      getCuratorData(fid)
+    }
+    if (points) {
+      setPoints(points)
+    }
+    setUserQuery({
+      ...userQuery,
+      curators: [fid], points: points || null
+    })
+    // getUser(fid)
+  }, [fid]);
+
+  // async function getUser(fid) {
+  //   try {
+  //     const response = await axios.get('/api/getUserByFid', {
+  //       params: { fid }
+  //     })
+  //     if (response?.data) {
+  //       setUser(response?.data)
+  //     } else {
+  //       setUser(null)
+  //     }
+  //   } catch (error) {
+  //     console.error('Error submitting data:', error)
+  //     setUser(null)
+  //   }
+  // }
 
 
   useEffect(() => {
