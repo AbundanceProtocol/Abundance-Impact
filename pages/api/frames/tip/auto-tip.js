@@ -23,7 +23,8 @@ const client = HubURL ? getSSLHubRpcClient(HubURL) : undefined;
 export default async function handler(req, res) {
   init(process.env.AIRSTACK_API_KEY ?? '')
   const body = await req.body;
-  const {isValid} = await validateFramesMessage(body)
+  const {isValid, message} = await validateFramesMessage(body)
+
   console.log('isValid:', isValid)
   const { untrustedData } = req.body
   const { time, curators, eco, ecosystem } = req.query;
@@ -31,9 +32,9 @@ export default async function handler(req, res) {
   if (req.method === 'POST') {
     const params = { time, curators, eco, ecosystem }
     const points = '$' + eco
-    const curatorFid = req.body.untrustedData.fid
+    const curatorFid = message?.data?.fid
     // const castHash = req.body.untrustedData.castId.hash
-    // const authorFid = req.body.untrustedData.castId.fid
+    // const authorFid = message?.data?.frameActionBody?.castId?.fid
     console.log('28', time, curators, eco, ecosystem)
 
     let autoTipImg = `${baseURL}/api/frames/tip/auto-tipping?${qs.stringify({ status: 'off', curators: [], points, add: curators })}`

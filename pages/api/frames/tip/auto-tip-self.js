@@ -10,6 +10,7 @@ import EcosystemRules from "../../../../models/EcosystemRules";
 import ScheduleTip from "../../../../models/ScheduleTip";
 import { encryptPassword, generateRandomString } from '../../../../utils/utils'
 import { metaButton } from '../../../../utils/frames'
+import { init, validateFramesMessage } from "@airstack/frames";
 
 const easyCronKey = process.env.EASYCRON_API_KEY;
 const baseURL = process.env.NEXT_PUBLIC_BASE_URL_PROD;
@@ -20,16 +21,19 @@ const client = HubURL ? getSSLHubRpcClient(HubURL) : undefined;
 // const apiKey = process.env.NEYNAR_API_KEY
 
 export default async function handler(req, res) {
-  
+  init(process.env.AIRSTACK_API_KEY ?? '')
+  const body = await req.body;
+  const {isValid, message} = await validateFramesMessage(body)
+
   const { untrustedData } = req.body
   const { time, curators, eco, ecosystem } = req.query;
 
   if (req.method === 'POST') {
     const params = { time, curators, eco, ecosystem }
     const points = '$' + eco
-    const curatorFid = req.body.untrustedData.fid
+    const curatorFid = message?.data?.fid
     // const castHash = req.body.untrustedData.castId.hash
-    // const authorFid = req.body.untrustedData.castId.fid
+    // const authorFid = message?.data?.frameActionBody?.castId?.fid
     // console.log('28', points, curatorFid, castHash)
 
     let autoTipImg = `${baseURL}/api/frames/tip/auto-tipping?${qs.stringify({ status: 'self', curators: [curatorFid], points })}`

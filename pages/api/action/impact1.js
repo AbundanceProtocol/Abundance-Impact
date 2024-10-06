@@ -8,6 +8,7 @@ import EcosystemRules from "../../../models/EcosystemRules";
 import Allowlist from '../../../models/Allowlist';
 import OptOut from "../../../models/OptOut";
 import { decryptPassword } from "../../../utils/utils"; 
+import { init, validateFramesMessage } from "@airstack/frames";
 
 const HubURL = process.env.NEYNAR_HUB
 const client = HubURL ? getSSLHubRpcClient(HubURL) : undefined;
@@ -16,13 +17,17 @@ const encryptedBotUuid = process.env.ENCRYPTED_BOT_UUID
 const secretKey = process.env.SECRET_KEY
 
 export default async function handler(req, res) {
+  init(process.env.AIRSTACK_API_KEY ?? '')
+  const body = await req.body;
+  const {isValid, message} = await validateFramesMessage(body)
+
   if (req.method === 'POST' && req.body && req.body.untrustedData && req.query.points) {
     const impactAmount = 1
     const eco = req.query.points
     const points = '$' + eco
-    const curatorFid = req.body.untrustedData.fid
+    const curatorFid = message?.data?.fid
     const castHash = req.body.untrustedData.castId.hash
-    const authorFid = req.body.untrustedData.castId.fid
+    const authorFid = message?.data?.frameActionBody?.castId?.fid
     const signer = decryptPassword(encryptedBotUuid, secretKey)
 
     async function checkOptOut(authorFid, points) {

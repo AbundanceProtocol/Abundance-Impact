@@ -15,9 +15,9 @@ import Time from '../../../../components/Page/FilterMenu/Time';
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { fid } = router.query
+  const { fid, points } = router.query
   const [user, setUser] = useState(null)
-  const { LoginPopup, isLogged } = useContext(AccountContext)
+  const { LoginPopup, isLogged, setPoints } = useContext(AccountContext)
   const ref = useRef(null)
   const [textMax, setTextMax] = useState('430px')
   const [screenWidth, setScreenWidth ] = useState(undefined)
@@ -111,11 +111,14 @@ export default function ProfilePage() {
   // console.log('updated', fid)
 
   useEffect(() => {
-
-      setUserQuery({
-        ...userQuery,
-        curators: [fid]
-      })
+    // console.log(fid, points)
+    if (points) {
+      setPoints(points)
+    }
+    setUserQuery({
+      ...userQuery,
+      curators: [fid], points: points || null
+    })
     getUser(fid)
   }, [fid]);
 
@@ -179,19 +182,19 @@ export default function ProfilePage() {
     // } else if (searchSelect == 'Casts + Replies') {
     //   getUserFeed(fid, false, fid)
     // } else if (searchSelect == 'Curation') {
-      const { shuffle, time, tags, channels, curators } = userQuery
+      const { shuffle, time, tags, channels, curators, points } = userQuery
       const timeRange = getTimeRange(time)
       // console.log(userQuery)
-      getUserSearch(timeRange, tags, channels, curators, null, shuffle)
+      getUserSearch(timeRange, tags, channels, curators, null, shuffle, points)
     // }
   }
   
-  async function getUserSearch(time, tags, channel, curator, text, shuffle) {
+  async function getUserSearch(time, tags, channel, curator, text, shuffle, points) {
 
-    async function getSearch(time, tags, channel, curator, text, shuffle) {
+    async function getSearch(time, tags, channel, curator, text, shuffle, points) {
       try {
         const response = await axios.get('/api/curation/getUserSearch', {
-          params: { time, tags, channel, curator, text, shuffle }
+          params: { time, tags, channel, curator, text, shuffle, points }
         })
         let casts = []
         if (response && response.data && response.data.casts.length > 0) {
@@ -204,7 +207,7 @@ export default function ProfilePage() {
       }
     }
 
-    const casts = await getSearch(time, tags, channel, curator, text, shuffle)
+    const casts = await getSearch(time, tags, channel, curator, text, shuffle, points)
     let filteredCasts
     let sortedCasts
 

@@ -22,7 +22,8 @@ const apiKey = process.env.NEYNAR_API_KEY
 export default async function handler(req, res) {
   init(process.env.AIRSTACK_API_KEY ?? '')
   const body = await req.body;
-  const {isValid} = await validateFramesMessage(body)
+  const {isValid, message} = await validateFramesMessage(body)
+  
   console.log('isValid:', isValid)
   const { time, curators, channels, tags, eco, ecosystem, refresh, time1 } = req.query;
   const { untrustedData } = req.body
@@ -35,7 +36,7 @@ export default async function handler(req, res) {
 
     const points = '$' + eco
 
-    const curatorFid = req.body.untrustedData.fid
+    const curatorFid = message?.data?.fid
     
     async function checkOptOut(curatorFid, points) {
       try {

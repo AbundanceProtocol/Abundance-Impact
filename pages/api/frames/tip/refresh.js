@@ -170,7 +170,7 @@ export default async function handler(req, res) {
 
     if (curators) {
       let curatorId = Array.isArray(curators) ? curators[0] : Number(curators);
-      exploreLink = `${baseURL}/~/curator/${curatorId}`
+      exploreLink = `${baseURL}/~/curator/${curatorId}?${qs.stringify({ points })}`
     }
 
     const impactLink = `https://warpcast.com/abundance/0x43ddd672`

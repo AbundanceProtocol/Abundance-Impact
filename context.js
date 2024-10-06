@@ -151,14 +151,14 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
       if (isLogged && ecoData) {
         setPopulate(populate+1)
         setPoints(ecoData?.ecosystem_points_name)
-        if (router.route !== '/' && router.route !== '/~/curator/[fid]') {
+        if (router.route !== '/') {
           console.log('c10 points', store.fid, points)
           getRemainingBalances(store.fid, ecoData?.ecosystem_points_name, store.signer_uuid)
         }
       }
     }
 
-    if (router.route !== "/~/ecosystems/[ecosystem]/tip" && router.route !== "/~/ecosystems/[ecosystem]/[eco]/[curators]/tip" && router.route !== "/~/ecosystems/[ecosystem]/tip-basic" && router.route !== "/~/ecosystems/[ecosystem]/tip-share" && router.route !== '/~/curator/[fid]') {
+    if (router.route !== "/~/ecosystems/[ecosystem]/tip" && router.route !== "/~/ecosystems/[ecosystem]/[eco]/[curators]/tip" && router.route !== "/~/ecosystems/[ecosystem]/tip-basic" && router.route !== "/~/ecosystems/[ecosystem]/tip-share") {
       if (sched.ecoData) {
         updateEcoData()
         setSched(prev => ({...prev, ecoData: false }))

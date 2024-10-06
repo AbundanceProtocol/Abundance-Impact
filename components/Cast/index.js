@@ -54,7 +54,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
         return null
       }
     }
-
+    // console.log(cast, qualityAmount, userBalances)
     if (fid && fid !== '-' && qualityAmount && castHash && userBalances.qdau > 0 && (cast.impact_balance || cast.impact_balance == 0)  &&  !(cast.impact_balance == 0 && qualityAmount < 0)) {
       const qualityResponse = await postQuality(fid, castHash, castChannel, qualityAmount)
       console.log(qualityResponse)
@@ -107,6 +107,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
       cast_channel: cast.root_parent_url
     }
     
+    // console.log('112 ca1', fid, cast, impactAmount, ecosystem)
     async function postImpact(fid, castContext, impactAmount) {
       try {
         const response = await axios.post('/api/curation/postPointImpact', { fid, castContext, impactAmount, points: ecosystem })
@@ -164,6 +165,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
     if (isLogged) {
       setUserFid(fid)
     }
+    console.log('isLogged', isLogged, fid)
     const handleResize = () => {
       setScreenWidth(window.innerWidth)
     }

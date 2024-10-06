@@ -11,7 +11,7 @@ import { decryptPassword, getTimeRange, processTips, populateCast } from "../../
 import _ from "lodash";
 import qs from "querystring";
 import { metaButton } from "../../../../utils/frames";
-// import { createCircle } from "./circle2";
+import { init, validateFramesMessage } from "@airstack/frames";
 
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 const HubURL = process.env.NEYNAR_HUB
@@ -20,6 +20,10 @@ const secretKey = process.env.SECRET_KEY
 const apiKey = process.env.NEYNAR_API_KEY
 
 export default async function handler(req, res) {
+  init(process.env.AIRSTACK_API_KEY ?? '')
+  const body = await req.body;
+  const {isValid, message} = await validateFramesMessage(body)
+
   const { time, curators, channels, tags, eco, ecosystem, refresh, time1 } = req.query;
   const { untrustedData } = req.body
 
@@ -31,7 +35,7 @@ export default async function handler(req, res) {
 
     const points = '$' + eco
 
-    const curatorFid = req.body.untrustedData.fid
+    const curatorFid = message?.data?.fid
     
     console.log('14-6:', req.query, refresh)
 
