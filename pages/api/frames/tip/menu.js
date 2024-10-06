@@ -49,9 +49,18 @@ export default async function handler(req, res) {
 
     let exploreLink = `${baseURL}/~/ecosystems/${ecosystem}?${qs.stringify({ time: 'all', curators })}`
 
+
+
+    
+
+
+
     if (curators) {
       let curatorId = Array.isArray(curators) ? curators[0] : Number(curators);
-      exploreLink = `${baseURL}/~/curator/${curatorId}?${qs.stringify({ points })}`
+
+      let shareUrl = `${baseURL}/~/curator/${curatorId}?${qs.stringify({ points })}`
+      let encodedMiniAppUrl = encodeURIComponent(shareUrl); 
+      exploreLink = `https://warpcast.com/~/composer-action?url=${encodedMiniAppUrl}`
     }
 
     const retryPost = `${baseURL}/api/frames/tip/start?${qs.stringify({ time, curators, eco, ecosystem })}`
