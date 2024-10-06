@@ -53,9 +53,11 @@ export default async function handler(req, res) {
       let curatorId = Array.isArray(curators) ? curators[0] : Number(curators);
       let shareUrl = `${baseURL}/api/mini-app/curator?${qs.stringify({ fid: curatorId, points, app: 'mini', view: 'prompt' })}`
       // let shareUrl = `${baseURL}/~/curator/${curatorId}?${qs.stringify({ points })}`
-      let encodedMiniAppUrl = encodeURIComponent(shareUrl); 
-      exploreLink = `https://warpcast.com/~/composer-action?url=${encodedMiniAppUrl}`
+      // let encodedMiniAppUrl = encodeURIComponent(shareUrl); 
+      // exploreLink =  `https://warpcast.com/~/composer-action?url=${encodedMiniAppUrl}`
+      exploreLink = `https://warpcast.com/~/composer-action?postUrl=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Fmini-app%2Fcurator%3Ffid%3D${curatorId}%26points%3D%24${eco}%26app%3Dmini%26view%3Dprompt`
     }
+    
 
     const retryPost = `${baseURL}/api/frames/tip/start?${qs.stringify({ time, curators, eco, ecosystem })}`
 
