@@ -56,7 +56,7 @@ export default async function handler(req, res) {
       // let encodedMiniAppUrl = encodeURIComponent(shareUrl); 
       // exploreLink =  `https://warpcast.com/~/composer-action?url=${encodedMiniAppUrl}`
 
-      exploreLink = `https://warpcast.com/~/composer-action?url=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Fmini-app%2Fcurator%3Ffid%3D${curatorId}%26points%3D%24${eco}%26app%3Dmini%26view%3Dprompt`
+      exploreLink = `https://warpcast.com/~/composer-action?view=prompt&url=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Fmini-app%2Fcurator%3Ffid%3D${curatorId}%26points%3D%24${eco}%26app%3Dmini`
     }
     
 
