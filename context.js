@@ -177,7 +177,7 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
     console.log('c11 triggered [store.isAuth]')
 
     const updateLogin = () => {
-      console.log('c12 store triggered', store.isAuth)
+      console.log('c12 store triggered', store.isAuth, miniApp)
       if (store.isAuth) {
         setIsLogged(true);
         setFid(store.fid)
