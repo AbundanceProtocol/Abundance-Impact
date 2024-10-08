@@ -184,6 +184,7 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
         getUserProfile(store.fid)
         setShowLogin(false)
       } else {
+        console.log('c12-2', isLogged)
         setIsLogged(false);
         setFid(null)
         setUserBalances({impact: 0, qdau: 0})

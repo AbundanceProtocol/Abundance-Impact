@@ -75,6 +75,7 @@ export default function CastPage({username, castHash}) {
   
   useEffect(() => {
     if (!isLogged) {
+      console.log('cast1', isLogged)
       setIsLogged(store.isAuth)
     }
     const handleResize = () => {
@@ -122,6 +123,7 @@ export default function CastPage({username, castHash}) {
 
   useEffect(() => {
     if (!isLogged) {
+      console.log('cast2', isLogged)
       setIsLogged(store.isAuth)
     }
     if (castHash && isLogged) {
