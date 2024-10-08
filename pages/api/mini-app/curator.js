@@ -52,7 +52,7 @@ export default async function handler(req, res) {
       res.status(200).json({ 
         type: 'form',
         title: 'Curator page',
-        url: `https://impact.abundance.id/~/curator/${curator}?${qs.stringify({ points, app: 'mini', userFid: curatorFid, pass: encodedPass })}`,
+        url: `https://impact.abundance.id/~/curator/${curator}?${qs.stringify({ points, app: 'mini', userFid: curatorFid, pass: 'encodedPass' })}`,
       });
       return
 

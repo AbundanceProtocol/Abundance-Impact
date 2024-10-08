@@ -147,7 +147,7 @@ export default function ProfilePage() {
       const decodedParam = decodeURIComponent(pass);
       let decryptedPass = decryptPassword(decodedParam, userSecret)
       let decryptedFid = decryptedPass.slice(10);
-      console.log('userFid', userFid)
+      console.log('userFid', userFid, pass, decryptedPass)
       if (userFid == decryptedFid) {
         setIsLogged(true)
         setFid(Number(userFid))
