@@ -738,10 +738,17 @@ export function getChain(chain) {
 
 export function confirmUser(fid, fidPass) {
   try {
-    const decodedParam = decodeURIComponent(fidPass);
     let decryptedPass = decryptPassword(fidPass, userSecret)
     let decryptedFid = decryptedPass.slice(10);
     if (fid == decryptedFid) {
+      console.log('pass1')
+      return true
+    }
+    const decodedParam = decodeURIComponent(fidPass);
+    decryptedPass = decryptPassword(decodedParam, userSecret)
+    decryptedFid = decryptedPass.slice(10);
+    if (fid == decryptedFid) {
+      console.log('pass2')
       return true
     }
     return false

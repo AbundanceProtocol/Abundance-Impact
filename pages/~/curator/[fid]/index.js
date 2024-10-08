@@ -158,7 +158,8 @@ export default function ProfilePage() {
   useEffect(() => {
     console.log('app01', app, userFid, !isLogged, pass !== '', !isLogged && app && app == 'mini' && userFid && pass !== '')
     if (!isLogged && app && app == 'mini' && userFid && pass !== '') {
-      let confirmed = confirmUser(userFid, pass)
+      const confirmed = confirmUser(userFid, pass)
+      console.log('confirmed', confirmed)
       if (confirmed) {
         setIsLogged(true)
         setFid(Number(userFid))
