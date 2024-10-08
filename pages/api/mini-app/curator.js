@@ -38,15 +38,17 @@ export default async function handler(req, res) {
     if (fid) {
       curator = fid
     }
+    console.log('cur0-1', curatorFid, fid, points, user )
 
     if (user) {
+      console.log('cur1', curatorFid)
       const today = new Date();
       const todayData = today.toISOString().split('T')[0];
       let phrase = String(todayData) + String(curatorFid)
+      console.log('cur1-1', todayData, curatorFid)
       let pass = encryptPassword(phrase, userSecret)
       let encodedPass = encodeURIComponent(pass)
       
-      console.log('cur1', curatorFid)
       res.status(200).json({ 
         type: 'form',
         title: 'Curator page',
