@@ -18,7 +18,7 @@ export default function ProfilePage() {
   const router = useRouter();
   const { fid, points, app, userFid, pass } = router.query
   const [user, setUser] = useState(null)
-  const { LoginPopup, isLogged, setPoints, setIsLogged, setFid, setMiniApp } = useContext(AccountContext)
+  const { LoginPopup, isLogged, setPoints, setIsLogged, setFid, miniApp, setMiniApp } = useContext(AccountContext)
   const ref = useRef(null)
   const [textMax, setTextMax] = useState('430px')
   const [screenWidth, setScreenWidth ] = useState(undefined)
@@ -159,16 +159,22 @@ export default function ProfilePage() {
     console.log('app01', app, userFid, !isLogged, pass !== '', !isLogged && app && app == 'mini' && userFid && pass !== '')
     if (!isLogged && app && app == 'mini' && userFid && pass !== '') {
       setMiniApp(true)
+    }
+  }, [userFid, pass, app]);
+
+  useEffect(() => {
+    if (miniApp) {
       const confirmed = confirmUser(userFid, pass)
       console.log('confirmed', confirmed)
       if (confirmed) {
         setIsLogged(true)
         setFid(Number(userFid))
         console.log('app03', isLogged, confirmed)
-
       }
     }
-  }, [userFid, pass, app]);
+  }, [miniApp]);
+
+
 
 
   useEffect(() => {
