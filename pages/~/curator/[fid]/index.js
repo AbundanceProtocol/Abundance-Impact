@@ -142,6 +142,7 @@ export default function ProfilePage() {
   }
 
   useEffect(() => {
+    console.log('app01', app, userFid)
     if (app && app == 'mini' && userFid && pass) {
       const decodedParam = decodeURIComponent(pass);
       let decryptedPass = decryptPassword(decodedParam, userSecret)
