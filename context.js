@@ -9,6 +9,7 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
   const store = useStore()
   const [showActions, setShowActions] = useState(false)
   const [showLogin, setShowLogin] = useState(false)
+  const [miniApp, setMiniApp] = useState(false)
   const [populate, setPopulate] = useState(0)
   const [userProfile, setUserProfile] = useState(null)
   const [showLogout, setShowLogout] = useState(false)
@@ -195,7 +196,7 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
     }
 
     console.log('c13-2', router.route, router.route !== "/~/ecosystems/[ecosystem]/tip-basic")
-    if (router.route !== "/~/ecosystems/[ecosystem]/tip" && router.route !== "/~/ecosystems/[ecosystem]/[eco]/[curators]/tip" && router.route !== "/~/ecosystems/[ecosystem]/tip-basic" && router.route !== "/~/ecosystems/[ecosystem]/tip-share") {
+    if (router.route !== "/~/ecosystems/[ecosystem]/tip" && router.route !== "/~/ecosystems/[ecosystem]/[eco]/[curators]/tip" && router.route !== "/~/ecosystems/[ecosystem]/tip-basic" && router.route !== "/~/ecosystems/[ecosystem]/tip-share" && !miniApp) {
       if (sched.login) {
         updateLogin()
         setSched(prev => ({...prev, login: false }))
@@ -301,6 +302,7 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
     changeEco,
     getEcosystems,
     getRemainingBalances,
+    setMiniApp,
     fid, setFid,
     points, setPoints,
     ecoData, setEcoData,
