@@ -142,12 +142,11 @@ export default function ProfilePage() {
   }
 
   useEffect(() => {
-    console.log('app01', app, userFid)
+    console.log('app01', app, userFid, pass)
     if (app && app == 'mini' && userFid && pass) {
       const decodedParam = decodeURIComponent(pass);
       let decryptedPass = decryptPassword(decodedParam, userSecret)
       let decryptedFid = decryptedPass.slice(10);
-      console.log('userFid', userFid, pass, decryptedPass)
       if (userFid == decryptedFid) {
         setIsLogged(true)
         setFid(Number(userFid))
