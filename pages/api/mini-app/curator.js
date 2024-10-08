@@ -41,18 +41,16 @@ export default async function handler(req, res) {
     console.log('cur0-1', curatorFid, fid, points, user )
 
     if (user) {
-      console.log('cur1', curatorFid)
       const today = new Date();
       const todayData = today.toISOString().split('T')[0];
       let phrase = String(todayData) + String(curatorFid)
-      console.log('cur1-1', todayData, curatorFid)
       let pass = encryptPassword(phrase, userSecret)
       let encodedPass = encodeURIComponent(pass)
       
       res.status(200).json({ 
         type: 'form',
         title: 'Curator page',
-        url: `https://impact.abundance.id/~/curator/${curator}?${qs.stringify({ points, app: 'mini', userFid: curatorFid, pass: 'encodedPass' })}`,
+        url: `${baseURL}/~/curator/${curator}?${qs.stringify({ points, app: 'mini', userFid: curatorFid, pass: encodedPass })}`,
       });
       return
 
@@ -62,7 +60,7 @@ export default async function handler(req, res) {
       res.status(200).json({ 
         type: 'form',
         title: 'Curator page',
-        url: `https://impact.abundance.id/~/curator/${curator}?${qs.stringify({ points, app: 'mini', userFid: curatorFid, pass: null })}`,
+        url: `${baseURL}/~/curator/${curator}?${qs.stringify({ points, app: 'mini', userFid: curatorFid, pass: null })}`,
       });
       return
 

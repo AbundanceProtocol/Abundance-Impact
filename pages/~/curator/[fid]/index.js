@@ -12,8 +12,7 @@ import CuratorData from '../../../../components/Page/CuratorData';
 import TopPicks from '../../../../components/Page/FilterMenu/TopPicks';
 import Shuffle from '../../../../components/Page/FilterMenu/Shuffle';
 import Time from '../../../../components/Page/FilterMenu/Time';
-import { decryptPassword } from '../../../../utils/utils';
-const userSecret = process.env.USER_SECRET
+import { confirmUser } from '../../../../utils/utils';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -142,12 +141,10 @@ export default function ProfilePage() {
   }
 
   useEffect(() => {
-    console.log('app01', app, userFid, pass)
-    if (app && app == 'mini' && userFid && pass) {
-      const decodedParam = decodeURIComponent(pass);
-      let decryptedPass = decryptPassword(decodedParam, userSecret)
-      let decryptedFid = decryptedPass.slice(10);
-      if (userFid == decryptedFid) {
+    console.log('app01', app, userFid)
+    if (!isLogged && app && app == 'mini' && userFid && pass !== '') {
+      let confirmed = confirmUser(userFid, pass)
+      if (confirmed) {
         setIsLogged(true)
         setFid(Number(userFid))
       }

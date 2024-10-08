@@ -4,6 +4,7 @@ import { ethers } from 'ethers';
 import Moralis from 'moralis';
 const apiKey = process.env.MORALIS_API_KEY
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
+const userSecret = process.env.NEXT_PUBLIC_USER_SECRET
 
 // shorten a hash address
 export function shortenAddress(input, long) {
@@ -731,5 +732,21 @@ export function getChain(chain) {
     return '8'
   } else {
     return '1'
+  }
+}
+
+
+export function confirmUser(fid, fidPass) {
+  try {
+    const decodedParam = decodeURIComponent(fidPass);
+    let decryptedPass = decryptPassword(fidPass, userSecret)
+    let decryptedFid = decryptedPass.slice(10);
+    if (fid == decryptedFid) {
+      return true
+    }
+    return false
+  } catch(error) {
+    console.error('Error confirming user:', error)
+    return false
   }
 }
