@@ -45,7 +45,8 @@ export default async function handler(req, res) {
       let phrase = String(todayData) + String(curatorFid)
       let pass = encryptPassword(phrase, userSecret)
       let encodedPass = encodeURIComponent(pass)
-
+      
+      console.log('cur1', curatorFid)
       res.status(200).json({ 
         type: 'form',
         title: 'Curator page',
@@ -54,6 +55,7 @@ export default async function handler(req, res) {
       return
 
     } else {
+      console.log('cur2', curatorFid)
 
       res.status(200).json({ 
         type: 'form',
@@ -61,7 +63,7 @@ export default async function handler(req, res) {
         url: `https://impact.abundance.id/~/curator/${curator}?${qs.stringify({ points, app: 'mini', userFid: curatorFid, pass: null })}`,
       });
       return
-      
+
     }
    
   } else if (req.method === 'GET') {
