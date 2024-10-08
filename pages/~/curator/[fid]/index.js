@@ -141,16 +141,6 @@ export default function ProfilePage() {
   }
 
   useEffect(() => {
-    console.log('app01', app, userFid)
-    if (!isLogged && app && app == 'mini' && userFid && pass !== '') {
-      let confirmed = confirmUser(userFid, pass)
-      if (confirmed) {
-        setIsLogged(true)
-        setFid(Number(userFid))
-      }
-    }
-
-
     if (fid) {
       getCuratorData(fid)
     }
@@ -163,6 +153,18 @@ export default function ProfilePage() {
     })
     // getUser(fid)
   }, [fid]);
+
+
+  useEffect(() => {
+    console.log('app01', app, userFid)
+    if (!isLogged && app && app == 'mini' && userFid && pass !== '') {
+      let confirmed = confirmUser(userFid, pass)
+      if (confirmed) {
+        setIsLogged(true)
+        setFid(Number(userFid))
+      }
+    }
+  }, [userFid, pass, app]);
 
   // async function getUser(fid) {
   //   try {
