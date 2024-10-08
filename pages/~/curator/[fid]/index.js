@@ -157,13 +157,14 @@ export default function ProfilePage() {
 
   useEffect(() => {
     console.log('app01', app, userFid, !isLogged, pass !== '', !isLogged && app && app == 'mini' && userFid && pass !== '')
-    if (!isLogged && app && app == 'mini' && userFid && pass !== '') {
+    if (!isLogged && app && app == 'mini' && userFid && pass !== '' && !miniApp) {
+      console.log('set mini app')
       setMiniApp(true)
     }
   }, [userFid, pass, app]);
 
   useEffect(() => {
-    if (miniApp) {
+    if (miniApp && (!isLogged || !fid)) {
       const confirmed = confirmUser(userFid, pass)
       console.log('confirmed', confirmed)
       if (confirmed) {
