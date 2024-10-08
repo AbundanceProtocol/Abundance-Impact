@@ -12,12 +12,14 @@ import CuratorData from '../../../../components/Page/CuratorData';
 import TopPicks from '../../../../components/Page/FilterMenu/TopPicks';
 import Shuffle from '../../../../components/Page/FilterMenu/Shuffle';
 import Time from '../../../../components/Page/FilterMenu/Time';
+import { decryptPassword } from '../../../../utils/utils';
+const userSecret = process.env.USER_SECRET
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { fid, points, app } = router.query
+  const { fid, points, app, userFid, pass } = router.query
   const [user, setUser] = useState(null)
-  const { LoginPopup, isLogged, setPoints } = useContext(AccountContext)
+  const { LoginPopup, isLogged, setPoints, setIsLogged, setFid } = useContext(AccountContext)
   const ref = useRef(null)
   const [textMax, setTextMax] = useState('430px')
   const [screenWidth, setScreenWidth ] = useState(undefined)
@@ -140,6 +142,17 @@ export default function ProfilePage() {
   }
 
   useEffect(() => {
+    if (app && app == 'mini' && userFid && pass) {
+      const decodedParam = decodeURIComponent(pass);
+      let decryptedPass = decryptPassword(decodedParam, userSecret)
+      let decryptedFid = decryptedPass.slice(10);
+      if (userFid == decryptedFid) {
+        setIsLogged(true)
+        setFid(Number(userFid))
+      }
+    }
+
+
     if (fid) {
       getCuratorData(fid)
     }

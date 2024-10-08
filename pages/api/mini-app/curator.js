@@ -1,8 +1,10 @@
-// import connectToDatabase from "../../../libs/mongodb";
-// import User from "../../../models/User";
+import connectToDatabase from "../../../libs/mongodb";
+import User from "../../../models/User";
 import qs from "querystring";
 import { init, validateFramesMessage } from "@airstack/frames";
+import { encryptPassword } from "../../../utils/utils";
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
+const userSecret = process.env.USER_SECRET
 
 export default async function handler(req, res) {
   init(process.env.AIRSTACK_API_KEY ?? '')
@@ -12,39 +14,55 @@ export default async function handler(req, res) {
   const { fid, points } = req.query;
 
   if (req.method === 'POST') {
-    const { untrustedData } = req.body;
-    console.log(untrustedData, fid);
 
     const curatorFid = message?.data?.fid
     console.log('curatorFid', curatorFid)
 
-    // async function getUser(curatorFid, points) {
-    //   try {
-    //     await connectToDatabase();
-    //     let user = await User.findOne({ fid: curatorFid, ecosystem_points: points }).select('username').exec();
-    //     if (user) {
-    //       return user.username
-    //     }
-    //     return null
-    //   } catch (error) {
-    //     console.error("Error getting data:", error);
-    //     return null
-    //   }
-    // }
+    async function getUser(curatorFid, points) {
+      try {
+        await connectToDatabase();
+        let user = await User.findOne({ fid: curatorFid, ecosystem_points: points }).select('username').exec();
+        if (user) {
+          return user.username
+        }
+        return null
+      } catch (error) {
+        console.error("Error getting data:", error);
+        return null
+      }
+    }
 
-    // const user = await getUser(curatorFid, points || null)
+    const user = await getUser(curatorFid, points || null)
     
     let curator = 3
     if (fid) {
       curator = fid
     }
 
-    res.status(200).json({ 
-      type: 'form',
-      title: 'Curator page',
-      url: `https://impact.abundance.id/~/curator/${curator}?${qs.stringify({ points, app: 'mini' })}`,
-    });
-    return
+    if (user) {
+      const today = new Date();
+      const todayData = today.toISOString().split('T')[0];
+      let phrase = String(todayData) + String(curatorFid)
+      let pass = encryptPassword(phrase, userSecret)
+      let encodedPass = encodeURIComponent(pass)
+
+      res.status(200).json({ 
+        type: 'form',
+        title: 'Curator page',
+        url: `https://impact.abundance.id/~/curator/${curator}?${qs.stringify({ points, app: 'mini', userFid: curatorFid, pass: encodedPass })}`,
+      });
+      return
+
+    } else {
+
+      res.status(200).json({ 
+        type: 'form',
+        title: 'Curator page',
+        url: `https://impact.abundance.id/~/curator/${curator}?${qs.stringify({ points, app: 'mini', userFid: curatorFid, pass: null })}`,
+      });
+      return
+      
+    }
    
   } else if (req.method === 'GET') {
     res.status(200).json({
