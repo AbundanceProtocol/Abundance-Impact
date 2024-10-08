@@ -163,9 +163,18 @@ export default function ProfilePage() {
       if (confirmed) {
         setIsLogged(true)
         setFid(Number(userFid))
+        console.log('app03', isLogged, confirmed)
+
       }
     }
   }, [userFid, pass, app]);
+
+
+  useEffect(() => {
+    console.log('app02', isLogged, fid)
+  }, [isLogged]);
+
+
 
   // async function getUser(fid) {
   //   try {
