@@ -195,7 +195,16 @@ async function getDegenAllowance(fid) {
   try {
     const response = await fetch(`https://api.degen.tips/airdrop2/allowances?fid=${fid}`);
     const data = await response.json();
-    return data?.length > 0 ? data[0].remaining_tip_allowance : 0;
+    const today = new Date();
+    const dayOfMonth = today.getDate();
+
+    if (data && data[0]?.remaining_tip_allowance) {
+      if (Math.floor(data[0]?.remaining_tip_allowance) >= 0 && (dayOfMonth % 3 == Number(fid) % 3)) {
+        return Math.floor(data[0]?.remaining_tip_allowance)
+      } else {
+        return 0
+      }
+    }
   } catch (error) {
     console.error('Error in getDegenAllowance:', error);
     return 0;
@@ -209,7 +218,11 @@ async function getWildAllowance(fid) {
       headers: { accept: "application/json" },
     });
     const getRemaining = await remainingBalance.json();
-    return getRemaining ? Math.floor(Number(getRemaining?.allowance_remaining)) : 0;
+    if (getRemaining?.remaining_allowance) {
+      return Math.floor(Number(getRemaining?.remaining_allowance)) || 0
+    } else {
+      return 0
+    }
   } catch (error) {
     console.error('Error in getWildAllowance:', error);
     return 0;
