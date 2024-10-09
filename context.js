@@ -180,8 +180,8 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
       console.log('c12 store triggered', store.isAuth, miniApp)
       if (store.isAuth) {
         setIsLogged(true);
-        setFid(store.fid)
-        getUserProfile(store.fid)
+        setFid(fid || store.fid)
+        getUserProfile(fid || store.fid)
         setShowLogin(false)
       } else {
         console.log('c12-2', isLogged)
