@@ -38,20 +38,6 @@ export default async function handler(req, res) {
       }
     }
     
-    async function getWildAllowance(fid) {
-      try {
-        const remainingUrl = `https://sys.wildcard.lol/tip/public/v1/token/balance/${fid}?currency=WILD`;
-        const remainingBalance = await fetch(remainingUrl, {
-          headers: { accept: "application/json" },
-        });
-        const getRemaining = await remainingBalance.json();
-        return getRemaining ? Math.floor(Number(getRemaining?.allowance_remaining)) : 0;
-      } catch (error) {
-        console.error('Error in getWildAllowance:', error);
-        return 0;
-      }
-    }
-    
     async function getHuntAllowance(fid) {
       try {
         const remainingUrl = `https://tip.hunt.town/api/stats/fid/${fid}`;
@@ -67,15 +53,13 @@ export default async function handler(req, res) {
     }
 
 
-    let allowances = [{coin: '$DEGEN', remaining: 0}, {coin: '$HAM', remaining: 0}, {coin: '$WILD', remaining: 0}, {coin: '$HUNT', remaining: 0}]
+    let allowances = [{coin: '$DEGEN', remaining: 0}, {coin: '$HAM', remaining: 0}, {coin: '$HUNT', remaining: 0}]
 
     for (const allowance of allowances) {
       if (allowance.coin == '$DEGEN') {
         allowance.remaining = await getDegenAllowance(fid)
       } else if (allowance.coin == '$HAM') {
         allowance.remaining = await getHamAllowance(fid)
-      } else if (allowance.coin == '$WILD') {
-        allowance.remaining = await getWildAllowance(fid)
       } else if (allowance.coin == '$HUNT') {
         allowance.remaining = await getHuntAllowance(fid)
       }
@@ -114,7 +98,7 @@ export default async function handler(req, res) {
 
           <div style={{display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', border: '1px solid #eeeeeeaa', borderRadius: '16px', padding: '10px', margin: '15px', background: '#eeeeeeaa', width: '500px'}}>
             <div style={{display: 'flex', textAlign: 'left', color:  '#220a4d', fontSize: '18px', margin: '5px 10px 5px 10px', width: '100px'}}>Auto-tip:</div>
-            <div style={{display: 'flex', textAlign: 'left', color: '#220a4d', fontSize: '17px', margin: '5px 10px 5px 0px', width: '360px'}}>Let /impact automatically distribute your remaining $DEGEN, $HAM, $WILD & $HUNT allowances before they reset</div>
+            <div style={{display: 'flex', textAlign: 'left', color: '#220a4d', fontSize: '17px', margin: '5px 10px 5px 0px', width: '360px'}}>Let /impact automatically distribute your remaining $DEGEN, $HAM & $HUNT allowances before they reset</div>
           </div>
 
 

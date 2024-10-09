@@ -73,7 +73,7 @@ const HorizontalScale = ({ initValue, setTipPercent, tokenData, setTokenData, av
             <div style={{textAlign: 'center', color: (token.allowance == 0 && type !== 'schedule') ? '#888' : token.set ? '#9df' : '#ccc', fontSize: '15px', fontWeight: '700'}}>
               {type == 'schedule' ? value + '%' : formatNum(Math.round(token.allowance * value / 100))}
             </div>
-            {(token.token == '$DEGEN') ? (<div style={{fontSize: '11px'}}>$DEGEN</div>) : (token.token == '$TN100x') ? (<div style={{fontSize: '11px'}}>$HAM</div>) : (token.token == '$WILD') ? (<div style={{fontSize: '11px'}}>$WILD</div>) : (token.token == '$HUNT') ? (<div style={{fontSize: '11px'}}>$HUNT</div>) : (<GiTwoCoins />)}
+            {(token.token == '$DEGEN') ? (<div style={{fontSize: '11px'}}>$DEGEN</div>) : (token.token == '$TN100x') ? (<div style={{fontSize: '11px'}}>$HAM</div>) : (token.token == '$HUNT') ? (<div style={{fontSize: '11px'}}>$HUNT</div>) : (<GiTwoCoins />)}
           </div>)
         })}
         </div>

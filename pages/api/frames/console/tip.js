@@ -231,7 +231,7 @@ export default async function handler(req, res) {
       // } 
       
       // Example usage
-      // const input = "500 $degen, 400 $HAM 10000 $wild 🍖x400, 300 $HAM";
+      // const input = "500 $degen, 400 $HAM 10000 🍖x400, 300 $HAM";
       let allowances = []
   
       if (!inputText || inputText == '') {

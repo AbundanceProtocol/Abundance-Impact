@@ -167,11 +167,6 @@ async function getAllowances(fid, currencies, percent, tipTime) {
       console.log('$DEGEN', allowance)
       tip = Math.round(allowance * percent / 100);
       allowances.push({token: coin, set: true, allowance: tip, totalTip: tip});
-    } else if (coin == '$WILD' && tipTime == '7pm') {
-      allowance = await getWildAllowance(fid);
-      console.log('$WILD', allowance)
-      tip = Math.round(allowance * percent / 100);
-      allowances.push({token: coin, set: true, allowance: tip, totalTip: tip});
     } else if (coin == '$HUNT' && tipTime == '7pm') {
       allowance = await getHuntAllowance(fid);
       console.log('$HUNT', allowance)

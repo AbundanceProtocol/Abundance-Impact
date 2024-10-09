@@ -115,7 +115,7 @@ export default async function handler(req, res) {
             schedule.points = points
             schedule.percent_tip = 100
             schedule.ecosystem_name = ecoName
-            schedule.currencies = ['$DEGEN', '$TN100x', '$HUNT', '$WILD']
+            schedule.currencies = ['$DEGEN', '$TN100x', '$HUNT']
             schedule.schedule_time = "45 18 * * *"
             schedule.active_cron = true
           } else {
@@ -130,7 +130,7 @@ export default async function handler(req, res) {
               points: points,
               percent_tip: 100,
               ecosystem_name: ecoName,
-              currencies: ['$DEGEN', '$TN100x', '$HUNT', '$WILD'],
+              currencies: ['$DEGEN', '$TN100x', '$HUNT'],
               schedule_time: "45 18 * * *",
               schedule_count: 1,
               schedule_total: 1,
