@@ -113,7 +113,7 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
         }
         
         if (ecoIndex !== -1) { 
-          console.log('c2', ecosystems[ecoIndex])
+          console.log('c2', ecosystems[ecoIndex], isLogged)
           setEcoData(ecosystems[ecoIndex])
           store.setPoints(ecosystems[ecoIndex].ecosystem_points_name)
           setPoints(ecosystems[ecoIndex].ecosystem_points_name)
@@ -303,7 +303,7 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
     changeEco,
     getEcosystems,
     getRemainingBalances,
-    setMiniApp,
+    miniApp, setMiniApp,
     fid, setFid,
     points, setPoints,
     ecoData, setEcoData,
