@@ -55,6 +55,7 @@ export default function Home() {
   };
 
   const handleSignIn = async (loginData) => {
+    console.log('isLogged-3')
     setFid(loginData.fid)
     setIsLogged(true)
     setShowLogin(false)

@@ -168,6 +168,7 @@ export default function ProfilePage() {
       const confirmed = confirmUser(userFid, pass)
       console.log('confirmed', confirmed)
       if (confirmed) {
+        console.log('isLogged-1')
         setIsLogged(true)
         setFid(Number(userFid))
         console.log('app03', isLogged, confirmed)

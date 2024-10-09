@@ -154,7 +154,7 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
         setPoints(ecoData?.ecosystem_points_name)
         if (router.route !== '/') {
           console.log('c10 points', store.fid, points)
-          getRemainingBalances(store.fid, ecoData?.ecosystem_points_name, store.signer_uuid)
+          getRemainingBalances(fid || store.fid, ecoData?.ecosystem_points_name, store.signer_uuid)
         }
       }
     }
@@ -184,11 +184,14 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
         getUserProfile(fid || store.fid)
         setShowLogin(false)
       } else {
-        console.log('c12-2', isLogged)
-        setIsLogged(false);
-        setFid(null)
-        setUserBalances({impact: 0, qdau: 0})
-        setUserProfile(null)
+        if (router.route !== '/~/curator/[fid]') {
+          console.log('c12-2', isLogged)
+          setIsLogged(false);
+          setFid(null)
+          setUserBalances({impact: 0, qdau: 0})
+          setUserProfile(null)
+        }
+
         if (router.route !== '/' && router.route !== '/~/curator/[fid]') {
           console.log('c13-1')
           LoginPopup()

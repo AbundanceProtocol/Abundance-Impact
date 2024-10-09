@@ -6,6 +6,7 @@ const LoginModal = () => {
   const { showLogin, setShowLogin, setIsLogged, setFid } = useContext(AccountContext);
 
   const handleSignIn = async (loginData) => {
+    console.log('isLogged-5')
     setFid(loginData.fid)
     setIsLogged(true)
     setShowLogin(false)
