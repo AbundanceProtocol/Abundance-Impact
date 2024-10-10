@@ -40,6 +40,49 @@ html, body {
     cursor: pointer;
 }
 
+.curator-frame {
+    min-width: 250px;
+    height: 100px;
+    border: 0px solid #999;
+    border-radius: 15px;
+    background-color: #223344ee;
+    padding: 15px;
+}
+
+.filter-item {
+    font-size: 8px;
+    font-weight: 400;
+    color: #eff;
+    padding: 3px 6px;
+    /* background-color: #33445522; */
+    border: 0px solid #eef;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+.filter-item:hover {
+    color: #fff;
+    background-color: #66778888;
+}
+
+.filter-item-on {
+    font-size: 8px;
+    font-weight: 500;
+    color: #123;
+    padding: 3px 6px;
+    background-color: #abc;
+    border: 0px solid #eef;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+.filter-item-on:hover {
+    color: #012;
+    background-color: #fff;
+}
+
+
+
 .cast-act:hover {
     background-color: #234;
 }

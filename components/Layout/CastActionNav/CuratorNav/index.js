@@ -1,6 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react';
 import Curators from '../../RightMenu/Leaderboard/Curators';
 import axios from 'axios';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { AccountContext } from '../../../../context';
 
@@ -43,13 +44,15 @@ const CuratorNav = () => {
   }, [points, sched.points]);
 
   return (
-    topCurators?.length > 0 && (
+    <>{(topCurators?.length > 0 && (
       <div style={{margin: '18px 0px 12px 0px', width: '380px', padding: '0 32px', border: '0px solid #678', color: '#fff', fontWeight: '700', alignItems:' center', fontSize: '20px'}}>
         <div className='flex-col' style={{gap: '0.25rem', marginTop: '10px'}}>
           {(topCurators.map((curator, index) => (<Curators {...{curator, index, key: index }} />)))}
         </div>
       </div>
-    )
+    ))}
+    {topCurators?.length > 0 && (<div className='flex-row' style={{height: '10px', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '0px', margin: '0 0 0 0'}}><Link href={'/~/curator?points=' + points } ><div className={'filter-item'} style={{fontSize: '12px', border: '1px solid #666', padding: '1px 5px'}}>See all</div></Link></div>)}
+    </>
   )
 }
 
