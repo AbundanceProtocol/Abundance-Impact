@@ -20,7 +20,7 @@ export default async function handler(req, res) {
           headers: { accept: "application/json" },
         });
         const getRemaining = await remainingBalance.json();
-        return getRemaining ? Math.floor((Number(getRemaining?.todaysAllocation) - Number(getRemaining?.totalTippedToday))/1e18) : 0;
+        return getRemaining?.todaysAllocation ? Math.floor((Number(getRemaining?.todaysAllocation) - Number(getRemaining?.totalTippedToday))/1e18) : 0;
       } catch (error) {
         console.error('Error in getHamAllowance:', error);
         return 0;
