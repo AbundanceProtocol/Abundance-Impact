@@ -23,12 +23,15 @@ export default async function handler(req, res) {
       }   
     }
 
-    if (req.query.points) {
-      query.points = req.query.points
+    let order = Number(req?.query?.order) || -1
+    console.log('order', order)
+    
+    if (req?.query?.points) {
+      query.points = req?.query?.points
     }
 
-    if (req.query.time) {
-      query.createdAt = { $gte: req.query.time } ;
+    if (req?.query?.time) {
+      query.createdAt = { $gte: req?.query?.time } ;
     }
     
     if (req.query['curator[]'] && req.query['curator[]'].length > 0) {
@@ -77,7 +80,7 @@ export default async function handler(req, res) {
       return array;
     }
 
-    async function fetchCasts(query, shuffle, page, limit) {
+    async function fetchCasts(query, shuffle, page, limit, order) {
       try {
         await connectToDatabase();
     
@@ -88,7 +91,7 @@ export default async function handler(req, res) {
           totalCount = await Cast.countDocuments(query);
           returnedCasts = await Cast.find(query)
 
-            .sort({ impact_total: -1 })
+            .sort({ impact_total: order, createdAt: -1 })
             .populate('impact_points')
             .skip((page - 1) * limit)
             .limit(limit)
@@ -105,18 +108,18 @@ export default async function handler(req, res) {
     
           // Fetch documents from each range
           const top20PercentCasts = await Cast.find(query)
-            .sort({ impact_total: -1 })
+            .sort({ impact_total: order, createdAt: -1 })
             .populate('impact_points')
             .limit(top20PercentCount)
             .exec();
           const middle40PercentCasts = await Cast.find(query)
-            .sort({ impact_total: -1 })
+            .sort({ impact_total: order, createdAt: -1 })
             .populate('impact_points')
             .skip(top20PercentCount)
             .limit(middle40PercentCount)
             .exec();
           const bottom40PercentCasts = await Cast.find(query)
-            .sort({ impact_total: -1 })
+            .sort({ impact_total: order, createdAt: -1 })
             .populate('impact_points')
             .skip(top20PercentCount + middle40PercentCount)
             .limit(bottom40PercentCount)
@@ -124,7 +127,11 @@ export default async function handler(req, res) {
     
           returnedCasts = top20PercentCasts.concat(middle40PercentCasts, bottom40PercentCasts);
     
-          returnedCasts.sort((a, b) => b.impact_total - a.impact_total);
+          if (order == -1) {
+            returnedCasts.sort((a, b) => b.impact_total - a.impact_total);
+          } else {
+            returnedCasts.sort((a, b) => a.impact_total - b.impact_total);
+          }
     
           returnedCasts = returnedCasts.reduce((acc, current) => {
             const existingItem = acc.find(item => item._id === current._id);
@@ -153,7 +160,7 @@ export default async function handler(req, res) {
         return null;
       }
     }
-    const { casts, totalCount } = await fetchCasts(query, req.query.shuffle === 'true', page, limit);
+    const { casts, totalCount } = await fetchCasts(query, req.query.shuffle === 'true', page, limit, order);
     // console.log('casts 157', casts)
     res.status(200).json({
       total: totalCount,

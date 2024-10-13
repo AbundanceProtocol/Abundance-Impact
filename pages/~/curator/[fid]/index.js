@@ -13,13 +13,18 @@ import TopPicks from '../../../../components/Page/FilterMenu/TopPicks';
 import Shuffle from '../../../../components/Page/FilterMenu/Shuffle';
 import Time from '../../../../components/Page/FilterMenu/Time';
 import { confirmUser } from '../../../../utils/utils';
+import { useInView } from 'react-intersection-observer'
+import { BsClock } from "react-icons/bs";
+import { BiSortDown, BiSortUp } from "react-icons/bi";
+import { IoShuffleOutline as ShuffleIcon } from "react-icons/io5";
 
 export default function ProfilePage() {
   const router = useRouter();
+  const [ref, inView] = useInView()
   const { fid, points, app, userFid, pass } = router.query
   const [user, setUser] = useState(null)
   const { LoginPopup, isLogged, setPoints, setIsLogged, setFid, miniApp, setMiniApp } = useContext(AccountContext)
-  const ref = useRef(null)
+  const ref1 = useRef(null)
   const [textMax, setTextMax] = useState('430px')
   const [screenWidth, setScreenWidth ] = useState(undefined)
   const [screenHeight, setScreenHeight] = useState(undefined)
@@ -28,9 +33,8 @@ export default function ProfilePage() {
   const [searchSelect, setSearchSelect ] = useState('Curation')
   const { isMobile } = useMatchBreakpoints();
   const [userFeed, setUserFeed] = useState(null)
+  const [prevSearch, setPrevSearch] = useState({getTime: null, channel: null, curator: null, text: null, shuffle: null, points: null, page: 0, order: -1})
   const [showPopup, setShowPopup] = useState({open: false, url: null})
-  const [feedRouterScheduled, setFeedRouterScheduled] = useState(false);
-  const [userRouterScheduled, setUserRouterScheduled] = useState(false);
   const initialEco = {
     channels: [],
     condition_channels: false,
@@ -61,7 +65,7 @@ export default function ProfilePage() {
   const [userSearch, setUserSearch] = useState({ search: '' })
   const [selectedChannels, setSelectedChannels] = useState([])
   const [channels, setChannels] = useState([])
-  const initialQuery = {shuffle: true, time: '3days', tags: [], channels: [], curators: []}
+  const initialQuery = {shuffle: false, time: '3d', tags: [], channels: [], curators: [], order: -1}
   const [userQuery, setUserQuery] = useState(initialQuery)
   const queryOptions = {
     tags: [
@@ -109,7 +113,11 @@ export default function ProfilePage() {
       },
     ]
   }
-  // console.log('updated', fid)
+  // const [page, setPage] = useState(1)
+  const [sched, setSched] = useState({inView: false, user: false, feed: false})
+  const [delay, setDelay] = useState(true)
+  const [timeframe, setTimeframe] = useState('3d')
+  const [sortBy, setSortBy] = useState('down')
 
   async function getCuratorData(fid) {
     try {
@@ -139,6 +147,59 @@ export default function ProfilePage() {
       setUser(null)
     }
   }
+
+  useEffect(() => {
+    const inViewRouter = () => {
+      console.log('running', userFeed?.length, (userFeed?.length % 10 == 0))
+      setDelay(true)
+      feedRouter()
+      // if (userFeed?.length % 10 == 0) {
+
+
+
+        // if (cursor !== prevCursor && cursor !== '' && isLogged) {
+        //   if (searchSelect == 'Main') {
+        //     setPrevCursor(cursor)
+        //     addToFeed(fid, channelSelect, true, cursor)
+        //   } else if (searchSelect == 'Recent') {
+        //     setPrevCursor(cursor)
+        //     addToFeed(fid, channelSelect, false, cursor)
+        //   } else if (searchSelect == 'Curation') {
+        //     setPrevCursor(cursor)
+        //     feedRouter()
+        //   }
+        //   console.log('trigger get additional casts', cursor, prevCursor, searchSelect)
+          
+        // } else {
+        //   console.log('triggered, no new casts', cursor, prevCursor, searchSelect)
+        // }
+      // }
+    }
+
+    if (sched.inView) {
+      inViewRouter()
+      setSched(prev => ({...prev, inView: false }))
+    } else {
+      const timeoutId = setTimeout(() => {
+        inViewRouter()
+        setSched(prev => ({...prev, inView: false }))
+      }, 1000);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [inView, sched.inView])
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   useEffect(() => {
     if (fid) {
@@ -203,66 +264,97 @@ export default function ProfilePage() {
 
 
   useEffect(() => {
-    if (userRouterScheduled) {
+    if (sched.user) {
       if (user && fid && fid !== '-') {
         console.log('2')
         feedRouter()
-
       }
-      setUserRouterScheduled(false);
+      setSched(prev => ({...prev, user: false }))
     } else {
       const timeoutId = setTimeout(() => {
         if (user && fid && fid !== '-') {
           console.log('3')
           feedRouter()
         }
-        setUserRouterScheduled(false);
+        setSched(prev => ({...prev, user: false }))
       }, 300);
   
       return () => clearTimeout(timeoutId);
     }
-  }, [user, userRouterScheduled]);
+  }, [user, sched.user]);
 
   useEffect(() => {
-    // console.log('updated', userQuery)
-    if (feedRouterScheduled) {
+    if (sched.feed) {
+      // setPage(1)
       feedRouter();
-      setFeedRouterScheduled(false);
+      setSched(prev => ({...prev, feed: false }))
     } else {
       const timeoutId = setTimeout(() => {
+        // setPage(1)
         feedRouter();
-        setFeedRouterScheduled(false);
+        setSched(prev => ({...prev, feed: false }))
       }, 300);
   
       return () => clearTimeout(timeoutId);
     }
-  }, [searchSelect, userQuery, feedRouterScheduled])
+  }, [searchSelect, userQuery, sched.feed])
 
   function feedRouter() {
-    // console.log(searchSelect)
-    // if (user && searchSelect == 'Casts') {
-    //   getLatestUserCasts(fid, fid)
-    // } else if (searchSelect == 'Casts + Replies') {
-    //   getUserFeed(fid, false, fid)
-    // } else if (searchSelect == 'Curation') {
-      const { shuffle, time, tags, channels, curators, points } = userQuery
-      const timeRange = getTimeRange(time)
-      // console.log(userQuery)
-      getUserSearch(timeRange, tags, channels, curators, null, shuffle, points)
-    // }
+    const { shuffle, time, tags, channels, curators, order } = userQuery
+    getUserSearch(time, tags, channels, curators, null, shuffle, order)
   }
   
-  async function getUserSearch(time, tags, channel, curator, text, shuffle, points) {
+  async function getUserSearch(getTime, tags, channel, curator, text, shuffle, order) {
+    const time = getTimeRange(getTime)
 
-    async function getSearch(time, tags, channel, curator, text, shuffle, points) {
+    console.log(getTime, tags, channel, curator, text, shuffle, points, order)
+    let page = prevSearch.page + 1
+
+    console.log(prevSearch.getTime == getTime, prevSearch.channel == channel, prevSearch.curator == curator, prevSearch.text == text, prevSearch.points == points, prevSearch.getTime == getTime && prevSearch.channel == channel && prevSearch.curator == curator && prevSearch.text == text && prevSearch.points == points)
+
+
+    if (shuffle) {
+      setDelay(true)
+      console.log('opt1')
+      page = 1
+      setUserFeed([])
+      setPrevSearch(prev => ({...prev, getTime, channel, curator, text, shuffle, points, page, order }))
+    } else if (prevSearch.getTime == getTime && prevSearch.channel == channel && prevSearch.curator == curator && prevSearch.text == text && prevSearch.points == points, prevSearch.order == order) {
+      setDelay(true)
+      console.log('opt2')
+      setPrevSearch(prev => ({...prev, getTime, channel, curator, text, shuffle, points, page, order }))
+    } else {
+      setDelay(true)
+      console.log('opt3')
+      page = 1
+      setUserFeed([])
+      setPrevSearch(prev => ({...prev, getTime, channel, curator, text, shuffle, points, page, order })) 
+    }
+
+    async function getSearch(time, tags, channel, curator, text, shuffle, points, page, order) {
+
       try {
         const response = await axios.get('/api/curation/getUserSearch', {
-          params: { time, tags, channel, curator, text, shuffle, points }
+          params: { time, tags, channel, curator, text, shuffle, points, page, order }
         })
-        let casts = []
-        if (response && response.data && response.data.casts.length > 0) {
-          casts = response.data.casts
+
+        const removeDelay = () => {
+          setTimeout(() => {
+            setDelay(false);
+            console.log('no delay')
+          }, 2000);
+        };
+    
+        if (!shuffle) {
+          removeDelay()
         }
+
+        let casts = []
+        if (response?.data?.casts?.length > 0) {
+          casts = response?.data?.casts
+        }
+        console.log(casts)
+
         return casts
       } catch (error) {
         console.error('Error submitting data:', error)
@@ -270,12 +362,18 @@ export default function ProfilePage() {
       }
     }
 
-    const casts = await getSearch(time, tags, channel, curator, text, shuffle, points)
+    let casts = []
+    console.log('pages', page == 1, (page !== 1 && userFeed?.length % 10 == 0))
+    if (page == 1 || (page !== 1 && userFeed?.length % 10 == 0) ) {
+      casts = await getSearch(time, tags, channel, curator, text, shuffle, points, page, order)
+    }
+    
     let filteredCasts
     let sortedCasts
 
     if (!casts) {
-      setUserFeed([])
+      // setUserFeed([])
+
     } else {
 
       console.log(casts)
@@ -286,12 +384,39 @@ export default function ProfilePage() {
         }
         return acc;
       }, [])
-      sortedCasts = filteredCasts.sort((a, b) => b.impact_total - a.impact_total);
+
+      if (order == -1) {
+        sortedCasts = filteredCasts.sort((a, b) => b.impact_total - a.impact_total);
+      } else {
+        sortedCasts = filteredCasts.sort((a, b) => a.impact_total - b.impact_total);
+      }
 
       let displayedCasts = await populateCast(sortedCasts)
 
-      setUserFeed(displayedCasts)
 
+
+
+
+      if (userFeed?.length == 0 || page == 1 || shuffle) {
+        console.log('opt1-2')
+        setUserFeed(displayedCasts)
+      } else if (userFeed) {
+        // let combinedCasts = userFeed.concat(displayedCasts)
+
+        // let filteredCombined = await combinedCasts.reduce((acc, current) => {
+        //   const existingItem = acc.find(item => item._id === current._id);
+        //   if (!existingItem) {
+        //     acc.push(current);
+        //   }
+        //   return acc;
+        // }, [])
+  
+
+        console.log('opt2-2')
+        console.log('feed length', userFeed?.length)
+        setUserFeed((prevUserFeed) => prevUserFeed.concat(displayedCasts))
+      }
+      // setPage(page+1)
     }
   }
 
@@ -462,7 +587,58 @@ export default function ProfilePage() {
     }
   }
 
+  function updateTime(time) {
+    setUserFeed([])
+    // setTimeframe(time)
+    console.log('time', time)
+
+    setTimeframe(time)
+    setUserQuery({
+      ...userQuery,
+      time: time
+    })
+
+    // setUserQuery({
+    //   ...userQuery,
+    //   curators: [fid], points: points || null
+    // })
+
+  }
+
+  function updateOrder(order) {
+    setUserFeed([])
+    // setTimeframe(time)
+    console.log('time', order)
+    setSortBy(order)
+    if (order == 'up') {
+      setUserQuery({
+        ...userQuery,
+        order: 1, shuffle: false
+      })
+    } else if (order == 'down') {
+      setUserQuery({
+        ...userQuery,
+        order: -1, shuffle: false
+      })
+    } else if (order == 'shuffle') {
+      setUserQuery({
+        ...userQuery,
+        order: -1, shuffle: true
+      })
+    }
+
+  }
+
+
   useEffect(() => {
+
+
+    // Example usage:
+    // executeWithDelay(() => {
+    //   console.log('This function is executed after a 2 second delay');
+    // });
+
+
     const handleResize = () => {
       setScreenWidth(window.innerWidth)
       setScreenHeight(window.innerHeight)
@@ -488,7 +664,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className='flex-col' style={{width: 'auto', position: 'relative'}} ref={ref}>
+    <div className='flex-col' style={{width: 'auto', position: 'relative'}} ref={ref1}>
       <div className="" style={{padding: '58px 0 0 0'}}>
       </div>
       {user && (<CuratorData {...{ show: (isLogged && user), user, textMax }} />)}
@@ -499,13 +675,43 @@ export default function ProfilePage() {
 
       {searchSelect == 'Curation' && (
 
-      <div className='flex-row' style={{justifyContent: 'space-between', marginTop: '15px', marginBottom: '30px'}}>
-        <div className='flex-row' style={{gap: '0.5rem'}}>
+      <div className='flex-row' style={{justifyContent: 'center', marginTop: '15px', marginBottom: '30px', gap: '1rem'}}>
+        {/* <div className='flex-row' style={{gap: '0.5rem'}}>
           <TopPicks handleSelection={handleSelection} selection={'picks'} />
           <Shuffle handleSelect={handleSelect} selection={'shuffle'} userQuery={userQuery} />
         </div>
 
-        <Time handleSelection={handleSelection} handleSelect={handleSelect} userQuery={userQuery} options={queryOptions.time} selection={'time'} isSelected={isSelected} isMobile={isMobile} btnText={btnText} />
+        <Time handleSelection={handleSelection} handleSelect={handleSelect} userQuery={userQuery} options={queryOptions.time} selection={'time'} isSelected={isSelected} isMobile={isMobile} btnText={btnText} /> */}
+
+
+
+        <div className='flex-row' style={{height: '30px', alignItems: 'center', justifyContent: 'center', padding: '20px 0'}}>
+          <div className='flex-row' style={{padding: '4px 8px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '20px', alignItems: 'center', gap: '0.25rem'}}>
+            <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>SORT</div>
+            {/* <div className={timeframe == '24h' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('24h')}}>24hr</div>
+            <div className={timeframe == '3d' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('3d')}}>3d</div> */}
+            <div className={sortBy == 'down' ? 'filter-item-on' : 'filter-item'} style={{padding: '2px 6px 0px 6px'}} onClick={() => {updateOrder('down')}}><BiSortDown size={12} /></div>
+            <div className={sortBy == 'up' ? 'filter-item-on' : 'filter-item'} style={{padding: '2px 6px 0px 6px'}} onClick={() => {updateOrder('up')}}><BiSortUp size={12} /></div>
+            <div className={sortBy == 'shuffle' ? 'filter-item-on' : 'filter-item'} style={{padding: '2px 6px 0px 6px'}} onClick={() => {updateOrder('shuffle')}}><ShuffleIcon size={12} /></div>
+            
+          </div>
+        </div>
+
+
+
+
+        <div className='flex-row' style={{height: '30px', alignItems: 'center', justifyContent: 'center', padding: '20px 0'}}>
+          <div className='flex-row' style={{padding: '4px 8px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '20px', alignItems: 'center', gap: '0.25rem'}}>
+            <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>TIME</div>
+
+            <div className={timeframe == '24h' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('24h')}}>24hr</div>
+            <div className={timeframe == '3d' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('3d')}}>3d</div>
+            <div className={timeframe == '7d' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('7d')}}>7d</div>
+            <div className={timeframe == '30d' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('30d')}}>30d</div>
+            <div className={timeframe == 'all' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('all')}}>all</div>
+          </div>
+        </div>
+
 
         {/* <div style={{position: 'relative'}}>
           <div className={`flex-row ${!isMobile ? 'active-nav-link btn-hvr' : ''}`} style={{border: '1px solid #abc', padding: `2px 6px 2px 6px`, borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'center', borderBottom: (isSelected == 'tags') ? '2px solid #99ddff' : '1px solid #abc', height: '28px'}} onMouseEnter={() => {handleSelection('tags')}} onMouseLeave={() => {handleSelection('none')}}>
@@ -523,16 +729,16 @@ export default function ProfilePage() {
           )}
         </div> */}
 
-        <div style={{position: 'relative'}}>
+        {/* <div style={{position: 'relative'}}>
           <div className={`flex-row ${!isMobile ? 'active-nav-link btn-hvr' : ''}`} style={{border: '1px solid #abc', padding: `2px 6px 2px 6px`, borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'center', borderBottom: (isSelected == 'channels') ? '2px solid #99ddff' : '1px solid #abc', height: '28px', marginRight: '4px'}} onMouseEnter={() => {handleSelection('channels')}} onMouseLeave={() => {handleSelection('none')}}>
             <div className="flex-row" style={{alignItems: 'center', gap: isMobile ? '0' : '0.3rem', selection: 'none'}}>
               <AiOutlineBars size={15} color='#eee' />
               <span className={`${!isMobile ? 'selection-btn' : ''}`} style={{cursor: 'pointer', padding: '0', color: userQuery['channels'].length == 0 ? '#aaa' : ''}}>{isMobile ? '' : userQuery['channels'].length == 0 ? 'All channels' : 'Channels'}</span>
             </div>
           </div>
-        </div>
+        </div> */}
 
-        {(isSelected == 'channels') && (
+        {/* {(isSelected == 'channels') && (
           <div className='' style={{position: 'absolute', width: '100%', margin: 'auto', marginTop: '28px'}} onMouseEnter={() => {handleSelection('channels')}} onMouseLeave={() => {handleSelection('none')}}>
             <div className='top-layer flex-col' style={{gap: '0.25rem', padding: '6px 6px', borderRadius: '10px', backgroundColor: '#1D3244dd', border: '1px solid #abc', width: 'auto', marginTop: '10px', alignItems: 'flex-start'}}>
               <div className={`selection-btn ${(userQuery['channels'] == 'all' || userQuery['channels'].length == 0) ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}}>
@@ -569,7 +775,7 @@ export default function ProfilePage() {
               </div>)}
               </div>
             </div>
-          )}
+          )} */}
         </div>
       )}
 
@@ -580,6 +786,7 @@ export default function ProfilePage() {
         </div>
         ) : (userFeed.map((cast, index) => (<Cast {...{cast, key: index, index, updateCast, openImagePopup, ecosystem: eco.ecosystem_points_name, self: false, app}} />)))}
       </div>
+      {!delay && (<div ref={ref}>&nbsp;</div>)}
       <ExpandImg  {...{show: showPopup.open, closeImagePopup, embed: {showPopup}, screenWidth, screenHeight }} />
     </div>
   );

@@ -137,15 +137,15 @@ export function isYesterday(previous, current) {
 export function getTimeRange(time) {
 
   let timeRange = null
-  if (time == '1hr') {
+  if (time == '1hr' || time == '1h') {
     timeRange = new Date(Date.now() - 1 * 60 * 60 * 1000);
-  } else if (time === '24hr') {
+  } else if (time === '24hr' || time === '24h') {
     timeRange = new Date(Date.now() - 24 * 60 * 60 * 1000);
-  } else if (time === '3days') {
+  } else if (time === '3days' || time === '3d') {
     timeRange = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
-  } else if (time === '7days') {
+  } else if (time === '7days' || time === '7d') {
     timeRange = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-  } else if (time === '30days') {
+  } else if (time === '30days' || time === '30d') {
     timeRange = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
   } else if (time === 'all') {
     timeRange = null
