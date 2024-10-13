@@ -2,7 +2,7 @@ import Head from 'next/head';
 import React, { useContext, useState, useRef, useEffect } from 'react'
 // import { AccountContext } from '../../context'
 import Link from 'next/link'
-// import useMatchBreakpoints from '../../hooks/useMatchBreakpoints'
+import useMatchBreakpoints from '../../hooks/useMatchBreakpoints'
 import useStore from '../../utils/store'
 import axios from 'axios';
 // import { FaPen, FaPlus } from "react-icons/fa"
@@ -22,7 +22,7 @@ import { BsClock } from "react-icons/bs";
 
 export default function Ecosystem() {
   const ref = useRef(null)
-  // const { isMobile } = useMatchBreakpoints();
+  const { isMobile } = useMatchBreakpoints();
   // const { setEcoData, getEcosystems, fid, isLogged } = useContext(AccountContext)
   const [screenWidth, setScreenWidth] = useState(undefined)
   const [screenHeight, setScreenHeight] = useState(undefined)
@@ -184,7 +184,7 @@ export default function Ecosystem() {
 
     <div className='flex-row' style={{padding: '10px 0 0 0', flexWrap: 'wrap', minWidth: feedMax, gap: '0.5rem', justifyContent: 'center'}}>
       {curators?.length > 0 ? curators.map((curator, index) => { return (
-        <Link key={index} href={'/~/curator/' + curator?.fid + '?points=' + ecoPoints }>
+        <Link key={index} href={'/~/curator/' + curator?.fid || 9326 + '?points=' + ecoPoints }>
           <div className='curator-frame' style={{gap: '1.5rem'}}>
             <img loading="lazy" src={curator?.author_pfp} className="" alt={`${curator?.author_name} avatar`} style={{width: '36px', height: '36px', maxWidth: '36px', maxHeight: '36px', borderRadius: '24px', border: '1px solid #000'}} />
             <div style={{fontSize: '18px', fontWeight: '400', color: '#eff'}}>@{curator?.username}</div>

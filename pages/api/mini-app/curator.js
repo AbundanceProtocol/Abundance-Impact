@@ -50,7 +50,7 @@ export default async function handler(req, res) {
       res.status(200).json({ 
         type: 'form',
         title: 'Curator page',
-        url: `${baseURL}/~/curator/${curator}?${qs.stringify({ points, app: 'mini', userFid: curatorFid, pass: encodedPass })}`,
+        url: `${baseURL}/~/curator/${curator || 9326}?${qs.stringify({ points, app: 'mini', userFid: curatorFid, pass: encodedPass })}`,
       });
       return
 
@@ -60,7 +60,7 @@ export default async function handler(req, res) {
       res.status(200).json({ 
         type: 'form',
         title: 'Curator page',
-        url: `${baseURL}/~/curator/${curator}?${qs.stringify({ points, app: 'mini', userFid: curatorFid, pass: null })}`,
+        url: `${baseURL}/~/curator/${curator || 9326}?${qs.stringify({ points, app: 'mini', userFid: curatorFid, pass: null })}`,
       });
       return
 
@@ -72,7 +72,7 @@ export default async function handler(req, res) {
       "name": "Curator page",
       "icon": "person",
       "description": "Curator",
-      "aboutUrl": `https://impact.abundance.id/~/curator/${fid}?${qs.stringify({ points, app: 'mini' })}`,
+      "aboutUrl": `https://impact.abundance.id/~/curator/${fid || 9326}?${qs.stringify({ points, app: 'mini' })}`,
       "imageUrl": `${baseURL}/images/input.jpg`,
       "action": {
         "type": "post",

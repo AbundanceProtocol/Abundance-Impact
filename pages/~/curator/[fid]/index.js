@@ -189,18 +189,6 @@ export default function ProfilePage() {
   }, [inView, sched.inView])
 
 
-
-
-
-
-
-
-
-
-
-
-
-
   useEffect(() => {
     if (fid) {
       getCuratorData(fid)
@@ -319,7 +307,7 @@ export default function ProfilePage() {
       page = 1
       setUserFeed([])
       setPrevSearch(prev => ({...prev, getTime, channel, curator, text, shuffle, points, page, order }))
-    } else if (prevSearch.getTime == getTime && prevSearch.channel == channel && prevSearch.curator == curator && prevSearch.text == text && prevSearch.points == points, prevSearch.order == order) {
+    } else if (prevSearch.getTime == getTime && prevSearch.channel == channel && prevSearch.curator == curator && prevSearch.text == text && prevSearch.points == points && prevSearch.order == order) {
       setDelay(true)
       console.log('opt2')
       setPrevSearch(prev => ({...prev, getTime, channel, curator, text, shuffle, points, page, order }))
@@ -363,7 +351,7 @@ export default function ProfilePage() {
     }
 
     let casts = []
-    console.log('pages', page == 1, (page !== 1 && userFeed?.length % 10 == 0))
+    console.log('pages', page, page == 1, (page !== 1 && userFeed?.length % 10 == 0))
     if (page == 1 || (page !== 1 && userFeed?.length % 10 == 0) ) {
       casts = await getSearch(time, tags, channel, curator, text, shuffle, points, page, order)
     }
