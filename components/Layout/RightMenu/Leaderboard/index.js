@@ -12,6 +12,7 @@ const Leaderboard = () => {
   const [topCurators, setTopCurators] = useState([])
   const [sched, setSched] = useState({points: false})
   const router = useRouter()
+  const { ecosystem } = router.query
 
   async function getTopCreators() {
     try {

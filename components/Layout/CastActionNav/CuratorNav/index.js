@@ -6,7 +6,7 @@ import { useRouter } from 'next/router';
 import { AccountContext } from '../../../../context';
 
 const CuratorNav = () => {
-  const { points } = useContext(AccountContext);
+  const { points, ecoData } = useContext(AccountContext);
   const [topCurators, setTopCurators] = useState([])
   const [sched, setSched] = useState({points: false})
   const router = useRouter()
@@ -29,6 +29,7 @@ const CuratorNav = () => {
   }
 
   useEffect(() => {
+    console.log('ecoData', ecoData)
     // if (router.route == '/~/ecosystems/[ecosystem]') {
       if (sched.points) {
         getTopCurators()
@@ -51,7 +52,7 @@ const CuratorNav = () => {
         </div>
       </div>
     ))}
-    {topCurators?.length > 0 && (<div className='flex-row' style={{height: '10px', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '0px', margin: '0 0 0 0'}}><Link href={'/~/curator?points=' + points } ><div className={'filter-item'} style={{fontSize: '12px', border: '1px solid #666', padding: '1px 5px'}}>See all</div></Link></div>)}
+    {topCurators?.length > 0 && (<div className='flex-row' style={{height: '10px', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '0px', margin: '0 0 0 0'}}><Link href={`/~/ecosystems/${ecoData?.ecosystem_handle}/curator` } ><div className={'filter-item'} style={{fontSize: '12px', border: '1px solid #666', padding: '1px 5px'}}>See all</div></Link></div>)}
     </>
   )
 }

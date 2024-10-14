@@ -1,6 +1,8 @@
 import connectToDatabase from '../../../libs/mongodb';
 import Cast from '../../../models/Cast';
 import Impact from '../../../models/Impact';
+import EcosystemRules from '../../../models/EcosystemRules';
+import User from '../../../models/User';
 
 export default async function handler(req, res) {
   if (req.method === 'GET') {
@@ -10,6 +12,8 @@ export default async function handler(req, res) {
     const skip = (page - 1) * limit;
 
     let query = {};
+
+
 
     async function getCuratorIds(fids) {
       try {
@@ -28,21 +32,60 @@ export default async function handler(req, res) {
     
     if (req?.query?.points) {
       query.points = req?.query?.points
+    } else if (req?.query?.ecosystem) {
+
+      async function getPoints(ecosystem) {
+        try {
+          await connectToDatabase();
+          const eco = await EcosystemRules.findOne({ ecosystem_handle: ecosystem }).select('ecosystem_points_name').exec();
+          console.log('eco', eco)
+          return eco ? eco.ecosystem_points_name : '$IMPACT';
+        } catch (error) {
+          console.error('Error in getHash:', error);
+          return '$IMPACT';
+        }
+      }
+
+      query.points = await getPoints(req?.query?.ecosystem)
     }
 
     if (req?.query?.time) {
       query.createdAt = { $gte: req?.query?.time } ;
     }
     
-    if (req.query['curator[]'] && req.query['curator[]'].length > 0) {
-      console.log('37', typeof req.query['curator[]'])
-      let curatorFids
-      if (typeof req.query['curator[]'] === 'string') {
-        curatorFids = [parseInt(req.query['curator[]'])];
-      } else if (Array.isArray(req.query['curator[]']) && req.query['curator[]'].length > 0) {
-          curatorFids = req.query['curator[]'].map(fid => parseInt(fid));
+    if (req?.query['curator[]'] && req?.query['curator[]'].length > 0) {
+      console.log('37', typeof req?.query['curator[]'])
+      let curatorFids = null
+      if (typeof req?.query['curator[]'] === 'string') {
+        curatorFids = [parseInt(req?.query['curator[]'])];
+      } else if (Array.isArray(req?.query['curator[]']) && req?.query['curator[]'].length > 0) {
+        curatorFids = req.query['curator[]'].map(fid => parseInt(fid));
       }
 
+      let impactIds
+      if (curatorFids) {
+        impactIds = await getCuratorIds(curatorFids)
+      }
+      if (impactIds) {
+        query['impact_points'] = { $in: impactIds }
+      }
+    } else if (req?.query?.username) {
+      let curatorFids = null
+
+      async function getCuratorFid(username) {
+        try {
+          await connectToDatabase();
+          const user = await User.findOne({ username }).select('fid').exec();
+          console.log('user', user)
+          return user ? parseInt(user.fid) : 9326;
+        } catch (error) {
+          console.error('Error in getHash:', error);
+          return 9326;
+        }
+      }
+      let curatorFid = 9326
+      curatorFid = await getCuratorFid(req?.query?.username)
+      curatorFids = [curatorFid]
       let impactIds
       if (curatorFids) {
         impactIds = await getCuratorIds(curatorFids)

@@ -1,9 +1,9 @@
 import Head from 'next/head';
 import React, { useContext, useState, useRef, useEffect } from 'react'
-// import { AccountContext } from '../../context'
+import { AccountContext } from '../../../../context'
 import Link from 'next/link'
-import useMatchBreakpoints from '../../hooks/useMatchBreakpoints'
-import useStore from '../../utils/store'
+import useMatchBreakpoints from '../../../../hooks/useMatchBreakpoints'
+// import useStore from '../../utils/store'
 import axios from 'axios';
 // import { FaPen, FaPlus } from "react-icons/fa"
 import { useRouter } from 'next/router';
@@ -14,16 +14,16 @@ import { useRouter } from 'next/router';
 // import InputField from '../../components/Ecosystem/InputField';
 // import Dropdown from '../../components/Ecosystem/Dropdown';
 // import { GrFormPrevious, GrFormNext } from "react-icons/gr";
-import Modal from '../../components/Layout/Modals/Modal';
+import Modal from '../../../../components/Layout/Modals/Modal';
 // import Checkbox from '../../components/Ecosystem/Checkbox';
-import Spinner from '../../components/Common/Spinner';
+import Spinner from '../../../../components/Common/Spinner';
 import { BsClock } from "react-icons/bs";
 
 
 export default function Ecosystem() {
   const ref = useRef(null)
   const { isMobile } = useMatchBreakpoints();
-  // const { setEcoData, getEcosystems, fid, isLogged } = useContext(AccountContext)
+  const { points } = useContext(AccountContext)
   const [screenWidth, setScreenWidth] = useState(undefined)
   const [screenHeight, setScreenHeight] = useState(undefined)
   // const store = useStore()
@@ -37,9 +37,10 @@ export default function Ecosystem() {
   const [ecoPoints, setEcoPoints] = useState(null)
   const [timeframe, setTimeframe] = useState('24h')
   const [page, setPage] = useState(1)
+  const { ecosystem } = router.query;
 
   useEffect(() => {
-    const { trigger, points } = router.query;
+    // const { trigger } = router.query;
     console.log('points', points, page)
     setTimeframe('24h')
     if (points) {
@@ -172,7 +173,7 @@ export default function Ecosystem() {
 
     <div className='flex-row' style={{height: '30px', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
       <div className='flex-row' style={{padding: '4px 8px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '20px', alignItems: 'center', gap: '0.25rem'}}>
-        <BsClock size={15} color='#eee' />
+        <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>TIME</div>
         <div className={timeframe == '24h' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('24h')}}>24hr</div>
         <div className={timeframe == '3d' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('3d')}}>3d</div>
         <div className={timeframe == '7d' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('7d')}}>7d</div>
@@ -184,7 +185,7 @@ export default function Ecosystem() {
 
     <div className='flex-row' style={{padding: '10px 0 0 0', flexWrap: 'wrap', minWidth: feedMax, gap: '0.5rem', justifyContent: 'center'}}>
       {curators?.length > 0 ? curators.map((curator, index) => { return (
-        <Link key={index} href={'/~/curator/' + curator?.fid || 9326 + '?points=' + ecoPoints }>
+        <Link key={index} href={`/~/ecosystems/${ecosystem}/curator/${curator?.username}`}>
           <div className='curator-frame' style={{gap: '1.5rem', minWidth: isMobile ? '200px' : '250px'}}>
             <img loading="lazy" src={curator?.author_pfp} className="" alt={`${curator?.author_name} avatar`} style={{width: '36px', height: '36px', maxWidth: '36px', maxHeight: '36px', borderRadius: '24px', border: '1px solid #000'}} />
             <div style={{fontSize: '18px', fontWeight: '400', color: '#eff'}}>@{curator?.username}</div>
