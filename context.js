@@ -10,6 +10,7 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
   const [showActions, setShowActions] = useState(false)
   const [showLogin, setShowLogin] = useState(false)
   const [miniApp, setMiniApp] = useState(false)
+  const [autotipping, setAutotipping] = useState([])
   const [populate, setPopulate] = useState(0)
   const [userProfile, setUserProfile] = useState(null)
   const [showLogout, setShowLogout] = useState(false)
@@ -311,6 +312,7 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
     points, setPoints,
     ecoData, setEcoData,
     ecosystemsData, setEcosystemsData,
+    autotipping, setAutotipping,
     isLogged, setIsLogged,
     userBalances, setUserBalances,
     eligibility, setEligibility,

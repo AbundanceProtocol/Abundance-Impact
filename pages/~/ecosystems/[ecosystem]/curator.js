@@ -23,7 +23,7 @@ import { BsClock } from "react-icons/bs";
 export default function Ecosystem() {
   const ref = useRef(null)
   const { isMobile } = useMatchBreakpoints();
-  const { points } = useContext(AccountContext)
+  const { points, fid, autotipping, setAutotipping, isLogged, LoginPopup } = useContext(AccountContext)
   const [screenWidth, setScreenWidth] = useState(undefined)
   const [screenHeight, setScreenHeight] = useState(undefined)
   // const store = useStore()
@@ -38,21 +38,51 @@ export default function Ecosystem() {
   const [timeframe, setTimeframe] = useState('24h')
   const [page, setPage] = useState(1)
   const { ecosystem } = router.query;
+  const [sched, setSched] = useState({autotip: false, setPoints: false})
 
   useEffect(() => {
     // const { trigger } = router.query;
     console.log('points', points, page)
-    setTimeframe('24h')
-    if (points) {
-      setEcoPoints(points)
-    } else {
-      setEcoPoints('$IMPACT')
+    function updatePoints() {
+      setTimeframe('24h')
+      if (points) {
+        setEcoPoints(points)
+      } else {
+        setEcoPoints('$IMPACT')
+      }
     }
     console.log(router)
-    // if (trigger === 'createEcosystem') {
-    //   setupEcosystem('start');
-    // }
-  }, [router.query]);
+
+    if (sched.setPoints) {
+      updatePoints()
+      setSched(prev => ({...prev, setPoints: false }))
+    } else {
+      const timeoutId = setTimeout(() => {
+        updatePoints()
+        setSched(prev => ({...prev, setPoints: false }))
+      }, 300);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [router.query, sched.setPoints]);
+
+
+  useEffect(() => {
+    console.log('trigger getUserAutotips', fid, autotipping)
+    if (sched.autotip) {
+      if (fid) {
+        getUserAutotips(fid)
+      }
+      setSched(prev => ({...prev, autotip: false }))
+    } else {
+      const timeoutId = setTimeout(() => {
+        if (fid) {
+          getUserAutotips(fid)
+        }
+        setSched(prev => ({...prev, autotip: false }))
+      }, 300);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [router.query, fid, sched.autotip]);
 
 
   useEffect(() => {
@@ -111,7 +141,73 @@ export default function Ecosystem() {
   // function setupEcosystem(target) {
     
   // }
+  async function getUserAutotips(fid) {
+    console.log('trigger getAutotipCurators', fid)
+    try {
+      const response = await axios.get('/api/curation/getAutotipCurators', {
+        params: { fid } })
+      if (response?.data?.curators?.length > 0 || curators) {
+        const userAutotips = response?.data?.curators
+        console.log('userAutotips', userAutotips)
+        setAutotipping(userAutotips)
+      } else {
+        setAutotipping([])
+      }
+    } catch (error) {
+      console.error('Error submitting data:', error)
+      setAutotipping([])
+    }
+  }
 
+  async function removeAutotip(event, curatorFid) {
+    event.preventDefault();
+    console.log('remove', curatorFid)
+    if (!isLogged) {
+      LoginPopup()
+      return
+    } else {
+      try {
+        const response = await axios.post('/api/curation/removeAutotip', { fid, curators: curatorFid, points });
+        console.log(response)
+        if (response?.data) {
+          let schedCurators = response?.data?.schedule?.search_curators || []
+          if (!schedCurators.includes(curatorFid)) {
+            setAutotipping(schedCurators);
+            console.log(`Added ${curatorFid} to autotipping list`);
+          }
+        } else {
+          console.log('Failed to add curator to autotipping list');
+        }
+      } catch (error) {
+        console.error('Error adding autotip curator:', error);
+      }
+    }
+  }
+
+  async function addAutotip(event, curatorFid) {
+    event.preventDefault();
+    console.log('add', fid, curatorFid, points)
+    if (!isLogged) {
+      LoginPopup()
+      return
+    } else {
+      try {
+        const response = await axios.post('/api/curation/addAutotip', { fid, curators: curatorFid, points });
+        console.log(response)
+        if (response?.data) {
+          let schedCurators = response?.data?.schedule?.search_curators || []
+          if (schedCurators.includes(curatorFid)) {
+            setAutotipping(prevAutotipping => [...prevAutotipping, curatorFid]);
+            console.log(`Added ${curatorFid} to autotipping list`);
+          }
+        } else {
+          console.log('Failed to add curator to autotipping list');
+        }
+      } catch (error) {
+        console.error('Error adding autotip curator:', error);
+      }
+    }
+  }
 
   async function getCurators(points, time, page) {
     console.log(points, time)
@@ -165,6 +261,15 @@ export default function Ecosystem() {
     <div style={{padding: '58px 0 0 0', width: feedMax}}>
     </div>
 
+    <div className='flex-row' style={{height: '30px', alignItems: 'center', justifyContent: 'flex-start', padding: '20px 0 30px 0'}}>
+      <div className='flex-row' style={{padding: '4px 8px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '20px', alignItems: 'center', gap: '0.25rem'}}>
+        {/* <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>TIME</div> */}
+
+        <Link href={`/~/ecosystems/${ecosystem}`}><div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>{ecosystem}</div></Link>
+        <div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px', padding: '0'}}>{'>'}</div>
+        <div className='filter-item-on' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>curator</div>
+      </div>
+    </div>
 
     <div title='Cast Actions' className='flex-row' style={{alignItems: 'center', justifyContent: 'center', margin: '8px'}}>
       <p className='' style={{padding: '10px', color: '#fff', fontWeight: '700', fontSize: '20px'}}>Ecosystem Curators </p>
@@ -187,8 +292,13 @@ export default function Ecosystem() {
       {curators?.length > 0 ? curators.map((curator, index) => { return (
         <Link key={index} href={`/~/ecosystems/${ecosystem}/curator/${curator?.username}`}>
           <div className='curator-frame' style={{gap: '1.5rem', minWidth: isMobile ? '200px' : '250px'}}>
-            <img loading="lazy" src={curator?.author_pfp} className="" alt={`${curator?.author_name} avatar`} style={{width: '36px', height: '36px', maxWidth: '36px', maxHeight: '36px', borderRadius: '24px', border: '1px solid #000'}} />
-            <div style={{fontSize: '18px', fontWeight: '400', color: '#eff'}}>@{curator?.username}</div>
+            <div className='flex-row' style={{gap: '1rem', paddingBottom: '10px', justifyContent: 'space-between'}}>
+              <img loading="lazy" src={curator?.author_pfp} className="" alt={`${curator?.author_name} avatar`} style={{width: '36px', height: '36px', maxWidth: '36px', maxHeight: '36px', borderRadius: '24px', border: '1px solid #000'}} />
+              <div>
+                {autotipping.includes(curator?.fid) ? (<div className='curator-button' style={{fontSize: isMobile ? '9px' : '10px'}} onClick={(event) => {removeAutotip(event, curator?.fid)}}>Auto-tipping</div>) : (<div className='curator-button-on' style={{fontSize: isMobile ? '9px' : '10px'}} onClick={(event) => {addAutotip(event, curator?.fid)}}>Auto-tip</div>)}
+              </div>
+            </div>
+            <div style={{fontSize: isMobile ? '16px' : '17px', fontWeight: '400', color: '#eff'}}>@{curator?.username}</div>
           </div>
         </Link>
       )}) : (

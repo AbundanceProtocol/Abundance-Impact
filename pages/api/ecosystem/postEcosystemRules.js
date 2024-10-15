@@ -9,7 +9,7 @@ export default async function handler(req, res) {
   const { fid, data, update, id } = req.body;
   
   if (req.method !== 'POST' || !fid || !data) {
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: 'Method not allowed' });
   } else {
     console.log(data)
 

@@ -42,12 +42,45 @@ html, body {
 
 .curator-frame {
     /* min-width: 250px; */
-    height: 100px;
+    /* height: 100px; */
+    gap: 2rem;
     border: 0px solid #999;
     border-radius: 15px;
     background-color: #223344ee;
     padding: 15px;
 }
+
+.curator-button {
+    border: 1px solid #999;
+    border-radius: 15px;
+    padding: 4px 7px;
+    color: #eff;
+    text-align: center;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.curator-button:hover {
+    color: #fff;
+    background-color: #66778888;
+}
+
+.curator-button-on {
+    border: 1px solid #999;
+    border-radius: 15px;
+    padding: 4px 7px;
+    color: #123;
+    background-color: #fff;
+    text-align: center;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.curator-button-on:hover {
+    color: #012;
+    background-color: #abc;
+}
+
 
 .filter-desc {
     font-size: 10px;

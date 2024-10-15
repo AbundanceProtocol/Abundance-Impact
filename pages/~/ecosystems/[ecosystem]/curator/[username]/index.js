@@ -1,5 +1,6 @@
 import { useRouter } from 'next/router';
 import { useRef, useContext, useEffect, useState } from 'react';
+import Link from 'next/link'
 import axios from 'axios';
 import { AiOutlineBars } from "react-icons/ai";
 import { useInView } from 'react-intersection-observer'
@@ -138,7 +139,7 @@ export default function ProfilePage() {
           profile: { bio: { text: profile?.profileBio } },
           followingCount: profile?.followingCount,
           followerCount: profile?.followerCount,
-          fid: profile?.userId
+          fid: Number(profile?.userId)
         }
         setUser(populatedProfile)
       } else {
@@ -672,6 +673,19 @@ export default function ProfilePage() {
     <div className='flex-col' style={{width: 'auto', position: 'relative'}} ref={ref1}>
       <div className="" style={{padding: '58px 0 0 0'}}>
       </div>
+
+      <div className='flex-row' style={{height: '30px', alignItems: 'center', justifyContent: 'flex-start', padding: '20px 0 30px 0'}}>
+        <div className='flex-row' style={{padding: '4px 8px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '20px', alignItems: 'center', gap: '0.25rem'}}>
+          {/* <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>TIME</div> */}
+
+          <Link href={`/~/ecosystems/${ecosystem}`}><div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>{ecosystem}</div></Link>
+          <div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px', padding: '0'}}>{'>'}</div>
+          <Link href={`/~/ecosystems/${ecosystem}/curator`}><div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>curator</div></Link>
+          <div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px', padding: '0'}}>{'>'}</div>
+          <div className='filter-item-on' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>@{username}</div>
+        </div>
+      </div>
+
       {user && (<CuratorData {...{ show: (isLogged && user), user, textMax }} />)}
       {/* <div className="top-layer flex-row" style={{padding: '10px 0 10px 0', alignItems: 'center', justifyContent: 'space-evenly', margin: '0', borderBottom: '1px solid #888'}}>
         {userButtons.map((btn, index) => (
