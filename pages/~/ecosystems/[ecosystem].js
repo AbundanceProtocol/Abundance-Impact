@@ -1,41 +1,73 @@
-import Head from 'next/head';
-import React, { useContext, useState, useRef, useEffect } from 'react'
-import { AccountContext } from '../../../context'
-import useMatchBreakpoints from '../../../hooks/useMatchBreakpoints'
-import useStore from '../../../utils/store'
-import axios from 'axios';
 import { useRouter } from 'next/router';
-import Cast from '../../../components/Cast'
-import { formatNum, getTimeRange, checkEmbedType, populateCast, isCast } from '../../../utils/utils';
-import { IoShuffleOutline as Shuffle, IoPeople, IoPeopleOutline } from "react-icons/io5";
-import { HiRefresh } from "react-icons/hi";
-import { BsClock } from "react-icons/bs";
-import { GoTag } from "react-icons/go";
-import { AiOutlineBars } from "react-icons/ai";
-import Spinner from '../../../components/Common/Spinner';
+import { useRef, useContext, useEffect, useState } from 'react';
+import Link from 'next/link'
+import axios from 'axios';
+// import { AiOutlineBars } from "react-icons/ai";
 import { useInView } from 'react-intersection-observer'
+// import { BsClock } from "react-icons/bs";
+import { BiSortDown, BiSortUp } from "react-icons/bi";
+import { IoShuffleOutline as ShuffleIcon } from "react-icons/io5";
+import { AccountContext } from '../../../context';
+import { confirmUser } from '../../../utils/utils';
+import Spinner from '../../../components/Common/Spinner';
 import ExpandImg from '../../../components/Cast/ExpandImg';
-import Modal from '../../../components/Layout/Modals/Modal';
-import FeedMenu from '../../../components/Common/FeedMenu';
-import TipScheduler from '../../../components/Common/TipScheduler';
-import HorizontalScale from '../../../components/Common/HorizontalScale';
-import TipAll from '../../../components/Common/TipAll';
+import CuratorData from '../../../components/Page/CuratorData';
+// import TopPicks from '../../../components/Page/FilterMenu/TopPicks';
+// import Shuffle from '../../../components/Page/FilterMenu/Shuffle';
+// import Time from '../../../components/Page/FilterMenu/Time';
+import { formatNum, getCurrentDateUTC, getTimeRange, isYesterday, checkEmbedType, populateCast, isCast } from '../../../utils/utils';
+import Cast from '../../../components/Cast'
+import useMatchBreakpoints from '../../../hooks/useMatchBreakpoints';
 
-export default function Home({ time, curators, channels, tags, shuffle, referrer, eco, ecosystem }) {
-  const ref2 = useRef(null)
+export default function Eco() {
+  const router = useRouter();
   const [ref, inView] = useInView()
-  const [userFeed, setUserFeed] = useState([])
-  const { isMobile } = useMatchBreakpoints();
-  const { LoginPopup, ecoData, points, setPoints, isLogged, fid, userProfile, populate } = useContext(AccountContext)
-  const [screenWidth, setScreenWidth] = useState(undefined)
+  const { ecosystem, time, curators, channels, shuffle, app, userFid, pass, referrer } = router.query
+  const [user, setUser] = useState(null)
+  const { LoginPopup, isLogged, setPoints, setIsLogged, setFid, miniApp, setMiniApp, fid } = useContext(AccountContext)
+  const ref1 = useRef(null)
+  const [textMax, setTextMax] = useState('430px')
+  const [screenWidth, setScreenWidth ] = useState(undefined)
   const [screenHeight, setScreenHeight] = useState(undefined)
-  const store = useStore()
-  const [textMax, setTextMax] = useState('562px')
   const [feedMax, setFeedMax ] = useState('620px')
-  const initialQuery = {shuffle: false, time: 'all', tags: [], channels: [], curators: []}
-  const [userQuery, setUserQuery] = useState(initialQuery)
+  const userButtons = ['Curation', 'Casts', 'Casts + Replies']
+  const [searchSelect, setSearchSelect ] = useState('Curation')
+  const { isMobile } = useMatchBreakpoints();
+  const [userFeed, setUserFeed] = useState(null)
+  const [prevSearch, setPrevSearch] = useState({getTime: null, channel: null, curators: null, text: null, shuffle: null, ecosystem: null, page: 0, order: -1})
   const [showPopup, setShowPopup] = useState({open: false, url: null})
-  const router = useRouter()
+  const initialEco = {
+    channels: [],
+    condition_channels: false,
+    condition_curators_threshold: 1,
+    condition_following_channel: false,
+    condition_following_owner: false,
+    condition_holding_erc20: false,
+    condition_holding_nft: false,
+    condition_points_threshold: 1,
+    condition_powerbadge: false,
+    createdAt: "2024-06-17T03:19:16.065Z",
+    downvote_value: 1,
+    ecosystem_moderators: [],
+    ecosystem_name: 'none',
+    ecosystem_handle: 'none',
+    ecosystem_points_name: '$IMPACT',
+    ecosystem_rules: [`Can't do evil`],
+    erc20s: [],
+    fid: 3,
+    nfts: [],
+    owner_name: 'none',
+    percent_tipped: 10,
+    points_per_tip: 1,
+    upvote_value: 1,
+  }
+  const [eco, setEco] = useState(initialEco)
+  // const [isSelected, setIsSelected] = useState('none')
+  // const [userSearch, setUserSearch] = useState({ search: '' })
+  // const [selectedChannels, setSelectedChannels] = useState([])
+  // const [channels, setChannels] = useState([])
+  const initialQuery = {shuffle: false, time: '3d', tags: [], channels: [], curators: null, order: -1}
+  const [userQuery, setUserQuery] = useState(initialQuery)
   const queryOptions = {
     tags: [
       {
@@ -82,210 +114,349 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
       },
     ]
   }
-  const [sched, setSched] = useState({userQuery: false, ecoData: false, login: false, searchSelect: false, inView: false})
-  const userButtons = ['Curation', 'Main', 'Recent']
-  const [searchSelect, setSearchSelect] = useState('Main')
-  const [channelSelect, setChannelSelect] = useState(null)
-  const initialState = { fid: null, signer: null, urls: [], channel: null, parentUrl: null, text: '' }
-	const [castData, setCastData] = useState(initialState)
-  const [loading, setLoading] = useState(false);
-  const tokenInfo = [{token: '$DEGEN', set: true}, {token: '$TN100x', set: false}]
-  const [tokenData, setTokenData] = useState(tokenInfo)
-  const [isSelected, setIsSelected] = useState('none')
-	const [userSearch, setUserSearch] = useState({ search: '' })
-  const [filterChannels, setFilterChannels] = useState([])
-  const [filterCurators, setFilterCurators] = useState([])
-  const [selectedCurators, setSelectedCurators] = useState([])
-  const [selectedChannels, setSelectedChannels] = useState([])
-  const [modal, setModal] = useState({on: false, success: false, text: ''})
-  const [initValue, setInitValue] = useState(50)
-  const [initHour, setInitHour] = useState('Hr')
-  const [initMinute, setInitMinute] = useState('0')
-  const [tokensSelected, setTokensSelected] = useState(['$DEGEN'])
-  const availableTokens = ['$DEGEN', '$TN100x']
-  const [noTip, setNoTip] = useState(true)
-  const [cursor, setCursor] = useState('')
-  const [prevCursor, setPrevCursor] = useState('')
-  const [tipPercent, setTipPercent] = useState(50)
-  
-  function btnText(type) {
-    if (type == 'tags' && (userQuery[type] == 'all' || userQuery[type].length == 0)) {
-      return 'All tags'
-    } else if (type == 'tags' && (userQuery[type].length > 1)) {
-      return 'Tags'
-    } else if (type == 'tags') {
-      const options = queryOptions[type];
-      const option = options.find(option => option.value === userQuery.tags[0]);
-      return option ? option.text : '';
-    } else {
-      const options = queryOptions[type];
-      const option = options.find(option => option.value === userQuery[type]);
-      return option ? option.text : '';
-    }
-  }
+  // const [page, setPage] = useState(1)
+  const [sched, setSched] = useState({inView: false, user: false, feed: false})
+  const [delay, setDelay] = useState(true)
+  const [timeframe, setTimeframe] = useState('3d')
+  const [sortBy, setSortBy] = useState('down')
+  const [shuffled, setShuffled] = useState(false)
 
-  const handleSelect = async (type, selection) => {
-    console.log(type)
-    setPrevCursor('')
-    setCursor('')
-    if (type == 'shuffle') {
-      setUserQuery(prevState => ({
-        ...prevState, 
-        [type]: !userQuery[type] 
-      }));
-      setIsSelected('none')
-    } else if (type == 'time') {
-      setUserQuery(prevState => ({
-        ...prevState, 
-        [type]: selection 
-      }));
-      setIsSelected('none')
-    } else if (type == 'tags') {
-      if (selection == 'all') {
-        setUserQuery(prevState => ({
-          ...prevState, 
-          [type]: [] 
-        }));
-      } else {
-        setUserQuery(prevUserQuery => {
-          const tagIndex = prevUserQuery.tags.indexOf(selection);
-          if (tagIndex === -1) {
-            return {
-              ...prevUserQuery,
-              tags: [...prevUserQuery.tags, selection]
-            };
-          } else {
-            return {
-              ...prevUserQuery,
-              tags: prevUserQuery.tags.filter(item => item !== selection)
-            };
-          }
-        });
-      }
-
-    } else {
-      setIsSelected(type)
-    }
-
-    if (type !== 'tags') {
-      setTimeout(() => {
-        setIsSelected('none')
-      }, 300);
-    }
-  }
+  // async function getCuratorData(username) {
+  //   try {
+  //     const response = await axios.get('/api/getCuratorProfile', {
+  //       params: { username }
+  //     })
+  //     if (response?.data) {
+  //       const profile = response?.data?.data?.Socials?.Social[0] || null
+  //       console.log('profile', profile)
+  //       const populatedProfile = {
+  //         username: profile?.profileName,
+  //         pfp: {
+  //           url: profile?.profileImage,
+  //         },
+  //         displayName: profile?.profileDisplayName,
+  //         activeOnFcNetwork: true,
+  //         profile: { bio: { text: profile?.profileBio } },
+  //         followingCount: profile?.followingCount,
+  //         followerCount: profile?.followerCount,
+  //         fid: Number(profile?.userId)
+  //       }
+  //       setUser(populatedProfile)
+  //     } else {
+  //       setUser(null)
+  //     }
+  //   } catch (error) {
+  //     console.error('Error submitting data:', error)
+  //     setUser(null)
+  //   }
+  // }
 
   useEffect(() => {
-    const searchRouter = () => {
-      setCursor('')
-      setPrevCursor('')
-      if (isLogged && ecoData) {
-        console.log('triggered')
-        if (searchSelect == 'Curation') {
-          feedRouter()
-        } else if (searchSelect == 'Main' && ecoData?.channels?.length > 0) {
-          getFeed(fid, ecoData?.channels[0]?.name, true)
-        } else if (searchSelect == 'Recent' && ecoData?.channels?.length > 0) {
-          getFeed(fid, ecoData?.channels[0]?.name, false)
+    const inViewRouter = () => {
+      console.log('running', userFeed?.length, (userFeed?.length % 10 == 0))
+      console.log('delay1')
+      setDelay(true)
+      console.log('feed3')
+      feedRouter()
+      // if (userFeed?.length % 10 == 0) {
+
+
+
+        // if (cursor !== prevCursor && cursor !== '' && isLogged) {
+        //   if (searchSelect == 'Main') {
+        //     setPrevCursor(cursor)
+        //     addToFeed(fid, channelSelect, true, cursor)
+        //   } else if (searchSelect == 'Recent') {
+        //     setPrevCursor(cursor)
+        //     addToFeed(fid, channelSelect, false, cursor)
+        //   } else if (searchSelect == 'Curation') {
+        //     setPrevCursor(cursor)
+        //     feedRouter()
+        //   }
+        //   console.log('trigger get additional casts', cursor, prevCursor, searchSelect)
+          
+        // } else {
+        //   console.log('triggered, no new casts', cursor, prevCursor, searchSelect)
+        // }
+      // }
+    }
+
+    if (sched.inView) {
+      inViewRouter()
+      setSched(prev => ({...prev, inView: false }))
+    } else {
+      const timeoutId = setTimeout(() => {
+        inViewRouter()
+        setSched(prev => ({...prev, inView: false }))
+      }, 4000);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [inView, sched.inView])
+
+
+  useEffect(() => {
+    // if (username) {
+    //   getCuratorData(username)
+    // }
+    // if (points) {
+    //   setPoints(points)
+    // }
+    if (time && (time == '24h' || time == '3d' || time == '7d' || time == '30d' || time == 'all')) {
+      setTimeframe(time)
+    }
+
+    if (shuffle && shuffle == 'true') {
+      setSortBy('shuffle')
+    } else {
+      setSortBy('down')
+    }
+
+
+    console.log('query', ecosystem, time, curators, channels, shuffle)
+    let setCurators = []
+    if (curators) {
+      setCurators = Array.isArray(curators) ? curators : [Number(curators)]
+    }
+
+    setUserQuery({
+      ...userQuery,
+      ecosystem, time: time || '3d', curators: setCurators || null, channels: channels || null, shuffle: shuffle || false
+    })
+    // getUser(fid)
+  }, [router.query]);
+
+
+  // useEffect(() => {
+  //   console.log('app01', app, userFid, !isLogged, pass !== '', !isLogged && app && app == 'mini' && userFid && pass !== '')
+  //   if (!isLogged && app && app == 'mini' && userFid && pass !== '' && !miniApp) {
+  //     console.log('set mini app')
+  //     setMiniApp(true)
+  //   }
+  // }, [userFid, pass, app]);
+
+  // useEffect(() => {
+  //   if (miniApp) {
+  //     const confirmed = confirmUser(userFid, pass)
+  //     console.log('confirmed', confirmed)
+  //     if (confirmed) {
+  //       console.log('isLogged-1')
+  //       setIsLogged(true)
+  //       setFid(Number(userFid))
+  //       console.log('app03', isLogged, confirmed)
+  //     }
+  //   }
+  // }, [miniApp]);
+
+
+
+
+  useEffect(() => {
+    console.log('app02', isLogged)
+  }, [isLogged]);
+
+
+
+  // async function getUser(fid) {
+  //   try {
+  //     const response = await axios.get('/api/getUserByFid', {
+  //       params: { fid }
+  //     })
+  //     if (response?.data) {
+  //       setUser(response?.data)
+  //     } else {
+  //       setUser(null)
+  //     }
+  //   } catch (error) {
+  //     console.error('Error submitting data:', error)
+  //     setUser(null)
+  //   }
+  // }
+
+
+  // useEffect(() => {
+  //   if (sched.user) {
+  //     if (user && username && username !== '-') {
+  //       console.log('feed4')
+  //       feedRouter()
+  //     }
+  //     setSched(prev => ({...prev, user: false }))
+  //   } else {
+  //     const timeoutId = setTimeout(() => {
+  //       if (user && username && username !== '-') {
+  //         console.log('feed5')
+  //         feedRouter()
+  //       }
+  //       setSched(prev => ({...prev, user: false }))
+  //     }, 300);
+  
+  //     return () => clearTimeout(timeoutId);
+  //   }
+  // }, [user, sched.user]);
+
+  useEffect(() => {
+    console.log('userQuery', userQuery)
+    if (sched.feed) {
+      // setPage(1)
+      console.log('feed1')
+      feedRouter();
+      setSched(prev => ({...prev, feed: false }))
+    } else {
+      const timeoutId = setTimeout(() => {
+        // setPage(1)
+        console.log('feed2')
+        feedRouter();
+        setSched(prev => ({...prev, feed: false }))
+      }, 300);
+  
+      return () => clearTimeout(timeoutId);
+    }
+  }, [searchSelect, userQuery, sched.feed])
+
+  function feedRouter() {
+    const { shuffle, time, tags, channels, ecosystem, curators, order } = userQuery
+    if (ecosystem) {
+      console.log('get user executed', shuffle, time, tags, channels, ecosystem, curators, order)
+      getUserSearch(time, tags, channels, curators, null, shuffle, order, ecosystem )
+    }
+  }
+  
+  async function getUserSearch(getTime, tags, channel, curators, text, shuffle, order, ecosystem ) {
+    const time = getTimeRange(getTime)
+
+    console.log(getTime, tags, channel, curators, text, shuffle, order, ecosystem)
+    let page = prevSearch.page + 1
+
+    console.log(prevSearch.getTime == getTime, prevSearch.channel == channel, prevSearch.curators == curators, prevSearch.text == text, prevSearch.ecosystem == ecosystem, prevSearch.getTime == getTime && prevSearch.channel == channel && prevSearch.curators == curators && prevSearch.text == text && prevSearch.ecosystem == ecosystem)
+
+
+    if (shuffle) {
+      setShuffled(true)
+      console.log('delay2')
+      setDelay(true)
+      console.log('opt1')
+      page = 1
+      setUserFeed([])
+      setPrevSearch(prev => ({...prev, getTime, channel, curators, text, shuffle, ecosystem, page, order }))
+    } else if (prevSearch.getTime == getTime && prevSearch.channel == channel && prevSearch.curators == curators && prevSearch.text == text && prevSearch.ecosystem == ecosystem && prevSearch.order == order) {
+      setShuffled(false)
+      console.log('delay3')
+      setDelay(true)
+      console.log('opt2')
+      setPrevSearch(prev => ({...prev, getTime, channel, curators, text, shuffle, ecosystem, page, order }))
+    } else {
+      setShuffled(false)
+      console.log('delay4')
+      setDelay(true)
+      console.log('opt3')
+      page = 1
+      setUserFeed([])
+      setPrevSearch(prev => ({...prev, getTime, channel, curators, text, shuffle, ecosystem, page, order })) 
+    }
+
+    async function getSearch(time, tags, channel, curators, text, shuffle, ecosystem, page, order) {
+
+      try {
+        const response = await axios.get('/api/curation/getUserSearch', {
+          params: { time, tags, channel, curators, text, shuffle, ecosystem, page, order }
+        })
+
+        const removeDelay = () => {
+          setTimeout(() => {
+            console.log('delay off1')
+            setDelay(false);
+            console.log('no delay')
+          }, 2000);
+        };
+    
+        if (!shuffle) {
+          removeDelay()
         }
+
+        let casts = []
+        if (response?.data?.casts?.length > 0) {
+          casts = response?.data?.casts
+        }
+        // console.log(casts)
+
+        return casts
+      } catch (error) {
+        console.error('Error submitting data:', error)
+        return null
       }
     }
 
-    if (sched.userQuery) {
-      searchRouter()
-      setSched(prev => ({...prev, userQuery: false }))
-    } else {
-      const timeoutId = setTimeout(() => {
-        searchRouter()
-        setSched(prev => ({...prev, userQuery: false }))
-      }, 300);
-      return () => clearTimeout(timeoutId);
+    let casts = []
+    console.log('pages', page, page == 1, (page !== 1 && userFeed?.length % 10 == 0))
+    if (page == 1 || (page !== 1 && userFeed?.length % 10 == 0) ) {
+      casts = await getSearch(time, tags, channel, curators, text, shuffle, ecosystem, page, order)
     }
     
-  }, [userQuery, selectedChannels, selectedCurators, sched.userQuery]);
+    let filteredCasts
+    let sortedCasts
 
-  useEffect(() => {
-    const ecoRouter = () => {
-      if (populate && populate !== 0) {
-        if (ecoData?.channels?.length > 0) {
-          setUserFeed([])
-          setPrevCursor('')
-          setCursor('')
-          setChannelSelect(ecoData.channels[0].name)
-          setSearchSelect('Main')
-          getFeed(fid, ecoData?.channels[0]?.name, true)
-        } else {
-          setUserFeed([])
-          setPrevCursor('')
-          setCursor('')
-          setChannelSelect(null)
-          setSearchSelect('Curation')
-          feedRouter()
+    if (!casts) {
+      // setUserFeed([])
+
+    } else {
+
+      console.log(casts)
+      filteredCasts = await casts.reduce((acc, current) => {
+        const existingItem = acc.find(item => item._id === current._id);
+        if (!existingItem) {
+          acc.push(current);
         }
+        return acc;
+      }, [])
+
+      if (order == -1) {
+        sortedCasts = filteredCasts.sort((a, b) => b.impact_total - a.impact_total);
+      } else {
+        sortedCasts = filteredCasts.sort((a, b) => a.impact_total - b.impact_total);
       }
-    }
 
-    if (sched.ecoData) {
-      ecoRouter()
-      setSched(prev => ({...prev, ecoData: false }))
-    } else {
-      const timeoutId = setTimeout(() => {
-        ecoRouter()
-        setSched(prev => ({...prev, ecoData: false }))
-      }, 300);
-      return () => clearTimeout(timeoutId);
-    }
-  }, [populate, sched.ecoData]);
+      let displayedCasts = await populateCast(sortedCasts)
 
-  const handleSelection = (type) => {
-    if (type == 'shuffle') {
-      setIsSelected('none')
-    } else {
-      setIsSelected(type)
+
+
+
+
+      if (userFeed?.length == 0 || page == 1 || shuffle) {
+        console.log('opt1-2')
+        setUserFeed(displayedCasts)
+      } else if (userFeed) {
+        // let combinedCasts = userFeed.concat(displayedCasts)
+
+        // let filteredCombined = await combinedCasts.reduce((acc, current) => {
+        //   const existingItem = acc.find(item => item._id === current._id);
+        //   if (!existingItem) {
+        //     acc.push(current);
+        //   }
+        //   return acc;
+        // }, [])
+  
+
+        console.log('opt2-2')
+        console.log('feed length', userFeed?.length)
+        setUserFeed((prevUserFeed) => prevUserFeed.concat(displayedCasts))
+      }
+      // setPage(page+1)
     }
   }
 
-  useEffect(() => {
-    setTokenData((prevTokenData) => {
-      let updatedTokenData = [...prevTokenData];
 
-      updatedTokenData.forEach((token) => {
-        if (token.allowance) {
-          return token.totalTip = Math.round((token.allowance * tipPercent) / 100)
-        }
-      })
-      return updatedTokenData
-    })
-    console.log(tokenData)
-
-  }, [tipPercent])
-
-  useEffect(() => {
-    for (const token of tokenData) {
-      if (token.set) {
-        if (token.token == '$TN100x' && token.totalTip >= 1) {
-          setNoTip(false)
-          return
-        } else if (token.totalTip > 0) {
-          setNoTip(false)
-          return
-        }
-      }
-    }
-    setNoTip(true)
-  }, [tokenData])
 
   useEffect(() => {
     if (screenWidth) {
       if (screenWidth > 680) {
-        setTextMax(`562px`)
+        setTextMax(`430px`)
         setFeedMax('620px')
       }
       else if (screenWidth >= 635 && screenWidth <= 680) {
-        setTextMax(`${screenWidth - 120}px`)
+        setTextMax(`390px`)
         setFeedMax('580px')
       }
       else {
-        setTextMax(`${screenWidth - 10}px`)
+        setTextMax(`${screenWidth - 190}px`)
         setFeedMax(`${screenWidth}px`)
       }
     }
@@ -294,7 +465,10 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
       setFeedMax(`100%`)
     }
   }, [screenWidth])
-
+  
+  function closeImagePopup() {
+    setShowPopup({open: false, url: null})
+  }
   function closeImagePopup() {
     setShowPopup({open: false, url: null})
   }
@@ -306,298 +480,192 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
     setShowPopup(newPopup)
   }
 
-  async function getAllowance(token, fid) {
-    let getToken = 'degen'
-    if (token == '$DEGEN') {
-      getToken = 'degen'
-    } else if (token == '$TN100x') {
-      getToken = 'ham'
-    } else if (token == '$FARTHER') {
-      getToken = 'farther'
-    }
+  // const handleSelect = async (type, selection) => {
+  //   console.log(type)
+  //   if (type == 'shuffle') {
+  //     setUserQuery(prevState => ({
+  //       ...prevState, 
+  //       [type]: !userQuery[type] 
+  //     }));
+  //     setIsSelected('none')
+  //   } else if (type == 'time') {
+  //     setUserQuery(prevState => ({
+  //       ...prevState, 
+  //       [type]: selection 
+  //     }));
+  //     setIsSelected('none')
+  //   } else if (type == 'tags') {
+  //     if (selection == 'all') {
+  //       setUserQuery(prevState => ({
+  //         ...prevState, 
+  //         [type]: [] 
+  //       }));
+  //     } else {
+  //       setUserQuery(prevUserQuery => {
+  //         const tagIndex = prevUserQuery.tags.indexOf(selection);
+  //         if (tagIndex === -1) {
+  //           return {
+  //             ...prevUserQuery,
+  //             tags: [...prevUserQuery.tags, selection]
+  //           };
+  //         } else {
+  //           return {
+  //             ...prevUserQuery,
+  //             tags: prevUserQuery.tags.filter(item => item !== selection)
+  //           };
+  //         }
+  //       });
+  //     }
 
-    try {
-      const responseTotal = await axios.get(`/api/${getToken}/getUserAllowance`, {
-        params: { fid } })
-      let remaningAllowance = 0
-      let minTip = 1
-      if (responseTotal?.data) {
-        remaningAllowance = responseTotal?.data?.remaining
-        if (getToken == 'farther') {
-          minTip = responseTotal?.data?.minTip
-        }
-        return { allowance: remaningAllowance, minTip }
-      } else {
-        return { allowance: 0, minTip: 1 }
-      }
-    } catch (error) {
-      console.error('Error creating post:', error);
-      return { allowance: 0, minTip: 1 }
-    }
-  }
+  //   } else {
+  //     setIsSelected(type)
+  //   }
 
-  async function updateAllowances(tokens, fid) {
-    let updatedTokenData = [...tokenData]
-    for (const token of tokens) {
-      let { allowance, minTip } = await getAllowance(token, fid)
-      const tokenIndex = updatedTokenData.findIndex(currentToken => currentToken.token == token)
-      if (tokenIndex !== -1) {
-        if (!updatedTokenData[tokenIndex]?.set) {
-          updatedTokenData[tokenIndex].set = false
-        }
-        if (token == '$FARTHER') {
-          updatedTokenData[tokenIndex].min = minTip
-        }
-        updatedTokenData[tokenIndex].allowance = allowance
-        updatedTokenData[tokenIndex].totalTip = Math.round(allowance * tipPercent / 100)
-      } else if (token == '$FARTHER') {
-        const newToken = {
-          token: token,
-          set: false,
-          allowance: allowance,
-          min: minTip,
-          totalTip: Math.round(allowance * tipPercent / 100)
-        }
-        updatedTokenData.push(newToken)
-      } else {
-        const newToken = {
-          token: token,
-          set: false,
-          allowance: allowance,
-          totalTip: Math.round(allowance * tipPercent / 100)
-        }
-        updatedTokenData.push(newToken)
-      }
-      setTokenData(updatedTokenData)
-    }
-  }
+  //   if (type !== 'tags') {
+  //     setTimeout(() => {
+  //       setIsSelected('none')
+  //     }, 300);
+  //   }
+  // }
 
-  useEffect(() => {
-    if (isLogged && ecoData && cursor == 'x') {
-      if (searchSelect == 'Curation') {
-        console.log(cursor)
-        feedRouter()
-      }
-    }
-  }, [cursor])
-
-
-  useEffect(() => {
-
-    const allowanceUpdate = () => {
-      if (isLogged) {
-        updateAllowances(availableTokens, fid)
-      }
-    }
-
-    if (sched.login) {
-      allowanceUpdate()
-      setSched(prev => ({...prev, login: false }))
-    } else {
-      const timeoutId = setTimeout(() => {
-        allowanceUpdate()
-        setSched(prev => ({...prev, login: false }))
-      }, 300);
-      return () => clearTimeout(timeoutId);
-    }
-
-  }, [isLogged, sched.login])
-
-  const searchSelectRouter = () => {
-    console.log(searchSelect, ecoData, ecoData?.channels[0])
-    setLoading(false)
-    setPrevCursor('')
-    setCursor('')
-    if (isLogged && ecoData) {
-      if (searchSelect == 'Curation') {
-        console.log(cursor)
-        setPrevCursor('x')
-        setCursor('x')
-      } else if (searchSelect == 'Main') {
-        getFeed(fid, ecoData?.channels[0]?.name, true)
-      } else if (searchSelect == 'Recent') {
-        getFeed(fid, ecoData?.channels[0]?.name, false)
-      }
-    }
-  }
+  // const handleSelection = (type, selection) => {
+  //   if (type == 'shuffle') {
+  //     setIsSelected('none')
+  //   } else {
+  //     setIsSelected(type)
+  //   }
+  // }
   
-  useEffect(() => {
-    if (sched.searchSelect) {
-      searchSelectRouter()
-      setSched(prev => ({...prev, searchSelect: false }))
-    } else {
-      const timeoutId = setTimeout(() => {
-        searchSelectRouter()
-        setSched(prev => ({...prev, searchSelect: false }))
-      }, 300);
-      return () => clearTimeout(timeoutId);
-    }
+  // function btnText(type) {
+  //   if (type == 'tags' && (userQuery[type] == 'all' || userQuery[type].length == 0)) {
+  //     return 'All tags'
+  //   } else if (type == 'tags' && (userQuery[type].length > 1)) {
+  //     return 'Tags'
+  //   } else if (type == 'tags') {
+  //     const options = queryOptions[type];
+  //     const option = options.find(option => option.value === userQuery.tags[0]);
+  //     return option ? option.text : '';
+  //   } else {
+  //     const options = queryOptions[type];
+  //     const option = options.find(option => option.value === userQuery[type]);
+  //     return option ? option.text : '';
+  //   }
+  // }
 
-  }, [searchSelect, sched.searchSelect])
+  // function onChannelChange(e) {
+	// 	setUserSearch( () => ({ ...userSearch, [e.target.name]: e.target.value }) )
+	// }
+
+  // async function getChannels(name) {
+  //   console.log(name)
+  //   try {
+  //     const response = await axios.get('/api/getChannels', {
+  //       params: {
+  //         name: name,
+  //       }
+  //     })
+  //     if (response) {
+  //       const channels = response.data.channels.channels
+  //       console.log(channels)
+  //       setChannels(channels)
+  //     }
+  //   } catch (error) {
+  //     console.error('Error submitting data:', error)
+  //   }
+  // }
+
+  // const channelKeyDown = (event) => {
+  //   if (event.key === 'Enter') {
+  //     event.preventDefault();
+  //     getChannels(userSearch.search)
+  //   }
+  // }
   
-  useEffect(() => {
-    const inViewRouter = () => {
-      if (userFeed && (userFeed.length % 10 == 0)) {
-        if (cursor !== prevCursor && cursor !== '' && isLogged) {
-          if (searchSelect == 'Main') {
-            setPrevCursor(cursor)
-            addToFeed(fid, channelSelect, true, cursor)
-          } else if (searchSelect == 'Recent') {
-            setPrevCursor(cursor)
-            addToFeed(fid, channelSelect, false, cursor)
-          } else if (searchSelect == 'Curation') {
-            setPrevCursor(cursor)
-            feedRouter()
-          }
-          console.log('trigger get additional casts', cursor, prevCursor, searchSelect)
-          
-        } else {
-          console.log('triggered, no new casts', cursor, prevCursor, searchSelect)
-        }
-      }
-    }
+  // function addChannel(channel) {
+  //   console.log(channel)
+  //   setUserQuery(prevUserQuery => {
+  //   const channelIndex = prevUserQuery.channels.indexOf(channel.url);
+  //   if (channelIndex === -1) {
+  //     return {
+  //       ...prevUserQuery,
+  //       channels: [...prevUserQuery.channels, channel.url]
+  //     };
+  //   } else {
+  //     // If the curator is found, remove it from the array
+  //     return {
+  //       ...prevUserQuery,
+  //       channels: prevUserQuery.channels.filter(item => item !== channel.url)
+  //       };
+  //     }
+  //   });
 
-    if (sched.inView) {
-      inViewRouter()
-      setSched(prev => ({...prev, inView: false }))
-    } else {
-      const timeoutId = setTimeout(() => {
-        inViewRouter()
-        setSched(prev => ({...prev, inView: false }))
-      }, 300);
-      return () => clearTimeout(timeoutId);
-    }
-  }, [inView, sched.inView])
+  //   const isChannelSelected = selectedChannels.some((c) => c.url === channel.url);
 
-  async function getFeed(fid, channel, curated) {
-    const getChannelFeed = async (fid, channel, curated) => {
-      setLoading(true)
-      try {
-        const response = await axios.get('/api/ecosystem/getFeed', {
-          params: { fid, channel, curated } })
-        setLoading(false)
-        if (response?.data) {
-          // console.log(response)
-          const casts = response?.data?.casts
-          let cursorData = ''
-          if (response?.data?.cursor) {
-            cursorData = response.data.cursor
-          }
-          console.log(casts, cursorData)
-          return {channelFeed: casts, cursorData}
-        } else {
-          return {channelFeed: [], cursorData: ''}
-        }
-      } catch (error) {
-        console.error('Error submitting data:', error)
-        return {channelFeed: [], cursorData: ''}
-      }
-    }
+  //   if (isChannelSelected) {
+  //     // If the curator is already selected, remove it from the state
+  //     setSelectedChannels(selectedChannels.filter((c) => c.url !== channel.url));
+  //   } else {
+  //     // If the curator is not selected, add it to the state
+  //     setSelectedChannels([...selectedChannels, channel]);
+  //   }
+  // }
 
-    const {channelFeed, cursorData} = await getChannelFeed(fid, channel, curated)
-    
-    setUserFeed(channelFeed)
-    updateFeed([], channelFeed, fid)
-    
-    setPrevCursor(cursor)
-    setCursor(cursorData)
+  function updateTime(time) {
+    setUserFeed([])
+    // setTimeframe(time)
+    console.log('time', time)
 
-  }
-
-  async function updateFeed(oldFeed, feed, fid) {
-    let combinedFeed = oldFeed.concat(feed)
-    console.log(combinedFeed)
-    if (oldFeed?.length > 0) {
-      setUserFeed((prevUserFeed) => prevUserFeed.concat(feed))
-    } else {
-      setUserFeed(feed)
-    }
-
-  }
-
-  async function addToFeed(fid, channel, curated, cursor) {
-
-    const getChannelFeed = async (fid, channel, curated, cursor) => {
-      try {
-        const response = await axios.get('/api/ecosystem/getFeed', {
-          params: { fid, channel, curated, cursor } })
-        let casts = []
-        if (response?.data) {
-          casts = response?.data?.casts
-          let cursorData = ''
-          if (response?.data?.cursor) {
-            cursorData = response?.data?.cursor
-          }
-          return {channelFeed: casts, cursorData}
-        } else {
-          return {channelFeed: [], cursorData: ''}
-        }
-      } catch (error) {
-        console.error('Error submitting data:', error)
-        return {channelFeed: [], cursorData: ''}
-      }
-    }
-
-    const {channelFeed, cursorData} = await getChannelFeed(fid, channel, curated, cursor)
-    console.log(channelFeed)
-    updateFeed(userFeed, channelFeed, fid)
-    setCursor(cursorData)
-  }
-
-  useEffect(() => {
-    setUserQuery(updateUserQuery => {
-      return {time, channels, tags, shuffle, curators}
-    })
-  }, [time, curators, channels, tags, shuffle])
-
-  useEffect(() => {
-    console.log('triggered []')
-
-    if (isLogged) {
-      updateAllowances(availableTokens, fid)
-    }
-
-    setUserQuery(updateUserQuery => {
-      return {time, channels, tags, shuffle, curators}
+    setTimeframe(time)
+    setUserQuery({
+      ...userQuery,
+      time: time
     })
 
-    async function getCuratorsQuery(curators) {
+    // setUserQuery({
+    //   ...userQuery,
+    //   curators: [fid], points: points || null
+    // })
 
-      const getCuratorData = async (name) => {
-        try {
-          const response = await axios.get('/api/curation/queryCurators', {
-            params: {
-              name: name,
-            }
-          })
-          if (response) {
-            const curatorsData = response?.data?.users
-            console.log(curatorsData)
-            return curatorsData
-          } else {
-            return null
-          }
-        } catch (error) {
-          console.error('Error submitting data:', error)
-          return null
-        }
-      }
+  }
 
-      for (const curator of curators) {
-        const curatorData = await getCuratorData(curator)
-        addCurator(curatorData)
-      }
+  function updateOrder(order) {
+    setUserFeed([])
+    // setTimeframe(time)
+    console.log('time', order)
+    setSortBy(order)
+    if (order == 'up') {
+      setUserQuery({
+        ...userQuery,
+        order: 1, shuffle: false
+      })
+    } else if (order == 'down') {
+      setUserQuery({
+        ...userQuery,
+        order: -1, shuffle: false
+      })
+    } else if (order == 'shuffle') {
+      setUserQuery({
+        ...userQuery,
+        order: -1, shuffle: true
+      })
     }
 
-    if (curators && selectedCurators?.length == 0) {
-      getCuratorsQuery(curators)
-    }
+  }
+
+
+  useEffect(() => {
+
+
+    // Example usage:
+    // executeWithDelay(() => {
+    //   console.log('This function is executed after a 2 second delay');
+    // });
+
 
     const handleResize = () => {
       setScreenWidth(window.innerWidth)
       setScreenHeight(window.innerHeight)
     }
-
     handleResize()
     window.addEventListener('resize', handleResize);
     
@@ -607,111 +675,9 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  useEffect(() => {
-    if (!isLogged) {
-      LoginPopup()
-    }
-  }, [router]);
-
-  function feedRouter() {
-    const { shuffle, time, tags, channels, curators } = userQuery
-    const timeRange = getTimeRange(time)
-    console.log(userQuery)
-    getUserSearch(timeRange, tags, channels, curators, null, shuffle)
-  }
-
-  async function getUserSearch(time, tags, channel, curator, text, shuffle) {
-    let page = null
-    if (!shuffle && typeof cursor !== 'number') {
-      page = 1
-      setPrevCursor(page)
-      setCursor(page+1)
-    } else if (!shuffle && typeof cursor == 'number') {
-      page = cursor
-      setPrevCursor(cursor)
-      setCursor(cursor+1)
-    }
-
-    async function getSearch(time, tags, channel, curator, text, shuffle) {
-      setLoading(true)
-      try {
-        const response = await axios.get('/api/curation/getUserSearch', {
-          params: { time, tags, channel, curator, text, shuffle, points, page }
-        })
-        setLoading(false)
-        let casts = []
-        let getPage = 1
-        let pages = 1
-        if (response?.data?.casts.length > 0) {
-          casts = response.data.casts
-        }
-        if (response?.data?.page) {
-          getPage = response?.data?.page
-        }
-        if (response?.data?.pages) {
-          pages = response?.data?.pages
-        }
-
-        if (getPage == pages) {
-          setPrevCursor('')
-          setCursor('')
-        } else {
-          setPrevCursor(cursor)
-          setCursor(getPage+1)
-        }
-        return {casts, getPage}
-      } catch (error) {
-        console.error('Error submitting data:', error)
-        setPrevCursor('')
-        setCursor('')
-        return { casts: null, getPage: 0 }
-      }
-    }
-
-    const {casts, getPage} = await getSearch(time, tags, channel, curator, text, shuffle, page)
-
-    let filteredCasts
-    let sortedCasts
-
-    if (!casts) {
-      setUserFeed([])
-    } else {
-
-      console.log(casts)
-      filteredCasts = await casts.reduce((acc, current) => {
-        const existingItem = acc.find(item => item._id === current._id);
-        if (!existingItem) {
-          acc.push(current);
-        }
-        return acc;
-      }, [])
-      sortedCasts = filteredCasts.sort((a, b) => b.impact_total - a.impact_total);
-
-      let displayedCasts = await populateCast(sortedCasts)
-
-      setUserFeed(displayedCasts)
-
-    }
-  }
-
-  const goToUserProfile = async (event, author) => {
-    event.preventDefault()
-    const username = author.username
-    await store.setUserData(author)
-    router.push(`/${username}`)
-  }
-
-  function clearCastText() {
-    setCastData({ ...castData, text: '', parentUrl: null });
-  }
-
-	function onChange(e) {
-		setCastData( () => ({ ...castData, [e.target.name]: e.target.value }) )
-	}
-
-  const searchOption = (e) => {
-    setSearchSelect(e.target.getAttribute('name'))
-  }
+  // const searchOption = (e) => {
+  //   setSearchSelect(e.target.getAttribute('name'))
+  // }
 
   const updateCast = (index, newData) => {
     const updatedFeed = [...userFeed]
@@ -720,274 +686,110 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
     setUserFeed(updatedFeed)
   }
 
-  const channelKeyDown = (event) => {
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      getChannels(userSearch.search)
-    }
-  }
-
-  const curatorKeyDown = (event) => {
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      getCurators(userSearch.search)
-    }
-  }
-
-  async function getChannels(name) {
-    console.log(name)
-    try {
-      const response = await axios.get('/api/getChannels', {
-        params: { name } })
-      if (response) {
-        const channelsData = response?.data?.channels?.channels
-        console.log(channelsData)
-        setFilterChannels(channelsData)
-      }
-    } catch (error) {
-      console.error('Error submitting data:', error)
-    }
-  }
-
-  async function getCurators(name) {
-    console.log(name)
-    try {
-      const response = await axios.get('/api/curation/getCurators', {
-        params: { name } })
-      if (response) {
-        const curatorsData = response?.data?.users
-        console.log(curatorsData)
-        setFilterCurators(curatorsData)
-      }
-    } catch (error) {
-      console.error('Error submitting data:', error)
-    }
-  }
-
-  function onChannelChange(e) {
-		setUserSearch( () => ({ ...userSearch, [e.target.name]: e.target.value }) )
-	}
-
-  function onCuratorSearch(e) {
-		setUserSearch( () => ({ ...userSearch, [e.target.name]: e.target.value }) )
-	}
-
-  function addCurator(curator) {
-    console.log(curator)
-    setUserQuery(prevUserQuery => {
-    const curatorIndex = prevUserQuery.curators.indexOf(curator?.fid);
-    if (curatorIndex === -1) {
-      return {
-        ...prevUserQuery,
-        curators: [...prevUserQuery.curators, curator?.fid]
-      };
-    } else {
-      // If the curator is found, remove it from the array
-      return {
-        ...prevUserQuery,
-        curators: prevUserQuery.curators.filter(item => item !== curator?.fid)
-        };
-      }
-    });
-
-    const isCuratorSelected = selectedCurators.some((c) => c.fid === curator?.fid);
-
-    if (isCuratorSelected) {
-      // If the curator is already selected, remove it from the state
-      setSelectedCurators(selectedCurators.filter((c) => c.fid !== curator?.fid));
-    } else {
-      // If the curator is not selected, add it to the state
-      setSelectedCurators([...selectedCurators, curator]);
-    }
-  }
-
-  function addChannel(channel) {
-    console.log(channel)
-    setUserQuery(prevUserQuery => {
-    const channelIndex = prevUserQuery.channels.indexOf(channel.url);
-    if (channelIndex === -1) {
-      return {
-        ...prevUserQuery,
-        channels: [...prevUserQuery.channels, channel.url]
-      };
-    } else {
-      // If the curator is found, remove it from the array
-      return {
-        ...prevUserQuery,
-        channels: prevUserQuery.channels.filter(item => item !== channel.url)
-        };
-      }
-    });
-
-    const isChannelSelected = selectedChannels.some((c) => c.url === channel.url);
-
-    if (isChannelSelected) {
-      // If the curator is already selected, remove it from the state
-      setSelectedChannels(selectedChannels.filter((c) => c.url !== channel.url));
-    } else {
-      // If the curator is not selected, add it to the state
-      setSelectedChannels([...selectedChannels, channel]);
-    }
-  }
-
   return (
-  <div name='feed' style={{width: 'auto', maxWidth: '620px'}} ref={ref2}>
-    <Head>
-      <title>Impact App | Abundance Protocol</title>
-      <meta name="description" content={`Building the global superalignment layer`} />
-    </Head>
-    <div style={{padding: '58px 0 0 0', width: feedMax}}>
-    </div>
-    <div className="top-layer">
-      <div className="flex-row" style={{padding: '0', marginBottom: '10px', flexWrap: 'wrap', justifyContent: 'center'}}>
-        <div className='flex-row' style={{gap: '0.5rem', width: '100%', alignItems: 'center'}}>
-          {isLogged && userProfile && (
-            <a className="" title="" href={`/${userProfile.username}`} onClick={() => {goToUserProfile(event, store.userProfile)}}>
-              <img loading="lazy" src={userProfile.pfp_url} className="" alt={`${userProfile.display_name} avatar`} style={{width: '40px', height: '40px', maxWidth: '48px', maxHeight: '48px', borderRadius: '24px', border: '1px solid #abc', margin: '6px 0 2px 20px'}} />
-            </a>
+    <div className='flex-col' style={{width: 'auto', position: 'relative'}} ref={ref1}>
+      <div className="" style={{padding: '58px 0 0 0'}}>
+      </div>
+
+      <div className='flex-row' style={{height: '30px', alignItems: 'center', justifyContent: 'flex-start', padding: '20px 0 30px 0'}}>
+        <div className='flex-row' style={{padding: '4px 8px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '20px', alignItems: 'center', gap: '0.25rem'}}>
+          {/* <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>TIME</div> */}
+
+          <Link href={`/~/ecosystems/${ecosystem}`}><div className='filter-item-on' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>{ecosystem}</div></Link>
+          <div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px', padding: '0'}}>{'>'}</div>
+          <Link href={`/~/ecosystems/${ecosystem}/curator`}><div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>curator</div></Link>
+          {/* <div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px', padding: '0'}}>{'>'}</div>
+          <div className='filter-item-on' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>@{username}</div> */}
+        </div>
+      </div>
+
+      {user && (<CuratorData {...{ show: (isLogged && user), user, textMax }} />)}
+      {/* <div className="top-layer flex-row" style={{padding: '10px 0 10px 0', alignItems: 'center', justifyContent: 'space-evenly', margin: '0', borderBottom: '1px solid #888'}}>
+        {userButtons.map((btn, index) => (
+          <FeedMenu {...{buttonName: btn, searchSelect, searchOption, isMobile }} key={index} />))}
+      </div> */}
+
+      {searchSelect == 'Curation' && (
+
+      <div className='flex-row' style={{justifyContent: 'center', marginTop: '15px', marginBottom: '30px', gap: '1rem'}}>
+        {/* <div className='flex-row' style={{gap: '0.5rem'}}>
+          <TopPicks handleSelection={handleSelection} selection={'picks'} />
+          <Shuffle handleSelect={handleSelect} selection={'shuffle'} userQuery={userQuery} />
+        </div>
+
+        <Time handleSelection={handleSelection} handleSelect={handleSelect} userQuery={userQuery} options={queryOptions.time} selection={'time'} isSelected={isSelected} isMobile={isMobile} btnText={btnText} /> */}
+
+
+
+        <div className='flex-row' style={{height: '30px', alignItems: 'center', justifyContent: 'center', padding: '20px 0'}}>
+          <div className='flex-row' style={{padding: '4px 8px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '20px', alignItems: 'center', gap: '0.25rem'}}>
+            <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>SORT</div>
+            {/* <div className={timeframe == '24h' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('24h')}}>24hr</div>
+            <div className={timeframe == '3d' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('3d')}}>3d</div> */}
+            <div className={sortBy == 'down' ? 'filter-item-on' : 'filter-item'} style={{padding: '2px 6px 0px 6px'}} onClick={() => {updateOrder('down')}}><BiSortDown size={12} /></div>
+            <div className={sortBy == 'up' ? 'filter-item-on' : 'filter-item'} style={{padding: '2px 6px 0px 6px'}} onClick={() => {updateOrder('up')}}><BiSortUp size={12} /></div>
+            <div className={sortBy == 'shuffle' ? 'filter-item-on' : 'filter-item'} style={{padding: '2px 6px 0px 6px'}} onClick={() => {updateOrder('shuffle')}}><ShuffleIcon size={12} /></div>
+            
+          </div>
+        </div>
+
+
+
+
+        <div className='flex-row' style={{height: '30px', alignItems: 'center', justifyContent: 'center', padding: '20px 0'}}>
+          <div className='flex-row' style={{padding: '4px 8px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '20px', alignItems: 'center', gap: '0.25rem'}}>
+            <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>TIME</div>
+
+            <div className={timeframe == '24h' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('24h')}}>24hr</div>
+            <div className={timeframe == '3d' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('3d')}}>3d</div>
+            <div className={timeframe == '7d' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('7d')}}>7d</div>
+            <div className={timeframe == '30d' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('30d')}}>30d</div>
+            <div className={timeframe == 'all' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('all')}}>all</div>
+          </div>
+        </div>
+
+
+        {/* <div style={{position: 'relative'}}>
+          <div className={`flex-row ${!isMobile ? 'active-nav-link btn-hvr' : ''}`} style={{border: '1px solid #abc', padding: `2px 6px 2px 6px`, borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'center', borderBottom: (isSelected == 'tags') ? '2px solid #99ddff' : '1px solid #abc', height: '28px'}} onMouseEnter={() => {handleSelection('tags')}} onMouseLeave={() => {handleSelection('none')}}>
+            <div className="flex-row" style={{alignItems: 'center', gap: isMobile ? '0' : '0.3rem', selection: 'none'}}>
+              <GoTag size={23} color='#eee' />
+              <span className={`${!isMobile ? 'selection-btn' : ''}`} style={{cursor: 'pointer', padding: '0'}}>{!isMobile && btnText('tags')}</span>
+            </div>
+          </div>
+          {(isSelected == 'tags') && (
+            <div className=' top-layer' style={{position: 'absolute', right: '0'}} onMouseEnter={() => {handleSelection('tags')}} onMouseLeave={() => {handleSelection('none')}}>
+
+              <TagsDropdown handleSelect={handleSelect} userQuery={userQuery} options={queryOptions.tags} selection={'tags'} />
+
+            </div>
           )}
-          <HorizontalScale {...{ initValue, setTipPercent, tokenData, setTokenData, availableTokens, tokensSelected, setInitValue }} />
-        </div>
-        <div className='flex-row' style={{gap: '0.5rem'}}>
-          <TipAll {...{ tokenData, setTokenData, loading, setLoading, noTip, modal, setModal, userFeed, tipPercent }} />
-          <TipScheduler {...{ initHour, setInitHour, initMinute, setInitMinute, userQuery, tokenData, initValue, setLoading, setModal }}  />
-        </div>
-      </div>
-    </div>
-    <div>
+        </div> */}
 
-    {(ecoData?.channels?.length > 0) && (<div className="top-layer flex-row" style={{padding: '10px 0 10px 0', alignItems: 'center', justifyContent: 'space-evenly', margin: '0', borderBottom: '1px solid #888'}}>
-      { userButtons.map((btn, index) => (
-        <FeedMenu {...{buttonName: btn, key: index, searchOption, searchSelect}} /> ))}
-    </div>)}
-
-    <div className='flex-row' style={{justifyContent: 'space-between', margin: '15px 0 30px 0'}}>
-      <div className='flex-row' style={{gap: '0.5rem', marginLeft: '4px'}}>
-        <div className="flex-row" style={{border: '1px solid #abc', padding: '2px 6px 2px 6px', borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'center'}} onClick={() => {handleSelection('picks')}}>
-          <div className="flex-row" style={{alignItems: 'center', gap: '0.3rem'}}>
-            <span className="channel-font" style={{color: '#eee'}}>Top Picks</span>
-          </div>
-        </div>
-
-        <div className={`flex-row ${userQuery['shuffle'] ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{border: '1px solid #abc', padding: '2px 6px 2px 6px', borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'flex-start'}} onClick={() => {handleSelect('shuffle')}}>
-          <div className={`flex-row`} style={{alignItems: 'center', gap: '0.3rem'}}>
-            <Shuffle size={22} />
-          </div>
-        </div>
-      </div>
-
-      <div style={{position: 'relative'}}>
-        <div className={`flex-row ${!isMobile ? 'active-nav-link btn-hvr' : ''}`} style={{border: '1px solid #abc', padding: `2px 6px 2px 6px`, borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'center', borderBottom: (isSelected == 'time') ? '2px solid #99ddff' : '1px solid #abc', height: '28px'}} onMouseEnter={() => {handleSelection('time')}} onMouseLeave={() => {handleSelection('none')}}>
-          <div className="flex-row" style={{alignItems: 'center', gap: isMobile ? '0' : '0.3rem', selection: 'none'}}>
-            <BsClock size={15} color='#eee' />
-            <span className={`${!isMobile ? 'selection-btn' : ''}`} style={{cursor: 'pointer', padding: '0'}}>{!isMobile && btnText('time')}</span>
-          </div>
-        </div>
-        {(isSelected == 'time') && (
-          <div className='top-layer' style={{position: 'absolute'}} onMouseEnter={() => {handleSelection('time')}} onMouseLeave={() => {handleSelection('none')}}>
-            <div className='flex-col' style={{gap: '0.25rem', padding: '6px 6px', borderRadius: '10px', backgroundColor: '#1D3244dd', border: '1px solid #abc', width: 'auto', marginTop: '10px', alignItems: 'flex-start'}}>
-              <div className={`selection-btn ${userQuery['time'] == '24hr' ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}} onClick={() => {handleSelect('time', '24hr')}}>{'24 hours'}</div>
-              <span className={`selection-btn ${userQuery['time'] == '3days' ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}} onClick={() => {handleSelect('time', '3days')}}>{'3 days'}</span>
-              <span className={`selection-btn ${userQuery['time'] == '7days' ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}} onClick={() => {handleSelect('time', '7days')}}>{'7 days'}</span>
-              <span className={`selection-btn ${userQuery['time'] == '30days' ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}} onClick={() => {handleSelect('time', '30days')}}>{'30 days'}</span>
-              <span className={`selection-btn ${userQuery['time'] == 'all' ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}} onClick={() => {handleSelect('time', 'all')}}>{'All'}</span>
+        {/* <div style={{position: 'relative'}}>
+          <div className={`flex-row ${!isMobile ? 'active-nav-link btn-hvr' : ''}`} style={{border: '1px solid #abc', padding: `2px 6px 2px 6px`, borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'center', borderBottom: (isSelected == 'channels') ? '2px solid #99ddff' : '1px solid #abc', height: '28px', marginRight: '4px'}} onMouseEnter={() => {handleSelection('channels')}} onMouseLeave={() => {handleSelection('none')}}>
+            <div className="flex-row" style={{alignItems: 'center', gap: isMobile ? '0' : '0.3rem', selection: 'none'}}>
+              <AiOutlineBars size={15} color='#eee' />
+              <span className={`${!isMobile ? 'selection-btn' : ''}`} style={{cursor: 'pointer', padding: '0', color: userQuery['channels'].length == 0 ? '#aaa' : ''}}>{isMobile ? '' : userQuery['channels'].length == 0 ? 'All channels' : 'Channels'}</span>
             </div>
           </div>
-        )}
-      </div>
+        </div> */}
 
-      <div style={{position: 'relative'}}>
-        <div className={`flex-row ${!isMobile ? 'active-nav-link btn-hvr' : ''}`} style={{border: '1px solid #abc', padding: `2px 6px 2px 6px`, borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'center', borderBottom: (isSelected == 'tags') ? '2px solid #99ddff' : '1px solid #abc', height: '28px'}} onMouseEnter={() => {handleSelection('tags')}} onMouseLeave={() => {handleSelection('none')}}>
-          <div className="flex-row" style={{alignItems: 'center', gap: isMobile ? '0' : '0.3rem', selection: 'none'}}>
-            <GoTag size={23} color='#eee' />
-            <span className={`${!isMobile ? 'selection-btn' : ''}`} style={{cursor: 'pointer', padding: '0'}}>{!isMobile && btnText('tags')}</span>
-          </div>
-        </div>
-        {(isSelected == 'tags') && (
-          <div className=' top-layer' style={{position: 'absolute', right: '0'}} onMouseEnter={() => {handleSelection('tags')}} onMouseLeave={() => {handleSelection('none')}}>
-            <div className='flex-col' style={{gap: '0.25rem', padding: '6px 6px', borderRadius: '10px', backgroundColor: '#1D3244dd', border: '1px solid #abc', width: 'auto', marginTop: '10px', alignItems: 'flex-start'}}>
-              <div className={`selection-btn ${(userQuery['tags'] == 'all' || userQuery['tags'].length == 0) ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}} onClick={() => {handleSelect('tags', 'all')}}>{'All tags'}</div>
-              <span className={`selection-btn ${userQuery['tags'].includes('art') ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}} onClick={() => {handleSelect('tags', 'art')}}>{'Art'}</span>
-              <span className={`selection-btn ${userQuery['tags'].includes('dev') ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}} onClick={() => {handleSelect('tags', 'dev')}}>{'Dev'}</span>
-              <span className={`selection-btn ${userQuery['tags'].includes('vibes') ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}} onClick={() => {handleSelect('tags', 'vibes')}}>{'Vibes'}</span>
-            </div>
-          </div>
-        )}
-      </div>
-
-      <div style={{position: 'relative'}}>
-        <div className={`flex-row ${!isMobile ? 'active-nav-link btn-hvr' : ''}`} style={{border: '1px solid #abc', padding: `2px 6px 2px 6px`, borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'center', borderBottom: (isSelected == 'channels') ? '2px solid #99ddff' : '1px solid #abc', height: '28px'}} onMouseEnter={() => {handleSelection('channels')}} onMouseLeave={() => {handleSelection('none')}}>
-          <div className="flex-row" style={{alignItems: 'center', gap: isMobile ? '0' : '0.3rem', selection: 'none'}}>
-            <AiOutlineBars size={15} color='#eee' />
-            <span className={`${!isMobile ? 'selection-btn' : ''}`} style={{cursor: 'pointer', padding: '0', color: userQuery['channels'].length == 0 ? '#aaa' : ''}}>{isMobile ? '' : userQuery['channels'].length == 0 ? 'All channels' : 'Channels'}</span>
-          </div>
-        </div>
-      </div>
-
-      <div style={{position: 'relative'}}>
-        <div className={`flex-row ${!isMobile ? 'active-nav-link btn-hvr' : ''}`} style={{border: '1px solid #abc', padding: `2px 6px 2px 6px`, borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'center', borderBottom: (isSelected == 'curators') ? '2px solid #99ddff' : '1px solid #abc', height: '28px', marginRight: '4px'}} onMouseEnter={() => {handleSelection('curators')}} onMouseLeave={() => {handleSelection('none')}}>
-          <div className="flex-row" style={{alignItems: 'center', gap: isMobile ? '0' : '0.3rem', selection: 'none'}}>
-            <IoPeopleOutline size={15} color='#eee' />
-            <span className={`${!isMobile ? 'selection-btn' : ''}`} style={{cursor: 'pointer', padding: '0', color: userQuery['curators'].length == 0 ? '#aaa' : ''}}>{isMobile ? '' : userQuery['curators'].length == 0 ? 'All curators' : 'Curators'}</span>
-          </div>
-        </div>
-      </div>
-
-
-      {(isSelected == 'curators') && (
-        <div className='' style={{position: 'absolute', width: feedMax, margin: 'auto', marginTop: '28px'}} onMouseEnter={() => {handleSelection('curators')}} onMouseLeave={() => {handleSelection('none')}}>
-          <div className='top-layer flex-col' style={{gap: '0.25rem', padding: '6px 6px', borderRadius: '10px', backgroundColor: '#1D3244dd', border: '1px solid #abc', width: 'auto', marginTop: '10px', alignItems: 'flex-start'}}>
-            <div className={`selection-btn ${(userQuery['curators'] == 'all' || userQuery['curators'].length == 0) ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}}>
-              <input onChange={onCuratorSearch} 
-                name='search' 
-                placeholder={`Search curators`} 
-                value={userSearch.search} 
-                className='srch-btn' 
-                style={{width: '100%', backgroundColor: '#234'}} 
-                onKeyDown={curatorKeyDown} />
-            </div>
-            <div className='flex-row' style={{gap: '0.5rem', padding: '0px 6px', flexWrap: 'wrap'}}>
-              {filterCurators && (
-                filterCurators.map((curator, index) => (
-                  <div key={`Cu2-${index}`} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addCurator(curator)}}>
-                    <img loading="lazy" src={curator.pfp} className="" alt={curator.display_name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
-                    <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>@{curator.username}</div>
-                  </div>
-                )
-              ))}
-            </div>
-
-            {(selectedCurators && selectedCurators.length > 0) && (<div className='flex-row' style={{gap: '0.5rem', padding: '10px 6px 6px 6px', flexWrap: 'wrap', borderTop: '1px solid #888', width: '100%', alignItems: 'center'}}>
-              <div style={{color: '#ddd', fontWeight: '600', fontSize: '13px', padding: '0 0 3px 6px'}}>Selected:</div>
-              {(
-                selectedCurators.map((curator, index) => (
-                  <div key={`Cu-${index}`} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addCurator(curator)}}>
-                    <img loading="lazy" src={curator.pfp} className="" alt={curator.display_name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
-                    <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>@{curator.username}</div>
-                  </div>
-                )
-              ))}
-            </div>)}
-          </div>
-        </div>
-      )}
-
-      {(isSelected == 'channels') && (
-          <div className='' style={{position: 'absolute', width: feedMax, margin: 'auto', marginTop: '28px'}} onMouseEnter={() => {handleSelection('channels')}} onMouseLeave={() => {handleSelection('none')}}>
+        {/* {(isSelected == 'channels') && (
+          <div className='' style={{position: 'absolute', width: '100%', margin: 'auto', marginTop: '28px'}} onMouseEnter={() => {handleSelection('channels')}} onMouseLeave={() => {handleSelection('none')}}>
             <div className='top-layer flex-col' style={{gap: '0.25rem', padding: '6px 6px', borderRadius: '10px', backgroundColor: '#1D3244dd', border: '1px solid #abc', width: 'auto', marginTop: '10px', alignItems: 'flex-start'}}>
               <div className={`selection-btn ${(userQuery['channels'] == 'all' || userQuery['channels'].length == 0) ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}}>
                 <input onChange={onChannelChange} 
                   name='search' 
                   placeholder={`Search channels`} 
                   value={userSearch.search} 
-                    className='srch-btn' 
+                  className='srch-btn' 
                   style={{width: '100%', backgroundColor: '#234'}} 
                   onKeyDown={channelKeyDown} />
               </div>
               <div className='flex-row top-layer' style={{gap: '0.5rem', padding: '0px 6px', flexWrap: 'wrap'}}>
-                {filterChannels && (
-                  filterChannels.map((channel, index) => (
-                    <div key={`Ch2-${index}`} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addChannel(channel)}}>
+                {channels && (
+                  channels.map((channel, index) => (
+                    <div key={index} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addChannel(channel)}}>
                       <img loading="lazy" src={channel.image_url} className="" alt={channel.name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
                       <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>{channel.name}</div>
                       <div style={{fontWeight: '400', fontSize: '10px', color: '#ccc'}}>{formatNum(channel.follower_count)}</div>
@@ -1000,85 +802,33 @@ export default function Home({ time, curators, channels, tags, shuffle, referrer
                 <div style={{color: '#ddd', fontWeight: '600', fontSize: '13px', padding: '0 0 3px 6px'}}>Selected:</div>
                 {(
                   selectedChannels.map((channel, index) => (
-                    <div key={`Ch-${index}`} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addChannel(channel)}}>
+                    <div key={index} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addChannel(channel)}}>
                       <img loading="lazy" src={channel.image_url} className="" alt={channel.name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
                       <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>{channel.name}</div>
                     </div>
                   )
                 ))}
               </div>)}
+              </div>
             </div>
+          )} */}
+        </div>
+      )}
+
+      <div style={{margin: '0 0 70px 0'}}>
+        {(!userFeed || userFeed.length == 0) ? (
+        <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
+          <Spinner size={31} color={'#999'} />
+        </div>
+        ) : (userFeed.map((cast, index) => (<Cast {...{cast, key: index, index, updateCast, openImagePopup, ecosystem: eco.ecosystem_points_name, self: false, app}} />)))}
+        {!delay && !shuffled && (
+          <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
+            <Spinner size={31} color={'#999'} />
           </div>
         )}
       </div>
+      {!delay && (<div ref={ref}>&nbsp;</div>)}
+      <ExpandImg  {...{show: showPopup.open, closeImagePopup, embed: {showPopup}, screenWidth, screenHeight }} />
     </div>
-
-    <div className='flex-col' style={{margin: '0 0 70px 0'}}>
-      {(!userFeed || userFeed.length == 0) ? (
-        <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
-          {loading ? (<Spinner size={31} color={'#999'} />) : (<div className='flex-row' style={{gap: '1rem', alignItems: 'center'}}>
-              <div style={{fontSize: '20px', color: '#def'}}>No casts found</div>
-              <div style={{cursor: 'pointer', margin: '3px 0 0 0'}} onClick={searchSelectRouter}>
-                <HiRefresh size={28} color='#fff' />
-              </div>
-            </div>
-            )}
-        </div>
-      ) : (userFeed.map((cast, index) => (<Cast key={index} {...{cast, index, updateCast, openImagePopup, ecosystem: points}} />)))}
-      {(cursor && cursor !== '') && (<div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
-        <Spinner size={31} color={'#999'} />
-      </div>)}
-    </div>
-    <div ref={ref}>&nbsp;</div>
-    <ExpandImg {...{show: showPopup.open, closeImagePopup, embed: {showPopup}, screenWidth, screenHeight }} />
-    <Modal {...{modal}} />
-  </div>
-  )
-}
-
-
-export async function getServerSideProps(context) {
-  // Fetch dynamic parameters from the context object
-  const { query, params } = context;
-  const { time, curators, channels, tags, shuffle, referrer, eco } = query;
-  const { ecosystem } = params;
-
-  let setTime = 'all'
-  let setEco = eco || '$IMPACT'
-  if (time) {
-    setTime = time
-  }
-  let setCurators = []
-  if (curators) {
-    setCurators = Array.isArray(curators) ? curators : [curators]
-  }  
-  let setChannels = []
-  if (channels) {
-    setChannels = Array.isArray(channels) ? channels : [channels]
-  }
-  let setTags = []
-  if (tags) {
-    setTags = Array.isArray(tags) ? tags : [tags]
-  }
-  let setShuffle = false
-  if (shuffle) {
-    if (shuffle == 'true') {
-      setShuffle = true
-    } else if (shuffle == 'false') {
-      setShuffle = false
-    }
-  }
-  let setReferrer = referrer || null
-  console.log(setTime, setCurators, setChannels, setTags, setShuffle)
-  return {
-    props: {
-      time: setTime,
-      curators: setCurators,
-      channels: setChannels,
-      tags: setTags,
-      shuffle: setShuffle,
-      referrer: setReferrer,
-      ecosystem: ecosystem
-    },
-  };
+  );
 }

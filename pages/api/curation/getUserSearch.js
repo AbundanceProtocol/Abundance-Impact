@@ -53,13 +53,15 @@ export default async function handler(req, res) {
       query.createdAt = { $gte: req?.query?.time } ;
     }
     
-    if (req?.query['curator[]'] && req?.query['curator[]'].length > 0) {
-      console.log('37', typeof req?.query['curator[]'])
+    if (req?.query['curators[]'] && req?.query['curators[]'].length > 0) {
+      console.log('37', typeof req?.query['curators[]'])
       let curatorFids = null
-      if (typeof req?.query['curator[]'] === 'string') {
-        curatorFids = [parseInt(req?.query['curator[]'])];
-      } else if (Array.isArray(req?.query['curator[]']) && req?.query['curator[]'].length > 0) {
-        curatorFids = req.query['curator[]'].map(fid => parseInt(fid));
+      if (typeof req?.query['curators[]'] === 'string') {
+        curatorFids = [parseInt(req?.query['curators[]'])];
+        console.log('curatorFids', curatorFids)
+      } else if (Array.isArray(req?.query['curators[]']) && req?.query['curators[]'].length > 0) {
+        curatorFids = req.query['curators[]'].map(fid => parseInt(fid));
+        console.log('curatorFids', curatorFids)
       }
 
       let impactIds

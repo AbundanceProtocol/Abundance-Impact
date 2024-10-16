@@ -123,7 +123,7 @@ export default async function handler(req, res) {
 
     try {
       const topCurators = await getTopCurators(points)
-      console.log(topCurators)
+      // console.log(topCurators)
       res.status(200).json({ topCurators });
     } catch (error) {
       console.error('Error submitting data:', error)

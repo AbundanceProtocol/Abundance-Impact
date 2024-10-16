@@ -56,7 +56,7 @@ export default async function handler(req, res) {
 
     try {
       const topCreators = await getTopCreators(points)
-      console.log(topCreators)
+      // console.log(topCreators)
       res.status(200).json({ topCreators: topCreators });
     } catch (error) {
       console.error('Error submitting data:', error)
