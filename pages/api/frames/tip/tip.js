@@ -771,7 +771,7 @@ export default async function handler(req, res) {
               } else if (curators?.length > 0) {
                 const curatorName = await getCurator(curators, points)
                 if (curatorName) {
-                  shareText = `I just multi-tipped ${curatorName}'s curation of builders & creators thru /impact.\n\nSupport ${curatorName}'s nominees here:`
+                  shareText = `I just multi-tipped ${curatorName}'s curation of builders & creators thru /impact by @abundance.\n\nSupport ${curatorName}'s nominees here:`
                 } else {
                   shareText = 'I just multi-tipped builders & creators on /impact. Try it out here:'
                 }
