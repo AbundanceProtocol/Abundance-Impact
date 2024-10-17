@@ -478,7 +478,7 @@ async function getTipCasts(id) {
   let ecosystem = 'abundance'
 
   async function getCasts(id) {
-
+    console.log('get tips', id)
     try {
       const response = await axios.get('/api/getTipCircle', {
         params: { id }
