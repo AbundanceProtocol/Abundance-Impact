@@ -266,11 +266,18 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
   }
 
   return (<>{
-    cast && (<div className="inner-container" style={{width: '100%', display: 'flex', flexDirection: 'row'}}>
+    cast && (<div className="inner-container" style={{width: '100%', display: 'flex', flexDirection: 'column'}}>
+      <div className='flex-row' style={{width: '100%', justifyContent: 'flex-end', gap: '0.8rem'}}>
+        {cast?.tip && (cast?.tip?.map((tip, index) => (<div key={index} className='flex-row' style={{gap: '0.2rem', alignItems: 'flex-end'}}>
+          <div style={{fontSize: '13px', fontWeight: '700', color: '#181'}}>{tip?.amount}</div>
+          <div style={{fontSize: '11px', fontWeight: '500', color: '#222'}}>{tip?.currency == '$TN100x' ? '$HAM' : tip?.currency}</div>
+        </div>
+        )))}
+      </div>
       <div className="flex-row">
         <div className="flex-col" style={{alignItems: 'center', userSelect: 'none'}}>
 
-          <div className="" style={{margin: '0 10px 0 0'}}>
+          <div className="" style={{margin: '0 10px 0 0', height: '50px'}}>
             <a className="" title="" href={`/${cast.author.username}`} onClick={(event) => {
               if (!isLogged) {
                 console.log('ca1')
@@ -282,7 +289,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
                 goToUserProfile(event, cast.author)
               }
             }}>
-              <img loading="lazy" src={cast.author.pfp_url} className="" alt={`${cast.author.display_name} avatar`} style={{width: '48px', height: '48px', maxWidth: '48px', maxHeight: '48px', borderRadius: '24px', border: '1px solid #000'}} />
+              <img loading="lazy" src={cast?.author?.pfp_url} className="" alt={`${cast.author.display_name} avatar`} style={{width: '48px', height: '48px', maxWidth: '48px', maxHeight: '48px', borderRadius: '24px', border: '1px solid #000'}} />
             </a>
           </div>
           {(userFid && userFid !== cast.author.fid || true) && (

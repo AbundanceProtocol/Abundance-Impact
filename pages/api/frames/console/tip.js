@@ -206,7 +206,7 @@ export default async function handler(req, res) {
     
     let shareText = 'I just multi-tipped builders and creators on /impact. Try it out here:'
 
-    let shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share?${qs.stringify({ time, curators, eco })}`
+    let shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share-v2?${qs.stringify({ time, curators, eco })}`
 
     let encodedShareText = encodeURIComponent(shareText); 
     let encodedShareUrl = encodeURIComponent(shareUrl); 
@@ -665,7 +665,7 @@ export default async function handler(req, res) {
             const remainingTip = await sendRequests(castData, decryptedUuid, apiKey);
             // const remainingTip = 0 
 
-            shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share?${qs.stringify({ id: circleId })}`
+            shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share-v2?${qs.stringify({ id: circleId })}`
           
             async function getCurator(curator, points) {
 

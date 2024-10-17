@@ -63,7 +63,7 @@ export default async function handler(req, res) {
 
     const optOutPost = `${baseURL}/api/frames/tip/opt-out-menu?${qs.stringify({ time, curators, eco, ecosystem })}`
 
-    let shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share?${qs.stringify({ time, curators, eco })}`
+    let shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share-v2?${qs.stringify({ time, curators, eco })}`
 
     const encodedShareText = encodeURIComponent(shareText); 
     let encodedShareUrl = encodeURIComponent(shareUrl); 

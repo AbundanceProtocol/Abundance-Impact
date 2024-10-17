@@ -11,7 +11,7 @@ export default async function handler(req, res) {
   const body = await req.body;
   const {isValid, message} = await validateFramesMessage(body)
 
-  const { fid, points } = req.query;
+  const { fid, points, id } = req.query;
 
   if (req.method === 'POST') {
 
@@ -50,7 +50,7 @@ export default async function handler(req, res) {
       res.status(200).json({ 
         type: 'form',
         title: 'Curator page',
-        url: `${baseURL}/~/curator/${curator || 9326}?${qs.stringify({ points, app: 'mini', userFid: curatorFid, pass: encodedPass })}`,
+        url: `${baseURL}/~/curator/${curator || 9326}?${qs.stringify({ points, app: 'mini', userFid: curatorFid, pass: encodedPass, id })}`,
       });
       return
 
@@ -60,7 +60,7 @@ export default async function handler(req, res) {
       res.status(200).json({ 
         type: 'form',
         title: 'Curator page',
-        url: `${baseURL}/~/curator/${curator || 9326}?${qs.stringify({ points, app: 'mini', userFid: curatorFid, pass: null })}`,
+        url: `${baseURL}/~/curator/${curator || 9326}?${qs.stringify({ points, app: 'mini', userFid: curatorFid, pass: null, id })}`,
       });
       return
 

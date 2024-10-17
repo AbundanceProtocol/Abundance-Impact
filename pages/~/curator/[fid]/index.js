@@ -1,5 +1,6 @@
 import { useRouter } from 'next/router';
 import { useRef, useContext, useEffect, useState } from 'react';
+import Link from 'next/link';
 import { AccountContext } from '../../../../context';
 import useMatchBreakpoints from '../../../../hooks/useMatchBreakpoints';
 import axios from 'axios';
@@ -21,7 +22,7 @@ import { IoShuffleOutline as ShuffleIcon } from "react-icons/io5";
 export default function ProfilePage() {
   const router = useRouter();
   const [ref, inView] = useInView()
-  const { fid, points, app, userFid, pass } = router.query
+  const { fid, points, app, userFid, pass, id } = router.query
   const [user, setUser] = useState(null)
   const { LoginPopup, isLogged, setPoints, setIsLogged, setFid, miniApp, setMiniApp } = useContext(AccountContext)
   const ref1 = useRef(null)
@@ -114,10 +115,14 @@ export default function ProfilePage() {
     ]
   }
   // const [page, setPage] = useState(1)
-  const [sched, setSched] = useState({inView: false, user: false, feed: false})
+  const [sched, setSched] = useState({inView: false, user: false, feed: false, id: false, fid: false})
   const [delay, setDelay] = useState(true)
   const [timeframe, setTimeframe] = useState('3d')
   const [sortBy, setSortBy] = useState('down')
+  const [tipId, setTipId] = useState(null)
+  const [userTip, setUserTip] = useState(null)
+  const [curators, setCurators] = useState([])
+  const [tipEcosystem, setTipEcosystem] = useState('abundance')
 
   async function getCuratorData(fid) {
     try {
@@ -150,9 +155,12 @@ export default function ProfilePage() {
 
   useEffect(() => {
     const inViewRouter = () => {
-      console.log('running', userFeed?.length, (userFeed?.length % 10 == 0))
-      setDelay(true)
-      feedRouter()
+      console.log('running', userFeed?.length, (userFeed?.length % 10 == 0), id, tipId)
+      if (!id) {
+        console.log('test1', id, tipId)
+        setDelay(true)
+        // feedRouter()
+      }
       // if (userFeed?.length % 10 == 0) {
 
 
@@ -190,18 +198,45 @@ export default function ProfilePage() {
 
 
   useEffect(() => {
-    if (fid) {
-      getCuratorData(fid)
+
+    function fidTrigger() {
+      if (id) {
+        console.log('id set')
+        setDelay(true)
+        setTipId(true)
+        getTipCasts(id)
+      }
+      if (fid) {
+        getCuratorData(fid)
+      }
+      if (points) {
+        setPoints(points)
+      }
+      setUserQuery({
+        ...userQuery,
+        curators: [fid], points: points || null
+      })
+
     }
-    if (points) {
-      setPoints(points)
+
+    if (sched.fid) {
+      console.log('feed', id, tipId)
+      fidTrigger()
+      setSched(prev => ({...prev, fid: false }))
+    } else {
+      const timeoutId = setTimeout(() => {
+        fidTrigger()
+        setSched(prev => ({...prev, fid: false }))
+      }, 1000);
+      return () => clearTimeout(timeoutId);
     }
-    setUserQuery({
-      ...userQuery,
-      curators: [fid], points: points || null
-    })
-    // getUser(fid)
-  }, [fid]);
+
+
+
+
+
+
+  }, [fid, sched.fid]);
 
 
   useEffect(() => {
@@ -272,14 +307,48 @@ export default function ProfilePage() {
   // }, [user, sched.user]);
 
   useEffect(() => {
+    if (sched.id) {
+      console.log('feed', id, tipId)
+      if (id) {
+        setDelay(true)
+        setTipId(true)
+        getTipCasts(id)
+      }
+      setSched(prev => ({...prev, id: false }))
+    } else {
+      const timeoutId = setTimeout(() => {
+        if (id) {
+          setDelay(true)
+          setTipId(true)
+          getTipCasts(id)
+        }
+        setSched(prev => ({...prev, id: false }))
+      }, 300);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [id, sched.id])
+
+  // useEffect(() => {
+  //   console.log('userFeed', userFeed)
+  // }, [userFeed])
+
+
+  useEffect(() => {
     if (sched.feed) {
+      console.log('feed', id, tipId)
       // setPage(1)
-      feedRouter();
+      if (!id) {
+        console.log('test2', id, tipId)
+        feedRouter();
+      }
       setSched(prev => ({...prev, feed: false }))
     } else {
       const timeoutId = setTimeout(() => {
         // setPage(1)
-        feedRouter();
+        if (!id) {
+          console.log('test3', id)
+          feedRouter();
+        }
         setSched(prev => ({...prev, feed: false }))
       }, 300);
   
@@ -289,10 +358,15 @@ export default function ProfilePage() {
 
   function feedRouter() {
     const { shuffle, time, tags, channels, curators, order } = userQuery
-    getUserSearch(time, tags, channels, curators, null, shuffle, order)
+    if (!id) {
+      getUserSearch(time, tags, channels, curators, null, shuffle, order)
+    } else {
+      getTipCasts(id)
+    }
   }
   
   async function getUserSearch(getTime, tags, channel, curator, text, shuffle, order) {
+    console.log('no id!')
     const time = getTimeRange(getTime)
 
     console.log(getTime, tags, channel, curator, text, shuffle, points, order)
@@ -352,7 +426,7 @@ export default function ProfilePage() {
 
     let casts = []
     console.log('pages', page, page == 1, (page !== 1 && userFeed?.length % 10 == 0))
-    if (page == 1 || (page !== 1 && userFeed?.length % 10 == 0) ) {
+    if (!id && (page == 1 || (page !== 1 && userFeed?.length % 10 == 0)) ) {
       casts = await getSearch(time, tags, channel, curator, text, shuffle, points, page, order)
     }
     
@@ -381,32 +455,100 @@ export default function ProfilePage() {
 
       let displayedCasts = await populateCast(sortedCasts)
 
-
-
-
-
       if (userFeed?.length == 0 || page == 1 || shuffle) {
         console.log('opt1-2')
         setUserFeed(displayedCasts)
       } else if (userFeed) {
-        // let combinedCasts = userFeed.concat(displayedCasts)
-
-        // let filteredCombined = await combinedCasts.reduce((acc, current) => {
-        //   const existingItem = acc.find(item => item._id === current._id);
-        //   if (!existingItem) {
-        //     acc.push(current);
-        //   }
-        //   return acc;
-        // }, [])
-  
-
         console.log('opt2-2')
         console.log('feed length', userFeed?.length)
         setUserFeed((prevUserFeed) => prevUserFeed.concat(displayedCasts))
       }
-      // setPage(page+1)
     }
   }
+
+
+
+
+
+async function getTipCasts(id) {
+  console.log('id!')
+  let casts = []
+  let tip = ''
+  let curatorData = []
+  let ecosystem = 'abundance'
+
+  async function getCasts(id) {
+
+    try {
+      const response = await axios.get('/api/getTipCircle', {
+        params: { id }
+      })
+
+      let casts = []
+      let tip = ''
+      let curatorData = []
+      let ecosystem = 'abundance'
+
+      if (response?.data?.casts?.length > 0) {
+        casts = response?.data?.casts
+        tip = response?.data?.tip
+        curatorData = response?.data?.curatorData
+        ecosystem = response?.data?.ecosystem
+      }
+      console.log(casts)
+
+      return {casts, tip, curatorData: curatorData || [], ecosystem}
+    } catch (error) {
+      console.error('Error submitting data:', error)
+      return {cassts: [], tip: '', curatorData: [], ecosystem: 'abundance'}
+    }
+  }
+
+  if (id) {
+    ({ casts, tip, curatorData } = await getCasts(id))
+  }
+  console.log('tip', tip, curatorData)
+
+  setUserTip(tip)
+  setCurators(curatorData)
+  setTipEcosystem(ecosystem)
+
+  let filteredCasts
+  let sortedCasts
+
+  if (!casts) {
+    setUserFeed([])
+
+  } else {
+
+    console.log(casts)
+    filteredCasts = await casts.reduce((acc, current) => {
+      const existingItem = acc.find(item => item._id === current._id);
+      if (!existingItem) {
+        acc.push(current);
+      }
+      return acc;
+    }, [])
+
+    // if (order == -1) {
+      sortedCasts = filteredCasts.sort((a, b) => b.impact_total - a.impact_total);
+    // } else {
+    //   sortedCasts = filteredCasts.sort((a, b) => a.impact_total - b.impact_total);
+    // }
+
+    let displayedCasts = await populateCast(sortedCasts)
+
+    // if (userFeed?.length == 0 || page == 1 || shuffle) {
+    //   console.log('opt1-2')
+      setUserFeed(displayedCasts)
+    // } else if (userFeed) {
+    //   console.log('opt2-2')
+    //   console.log('feed length', userFeed?.length)
+    //   setUserFeed((prevUserFeed) => prevUserFeed.concat(displayedCasts))
+    // }
+  }
+}
+
 
 
 
@@ -655,13 +797,27 @@ export default function ProfilePage() {
     <div className='flex-col' style={{width: 'auto', position: 'relative'}} ref={ref1}>
       <div className="" style={{padding: '58px 0 0 0'}}>
       </div>
+
+      <div className='flex-row' style={{height: '30px', alignItems: 'center', justifyContent: 'flex-start', padding: '20px 0 30px 0'}}>
+        <div className='flex-row' style={{padding: '4px 8px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '20px', alignItems: 'center', gap: '0.25rem'}}>
+          {/* <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>TIME</div> */}
+
+          <Link href={`/~/ecosystems/${tipEcosystem || 'abundance'}`}><div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>{tipEcosystem || 'abundance'}</div></Link>
+          <div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px', padding: '0'}}>{'>'}</div>
+          {id ? (<div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>tips</div>) : (<Link href={`/~/ecosystems/${tipEcosystem || 'abundance'}/curator`}><div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>curator</div></Link>)}
+          <div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px', padding: '0'}}>{'>'}</div>
+          <div className='filter-item-on' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>@{user?.username}</div>
+        </div>
+      </div>
+
+
       {user && (<CuratorData {...{ show: (isLogged && user), user, textMax }} />)}
       {/* <div className="top-layer flex-row" style={{padding: '10px 0 10px 0', alignItems: 'center', justifyContent: 'space-evenly', margin: '0', borderBottom: '1px solid #888'}}>
         {userButtons.map((btn, index) => (
           <FeedMenu {...{buttonName: btn, searchSelect, searchOption, isMobile }} key={index} />))}
       </div> */}
 
-      {searchSelect == 'Curation' && (
+      {searchSelect == 'Curation' && !id ? (
 
       <div className='flex-row' style={{justifyContent: 'center', marginTop: '15px', marginBottom: '30px', gap: '1rem'}}>
         {/* <div className='flex-row' style={{gap: '0.5rem'}}>
@@ -760,6 +916,26 @@ export default function ProfilePage() {
               </div>
             </div>
           )} */}
+        </div>
+      ) : (
+        <div className='flex-row' style={{justifyContent: 'center', marginTop: '15px', marginBottom: '30px', gap: '1rem'}}>
+          <div className='flex-row' style={{height: '30px', alignItems: 'center', justifyContent: 'center', padding: '20px 0'}}>
+            <div className='flex-row' style={{padding: '4px 8px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '20px', alignItems: 'center', gap: '0.25rem'}}>
+              <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>USER TIP</div>
+              <div className={timeframe == '24h' ? 'filter-item-on' : 'filter-item'} style={{fontSize: isMobile ? '9px' : '10px'}}>{userTip || 'none'}</div>
+            </div>
+          </div>
+
+          <div className='flex-row' style={{height: '30px', alignItems: 'center', justifyContent: 'center', padding: '20px 0'}}>
+            <div className='flex-row' style={{padding: '4px 8px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '20px', alignItems: 'center', gap: '0.25rem'}}>
+              <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>CURATORS</div>
+              {curators && (curators.map((curator, index) => (
+                (<Link key={index} href={`/~/ecosystems/${tipEcosystem || 'abundance'}/curator/${curator?.username}`}><div className='filter-item' style={{fontSize: isMobile ? '9px' : '10px'}}>@{curator?.username}</div></Link>)
+              )))}
+            </div>
+          </div>
+
+
         </div>
       )}
 

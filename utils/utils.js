@@ -269,17 +269,18 @@ export async function populateCast(casts) {
     casts.forEach(cast => {
       let newCast = {
         author: {
-          fid: cast.author_fid,
-          pfp_url: cast.author_pfp,
-          username: cast.author_username,
-          display_name: cast.author_display_name,
+          fid: cast?.author_fid,
+          pfp_url: cast?.author_pfp,
+          username: cast?.author_username,
+          display_name: cast?.author_display_name,
           power_badge: false,
         },
-        hash: cast.cast_hash,
-        cast_media: cast.cast_media,
-        timestamp: cast.createdAt,
-        text: cast.cast_text,
-        impact_points: cast.impact_points,
+        hash: cast?.cast_hash,
+        cast_media: cast?.cast_media,
+        timestamp: cast?.createdAt,
+        text: cast?.cast_text,
+        impact_points: cast?.impact_points,
+        tip: [...(cast?.tip || [])],
         embeds: [],
         mentioned_profiles: [],
         replies: {
@@ -289,9 +290,9 @@ export async function populateCast(casts) {
           recasts: [],
           likes: []
         },
-        impact_balance: cast.impact_total,
-        quality_absolute: cast.quality_absolute,
-        quality_balance: cast.quality_balance
+        impact_balance: cast?.impact_total,
+        quality_absolute: cast?.quality_absolute,
+        quality_balance: cast?.quality_balance
       }
 
       displayedCasts.push(newCast)
