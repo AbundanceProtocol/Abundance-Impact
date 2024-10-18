@@ -228,7 +228,7 @@ export default async function handler(req, res) {
       // } 
       
       // Example usage
-      // const input = "500 $degen, 400 $HAM 10000 $wild 🍖x400, 300 $HAM";
+      // const input = "500 $degen, 400 $HAM 10000 🍖x400, 300 $HAM";
       let allowances = []
   
       if (!inputText || inputText == '') {
@@ -526,7 +526,7 @@ export default async function handler(req, res) {
             } else if (curators?.length > 0) {
               const curatorName = await getCurator(curators, points)
               if (curatorName) {
-                shareText = `I just multi-tipped ${curatorName}'s curation of builders & creators thru /impact.\n\nSupport ${curatorName}'s nominees here:`
+                shareText = `I just multi-tipped ${curatorName}'s curation of builders & creators thru /impact by @abundance.\n\nSupport ${curatorName}'s nominees here:`
               } else {
                 shareText = 'I just multi-tipped builders & creators on /impact. Try it out here:'
               }

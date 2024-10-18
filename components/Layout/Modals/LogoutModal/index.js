@@ -10,6 +10,8 @@ const LogoutModal = () => {
   const { showLogout, setShowLogout, setFid, setIsLogged } = useContext(AccountContext);
 
   const handleLogOut = () => {
+    console.log('isLogged-4')
+
     store.setFid(null)
     store.setIsAuth(false)
     store.setSignerUuid(null)

@@ -99,10 +99,10 @@ export default function Schedule() {
   const [cronId, setCronId] = useState(null)
   const [activeCron, setActiveCron] = useState(null)
   const [loadedSchedule, setLoadedSchedule] = useState(false)
-  const tokenInfo = [{token: '$DEGEN', set: true}, {token: '$TN100x', set: true}, {token: '$WILD', set: true}, {token: '$HUNT', set: true}]
+  const tokenInfo = [{token: '$DEGEN', set: true}, {token: '$TN100x', set: true}, {token: '$HUNT', set: true}]
   const [tokenData, setTokenData] = useState(tokenInfo)
   const [tokensSelected, setTokensSelected] = useState(['$DEGEN'])
-  const availableTokens = ['$DEGEN', '$TN100x', '$WILD', '$HUNT']
+  const availableTokens = ['$DEGEN', '$TN100x', '$HUNT']
   const [tipPercent, setTipPercent] = useState(50)
 
   function btnText(type) {

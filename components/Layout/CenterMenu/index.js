@@ -7,7 +7,7 @@ const CenterMenu = ({ children }) => {
 
   return (
     <div>
-      <div className="container cast-area flex-col" style={isMobile ? {} : {width: isMobile? '100%' : '620px', position: 'relative'}}>
+      <div className="container cast-area flex-col" style={isMobile ? {} : {width: isMobile? '100%' : '620px', position: 'relative', maxWidth: isMobile? '100%' : '620px' }}>
         {!isMobile && <EcosystemNav />}
         {children}
       </div>

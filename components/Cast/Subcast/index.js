@@ -4,8 +4,9 @@ import useStore from '../../../utils/store';
 import { ActiveUser } from '../../../pages/assets'
 import { timePassed } from '../../../utils/utils';
 import CastText from '../Text';
+import axios from 'axios';
 
-export default function Subcast({ cast, index }) {
+export default function Subcast({ castHash, index }) {
   const store = useStore()
   const router = useRouter();
   const [screenWidth, setScreenWidth] = useState(undefined)
@@ -15,6 +16,7 @@ export default function Subcast({ cast, index }) {
   const recastRefs = useRef([])
   const [userFid, setuserFid] = useState(null)
   const [fail, setFail] = useState(false)
+  const [cast, setCast] = useState(null)
 
   useEffect(() => {
     if (screenWidth) {
@@ -37,8 +39,32 @@ export default function Subcast({ cast, index }) {
     }
   }, [screenWidth])
 
+  async function getSubcast(hash, userFid) {
+    if (hash && userFid) {
+      try {
+        const response = await axios.get('/api/getCastByHash', {
+          params: { hash, userFid } })
+        const castData = response.data.cast.cast
+        if (castData) {
+          // console.log('castData', castData)
+          setCast(castData)
+        } else {
+          return null
+        }
+      } catch (error) {
+        console.error('Error submitting data:', error)
+        return null
+      }
+    }
+  }
+
+
+
+
   useEffect(() => {
     setuserFid(store.fid)
+    console.log('subcast triggered')
+    getSubcast(castHash, 3)
 
     const handleResize = () => {
       setScreenWidth(window.innerWidth)
@@ -105,10 +131,10 @@ export default function Subcast({ cast, index }) {
             {/* <CastText text={cast.text} embeds={cast.embeds} mentions={cast.mentioned_profiles} /> */}
             {cast.text}
             </div>
-          {(cast.embeds.length > 0) && (cast.embeds.map((embed, subindex) => (
+          {(cast?.embeds?.length > 0) && (cast.embeds.map((embed, subindex) => (
             
           <div key={subindex} className='flex-col' style={{alignItems: 'center'}}>
-            {(embed.type && embed.type == 'image') && (
+            {(embed?.metadata?.content_type?.startsWith('image/')) && (
               <div className="" key={`${index}-${subindex}`}>
                 <div className="flex-col" style={{position: 'relative'}}>
                   <img 

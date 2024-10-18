@@ -9,6 +9,8 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
   const store = useStore()
   const [showActions, setShowActions] = useState(false)
   const [showLogin, setShowLogin] = useState(false)
+  const [miniApp, setMiniApp] = useState(false)
+  const [autotipping, setAutotipping] = useState([])
   const [populate, setPopulate] = useState(0)
   const [userProfile, setUserProfile] = useState(null)
   const [showLogout, setShowLogout] = useState(false)
@@ -112,7 +114,7 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
         }
         
         if (ecoIndex !== -1) { 
-          console.log('c2', ecosystems[ecoIndex])
+          console.log('c2', ecosystems[ecoIndex], isLogged)
           setEcoData(ecosystems[ecoIndex])
           store.setPoints(ecosystems[ecoIndex].ecosystem_points_name)
           setPoints(ecosystems[ecoIndex].ecosystem_points_name)
@@ -136,7 +138,7 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
   }
 
   useEffect(() => {
-    if (router.route !== "/~/ecosystems/[ecosystem]/tip" && router.route !== "/~/ecosystems/[ecosystem]/[eco]/[curators]/tip" && router.route !== "/~/ecosystems/[ecosystem]/tip-basic" && router.route !== "/~/ecosystems/[ecosystem]/tip-share") {
+    if (router.route !== "/~/ecosystems/[ecosystem]/tip" && router.route !== "/~/ecosystems/[ecosystem]/[eco]/[curators]/tip" && router.route !== "/~/ecosystems/[ecosystem]/tip-basic" && router.route !== "/~/ecosystems/[ecosystem]/tip-share" && router.route !== "/~/ecosystems/[ecosystem]/tip-share-v2") {
       console.log('c5 triggered []')
       console.log('c6', store.points, points)
       getEcosystems(store.points || points)
@@ -151,14 +153,14 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
       if (isLogged && ecoData) {
         setPopulate(populate+1)
         setPoints(ecoData?.ecosystem_points_name)
-        if (router.route !== '/' && router.route !== '/~/curator/[fid]') {
+        if (router.route !== '/') {
           console.log('c10 points', store.fid, points)
-          getRemainingBalances(store.fid, ecoData?.ecosystem_points_name, store.signer_uuid)
+          getRemainingBalances(fid || store.fid, ecoData?.ecosystem_points_name, store.signer_uuid)
         }
       }
     }
 
-    if (router.route !== "/~/ecosystems/[ecosystem]/tip" && router.route !== "/~/ecosystems/[ecosystem]/[eco]/[curators]/tip" && router.route !== "/~/ecosystems/[ecosystem]/tip-basic" && router.route !== "/~/ecosystems/[ecosystem]/tip-share" && router.route !== '/~/curator/[fid]') {
+    if (router.route !== "/~/ecosystems/[ecosystem]/tip" && router.route !== "/~/ecosystems/[ecosystem]/[eco]/[curators]/tip" && router.route !== "/~/ecosystems/[ecosystem]/tip-basic" && router.route !== "/~/ecosystems/[ecosystem]/tip-share" && router.route !== "/~/ecosystems/[ecosystem]/tip-share-v2") {
       if (sched.ecoData) {
         updateEcoData()
         setSched(prev => ({...prev, ecoData: false }))
@@ -176,17 +178,21 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
     console.log('c11 triggered [store.isAuth]')
 
     const updateLogin = () => {
-      console.log('c12 store triggered', store.isAuth)
+      console.log('c12 store triggered', store.isAuth, miniApp)
       if (store.isAuth) {
         setIsLogged(true);
-        setFid(store.fid)
-        getUserProfile(store.fid)
+        setFid(fid || store.fid)
+        getUserProfile(fid || store.fid)
         setShowLogin(false)
       } else {
-        setIsLogged(false);
-        setFid(null)
-        setUserBalances({impact: 0, qdau: 0})
-        setUserProfile(null)
+        if (router.route !== '/~/curator/[fid]') {
+          console.log('c12-2', isLogged)
+          setIsLogged(false);
+          setFid(null)
+          setUserBalances({impact: 0, qdau: 0})
+          setUserProfile(null)
+        }
+
         if (router.route !== '/' && router.route !== '/~/curator/[fid]') {
           console.log('c13-1')
           LoginPopup()
@@ -195,7 +201,7 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
     }
 
     console.log('c13-2', router.route, router.route !== "/~/ecosystems/[ecosystem]/tip-basic")
-    if (router.route !== "/~/ecosystems/[ecosystem]/tip" && router.route !== "/~/ecosystems/[ecosystem]/[eco]/[curators]/tip" && router.route !== "/~/ecosystems/[ecosystem]/tip-basic" && router.route !== "/~/ecosystems/[ecosystem]/tip-share") {
+    if (router.route !== "/~/ecosystems/[ecosystem]/tip" && router.route !== "/~/ecosystems/[ecosystem]/[eco]/[curators]/tip" && router.route !== "/~/ecosystems/[ecosystem]/tip-basic" && router.route !== "/~/ecosystems/[ecosystem]/tip-share" && router.route !== "/~/ecosystems/[ecosystem]/tip-share-v2" && !miniApp) {
       if (sched.login) {
         updateLogin()
         setSched(prev => ({...prev, login: false }))
@@ -301,10 +307,12 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
     changeEco,
     getEcosystems,
     getRemainingBalances,
+    miniApp, setMiniApp,
     fid, setFid,
     points, setPoints,
     ecoData, setEcoData,
     ecosystemsData, setEcosystemsData,
+    autotipping, setAutotipping,
     isLogged, setIsLogged,
     userBalances, setUserBalances,
     eligibility, setEligibility,

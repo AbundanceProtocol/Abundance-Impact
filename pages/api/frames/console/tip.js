@@ -20,7 +20,7 @@ const apiKey = process.env.NEYNAR_API_KEY
 export default async function handler(req, res) {
   init(process.env.AIRSTACK_API_KEY ?? '')
   const body = await req.body;
-  const {isValid} = await validateFramesMessage(body)
+  const {isValid, message} = await validateFramesMessage(body)
   console.log('isValid:', isValid)
   const { time, curators, channels, tags, eco, ecosystem, time1 } = req.query;
   const { untrustedData } = req.body
@@ -206,7 +206,7 @@ export default async function handler(req, res) {
     
     let shareText = 'I just multi-tipped builders and creators on /impact. Try it out here:'
 
-    let shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share?${qs.stringify({ time, curators, eco })}`
+    let shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share-v2?${qs.stringify({ time, curators, eco })}`
 
     let encodedShareText = encodeURIComponent(shareText); 
     let encodedShareUrl = encodeURIComponent(shareUrl); 
@@ -231,7 +231,7 @@ export default async function handler(req, res) {
       // } 
       
       // Example usage
-      // const input = "500 $degen, 400 $HAM 10000 $wild 🍖x400, 300 $HAM";
+      // const input = "500 $degen, 400 $HAM 10000 🍖x400, 300 $HAM";
       let allowances = []
   
       if (!inputText || inputText == '') {
@@ -665,7 +665,7 @@ export default async function handler(req, res) {
             const remainingTip = await sendRequests(castData, decryptedUuid, apiKey);
             // const remainingTip = 0 
 
-            shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share?${qs.stringify({ id: circleId })}`
+            shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share-v2?${qs.stringify({ id: circleId })}`
           
             async function getCurator(curator, points) {
 
@@ -715,7 +715,7 @@ export default async function handler(req, res) {
             } else if (curators?.length > 0) {
               const curatorName = await getCurator(curators, points)
               if (curatorName) {
-                shareText = `I just multi-tipped ${curatorName}'s curation of builders & creators thru /impact.\n\nSupport ${curatorName}'s nominees here:`
+                shareText = `I just multi-tipped ${curatorName}'s curation of builders & creators thru /impact by @abundance.\n\nSupport ${curatorName}'s nominees here:`
               } else {
                 shareText = 'I just multi-tipped builders & creators on /impact. Try it out here:'
               }

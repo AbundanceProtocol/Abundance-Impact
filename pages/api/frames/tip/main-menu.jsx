@@ -20,7 +20,7 @@ export default async function handler(req, res) {
           headers: { accept: "application/json" },
         });
         const getRemaining = await remainingBalance.json();
-        return getRemaining ? Math.floor((Number(getRemaining?.todaysAllocation) - Number(getRemaining?.totalTippedToday))/1e18) : 0;
+        return getRemaining?.todaysAllocation ? Math.floor((Number(getRemaining?.todaysAllocation) - Number(getRemaining?.totalTippedToday))/1e18) : 0;
       } catch (error) {
         console.error('Error in getHamAllowance:', error);
         return 0;
@@ -34,20 +34,6 @@ export default async function handler(req, res) {
         return data?.length > 0 ? data[0].remaining_tip_allowance : 0;
       } catch (error) {
         console.error('Error in getDegenAllowance:', error);
-        return 0;
-      }
-    }
-    
-    async function getWildAllowance(fid) {
-      try {
-        const remainingUrl = `https://sys.wildcard.lol/tip/public/v1/token/balance/${fid}?currency=WILD`;
-        const remainingBalance = await fetch(remainingUrl, {
-          headers: { accept: "application/json" },
-        });
-        const getRemaining = await remainingBalance.json();
-        return getRemaining ? Math.floor(Number(getRemaining?.allowance_remaining)) : 0;
-      } catch (error) {
-        console.error('Error in getWildAllowance:', error);
         return 0;
       }
     }
@@ -67,15 +53,13 @@ export default async function handler(req, res) {
     }
 
 
-    let allowances = [{coin: '$DEGEN', remaining: 0}, {coin: '$HAM', remaining: 0}, {coin: '$WILD', remaining: 0}, {coin: '$HUNT', remaining: 0}]
+    let allowances = [{coin: '$DEGEN', remaining: 0}, {coin: '$HAM', remaining: 0}, {coin: '$HUNT', remaining: 0}]
 
     for (const allowance of allowances) {
       if (allowance.coin == '$DEGEN') {
         allowance.remaining = await getDegenAllowance(fid)
       } else if (allowance.coin == '$HAM') {
         allowance.remaining = await getHamAllowance(fid)
-      } else if (allowance.coin == '$WILD') {
-        allowance.remaining = await getWildAllowance(fid)
       } else if (allowance.coin == '$HUNT') {
         allowance.remaining = await getHuntAllowance(fid)
       }

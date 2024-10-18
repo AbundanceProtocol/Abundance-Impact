@@ -8,6 +8,8 @@ import Quality from '../../../models/Quality';
 import Cast from "../../../models/Cast";
 import OptOut from "../../../models/OptOut";
 import EcosystemRules from "../../../models/EcosystemRules";
+import { init, validateFramesMessage } from "@airstack/frames";
+
 // import Allowlist from '../../../models/Allowlist';
 
 // import { decryptPassword } from "../../../utils/utils"; 
@@ -19,13 +21,17 @@ const apiKey = process.env.NEYNAR_API_KEY
 // const secretKey = process.env.SECRET_KEY
 
 export default async function handler(req, res) {
+  init(process.env.AIRSTACK_API_KEY ?? '')
+  const body = await req.body;
+  const {isValid, message} = await validateFramesMessage(body)
+  
   if (req.method === 'POST') {
     // const impactAmount = 1
     const eco = req.query.points
     const points = '$' + eco
-    const curatorFid = req.body.untrustedData.fid
+    const curatorFid = message?.data?.fid
     const castHash = req.body.untrustedData.castId.hash
-    const authorFid = req.body.untrustedData.castId.fid
+    const authorFid = message?.data?.frameActionBody?.castId?.fid
     console.log('28', points, curatorFid, castHash)
 
     let quality = 0
@@ -216,14 +222,55 @@ export default async function handler(req, res) {
       let castContext
 
       if (getCastData) {
+
+        let castMedia = []
+
+        async function getCastMedia(cast) {
+          try {
+          
+            if (cast) {
+              let embeds = cast?.embeds || []
+              let frames = cast?.frames || []
+              let media = []
+    
+    
+              for (const embed of embeds) {
+                if (embed?.metadata?.content_type) {
+                  let image = {url: embed?.url, content_type: embed?.metadata?.content_type}
+                  media.push(image)
+                } else if (embed?.cast_id) {
+                  let quote = {url: embed?.cast_id?.hash, content_type: 'quotecast'}
+                  media.push(quote)
+                }
+              }
+
+              for (const frame of frames) {
+                if (frame?.image) {
+                  let frameImage = {url: frame?.image, content_type: 'frame'}
+                  media.push(frameImage)
+                }
+              }
+    
+              return media
+            } else {
+              return []
+            }
+          } catch (error) {
+            console.error('Error handling GET request:', error);
+            return []
+          }
+        }
+
+        castMedia = await getCastMedia(getCastData)
+
         castContext = {
-          author_fid: getCastData.author.fid,
-          author_pfp: getCastData.author.pfp_url,
-          author_username: getCastData.author.username,
-          author_display_name: getCastData.author.display_name,
-          cast_hash: getCastData.hash,
-          cast_text: getCastData.text,
-          cast_channel: getCastData.root_parent_url
+          author_fid: getCastData?.author.fid,
+          author_pfp: getCastData?.author.pfp_url,
+          author_username: getCastData?.author.username,
+          author_display_name: getCastData?.author.display_name,
+          cast_hash: getCastData?.hash,
+          cast_text: getCastData?.text,
+          cast_channel: getCastData?.root_parent_url
         }
 
         let cast = new Cast({
@@ -240,7 +287,9 @@ export default async function handler(req, res) {
           impact_total: 0,
           impact_points: [],
         });
-  
+        
+        cast.cast_media = [...castMedia]
+
         await cast.save()
   
         author = castContext.author_username

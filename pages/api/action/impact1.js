@@ -8,6 +8,7 @@ import EcosystemRules from "../../../models/EcosystemRules";
 import Allowlist from '../../../models/Allowlist';
 import OptOut from "../../../models/OptOut";
 import { decryptPassword } from "../../../utils/utils"; 
+import { init, validateFramesMessage } from "@airstack/frames";
 
 const HubURL = process.env.NEYNAR_HUB
 const client = HubURL ? getSSLHubRpcClient(HubURL) : undefined;
@@ -16,13 +17,17 @@ const encryptedBotUuid = process.env.ENCRYPTED_BOT_UUID
 const secretKey = process.env.SECRET_KEY
 
 export default async function handler(req, res) {
+  init(process.env.AIRSTACK_API_KEY ?? '')
+  const body = await req.body;
+  const {isValid, message} = await validateFramesMessage(body)
+
   if (req.method === 'POST' && req.body && req.body.untrustedData && req.query.points) {
     const impactAmount = 1
     const eco = req.query.points
     const points = '$' + eco
-    const curatorFid = req.body.untrustedData.fid
+    const curatorFid = message?.data?.fid
     const castHash = req.body.untrustedData.castId.hash
-    const authorFid = req.body.untrustedData.castId.fid
+    const authorFid = message?.data?.frameActionBody?.castId?.fid
     const signer = decryptPassword(encryptedBotUuid, secretKey)
 
     async function checkOptOut(authorFid, points) {
@@ -112,8 +117,48 @@ export default async function handler(req, res) {
       const getCastData = await populateCast(curatorFid, castHash)
 
       let castContext
+      let castMedia = []
 
       if (getCastData) {
+
+        async function getCastMedia(cast) {
+          try {
+          
+            if (cast) {
+              let embeds = cast?.embeds || []
+              let frames = cast?.frames || []
+              let media = []
+    
+    
+              for (const embed of embeds) {
+                if (embed?.metadata?.content_type) {
+                  let image = {url: embed?.url, content_type: embed?.metadata?.content_type}
+                  media.push(image)
+                } else if (embed?.cast_id) {
+                  let quote = {url: embed?.cast_id?.hash, content_type: 'quotecast'}
+                  media.push(quote)
+                }
+              }
+
+              for (const frame of frames) {
+                if (frame?.image) {
+                  let frameImage = {url: frame?.image, content_type: 'frame'}
+                  media.push(frameImage)
+                }
+              }
+    
+              return media
+            } else {
+              return []
+            }
+          } catch (error) {
+            console.error('Error handling GET request:', error);
+            return []
+          }
+        }
+
+        castMedia = await getCastMedia(getCastData)
+
         castContext = {
           author_fid: getCastData.author.fid,
           author_pfp: getCastData.author.pfp_url,
@@ -247,6 +292,7 @@ export default async function handler(req, res) {
                       impact_points: [impact],
                     });
 
+                    cast.cast_media = [...castMedia]
                     cast.points = points
 
                     const { balance, castImpact } = await saveAll(user, impact, cast)

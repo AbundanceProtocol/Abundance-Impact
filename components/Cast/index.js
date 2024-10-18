@@ -15,7 +15,7 @@ import { ImArrowUp, ImArrowDown  } from "react-icons/im";
 import VideoPlayer from './VideoPlayer';
 import Images from './Images';
 
-export default function Cast({ cast, index, updateCast, openImagePopup, ecosystem, self }) {
+export default function Cast({ cast, index, updateCast, openImagePopup, ecosystem, self, app }) {
   const store = useStore()
   const router = useRouter();
   const [screenWidth, setScreenWidth] = useState(undefined)
@@ -54,7 +54,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
         return null
       }
     }
-
+    // console.log(cast, qualityAmount, userBalances)
     if (fid && fid !== '-' && qualityAmount && castHash && userBalances.qdau > 0 && (cast.impact_balance || cast.impact_balance == 0)  &&  !(cast.impact_balance == 0 && qualityAmount < 0)) {
       const qualityResponse = await postQuality(fid, castHash, castChannel, qualityAmount)
       console.log(qualityResponse)
@@ -107,6 +107,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
       cast_channel: cast.root_parent_url
     }
     
+    // console.log('112 ca1', fid, cast, impactAmount, ecosystem)
     async function postImpact(fid, castContext, impactAmount) {
       try {
         const response = await axios.post('/api/curation/postPointImpact', { fid, castContext, impactAmount, points: ecosystem })
@@ -164,6 +165,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
     if (isLogged) {
       setUserFid(fid)
     }
+    console.log('isLogged', isLogged, fid)
     const handleResize = () => {
       setScreenWidth(window.innerWidth)
     }
@@ -264,21 +266,30 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
   }
 
   return (<>{
-    cast && (<div className="inner-container" style={{width: '100%', display: 'flex', flexDirection: 'row'}}>
+    cast && (<div className="inner-container" style={{width: '100%', display: 'flex', flexDirection: 'column'}}>
+      <div className='flex-row' style={{width: '100%', justifyContent: 'flex-end', gap: '0.8rem'}}>
+        {cast?.tip && (cast?.tip?.map((tip, index) => (<div key={index} className='flex-row' style={{gap: '0.2rem', alignItems: 'flex-end'}}>
+          <div style={{fontSize: '13px', fontWeight: '700', color: '#181'}}>{tip?.amount}</div>
+          <div style={{fontSize: '11px', fontWeight: '500', color: '#222'}}>{tip?.currency == '$TN100x' ? '$HAM' : tip?.currency}</div>
+        </div>
+        )))}
+      </div>
       <div className="flex-row">
         <div className="flex-col" style={{alignItems: 'center', userSelect: 'none'}}>
 
-          <div className="" style={{margin: '0 10px 0 0'}}>
+          <div className="" style={{margin: '0 10px 0 0', height: '50px'}}>
             <a className="" title="" href={`/${cast.author.username}`} onClick={(event) => {
               if (!isLogged) {
                 console.log('ca1')
-                LoginPopup()
+                if (!app) {
+                  LoginPopup()
+                }
                 event.preventDefault()
               } else {
                 goToUserProfile(event, cast.author)
               }
             }}>
-              <img loading="lazy" src={cast.author.pfp_url} className="" alt={`${cast.author.display_name} avatar`} style={{width: '48px', height: '48px', maxWidth: '48px', maxHeight: '48px', borderRadius: '24px', border: '1px solid #000'}} />
+              <img loading="lazy" src={cast?.author?.pfp_url} className="" alt={`${cast.author.display_name} avatar`} style={{width: '48px', height: '48px', maxWidth: '48px', maxHeight: '48px', borderRadius: '24px', border: '1px solid #000'}} />
             </a>
           </div>
           {(userFid && userFid !== cast.author.fid || true) && (
@@ -290,7 +301,9 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
              () => {
                 if (!isLogged) {
                   console.log('ca2')
-                  LoginPopup()
+                  if (!app) {
+                    LoginPopup()
+                  }
                 } else {
                   if(userBalances.impact > 0) {
                     boostImpact(cast, 1)
@@ -307,7 +320,9 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
              () => {
                 if (!isLogged) {
                   console.log('ca3')
-                  LoginPopup()
+                  if (!app) {
+                    LoginPopup()
+                  }
                 } else {
                   unstakePoint(cast)
                 }
@@ -379,39 +394,44 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
             <div style={{wordWrap: 'break-word', maxWidth: `100%`, width: textMax, whiteSpace: 'pre-line'}}>
               {/* <CastText text={cast.text} embeds={cast.embeds} mentions={cast.mentioned_profiles} /> */}
               {cast.text}
-              </div>
-            {(cast.embeds.length > 0) && (cast.embeds.map((embed, subindex) => (
-              
-            <div key={subindex} className='flex-col' style={{alignItems: 'center', display: hide ? 'flex' : 'flex'}}>
-              {/* {(embed?.metadata?.content_type && embed?.metadata?.content_type?.startsWith('image/')) && (
-                <Images image={embed?.url} subindex={subindex} textMax={textMax} handleClick={handleClick} index={index} />
-              )} */}
-              {(embed && embed.type && (embed.type == 'image' || embed.type == 'other')) && (
-                <Images image={embed?.url} subindex={subindex} textMax={textMax} handleClick={handleClick} index={index} />
-              )}
-              {(embed && embed.type && embed.type == 'subcast') && (
-                <div className="" key={`${index}-${subindex}`} style={{marginTop: '10px'}}>
-                  <Subcast cast={embed.subcast} key={subindex} index={subindex} />
-                </div>
-              )}
-              {(embed && embed.type && embed.type == 'video') && (
-                <div className="" key={`${index}-${subindex}`}>
-                  <VideoPlayer width={textMax} src={embed.url} />
-                </div>
-              )}
-              {(embed && embed?.url && embed?.type && (embed?.type == 'html') && embed?.metadata && embed?.metadata?.title) && (
-                <Embed embed={embed} index={index} subindex={subindex} textMax={textMax} />
-              )}
             </div>
-            )))}
 
-            {(cast?.frames?.length > 0) && (cast?.frames?.map((frame, subindex) => (
+            {(cast?.cast_media?.length > 0) && (cast?.cast_media?.map((media, subindex) => (
+              
+              <div key={subindex} className='flex-col' style={{alignItems: 'center', display: hide ? 'flex' : 'flex'}}>
+                {(media?.content_type?.startsWith('text/html')) && (
+                  <Embed url={media?.url} index={index} subindex={subindex} textMax={textMax} />
+                )}
+                {(media?.content_type?.startsWith('image/') || media?.content_type == 'frame') && (
+                  <Images image={media?.url} subindex={subindex} textMax={textMax} handleClick={handleClick} index={index} />
+                )}
+                {(media?.content_type == 'quotecast') && (
+                  <div className="" key={`${index}-${subindex}`} style={{marginTop: '10px'}}>
+                    <Subcast castHash={media?.url} key={subindex} index={subindex} />
+                  </div>
+                )}
+                {(media?.content_type == 'application/x-mpegurl') && (
+                  <div className="" key={`${index}-${subindex}`}>
+                    <VideoPlayer width={textMax} src={media.url} />
+                  </div>
+                )}
+              </div>
+              )))}
+
+
+
+
+
+
+
+
+            {/* {(cast?.frames?.length > 0) && (cast?.frames?.map((frame, subindex) => (
               <div key={subindex} className='flex-col' style={{alignItems: 'center', display: hide ? 'flex' : 'flex'}}>
                 {(frame?.image) && (
                   <Images {...{image: frame?.image, subindex, textMax, handleClick, index}} />
                 )}
               </div>
-            )))}
+            )))} */}
 
             {cast?.channel && (<div style={{alignSelf: 'flex-start', fontSize: '13px', margin: '10px 0 0 0', padding: '3px 6px', border: '1px solid #666', width: 'fit-content', borderRadius: '3px', backgroundColor: '#eff', fontWeight: '500', color: '#246'}}>/{cast?.channel?.id}</div>)}
           </div>
@@ -430,7 +450,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
               <div className="">
                 <Message />
               </div>
-              <span className="" style={{padding: '0 0 0 5px'}}>{cast.replies.count}</span>
+              {/* <span className="" style={{padding: '0 0 0 5px'}}>{cast.replies.count}</span> */}
             </div>
             <div className="flex-row" style={{flex: 1}}>
               <div
@@ -440,7 +460,9 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
                 onClick={() => {
                   if (!isLogged) {
                     console.log('ca7')
-                    LoginPopup()
+                    if (!app) {
+                      LoginPopup()
+                    }
                   } else {
                     postRecast(cast.hash, index, cast.reactions.recasts_count)
                   }
@@ -449,7 +471,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
                 <div className="">
                   <Recast />
                 </div>
-                <span className="" style={{padding: '0 0 0 5px'}}>{cast.reactions.recasts_count}</span>
+                {/* <span className="" style={{padding: '0 0 0 5px'}}>{cast.reactions.recasts_count}</span> */}
               </div>
             </div>
             <div className="flex-row" style={{flex: 4}}>
@@ -460,7 +482,9 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
                 onClick={() => {
                   if (!isLogged) {
                     console.log('ca8')
-                    LoginPopup()
+                    if (!app) {
+                      LoginPopup()
+                    }
                   } else {
                     postLike(cast.hash, index, cast.reactions.likes_count)
                   }
@@ -468,14 +492,16 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
                 <div className="">
                   {cast.viewer_context?.liked ? <LikeOn /> : <Like />}
                 </div>
-                <span className="" style={{padding: '0 0 0 5px'}}>{cast.reactions.likes_count}</span>
+                {/* <span className="" style={{padding: '0 0 0 5px'}}>{cast.reactions.likes_count}</span> */}
               </div>
             </div>
             <div className="flex-row" style={{flex: 1, padding: '3px', gap: '0.5rem'}}>
               <div className={`impact-arrow ${fail ? 'flash-fail' : ''}`} style={{padding: '0px 1px 0 0px'}} onClick={() => {
                 if (!isLogged) {
                   console.log('ca9')
-                  LoginPopup()
+                  if (!app) {
+                    LoginPopup()
+                  }
                 } else {
                   boostQuality(cast, 1)
                 }
@@ -495,7 +521,9 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
               <div className={`like-btn ${fail ? 'flash-fail' : ''}`} style={{padding: '2px 0 0 0px'}} onClick={() => {
                 if (!isLogged) {
                   console.log('ca10')
-                  LoginPopup()
+                  if (!app) {
+                    LoginPopup()
+                  }
                 } else {
                   boostQuality(cast, -1)
                 }

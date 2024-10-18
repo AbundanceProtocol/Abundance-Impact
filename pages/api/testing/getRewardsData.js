@@ -62,6 +62,9 @@ export default async function handler(req, res) {
       const getTopQDAU = await getUniqueCuratorsQualityCount()
       const getTopTips = await getTop5UsersByTips()
 
+
+
+
       const impactUsernames = await Promise.all(getTopNominations.map(async (tip) => {
         const user = await User.findOne({ fid: tip._id.toString() });
         return {username: user ? user.username : 'Unknown User', points: tip.totalImpactPoints};
@@ -72,8 +75,25 @@ export default async function handler(req, res) {
         return {username: user ? user.username : 'Unknown User', points: tip.totalQualityPoints};
       }));
 
+      const combinedPoints = impactUsernames.reduce((acc, current) => {
+        const found = qualityUsernames.find(item => item.username === current.username);
+        if (found) {
+          acc[current.username] = { points: current.points + found.points };
+        } else {
+          acc[current.username] = { points: current.points };
+        }
+        return acc;
+      }, {});
+
+      const combinedUsernames = Object.entries(combinedPoints).map(([username, { points }]) => ({
+        username,
+        points
+      }));
+
+      combinedUsernames.sort((a, b) => b.points - a.points);
 
 
+      
       const tipperUsernames = await Promise.all(getTopTips.map(async (tip) => {
         const user = await User.findOne({ fid: tip._id.toString() });
         return {username: user ? user.username : 'Unknown User', tip: tip.totalTips};
@@ -82,20 +102,20 @@ export default async function handler(req, res) {
 
 
       const uniqueCuratorsCount = await Impact.distinct("curator_fid", { createdAt: { $gte: oneDay } });
-      console.log(`Number of unique 'curator_fid's that created Impact docs in the past 24 hours: ${uniqueCuratorsCount.length}`);
+      // console.log(`Number of unique 'curator_fid's that created Impact docs in the past 24 hours: ${uniqueCuratorsCount.length}`);
 
       const newUserCount = await User.countDocuments({ createdAt: { $gte: oneDay } });
-      console.log(`Number of new User docs created in the last 24 hours: ${newUserCount}`);
+      // console.log(`Number of new User docs created in the last 24 hours: ${newUserCount}`);
 
       const uniqueQualityCuratorsCount = await Quality.distinct("curator_fid", { createdAt: { $gte: oneDay } });
-      console.log(`Number of unique 'curator_fid's that created Quality docs in the past 24 hours: ${uniqueQualityCuratorsCount.length}`);
+      // console.log(`Number of unique 'curator_fid's that created Quality docs in the past 24 hours: ${uniqueQualityCuratorsCount.length}`);
 
 
       const newOptOutCount = await OptOut.countDocuments({ createdAt: { $gte: oneDay } });
-      console.log(`Number of new OptOut docs created in the last 24 hours: ${newOptOutCount}`);
+      // console.log(`Number of new OptOut docs created in the last 24 hours: ${newOptOutCount}`);
 
       const uniqueTipperCount = await Tip.distinct("tipper_fid", { createdAt: { $gte: oneDay } });
-      console.log(`Number of unique 'tipper_fid's that created new Tip docs in the past 24 hours: ${uniqueTipperCount.length}`);
+      // console.log(`Number of unique 'tipper_fid's that created new Tip docs in the past 24 hours: ${uniqueTipperCount.length}`);
 
       const totalDegenAmount = await Tip.aggregate([
         { $match: { createdAt: { $gte: oneDay }, 'tip.currency': { $regex: /degen/i } } },
@@ -103,7 +123,7 @@ export default async function handler(req, res) {
         { $match: { 'tip.currency': { $regex: /degen/i } } },
         { $group: { _id: null, totalAmount: { $sum: '$tip.amount' } } }
       ]);
-      console.log(`Total 'amount' of '$degen' 'currency' in Tip documents created in the past 24 hours: ${totalDegenAmount[0].totalAmount}`);
+      // console.log(`Total 'amount' of '$degen' 'currency' in Tip documents created in the past 24 hours: ${totalDegenAmount[0].totalAmount}`);
 
 
       let dcText = ''
@@ -117,8 +137,13 @@ export default async function handler(req, res) {
       }
       dcText += '\n'
       for (const quality of qualityUsernames) {
-        dcText += '@' + quality.username + ' - tip: ' + quality.points + '\n'
+        dcText += '@' + quality.username + ' - quality: ' + quality.points + '\n'
       }
+      dcText += '\n'
+      for (const user of combinedUsernames) {
+        dcText += '@' + user.username + ' - combined: ' + user.points + '\n'
+      }
+
 
       dcText += '\nCurators staking: ' + uniqueCuratorsCount.length + '\n'
       dcText += 'New users: ' + newUserCount + '\n'
@@ -126,7 +151,7 @@ export default async function handler(req, res) {
       dcText += 'New opt outs: ' + newOptOutCount + '\n'
       dcText += 'Users tipping: ' + uniqueTipperCount.length + '\n'
       dcText += 'Total $degen: ' + totalDegenAmount[0].totalAmount + '\n'
-
+      console.log('dcText', dcText)
       async function sendDc() {
         const response = await fetch(
           "https://api.warpcast.com/v2/ext-send-direct-cast",
@@ -147,10 +172,10 @@ export default async function handler(req, res) {
       
       sendDc();
 
-      console.log('nominations, tips', tipperUsernames, impactUsernames, uniqueCuratorsCount, newUserCount, uniqueQualityCuratorsCount, newOptOutCount, uniqueTipperCount, totalDegenAmount, qualityUsernames)
+      // console.log('nominations, tips', tipperUsernames, impactUsernames, uniqueCuratorsCount, newUserCount, uniqueQualityCuratorsCount, newOptOutCount, uniqueTipperCount, totalDegenAmount, qualityUsernames)
+      // console.log('combinedUsernames', combinedUsernames)
 
-
-      res.status(200).json({ message: 'nominations, tips', tipperUsernames, impactUsernames, uniqueCuratorsCount, newUserCount, uniqueQualityCuratorsCount, newOptOutCount, uniqueTipperCount, totalDegenAmount, qualityUsernames });
+      res.status(200).json({ message: 'nominations, tips', combinedUsernames });
     } catch (error) {
       console.error('Error handling GET request:', error);
       res.status(500).json({ error: 'Internal Server Error' });

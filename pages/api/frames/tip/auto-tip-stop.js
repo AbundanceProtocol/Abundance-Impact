@@ -10,6 +10,7 @@ import EcosystemRules from "../../../../models/EcosystemRules";
 import ScheduleTip from "../../../../models/ScheduleTip";
 import { encryptPassword, generateRandomString } from '../../../../utils/utils'
 import { metaButton } from '../../../../utils/frames'
+import { init, validateFramesMessage } from "@airstack/frames";
 
 const easyCronKey = process.env.EASYCRON_API_KEY;
 const baseURL = process.env.NEXT_PUBLIC_BASE_URL_PROD;
@@ -20,7 +21,10 @@ const client = HubURL ? getSSLHubRpcClient(HubURL) : undefined;
 // const apiKey = process.env.NEYNAR_API_KEY
 
 export default async function handler(req, res) {
-  
+  init(process.env.AIRSTACK_API_KEY ?? '')
+  const body = await req.body;
+  const {isValid, message} = await validateFramesMessage(body)
+
   const { untrustedData } = req.body
   const { time, curators, eco, ecosystem } = req.query;
 
@@ -28,7 +32,7 @@ export default async function handler(req, res) {
     const params = { time, curators, eco, ecosystem }
     const points = pt
     const eco = points?.substring(1)
-    const curatorFid = req.body.untrustedData.fid
+    const curatorFid = message?.data?.fid
 
     let autoTipImg = `${baseURL}/api/frames/tip/auto-tipping?${qs.stringify({ status: 'all', curators: [], points })}`
 

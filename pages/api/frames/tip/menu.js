@@ -20,7 +20,7 @@ const apiKey = process.env.NEYNAR_API_KEY
 export default async function handler(req, res) {
   init(process.env.AIRSTACK_API_KEY ?? '')
   const body = await req.body;
-  const {isValid} = await validateFramesMessage(body)
+  const {isValid, message} = await validateFramesMessage(body)
   console.log('isValid:', isValid)
   const { time, curators, channels, tags, eco, ecosystem, refresh, retry, start } = req.query;
   const { untrustedData } = req.body
@@ -51,8 +51,14 @@ export default async function handler(req, res) {
 
     if (curators) {
       let curatorId = Array.isArray(curators) ? curators[0] : Number(curators);
-      exploreLink = `${baseURL}/~/curator/${curatorId}`
+      let shareUrl = `${baseURL}/api/mini-app/curator?${qs.stringify({ fid: curatorId, points, app: 'mini', view: 'prompt' })}`
+      // let shareUrl = `${baseURL}/~/curator/${curatorId}?${qs.stringify({ points })}`
+      // let encodedMiniAppUrl = encodeURIComponent(shareUrl); 
+      // exploreLink =  `https://warpcast.com/~/composer-action?url=${encodedMiniAppUrl}`
+
+      exploreLink = `https://warpcast.com/~/composer-action?view=prompt&url=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Fmini-app%2Fcurator%3Ffid%3D${curatorId}%26points%3D%24${eco}%26app%3Dmini`
     }
+    
 
     const retryPost = `${baseURL}/api/frames/tip/start?${qs.stringify({ time, curators, eco, ecosystem })}`
 

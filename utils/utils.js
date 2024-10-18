@@ -4,6 +4,7 @@ import { ethers } from 'ethers';
 import Moralis from 'moralis';
 const apiKey = process.env.MORALIS_API_KEY
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
+const userSecret = process.env.NEXT_PUBLIC_USER_SECRET
 
 // shorten a hash address
 export function shortenAddress(input, long) {
@@ -136,15 +137,15 @@ export function isYesterday(previous, current) {
 export function getTimeRange(time) {
 
   let timeRange = null
-  if (time == '1hr') {
+  if (time == '1hr' || time == '1h') {
     timeRange = new Date(Date.now() - 1 * 60 * 60 * 1000);
-  } else if (time === '24hr') {
+  } else if (time === '24hr' || time === '24h') {
     timeRange = new Date(Date.now() - 24 * 60 * 60 * 1000);
-  } else if (time === '3days') {
+  } else if (time === '3days' || time === '3d') {
     timeRange = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
-  } else if (time === '7days') {
+  } else if (time === '7days' || time === '7d') {
     timeRange = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-  } else if (time === '30days') {
+  } else if (time === '30days' || time === '30d') {
     timeRange = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
   } else if (time === 'all') {
     timeRange = null
@@ -268,16 +269,18 @@ export async function populateCast(casts) {
     casts.forEach(cast => {
       let newCast = {
         author: {
-          fid: cast.author_fid,
-          pfp_url: cast.author_pfp,
-          username: cast.author_username,
-          display_name: cast.author_display_name,
+          fid: cast?.author_fid,
+          pfp_url: cast?.author_pfp,
+          username: cast?.author_username,
+          display_name: cast?.author_display_name,
           power_badge: false,
         },
-        hash: cast.cast_hash,
-        timestamp: cast.createdAt,
-        text: cast.cast_text,
-        impact_points: cast.impact_points,
+        hash: cast?.cast_hash,
+        cast_media: cast?.cast_media,
+        timestamp: cast?.createdAt,
+        text: cast?.cast_text,
+        impact_points: cast?.impact_points,
+        tip: [...(cast?.tip || [])],
         embeds: [],
         mentioned_profiles: [],
         replies: {
@@ -287,9 +290,9 @@ export async function populateCast(casts) {
           recasts: [],
           likes: []
         },
-        impact_balance: cast.impact_total,
-        quality_absolute: cast.quality_absolute,
-        quality_balance: cast.quality_balance
+        impact_balance: cast?.impact_total,
+        quality_absolute: cast?.quality_absolute,
+        quality_balance: cast?.quality_balance
       }
 
       displayedCasts.push(newCast)
@@ -577,7 +580,7 @@ export async function processTips(userFeed, userFid, tokenData, ecosystem, curat
   
     let finalTips = cleanTips.filter(cast => cast.text.length > 0)
   
-    console.log('finalTips', userFid, finalTips)
+    // console.log('finalTips', userFid, finalTips)
 
     const circle = finalTips.map(finalTip => {
       const feedItem = userFeed.find(feedItem => feedItem.author.fid === finalTip.fid);
@@ -730,5 +733,22 @@ export function getChain(chain) {
     return '8'
   } else {
     return '1'
+  }
+}
+
+
+export function confirmUser(fid, fidPass) {
+  try {
+    const decodedParam = decodeURIComponent(fidPass);
+    let decryptedPass = decryptPassword(decodedParam, userSecret)
+    let decryptedFid = decryptedPass.slice(10);
+    if (fid == decryptedFid) {
+      console.log('pass2')
+      return true
+    }
+    return false
+  } catch(error) {
+    console.error('Error confirming user:', error)
+    return false
   }
 }

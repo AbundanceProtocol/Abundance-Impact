@@ -2,15 +2,17 @@ import React, { useState, useContext, useEffect } from 'react';
 import { AccountContext } from '../../../../context';
 import Creators from './Creators';
 import Curators from './Curators';
+import Link from 'next/link';
 import axios from 'axios';
 import { useRouter } from 'next/router';
 
 const Leaderboard = () => {
-  const { points } = useContext(AccountContext);
+  const { points, ecoData } = useContext(AccountContext);
   const [topCreators, setTopCreators] = useState([])
   const [topCurators, setTopCurators] = useState([])
   const [sched, setSched] = useState({points: false})
   const router = useRouter()
+  const { ecosystem } = router.query
 
   async function getTopCreators() {
     try {
@@ -81,6 +83,7 @@ const Leaderboard = () => {
             <div className='flex-col' style={{gap: '0.5rem', marginTop: '10px'}}>
               {(topCurators.map((curator, index) => (<Curators {...{curator, index, key: index }} />)))}
             </div>
+            {topCurators?.length > 0 && (<div className='flex-row' style={{height: '10px', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '0px', margin: '15px 0 0 0'}}><Link href={`/~/ecosystems/${ecoData?.ecosystem_handle}/curator`} ><div className={'filter-item'} style={{fontSize: '12px', border: '1px solid #666', padding: '1px 5px'}}>See all</div></Link></div>)}
           </div>
         )}
       </>

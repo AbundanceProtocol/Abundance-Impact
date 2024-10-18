@@ -1,5 +1,6 @@
 import { useRouter } from 'next/router';
 import { useRef, useContext, useEffect, useState } from 'react';
+import Link from 'next/link';
 import { AccountContext } from '../../../../context';
 import useMatchBreakpoints from '../../../../hooks/useMatchBreakpoints';
 import axios from 'axios';
@@ -12,13 +13,19 @@ import CuratorData from '../../../../components/Page/CuratorData';
 import TopPicks from '../../../../components/Page/FilterMenu/TopPicks';
 import Shuffle from '../../../../components/Page/FilterMenu/Shuffle';
 import Time from '../../../../components/Page/FilterMenu/Time';
+import { confirmUser } from '../../../../utils/utils';
+import { useInView } from 'react-intersection-observer'
+import { BsClock } from "react-icons/bs";
+import { BiSortDown, BiSortUp } from "react-icons/bi";
+import { IoShuffleOutline as ShuffleIcon } from "react-icons/io5";
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { fid } = router.query
+  const [ref, inView] = useInView()
+  const { fid, points, app, userFid, pass, id } = router.query
   const [user, setUser] = useState(null)
-  const { LoginPopup, isLogged } = useContext(AccountContext)
-  const ref = useRef(null)
+  const { LoginPopup, isLogged, setPoints, setIsLogged, setFid, miniApp, setMiniApp } = useContext(AccountContext)
+  const ref1 = useRef(null)
   const [textMax, setTextMax] = useState('430px')
   const [screenWidth, setScreenWidth ] = useState(undefined)
   const [screenHeight, setScreenHeight] = useState(undefined)
@@ -27,9 +34,8 @@ export default function ProfilePage() {
   const [searchSelect, setSearchSelect ] = useState('Curation')
   const { isMobile } = useMatchBreakpoints();
   const [userFeed, setUserFeed] = useState(null)
+  const [prevSearch, setPrevSearch] = useState({getTime: null, channel: null, curator: null, text: null, shuffle: null, points: null, page: 0, order: -1})
   const [showPopup, setShowPopup] = useState({open: false, url: null})
-  const [feedRouterScheduled, setFeedRouterScheduled] = useState(false);
-  const [userRouterScheduled, setUserRouterScheduled] = useState(false);
   const initialEco = {
     channels: [],
     condition_channels: false,
@@ -60,7 +66,7 @@ export default function ProfilePage() {
   const [userSearch, setUserSearch] = useState({ search: '' })
   const [selectedChannels, setSelectedChannels] = useState([])
   const [channels, setChannels] = useState([])
-  const initialQuery = {shuffle: true, time: '3days', tags: [], channels: [], curators: []}
+  const initialQuery = {shuffle: false, time: '3d', tags: [], channels: [], curators: [], order: -1}
   const [userQuery, setUserQuery] = useState(initialQuery)
   const queryOptions = {
     tags: [
@@ -108,24 +114,36 @@ export default function ProfilePage() {
       },
     ]
   }
-  // console.log('updated', fid)
+  // const [page, setPage] = useState(1)
+  const [sched, setSched] = useState({inView: false, user: false, feed: false, id: false, fid: false})
+  const [delay, setDelay] = useState(true)
+  const [timeframe, setTimeframe] = useState('3d')
+  const [sortBy, setSortBy] = useState('down')
+  const [tipId, setTipId] = useState(null)
+  const [userTip, setUserTip] = useState(null)
+  const [curators, setCurators] = useState([])
+  const [tipEcosystem, setTipEcosystem] = useState('abundance')
 
-  useEffect(() => {
-
-      setUserQuery({
-        ...userQuery,
-        curators: [fid]
-      })
-    getUser(fid)
-  }, [fid]);
-
-  async function getUser(fid) {
+  async function getCuratorData(fid) {
     try {
-      const response = await axios.get('/api/getUserByFid', {
+      const response = await axios.get('/api/getCuratorProfile', {
         params: { fid }
       })
       if (response?.data) {
-        setUser(response?.data)
+        const profile = response?.data?.data?.Socials?.Social[0] || null
+        const populatedProfile = {
+          username: profile?.profileName,
+          pfp: {
+            url: profile?.profileImage,
+          },
+          displayName: profile?.profileDisplayName,
+          activeOnFcNetwork: true,
+          profile: { bio: { text: profile?.profileBio } },
+          followingCount: profile?.followingCount,
+          followerCount: profile?.followerCount,
+          fid
+        }
+        setUser(populatedProfile)
       } else {
         setUser(null)
       }
@@ -135,68 +153,270 @@ export default function ProfilePage() {
     }
   }
 
-
   useEffect(() => {
-    if (userRouterScheduled) {
-      if (user && fid && fid !== '-') {
-        console.log('2')
-        feedRouter()
-
+    const inViewRouter = () => {
+      console.log('running', userFeed?.length, (userFeed?.length % 10 == 0), id, tipId)
+      if (!id) {
+        console.log('test1', id, tipId)
+        setDelay(true)
+        // feedRouter()
       }
-      setUserRouterScheduled(false);
+      // if (userFeed?.length % 10 == 0) {
+
+
+
+        // if (cursor !== prevCursor && cursor !== '' && isLogged) {
+        //   if (searchSelect == 'Main') {
+        //     setPrevCursor(cursor)
+        //     addToFeed(fid, channelSelect, true, cursor)
+        //   } else if (searchSelect == 'Recent') {
+        //     setPrevCursor(cursor)
+        //     addToFeed(fid, channelSelect, false, cursor)
+        //   } else if (searchSelect == 'Curation') {
+        //     setPrevCursor(cursor)
+        //     feedRouter()
+        //   }
+        //   console.log('trigger get additional casts', cursor, prevCursor, searchSelect)
+          
+        // } else {
+        //   console.log('triggered, no new casts', cursor, prevCursor, searchSelect)
+        // }
+      // }
+    }
+
+    if (sched.inView) {
+      inViewRouter()
+      setSched(prev => ({...prev, inView: false }))
     } else {
       const timeoutId = setTimeout(() => {
-        if (user && fid && fid !== '-') {
-          console.log('3')
-          feedRouter()
-        }
-        setUserRouterScheduled(false);
-      }, 300);
-  
+        inViewRouter()
+        setSched(prev => ({...prev, inView: false }))
+      }, 1000);
       return () => clearTimeout(timeoutId);
     }
-  }, [user, userRouterScheduled]);
+  }, [inView, sched.inView])
+
 
   useEffect(() => {
-    // console.log('updated', userQuery)
-    if (feedRouterScheduled) {
-      feedRouter();
-      setFeedRouterScheduled(false);
+
+    function fidTrigger() {
+      if (id) {
+        console.log('id set')
+        setDelay(true)
+        setTipId(true)
+        getTipCasts(id)
+      }
+      if (fid) {
+        getCuratorData(fid)
+      }
+      if (points) {
+        setPoints(points)
+      }
+      setUserQuery({
+        ...userQuery,
+        curators: [fid], points: points || null
+      })
+
+    }
+
+    if (sched.fid) {
+      console.log('feed', id, tipId)
+      fidTrigger()
+      setSched(prev => ({...prev, fid: false }))
     } else {
       const timeoutId = setTimeout(() => {
+        fidTrigger()
+        setSched(prev => ({...prev, fid: false }))
+      }, 1000);
+      return () => clearTimeout(timeoutId);
+    }
+
+
+
+
+
+
+  }, [fid, sched.fid]);
+
+
+  useEffect(() => {
+    console.log('app01', app, userFid, !isLogged, pass !== '', !isLogged && app && app == 'mini' && userFid && pass !== '')
+    if (!isLogged && app && app == 'mini' && userFid && pass !== '' && !miniApp) {
+      console.log('set mini app')
+      setMiniApp(true)
+    }
+  }, [userFid, pass, app]);
+
+  useEffect(() => {
+    if (miniApp) {
+      const confirmed = confirmUser(userFid, pass)
+      console.log('confirmed', confirmed)
+      if (confirmed) {
+        console.log('isLogged-1')
+        setIsLogged(true)
+        setFid(Number(userFid))
+        console.log('app03', isLogged, confirmed)
+      }
+    }
+  }, [miniApp]);
+
+
+
+
+  useEffect(() => {
+    console.log('app02', isLogged, fid)
+  }, [isLogged]);
+
+
+
+  // async function getUser(fid) {
+  //   try {
+  //     const response = await axios.get('/api/getUserByFid', {
+  //       params: { fid }
+  //     })
+  //     if (response?.data) {
+  //       setUser(response?.data)
+  //     } else {
+  //       setUser(null)
+  //     }
+  //   } catch (error) {
+  //     console.error('Error submitting data:', error)
+  //     setUser(null)
+  //   }
+  // }
+
+
+  // useEffect(() => {
+  //   if (sched.user) {
+  //     if (user && fid && fid !== '-') {
+  //       console.log('2')
+  //       feedRouter()
+  //     }
+  //     setSched(prev => ({...prev, user: false }))
+  //   } else {
+  //     const timeoutId = setTimeout(() => {
+  //       if (user && fid && fid !== '-') {
+  //         console.log('3')
+  //         feedRouter()
+  //       }
+  //       setSched(prev => ({...prev, user: false }))
+  //     }, 300);
+  
+  //     return () => clearTimeout(timeoutId);
+  //   }
+  // }, [user, sched.user]);
+
+  useEffect(() => {
+    if (sched.id) {
+      console.log('feed', id, tipId)
+      if (id) {
+        setDelay(true)
+        setTipId(true)
+        getTipCasts(id)
+      }
+      setSched(prev => ({...prev, id: false }))
+    } else {
+      const timeoutId = setTimeout(() => {
+        if (id) {
+          setDelay(true)
+          setTipId(true)
+          getTipCasts(id)
+        }
+        setSched(prev => ({...prev, id: false }))
+      }, 300);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [id, sched.id])
+
+  // useEffect(() => {
+  //   console.log('userFeed', userFeed)
+  // }, [userFeed])
+
+
+  useEffect(() => {
+    if (sched.feed) {
+      console.log('feed', id, tipId)
+      // setPage(1)
+      if (!id) {
+        console.log('test2', id, tipId)
         feedRouter();
-        setFeedRouterScheduled(false);
+      }
+      setSched(prev => ({...prev, feed: false }))
+    } else {
+      const timeoutId = setTimeout(() => {
+        // setPage(1)
+        if (!id) {
+          console.log('test3', id)
+          feedRouter();
+        }
+        setSched(prev => ({...prev, feed: false }))
       }, 300);
   
       return () => clearTimeout(timeoutId);
     }
-  }, [searchSelect, userQuery, feedRouterScheduled])
+  }, [searchSelect, userQuery, sched.feed])
 
   function feedRouter() {
-    // console.log(searchSelect)
-    // if (user && searchSelect == 'Casts') {
-    //   getLatestUserCasts(fid, fid)
-    // } else if (searchSelect == 'Casts + Replies') {
-    //   getUserFeed(fid, false, fid)
-    // } else if (searchSelect == 'Curation') {
-      const { shuffle, time, tags, channels, curators } = userQuery
-      const timeRange = getTimeRange(time)
-      // console.log(userQuery)
-      getUserSearch(timeRange, tags, channels, curators, null, shuffle)
-    // }
+    const { shuffle, time, tags, channels, curators, order } = userQuery
+    if (!id) {
+      getUserSearch(time, tags, channels, curators, null, shuffle, order)
+    } else {
+      getTipCasts(id)
+    }
   }
   
-  async function getUserSearch(time, tags, channel, curator, text, shuffle) {
+  async function getUserSearch(getTime, tags, channel, curator, text, shuffle, order) {
+    console.log('no id!')
+    const time = getTimeRange(getTime)
 
-    async function getSearch(time, tags, channel, curator, text, shuffle) {
+    console.log(getTime, tags, channel, curator, text, shuffle, points, order)
+    let page = prevSearch.page + 1
+
+    console.log(prevSearch.getTime == getTime, prevSearch.channel == channel, prevSearch.curator == curator, prevSearch.text == text, prevSearch.points == points, prevSearch.getTime == getTime && prevSearch.channel == channel && prevSearch.curator == curator && prevSearch.text == text && prevSearch.points == points)
+
+
+    if (shuffle) {
+      setDelay(true)
+      console.log('opt1')
+      page = 1
+      setUserFeed([])
+      setPrevSearch(prev => ({...prev, getTime, channel, curator, text, shuffle, points, page, order }))
+    } else if (prevSearch.getTime == getTime && prevSearch.channel == channel && prevSearch.curator == curator && prevSearch.text == text && prevSearch.points == points && prevSearch.order == order) {
+      setDelay(true)
+      console.log('opt2')
+      setPrevSearch(prev => ({...prev, getTime, channel, curator, text, shuffle, points, page, order }))
+    } else {
+      setDelay(true)
+      console.log('opt3')
+      page = 1
+      setUserFeed([])
+      setPrevSearch(prev => ({...prev, getTime, channel, curator, text, shuffle, points, page, order })) 
+    }
+
+    async function getSearch(time, tags, channel, curator, text, shuffle, points, page, order) {
+
       try {
         const response = await axios.get('/api/curation/getUserSearch', {
-          params: { time, tags, channel, curator, text, shuffle }
+          params: { time, tags, channel, curator, text, shuffle, points, page, order }
         })
-        let casts = []
-        if (response && response.data && response.data.casts.length > 0) {
-          casts = response.data.casts
+
+        const removeDelay = () => {
+          setTimeout(() => {
+            setDelay(false);
+            console.log('no delay')
+          }, 2000);
+        };
+    
+        if (!shuffle) {
+          removeDelay()
         }
+
+        let casts = []
+        if (response?.data?.casts?.length > 0) {
+          casts = response?.data?.casts
+        }
+        console.log(casts)
+
         return casts
       } catch (error) {
         console.error('Error submitting data:', error)
@@ -204,12 +424,18 @@ export default function ProfilePage() {
       }
     }
 
-    const casts = await getSearch(time, tags, channel, curator, text, shuffle)
+    let casts = []
+    console.log('pages', page, page == 1, (page !== 1 && userFeed?.length % 10 == 0))
+    if (!id && (page == 1 || (page !== 1 && userFeed?.length % 10 == 0)) ) {
+      casts = await getSearch(time, tags, channel, curator, text, shuffle, points, page, order)
+    }
+    
     let filteredCasts
     let sortedCasts
 
     if (!casts) {
-      setUserFeed([])
+      // setUserFeed([])
+
     } else {
 
       console.log(casts)
@@ -220,165 +446,109 @@ export default function ProfilePage() {
         }
         return acc;
       }, [])
-      // console.log(filteredCasts)
-      sortedCasts = filteredCasts.sort((a, b) => b.impact_total - a.impact_total);
-      // console.log(sortedCasts)
 
-      let displayedCasts = await populateCast(sortedCasts)
-      // setUserFeed(displayedCasts)
-
-      let castString
-
-      if (sortedCasts) {
-        const castHashes = sortedCasts.map(obj => obj.cast_hash)
-        castString = castHashes.join(',');
+      if (order == -1) {
+        sortedCasts = filteredCasts.sort((a, b) => b.impact_total - a.impact_total);
+      } else {
+        sortedCasts = filteredCasts.sort((a, b) => a.impact_total - b.impact_total);
       }
 
+      let displayedCasts = await populateCast(sortedCasts)
 
-      setUserFeed(displayedCasts)
-
-      if (!fid) {
-        console.log('cu1')
-        // LoginPopup()
-      } else {
-          
-        async function populateCasts(fid, castString) {
-          try {
-            const response = await axios.get('/api/curation/getCastsByHash', {
-              params: { fid, castString }
-            })
-            return response
-          } catch (error) {
-            console.error('Error submitting data:', error)
-            return null
-          }
-        }
-
-        const populateResponse = await populateCasts(fid, castString)
-
-        let populatedCasts = []
-
-        if (populateResponse) {
-          populatedCasts = populateResponse.data.casts
-          // setUserFeed(populatedCasts)
-        }
-
-        for (let i = 0; i < populatedCasts.length; i++) {
-          const obj2 = populatedCasts[i]
-          let obj1 = displayedCasts.find(cast => cast.hash === obj2.hash)
-          if (obj1) {
-            Object.keys(obj2).forEach(key => {
-              obj1[key] = obj2[key]
-            })
-          } else {
-            displayedCasts.push({...obj2})
-          }
-        }
-
+      if (userFeed?.length == 0 || page == 1 || shuffle) {
+        console.log('opt1-2')
         setUserFeed(displayedCasts)
-
-        async function checkEmbedTypeForCasts(casts) {
-          // Map over each cast and apply checkEmbedType function
-          const updatedCasts = await Promise.all(casts.map(async (cast) => {
-            return await checkEmbedType(cast);
-          }));
-        
-          return updatedCasts;
-        }
-        
-        const castsWithImages = await checkEmbedTypeForCasts(displayedCasts);
-        setUserFeed(castsWithImages);
-
-
-        async function getSubcast(hash, userFid) {
-          if (hash && userFid) {
-            try {
-              const response = await axios.get('/api/getCastByHash', {
-                params: { hash, userFid } })
-              const castData = response.data.cast.cast
-              if (castData) {
-                console.log(castData)
-                return castData
-              } else {
-                return null
-              }
-            } catch (error) {
-              console.error('Error submitting data:', error)
-              return null
-            }
-          }
-        }
-
-        async function populateSubcasts(cast, fid) {
-          const { embeds } = isCast(cast);
-          if (embeds && embeds.length > 0) {
-            const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
-              if (embed.type == 'subcast') {
-                const subcastData = await getSubcast(embed.cast_id.hash, fid)
-                const checkImages = await checkEmbedType(subcastData)
-                return { ...embed, subcast: checkImages };
-              } else {
-                return { ...embed }
-              }
-            }));
-            return { ...cast, embeds: updatedEmbeds };
-          }
-          
-          return cast; 
-        }
-
-        async function populateEmbeds(cast) {
-          const { embeds } = isCast(cast);
-          if (embeds && embeds.length > 0) {
-            const updatedEmbeds = await Promise.all(embeds.map(async (embed) => {
-              if (embed && embed.url && embed.type == 'html') {
-                try {
-                  const metaData = await axios.get('/api/getMetaTags', {
-                    params: { url: embed.url } })
-                  if (metaData && metaData.data) {
-                    return { ...embed, metadata: metaData.data };
-                  } else {
-                    return { ...embed }
-                  }
-                } catch (error) {
-                  return { ...embed }
-                }
-              } else {
-                return { ...embed }
-              }
-            }));
-            return { ...cast, embeds: updatedEmbeds };
-          }
-          
-          return cast;
-        }
-
-        async function checkEmbeds(casts) {
-          const updatedCasts = await Promise.all(casts.map(async (cast) => {
-            return await populateEmbeds(cast);
-          }));
-        
-          return updatedCasts;
-        }
-
-        async function checkSubcasts(casts, fid) {
-          const updatedCasts = await Promise.all(casts.map(async (cast) => {
-            return await populateSubcasts(cast, fid);
-          }));
-        
-          return updatedCasts;
-        }
-
-        const castsWithSubcasts = await checkSubcasts(castsWithImages, fid)
-        console.log(castsWithSubcasts)
-        setUserFeed(castsWithSubcasts);
-
-        const castsWithEmbeds = await checkEmbeds(castsWithSubcasts)
-        console.log(castsWithEmbeds)
-        setUserFeed(castsWithEmbeds);
+      } else if (userFeed) {
+        console.log('opt2-2')
+        console.log('feed length', userFeed?.length)
+        setUserFeed((prevUserFeed) => prevUserFeed.concat(displayedCasts))
       }
     }
   }
+
+
+
+
+
+async function getTipCasts(id) {
+  console.log('id!')
+  let casts = []
+  let tip = ''
+  let curatorData = []
+  let ecosystem = 'abundance'
+
+  async function getCasts(id) {
+    console.log('get tips', id)
+    try {
+      const response = await axios.get('/api/getTipCircle', {
+        params: { id }
+      })
+
+      let casts = []
+      let tip = ''
+      let curatorData = []
+      let ecosystem = 'abundance'
+
+      if (response?.data?.casts?.length > 0) {
+        casts = response?.data?.casts
+        tip = response?.data?.tip
+        curatorData = response?.data?.curatorData
+        ecosystem = response?.data?.ecosystem
+      }
+      console.log(casts)
+
+      return {casts, tip, curatorData: curatorData || [], ecosystem}
+    } catch (error) {
+      console.error('Error submitting data:', error)
+      return {cassts: [], tip: '', curatorData: [], ecosystem: 'abundance'}
+    }
+  }
+
+  if (id) {
+    ({ casts, tip, curatorData } = await getCasts(id))
+  }
+  console.log('tip', tip, curatorData)
+
+  setUserTip(tip)
+  setCurators(curatorData)
+  setTipEcosystem(ecosystem)
+
+  let filteredCasts
+  let sortedCasts
+
+  if (!casts) {
+    setUserFeed([])
+
+  } else {
+
+    console.log(casts)
+    filteredCasts = await casts.reduce((acc, current) => {
+      const existingItem = acc.find(item => item._id === current._id);
+      if (!existingItem) {
+        acc.push(current);
+      }
+      return acc;
+    }, [])
+
+    // if (order == -1) {
+      sortedCasts = filteredCasts.sort((a, b) => b.impact_total - a.impact_total);
+    // } else {
+    //   sortedCasts = filteredCasts.sort((a, b) => a.impact_total - b.impact_total);
+    // }
+
+    let displayedCasts = await populateCast(sortedCasts)
+
+    // if (userFeed?.length == 0 || page == 1 || shuffle) {
+    //   console.log('opt1-2')
+      setUserFeed(displayedCasts)
+    // } else if (userFeed) {
+    //   console.log('opt2-2')
+    //   console.log('feed length', userFeed?.length)
+    //   setUserFeed((prevUserFeed) => prevUserFeed.concat(displayedCasts))
+    // }
+  }
+}
+
 
 
 
@@ -547,7 +717,58 @@ export default function ProfilePage() {
     }
   }
 
+  function updateTime(time) {
+    setUserFeed([])
+    // setTimeframe(time)
+    console.log('time', time)
+
+    setTimeframe(time)
+    setUserQuery({
+      ...userQuery,
+      time: time
+    })
+
+    // setUserQuery({
+    //   ...userQuery,
+    //   curators: [fid], points: points || null
+    // })
+
+  }
+
+  function updateOrder(order) {
+    setUserFeed([])
+    // setTimeframe(time)
+    console.log('time', order)
+    setSortBy(order)
+    if (order == 'up') {
+      setUserQuery({
+        ...userQuery,
+        order: 1, shuffle: false
+      })
+    } else if (order == 'down') {
+      setUserQuery({
+        ...userQuery,
+        order: -1, shuffle: false
+      })
+    } else if (order == 'shuffle') {
+      setUserQuery({
+        ...userQuery,
+        order: -1, shuffle: true
+      })
+    }
+
+  }
+
+
   useEffect(() => {
+
+
+    // Example usage:
+    // executeWithDelay(() => {
+    //   console.log('This function is executed after a 2 second delay');
+    // });
+
+
     const handleResize = () => {
       setScreenWidth(window.innerWidth)
       setScreenHeight(window.innerHeight)
@@ -573,24 +794,64 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className='flex-col' style={{width: 'auto', position: 'relative'}} ref={ref}>
+    <div className='flex-col' style={{width: 'auto', position: 'relative'}} ref={ref1}>
       <div className="" style={{padding: '58px 0 0 0'}}>
       </div>
+
+      <div className='flex-row' style={{height: '30px', alignItems: 'center', justifyContent: 'flex-start', padding: '20px 0 30px 0'}}>
+        <div className='flex-row' style={{padding: '4px 8px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '20px', alignItems: 'center', gap: '0.25rem'}}>
+          {/* <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>TIME</div> */}
+
+          <Link href={`/~/ecosystems/${tipEcosystem || 'abundance'}`}><div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>{tipEcosystem || 'abundance'}</div></Link>
+          <div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px', padding: '0'}}>{'>'}</div>
+          {id ? (<div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>tips</div>) : (<Link href={`/~/ecosystems/${tipEcosystem || 'abundance'}/curator`}><div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>curator</div></Link>)}
+          <div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px', padding: '0'}}>{'>'}</div>
+          <div className='filter-item-on' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>@{user?.username}</div>
+        </div>
+      </div>
+
+
       {user && (<CuratorData {...{ show: (isLogged && user), user, textMax }} />)}
       {/* <div className="top-layer flex-row" style={{padding: '10px 0 10px 0', alignItems: 'center', justifyContent: 'space-evenly', margin: '0', borderBottom: '1px solid #888'}}>
         {userButtons.map((btn, index) => (
           <FeedMenu {...{buttonName: btn, searchSelect, searchOption, isMobile }} key={index} />))}
       </div> */}
 
-      {searchSelect == 'Curation' && (
+      {searchSelect == 'Curation' && !id ? (
 
-      <div className='flex-row' style={{justifyContent: 'space-between', marginTop: '15px', marginBottom: '30px'}}>
-        <div className='flex-row' style={{gap: '0.5rem'}}>
+      <div className='flex-row' style={{justifyContent: 'center', marginTop: '15px', marginBottom: '30px', gap: '1rem'}}>
+        {/* <div className='flex-row' style={{gap: '0.5rem'}}>
           <TopPicks handleSelection={handleSelection} selection={'picks'} />
           <Shuffle handleSelect={handleSelect} selection={'shuffle'} userQuery={userQuery} />
         </div>
 
-        <Time handleSelection={handleSelection} handleSelect={handleSelect} userQuery={userQuery} options={queryOptions.time} selection={'time'} isSelected={isSelected} isMobile={isMobile} btnText={btnText} />
+        <Time handleSelection={handleSelection} handleSelect={handleSelect} userQuery={userQuery} options={queryOptions.time} selection={'time'} isSelected={isSelected} isMobile={isMobile} btnText={btnText} /> */}
+
+
+
+        <div className='flex-row' style={{height: '30px', alignItems: 'center', justifyContent: 'center', padding: '20px 0'}}>
+          <div className='flex-row' style={{padding: '4px 8px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '20px', alignItems: 'center', gap: '0.25rem'}}>
+            <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>SORT</div>
+            <div className={sortBy == 'down' ? 'filter-item-on' : 'filter-item'} style={{padding: '2px 6px 0px 6px'}} onClick={() => {updateOrder('down')}}><BiSortDown size={12} /></div>
+            <div className={sortBy == 'up' ? 'filter-item-on' : 'filter-item'} style={{padding: '2px 6px 0px 6px'}} onClick={() => {updateOrder('up')}}><BiSortUp size={12} /></div>
+            <div className={sortBy == 'shuffle' ? 'filter-item-on' : 'filter-item'} style={{padding: '2px 6px 0px 6px'}} onClick={() => {updateOrder('shuffle')}}><ShuffleIcon size={12} /></div>
+          </div>
+        </div>
+
+
+
+
+        <div className='flex-row' style={{height: '30px', alignItems: 'center', justifyContent: 'center', padding: '20px 0'}}>
+          <div className='flex-row' style={{padding: '4px 8px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '20px', alignItems: 'center', gap: '0.25rem'}}>
+            <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>TIME</div>
+            <div className={timeframe == '24h' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('24h')}}>24hr</div>
+            <div className={timeframe == '3d' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('3d')}}>3d</div>
+            <div className={timeframe == '7d' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('7d')}}>7d</div>
+            <div className={timeframe == '30d' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('30d')}}>30d</div>
+            <div className={timeframe == 'all' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('all')}}>all</div>
+          </div>
+        </div>
+
 
         {/* <div style={{position: 'relative'}}>
           <div className={`flex-row ${!isMobile ? 'active-nav-link btn-hvr' : ''}`} style={{border: '1px solid #abc', padding: `2px 6px 2px 6px`, borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'center', borderBottom: (isSelected == 'tags') ? '2px solid #99ddff' : '1px solid #abc', height: '28px'}} onMouseEnter={() => {handleSelection('tags')}} onMouseLeave={() => {handleSelection('none')}}>
@@ -608,16 +869,16 @@ export default function ProfilePage() {
           )}
         </div> */}
 
-        <div style={{position: 'relative'}}>
+        {/* <div style={{position: 'relative'}}>
           <div className={`flex-row ${!isMobile ? 'active-nav-link btn-hvr' : ''}`} style={{border: '1px solid #abc', padding: `2px 6px 2px 6px`, borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'center', borderBottom: (isSelected == 'channels') ? '2px solid #99ddff' : '1px solid #abc', height: '28px', marginRight: '4px'}} onMouseEnter={() => {handleSelection('channels')}} onMouseLeave={() => {handleSelection('none')}}>
             <div className="flex-row" style={{alignItems: 'center', gap: isMobile ? '0' : '0.3rem', selection: 'none'}}>
               <AiOutlineBars size={15} color='#eee' />
               <span className={`${!isMobile ? 'selection-btn' : ''}`} style={{cursor: 'pointer', padding: '0', color: userQuery['channels'].length == 0 ? '#aaa' : ''}}>{isMobile ? '' : userQuery['channels'].length == 0 ? 'All channels' : 'Channels'}</span>
             </div>
           </div>
-        </div>
+        </div> */}
 
-        {(isSelected == 'channels') && (
+        {/* {(isSelected == 'channels') && (
           <div className='' style={{position: 'absolute', width: '100%', margin: 'auto', marginTop: '28px'}} onMouseEnter={() => {handleSelection('channels')}} onMouseLeave={() => {handleSelection('none')}}>
             <div className='top-layer flex-col' style={{gap: '0.25rem', padding: '6px 6px', borderRadius: '10px', backgroundColor: '#1D3244dd', border: '1px solid #abc', width: 'auto', marginTop: '10px', alignItems: 'flex-start'}}>
               <div className={`selection-btn ${(userQuery['channels'] == 'all' || userQuery['channels'].length == 0) ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}}>
@@ -654,7 +915,27 @@ export default function ProfilePage() {
               </div>)}
               </div>
             </div>
-          )}
+          )} */}
+        </div>
+      ) : (
+        <div className='flex-row' style={{justifyContent: 'center', marginTop: '15px', marginBottom: '30px', gap: '1rem'}}>
+          <div className='flex-row' style={{height: '30px', alignItems: 'center', justifyContent: 'center', padding: '20px 0'}}>
+            <div className='flex-row' style={{padding: '4px 8px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '20px', alignItems: 'center', gap: '0.25rem'}}>
+              <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>USER TIP</div>
+              <div className={timeframe == '24h' ? 'filter-item-on' : 'filter-item'} style={{fontSize: isMobile ? '9px' : '10px'}}>{userTip || 'none'}</div>
+            </div>
+          </div>
+
+          <div className='flex-row' style={{height: '30px', alignItems: 'center', justifyContent: 'center', padding: '20px 0'}}>
+            <div className='flex-row' style={{padding: '4px 8px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '20px', alignItems: 'center', gap: '0.25rem'}}>
+              <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>CURATORS</div>
+              {curators && (curators.map((curator, index) => (
+                (<Link key={index} href={`/~/ecosystems/${tipEcosystem || 'abundance'}/curator/${curator?.username}`}><div className='filter-item' style={{fontSize: isMobile ? '9px' : '10px'}}>@{curator?.username}</div></Link>)
+              )))}
+            </div>
+          </div>
+
+
         </div>
       )}
 
@@ -663,8 +944,9 @@ export default function ProfilePage() {
         <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
           <Spinner size={31} color={'#999'} />
         </div>
-        ) : (userFeed.map((cast, index) => (<Cast {...{cast, key: index, index, updateCast, openImagePopup, ecosystem: eco.ecosystem_points_name, self: false}} />)))}
+        ) : (userFeed.map((cast, index) => (<Cast {...{cast, key: index, index, updateCast, openImagePopup, ecosystem: eco.ecosystem_points_name, self: false, app}} />)))}
       </div>
+      {!delay && (<div ref={ref}>&nbsp;</div>)}
       <ExpandImg  {...{show: showPopup.open, closeImagePopup, embed: {showPopup}, screenWidth, screenHeight }} />
     </div>
   );

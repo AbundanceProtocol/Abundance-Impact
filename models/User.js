@@ -5,13 +5,13 @@ const { Schema } = mongoose;
 
 const userSchema = new mongoose.Schema({
   invited_by: { type: Number, default: null },
-  fid: String,
+  fid: { type: String, index: true },
   uuid: String, //encrypted
-  ecosystem_points: String,
+  ecosystem_points: { type: String, index: true },
   ecosystem_name: String,
   pfp: String,
   wallet: String,
-  username: String,
+  username: { type: String, index: true },
   display_name: String,
   set_cast_hash: String,
   need_cast_hash: { type: Boolean, default: true },
@@ -29,7 +29,7 @@ const userSchema = new mongoose.Schema({
   quality_reviews: [{type: Schema.Types.ObjectId, ref: 'Quality'}],
   quality_score: [{type: Schema.Types.ObjectId, ref: 'Quality'}],
   next_update: Date,
-  createdAt: { type: Date, default: () => new Date() }
+  createdAt: { type: Date, default: () => new Date(), index: true }
 });
 
 const User = mongoose.models.User || mongoose.model('User', userSchema);

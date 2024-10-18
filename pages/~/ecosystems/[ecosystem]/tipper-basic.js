@@ -166,7 +166,7 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem, ha
     updatedFrameData.buttons[0].target = `${baseURL}/api/frames/console/tip-tip?${qs.stringify({    
       time, curators, eco, ecosystem, hash })}`
 
-    updatedFrameData.buttons[1].target = `${baseURL}/~/curator/${curators}`
+    updatedFrameData.buttons[1].target = `${baseURL}/~/curator/${curators || 9326}?${qs.stringify({ points: '$' + eco })}`
 
     updatedFrameData.buttons[3].target = `${baseURL}/api/frames/console/refresh-tip?${qs.stringify({    
       time, curators, eco, ecosystem, hash })}`
@@ -314,7 +314,7 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem, ha
         <meta property="fc:frame:button:2" content={`Explore curation`} />
         <meta property="fc:frame:button:2:action" content="link" />
 
-        <meta property="fc:frame:button:2:target" content={`${baseURL}/~/curator/${curators}`} />
+        <meta property="fc:frame:button:2:target" content={`${baseURL}/~/curator/${curators || 9326}?${qs.stringify({ points: '$' + eco })}`} />
         <meta property="fc:frame:button:3" content={`What's /impact?`} />
         <meta property="fc:frame:button:3:action" content="link" />
         <meta property="fc:frame:button:3:target" content={`https://warpcast.com/abundance/0x43ddd672`} />

@@ -170,7 +170,7 @@ export default async function handler(req, res) {
 
     if (curators) {
       let curatorId = Array.isArray(curators) ? curators[0] : Number(curators);
-      exploreLink = `${baseURL}/~/curator/${curatorId}`
+      exploreLink = `${baseURL}/~/curator/${curatorId || 9326}?${qs.stringify({ points })}`
     }
 
     const impactLink = `https://warpcast.com/abundance/0x43ddd672`
@@ -191,7 +191,7 @@ export default async function handler(req, res) {
 
     const shareText = 'I just multi-tipped builders and creators on /impact. Try it out here:'
 
-    let shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share?${qs.stringify({ time, curators, eco })}`
+    let shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share-v2?${qs.stringify({ time, curators, eco })}`
 
     const encodedShareText = encodeURIComponent(shareText); 
     let encodedShareUrl = encodeURIComponent(shareUrl); 
@@ -213,7 +213,7 @@ export default async function handler(req, res) {
 
         circlesImg = `${baseURL}/api/frames/tip/circle?${qs.stringify({ id: circleFids })}`
 
-        shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share?${qs.stringify({ id: circleFids })}`
+        shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share-v2?${qs.stringify({ id: circleFids })}`
     
         encodedShareUrl = encodeURIComponent(shareUrl); 
         shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
