@@ -10,6 +10,7 @@ import { getTimeRange, processTips, populateCast } from '../../../utils/utils';
 import { Queue } from 'async-await-queue';
 
 const secretKey = process.env.SECRET_KEY;
+const secretCode = process.env.SECRET_CODE;
 const apiKey = process.env.NEYNAR_API_KEY;
 
 export default async function handler(req, res) {
@@ -17,86 +18,121 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
-  // const { fid, code } = req.query;
   const { code, tipTime } = req.query;
-  // if (!fid || !code) {
-  console.log('code', code);
-  if (!code) {
+  // console.log('code', code);
+  if (code !== secretCode) {
     return res.status(400).json({ error: 'Bad Request', message: 'Missing required parameters' });
-  }
+  } else {
+  
+    let counter = 0
+    let errors = 0
 
-  try {
-    await connectToDatabase();
-    const scheduled = await getScheduled(code);
-    console.log('scheduled', scheduled, !scheduled);
-    if (!scheduled) {
-      return res.status(500).json({ error: 'Internal Server Error' });
-    } else {
+    try {
+      await connectToDatabase();
+      // const scheduled = await getScheduled(code);
+      // console.log('scheduled', scheduled, !scheduled);
+      // if (!scheduled) {
+      //   return res.status(500).json({ error: 'Internal Server Error' });
+      // } else {
 
       const uniquePoints = await getUniquePoints();
-  
+
+      let users = []
+
       for (const points of uniquePoints) {
-  
+
         const curatorPercent = await getCuratorPercent(points);
-           
+
         const uniqueFids = await getUniqueFids(points);
         
         for (const fid of uniqueFids) {
-          console.log('fid', fid);
+          // console.log('fid', fid);
           
-          const schedule = await getSchedule(fid, points);
-          const time = schedule.timeRange ? getTimeRange(schedule.timeRange) : null;
-          const allowances = await getAllowances(fid, schedule.currencies, schedule.percent, tipTime);
-          if (!schedule.percent || !schedule.decryptedUuid || allowances.length === 0) {
-            console.log(`Skipping fid ${fid} due to missing percent or decryptedUuid`);
+          await new Promise(resolve => setTimeout(resolve, 300));
+          let time = null
+          let schedule = null
+          let allowances = [];
+          try {
+            schedule = await getSchedule(fid, points);
+            time = schedule.timeRange ? getTimeRange(schedule.timeRange) : null;
+            allowances = await getAllowances(fid, schedule.currencies || [], schedule.percent, tipTime);
+          } catch (error) {
+            console.error(`Error fetching allowances or user search for fid ${fid}:`, error);
+            continue; // Skip to the next fid
+          }
+
+          if (!schedule?.percent || !schedule?.decryptedUuid || allowances?.length === 0) {
+            // console.log(`Skipping fid ${fid} due to missing percent or decryptedUuid`);
             continue;
           }
-  
-          const { casts } = await getUserSearch(time, schedule.tags, schedule.channels, schedule.curators, points);
-          const displayedCasts = await processCasts(casts, fid);
-          const { castData, coinTotals } = await processTips(displayedCasts, fid, allowances, schedule.ecosystem, curatorPercent);
-  
-          const tipQueue = new Queue(1, 100); // Process 1 tip at a time, with a 100ms delay between each
-          let tipCounter = 0;
-      
-          const tipPromises = castData.map(cast => 
-            tipQueue.run(async () => {
-              const result = await sendTip(cast, schedule.decryptedUuid, fid, schedule.points);
-              console.log('cast', fid, cast);
-              // const result = 1;
-              tipCounter += result;
-            })
-          );
-  
-          console.log('tipPromises', tipCounter);
-          await Promise.all(tipPromises);
+          users.push({points, fid, allowances, time, curators: schedule?.curators, tags: schedule?.tags, channels: schedule?.channels, ecosystem: schedule?.ecosystem, curatorPercent, uuid: schedule?.decryptedUuid})
         }
       }
-      res.status(200).json({ message: 'All casts tipped successfully'});
-    }
 
-  } catch (error) {
-    console.error('Error in handler:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+      // console.log('users', users)
+      for (const user of users) {
+        // console.log('user', user)
+
+        await new Promise(resolve => setTimeout(resolve, 300));
+
+        async function getCasts(user) {
+          // console.log('getCasts', user?.time, user?.tags, user?.channels, user?.curators, user?.points, user?.fid, user?.ecosystem, user?.curatorPercent)
+          try {
+            const { casts } = await getUserSearch(user?.time, user?.tags, user?.channels, user?.curators, user?.points);
+            if (!casts) {
+              // console.log('no casts')
+              return {castData: [], coinTotals: 0}
+            }
+            // console.log('casts')
+            const displayedCasts = await processCasts(casts, user?.fid);
+            if (!displayedCasts) {
+              // console.log('no displayedCasts')
+            }
+            const { castData, coinTotals } = await processTips(displayedCasts, user?.fid, user?.allowances, user?.ecosystem, user?.curatorPercent);
+            return {castData, coinTotals}
+          } catch(error) {
+            console.error('Error in handler:', error);
+            return {castData: [], coinTotals: 0}
+          }
+
+        }
+
+        const { castData } = await getCasts(user)
+        // console.log('text', castData)
+
+        for (const userCast of castData) {
+
+          async function processTip(cast, user) {
+            try {
+              await new Promise(resolve => setTimeout(resolve, 100));
+              const result = await sendTip(cast, user?.uuid, user?.fid, user?.points);
+              if (result) {
+                counter++
+                return result
+              } else {
+                errors++
+                return 0
+              }
+            } catch(error) {
+              console.error('Error in handler:', error);
+              errors++
+              return 0
+            }
+          }
+
+          const tipped = await processTip(userCast, user)
+        }
+      }
+      console.log('error count', counter, errors)
+      res.status(200).json({ message: 'All casts tipped successfully', counter, errors });
+      
+    } catch (error) {
+      console.error('Error in handler:', error, counter, errors );
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
   }
 }
 
-async function getScheduled(code) {
-  console.log('getScheduled1', code);
-  try {
-    const schedule = await ScheduleTip.findOne({ code: code, fid: 9326 }).select('fid').exec();
-    if (schedule) {
-      // const decryptedUuid = decryptPassword(schedule.uuid, secretKey);
-      return {
-        fid: schedule.fid,
-      };
-    }
-    return null;
-  } catch (error) {
-    console.error('Error in getSchedule:', error);
-    return null;
-  }
-}
 
 async function getSchedule(fid, points) {
   try {
@@ -159,17 +195,17 @@ async function getAllowances(fid, currencies, percent, tipTime) {
     let allowance, tip, minTip;
     if (coin == '$TN100x' && tipTime == '12am') {
       allowance = await getHamAllowance(fid);
-      console.log('$TN100x', allowance)
+      // console.log('$TN100x', allowance)
       tip = Math.floor(allowance * percent / 100);
       allowances.push({token: coin, set: true, allowance: tip, totalTip: tip});
     } else if (coin == '$DEGEN' && tipTime == '7pm') {
       allowance = await getDegenAllowance(fid);
-      console.log('$DEGEN', allowance)
+      // console.log('$DEGEN', allowance)
       tip = Math.round(allowance * percent / 100);
       allowances.push({token: coin, set: true, allowance: tip, totalTip: tip});
     } else if (coin == '$HUNT' && tipTime == '7pm') {
       allowance = await getHuntAllowance(fid);
-      console.log('$HUNT', allowance)
+      // console.log('$HUNT', allowance)
       tip = Math.round(allowance * percent / 100);
       allowances.push({token: coin, set: true, allowance: tip, totalTip: tip});
     }
@@ -184,6 +220,7 @@ async function getHamAllowance(fid) {
       headers: { accept: "application/json" },
     });
     const getRemaining = await remainingBalance.json();
+    // console.log(getRemaining)
     return getRemaining?.todaysAllocation ? Math.floor((Number(getRemaining?.todaysAllocation) - Number(getRemaining?.totalTippedToday))/1e18) : 0;
   } catch (error) {
     console.error('Error in getHamAllowance:', error);
@@ -197,34 +234,17 @@ async function getDegenAllowance(fid) {
     const data = await response.json();
     const today = new Date();
     const dayOfMonth = today.getDate();
-
+    // console.log(fid, data[0], Number(data[0]?.remaining_tip_allowance))
     if (data && data[0]?.remaining_tip_allowance) {
-      if (Math.floor(data[0]?.remaining_tip_allowance) >= 0 && (dayOfMonth % 3 == Number(fid) % 3)) {
-        return Math.floor(data[0]?.remaining_tip_allowance)
+      if (Number(data[0]?.remaining_tip_allowance) >= 0 && (dayOfMonth % 3 == Number(fid) % 3)) {
+        return Number(data[0]?.remaining_tip_allowance)
       } else {
         return 0
       }
     }
+    return 0
   } catch (error) {
     console.error('Error in getDegenAllowance:', error);
-    return 0;
-  }
-}
-
-async function getWildAllowance(fid) {
-  try {
-    const remainingUrl = `https://sys.wildcard.lol/tip/public/v1/token/balance/${fid}?currency=WILD`;
-    const remainingBalance = await fetch(remainingUrl, {
-      headers: { accept: "application/json" },
-    });
-    const getRemaining = await remainingBalance.json();
-    if (getRemaining?.remaining_allowance) {
-      return Math.floor(Number(getRemaining?.remaining_allowance)) || 0
-    } else {
-      return 0
-    }
-  } catch (error) {
-    console.error('Error in getWildAllowance:', error);
     return 0;
   }
 }
@@ -236,7 +256,13 @@ async function getHuntAllowance(fid) {
       headers: { accept: "application/json" },
     });
     const getRemaining = await remainingBalance.json();
-    return getRemaining ? Math.floor(Number(getRemaining?.remaining_allowance)) : 0;
+    if (getRemaining?.remaining_allowance) {
+      return Math.floor(Number(getRemaining?.remaining_allowance)) || 0
+    } else {
+      return 0
+    }
+    // console.log(Math.floor(Number(getRemaining?.remaining_allowance)))
+    // return getRemaining ? Math.floor(Number(getRemaining?.remaining_allowance)) : 0;
   } catch (error) {
     console.error('Error in getWildAllowance:', error);
     return 0;
@@ -261,7 +287,7 @@ async function getUserSearch(time, tags, channel, curator, points) {
   }
 
   const { casts, totalCount } = await fetchCasts(query, limit);
-  return { casts, totalCount };
+  return { casts: casts || [], totalCount };
 }
 
 async function getCuratorIds(fids, points) {
@@ -348,7 +374,8 @@ async function fetchCasts(query, limit) {
 }
 
 async function processCasts(casts, fid) {
-  let filteredCasts = casts.reduce((acc, current) => {
+  // console.log(casts)
+  let filteredCasts = (casts || []).reduce((acc, current) => {
     const existingItem = acc.find(item => item._id === current._id);
     if (!existingItem) {
       acc.push(current);
