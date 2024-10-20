@@ -19,7 +19,7 @@ export default async function handler(req, res) {
   }
 
   const { code, tipTime } = req.query;
-  // console.log('code', code);
+  console.log('passed', code !== secretCode);
   if (code !== secretCode) {
     return res.status(400).json({ error: 'Bad Request', message: 'Missing required parameters' });
   } else {
@@ -44,9 +44,9 @@ export default async function handler(req, res) {
         const curatorPercent = await getCuratorPercent(points);
 
         const uniqueFids = await getUniqueFids(points);
+        console.log('uniqueFids', uniqueFids);
         
         for (const fid of uniqueFids) {
-          // console.log('fid', fid);
           
           await new Promise(resolve => setTimeout(resolve, 300));
           let time = null
@@ -54,8 +54,8 @@ export default async function handler(req, res) {
           let allowances = [];
           try {
             schedule = await getSchedule(fid, points);
-            time = schedule.timeRange ? getTimeRange(schedule.timeRange) : null;
-            allowances = await getAllowances(fid, schedule.currencies || [], schedule.percent, tipTime);
+            time = schedule?.timeRange ? getTimeRange(schedule?.timeRange) : null;
+            allowances = await getAllowances(fid, schedule?.currencies || [], schedule?.percent, tipTime);
           } catch (error) {
             console.error(`Error fetching allowances or user search for fid ${fid}:`, error);
             continue; // Skip to the next fid
@@ -80,13 +80,13 @@ export default async function handler(req, res) {
           try {
             const { casts } = await getUserSearch(user?.time, user?.tags, user?.channels, user?.curators, user?.points);
             if (!casts) {
-              // console.log('no casts')
+              console.log('no casts')
               return {castData: [], coinTotals: 0}
             }
-            // console.log('casts')
+            console.log('casts')
             const displayedCasts = await processCasts(casts, user?.fid);
             if (!displayedCasts) {
-              // console.log('no displayedCasts')
+              console.log('no displayedCasts')
             }
             const { castData, coinTotals } = await processTips(displayedCasts, user?.fid, user?.allowances, user?.ecosystem, user?.curatorPercent);
             return {castData, coinTotals}
