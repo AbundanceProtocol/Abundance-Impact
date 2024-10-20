@@ -34,7 +34,7 @@ export default function ProfilePage() {
   const [searchSelect, setSearchSelect ] = useState('Curation')
   const { isMobile } = useMatchBreakpoints();
   const [userFeed, setUserFeed] = useState(null)
-  const [prevSearch, setPrevSearch] = useState({getTime: null, channel: null, username: null, text: null, shuffle: null, ecosystem: null, page: 0, order: -1})
+  const [prevSearch, setPrevSearch] = useState({author_username: null, getTime: null, channel: null, username: null, text: null, shuffle: null, ecosystem: null, page: 0, order: -1})
   const [showPopup, setShowPopup] = useState({open: false, url: null})
   const initialEco = {
     channels: [],
@@ -66,7 +66,7 @@ export default function ProfilePage() {
   const [userSearch, setUserSearch] = useState({ search: '' })
   const [selectedChannels, setSelectedChannels] = useState([])
   const [channels, setChannels] = useState([])
-  const initialQuery = {shuffle: false, time: '3d', tags: [], channels: [], username: null, order: -1}
+  const initialQuery = {author_username: null, shuffle: false, time: '3d', tags: [], channels: [], username: null, order: -1}
   const [userQuery, setUserQuery] = useState(initialQuery)
   const queryOptions = {
     tags: [
@@ -203,7 +203,7 @@ export default function ProfilePage() {
     // }
     setUserQuery({
       ...userQuery,
-      username, ecosystem
+      author_username: username, ecosystem
     })
     // getUser(fid)
   }, [username]);
@@ -296,14 +296,14 @@ export default function ProfilePage() {
   }, [searchSelect, userQuery, sched.feed])
 
   function feedRouter() {
-    const { shuffle, time, tags, channels, ecosystem, username, order } = userQuery
-    if (username && ecosystem) {
+    const { author_username, shuffle, time, tags, channels, ecosystem, username, order } = userQuery
+    if (author_username && ecosystem) {
       console.log('get user executed')
-      getUserSearch(time, tags, channels, username, null, shuffle, order, ecosystem )
+      getUserSearch(author_username, time, tags, channels, username, null, shuffle, order, ecosystem )
     }
   }
   
-  async function getUserSearch(getTime, tags, channel, username, text, shuffle, order, ecosystem ) {
+  async function getUserSearch(author_username, getTime, tags, channel, username, text, shuffle, order, ecosystem ) {
     const time = getTimeRange(getTime)
 
     console.log(getTime, tags, channel, username, text, shuffle, order, ecosystem)
@@ -319,13 +319,13 @@ export default function ProfilePage() {
       console.log('opt1')
       page = 1
       setUserFeed([])
-      setPrevSearch(prev => ({...prev, getTime, channel, username, text, shuffle, ecosystem, page, order }))
-    } else if (prevSearch.getTime == getTime && prevSearch.channel == channel && prevSearch.username == username && prevSearch.text == text && prevSearch.ecosystem == ecosystem && prevSearch.order == order) {
+      setPrevSearch(prev => ({...prev, getTime, channel, username, text, shuffle, ecosystem, page, order, author_username }))
+    } else if (prevSearch?.author_username == author_username && prevSearch.getTime == getTime && prevSearch.channel == channel && prevSearch.username == username && prevSearch.text == text && prevSearch.ecosystem == ecosystem && prevSearch.order == order) {
       setShuffled(false)
       console.log('delay3')
       setDelay(true)
       console.log('opt2')
-      setPrevSearch(prev => ({...prev, getTime, channel, username, text, shuffle, ecosystem, page, order }))
+      setPrevSearch(prev => ({...prev, getTime, channel, username, text, shuffle, ecosystem, page, order, author_username }))
     } else {
       setShuffled(false)
       console.log('delay4')
@@ -333,14 +333,14 @@ export default function ProfilePage() {
       console.log('opt3')
       page = 1
       setUserFeed([])
-      setPrevSearch(prev => ({...prev, getTime, channel, username, text, shuffle, ecosystem, page, order })) 
+      setPrevSearch(prev => ({...prev, getTime, channel, username, text, shuffle, ecosystem, page, order, author_username })) 
     }
 
-    async function getSearch(time, tags, channel, username, text, shuffle, ecosystem, page, order) {
+    async function getSearch(author_username, time, tags, channel, username, text, shuffle, ecosystem, page, order) {
 
       try {
         const response = await axios.get('/api/curation/getUserSearch', {
-          params: { time, tags, channel, username, text, shuffle, ecosystem, page, order }
+          params: { author_username, time, tags, channel, username, text, shuffle, ecosystem, page, order }
         })
 
         const removeDelay = () => {
@@ -371,7 +371,7 @@ export default function ProfilePage() {
     let casts = []
     console.log('pages', page, page == 1, (page !== 1 && userFeed?.length % 10 == 0))
     if (page == 1 || (page !== 1 && userFeed?.length % 10 == 0) ) {
-      casts = await getSearch(time, tags, channel, username, text, shuffle, ecosystem, page, order)
+      casts = await getSearch(author_username, time, tags, channel, username, text, shuffle, ecosystem, page, order)
     }
     
     let filteredCasts
@@ -680,13 +680,13 @@ export default function ProfilePage() {
 
           <Link href={`/~/ecosystems/${ecosystem}`}><div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>{ecosystem}</div></Link>
           <div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px', padding: '0'}}>{'>'}</div>
-          <Link href={`/~/ecosystems/${ecosystem}/curator`}><div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>curator</div></Link>
+          <Link href={`/~/ecosystems/${ecosystem}/creators`}><div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>creators</div></Link>
           <div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px', padding: '0'}}>{'>'}</div>
           <div className='filter-item-on' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>@{username}</div>
         </div>
       </div>
 
-      {user && (<CuratorData {...{ show: (isLogged && user), user, textMax }} />)}
+      {user && (<CuratorData {...{ show: (isLogged && user), user, textMax, type: 'creator' }} />)}
       {/* <div className="top-layer flex-row" style={{padding: '10px 0 10px 0', alignItems: 'center', justifyContent: 'space-evenly', margin: '0', borderBottom: '1px solid #888'}}>
         {userButtons.map((btn, index) => (
           <FeedMenu {...{buttonName: btn, searchSelect, searchOption, isMobile }} key={index} />))}

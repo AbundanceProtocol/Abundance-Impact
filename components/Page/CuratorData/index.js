@@ -6,7 +6,7 @@ import { useRouter } from 'next/router';
 import useMatchBreakpoints from "../../../hooks/useMatchBreakpoints";
 import axios from "axios";
 
-const CuratorData = ({ user, textMax, show }) => {
+const CuratorData = ({ user, textMax, show, type }) => {
   const { points, fid, autotipping, setAutotipping, isLogged, LoginPopup } = useContext(AccountContext)
   const [sched, setSched] = useState({autotip: false})
   const [curators, setCurators] = useState(null)
@@ -156,18 +156,13 @@ const CuratorData = ({ user, textMax, show }) => {
             </div>
           </div>
 
-          <div className='flex-col' style={{gap: '0.5rem', alignItems: 'center'}}>
+          {type == 'curator' && (<div className='flex-col' style={{gap: '0.5rem', alignItems: 'center'}}>
             {autotipping.includes(user?.fid) ? (<div className='curator-button' style={{fontSize: isMobile ? '10px' : '11px'}} onClick={(event) => {removeAutotip(event, user?.fid)}}>Auto-tipping</div>) : (<div className='curator-button-on' style={{fontSize: isMobile ? '10px' : '11px'}} onClick={(event) => {addAutotip(event, user?.fid)}}>Auto-tip</div>)}
-            {/* <div className='follow-select' style={{width: 'auto', padding: '5px 5px 8px 5px', textAlign: 'center'}} onClick={() => getCurationAllowance(user?.fid)}>
-              <HiRefresh size={22} color='#fff' />
-            </div> */}
-          </div>
+          </div>)}
+          {type == 'creator' && (<div className='flex-col' style={{gap: '0.5rem', alignItems: 'center'}}>
+            {/* {autotipping.includes(user?.fid) ? (<div className='curator-button' style={{fontSize: isMobile ? '10px' : '11px'}} onClick={(event) => {removeAutotip(event, user?.fid)}}>Auto-tipping</div>) : (<div className='curator-button-on' style={{fontSize: isMobile ? '10px' : '11px'}} onClick={(event) => {addAutotip(event, user?.fid)}}>Auto-tip</div>)} */}
+          </div>)}
         </div>
-        {/* <div className='flex-row' style={{justifyContent: 'center', gap: '0.5rem'}}>
-          <DashboardBtn amount={formatNum(userAllowance)} type={'allowance'} icon={Degen} />
-          <DashboardBtn amount={formatNum(userBalance?.impact || 0)} type={'impact'} icon={FaRegStar} />
-          <DashboardBtn amount={formatNum(userBalance?.qdau || 0)} type={'q/dau'} icon={Diamond} />
-        </div> */}
       </div>
     )
   )

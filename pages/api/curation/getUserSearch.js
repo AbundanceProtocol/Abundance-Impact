@@ -53,6 +53,14 @@ export default async function handler(req, res) {
       query.createdAt = { $gte: req?.query?.time } ;
     }
     
+    if (req?.query?.author_fid) {
+      query.author_fid = { $in: req?.query?.author_fid } ;
+    }
+
+    if (req?.query?.author_username) {
+      query.author_username = { $in: req?.query?.author_username } ;
+    }
+
     if (req?.query['curators[]'] && req?.query['curators[]'].length > 0) {
       console.log('37', typeof req?.query['curators[]'])
       let curatorFids = null
