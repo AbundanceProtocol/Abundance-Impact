@@ -68,12 +68,12 @@ export default async function handler(req, res) {
 
       // console.log('users', users)
       for (const user of users) {
-        // console.log('user', user)
+        console.log('user')
 
         await new Promise(resolve => setTimeout(resolve, 300));
 
         const { castData } = await getCasts(user)
-        // console.log('text', castData)
+        console.log('text')
 
         for (const userCast of castData) {
 
@@ -219,7 +219,7 @@ async function getHamAllowance(fid) {
     // console.log(getRemaining)
     return getRemaining?.todaysAllocation ? Math.floor((Number(getRemaining?.todaysAllocation) - Number(getRemaining?.totalTippedToday))/1e18) : 0;
   } catch (error) {
-    console.error('Error in getHamAllowance:', error);
+    console.error('Error in getHamAllowance:');
     return 0;
   }
 }
@@ -240,7 +240,7 @@ async function getDegenAllowance(fid) {
     }
     return 0
   } catch (error) {
-    console.error('Error in getDegenAllowance:', error);
+    console.error('Error in getDegenAllowance:');
     return 0;
   }
 }
@@ -260,7 +260,7 @@ async function getHuntAllowance(fid) {
     // console.log(Math.floor(Number(getRemaining?.remaining_allowance)))
     // return getRemaining ? Math.floor(Number(getRemaining?.remaining_allowance)) : 0;
   } catch (error) {
-    console.error('Error in getWildAllowance:', error);
+    console.error('Error in getHuntAllowance:');
     return 0;
   }
 }
