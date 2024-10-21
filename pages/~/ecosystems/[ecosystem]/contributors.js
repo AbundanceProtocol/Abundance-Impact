@@ -37,7 +37,6 @@ export default function Ecosystem() {
   const [loaded, setLoaded] = useState(false);
   const [ecoPoints, setEcoPoints] = useState(null)
   const [timeframe, setTimeframe] = useState('24h')
-  const [sort, setSort] = useState('impact')
   const [page, setPage] = useState(1)
   const { ecosystem } = router.query;
   const [sched, setSched] = useState({autotip: false, setPoints: false})
@@ -111,16 +110,16 @@ export default function Ecosystem() {
   useEffect(() => {
     if (ecoPoints) {
       console.log('eco1')
-      getCurators(ecoPoints, timeframe, 1, sort)
+      getCurators(ecoPoints, timeframe, 1)
     }
-  }, [ecoPoints, timeframe, sort])
+  }, [ecoPoints])
 
-  // useEffect(() => {
-  //   if (ecoPoints) {
-  //     console.log('time1')
-  //     getCurators(ecoPoints, timeframe, 1, sort)
-  //   }
-  // }, [timeframe])
+  useEffect(() => {
+    if (ecoPoints) {
+      console.log('time1')
+      getCurators(ecoPoints, timeframe, 1)
+    }
+  }, [timeframe])
 
 
   useEffect(() => {
@@ -211,14 +210,14 @@ export default function Ecosystem() {
     }
   }
 
-  async function getCurators(points, time, page, sort) {
+  async function getCurators(points, time, page) {
     console.log(points, time)
     // const points = '$IMPACT'
     try {
-      const response = await axios.get('/api/curation/getEcoCreators', {
-        params: { points, time, page, sort } })
-      if (response?.data?.topCreators?.length > 0 || creators) {
-        const creatorData = response?.data?.topCreators
+      const response = await axios.get('/api/curation/getEcoContributors', {
+        params: { points, time, page } })
+      if (response?.data?.topContributors?.length > 0 || creators) {
+        const creatorData = response?.data?.topContributors
         console.log(creatorData)
         if (page > 1) {
           let combinedCurators = creators.concat(creatorData)
@@ -249,16 +248,9 @@ export default function Ecosystem() {
     setTimeframe(time)
   }
 
-  function updateSort(sort) {
-    setLoaded(false)
-    setPage(1)
-    setCreators([])
-    setSort(sort)
-  }
-
   function updatePage(getPage) {
     setPage(getPage)
-    getCurators(ecoPoints, timeframe, getPage, sort)
+    getCurators(ecoPoints, timeframe, getPage)
   }
 
   return (
@@ -277,24 +269,15 @@ export default function Ecosystem() {
         <Link href={`/~/ecosystems/${ecosystem}`}><div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>{ecosystem}</div></Link>
         <div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px', padding: '0'}}>{'>'}</div>
         <Link href={`/~/ecosystems/${ecosystem}/curators`}><div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>curators</div></Link>
-        <div className='filter-item-on' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>creators</div>
-        <Link href={`/~/ecosystems/${ecosystem}/contributors`}><div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>contributors</div></Link>
+        <Link href={`/~/ecosystems/${ecosystem}/creators`}><div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>creators</div></Link>
+        <div className='filter-item-on' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>contributors</div>
       </div>
     </div>
 
     <div title='Cast Actions' className='flex-row' style={{alignItems: 'center', justifyContent: 'center', margin: '8px'}}>
-      <p className='' style={{padding: '10px', color: '#fff', fontWeight: '700', fontSize: '20px'}}>Ecosystem Creators </p>
+      <p className='' style={{padding: '10px', color: '#fff', fontWeight: '700', fontSize: '20px'}}>Ecosystem Contributors </p>
     </div>
     {/* <Description {...{show: true, text: 'Ecosystem Curators', padding: '30px 0 4px 10px'}} /> */}
-
-    <div className='flex-row' style={{height: '30px', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
-      <div className='flex-row' style={{padding: '4px 8px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '20px', alignItems: 'center', gap: '0.25rem'}}>
-        <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>SORT</div>
-        <div className={sort == 'impact' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateSort('impact')}}>Impact</div>
-        <div className={sort == 'tips' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateSort('tips')}}>Tips</div>
-      </div>
-    </div>
-
 
     <div className='flex-row' style={{height: '30px', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
       <div className='flex-row' style={{padding: '4px 8px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '20px', alignItems: 'center', gap: '0.25rem'}}>
@@ -310,7 +293,7 @@ export default function Ecosystem() {
 
     <div className='flex-row' style={{padding: '10px 0 0 0', flexWrap: 'wrap', minWidth: feedMax, gap: '0.5rem', justifyContent: 'center'}}>
       {creators?.length > 0 ? creators.map((creator, index) => { return (
-        <Link key={index} href={`/~/ecosystems/${ecosystem}/creators/${creator?.username}`}>
+        <Link key={index} href={`/~/ecosystems/${ecosystem}/curators/${creator?.username}`}>
           <div className='curator-frame' style={{gap: '1.5rem', minWidth: isMobile ? '200px' : '250px'}}>
             <div className='flex-row' style={{gap: '1rem', paddingBottom: '10px', justifyContent: 'space-between'}}>
               <img loading="lazy" src={creator?.author_pfp} className="" alt={`${creator?.author_name} avatar`} style={{width: '36px', height: '36px', maxWidth: '36px', maxHeight: '36px', borderRadius: '24px', border: '1px solid #000'}} />

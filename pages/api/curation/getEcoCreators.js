@@ -6,7 +6,7 @@ import Tip from '../../../models/Tip';
 import Cast from '../../../models/Cast';
 
 export default async function handler(req, res) {
-  const { points, time } = req.query
+  const { points, time, sort } = req.query
   if (req.method !== 'GET' || !points) {
     res.status(405).json({ error: 'Method not allowed' });
   } else {
@@ -87,7 +87,58 @@ export default async function handler(req, res) {
           return result;
         }
 
-        const getTopCreators = await getTopCreatorsByImpact()
+
+        async function getTopCreatorsByTips(points) {
+          try {
+            await connectToDatabase();
+      
+            const result = await Tip.aggregate([
+              { $match: { createdAt: { $gte: timeFrame }, points } },
+              { $unwind: "$tip" },
+              { $match: { "tip.currency": { $regex: /^\$degen$/i } } },
+              { $group: {
+                _id: "$receiver_fid",
+                totalTips: { $sum: "$tip.amount" }
+              }},
+              { $sort: { totalTips: -1, receiver_fid: -1 } },
+              { $skip: skip },
+              { $limit: limit }
+            ]);
+
+            const contributorsWithDetails = await Cast.aggregate([
+              { $match: { author_fid: { $in: result.map(r => r._id) } } },
+              { $group: {
+                _id: "$author_fid",
+                username: { $first: "$author_username" },
+                author_name: { $first: "$author_display_name" },
+                author_pfp: { $first: "$author_pfp" }
+              }}
+            ]);
+
+            const detailsMap = new Map(contributorsWithDetails.map(c => [c._id, c]));
+
+            const finalResult = result.map(contributor => ({
+              ...contributor,
+              ...detailsMap.get(contributor._id),
+              fid: contributor._id
+            }));
+
+            finalResult.sort((a, b) => b.totalTips - a.totalTips);
+
+            return finalResult;
+          } catch (err) {
+            console.error('Error:', err);
+            return [];
+          }
+        }
+
+
+        let getTopCreators = []
+        if (sort && sort == 'tips') {
+          getTopCreators = await getTopCreatorsByTips(points)
+        } else {
+          getTopCreators = await getTopCreatorsByImpact()
+        }
     
         return getTopCreators;
       } catch (err) {

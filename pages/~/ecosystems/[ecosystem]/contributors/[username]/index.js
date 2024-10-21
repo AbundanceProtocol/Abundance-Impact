@@ -7,24 +7,24 @@ import { useInView } from 'react-intersection-observer'
 // import { BsClock } from "react-icons/bs";
 import { BiSortDown, BiSortUp } from "react-icons/bi";
 import { IoShuffleOutline as ShuffleIcon } from "react-icons/io5";
-import { AccountContext } from '../../../context';
-import { confirmUser } from '../../../utils/utils';
-import Spinner from '../../../components/Common/Spinner';
-import ExpandImg from '../../../components/Cast/ExpandImg';
-import CuratorData from '../../../components/Page/CuratorData';
-// import TopPicks from '../../../components/Page/FilterMenu/TopPicks';
-// import Shuffle from '../../../components/Page/FilterMenu/Shuffle';
-// import Time from '../../../components/Page/FilterMenu/Time';
-import { formatNum, getCurrentDateUTC, getTimeRange, isYesterday, checkEmbedType, populateCast, isCast } from '../../../utils/utils';
-import Cast from '../../../components/Cast'
-import useMatchBreakpoints from '../../../hooks/useMatchBreakpoints';
+import { AccountContext } from '../../../../../../context';
+import { confirmUser } from '../../../../../../utils/utils';
+import Spinner from '../../../../../../components/Common/Spinner';
+import ExpandImg from '../../../../../../components/Cast/ExpandImg';
+import CuratorData from '../../../../../../components/Page/CuratorData';
+// import TopPicks from '../../../../../../components/Page/FilterMenu/TopPicks';
+// import Shuffle from '../../../../../../components/Page/FilterMenu/Shuffle';
+// import Time from '../../../../../../components/Page/FilterMenu/Time';
+import { formatNum, getCurrentDateUTC, getTimeRange, isYesterday, checkEmbedType, populateCast, isCast } from '../../../../../../utils/utils';
+import Cast from '../../../../../../components/Cast'
+import useMatchBreakpoints from '../../../../../../hooks/useMatchBreakpoints';
 
-export default function Eco() {
+export default function ProfilePage() {
   const router = useRouter();
   const [ref, inView] = useInView()
-  const { ecosystem, time, curators, channels, shuffle, app, userFid, pass, referrer } = router.query
+  const { ecosystem, username, app, userFid, pass } = router.query
   const [user, setUser] = useState(null)
-  const { LoginPopup, isLogged, setPoints, setIsLogged, setFid, miniApp, setMiniApp, fid } = useContext(AccountContext)
+  const { LoginPopup, isLogged, setPoints, setIsLogged, setFid, miniApp, setMiniApp } = useContext(AccountContext)
   const ref1 = useRef(null)
   const [textMax, setTextMax] = useState('430px')
   const [screenWidth, setScreenWidth ] = useState(undefined)
@@ -34,7 +34,7 @@ export default function Eco() {
   const [searchSelect, setSearchSelect ] = useState('Curation')
   const { isMobile } = useMatchBreakpoints();
   const [userFeed, setUserFeed] = useState(null)
-  const [prevSearch, setPrevSearch] = useState({getTime: null, channel: null, curators: null, text: null, shuffle: null, ecosystem: null, page: 0, order: -1})
+  const [prevSearch, setPrevSearch] = useState({author_username: null, getTime: null, channel: null, username: null, text: null, shuffle: null, ecosystem: null, page: 0, order: -1})
   const [showPopup, setShowPopup] = useState({open: false, url: null})
   const initialEco = {
     channels: [],
@@ -62,11 +62,11 @@ export default function Eco() {
     upvote_value: 1,
   }
   const [eco, setEco] = useState(initialEco)
-  // const [isSelected, setIsSelected] = useState('none')
-  // const [userSearch, setUserSearch] = useState({ search: '' })
-  // const [selectedChannels, setSelectedChannels] = useState([])
-  // const [channels, setChannels] = useState([])
-  const initialQuery = {shuffle: false, time: '3d', tags: [], channels: [], curators: null, order: -1}
+  const [isSelected, setIsSelected] = useState('none')
+  const [userSearch, setUserSearch] = useState({ search: '' })
+  const [selectedChannels, setSelectedChannels] = useState([])
+  const [channels, setChannels] = useState([])
+  const initialQuery = {author_username: null, shuffle: false, time: '3d', tags: [], channels: [], username: null, order: -1}
   const [userQuery, setUserQuery] = useState(initialQuery)
   const queryOptions = {
     tags: [
@@ -121,35 +121,35 @@ export default function Eco() {
   const [sortBy, setSortBy] = useState('down')
   const [shuffled, setShuffled] = useState(false)
 
-  // async function getCuratorData(username) {
-  //   try {
-  //     const response = await axios.get('/api/getCuratorProfile', {
-  //       params: { username }
-  //     })
-  //     if (response?.data) {
-  //       const profile = response?.data?.data?.Socials?.Social[0] || null
-  //       console.log('profile', profile)
-  //       const populatedProfile = {
-  //         username: profile?.profileName,
-  //         pfp: {
-  //           url: profile?.profileImage,
-  //         },
-  //         displayName: profile?.profileDisplayName,
-  //         activeOnFcNetwork: true,
-  //         profile: { bio: { text: profile?.profileBio } },
-  //         followingCount: profile?.followingCount,
-  //         followerCount: profile?.followerCount,
-  //         fid: Number(profile?.userId)
-  //       }
-  //       setUser(populatedProfile)
-  //     } else {
-  //       setUser(null)
-  //     }
-  //   } catch (error) {
-  //     console.error('Error submitting data:', error)
-  //     setUser(null)
-  //   }
-  // }
+  async function getCuratorData(username) {
+    try {
+      const response = await axios.get('/api/getCuratorProfile', {
+        params: { username }
+      })
+      if (response?.data) {
+        const profile = response?.data?.data?.Socials?.Social[0] || null
+        console.log('profile', profile)
+        const populatedProfile = {
+          username: profile?.profileName,
+          pfp: {
+            url: profile?.profileImage,
+          },
+          displayName: profile?.profileDisplayName,
+          activeOnFcNetwork: true,
+          profile: { bio: { text: profile?.profileBio } },
+          followingCount: profile?.followingCount,
+          followerCount: profile?.followerCount,
+          fid: Number(profile?.userId)
+        }
+        setUser(populatedProfile)
+      } else {
+        setUser(null)
+      }
+    } catch (error) {
+      console.error('Error submitting data:', error)
+      setUser(null)
+    }
+  }
 
   useEffect(() => {
     const inViewRouter = () => {
@@ -195,63 +195,46 @@ export default function Eco() {
 
 
   useEffect(() => {
-    // if (username) {
-    //   getCuratorData(username)
-    // }
+    if (username) {
+      getCuratorData(username)
+    }
     // if (points) {
     //   setPoints(points)
     // }
-    if (time && (time == '24h' || time == '3d' || time == '7d' || time == '30d' || time == 'all')) {
-      setTimeframe(time)
-    }
-
-    if (shuffle && shuffle == 'true') {
-      setSortBy('shuffle')
-    } else {
-      setSortBy('down')
-    }
-
-
-    console.log('query', ecosystem, time, curators, channels, shuffle)
-    let setCurators = []
-    if (curators) {
-      setCurators = Array.isArray(curators) ? curators : [Number(curators)]
-    }
-
     setUserQuery({
       ...userQuery,
-      ecosystem, time: time || '3d', curators: setCurators || null, channels: channels || null, shuffle: shuffle || false
+      author_username: username, ecosystem
     })
     // getUser(fid)
-  }, [router.query]);
+  }, [username]);
 
 
-  // useEffect(() => {
-  //   console.log('app01', app, userFid, !isLogged, pass !== '', !isLogged && app && app == 'mini' && userFid && pass !== '')
-  //   if (!isLogged && app && app == 'mini' && userFid && pass !== '' && !miniApp) {
-  //     console.log('set mini app')
-  //     setMiniApp(true)
-  //   }
-  // }, [userFid, pass, app]);
+  useEffect(() => {
+    console.log('app01', app, userFid, !isLogged, pass !== '', !isLogged && app && app == 'mini' && userFid && pass !== '')
+    if (!isLogged && app && app == 'mini' && userFid && pass !== '' && !miniApp) {
+      console.log('set mini app')
+      setMiniApp(true)
+    }
+  }, [userFid, pass, app]);
 
-  // useEffect(() => {
-  //   if (miniApp) {
-  //     const confirmed = confirmUser(userFid, pass)
-  //     console.log('confirmed', confirmed)
-  //     if (confirmed) {
-  //       console.log('isLogged-1')
-  //       setIsLogged(true)
-  //       setFid(Number(userFid))
-  //       console.log('app03', isLogged, confirmed)
-  //     }
-  //   }
-  // }, [miniApp]);
+  useEffect(() => {
+    if (miniApp) {
+      const confirmed = confirmUser(userFid, pass)
+      console.log('confirmed', confirmed)
+      if (confirmed) {
+        console.log('isLogged-1')
+        setIsLogged(true)
+        setFid(Number(userFid))
+        console.log('app03', isLogged, confirmed)
+      }
+    }
+  }, [miniApp]);
 
 
 
 
   useEffect(() => {
-    console.log('app02', isLogged)
+    console.log('app02', isLogged, username)
   }, [isLogged]);
 
 
@@ -313,20 +296,20 @@ export default function Eco() {
   }, [searchSelect, userQuery, sched.feed])
 
   function feedRouter() {
-    const { shuffle, time, tags, channels, ecosystem, curators, order } = userQuery
-    if (ecosystem) {
-      console.log('get user executed', shuffle, time, tags, channels, ecosystem, curators, order)
-      getUserSearch(time, tags, channels, curators, null, shuffle, order, ecosystem )
+    const { author_username, shuffle, time, tags, channels, ecosystem, username, order } = userQuery
+    if (author_username && ecosystem) {
+      console.log('get user executed')
+      getUserSearch(author_username, time, tags, channels, username, null, shuffle, order, ecosystem )
     }
   }
   
-  async function getUserSearch(getTime, tags, channel, curators, text, shuffle, order, ecosystem ) {
+  async function getUserSearch(author_username, getTime, tags, channel, username, text, shuffle, order, ecosystem ) {
     const time = getTimeRange(getTime)
 
-    console.log(getTime, tags, channel, curators, text, shuffle, order, ecosystem)
+    console.log(getTime, tags, channel, username, text, shuffle, order, ecosystem)
     let page = prevSearch.page + 1
 
-    console.log(prevSearch.getTime == getTime, prevSearch.channel == channel, prevSearch.curators == curators, prevSearch.text == text, prevSearch.ecosystem == ecosystem, prevSearch.getTime == getTime && prevSearch.channel == channel && prevSearch.curators == curators && prevSearch.text == text && prevSearch.ecosystem == ecosystem)
+    console.log(prevSearch.getTime == getTime, prevSearch.channel == channel, prevSearch.username == username, prevSearch.text == text, prevSearch.ecosystem == ecosystem, prevSearch.getTime == getTime && prevSearch.channel == channel && prevSearch.username == username && prevSearch.text == text && prevSearch.ecosystem == ecosystem)
 
 
     if (shuffle) {
@@ -336,13 +319,13 @@ export default function Eco() {
       console.log('opt1')
       page = 1
       setUserFeed([])
-      setPrevSearch(prev => ({...prev, getTime, channel, curators, text, shuffle, ecosystem, page, order }))
-    } else if (prevSearch.getTime == getTime && prevSearch.channel == channel && prevSearch.curators == curators && prevSearch.text == text && prevSearch.ecosystem == ecosystem && prevSearch.order == order) {
+      setPrevSearch(prev => ({...prev, getTime, channel, username, text, shuffle, ecosystem, page, order, author_username }))
+    } else if (prevSearch?.author_username == author_username && prevSearch.getTime == getTime && prevSearch.channel == channel && prevSearch.username == username && prevSearch.text == text && prevSearch.ecosystem == ecosystem && prevSearch.order == order) {
       setShuffled(false)
       console.log('delay3')
       setDelay(true)
       console.log('opt2')
-      setPrevSearch(prev => ({...prev, getTime, channel, curators, text, shuffle, ecosystem, page, order }))
+      setPrevSearch(prev => ({...prev, getTime, channel, username, text, shuffle, ecosystem, page, order, author_username }))
     } else {
       setShuffled(false)
       console.log('delay4')
@@ -350,14 +333,14 @@ export default function Eco() {
       console.log('opt3')
       page = 1
       setUserFeed([])
-      setPrevSearch(prev => ({...prev, getTime, channel, curators, text, shuffle, ecosystem, page, order })) 
+      setPrevSearch(prev => ({...prev, getTime, channel, username, text, shuffle, ecosystem, page, order, author_username })) 
     }
 
-    async function getSearch(time, tags, channel, curators, text, shuffle, ecosystem, page, order) {
+    async function getSearch(author_username, time, tags, channel, username, text, shuffle, ecosystem, page, order) {
 
       try {
         const response = await axios.get('/api/curation/getUserSearch', {
-          params: { time, tags, channel, curators, text, shuffle, ecosystem, page, order }
+          params: { author_username, time, tags, channel, username, text, shuffle, ecosystem, page, order }
         })
 
         const removeDelay = () => {
@@ -388,7 +371,7 @@ export default function Eco() {
     let casts = []
     console.log('pages', page, page == 1, (page !== 1 && userFeed?.length % 10 == 0))
     if (page == 1 || (page !== 1 && userFeed?.length % 10 == 0) ) {
-      casts = await getSearch(time, tags, channel, curators, text, shuffle, ecosystem, page, order)
+      casts = await getSearch(author_username, time, tags, channel, username, text, shuffle, ecosystem, page, order)
     }
     
     let filteredCasts
@@ -480,135 +463,135 @@ export default function Eco() {
     setShowPopup(newPopup)
   }
 
-  // const handleSelect = async (type, selection) => {
-  //   console.log(type)
-  //   if (type == 'shuffle') {
-  //     setUserQuery(prevState => ({
-  //       ...prevState, 
-  //       [type]: !userQuery[type] 
-  //     }));
-  //     setIsSelected('none')
-  //   } else if (type == 'time') {
-  //     setUserQuery(prevState => ({
-  //       ...prevState, 
-  //       [type]: selection 
-  //     }));
-  //     setIsSelected('none')
-  //   } else if (type == 'tags') {
-  //     if (selection == 'all') {
-  //       setUserQuery(prevState => ({
-  //         ...prevState, 
-  //         [type]: [] 
-  //       }));
-  //     } else {
-  //       setUserQuery(prevUserQuery => {
-  //         const tagIndex = prevUserQuery.tags.indexOf(selection);
-  //         if (tagIndex === -1) {
-  //           return {
-  //             ...prevUserQuery,
-  //             tags: [...prevUserQuery.tags, selection]
-  //           };
-  //         } else {
-  //           return {
-  //             ...prevUserQuery,
-  //             tags: prevUserQuery.tags.filter(item => item !== selection)
-  //           };
-  //         }
-  //       });
-  //     }
+  const handleSelect = async (type, selection) => {
+    console.log(type)
+    if (type == 'shuffle') {
+      setUserQuery(prevState => ({
+        ...prevState, 
+        [type]: !userQuery[type] 
+      }));
+      setIsSelected('none')
+    } else if (type == 'time') {
+      setUserQuery(prevState => ({
+        ...prevState, 
+        [type]: selection 
+      }));
+      setIsSelected('none')
+    } else if (type == 'tags') {
+      if (selection == 'all') {
+        setUserQuery(prevState => ({
+          ...prevState, 
+          [type]: [] 
+        }));
+      } else {
+        setUserQuery(prevUserQuery => {
+          const tagIndex = prevUserQuery.tags.indexOf(selection);
+          if (tagIndex === -1) {
+            return {
+              ...prevUserQuery,
+              tags: [...prevUserQuery.tags, selection]
+            };
+          } else {
+            return {
+              ...prevUserQuery,
+              tags: prevUserQuery.tags.filter(item => item !== selection)
+            };
+          }
+        });
+      }
 
-  //   } else {
-  //     setIsSelected(type)
-  //   }
+    } else {
+      setIsSelected(type)
+    }
 
-  //   if (type !== 'tags') {
-  //     setTimeout(() => {
-  //       setIsSelected('none')
-  //     }, 300);
-  //   }
-  // }
+    if (type !== 'tags') {
+      setTimeout(() => {
+        setIsSelected('none')
+      }, 300);
+    }
+  }
 
-  // const handleSelection = (type, selection) => {
-  //   if (type == 'shuffle') {
-  //     setIsSelected('none')
-  //   } else {
-  //     setIsSelected(type)
-  //   }
-  // }
+  const handleSelection = (type, selection) => {
+    if (type == 'shuffle') {
+      setIsSelected('none')
+    } else {
+      setIsSelected(type)
+    }
+  }
   
-  // function btnText(type) {
-  //   if (type == 'tags' && (userQuery[type] == 'all' || userQuery[type].length == 0)) {
-  //     return 'All tags'
-  //   } else if (type == 'tags' && (userQuery[type].length > 1)) {
-  //     return 'Tags'
-  //   } else if (type == 'tags') {
-  //     const options = queryOptions[type];
-  //     const option = options.find(option => option.value === userQuery.tags[0]);
-  //     return option ? option.text : '';
-  //   } else {
-  //     const options = queryOptions[type];
-  //     const option = options.find(option => option.value === userQuery[type]);
-  //     return option ? option.text : '';
-  //   }
-  // }
+  function btnText(type) {
+    if (type == 'tags' && (userQuery[type] == 'all' || userQuery[type].length == 0)) {
+      return 'All tags'
+    } else if (type == 'tags' && (userQuery[type].length > 1)) {
+      return 'Tags'
+    } else if (type == 'tags') {
+      const options = queryOptions[type];
+      const option = options.find(option => option.value === userQuery.tags[0]);
+      return option ? option.text : '';
+    } else {
+      const options = queryOptions[type];
+      const option = options.find(option => option.value === userQuery[type]);
+      return option ? option.text : '';
+    }
+  }
 
-  // function onChannelChange(e) {
-	// 	setUserSearch( () => ({ ...userSearch, [e.target.name]: e.target.value }) )
-	// }
+  function onChannelChange(e) {
+		setUserSearch( () => ({ ...userSearch, [e.target.name]: e.target.value }) )
+	}
 
-  // async function getChannels(name) {
-  //   console.log(name)
-  //   try {
-  //     const response = await axios.get('/api/getChannels', {
-  //       params: {
-  //         name: name,
-  //       }
-  //     })
-  //     if (response) {
-  //       const channels = response.data.channels.channels
-  //       console.log(channels)
-  //       setChannels(channels)
-  //     }
-  //   } catch (error) {
-  //     console.error('Error submitting data:', error)
-  //   }
-  // }
+  async function getChannels(name) {
+    console.log(name)
+    try {
+      const response = await axios.get('/api/getChannels', {
+        params: {
+          name: name,
+        }
+      })
+      if (response) {
+        const channels = response.data.channels.channels
+        console.log(channels)
+        setChannels(channels)
+      }
+    } catch (error) {
+      console.error('Error submitting data:', error)
+    }
+  }
 
-  // const channelKeyDown = (event) => {
-  //   if (event.key === 'Enter') {
-  //     event.preventDefault();
-  //     getChannels(userSearch.search)
-  //   }
-  // }
+  const channelKeyDown = (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      getChannels(userSearch.search)
+    }
+  }
   
-  // function addChannel(channel) {
-  //   console.log(channel)
-  //   setUserQuery(prevUserQuery => {
-  //   const channelIndex = prevUserQuery.channels.indexOf(channel.url);
-  //   if (channelIndex === -1) {
-  //     return {
-  //       ...prevUserQuery,
-  //       channels: [...prevUserQuery.channels, channel.url]
-  //     };
-  //   } else {
-  //     // If the curator is found, remove it from the array
-  //     return {
-  //       ...prevUserQuery,
-  //       channels: prevUserQuery.channels.filter(item => item !== channel.url)
-  //       };
-  //     }
-  //   });
+  function addChannel(channel) {
+    console.log(channel)
+    setUserQuery(prevUserQuery => {
+    const channelIndex = prevUserQuery.channels.indexOf(channel.url);
+    if (channelIndex === -1) {
+      return {
+        ...prevUserQuery,
+        channels: [...prevUserQuery.channels, channel.url]
+      };
+    } else {
+      // If the curator is found, remove it from the array
+      return {
+        ...prevUserQuery,
+        channels: prevUserQuery.channels.filter(item => item !== channel.url)
+        };
+      }
+    });
 
-  //   const isChannelSelected = selectedChannels.some((c) => c.url === channel.url);
+    const isChannelSelected = selectedChannels.some((c) => c.url === channel.url);
 
-  //   if (isChannelSelected) {
-  //     // If the curator is already selected, remove it from the state
-  //     setSelectedChannels(selectedChannels.filter((c) => c.url !== channel.url));
-  //   } else {
-  //     // If the curator is not selected, add it to the state
-  //     setSelectedChannels([...selectedChannels, channel]);
-  //   }
-  // }
+    if (isChannelSelected) {
+      // If the curator is already selected, remove it from the state
+      setSelectedChannels(selectedChannels.filter((c) => c.url !== channel.url));
+    } else {
+      // If the curator is not selected, add it to the state
+      setSelectedChannels([...selectedChannels, channel]);
+    }
+  }
 
   function updateTime(time) {
     setUserFeed([])
@@ -675,9 +658,9 @@ export default function Eco() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // const searchOption = (e) => {
-  //   setSearchSelect(e.target.getAttribute('name'))
-  // }
+  const searchOption = (e) => {
+    setSearchSelect(e.target.getAttribute('name'))
+  }
 
   const updateCast = (index, newData) => {
     const updatedFeed = [...userFeed]
@@ -695,17 +678,15 @@ export default function Eco() {
         <div className='flex-row' style={{padding: '4px 8px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '20px', alignItems: 'center', gap: '0.25rem'}}>
           {/* <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>TIME</div> */}
 
-          <Link href={`/~/ecosystems/${ecosystem}`}><div className='filter-item-on' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>{ecosystem}</div></Link>
+          <Link href={`/~/ecosystems/${ecosystem}`}><div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>{ecosystem}</div></Link>
           <div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px', padding: '0'}}>{'>'}</div>
-          <Link href={`/~/ecosystems/${ecosystem}/curators`}><div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>curators</div></Link>
           <Link href={`/~/ecosystems/${ecosystem}/creators`}><div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>creators</div></Link>
-          <Link href={`/~/ecosystems/${ecosystem}/contributors`}><div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>contributors</div></Link>
-          {/* <div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px', padding: '0'}}>{'>'}</div>
-          <div className='filter-item-on' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>@{username}</div> */}
+          <div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px', padding: '0'}}>{'>'}</div>
+          <div className='filter-item-on' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>@{username}</div>
         </div>
       </div>
 
-      {user && (<CuratorData {...{ show: (isLogged && user), user, textMax, type: 'curator' }} />)}
+      {user && (<CuratorData {...{ show: (isLogged && user), user, textMax, type: 'creator' }} />)}
       {/* <div className="top-layer flex-row" style={{padding: '10px 0 10px 0', alignItems: 'center', justifyContent: 'space-evenly', margin: '0', borderBottom: '1px solid #888'}}>
         {userButtons.map((btn, index) => (
           <FeedMenu {...{buttonName: btn, searchSelect, searchOption, isMobile }} key={index} />))}
