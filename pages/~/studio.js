@@ -18,7 +18,6 @@ import { formatNum, getCurrentDateUTC, getTimeRange, isYesterday, checkEmbedType
 import Cast from '../../components/Cast'
 import useMatchBreakpoints from '../../hooks/useMatchBreakpoints';
 import { AccountContext } from '../../context';
-import Multitip from '../../components/Page/Multitips';
 
 export default function ProfilePage() {
   const router = useRouter();
