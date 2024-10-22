@@ -45,7 +45,7 @@ export default async function handler(req, res) {
         
         for (const fid of uniqueFids) {
           
-          await new Promise(resolve => setTimeout(resolve, 300));
+          await new Promise(resolve => setTimeout(resolve, 100));
           let time = null
           let schedule = null
           let allowances = [];
@@ -70,7 +70,7 @@ export default async function handler(req, res) {
       for (const user of users) {
         console.log('user')
 
-        await new Promise(resolve => setTimeout(resolve, 300));
+        await new Promise(resolve => setTimeout(resolve, 50));
 
         const { castData } = await getCasts(user)
         console.log('text')
@@ -79,7 +79,7 @@ export default async function handler(req, res) {
 
           async function processTip(cast, user) {
             try {
-              await new Promise(resolve => setTimeout(resolve, 100));
+              await new Promise(resolve => setTimeout(resolve, 60));
               const result = await sendTip(cast, user?.uuid, user?.fid, user?.points);
               if (result) {
                 counter++

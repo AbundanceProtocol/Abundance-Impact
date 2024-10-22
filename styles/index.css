@@ -57,6 +57,29 @@ html, body {
     padding: 15px;
 }
 
+.btn-large {
+    border-radius: 15px;
+    background-color: #223344cc;
+    gap: 2rem;
+    border: 0px solid #999;
+    border-radius: 15px;
+    padding: 15px;
+}
+
+.btn-large:hover {
+    background-color: #223344ff;
+}
+
+.curator-button-off {
+    border: 1px solid #999;
+    border-radius: 15px;
+    padding: 4px 7px;
+    color: #eff;
+    text-align: center;
+    cursor: pointer;
+    font-weight: 500;
+}
+
 .curator-button {
     border: 1px solid #999;
     border-radius: 15px;
@@ -70,6 +93,22 @@ html, body {
 .curator-button:hover {
     color: #fff;
     background-color: #66778888;
+}
+
+.curator-button-red {
+    border: 1px solid #999;
+    border-radius: 15px;
+    padding: 4px 7px;
+    color: #eff;
+    text-align: center;
+    cursor: pointer;
+    font-weight: 500;
+    background-color: #990000;
+}
+
+.curator-button-red:hover {
+    color: #fff;
+    background-color: #660000;
 }
 
 .curator-button-on {

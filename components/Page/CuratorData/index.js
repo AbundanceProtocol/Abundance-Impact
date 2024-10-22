@@ -3,11 +3,12 @@ import { ActiveUser } from '../../../pages/assets'
 import { formatNum } from "../../../utils/utils";
 import { AccountContext } from "../../../context";
 import { useRouter } from 'next/router';
+import { FaPowerOff, FaRegStar } from "react-icons/fa";
 import useMatchBreakpoints from "../../../hooks/useMatchBreakpoints";
 import axios from "axios";
 
 const CuratorData = ({ user, textMax, show, type }) => {
-  const { points, fid, autotipping, setAutotipping, isLogged, LoginPopup } = useContext(AccountContext)
+  const { points, fid, autotipping, setAutotipping, isLogged, LoginPopup, LogoutPopup } = useContext(AccountContext)
   const [sched, setSched] = useState({autotip: false})
   const [curators, setCurators] = useState(null)
   const router = useRouter()
@@ -157,7 +158,13 @@ const CuratorData = ({ user, textMax, show, type }) => {
           </div>
 
           {type == 'curator' && (<div className='flex-col' style={{gap: '0.5rem', alignItems: 'center'}}>
+            {fid == user?.fid && (isLogged ? (<div className='curator-button-red' style={{height: 'max-content', textAlign: 'center', width: '64px', padding: '5px 0 3px 0', alignItems: 'center', justifyContent: 'center'}} onClick={LogoutPopup}>
+            <FaPowerOff size={16} color='#fff' />
+            </div>) : (<div className='logout-btn' style={{height: 'max-content', textAlign: 'center'}} onClick={LoginPopup}>Login</div>))}
+            
             {autotipping.includes(user?.fid) ? (<div className='curator-button' style={{fontSize: isMobile ? '10px' : '11px'}} onClick={(event) => {removeAutotip(event, user?.fid)}}>Auto-tipping</div>) : (<div className='curator-button-on' style={{fontSize: isMobile ? '10px' : '11px'}} onClick={(event) => {addAutotip(event, user?.fid)}}>Auto-tip</div>)}
+
+
           </div>)}
           {type == 'creator' && (<div className='flex-col' style={{gap: '0.5rem', alignItems: 'center'}}>
             {/* {autotipping.includes(user?.fid) ? (<div className='curator-button' style={{fontSize: isMobile ? '10px' : '11px'}} onClick={(event) => {removeAutotip(event, user?.fid)}}>Auto-tipping</div>) : (<div className='curator-button-on' style={{fontSize: isMobile ? '10px' : '11px'}} onClick={(event) => {addAutotip(event, user?.fid)}}>Auto-tip</div>)} */}
