@@ -18,6 +18,8 @@ import { formatNum, getCurrentDateUTC, getTimeRange, isYesterday, checkEmbedType
 import Cast from '../../components/Cast'
 import useMatchBreakpoints from '../../hooks/useMatchBreakpoints';
 import { AccountContext } from '../../context';
+import { FiShare } from "react-icons/fi";
+import qs from "querystring";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -449,6 +451,31 @@ export default function ProfilePage() {
   }
 
 
+  function shareFrame(event, tip) {
+    event.preventDefault();
+    let shareUrl = `https://impact.abundance.id/~/ecosystems/${tip?.handle}/tip-share-v2?${qs.stringify({ id: tip?._id })}`
+    let shareText = ''
+
+    if (tip?.curators && tip?.curators[0]?.fid == fid) {
+      shareText = 'I just multi-tipped builders & creators on /impact by @abundance.\n\nSupport my nominees here:'
+    } else if (tip?.curators?.length > 0) {
+      // const curatorName = await getCurator(curators, points)
+
+      if (tip?.curators[0]?.fid !== fid) {
+        shareText = `I just multi-tipped @${tip?.curators[0]?.username}'s curation of builders & creators thru /impact by @abundance.\n\nSupport @${tip?.curators[0]?.username}'s nominees here:`
+      } else {
+        shareText = 'I just multi-tipped builders & creators on /impact by @abundance. Try it out here:'
+      }
+    } else {
+      shareText = 'I just multi-tipped builders & creators on /impact by @abundance. Try it out here:'
+    }
+
+    let encodedShareText = encodeURIComponent(shareText)
+    let encodedShareUrl = encodeURIComponent(shareUrl); 
+    let shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
+
+    window.open(shareLink, '_blank');
+  }
 
   useEffect(() => {
     if (screenWidth) {
@@ -724,7 +751,7 @@ export default function ProfilePage() {
                 <div className='flex-row' style={{flexWrap: 'wrap'}}>
                   {(multitip?.text) && (<div className='curator-button-off' style={{fontSize: isMobile ? '8px' : '9px', border: '0px'}}>TIP: {multitip?.text}</div>)}
                   {(multitip?.createdAt) && (<div className='curator-button-off' style={{fontSize: isMobile ? '8px' : '9px', border: '0px'}}>{timePassed(multitip?.createdAt)}</div>)}
-                  
+                  {(multitip) && (<div className='curator-button' style={{fontSize: isMobile ? '8px' : '9px', border: '1px solid #999'}} onClick={(event) => {shareFrame(event, multitip)}}><FiShare size={9} color={'#eff'} /></div>)}
                   {/* {autotipping.includes(multitip?.fid) ? (<div className='curator-button' style={{fontSize: isMobile ? '9px' : '10px'}} onClick={(event) => {removeAutotip(event, multitip?.fid)}}>Auto-tipping</div>) : (<div className='curator-button-on' style={{fontSize: isMobile ? '9px' : '10px'}} onClick={(event) => {addAutotip(event, multitip?.fid)}}>Auto-tip</div>)} */}
                 </div>
               </div>

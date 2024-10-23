@@ -70,10 +70,10 @@ export default async function handler(req, res) {
       for (const user of users) {
         console.log('user')
 
-        await new Promise(resolve => setTimeout(resolve, 50));
+        // await new Promise(resolve => setTimeout(resolve, 50));
 
         const { castData } = await getCasts(user)
-        console.log('text')
+        console.log('text', user?.fid)
 
         for (const userCast of castData) {
 
