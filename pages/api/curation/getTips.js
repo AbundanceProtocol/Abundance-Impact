@@ -19,44 +19,28 @@ export default async function handler(req, res) {
           .sort({ createdAt: -1 }).limit(5).exec();
 
         const uniquePoints = [...new Set(latestCircles.flatMap(circle => circle.points))];
-        console.log('uniquePoints', uniquePoints);
 
         const curatorFids = [...new Set(latestCircles.flatMap(circle => circle.curators))];
-        console.log('curatorFids', curatorFids)
 
         const ecosystemHandles = await EcosystemRules.find({ ecosystem_points_name: { $in: uniquePoints } })
           .select('ecosystem_points_name ecosystem_handle').lean().exec();
-
-        console.log('ecosystemHandles', ecosystemHandles)
 
         const pointsToHandleMap = ecosystemHandles.reduce((map, ecosystem) => {
           map[ecosystem.ecosystem_points_name] = ecosystem.ecosystem_handle;
           return map;
         }, {});
 
-        console.log('pointsToHandleMap', pointsToHandleMap)
-
         const circlesWithHandles = latestCircles.map(circle => ({
           ...circle.toObject(),
           handle: pointsToHandleMap[circle.points] || 'Unknown'
-          
         }));
 
-        console.log('circlesWithHandles', circlesWithHandles)
-
-
-        const curatorUsers = await User.find({ fid: { $in: curatorFids } })
-          .select('fid username')
-          .lean()
-          .exec();
+        const curatorUsers = await User.find({ fid: { $in: curatorFids } }).select('fid username').lean().exec();
 
         const fidToUsernameMap = curatorUsers.reduce((map, user) => {
           map[user.fid] = user.username;
           return map;
         }, {});
-
-        console.log('fidToUsernameMap', fidToUsernameMap)
-
 
         const circlesWithUsernames = circlesWithHandles.map(circle => ({
           ...circle,
