@@ -474,7 +474,19 @@ export default function ProfilePage() {
     let encodedShareUrl = encodeURIComponent(shareUrl); 
     let shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
 
-    window.open(shareLink, '_blank');
+    if (!miniApp) {
+      window.open(shareLink, '_blank');
+    } else if (miniApp) {
+      window.parent.postMessage({
+        type: "createCast",
+        data: {
+          cast: {
+            text: shareText,
+            embeds: [shareUrl]
+          }
+        }
+      }, "*");
+    }
   }
 
   useEffect(() => {
