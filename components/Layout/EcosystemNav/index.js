@@ -10,7 +10,7 @@ const EcosystemNav = () => {
   const router = useRouter()
 
   return (
-    (router.route == '/~/ecosystems/[ecosystem]') && (<div className={`flex-row ${!isMobile && 'top-layer'}`} style={{gap: '0.3rem', justifyContent: 'center', alignItems: 'center', width: !isMobile ? '620px' : '100%', position: !isMobile ? 'fixed' : 'relative', backgroundColor: isMobile ? '' : '#1D324466', padding: isMobile ? '0' : '4px 0'}}>
+    (router.route.startsWith('/~/ecosystems/') && router.route.split('/').length > 3) && (<div className={`flex-row ${!isMobile && 'top-layer'}`} style={{gap: '0.3rem', justifyContent: 'center', alignItems: 'center', width: !isMobile ? '620px' : '100%', position: !isMobile ? 'fixed' : 'relative', backgroundColor: isMobile ? '' : '#00112266', padding: isMobile ? '0' : '4px 0'}}>
       <EcosystemMenu />
       <div className="flex-row" style={{border: '1px solid #abc', padding: isMobile ? '3px 4px' : '2px 6px', borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'center'}}>
         <div className="flex-row" style={{alignItems: 'center', gap: '0.3rem'}}>
