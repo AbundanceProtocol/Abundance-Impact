@@ -19,113 +19,90 @@ export default async function handler(req, res) {
   }
 
   const { code, tipTime } = req.query;
-  console.log('passed', code !== secretCode);
+
   if (code !== secretCode) {
     return res.status(400).json({ error: 'Bad Request', message: 'Missing required parameters' });
-  } else {
-  
-    res.status(200).json({ message: 'Processing started. You will be notified when complete.' });
+  }
 
-    let counter = 0
-    let errors = 0
+  res.status(200).json({ message: 'Processing started. You will be notified when complete.' });
 
-    try {
-      await connectToDatabase();
+  try {
+    await connectToDatabase();
 
-      const uniquePoints = await getUniquePoints();
+    const uniquePoints = await getUniquePoints();
 
-      let users = []
+    let users = [];
 
-      for (const points of uniquePoints) {
+    for (const points of uniquePoints) {
+      const curatorPercent = await getCuratorPercent(points);
+      const uniqueFids = await getUniqueFids(points);
 
-        const curatorPercent = await getCuratorPercent(points);
+      for (const fid of uniqueFids) {
+        try {
+          let schedule = await getSchedule(fid, points);
+          let time = schedule?.timeRange ? getTimeRange(schedule?.timeRange) : null;
+          let allowances = await getAllowances(fid, schedule?.currencies || [], schedule?.percent, tipTime);
 
-        const uniqueFids = await getUniqueFids(points);
-        console.log('uniqueFids', uniqueFids);
-        
-        for (const fid of uniqueFids) {
-          
-          await new Promise(resolve => setTimeout(resolve, 100));
-          let time = null
-          let schedule = null
-          let allowances = [];
-          try {
-            schedule = await getSchedule(fid, points);
-            time = schedule?.timeRange ? getTimeRange(schedule?.timeRange) : null;
-            allowances = await getAllowances(fid, schedule?.currencies || [], schedule?.percent, tipTime);
-          } catch (error) {
-            console.error(`Error fetching allowances or user search for fid ${fid}:`, error);
-            continue; // Skip to the next fid
-          }
+          if (!schedule?.percent || !schedule?.decryptedUuid || allowances?.length === 0) continue;
 
-          if (!schedule?.percent || !schedule?.decryptedUuid || allowances?.length === 0) {
-            // console.log(`Skipping fid ${fid} due to missing percent or decryptedUuid`);
-            continue;
-          }
-          users.push({points, fid, allowances, time, curators: schedule?.curators, tags: schedule?.tags, channels: schedule?.channels, ecosystem: schedule?.ecosystem, curatorPercent, uuid: schedule?.decryptedUuid})
+          users.push({
+            points, fid, allowances, time,
+            curators: schedule?.curators,
+            tags: schedule?.tags,
+            channels: schedule?.channels,
+            ecosystem: schedule?.ecosystem,
+            curatorPercent,
+            uuid: schedule?.decryptedUuid
+          });
+        } catch (error) {
+          console.error(`Error fetching schedule or allowances for fid ${fid}:`, error);
+          continue;  // Skip this fid on error
         }
       }
+    }
 
-      // console.log('users', users)
-      for (const user of users) {
-        console.log('user')
+    let counter = 0;
+    let errors = 0;
 
-        // await new Promise(resolve => setTimeout(resolve, 50));
-
-        const { castData } = await getCasts(user)
-        console.log('text', user?.fid)
+    for (const user of users) {
+      try {
+        const { castData } = await getCasts(user);
 
         for (const userCast of castData) {
-
-          async function processTip(cast, user) {
-            try {
-              await new Promise(resolve => setTimeout(resolve, 60));
-              const result = await sendTip(cast, user?.uuid, user?.fid, user?.points);
-              if (result) {
-                counter++
-                return result
-              } else {
-                errors++
-                return 0
-              }
-            } catch(error) {
-              console.error('Error in handler:', error);
-              errors++
-              return 0
+          try {
+            const result = await sendTip(userCast, user.uuid, user.fid, user.points);
+            if (result) {
+              counter++;
+            } else {
+              errors++;
             }
+          } catch (error) {
+            console.error('Error processing tip:', error);
+            errors++;
           }
-
-          const tipped = await processTip(userCast, user)
         }
+      } catch (error) {
+        console.error('Error fetching casts or tipping:', error);
+        errors++;
       }
-
-      console.log(`Processing complete. Success: ${counter}, Errors: ${errors}`);
-
-    } catch (error) {
-      console.error('Background processing error:', error);
     }
+
+    console.log(`Processing complete. Success: ${counter}, Errors: ${errors}`);
+
+  } catch (error) {
+    console.error('Background processing error:', error);
   }
 }
 
-
 async function getCasts(user) {
-
   try {
     const { casts } = await getUserSearch(user?.time, user?.tags, user?.channels, user?.curators, user?.points);
-    if (!casts) {
-      console.log('no casts')
-      return {castData: [], coinTotals: 0}
-    }
-    console.log('casts')
     const displayedCasts = await processCasts(casts, user?.fid);
-    if (!displayedCasts) {
-      console.log('no displayedCasts')
-    }
-    const { castData, coinTotals } = await processTips(displayedCasts, user?.fid, user?.allowances, user?.ecosystem, user?.curatorPercent);
-    return {castData, coinTotals}
-  } catch(error) {
-    console.error('Error in handler:', error);
-    return {castData: [], coinTotals: 0}
+    const { castData } = await processTips(displayedCasts, user?.fid, user?.allowances, user?.ecosystem, user?.curatorPercent);
+    return { castData };
+  } catch (error) {
+    console.error('Error fetching casts:', error);
+    return { castData: [] };
   }
 }
 
@@ -219,7 +196,7 @@ async function getHamAllowance(fid) {
     // console.log(getRemaining)
     return getRemaining?.todaysAllocation ? Math.floor((Number(getRemaining?.todaysAllocation) - Number(getRemaining?.totalTippedToday))/1e18) : 0;
   } catch (error) {
-    console.error('Error in getHamAllowance:');
+    console.error('Error in getHamAllowance:', error);
     return 0;
   }
 }
@@ -240,7 +217,7 @@ async function getDegenAllowance(fid) {
     }
     return 0
   } catch (error) {
-    console.error('Error in getDegenAllowance:');
+    console.error('Error in getDegenAllowance:', error);
     return 0;
   }
 }
@@ -260,7 +237,7 @@ async function getHuntAllowance(fid) {
     // console.log(Math.floor(Number(getRemaining?.remaining_allowance)))
     // return getRemaining ? Math.floor(Number(getRemaining?.remaining_allowance)) : 0;
   } catch (error) {
-    console.error('Error in getHuntAllowance:');
+    console.error('Error in getWildAllowance:', error);
     return 0;
   }
 }

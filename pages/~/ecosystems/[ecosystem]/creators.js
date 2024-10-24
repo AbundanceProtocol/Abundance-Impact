@@ -7,6 +7,7 @@ import useMatchBreakpoints from '../../../../hooks/useMatchBreakpoints'
 import axios from 'axios';
 // import { FaPen, FaPlus } from "react-icons/fa"
 import { useRouter } from 'next/router';
+import { formatNum } from '../../../../utils/utils';
 // import { formatNum, isAlphanumeric, getToken, getChain } from '../../utils/utils';
 // import Spinner from '../../components/Common/Spinner';
 // import Button from '../../components/Ecosystem/Button';
@@ -29,13 +30,14 @@ export default function Ecosystem() {
   // const store = useStore()
   const [textMax, setTextMax] = useState('562px')
   const [feedMax, setFeedMax ] = useState('620px')
-  const [curators, setCurators] = useState(null)
+  const [creators, setCreators] = useState(null)
   const router = useRouter()
   const [modal, setModal] = useState({on: false, success: false, text: ''})
   // const [jobScheduled, setJobScheduled] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [ecoPoints, setEcoPoints] = useState(null)
   const [timeframe, setTimeframe] = useState('24h')
+  const [sort, setSort] = useState('impact')
   const [page, setPage] = useState(1)
   const { ecosystem } = router.query;
   const [sched, setSched] = useState({autotip: false, setPoints: false})
@@ -109,16 +111,16 @@ export default function Ecosystem() {
   useEffect(() => {
     if (ecoPoints) {
       console.log('eco1')
-      getCurators(ecoPoints, timeframe, 1)
+      getCurators(ecoPoints, timeframe, 1, sort)
     }
-  }, [ecoPoints])
+  }, [ecoPoints, timeframe, sort])
 
-  useEffect(() => {
-    if (ecoPoints) {
-      console.log('time1')
-      getCurators(ecoPoints, timeframe, 1)
-    }
-  }, [timeframe])
+  // useEffect(() => {
+  //   if (ecoPoints) {
+  //     console.log('time1')
+  //     getCurators(ecoPoints, timeframe, 1, sort)
+  //   }
+  // }, [timeframe])
 
 
   useEffect(() => {
@@ -146,7 +148,7 @@ export default function Ecosystem() {
     try {
       const response = await axios.get('/api/curation/getAutotipCurators', {
         params: { fid } })
-      if (response?.data?.curators?.length > 0 || curators) {
+      if (response?.data?.curators?.length > 0 || creators) {
         const userAutotips = response?.data?.curators
         console.log('userAutotips', userAutotips)
         setAutotipping(userAutotips)
@@ -209,47 +211,54 @@ export default function Ecosystem() {
     }
   }
 
-  async function getCurators(points, time, page) {
+  async function getCurators(points, time, page, sort) {
     console.log(points, time)
     // const points = '$IMPACT'
     try {
-      const response = await axios.get('/api/curation/getEcoCurators', {
-        params: { points, time, page } })
-      if (response?.data?.topCurators?.length > 0 || curators) {
-        const curatorData = response?.data?.topCurators
-        console.log(curatorData)
+      const response = await axios.get('/api/curation/getEcoCreators', {
+        params: { points, time, page, sort } })
+      if (response?.data?.topCreators?.length > 0 || creators) {
+        const creatorData = response?.data?.topCreators
+        console.log(creatorData)
         if (page > 1) {
-          let combinedCurators = curators.concat(curatorData)
+          let combinedCurators = creators.concat(creatorData)
           console.log(combinedCurators)
-          setCurators((prevUserFeed) => prevUserFeed.concat(curatorData))
+          setCreators((prevUserFeed) => prevUserFeed.concat(creatorData))
         } else {
-          setCurators(curatorData)
+          setCreators(creatorData)
         }
         setPage(page+1)
       } else {
         console.log('1')
         setPage(1)
-        setCurators([])
+        setCreators([])
       }
       setLoaded(true)
     } catch (error) {
       console.error('Error submitting data:', error)
       setLoaded(true)
       setPage(1)
-      setCurators([])
+      setCreators([])
     }
   }
 
   function updateTime(time) {
     setLoaded(false)
     setPage(1)
-    setCurators([])
+    setCreators([])
     setTimeframe(time)
+  }
+
+  function updateSort(sort) {
+    setLoaded(false)
+    setPage(1)
+    setCreators([])
+    setSort(sort)
   }
 
   function updatePage(getPage) {
     setPage(getPage)
-    getCurators(ecoPoints, timeframe, getPage)
+    getCurators(ecoPoints, timeframe, getPage, sort)
   }
 
   return (
@@ -267,14 +276,25 @@ export default function Ecosystem() {
 
         <Link href={`/~/ecosystems/${ecosystem}`}><div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>{ecosystem}</div></Link>
         <div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px', padding: '0'}}>{'>'}</div>
-        <div className='filter-item-on' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>curator</div>
+        <Link href={`/~/ecosystems/${ecosystem}/curators`}><div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>curators</div></Link>
+        <div className='filter-item-on' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>creators</div>
+        <Link href={`/~/ecosystems/${ecosystem}/contributors`}><div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>contributors</div></Link>
       </div>
     </div>
 
     <div title='Cast Actions' className='flex-row' style={{alignItems: 'center', justifyContent: 'center', margin: '8px'}}>
-      <p className='' style={{padding: '10px', color: '#fff', fontWeight: '700', fontSize: '20px'}}>Ecosystem Curators </p>
+      <p className='' style={{padding: '10px', color: '#fff', fontWeight: '700', fontSize: '20px'}}>Ecosystem Creators </p>
     </div>
     {/* <Description {...{show: true, text: 'Ecosystem Curators', padding: '30px 0 4px 10px'}} /> */}
+
+    <div className='flex-row' style={{height: '30px', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
+      <div className='flex-row' style={{padding: '4px 8px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '20px', alignItems: 'center', gap: '0.25rem'}}>
+        <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>SORT</div>
+        <div className={sort == 'impact' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateSort('impact')}}>Impact</div>
+        <div className={sort == 'tips' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateSort('tips')}}>Tips</div>
+      </div>
+    </div>
+
 
     <div className='flex-row' style={{height: '30px', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
       <div className='flex-row' style={{padding: '4px 8px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '20px', alignItems: 'center', gap: '0.25rem'}}>
@@ -289,29 +309,31 @@ export default function Ecosystem() {
 
 
     <div className='flex-row' style={{padding: '10px 0 0 0', flexWrap: 'wrap', minWidth: feedMax, gap: '0.5rem', justifyContent: 'center'}}>
-      {curators?.length > 0 ? curators.map((curator, index) => { return (
-        <Link key={index} href={`/~/ecosystems/${ecosystem}/curator/${curator?.username}`}>
+      {creators?.length > 0 ? creators.map((creator, index) => { return (
+        <Link key={index} href={`/~/ecosystems/${ecosystem}/creators/${creator?.username}`}>
           <div className='curator-frame' style={{gap: '1.5rem', minWidth: isMobile ? '200px' : '250px'}}>
             <div className='flex-row' style={{gap: '1rem', paddingBottom: '10px', justifyContent: 'space-between'}}>
-              <img loading="lazy" src={curator?.author_pfp} className="" alt={`${curator?.author_name} avatar`} style={{width: '36px', height: '36px', maxWidth: '36px', maxHeight: '36px', borderRadius: '24px', border: '1px solid #000'}} />
-              <div>
-                {autotipping.includes(curator?.fid) ? (<div className='curator-button' style={{fontSize: isMobile ? '9px' : '10px'}} onClick={(event) => {removeAutotip(event, curator?.fid)}}>Auto-tipping</div>) : (<div className='curator-button-on' style={{fontSize: isMobile ? '9px' : '10px'}} onClick={(event) => {addAutotip(event, curator?.fid)}}>Auto-tip</div>)}
+              <img loading="lazy" src={creator?.author_pfp} className="" alt={`${creator?.author_name} avatar`} style={{width: '36px', height: '36px', maxWidth: '36px', maxHeight: '36px', borderRadius: '24px', border: '1px solid #000'}} />
+              <div className='flex-col'>
+                {(creator?.totalImpact || creator?.totalImpact == 0) && (<div className='curator-button' style={{fontSize: isMobile ? '10px' : '11px', border: '0px'}}>Impact: {formatNum(creator?.totalImpact)}</div>)}
+                {(creator?.totalTips || creator?.totalTips == 0) && (<div className='curator-button' style={{fontSize: isMobile ? '9px' : '10px', border: '0px'}}>{formatNum(creator?.totalTips)} $DEGEN</div>)}
+                {/* {autotipping.includes(creator?.fid) ? (<div className='curator-button' style={{fontSize: isMobile ? '9px' : '10px'}} onClick={(event) => {removeAutotip(event, creator?.fid)}}>Auto-tipping</div>) : (<div className='curator-button-on' style={{fontSize: isMobile ? '9px' : '10px'}} onClick={(event) => {addAutotip(event, creator?.fid)}}>Auto-tip</div>)} */}
               </div>
             </div>
-            <div style={{fontSize: isMobile ? '16px' : '17px', fontWeight: '400', color: '#eff'}}>@{curator?.username}</div>
+            <div style={{fontSize: isMobile ? '16px' : '17px', fontWeight: '400', color: '#eff'}}>@{creator?.username}</div>
           </div>
         </Link>
       )}) : (
         <>
           {!loaded ? (<div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
             <Spinner size={31} color={'#999'} />
-          </div>) : (<div style={{fontSize: '20px', color: '#def'}}>No curators found</div>)}
+          </div>) : (<div style={{fontSize: '20px', color: '#def'}}>No creators found</div>)}
         </>
       )}
 
     </div>
 
-    {(loaded && curators?.length > 0 && curators?.length % 10 == 0) && (<div className='flex-row' style={{height: '30px', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px', margin: '10px 0 50px 0'}}>
+    {(loaded && creators?.length > 0 && creators?.length % 10 == 0) && (<div className='flex-row' style={{height: '30px', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px', margin: '10px 0 50px 0'}}>
       <div className='flex-row' style={{padding: '4px 8px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '20px', alignItems: 'center', gap: '0.25rem'}}>
         <div className={'filter-item'} onClick={() => {updatePage(page)}} style={{fontSize: '12px'}}>Load more</div>
       </div>

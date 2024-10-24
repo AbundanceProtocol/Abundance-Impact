@@ -802,14 +802,13 @@ async function getTipCasts(id) {
         <div className='flex-row' style={{padding: '4px 8px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '20px', alignItems: 'center', gap: '0.25rem'}}>
           {/* <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>TIME</div> */}
 
-          <Link href={`/~/ecosystems/${tipEcosystem || 'abundance'}`}><div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>{tipEcosystem || 'abundance'}</div></Link>
+          <Link href={`/~/studio`}><div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>studio</div></Link>
           <div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px', padding: '0'}}>{'>'}</div>
           {id ? (<div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>tips</div>) : (<Link href={`/~/ecosystems/${tipEcosystem || 'abundance'}/curators`}><div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>curators</div></Link>)}
           <div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px', padding: '0'}}>{'>'}</div>
-          <div className='filter-item-on' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>@{user?.username}</div>
+          <div className='filter-item-on' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>tip {id?.slice(0, 6)}</div>
         </div>
       </div>
-
 
       {user && (<CuratorData {...{ show: (isLogged && user), user, textMax, type: 'curator' }} />)}
       {/* <div className="top-layer flex-row" style={{padding: '10px 0 10px 0', alignItems: 'center', justifyContent: 'space-evenly', margin: '0', borderBottom: '1px solid #888'}}>

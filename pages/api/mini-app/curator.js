@@ -21,9 +21,14 @@ export default async function handler(req, res) {
     async function getUser(curatorFid, points) {
       try {
         await connectToDatabase();
-        let user = await User.findOne({ fid: curatorFid, ecosystem_points: points }).select('username').exec();
+        let user = null
+        if (points) {
+          user = await User.findOne({ fid: curatorFid, ecosystem_points: points }).select('username').exec();
+        } else {
+          user = await User.findOne({ fid: curatorFid }).select('username').exec();
+        }
         if (user) {
-          return user.username
+          return user?.username
         }
         return null
       } catch (error) {

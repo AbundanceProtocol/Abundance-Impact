@@ -697,13 +697,15 @@ export default function Eco() {
 
           <Link href={`/~/ecosystems/${ecosystem}`}><div className='filter-item-on' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>{ecosystem}</div></Link>
           <div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px', padding: '0'}}>{'>'}</div>
-          <Link href={`/~/ecosystems/${ecosystem}/curator`}><div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>curator</div></Link>
+          <Link href={`/~/ecosystems/${ecosystem}/curators`}><div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>curators</div></Link>
+          <Link href={`/~/ecosystems/${ecosystem}/creators`}><div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>creators</div></Link>
+          <Link href={`/~/ecosystems/${ecosystem}/contributors`}><div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>contributors</div></Link>
           {/* <div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px', padding: '0'}}>{'>'}</div>
           <div className='filter-item-on' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>@{username}</div> */}
         </div>
       </div>
 
-      {user && (<CuratorData {...{ show: (isLogged && user), user, textMax }} />)}
+      {user && (<CuratorData {...{ show: (isLogged && user), user, textMax, type: 'curator' }} />)}
       {/* <div className="top-layer flex-row" style={{padding: '10px 0 10px 0', alignItems: 'center', justifyContent: 'space-evenly', margin: '0', borderBottom: '1px solid #888'}}>
         {userButtons.map((btn, index) => (
           <FeedMenu {...{buttonName: btn, searchSelect, searchOption, isMobile }} key={index} />))}
