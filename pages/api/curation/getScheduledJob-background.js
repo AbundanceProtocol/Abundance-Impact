@@ -13,118 +13,126 @@ const secretKey = process.env.SECRET_KEY;
 const secretCode = process.env.SECRET_CODE;
 const apiKey = process.env.NEYNAR_API_KEY;
 
-export default async function handler(request, context) {
-  console.log('Background function invoked:', request);
+export default async function handler(req, res) {
+  if (req.method !== 'GET') {
+    return res.status(405).json({ error: 'Method Not Allowed' });
+  }
 
-  const { code, tipTime } = request.query;
+  const { code, tipTime } = req.query;
   console.log('passed', code !== secretCode);
-  
   if (code !== secretCode) {
-    console.error('Bad Request: Missing required parameters');
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ error: 'Bad Request', message: 'Missing required parameters' }),
-    };
-  }
+    return res.status(400).json({ error: 'Bad Request', message: 'Missing required parameters' });
+  } else {
+  
+    res.status(200).json({ message: 'Processing started. You will be notified when complete.' });
 
-  let counter = 0;
-  let errors = 0;
+    let counter = 0
+    let errors = 0
 
-  try {
-    await connectToDatabase();
+    try {
+      await connectToDatabase();
 
-    const uniquePoints = await getUniquePoints();
-    let users = [];
+      const uniquePoints = await getUniquePoints();
 
-    for (const points of uniquePoints) {
-      const curatorPercent = await getCuratorPercent(points);
-      const uniqueFids = await getUniqueFids(points);
-      console.log('uniqueFids', uniqueFids);
-      
-      for (const fid of uniqueFids) {
-        await new Promise(resolve => setTimeout(resolve, 100));
-        let time = null;
-        let schedule = null;
-        let allowances = [];
+      let users = []
+
+      for (const points of uniquePoints) {
+
+        const curatorPercent = await getCuratorPercent(points);
+
+        const uniqueFids = await getUniqueFids(points);
+        console.log('uniqueFids', uniqueFids);
         
-        try {
-          schedule = await getSchedule(fid, points);
-          time = schedule?.timeRange ? getTimeRange(schedule?.timeRange) : null;
-          allowances = await getAllowances(fid, schedule?.currencies || [], schedule?.percent, tipTime);
-        } catch (error) {
-          console.error(`Error fetching allowances or user search for fid ${fid}:`, error);
-          continue; // Skip to the next fid
-        }
+        for (const fid of uniqueFids) {
+          
+          await new Promise(resolve => setTimeout(resolve, 100));
+          let time = null
+          let schedule = null
+          let allowances = [];
+          try {
+            schedule = await getSchedule(fid, points);
+            time = schedule?.timeRange ? getTimeRange(schedule?.timeRange) : null;
+            allowances = await getAllowances(fid, schedule?.currencies || [], schedule?.percent, tipTime);
+          } catch (error) {
+            console.error(`Error fetching allowances or user search for fid ${fid}:`, error);
+            continue; // Skip to the next fid
+          }
 
-        if (!schedule?.percent || !schedule?.decryptedUuid || allowances?.length === 0) {
-          continue;
-        }
-        
-        users.push({
-          points,
-          fid,
-          allowances,
-          time,
-          curators: schedule?.curators,
-          tags: schedule?.tags,
-          channels: schedule?.channels,
-          ecosystem: schedule?.ecosystem,
-          curatorPercent,
-          uuid: schedule?.decryptedUuid
-        });
-      }
-    }
-
-    for (const user of users) {
-      console.log('Processing user:', user.fid);
-      const { castData } = await getCasts(user);
-      console.log('User casts:', user?.fid);
-
-      for (const userCast of castData) {
-        const tipped = await processTip(userCast, user);
-        if (tipped) {
-          counter++;
-        } else {
-          errors++;
+          if (!schedule?.percent || !schedule?.decryptedUuid || allowances?.length === 0) {
+            // console.log(`Skipping fid ${fid} due to missing percent or decryptedUuid`);
+            continue;
+          }
+          users.push({points, fid, allowances, time, curators: schedule?.curators, tags: schedule?.tags, channels: schedule?.channels, ecosystem: schedule?.ecosystem, curatorPercent, uuid: schedule?.decryptedUuid})
         }
       }
+
+      // console.log('users', users)
+      for (const user of users) {
+        console.log('user')
+
+        // await new Promise(resolve => setTimeout(resolve, 50));
+
+        const { castData } = await getCasts(user)
+        console.log('text', user?.fid)
+
+        for (const userCast of castData) {
+
+          async function processTip(cast, user) {
+            try {
+              await new Promise(resolve => setTimeout(resolve, 60));
+              const result = await sendTip(cast, user?.uuid, user?.fid, user?.points);
+              if (result) {
+                counter++
+                return result
+              } else {
+                errors++
+                return 0
+              }
+            } catch(error) {
+              console.error('Error in handler:', error);
+              errors++
+              return 0
+            }
+          }
+
+          const tipped = await processTip(userCast, user)
+        }
+      }
+
+      console.log(`Processing complete. Success: ${counter}, Errors: ${errors}`);
+
+    } catch (error) {
+      console.error('Background processing error:', error);
     }
-
-    console.log(`Processing complete. Success: ${counter}, Errors: ${errors}`);
-
-  } catch (error) {
-    console.error('Background processing error:', error);
   }
-
-  // Return an empty response since this is a background function
-  return {
-    statusCode: 204, // No Content
-    body: JSON.stringify({ message: 'Background job is running.' }),
-  };
 }
 
+
 async function getCasts(user) {
+
   try {
     const { casts } = await getUserSearch(user?.time, user?.tags, user?.channels, user?.curators, user?.points);
     if (!casts) {
-      console.log('No casts found');
-      return { castData: [], coinTotals: 0 };
+      console.log('no casts')
+      return {castData: [], coinTotals: 0}
     }
-    console.log('Casts found');
+    console.log('casts')
     const displayedCasts = await processCasts(casts, user?.fid);
+    if (!displayedCasts) {
+      console.log('no displayedCasts')
+    }
     const { castData, coinTotals } = await processTips(displayedCasts, user?.fid, user?.allowances, user?.ecosystem, user?.curatorPercent);
-    return { castData, coinTotals };
-  } catch (error) {
-    console.error('Error in getCasts:', error);
-    return { castData: [], coinTotals: 0 };
+    return {castData, coinTotals}
+  } catch(error) {
+    console.error('Error in handler:', error);
+    return {castData: [], coinTotals: 0}
   }
 }
 
+
 async function getSchedule(fid, points) {
   try {
-    const schedule = await ScheduleTip.findOne({ fid, points, active_cron: true })
-      .select('search_shuffle search_time search_tags points search_channels search_curators percent_tip ecosystem_name currencies uuid')
-      .exec();
+    const schedule = await ScheduleTip.findOne({ fid, points, active_cron: true }).select('search_shuffle search_time search_tags points search_channels search_curators percent_tip ecosystem_name currencies uuid').exec();
     if (schedule) {
       const decryptedUuid = decryptPassword(schedule.uuid, secretKey);
       return {
