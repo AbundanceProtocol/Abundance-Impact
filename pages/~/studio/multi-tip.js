@@ -179,16 +179,16 @@ export default function MultiTip() {
     let shareText = ''
 
     if (frameCurators?.url && frameCurators?.url[0] == fid) {
-      shareText = 'I just multi-tipped builders & creators on /impact by @abundance.\n\nSupport my nominees here:'
+      shareText = `I'm supporting great builders & creators on /impact by @abundance.\n\nExplore my curation and support the nominees here:`
     } else if (frameCurators?.url?.length > 0) {
 
       if (frameCurators?.url[0] !== fid) {
-        shareText = `I just multi-tipped @${frameCurators?.condition}'s curation of builders & creators thru /impact by @abundance.\n\nSupport @${frameCurators?.condition}'s nominees here:`
+        shareText = `Loving @${frameCurators?.condition}'s curation of builders & creators on /impact by @abundance.\n\nExplore @${frameCurators?.condition}'s curation and support their nominees here:`
       } else {
-        shareText = 'I just multi-tipped builders & creators on /impact by @abundance. Try it out here:'
+        shareText = `I'm supporting great builders & creators in the ${frameEcosystem?.url} ecosystem on /impact by @abundance. Explore the ecossytem and support builders & creators here:`
       }
     } else {
-      shareText = 'I just multi-tipped builders & creators on /impact by @abundance. Try it out here:'
+      shareText = `I'm supporting great builders & creators in the ${frameEcosystem?.url} ecosystem on /impact by @abundance. Explore the ecossytem and support builders & creators here:`
     }
 
     let encodedShareText = encodeURIComponent(shareText)
