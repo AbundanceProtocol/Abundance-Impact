@@ -173,9 +173,9 @@ export default function MultiTip() {
   function setupEcosystem(target) {
 
     console.log(frameEcosystem?.url, frameTime?.url, fid, frameEcosystem?.eco)
-    let shareUrl = `https://impact.abundance.id/~/ecosystems/${frameEcosystem?.url}/tip-v4?time=${frameTime?.url}&shuffle=true&curators=${fid}&eco=${frameEcosystem?.eco}&referrer=${fid}`
+    let shareUrl = `https://impact.abundance.id/~/ecosystems/${frameEcosystem?.url}/tip-v4?time=${frameTime?.url}&shuffle=true&curators=${frameCurators?.url[0]}&eco=${frameEcosystem?.eco}`
 
-
+    console.log('shareUrl', shareUrl)
     let shareText = ''
 
     if (frameCurators?.url && frameCurators?.url[0] == fid) {
