@@ -175,7 +175,7 @@ export default function MultiTip() {
     console.log(frameEcosystem?.url, frameTime?.url, fid, frameEcosystem?.eco)
     let shareUrl = `https://impact.abundance.id/~/ecosystems/${frameEcosystem?.url}/tip-v4?time=${frameTime?.url}&shuffle=true&curators=${frameCurators?.url[0]}&eco=${frameEcosystem?.eco}`
 
-    console.log('shareUrl', shareUrl)
+    // console.log('shareUrl', shareUrl)
     let shareText = ''
 
     if (frameCurators?.url && frameCurators?.url[0] == fid) {
@@ -183,7 +183,7 @@ export default function MultiTip() {
     } else if (frameCurators?.url?.length > 0) {
 
       if (frameCurators?.url[0] !== fid) {
-        shareText = `I just multi-tipped @${frameCurators?.value}'s curation of builders & creators thru /impact by @abundance.\n\nSupport @${frameCurators?.value}'s nominees here:`
+        shareText = `I just multi-tipped @${frameCurators?.condition}'s curation of builders & creators thru /impact by @abundance.\n\nSupport @${frameCurators?.condition}'s nominees here:`
       } else {
         shareText = 'I just multi-tipped builders & creators on /impact by @abundance. Try it out here:'
       }
