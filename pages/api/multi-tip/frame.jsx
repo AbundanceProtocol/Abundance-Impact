@@ -26,7 +26,7 @@ export default async function handler(req, res) {
       { value: 'all', label: 'All time' },
     ]
     const timeText = timeframe.find(item => item.value === time);
-    
+    console.log('timeText', timeText)
 
     async function getUsernames(curators, points) {
       const curatorsArray = curators.split(',').map(curator => Number(curator.trim()))
@@ -106,7 +106,7 @@ export default async function handler(req, res) {
 
             <div style={{display: 'flex', flexDirection: 'column', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '1px solid #eeeeeeaa', borderRadius: '16px', padding: '5px 10px', margin: '0 5px 3px 5px', background: '#eeeeeeaa', width: 'auto', justifyContent: 'center', alignItems: 'center'}}>
               <div style={{display: 'flex', textAlign: 'center', color: '#220a4d', fontSize: '16px', margin: '2px 0px', width: 'auto', justifyContent: 'center', alignItems: 'center'}}>timeframe</div>
-              <div style={{display: 'flex', textAlign: 'center', color:  '#220a4d', fontSize: '19px', margin: '2px 0px', width: 'auto', justifyContent: 'center', alignItems: 'center', padding: '0 20px'}}>{timeText.label}</div>
+              <div style={{display: 'flex', textAlign: 'center', color:  '#220a4d', fontSize: '19px', margin: '2px 0px', width: 'auto', justifyContent: 'center', alignItems: 'center', padding: '0 20px'}}>{timeText?.label}</div>
             </div>
 
             <div style={{display: 'flex', flexDirection: 'column', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '1px solid #eeeeeeaa', borderRadius: '16px', padding: '5px 10px', margin: '0 5px 3px 5px', background: '#eeeeeeaa', width: 'auto', justifyContent: 'center', alignItems: 'center'}}>

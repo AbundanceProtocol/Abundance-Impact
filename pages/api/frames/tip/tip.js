@@ -283,9 +283,9 @@ export default async function handler(req, res) {
         console.log('inputText2', inputText)
     
         let timeRange = null
-        // if (time) {
-        //   timeRange = getTimeRange(time)
-        // } 
+        if (time) {
+          timeRange = getTimeRange(time)
+        } 
         
         // Example usage
         // const input = "500 $degen, 400 $HAM 10000 🍖x400, 300 $HAM";
