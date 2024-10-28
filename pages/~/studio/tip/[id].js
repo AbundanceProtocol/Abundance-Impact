@@ -398,7 +398,7 @@ export default function ProfilePage() {
 
       try {
         const response = await axios.get('/api/curation/getUserSearch', {
-          params: { time, tags, channel, curator, text, shuffle, points, page, order, timeSort }
+          params: { time, tags, channel, curators: curator, text, shuffle, points, page, order, timeSort }
         })
 
         const removeDelay = () => {
