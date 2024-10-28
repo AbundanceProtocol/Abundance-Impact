@@ -27,8 +27,18 @@ export default async function handler(req, res) {
       }   
     }
 
+    let timeSort = null
+    if (req?.query?.timeSort) {
+      timeSort = Number(req?.query?.timeSort) || -1
+    }
+
     let order = Number(req?.query?.order) || -1
     console.log('order', order)
+
+    let sort = { impact_total: order, createdAt: -1 }
+    if (timeSort) {
+      sort = { createdAt: timeSort }
+    }
     
     if (req?.query?.points) {
       query.points = req?.query?.points
@@ -144,7 +154,7 @@ export default async function handler(req, res) {
           totalCount = await Cast.countDocuments(query);
           returnedCasts = await Cast.find(query)
 
-            .sort({ impact_total: order, createdAt: -1 })
+            .sort(sort)
             .populate('impact_points')
             .skip((page - 1) * limit)
             .limit(limit)
@@ -161,30 +171,39 @@ export default async function handler(req, res) {
     
           // Fetch documents from each range
           const top20PercentCasts = await Cast.find(query)
-            .sort({ impact_total: order, createdAt: -1 })
+            .sort(sort)
             .populate('impact_points')
             .limit(top20PercentCount)
             .exec();
           const middle40PercentCasts = await Cast.find(query)
-            .sort({ impact_total: order, createdAt: -1 })
+            .sort(sort)
             .populate('impact_points')
             .skip(top20PercentCount)
             .limit(middle40PercentCount)
             .exec();
           const bottom40PercentCasts = await Cast.find(query)
-            .sort({ impact_total: order, createdAt: -1 })
+            .sort(sort)
             .populate('impact_points')
             .skip(top20PercentCount + middle40PercentCount)
             .limit(bottom40PercentCount)
             .exec();
     
           returnedCasts = top20PercentCasts.concat(middle40PercentCasts, bottom40PercentCasts);
-    
-          if (order == -1) {
-            returnedCasts.sort((a, b) => b.impact_total - a.impact_total);
+
+          if (timeSort) {
+            if (timeSort == -1) {
+              returnedCasts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            } else {
+              returnedCasts.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+            }
           } else {
-            returnedCasts.sort((a, b) => a.impact_total - b.impact_total);
+            if (order == -1) {
+              returnedCasts.sort((a, b) => b.impact_total - a.impact_total);
+            } else {
+              returnedCasts.sort((a, b) => a.impact_total - b.impact_total);
+            }
           }
+
     
           returnedCasts = returnedCasts.reduce((acc, current) => {
             const existingItem = acc.find(item => item._id === current._id);
