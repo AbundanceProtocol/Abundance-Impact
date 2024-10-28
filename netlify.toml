@@ -7,12 +7,12 @@
   node_bundler = "esbuild"
   external_node_modules = ["mongodb", "mongoose"]
   included_files = ["utils/**", "libs/**", "models/**"]
-  timeout = 900
 
 [functions.scheduledTips]
   schedule = "40 22 * * *" # Runs at 6:40 PM EST daily
   path = "scheduledTips"
   queryParams = { code = "test", tipTime = "7pm" }
+  timeout = { duration = 900 }
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
