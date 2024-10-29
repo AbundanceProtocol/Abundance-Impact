@@ -127,7 +127,7 @@ export default function ProfilePage() {
       const response = await axios.get('/api/getCuratorProfile', {
         params: { username }
       })
-      if (response?.data) {
+      if (response?.data?.data?.Socials?.Social[0]) {
         const profile = response?.data?.data?.Socials?.Social[0] || null
         console.log('profile', profile)
         const populatedProfile = {

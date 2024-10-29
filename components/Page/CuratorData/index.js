@@ -100,7 +100,12 @@ const CuratorData = ({ user, textMax, show, type }) => {
     }
   }
 
-
+  const setCurator = () => {
+    router.push({
+      pathname: `/~/ecosystems/abundance/curators/${user?.username}/multi-tip`,
+      query: { userFid: user?.fid, name: user?.username }
+    });
+  };
 
 
   return (
@@ -164,6 +169,7 @@ const CuratorData = ({ user, textMax, show, type }) => {
             
             {autotipping.includes(user?.fid) ? (<div className='curator-button' style={{fontSize: isMobile ? '10px' : '11px'}} onClick={(event) => {removeAutotip(event, user?.fid)}}>Auto-tipping</div>) : (<div className='curator-button-on' style={{fontSize: isMobile ? '10px' : '11px'}} onClick={(event) => {addAutotip(event, user?.fid)}}>Auto-tip</div>)}
 
+            <div className='curator-button' style={{fontSize: isMobile ? '10px' : '11px'}} onClick={setCurator}>Share Multi-tip</div>
 
           </div>)}
           {type == 'creator' && (<div className='flex-col' style={{gap: '0.5rem', alignItems: 'center'}}>
