@@ -18,7 +18,7 @@ export default async function handler(req, res) {
     async function getCuratorIds(fids) {
       try {
         await connectToDatabase();
-        const impacts = await Impact.find({ curator_fid: { $in: fids } });
+        const impacts = await Impact.find({ curator_fid: { $in: fids }});
         const impactIds = impacts.map(impact => impact._id);
         return impactIds
       } catch (error) {
@@ -115,6 +115,7 @@ export default async function handler(req, res) {
       }
     }
 
+    query.impact_total = { $gte: 1 }
     // if (req.query['tags[]'] && req.query['tags[]'].length > 0) {
     //   query.cast_tags = { $in: [req.query['tags[]']] };
     // }
