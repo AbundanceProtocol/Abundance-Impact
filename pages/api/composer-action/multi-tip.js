@@ -15,7 +15,7 @@ export default async function handler(req, res) {
 
     res.status(200).json({ 
       type: 'form',
-      title: 'Curator page',
+      title: 'Multi-tip page',
       url: `${baseURL}/~/studio/multi-tip-compose?${qs.stringify({ fid: curatorFid })}`,
     });
     return
@@ -23,7 +23,7 @@ export default async function handler(req, res) {
   } else if (req.method === 'GET') {
     res.status(200).json({
       "type": "composer",
-      "name": "Curator page",
+      "name": "Multi-tip page",
       "icon": "person",
       "description": "Curator",
       "aboutUrl": `${baseURL}/~/studio/multi-tip-compose?${qs.stringify({ fid: 3 })}`,
