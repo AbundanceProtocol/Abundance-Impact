@@ -7,10 +7,10 @@ export default async function handler(req, res) {
   init(process.env.AIRSTACK_API_KEY ?? '')
   const body = await req.body;
   const {isValid, message} = await validateFramesMessage(body)
-  const curatorFid = message?.data?.fid
-
+  
   if (req.method === 'POST') {
-
+    const curatorFid = message?.data?.fid
+    
     res.status(200).json({ 
       type: 'form',
       title: 'Curator page',
@@ -24,7 +24,7 @@ export default async function handler(req, res) {
       "name": "Curator page",
       "icon": "person",
       "description": "Curator",
-      "aboutUrl": `${baseURL}/~/studio/multi-tip-compose?${qs.stringify({ fid: curatorFid })}`,
+      "aboutUrl": `${baseURL}/~/studio/multi-tip-compose?${qs.stringify({ fid: 3 })}`,
       "imageUrl": `${baseURL}/images/input.jpg`,
       "action": {
         "type": "post",
