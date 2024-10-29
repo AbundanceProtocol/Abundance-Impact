@@ -7,10 +7,12 @@ export default async function handler(req, res) {
   init(process.env.AIRSTACK_API_KEY ?? '')
   const body = await req.body;
   const {isValid, message} = await validateFramesMessage(body)
-  
+  const { untrustedData } = req.body
+
   if (req.method === 'POST') {
-    const curatorFid = message?.data?.fid
-    
+    // const curatorFid = message?.data?.fid
+    const curatorFid = untrustedData?.fid
+
     res.status(200).json({ 
       type: 'form',
       title: 'Curator page',
