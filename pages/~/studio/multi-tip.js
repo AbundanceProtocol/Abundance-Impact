@@ -172,8 +172,8 @@ export default function MultiTip() {
 
   function setupEcosystem(target) {
 
-    console.log(frameEcosystem?.url, frameTime?.url, fid, frameEcosystem?.eco)
-    let shareUrl = `https://impact.abundance.id/~/ecosystems/${frameEcosystem?.url}/tip-v4?time=${frameTime?.url}&shuffle=true&curators=${frameCurators?.url[0]}&eco=${frameEcosystem?.eco}`
+    console.log(frameEcosystem?.url, frameTime?.url, fid, frameEcosystem?.eco, frameCurators?.url)
+    let shareUrl = `https://impact.abundance.id/~/ecosystems/${frameEcosystem?.url}/tip-v4?time=${frameTime?.url}&shuffle=true${frameCurators?.url ? '&curators=' + frameCurators?.url[0] : ''}&eco=${frameEcosystem?.eco}`
 
     // console.log('shareUrl', shareUrl)
     let shareText = ''
@@ -185,10 +185,10 @@ export default function MultiTip() {
       if (frameCurators?.url[0] !== fid) {
         shareText = `Loving @${frameCurators?.condition}'s curation of builders & creators on /impact by @abundance.\n\nExplore @${frameCurators?.condition}'s curation and support their nominees here:`
       } else {
-        shareText = `I'm supporting great builders & creators in the ${frameEcosystem?.url} ecosystem on /impact by @abundance. Explore the ecossytem and support builders & creators here:`
+        shareText = `I'm supporting great builders & creators in the ${frameEcosystem?.url} ecosystem on /impact by @abundance. Explore the ecosystem and support builders & creators here:`
       }
     } else {
-      shareText = `I'm supporting great builders & creators in the ${frameEcosystem?.url} ecosystem on /impact by @abundance. Explore the ecossytem and support builders & creators here:`
+      shareText = `I'm supporting great builders & creators in the ${frameEcosystem?.url} ecosystem on /impact by @abundance. Explore the ecosystem and support builders & creators here:`
     }
 
     let encodedShareText = encodeURIComponent(shareText)
