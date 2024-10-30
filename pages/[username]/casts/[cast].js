@@ -43,7 +43,7 @@ export default function CastPage({username, castHash}) {
     downvote_value: 1,
     ecosystem_moderators: [],
     ecosystem_name: 'none',
-    ecosystem_handle: 'none',
+    ecosystem_handle: 'abundance',
     ecosystem_points_name: '$IMPACT',
     ecosystem_rules: [`Can't do evil`],
     erc20s: [],
@@ -247,7 +247,7 @@ export default function CastPage({username, castHash}) {
       </Head>
       <div className="" style={{padding: '58px 0 0 0'}}>
       </div>
-      { (cast) && <Cast cast={cast} key={0} index={0} openImagePopup={openImagePopup} ecosystem={eco.ecosystem_points_name} /> }
+      { (cast) && <Cast cast={cast} key={0} index={0} openImagePopup={openImagePopup} ecosystem={eco.ecosystem_points_name} handle={eco?.ecosystem_handle} /> }
       <ExpandImg  {...{show: showPopup.open, closeImagePopup, embed: {showPopup}, screenWidth, screenHeight }} />
     </div>
   );

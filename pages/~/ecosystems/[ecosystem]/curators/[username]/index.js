@@ -51,7 +51,7 @@ export default function ProfilePage() {
     downvote_value: 1,
     ecosystem_moderators: [],
     ecosystem_name: 'none',
-    ecosystem_handle: 'none',
+    ecosystem_handle: 'abundance',
     ecosystem_points_name: '$IMPACT',
     ecosystem_rules: [`Can't do evil`],
     erc20s: [],
@@ -124,25 +124,59 @@ export default function ProfilePage() {
 
   async function getCuratorData(username) {
     try {
-      const response = await axios.get('/api/getCuratorProfile', {
+      const response = await axios.get('/api/getCurator', {
         params: { username }
       })
-      if (response?.data?.data?.Socials?.Social[0]) {
-        const profile = response?.data?.data?.Socials?.Social[0] || null
-        console.log('profile', profile)
+      console.log(response)
+      if (response?.data) {
+        const profile = response?.data?.user || null
         const populatedProfile = {
-          username: profile?.profileName,
+          username: profile?.username,
           pfp: {
-            url: profile?.profileImage,
+            url: profile?.pfp?.url,
           },
-          displayName: profile?.profileDisplayName,
+          displayName: profile?.displayName,
           activeOnFcNetwork: true,
-          profile: { bio: { text: profile?.profileBio } },
+          profile: { bio: { text: profile?.bio?.profile } },
           followingCount: profile?.followingCount,
           followerCount: profile?.followerCount,
-          fid: Number(profile?.userId)
+          fid: profile?.fid
         }
         setUser(populatedProfile)
+      
+        const updateResponse = await axios.get('/api/getCuratorProfile', {
+          params: { fid: populatedProfile?.fid }
+        })
+
+        if (updateResponse?.data?.data?.Socials?.Social[0]) {
+          const profile = updateResponse?.data?.data?.Socials?.Social[0] || null
+          console.log('profile', profile)
+          const updateProfile = {
+            username: profile?.profileName,
+            pfp: {
+              url: profile?.profileImage,
+            },
+            displayName: profile?.profileDisplayName,
+            activeOnFcNetwork: true,
+            profile: { bio: { text: profile?.profileBio } },
+            followingCount: profile?.followingCount,
+            followerCount: profile?.followerCount,
+            fid: Number(profile?.userId)
+          }
+          setUser(updateProfile)
+
+          if ((updateProfile?.pfp?.url && updateProfile?.pfp?.url !== populatedProfile?.pfp?.url && updateProfile?.pfp?.url?.length > 0) || (updateProfile?.displayName && updateProfile?.displayName !== populatedProfile?.displayName && updateProfile?.displayName?.length > 0) || (updateProfile?.username && updateProfile?.username !== populatedProfile?.username && updateProfile?.username?.length > 0)) {
+            const updatedUser = await axios.post('/api/updateUserProfile', {       
+              fid: updateProfile?.fid,
+              username: updateProfile?.username,
+              pfp: updateProfile?.pfp?.url,
+              displayName: updateProfile?.displayName
+            })
+            console.log('updatedUser', updatedUser)
+          }
+        } else {
+          setUser(null)
+        }
       } else {
         setUser(null)
       }
@@ -823,7 +857,7 @@ export default function ProfilePage() {
         <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
           <Spinner size={31} color={'#999'} />
         </div>
-        ) : (userFeed.map((cast, index) => (<Cast {...{cast, key: index, index, updateCast, openImagePopup, ecosystem: eco.ecosystem_points_name, self: false, app}} />)))}
+        ) : (userFeed.map((cast, index) => (<Cast {...{cast, key: index, index, updateCast, openImagePopup, ecosystem: eco?.ecosystem_points_name, handle: eco?.ecosystem_handle, self: false, app}} />)))}
         {!delay && !shuffled && (
           <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
             <Spinner size={31} color={'#999'} />

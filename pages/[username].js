@@ -27,7 +27,7 @@ export default function UserPage({username}) {
   }
   const store = useStore()
   const [user, setUser] = useState(null)
-  const { LoginPopup, isLogged, fid, points } = useContext(AccountContext)
+  const { LoginPopup, isLogged, fid, points, eco } = useContext(AccountContext)
   const ref = useRef(null)
   const [textMax, setTextMax] = useState('430px')
   const [screenWidth, setScreenWidth ] = useState(undefined)
@@ -294,16 +294,16 @@ export default function UserPage({username}) {
                 <div className="flex-row">
                   <span className="" datastate="closed" style={{margin: '0 10px 0 0'}}>
                     <a className="" title="" href={`https://warpcast.com/${user.username}`}>
-                      <img loading="lazy" src={user.pfp_url} className="" alt={`${user.display_name} avatar`} style={{width: '48px', height: '48px', maxWidth: '48px', maxHeight: '48px', borderRadius: '24px', border: '1px solid #cdd'}} />
+                      <img loading="lazy" src={user?.pfp_url} className="" alt={`${user?.display_name} avatar`} style={{width: '48px', height: '48px', maxWidth: '48px', maxHeight: '48px', borderRadius: '24px', border: '1px solid #cdd'}} />
                     </a>
                   </span>
                   <div className="flex-col" style={{width: '100%', gap: '1rem', alignItems: 'flex-start'}}>
                     <div className="flex-row" style={{width: '100%', justifyContent: 'space-between', alignItems: 'flex-start'}}>
                       <div className="flex-row" style={{alignItems: 'center', gap: '0.25rem', flexWrap: 'wrap'}}>
                         <span className="" data-state="closed">
-                          <a className="fc-lnk" title="" href={`https://warpcast.com/${user.username}`}>
+                          <a className="fc-lnk" title="" href={`https://warpcast.com/${user?.username}`}>
                             <div className="flex-row" style={{alignItems: 'center'}}>
-                              <span className="name-font" style={{color: '#cdd', fontSize: '18px'}}>{user.display_name}</span>
+                              <span className="name-font" style={{color: '#cdd', fontSize: '18px'}}>{user?.display_name}</span>
                               <div className="" style={{margin: '0 0 0 3px'}}>
                                 {(user.power_badge) && (<ActiveUser />)}
                               </div>
@@ -311,27 +311,27 @@ export default function UserPage({username}) {
                           </a>
                         </span>
                         <span className="user-font" datastate="closed">
-                          <a className="fc-lnk" title="" href={`https://warpcast.com/${user.username}`} style={{color: '#cdd'}}>@{user.username}</a>
+                          <a className="fc-lnk" title="" href={`https://warpcast.com/${user?.username}`} style={{color: '#cdd'}}>@{user?.username}</a>
                         </span>
                         <div className="">·</div>
-                        <a className="fc-lnk" title="Navigate to cast" href={`https://warpcast.com/${user.username}`}>
-                          <div className="fid-btn" style={{backgroundColor: '#355', color: '#cdd'}}>fid: {user.fid}</div>
+                        <a className="fc-lnk" title="Navigate to cast" href={`https://warpcast.com/${user?.username}`}>
+                          <div className="fid-btn" style={{backgroundColor: '#355', color: '#cdd'}}>fid: {user?.fid}</div>
                         </a>
                       </div>
                     </div>
                     <div className="">
-                      <div style={{wordWrap: 'break-word', maxWidth: textMax, color: '#cdd'}}>{user.profile.bio.text}</div>
+                      <div style={{wordWrap: 'break-word', maxWidth: textMax, color: '#cdd'}}>{user?.profile?.bio?.text}</div>
                     </div>
                     <div className="flex-row" style={{width: '100%', justifyContent: 'space-evenly'}}>
                       <div className="" style={{flex: 1}}>
                         <div className="flex-row" style={{padding: '0 0 0 5px', fontSize: '12px', color: '#cdd', gap: '0.25rem', alignItems: 'center', cursor: 'default'}}>
-                          <div style={{fontWeight: '700', fontSize: '13px'}} title={user.following_count}>{formatNum(user.following_count)}</div>
+                          <div style={{fontWeight: '700', fontSize: '13px'}} title={user?.following_count}>{formatNum(user?.following_count)}</div>
                           <div style={{fontWeight: '400'}}>following</div>
                         </div>
                       </div>
                       <div className="flex-row" style={{flex: 2}}>
                         <div className="flex-row" style={{padding: '0 0 0 5px', fontSize: '12px', color: '#cdd', gap: '0.25rem', alignItems: 'center', cursor: 'default'}}>
-                          <div style={{fontWeight: '700', fontSize: '13px'}} title={user.follower_count}>{formatNum(user.follower_count)}</div>
+                          <div style={{fontWeight: '700', fontSize: '13px'}} title={user?.follower_count}>{formatNum(user?.follower_count)}</div>
                           <div style={{fontWeight: '400'}}>followed</div>
                         </div>
                       </div>
@@ -349,7 +349,7 @@ export default function UserPage({username}) {
           </div>
         </div>
         <div className='flex-col' style={{gap: '0.5rem'}}>
-        {(store.userProfile && store.userProfile.username !== user.username && user.fid !== '-') && (
+        {(store?.userProfile && store?.userProfile?.username !== user?.username && user?.fid !== '-') && (
           <>
             {store.isAuth ? (
               <div className="flex-row">
@@ -460,7 +460,7 @@ export default function UserPage({username}) {
         <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
           <Spinner size={31} color={'#999'} />
         </div>
-        ) : (userFeed.map((cast, index) => (<Cast {...{ cast, index, key: index, updateCast, openImagePopup, ecosystem: points }} />)))}
+        ) : (userFeed.map((cast, index) => (<Cast {...{ cast, index, key: index, updateCast, openImagePopup, ecosystem: points, handle: eco?.ecosystem_handle }} />)))}
       </div>
       <ExpandImg {...{ show: showPopup.open, closeImagePopup, embed: {showPopup}, screenWidth, screenHeight }} />
     </div>
