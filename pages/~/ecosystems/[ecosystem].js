@@ -7,6 +7,7 @@ import { useInView } from 'react-intersection-observer'
 // import { BsClock } from "react-icons/bs";
 import { BiSortDown, BiSortUp } from "react-icons/bi";
 import { IoShuffleOutline as ShuffleIcon } from "react-icons/io5";
+import { PiClockClockwiseBold as ClockForward, PiClockCounterClockwiseBold as ClockBack } from "react-icons/pi";
 import { AccountContext } from '../../../context';
 import { confirmUser } from '../../../utils/utils';
 import Spinner from '../../../components/Common/Spinner';
@@ -34,7 +35,7 @@ export default function Eco() {
   const [searchSelect, setSearchSelect ] = useState('Curation')
   const { isMobile } = useMatchBreakpoints();
   const [userFeed, setUserFeed] = useState(null)
-  const [prevSearch, setPrevSearch] = useState({getTime: null, channel: null, curators: null, text: null, shuffle: null, ecosystem: null, page: 0, order: -1})
+  const [prevSearch, setPrevSearch] = useState({getTime: null, channel: null, curators: null, text: null, shuffle: null, ecosystem: null, page: 0, order: -1, timeSort: null})
   const [showPopup, setShowPopup] = useState({open: false, url: null})
   const initialEco = {
     channels: [],
@@ -50,7 +51,7 @@ export default function Eco() {
     downvote_value: 1,
     ecosystem_moderators: [],
     ecosystem_name: 'none',
-    ecosystem_handle: 'none',
+    ecosystem_handle: 'abundance',
     ecosystem_points_name: '$IMPACT',
     ecosystem_rules: [`Can't do evil`],
     erc20s: [],
@@ -313,14 +314,14 @@ export default function Eco() {
   }, [searchSelect, userQuery, sched.feed])
 
   function feedRouter() {
-    const { shuffle, time, tags, channels, ecosystem, curators, order } = userQuery
+    const { shuffle, time, tags, channels, ecosystem, curators, order, timeSort } = userQuery
     if (ecosystem) {
       console.log('get user executed', shuffle, time, tags, channels, ecosystem, curators, order)
-      getUserSearch(time, tags, channels, curators, null, shuffle, order, ecosystem )
+      getUserSearch(time, tags, channels, curators, null, shuffle, order, ecosystem, timeSort )
     }
   }
   
-  async function getUserSearch(getTime, tags, channel, curators, text, shuffle, order, ecosystem ) {
+  async function getUserSearch(getTime, tags, channel, curators, text, shuffle, order, ecosystem, timeSort) {
     const time = getTimeRange(getTime)
 
     console.log(getTime, tags, channel, curators, text, shuffle, order, ecosystem)
@@ -336,13 +337,13 @@ export default function Eco() {
       console.log('opt1')
       page = 1
       setUserFeed([])
-      setPrevSearch(prev => ({...prev, getTime, channel, curators, text, shuffle, ecosystem, page, order }))
-    } else if (prevSearch.getTime == getTime && prevSearch.channel == channel && prevSearch.curators == curators && prevSearch.text == text && prevSearch.ecosystem == ecosystem && prevSearch.order == order) {
+      setPrevSearch(prev => ({...prev, getTime, channel, curators, text, shuffle, ecosystem, page, order, timeSort }))
+    } else if (prevSearch.getTime == getTime && prevSearch.channel == channel && prevSearch.curators == curators && prevSearch.text == text && prevSearch.ecosystem == ecosystem && prevSearch.order == order && prevSearch.timeSort == timeSort) {
       setShuffled(false)
       console.log('delay3')
       setDelay(true)
       console.log('opt2')
-      setPrevSearch(prev => ({...prev, getTime, channel, curators, text, shuffle, ecosystem, page, order }))
+      setPrevSearch(prev => ({...prev, getTime, channel, curators, text, shuffle, ecosystem, page, order, timeSort }))
     } else {
       setShuffled(false)
       console.log('delay4')
@@ -350,14 +351,14 @@ export default function Eco() {
       console.log('opt3')
       page = 1
       setUserFeed([])
-      setPrevSearch(prev => ({...prev, getTime, channel, curators, text, shuffle, ecosystem, page, order })) 
+      setPrevSearch(prev => ({...prev, getTime, channel, curators, text, shuffle, ecosystem, page, order, timeSort })) 
     }
 
-    async function getSearch(time, tags, channel, curators, text, shuffle, ecosystem, page, order) {
+    async function getSearch(time, tags, channel, curators, text, shuffle, ecosystem, page, order, timeSort) {
 
       try {
         const response = await axios.get('/api/curation/getUserSearch', {
-          params: { time, tags, channel, curators, text, shuffle, ecosystem, page, order }
+          params: { time, tags, channel, curators, text, shuffle, ecosystem, page, order, timeSort }
         })
 
         const removeDelay = () => {
@@ -388,7 +389,7 @@ export default function Eco() {
     let casts = []
     console.log('pages', page, page == 1, (page !== 1 && userFeed?.length % 10 == 0))
     if (page == 1 || (page !== 1 && userFeed?.length % 10 == 0) ) {
-      casts = await getSearch(time, tags, channel, curators, text, shuffle, ecosystem, page, order)
+      casts = await getSearch(time, tags, channel, curators, text, shuffle, ecosystem, page, order, timeSort)
     }
     
     let filteredCasts
@@ -408,10 +409,18 @@ export default function Eco() {
         return acc;
       }, [])
 
-      if (order == -1) {
-        sortedCasts = filteredCasts.sort((a, b) => b.impact_total - a.impact_total);
+      if (timeSort) {
+        if (timeSort == -1) {
+          sortedCasts = filteredCasts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        } else {
+          sortedCasts = filteredCasts.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+        }
       } else {
-        sortedCasts = filteredCasts.sort((a, b) => a.impact_total - b.impact_total);
+        if (order == -1) {
+          sortedCasts = filteredCasts.sort((a, b) => b.impact_total - a.impact_total);
+        } else {
+          sortedCasts = filteredCasts.sort((a, b) => a.impact_total - b.impact_total);
+        }
       }
 
       let displayedCasts = await populateCast(sortedCasts)
@@ -636,17 +645,27 @@ export default function Eco() {
     if (order == 'up') {
       setUserQuery({
         ...userQuery,
-        order: 1, shuffle: false
+        order: 1, shuffle: false, timeSort: null
       })
     } else if (order == 'down') {
       setUserQuery({
         ...userQuery,
-        order: -1, shuffle: false
+        order: -1, shuffle: false, timeSort: null
       })
     } else if (order == 'shuffle') {
       setUserQuery({
         ...userQuery,
-        order: -1, shuffle: true
+        order: -1, shuffle: true, timeSort: null
+      })
+    } else if (order == 'clock-forward') {
+      setUserQuery({
+        ...userQuery,
+        order: -1, shuffle: false, timeSort: -1
+      })
+    } else if (order == 'clock-back') {
+      setUserQuery({
+        ...userQuery,
+        order: -1, shuffle: false, timeSort: 1
       })
     }
 
@@ -713,7 +732,7 @@ export default function Eco() {
 
       {searchSelect == 'Curation' && (
 
-      <div className='flex-row' style={{justifyContent: 'center', marginTop: '15px', marginBottom: '30px', gap: '1rem'}}>
+      <div className={isMobile ? 'flex-col' : 'flex-row'} style={{justifyContent: 'center', marginTop: '15px', marginBottom: '30px', gap: isMobile ? '0.25rem' : '1rem'}}>
         {/* <div className='flex-row' style={{gap: '0.5rem'}}>
           <TopPicks handleSelection={handleSelection} selection={'picks'} />
           <Shuffle handleSelect={handleSelect} selection={'shuffle'} userQuery={userQuery} />
@@ -731,7 +750,8 @@ export default function Eco() {
             <div className={sortBy == 'down' ? 'filter-item-on' : 'filter-item'} style={{padding: '2px 6px 0px 6px'}} onClick={() => {updateOrder('down')}}><BiSortDown size={12} /></div>
             <div className={sortBy == 'up' ? 'filter-item-on' : 'filter-item'} style={{padding: '2px 6px 0px 6px'}} onClick={() => {updateOrder('up')}}><BiSortUp size={12} /></div>
             <div className={sortBy == 'shuffle' ? 'filter-item-on' : 'filter-item'} style={{padding: '2px 6px 0px 6px'}} onClick={() => {updateOrder('shuffle')}}><ShuffleIcon size={12} /></div>
-            
+            <div className={sortBy == 'clock-forward' ? 'filter-item-on' : 'filter-item'} style={{padding: '2px 6px 0px 6px'}} onClick={() => {updateOrder('clock-forward')}}><ClockForward size={12} /></div>
+            <div className={sortBy == 'clock-back' ? 'filter-item-on' : 'filter-item'} style={{padding: '2px 6px 0px 6px'}} onClick={() => {updateOrder('clock-back')}}><ClockBack size={12} /></div>
           </div>
         </div>
 
@@ -822,7 +842,7 @@ export default function Eco() {
         <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
           <Spinner size={31} color={'#999'} />
         </div>
-        ) : (userFeed.map((cast, index) => (<Cast {...{cast, key: index, index, updateCast, openImagePopup, ecosystem: eco.ecosystem_points_name, self: false, app}} />)))}
+        ) : (userFeed.map((cast, index) => (<Cast {...{cast, key: index, index, updateCast, openImagePopup, ecosystem: eco?.ecosystem_points_name, handle: eco?.ecosystem_handle, self: false, app}} />)))}
         {!delay && !shuffled && (
           <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
             <Spinner size={31} color={'#999'} />

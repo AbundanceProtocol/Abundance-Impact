@@ -30,6 +30,11 @@ export default async function handler(req, res) {
     res.status(405).end(`Method ${req.method} Not Allowed`);
   } else {
 
+    let timeRange = null
+    if (time) {
+      timeRange = getTimeRange(time)
+    } 
+
     function sanitizeInput(input) {
       input = _.trim(input);
       input = _.replace(input, /[\x00-\x1F\x7F-\x9F]/g, ''); // Remove control characters
@@ -188,7 +193,7 @@ export default async function handler(req, res) {
     
     console.log('14-1:', req.query)
 
-    const exploreLink = `${baseURL}/~/ecosystems/${ecosystem}?${qs.stringify({ time: 'all', curators, eco })}`
+    const exploreLink = `${baseURL}/~/ecosystems/${ecosystem}?${qs.stringify({ time, curators, eco })}`
 
     const impactLink = `https://warpcast.com/abundance/0x43ddd672`
 
@@ -224,11 +229,6 @@ export default async function handler(req, res) {
         curator = curators[0]
       }
       console.log('inputText2', inputText)
-  
-      let timeRange = null
-      // if (time) {
-      //   timeRange = getTimeRange(time)
-      // } 
       
       // Example usage
       // const input = "500 $degen, 400 $HAM 10000 🍖x400, 300 $HAM";

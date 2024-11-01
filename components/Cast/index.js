@@ -1,4 +1,5 @@
 import React, { useContext, useRef, useEffect, useState } from 'react';
+import Link from 'next/link'
 import { useRouter } from 'next/router';
 import useStore from '../../utils/store';
 import { AccountContext } from '../../context';
@@ -15,7 +16,7 @@ import { ImArrowUp, ImArrowDown  } from "react-icons/im";
 import VideoPlayer from './VideoPlayer';
 import Images from './Images';
 
-export default function Cast({ cast, index, updateCast, openImagePopup, ecosystem, self, app }) {
+export default function Cast({ cast, index, updateCast, openImagePopup, ecosystem, handle, self, app }) {
   const store = useStore()
   const router = useRouter();
   const [screenWidth, setScreenWidth] = useState(undefined)
@@ -276,21 +277,10 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
       </div>
       <div className="flex-row">
         <div className="flex-col" style={{alignItems: 'center', userSelect: 'none'}}>
-
           <div className="" style={{margin: '0 10px 0 0', height: '50px'}}>
-            <a className="" title="" href={`/${cast.author.username}`} onClick={(event) => {
-              if (!isLogged) {
-                console.log('ca1')
-                if (!app) {
-                  LoginPopup()
-                }
-                event.preventDefault()
-              } else {
-                goToUserProfile(event, cast.author)
-              }
-            }}>
+            <Link href={`/~/ecosystems/${handle}/creators/${cast?.author?.username}`}>
               <img loading="lazy" src={cast?.author?.pfp_url} className="" alt={`${cast.author.display_name} avatar`} style={{width: '48px', height: '48px', maxWidth: '48px', maxHeight: '48px', borderRadius: '24px', border: '1px solid #000'}} />
-            </a>
+            </Link>
           </div>
           {(userFid && userFid !== cast.author.fid || true) && (
           <div className={`'flex-col' ${fail ? 'flash-fail' : ''}`} style={{margin: '10px 10px 0 0'}}>
@@ -347,14 +337,14 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
                     goToUserProfile(event, cast.author)
                   }
                 }}> */}
-                <a href={`https://warpcast.com/${cast?.author?.username}`} className="fc-lnk" title={cast?.author?.display_name} style={{cursor: 'pointer'}}>
+                <Link className="fc-lnk" title={cast?.author?.display_name} style={{cursor: 'pointer'}} href={`/~/ecosystems/${handle}/creators/${cast?.author?.username}`}>
                   <div className="flex-row" style={{alignItems: 'center'}}>
                     <span className="name-font">{cast.author.display_name}</span>
                     <div className="" style={{margin: '0 0 0 3px'}}>
                       {(cast.author.power_badge) && (<ActiveUser />)}
                     </div>
                   </div>
-                </a>
+                </Link>
               </span>
               <span className="user-font">
                 {/* <a href={`/${cast.author.username}`} className="fc-lnk" title={cast.author.display_name} onClick={(event) => {

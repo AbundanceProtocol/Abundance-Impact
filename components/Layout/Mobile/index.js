@@ -9,10 +9,12 @@ import EcosystemNav from '../EcosystemNav'
 import HomeButton from '../HomeButton';
 import MobileMenu from './MobileMenu';
 import useMatchBreakpoints from '../../../hooks/useMatchBreakpoints';
+import { useRouter } from 'next/router';
 
 const Mobile = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const { isMobile } = useMatchBreakpoints();
+  const router = useRouter()
 
   const toggleDrawer = () => (e) => {
     if (
@@ -26,7 +28,7 @@ const Mobile = () => {
   };
 
   return (
-    isMobile && 
+    isMobile && router.route !== '/~/studio/multi-tip-compose' && 
       (<React.Fragment key="top">
         <MobileAppbar className='top-layer' position="fixed" elevation={0} sx={{paddingRight: 0}} style={{backgroundColor: '#22334488'}}>
           <nav className="nav-bar-mobile">

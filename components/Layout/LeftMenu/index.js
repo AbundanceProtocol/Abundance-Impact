@@ -13,7 +13,7 @@ const LeftMenu = () => {
   const { isMobile } = useMatchBreakpoints();
 
   return (
-    !isMobile && (
+    !isMobile && router.route !== '/~/studio/multi-tip-compose' && (
       <div className="flex-col" style={{padding: '58px 0 0 0', position: 'relative'}}>
         <div className='left-container'></div>
         {!(!isLogged && router.route == '/') && (<div className='flex-row left-container' style={{position: 'fixed', top: '4px', width: '49px', height: '33px', alignItems: 'center', justifyContent: 'center'}}>

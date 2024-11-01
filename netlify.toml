@@ -1,0 +1,18 @@
+[build]
+  command = "next build"
+  publish = ".next"
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+  external_node_modules = ["mongodb", "mongoose"]
+  included_files = ["utils/**", "libs/**", "models/**"]
+
+[functions.scheduledTips]
+  schedule = "40 22 * * *" # Runs at 6:40 PM EST daily
+  path = "scheduledTips"
+  queryParams = { code = "test", tipTime = "7pm" }
+  timeout = { duration = 900 }
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"

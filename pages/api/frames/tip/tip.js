@@ -176,7 +176,9 @@ export default async function handler(req, res) {
     const timePlus1 = new Date(now.getTime() + 1 * 60 * 1000);
     const points = '$' + eco
 
-    const fid = untrustedData?.fid
+    const fid = message?.data?.fid
+    const authorFid = message?.data?.frameActionBody?.castId?.fid
+
     const loginImg = `${baseURL}/images/login.jpg`;
     const tipsImg = `${baseURL}/images/frame36.gif`
     const inputImg = `${baseURL}/images/input.jpg`;
@@ -281,9 +283,9 @@ export default async function handler(req, res) {
         console.log('inputText2', inputText)
     
         let timeRange = null
-        // if (time) {
-        //   timeRange = getTimeRange(time)
-        // } 
+        if (time) {
+          timeRange = getTimeRange(time)
+        } 
         
         // Example usage
         // const input = "500 $degen, 400 $HAM 10000 🍖x400, 300 $HAM";

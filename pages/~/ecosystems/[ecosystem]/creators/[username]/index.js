@@ -7,6 +7,7 @@ import { useInView } from 'react-intersection-observer'
 // import { BsClock } from "react-icons/bs";
 import { BiSortDown, BiSortUp } from "react-icons/bi";
 import { IoShuffleOutline as ShuffleIcon } from "react-icons/io5";
+import { PiClockClockwiseBold as ClockForward, PiClockCounterClockwiseBold as ClockBack } from "react-icons/pi";
 import { AccountContext } from '../../../../../../context';
 import { confirmUser } from '../../../../../../utils/utils';
 import Spinner from '../../../../../../components/Common/Spinner';
@@ -34,7 +35,7 @@ export default function ProfilePage() {
   const [searchSelect, setSearchSelect ] = useState('Curation')
   const { isMobile } = useMatchBreakpoints();
   const [userFeed, setUserFeed] = useState(null)
-  const [prevSearch, setPrevSearch] = useState({author_username: null, getTime: null, channel: null, username: null, text: null, shuffle: null, ecosystem: null, page: 0, order: -1})
+  const [prevSearch, setPrevSearch] = useState({author_username: null, getTime: null, channel: null, username: null, text: null, shuffle: null, ecosystem: null, page: 0, order: -1, timeSort: null})
   const [showPopup, setShowPopup] = useState({open: false, url: null})
   const initialEco = {
     channels: [],
@@ -50,7 +51,7 @@ export default function ProfilePage() {
     downvote_value: 1,
     ecosystem_moderators: [],
     ecosystem_name: 'none',
-    ecosystem_handle: 'none',
+    ecosystem_handle: 'abundance',
     ecosystem_points_name: '$IMPACT',
     ecosystem_rules: [`Can't do evil`],
     erc20s: [],
@@ -126,7 +127,7 @@ export default function ProfilePage() {
       const response = await axios.get('/api/getCuratorProfile', {
         params: { username }
       })
-      if (response?.data) {
+      if (response?.data?.data?.Socials?.Social[0]) {
         const profile = response?.data?.data?.Socials?.Social[0] || null
         console.log('profile', profile)
         const populatedProfile = {
@@ -296,14 +297,14 @@ export default function ProfilePage() {
   }, [searchSelect, userQuery, sched.feed])
 
   function feedRouter() {
-    const { author_username, shuffle, time, tags, channels, ecosystem, username, order } = userQuery
+    const { author_username, shuffle, time, tags, channels, ecosystem, username, order, timeSort } = userQuery
     if (author_username && ecosystem) {
       console.log('get user executed')
-      getUserSearch(author_username, time, tags, channels, username, null, shuffle, order, ecosystem )
+      getUserSearch(author_username, time, tags, channels, username, null, shuffle, order, ecosystem, timeSort )
     }
   }
   
-  async function getUserSearch(author_username, getTime, tags, channel, username, text, shuffle, order, ecosystem ) {
+  async function getUserSearch(author_username, getTime, tags, channel, username, text, shuffle, order, ecosystem, timeSort) {
     const time = getTimeRange(getTime)
 
     console.log(getTime, tags, channel, username, text, shuffle, order, ecosystem)
@@ -319,13 +320,13 @@ export default function ProfilePage() {
       console.log('opt1')
       page = 1
       setUserFeed([])
-      setPrevSearch(prev => ({...prev, getTime, channel, username, text, shuffle, ecosystem, page, order, author_username }))
-    } else if (prevSearch?.author_username == author_username && prevSearch.getTime == getTime && prevSearch.channel == channel && prevSearch.username == username && prevSearch.text == text && prevSearch.ecosystem == ecosystem && prevSearch.order == order) {
+      setPrevSearch(prev => ({...prev, getTime, channel, username, text, shuffle, ecosystem, page, order, author_username, timeSort }))
+    } else if (prevSearch?.author_username == author_username && prevSearch.getTime == getTime && prevSearch.channel == channel && prevSearch.username == username && prevSearch.text == text && prevSearch.ecosystem == ecosystem && prevSearch.order == order && prevSearch.timeSort == timeSort) {
       setShuffled(false)
       console.log('delay3')
       setDelay(true)
       console.log('opt2')
-      setPrevSearch(prev => ({...prev, getTime, channel, username, text, shuffle, ecosystem, page, order, author_username }))
+      setPrevSearch(prev => ({...prev, getTime, channel, username, text, shuffle, ecosystem, page, order, author_username, timeSort }))
     } else {
       setShuffled(false)
       console.log('delay4')
@@ -333,14 +334,14 @@ export default function ProfilePage() {
       console.log('opt3')
       page = 1
       setUserFeed([])
-      setPrevSearch(prev => ({...prev, getTime, channel, username, text, shuffle, ecosystem, page, order, author_username })) 
+      setPrevSearch(prev => ({...prev, getTime, channel, username, text, shuffle, ecosystem, page, order, author_username, timeSort })) 
     }
 
-    async function getSearch(author_username, time, tags, channel, username, text, shuffle, ecosystem, page, order) {
+    async function getSearch(author_username, time, tags, channel, username, text, shuffle, ecosystem, page, order, timeSort) {
 
       try {
         const response = await axios.get('/api/curation/getUserSearch', {
-          params: { author_username, time, tags, channel, username, text, shuffle, ecosystem, page, order }
+          params: { author_username, time, tags, channel, username, text, shuffle, ecosystem, page, order, timeSort }
         })
 
         const removeDelay = () => {
@@ -371,7 +372,7 @@ export default function ProfilePage() {
     let casts = []
     console.log('pages', page, page == 1, (page !== 1 && userFeed?.length % 10 == 0))
     if (page == 1 || (page !== 1 && userFeed?.length % 10 == 0) ) {
-      casts = await getSearch(author_username, time, tags, channel, username, text, shuffle, ecosystem, page, order)
+      casts = await getSearch(author_username, time, tags, channel, username, text, shuffle, ecosystem, page, order, timeSort)
     }
     
     let filteredCasts
@@ -391,10 +392,18 @@ export default function ProfilePage() {
         return acc;
       }, [])
 
-      if (order == -1) {
-        sortedCasts = filteredCasts.sort((a, b) => b.impact_total - a.impact_total);
+      if (timeSort) {
+        if (timeSort == -1) {
+          sortedCasts = filteredCasts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        } else {
+          sortedCasts = filteredCasts.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+        }
       } else {
-        sortedCasts = filteredCasts.sort((a, b) => a.impact_total - b.impact_total);
+        if (order == -1) {
+          sortedCasts = filteredCasts.sort((a, b) => b.impact_total - a.impact_total);
+        } else {
+          sortedCasts = filteredCasts.sort((a, b) => a.impact_total - b.impact_total);
+        }
       }
 
       let displayedCasts = await populateCast(sortedCasts)
@@ -619,17 +628,27 @@ export default function ProfilePage() {
     if (order == 'up') {
       setUserQuery({
         ...userQuery,
-        order: 1, shuffle: false
+        order: 1, shuffle: false, timeSort: null
       })
     } else if (order == 'down') {
       setUserQuery({
         ...userQuery,
-        order: -1, shuffle: false
+        order: -1, shuffle: false, timeSort: null
       })
     } else if (order == 'shuffle') {
       setUserQuery({
         ...userQuery,
-        order: -1, shuffle: true
+        order: -1, shuffle: true, timeSort: null
+      })
+    } else if (order == 'clock-forward') {
+      setUserQuery({
+        ...userQuery,
+        order: -1, shuffle: false, timeSort: -1
+      })
+    } else if (order == 'clock-back') {
+      setUserQuery({
+        ...userQuery,
+        order: -1, shuffle: false, timeSort: 1
       })
     }
 
@@ -694,7 +713,7 @@ export default function ProfilePage() {
 
       {searchSelect == 'Curation' && (
 
-      <div className='flex-row' style={{justifyContent: 'center', marginTop: '15px', marginBottom: '30px', gap: '1rem'}}>
+      <div className={isMobile ? 'flex-col' : 'flex-row'} style={{justifyContent: 'center', marginTop: '15px', marginBottom: '30px', gap: isMobile ? '0.25rem' : '1rem'}}>
         {/* <div className='flex-row' style={{gap: '0.5rem'}}>
           <TopPicks handleSelection={handleSelection} selection={'picks'} />
           <Shuffle handleSelect={handleSelect} selection={'shuffle'} userQuery={userQuery} />
@@ -712,7 +731,8 @@ export default function ProfilePage() {
             <div className={sortBy == 'down' ? 'filter-item-on' : 'filter-item'} style={{padding: '2px 6px 0px 6px'}} onClick={() => {updateOrder('down')}}><BiSortDown size={12} /></div>
             <div className={sortBy == 'up' ? 'filter-item-on' : 'filter-item'} style={{padding: '2px 6px 0px 6px'}} onClick={() => {updateOrder('up')}}><BiSortUp size={12} /></div>
             <div className={sortBy == 'shuffle' ? 'filter-item-on' : 'filter-item'} style={{padding: '2px 6px 0px 6px'}} onClick={() => {updateOrder('shuffle')}}><ShuffleIcon size={12} /></div>
-            
+            <div className={sortBy == 'clock-forward' ? 'filter-item-on' : 'filter-item'} style={{padding: '2px 6px 0px 6px'}} onClick={() => {updateOrder('clock-forward')}}><ClockForward size={12} /></div>
+            <div className={sortBy == 'clock-back' ? 'filter-item-on' : 'filter-item'} style={{padding: '2px 6px 0px 6px'}} onClick={() => {updateOrder('clock-back')}}><ClockBack size={12} /></div>            
           </div>
         </div>
 
@@ -803,7 +823,7 @@ export default function ProfilePage() {
         <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
           <Spinner size={31} color={'#999'} />
         </div>
-        ) : (userFeed.map((cast, index) => (<Cast {...{cast, key: index, index, updateCast, openImagePopup, ecosystem: eco.ecosystem_points_name, self: false, app}} />)))}
+        ) : (userFeed.map((cast, index) => (<Cast {...{cast, key: index, index, updateCast, openImagePopup, ecosystem: eco?.ecosystem_points_name, handle: eco?.ecosystem_handle, self: false, app}} />)))}
         {!delay && !shuffled && (
           <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
             <Spinner size={31} color={'#999'} />

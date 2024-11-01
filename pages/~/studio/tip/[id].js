@@ -7,6 +7,7 @@ import axios from 'axios';
 import Cast from '../../../../components/Cast'
 import { formatNum, getCurrentDateUTC, getTimeRange, isYesterday, checkEmbedType, populateCast, isCast } from '../../../../utils/utils';
 import { AiOutlineBars } from "react-icons/ai";
+import { PiClockClockwiseBold as ClockForward, PiClockCounterClockwiseBold as ClockBack } from "react-icons/pi";
 import Spinner from '../../../../components/Common/Spinner';
 import ExpandImg from '../../../../components/Cast/ExpandImg';
 import CuratorData from '../../../../components/Page/CuratorData';
@@ -34,7 +35,7 @@ export default function ProfilePage() {
   const [searchSelect, setSearchSelect ] = useState('Curation')
   const { isMobile } = useMatchBreakpoints();
   const [userFeed, setUserFeed] = useState(null)
-  const [prevSearch, setPrevSearch] = useState({getTime: null, channel: null, curator: null, text: null, shuffle: null, points: null, page: 0, order: -1})
+  const [prevSearch, setPrevSearch] = useState({getTime: null, channel: null, curator: null, text: null, shuffle: null, points: null, page: 0, order: -1, timeSort: null})
   const [showPopup, setShowPopup] = useState({open: false, url: null})
   const initialEco = {
     channels: [],
@@ -50,7 +51,7 @@ export default function ProfilePage() {
     downvote_value: 1,
     ecosystem_moderators: [],
     ecosystem_name: 'none',
-    ecosystem_handle: 'none',
+    ecosystem_handle: 'abundance',
     ecosystem_points_name: '$IMPACT',
     ecosystem_rules: [`Can't do evil`],
     erc20s: [],
@@ -357,15 +358,15 @@ export default function ProfilePage() {
   }, [searchSelect, userQuery, sched.feed])
 
   function feedRouter() {
-    const { shuffle, time, tags, channels, curators, order } = userQuery
+    const { shuffle, time, tags, channels, curators, order, timeSort } = userQuery
     if (!id) {
-      getUserSearch(time, tags, channels, curators, null, shuffle, order)
+      getUserSearch(time, tags, channels, curators, null, shuffle, order, timeSort)
     } else {
       getTipCasts(id)
     }
   }
   
-  async function getUserSearch(getTime, tags, channel, curator, text, shuffle, order) {
+  async function getUserSearch(getTime, tags, channel, curator, text, shuffle, order, timeSort) {
     console.log('no id!')
     const time = getTimeRange(getTime)
 
@@ -380,24 +381,24 @@ export default function ProfilePage() {
       console.log('opt1')
       page = 1
       setUserFeed([])
-      setPrevSearch(prev => ({...prev, getTime, channel, curator, text, shuffle, points, page, order }))
-    } else if (prevSearch.getTime == getTime && prevSearch.channel == channel && prevSearch.curator == curator && prevSearch.text == text && prevSearch.points == points && prevSearch.order == order) {
+      setPrevSearch(prev => ({...prev, getTime, channel, curator, text, shuffle, points, page, order, timeSort }))
+    } else if (prevSearch.getTime == getTime && prevSearch.channel == channel && prevSearch.curator == curator && prevSearch.text == text && prevSearch.points == points && prevSearch.order == order && prevSearch.timeSort == timeSort) {
       setDelay(true)
       console.log('opt2')
-      setPrevSearch(prev => ({...prev, getTime, channel, curator, text, shuffle, points, page, order }))
+      setPrevSearch(prev => ({...prev, getTime, channel, curator, text, shuffle, points, page, order, timeSort }))
     } else {
       setDelay(true)
       console.log('opt3')
       page = 1
       setUserFeed([])
-      setPrevSearch(prev => ({...prev, getTime, channel, curator, text, shuffle, points, page, order })) 
+      setPrevSearch(prev => ({...prev, getTime, channel, curator, text, shuffle, points, page, order, timeSort })) 
     }
 
-    async function getSearch(time, tags, channel, curator, text, shuffle, points, page, order) {
+    async function getSearch(time, tags, channel, curator, text, shuffle, points, page, order, timeSort) {
 
       try {
         const response = await axios.get('/api/curation/getUserSearch', {
-          params: { time, tags, channel, curator, text, shuffle, points, page, order }
+          params: { time, tags, channel, curators: curator, text, shuffle, points, page, order, timeSort }
         })
 
         const removeDelay = () => {
@@ -427,7 +428,7 @@ export default function ProfilePage() {
     let casts = []
     console.log('pages', page, page == 1, (page !== 1 && userFeed?.length % 10 == 0))
     if (!id && (page == 1 || (page !== 1 && userFeed?.length % 10 == 0)) ) {
-      casts = await getSearch(time, tags, channel, curator, text, shuffle, points, page, order)
+      casts = await getSearch(time, tags, channel, curator, text, shuffle, points, page, order, timeSort)
     }
     
     let filteredCasts
@@ -447,10 +448,18 @@ export default function ProfilePage() {
         return acc;
       }, [])
 
-      if (order == -1) {
-        sortedCasts = filteredCasts.sort((a, b) => b.impact_total - a.impact_total);
+      if (timeSort) {
+        if (timeSort == -1) {
+          sortedCasts = filteredCasts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        } else {
+          sortedCasts = filteredCasts.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+        }
       } else {
-        sortedCasts = filteredCasts.sort((a, b) => a.impact_total - b.impact_total);
+        if (order == -1) {
+          sortedCasts = filteredCasts.sort((a, b) => b.impact_total - a.impact_total);
+        } else {
+          sortedCasts = filteredCasts.sort((a, b) => a.impact_total - b.impact_total);
+        }
       }
 
       let displayedCasts = await populateCast(sortedCasts)
@@ -743,17 +752,27 @@ async function getTipCasts(id) {
     if (order == 'up') {
       setUserQuery({
         ...userQuery,
-        order: 1, shuffle: false
+        order: 1, shuffle: false, timeSort: null
       })
     } else if (order == 'down') {
       setUserQuery({
         ...userQuery,
-        order: -1, shuffle: false
+        order: -1, shuffle: false, timeSort: null
       })
     } else if (order == 'shuffle') {
       setUserQuery({
         ...userQuery,
-        order: -1, shuffle: true
+        order: -1, shuffle: true, timeSort: null
+      })
+    } else if (order == 'clock-forward') {
+      setUserQuery({
+        ...userQuery,
+        order: -1, shuffle: false, timeSort: -1
+      })
+    } else if (order == 'clock-back') {
+      setUserQuery({
+        ...userQuery,
+        order: -1, shuffle: false, timeSort: 1
       })
     }
 
@@ -818,7 +837,7 @@ async function getTipCasts(id) {
 
       {searchSelect == 'Curation' && !id ? (
 
-      <div className='flex-row' style={{justifyContent: 'center', marginTop: '15px', marginBottom: '30px', gap: '1rem'}}>
+      <div className={isMobile ? 'flex-col' : 'flex-row'} style={{justifyContent: 'center', marginTop: '15px', marginBottom: '30px', gap: isMobile ? '0.25rem' : '1rem'}}>
         {/* <div className='flex-row' style={{gap: '0.5rem'}}>
           <TopPicks handleSelection={handleSelection} selection={'picks'} />
           <Shuffle handleSelect={handleSelect} selection={'shuffle'} userQuery={userQuery} />
@@ -834,6 +853,8 @@ async function getTipCasts(id) {
             <div className={sortBy == 'down' ? 'filter-item-on' : 'filter-item'} style={{padding: '2px 6px 0px 6px'}} onClick={() => {updateOrder('down')}}><BiSortDown size={12} /></div>
             <div className={sortBy == 'up' ? 'filter-item-on' : 'filter-item'} style={{padding: '2px 6px 0px 6px'}} onClick={() => {updateOrder('up')}}><BiSortUp size={12} /></div>
             <div className={sortBy == 'shuffle' ? 'filter-item-on' : 'filter-item'} style={{padding: '2px 6px 0px 6px'}} onClick={() => {updateOrder('shuffle')}}><ShuffleIcon size={12} /></div>
+            <div className={sortBy == 'clock-forward' ? 'filter-item-on' : 'filter-item'} style={{padding: '2px 6px 0px 6px'}} onClick={() => {updateOrder('clock-forward')}}><ClockForward size={12} /></div>
+            <div className={sortBy == 'clock-back' ? 'filter-item-on' : 'filter-item'} style={{padding: '2px 6px 0px 6px'}} onClick={() => {updateOrder('clock-back')}}><ClockBack size={12} /></div>
           </div>
         </div>
 
@@ -943,7 +964,7 @@ async function getTipCasts(id) {
         <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
           <Spinner size={31} color={'#999'} />
         </div>
-        ) : (userFeed.map((cast, index) => (<Cast {...{cast, key: index, index, updateCast, openImagePopup, ecosystem: eco.ecosystem_points_name, self: false, app}} />)))}
+        ) : (userFeed.map((cast, index) => (<Cast {...{cast, key: index, index, updateCast, openImagePopup, ecosystem: eco?.ecosystem_points_name, handle: eco?.ecosystem_handle, self: false, app}} />)))}
       </div>
       {!delay && (<div ref={ref}>&nbsp;</div>)}
       <ExpandImg  {...{show: showPopup.open, closeImagePopup, embed: {showPopup}, screenWidth, screenHeight }} />

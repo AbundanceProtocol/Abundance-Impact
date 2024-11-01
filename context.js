@@ -138,7 +138,7 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
   }
 
   useEffect(() => {
-    if (router.route !== "/~/ecosystems/[ecosystem]/tip" && router.route !== "/~/ecosystems/[ecosystem]/[eco]/[curators]/tip" && router.route !== "/~/ecosystems/[ecosystem]/tip-basic" && router.route !== "/~/ecosystems/[ecosystem]/tip-share" && router.route !== "/~/ecosystems/[ecosystem]/tip-share-v2") {
+    if (router.route !== "/~/ecosystems/[ecosystem]/tip" && router.route !== "/~/ecosystems/[ecosystem]/[eco]/[curators]/tip" && router.route !== "/~/ecosystems/[ecosystem]/tip-basic" && router.route !== "/~/ecosystems/[ecosystem]/tip-share" && router.route !== "/~/ecosystems/[ecosystem]/tip-share-v2" && router.route !== "/~/studio/multi-tip-compose") {
       console.log('c5 triggered []')
       console.log('c6', store.points, points)
       getEcosystems(store.points || points)
@@ -160,7 +160,7 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
       }
     }
 
-    if (router.route !== "/~/ecosystems/[ecosystem]/tip" && router.route !== "/~/ecosystems/[ecosystem]/[eco]/[curators]/tip" && router.route !== "/~/ecosystems/[ecosystem]/tip-basic" && router.route !== "/~/ecosystems/[ecosystem]/tip-share" && router.route !== "/~/ecosystems/[ecosystem]/tip-share-v2") {
+    if (router.route !== "/~/ecosystems/[ecosystem]/tip" && router.route !== "/~/ecosystems/[ecosystem]/[eco]/[curators]/tip" && router.route !== "/~/ecosystems/[ecosystem]/tip-basic" && router.route !== "/~/ecosystems/[ecosystem]/tip-share" && router.route !== "/~/ecosystems/[ecosystem]/tip-share-v2" && router.route !== "/~/studio/multi-tip-compose") {
       if (sched.ecoData) {
         updateEcoData()
         setSched(prev => ({...prev, ecoData: false }))
@@ -201,7 +201,7 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
     }
 
     console.log('c13-2', router.route, router.route !== "/~/ecosystems/[ecosystem]/tip-basic")
-    if (router.route !== "/~/ecosystems/[ecosystem]/tip" && router.route !== "/~/ecosystems/[ecosystem]/[eco]/[curators]/tip" && router.route !== "/~/ecosystems/[ecosystem]/tip-basic" && router.route !== "/~/ecosystems/[ecosystem]/tip-share" && router.route !== "/~/ecosystems/[ecosystem]/tip-share-v2" && !miniApp) {
+    if (router.route !== "/~/ecosystems/[ecosystem]/tip" && router.route !== "/~/ecosystems/[ecosystem]/[eco]/[curators]/tip" && router.route !== "/~/ecosystems/[ecosystem]/tip-basic" && router.route !== "/~/ecosystems/[ecosystem]/tip-share" && router.route !== "/~/ecosystems/[ecosystem]/tip-share-v2" && router.route !== "/~/studio/multi-tip-compose" && !miniApp) {
       if (sched.login) {
         updateLogin()
         setSched(prev => ({...prev, login: false }))
