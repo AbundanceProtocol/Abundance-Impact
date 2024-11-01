@@ -51,7 +51,7 @@ export default function MultiTip() {
 
   useEffect(() => {
     const { trigger, fid } = router.query;
-
+    console.log('fid', fid)
     if (fid) {
       setFrameFid(Number(fid))
     }
@@ -176,7 +176,7 @@ export default function MultiTip() {
     console.log(frameEcosystem?.url, frameTime?.url, frameFid, frameEcosystem?.eco)
     let shareUrl = `https://impact.abundance.id/~/ecosystems/${frameEcosystem?.url}/tip-v4?time=${frameTime?.url}&shuffle=true${frameCurators?.url ? '&curators=' + frameCurators?.url[0] : ''}&eco=${frameEcosystem?.eco}`
 
-    // console.log('shareUrl', shareUrl)
+    console.log('shareUrl', shareUrl)
     let shareText = ''
 
     if (frameCurators?.url && frameCurators?.url[0] == fid) {
