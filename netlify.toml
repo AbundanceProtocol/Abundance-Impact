@@ -8,7 +8,7 @@
   external_node_modules = ["mongodb", "mongoose"]
   included_files = ["utils/**", "libs/**", "models/**"]
 
-[functions.scheduledTips_background]
+[functions.scheduledTips-background]
   schedule = "40 23 * * *" # Runs at 6:40 PM EST daily
   queryParams = { code = "test", tipTime = "7pm" }
 
