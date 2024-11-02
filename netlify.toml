@@ -9,9 +9,8 @@
   included_files = ["utils/**", "libs/**", "models/**"]
 
 [functions.scheduledTips_background]
-  schedule = "59 22 * * *" # Runs at 6:40 PM EST daily
+  schedule = "40 23 * * *" # Runs at 6:40 PM EST daily
   queryParams = { code = "test", tipTime = "7pm" }
-  timeout = { duration = 900 }
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
