@@ -647,7 +647,7 @@ export default async function handler(req, res) {
                 }
               }
   
-              const { castData, circle, pfps } = await processTips(displayedCasts, fid, allowances, ecoName, curatorPercent)
+              const { castData, circle, pfps, usernames } = await processTips(displayedCasts, fid, allowances, ecoName, curatorPercent)
               console.log('pfps', pfps)
               const jointFids = circle.join(',')
   
@@ -768,17 +768,31 @@ export default async function handler(req, res) {
                 }
               }
   
+              let userText = ''
+
+              if (usernames && usernames?.length > 0) {
+                for (let i = 0; i < usernames?.length; i++) {
+                  if (i < usernames?.length - 1) {
+                    userText += '@' + usernames[i] + ', ';
+                  } else if (i === usernames?.length - 1 && usernames?.length <= 5) {
+                    userText += 'and @' + usernames[i] + ' ';
+                  } else if (i === usernames?.length - 1 && usernames?.length > 5) {
+                    userText += 'and other builders & creators ';
+                  }
+                }
+              }
+
               if (curators && fid == curators) {
-                shareText = 'I just multi-tipped builders & creators on /impact by @abundance.\n\nSupport my nominees here:'
+                shareText = `I just multi-tipped ${userText} on /impact by @abundance.\n\nSupport my nominees here:`
               } else if (curators?.length > 0) {
                 const curatorName = await getCurator(curators, points)
                 if (curatorName) {
-                  shareText = `I just multi-tipped ${curatorName}'s curation of builders & creators thru /impact by @abundance.\n\nSupport ${curatorName}'s nominees here:`
+                  shareText = `I just multi-tipped ${userText}curated by ${curatorName} thru /impact by @abundance.\n\nSupport ${curatorName}'s nominees here:`
                 } else {
-                  shareText = 'I just multi-tipped builders & creators on /impact by @abundance. Try it out here:'
+                  shareText = `I just multi-tipped ${userText}on /impact by @abundance. Try it out here:`
                 }
               } else {
-                shareText = 'I just multi-tipped builders & creators on /impact by @abundance. Try it out here:'
+                shareText = `I just multi-tipped ${userText}on /impact by @abundance. Try it out here:`
               }
               encodedShareText = encodeURIComponent(shareText)
   

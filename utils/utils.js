@@ -594,9 +594,13 @@ export async function processTips(userFeed, userFid, tokenData, ecosystem, curat
     .filter(feed => circle.includes(feed.author.fid))
     .map(feed => feed.author.pfp_url);
 
-    let uniquePfPs = pfps.filter((pfp, index, self) => self.indexOf(pfp) === index);
+    const usernames = userFeed
+    .filter(feed => circle.includes(feed.author.fid))
+    .map(feed => feed.author.username);
 
-    return { castData: finalTips, coinTotals: coinTotals, circle, pfps: uniquePfPs }
+    let uniqueUsernames = usernames.filter((username, index, self) => self.indexOf(username) === index);
+
+    return { castData: finalTips, coinTotals: coinTotals, circle, pfps: uniquePfPs, usernames: uniqueUsernames || [] }
   }
 }
 

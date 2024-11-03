@@ -150,7 +150,7 @@ const CuratorNav = () => {
         </div>
       </div>
     ))}
-    {topCurators?.length > 0 && (<div className='flex-row' style={{height: '10px', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '0px', margin: '0 0 0 0'}}><Link href={`/~/ecosystems/${ecoData?.ecosystem_handle}/curator`} ><div className={'filter-item'} style={{fontSize: '12px', border: '1px solid #666', padding: '1px 5px'}}>See all</div></Link></div>)}
+    {topCurators?.length > 0 && (<div className='flex-row' style={{height: '10px', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '0px', margin: '0 0 0 0'}}><Link href={`/~/ecosystems/${ecoData?.ecosystem_handle}/curators`} ><div className={'filter-item'} style={{fontSize: '12px', border: '1px solid #666', padding: '1px 5px'}}>See all</div></Link></div>)}
     </>
   )
 }
