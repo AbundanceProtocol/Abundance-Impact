@@ -713,14 +713,18 @@ export default async function handler(req, res) {
             let userText = ''
 
             if (usernames && usernames?.length > 0) {
-              for (let i = 0; i < usernames?.length; i++) {
-                if (i < usernames?.length - 1) {
-                  userText += '@' + usernames[i] + ', ';
-                } else if (i === usernames?.length - 1 && usernames?.length <= 5) {
-                  userText += 'and @' + usernames[i] + ' ';
-                } else if (i === usernames?.length - 1 && usernames?.length > 5) {
-                  userText += 'and other builders & creators ';
-                }
+              if (usernames && usernames?.length == 1) {
+                userText = '@' + usernames[0] + ' '
+              } else if (usernames && usernames?.length == 2) {
+                userText = '@' + usernames[0] + ' and @' + usernames[1] + ' '
+              } else if (usernames && usernames?.length == 3) {
+                userText = '@' + usernames[0] + ', @' + usernames[1] + ' and @' + usernames[2] + ' '
+              } else if (usernames && usernames?.length == 4) {
+                userText = '@' + usernames[0] + ', @' + usernames[1] + ', @' + usernames[2] + ' and @' + usernames[3] + ' '
+              } else if (usernames && usernames?.length == 5) {
+                userText = '@' + usernames[0] + ', @' + usernames[1] + ', @' + usernames[2] + ', @' + usernames[3] + ' and @' + usernames[4] + ' '
+              } else if (usernames && usernames?.length > 5) {
+                userText = '@' + usernames[0] + ', @' + usernames[1] + ', @' + usernames[2] + ', @' + usernames[3] + ', @' + usernames[4] + ' and other builders & creators '
               }
             }
 
