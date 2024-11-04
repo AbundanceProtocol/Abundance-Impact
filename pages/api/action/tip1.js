@@ -89,6 +89,11 @@ export default async function handler(req, res) {
 
       let castContext
 
+      let userAddress = null
+      if (getCastData?.author?.verified_addresses?.eth_addresses?.length > 0) {
+        userAddress = getCastData?.author?.verified_addresses?.eth_addresses[0]
+      }
+
       if (getCastData) {
         castContext = {
           author_fid: getCastData.author.fid,
@@ -97,7 +102,9 @@ export default async function handler(req, res) {
           author_display_name: getCastData.author.display_name,
           cast_hash: getCastData.hash,
           cast_text: getCastData.text,
-          cast_channel: getCastData.root_parent_url
+          cast_channel: getCastData.root_parent_url || null,
+          channel_id: getCastData?.channel?.id || null,
+          wallet: userAddress
         }
       }
 
@@ -221,6 +228,8 @@ export default async function handler(req, res) {
                       quality_absolute: 0,
                       impact_total: impactAmount,
                       impact_points: [impact],
+                      wallet: castContext?.wallet,
+                      channel_id: castContext?.channel_id
                     });
 
                     cast.points = points
