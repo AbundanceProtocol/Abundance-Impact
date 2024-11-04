@@ -265,7 +265,7 @@ export default async function handler(req, res) {
         
         let userAddress = null
         if (getCastData?.author?.verified_addresses?.eth_addresses?.length > 0) {
-          userAddress = etCastData?.author?.verified_addresses?.eth_addresses[0]
+          userAddress = getCastData?.author?.verified_addresses?.eth_addresses[0]
         }
 
         castContext = {
