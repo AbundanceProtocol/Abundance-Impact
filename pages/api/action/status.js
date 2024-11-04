@@ -262,6 +262,11 @@ export default async function handler(req, res) {
         }
 
         castMedia = await getCastMedia(getCastData)
+        
+        let userAddress = null
+        if (getCastData?.author?.verified_addresses?.eth_addresses?.length > 0) {
+          userAddress = etCastData?.author?.verified_addresses?.eth_addresses[0]
+        }
 
         castContext = {
           author_fid: getCastData?.author.fid,
@@ -272,7 +277,7 @@ export default async function handler(req, res) {
           cast_text: getCastData?.text,
           cast_channel: getCastData?.root_parent_url || null,
           channel_id: getCastData?.channel?.id || null,
-          wallet: getCastData?.author?.verified_addresses?.eth_addresses || null
+          wallet: userAddress
         }
 
         let cast = new Cast({
