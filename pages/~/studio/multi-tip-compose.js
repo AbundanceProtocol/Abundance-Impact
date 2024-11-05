@@ -122,11 +122,11 @@ export default function MultiTip() {
 
   useEffect(() => {
     if (sched.curators) {
-        getCurators('$IMPACT')
+      getCurators('$IMPACT')
       setSched(prev => ({...prev, curators: false }))
     } else {
       const timeoutId = setTimeout(() => {
-          getCurators('$IMPACT')
+        getCurators('$IMPACT')
         setSched(prev => ({...prev, curators: false }))
       }, 300);
       return () => clearTimeout(timeoutId);
@@ -148,8 +148,7 @@ export default function MultiTip() {
         setCuratorOptions(updatedCurators);
       }
     } catch (error) {
-      console.error('Error creating post:', error);
-      setCuratorOptions(updatedCurators);
+      console.error('Error updating curators:', error);
     }
   }
 

@@ -120,17 +120,21 @@ export default async function handler(req, res) {
     //   query.cast_tags = { $in: [req.query['tags[]']] };
     // }
 
-    if (req.query['channel[]'] && req.query['channel[]'].length > 0) {
-
-      if (typeof req.query['channel[]'] === 'string') {
-        query.cast_channel = { $in: [req.query['channel[]']]};
-      } else if (Array.isArray(req.query['channel[]']) && req.query['channel[]'].length > 0) {
-        query.cast_channel = { $in: req.query['channel[]']};
-      }
-
-
-      // query.cast_channel = { $in: [req.query['channel[]']] };
+    if (req?.query?.channel) {
+      query.channel_id = { $in: req.query.channel}
     }
+
+    // if (req.query['channel[]'] && req.query['channel[]'].length > 0) {
+
+    //   if (typeof req.query['channel[]'] === 'string') {
+    //     query.channel_id = { $in: [req.query['channel[]']]};
+    //   } else if (Array.isArray(req.query['channel[]']) && req.query['channel[]'].length > 0) {
+    //     query.channel_id = { $in: req.query['channel[]']};
+    //   }
+
+
+    //   // query.cast_channel = { $in: [req.query['channel[]']] };
+    // }
 
     // if (req.query.text) {
     //   query.cast_text = { $regex: req.query.text, $options: 'i' }; // Case-insensitive search
@@ -154,7 +158,6 @@ export default async function handler(req, res) {
         if (!shuffle) {
           totalCount = await Cast.countDocuments(query);
           returnedCasts = await Cast.find(query)
-
             .sort(sort)
             .populate('impact_points')
             .skip((page - 1) * limit)

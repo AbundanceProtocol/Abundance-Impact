@@ -118,13 +118,19 @@ export default function ProfilePage() {
     ]
   }
   // const [page, setPage] = useState(1)
-  const [sched, setSched] = useState({inView: false, user: false, feed: false})
+  const [sched, setSched] = useState({inView: false, user: false, feed: false, channels: false})
   const [delay, setDelay] = useState(true)
   const [timeframe, setTimeframe] = useState('3d')
   const [sortBy, setSortBy] = useState('down')
   const [shuffled, setShuffled] = useState(false)
   const [multitips, setMultitips] = useState([])
   const [loaded, setLoaded] = useState(false);
+  const initChannels = [
+    ' ',
+    'impact',
+  ]
+  const [channelOptions, setChannelOptions] = useState(initChannels)
+  const [selectedChannel, setSelectedChannel] = useState('none')
 
   async function getCuratorData(fid) {
     try {
@@ -185,27 +191,7 @@ export default function ProfilePage() {
       setDelay(true)
       console.log('feed3')
       feedRouter()
-      // if (userFeed?.length % 10 == 0) {
 
-
-
-        // if (cursor !== prevCursor && cursor !== '' && isLogged) {
-        //   if (searchSelect == 'Main') {
-        //     setPrevCursor(cursor)
-        //     addToFeed(fid, channelSelect, true, cursor)
-        //   } else if (searchSelect == 'Recent') {
-        //     setPrevCursor(cursor)
-        //     addToFeed(fid, channelSelect, false, cursor)
-        //   } else if (searchSelect == 'Curation') {
-        //     setPrevCursor(cursor)
-        //     feedRouter()
-        //   }
-        //   console.log('trigger get additional casts', cursor, prevCursor, searchSelect)
-          
-        // } else {
-        //   console.log('triggered, no new casts', cursor, prevCursor, searchSelect)
-        // }
-      // }
     }
 
     if (sched.inView) {
@@ -256,50 +242,10 @@ export default function ProfilePage() {
   }, [miniApp]);
 
 
-
-
   useEffect(() => {
     console.log('app02', isLogged)
   }, [isLogged]);
 
-
-
-  // async function getUser(fid) {
-  //   try {
-  //     const response = await axios.get('/api/getUserByFid', {
-  //       params: { fid }
-  //     })
-  //     if (response?.data) {
-  //       setUser(response?.data)
-  //     } else {
-  //       setUser(null)
-  //     }
-  //   } catch (error) {
-  //     console.error('Error submitting data:', error)
-  //     setUser(null)
-  //   }
-  // }
-
-
-  // useEffect(() => {
-  //   if (sched.user) {
-  //     if (user && username && username !== '-') {
-  //       console.log('feed4')
-  //       feedRouter()
-  //     }
-  //     setSched(prev => ({...prev, user: false }))
-  //   } else {
-  //     const timeoutId = setTimeout(() => {
-  //       if (user && username && username !== '-') {
-  //         console.log('feed5')
-  //         feedRouter()
-  //       }
-  //       setSched(prev => ({...prev, user: false }))
-  //     }, 300);
-  
-  //     return () => clearTimeout(timeoutId);
-  //   }
-  // }, [user, sched.user]);
 
   useEffect(() => {
     console.log('userQuery', userQuery)
@@ -328,6 +274,49 @@ export default function ProfilePage() {
     }
   }
   
+  const updateChannel = (event) => {
+    setSelectedChannel(event.target.value)
+    let channelUpdate = []
+    if (event.target.value !== ' ') {
+      channelUpdate = event.target.value
+    }
+    setUserQuery({
+      ...userQuery,
+      channels: channelUpdate
+    })
+  };
+
+  useEffect(() => {
+    if (sched.channels) {
+      getChannels('$IMPACT')
+      setSched(prev => ({...prev, channels: false }))
+    } else {
+      const timeoutId = setTimeout(() => {
+        getChannels('$IMPACT')
+        setSched(prev => ({...prev, channels: false }))
+      }, 300);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [sched.channels])
+
+  async function getChannels(points) {
+    try {
+      const channelData = await axios.get('/api/curation/getChannelNames', { params: { points } })
+      if (channelData) {
+        const ecoChannels = channelData?.data?.channels
+        console.log('e1', ecoChannels)
+
+        const updatedChannels = [
+          ' ',
+          ...ecoChannels
+        ];
+        setChannelOptions(updatedChannels);
+      }
+    } catch (error) {
+      console.error('Error updating channels:', error);
+    }
+  }
+
   async function getUserSearch(getTime, tags, channel, curators, text, shuffle, order, ecosystem, timeSort ) {
     const time = getTimeRange(getTime)
 
@@ -609,23 +598,42 @@ export default function ProfilePage() {
 		setUserSearch( () => ({ ...userSearch, [e.target.name]: e.target.value }) )
 	}
 
-  async function getChannels(name) {
-    console.log(name)
+  // async function getChannels(name) {
+  //   console.log(name)
+  //   try {
+  //     const response = await axios.get('/api/getChannels', {
+  //       params: {
+  //         name: name,
+  //       }
+  //     })
+  //     if (response) {
+  //       const channels = response.data.channels.channels
+  //       console.log(channels)
+  //       setChannels(channels)
+  //     }
+  //   } catch (error) {
+  //     console.error('Error submitting data:', error)
+  //   }
+  // }
+
+  async function getChannels(points) {
     try {
-      const response = await axios.get('/api/getChannels', {
-        params: {
-          name: name,
-        }
-      })
-      if (response) {
-        const channels = response.data.channels.channels
-        console.log(channels)
-        setChannels(channels)
+      const channelData = await axios.get('/api/curation/getChannelNames', { params: { points } })
+      if (channelData) {
+        const ecoChannels = channelData?.data?.channels
+        console.log('e1', ecoChannels)
+
+        const updatedChannels = [
+          ' ',
+          ...ecoChannels
+        ];
+        setChannelOptions(updatedChannels);
       }
     } catch (error) {
-      console.error('Error submitting data:', error)
+      console.error('Error updating channels:', error);
     }
   }
+
 
   const channelKeyDown = (event) => {
     if (event.key === 'Enter') {
@@ -808,7 +816,7 @@ export default function ProfilePage() {
 
       {searchSelect == 'Curation' && (
 
-      <div className={isMobile ? 'flex-col' : 'flex-row'} style={{justifyContent: 'center', marginTop: '15px', marginBottom: '30px', gap: isMobile ? '0.25rem' : '1rem'}}>
+      <div className={'flex-row'} style={{justifyContent: 'center', marginTop: '15px', marginBottom: '30px', gap: isMobile ? '0.25rem' : '0.25rem', flexWrap: 'wrap'}}>
         {/* <div className='flex-row' style={{gap: '0.5rem'}}>
           <TopPicks handleSelection={handleSelection} selection={'picks'} />
           <Shuffle handleSelect={handleSelect} selection={'shuffle'} userQuery={userQuery} />
@@ -847,69 +855,33 @@ export default function ProfilePage() {
         </div>
 
 
-        {/* <div style={{position: 'relative'}}>
-          <div className={`flex-row ${!isMobile ? 'active-nav-link btn-hvr' : ''}`} style={{border: '1px solid #abc', padding: `2px 6px 2px 6px`, borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'center', borderBottom: (isSelected == 'tags') ? '2px solid #99ddff' : '1px solid #abc', height: '28px'}} onMouseEnter={() => {handleSelection('tags')}} onMouseLeave={() => {handleSelection('none')}}>
-            <div className="flex-row" style={{alignItems: 'center', gap: isMobile ? '0' : '0.3rem', selection: 'none'}}>
-              <GoTag size={23} color='#eee' />
-              <span className={`${!isMobile ? 'selection-btn' : ''}`} style={{cursor: 'pointer', padding: '0'}}>{!isMobile && btnText('tags')}</span>
-            </div>
+        <div className='flex-row' style={{height: '30px', alignItems: 'center', justifyContent: 'center', padding: '20px 0'}}>
+          <div className='flex-row' style={{padding: '4px 8px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '20px', alignItems: 'center', gap: '0.25rem'}}>
+            <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>CHANNEL</div>
+
+            <select value={selectedChannel} onChange={updateChannel} style={{backgroundColor: '#adf', borderRadius: '4px', padding: isMobile ? '1px 4px' : '1px', fontSize: isMobile ? '10px' : '12px', width: '100%', fontWeight: '600'}}>
+              {channelOptions.map((channel) => (
+                <option key={channel} value={channel}>
+                  {(channel !== ' ') ? '/' + channel : channel}
+                </option>
+              ))}
+            </select>
           </div>
-          {(isSelected == 'tags') && (
-            <div className=' top-layer' style={{position: 'absolute', right: '0'}} onMouseEnter={() => {handleSelection('tags')}} onMouseLeave={() => {handleSelection('none')}}>
+        </div>
 
-              <TagsDropdown handleSelect={handleSelect} userQuery={userQuery} options={queryOptions.tags} selection={'tags'} />
 
-            </div>
-          )}
-        </div> */}
 
-        {/* <div style={{position: 'relative'}}>
-          <div className={`flex-row ${!isMobile ? 'active-nav-link btn-hvr' : ''}`} style={{border: '1px solid #abc', padding: `2px 6px 2px 6px`, borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'center', borderBottom: (isSelected == 'channels') ? '2px solid #99ddff' : '1px solid #abc', height: '28px', marginRight: '4px'}} onMouseEnter={() => {handleSelection('channels')}} onMouseLeave={() => {handleSelection('none')}}>
-            <div className="flex-row" style={{alignItems: 'center', gap: isMobile ? '0' : '0.3rem', selection: 'none'}}>
-              <AiOutlineBars size={15} color='#eee' />
-              <span className={`${!isMobile ? 'selection-btn' : ''}`} style={{cursor: 'pointer', padding: '0', color: userQuery['channels'].length == 0 ? '#aaa' : ''}}>{isMobile ? '' : userQuery['channels'].length == 0 ? 'All channels' : 'Channels'}</span>
-            </div>
-          </div>
-        </div> */}
 
-        {/* {(isSelected == 'channels') && (
-          <div className='' style={{position: 'absolute', width: '100%', margin: 'auto', marginTop: '28px'}} onMouseEnter={() => {handleSelection('channels')}} onMouseLeave={() => {handleSelection('none')}}>
-            <div className='top-layer flex-col' style={{gap: '0.25rem', padding: '6px 6px', borderRadius: '10px', backgroundColor: '#1D3244dd', border: '1px solid #abc', width: 'auto', marginTop: '10px', alignItems: 'flex-start'}}>
-              <div className={`selection-btn ${(userQuery['channels'] == 'all' || userQuery['channels'].length == 0) ? 'active-nav-link btn-hvr' : 'nav-link btn-hvr'}`} style={{justifyContent: 'flex-start'}}>
-                <input onChange={onChannelChange} 
-                  name='search' 
-                  placeholder={`Search channels`} 
-                  value={userSearch.search} 
-                  className='srch-btn' 
-                  style={{width: '100%', backgroundColor: '#234'}} 
-                  onKeyDown={channelKeyDown} />
-              </div>
-              <div className='flex-row top-layer' style={{gap: '0.5rem', padding: '0px 6px', flexWrap: 'wrap'}}>
-                {channels && (
-                  channels.map((channel, index) => (
-                    <div key={index} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addChannel(channel)}}>
-                      <img loading="lazy" src={channel.image_url} className="" alt={channel.name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
-                      <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>{channel.name}</div>
-                      <div style={{fontWeight: '400', fontSize: '10px', color: '#ccc'}}>{formatNum(channel.follower_count)}</div>
-                    </div>
-                  )
-                ))}
-              </div>
 
-              {(selectedChannels && selectedChannels.length > 0) && (<div className='flex-row' style={{gap: '0.5rem', padding: '10px 6px 6px 6px', flexWrap: 'wrap', borderTop: '1px solid #888', width: '100%', alignItems: 'center'}}>
-                <div style={{color: '#ddd', fontWeight: '600', fontSize: '13px', padding: '0 0 3px 6px'}}>Selected:</div>
-                {(
-                  selectedChannels.map((channel, index) => (
-                    <div key={index} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addChannel(channel)}}>
-                      <img loading="lazy" src={channel.image_url} className="" alt={channel.name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
-                      <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>{channel.name}</div>
-                    </div>
-                  )
-                ))}
-              </div>)}
-              </div>
-            </div>
-          )} */}
+
+
+
+
+
+
+
+
+
         </div>
       )}
 

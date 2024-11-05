@@ -189,7 +189,7 @@ async function getAllowances(fid, currencies, percent, tipTime) {
   const allowances = [];
   for (const coin of currencies) {
     let allowance, tip, minTip;
-    if (coin == '$TN100x' && tipTime == '12am') {
+    if (coin == '$TN100x' && tipTime == '7pm') {
       allowance = await getHamAllowance(fid);
       // console.log('$TN100x', allowance)
       tip = Math.floor(allowance * percent / 100);
