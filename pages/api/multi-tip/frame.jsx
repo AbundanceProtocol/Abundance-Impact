@@ -9,9 +9,9 @@ import User from "../../../models/User";
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 
 export default async function handler(req, res) {
-  const { curators, points, time, ecosystem } = req.query
+  const { curators, points, time, ecosystem, channel } = req.query
 
-  console.log('at1 status', curators, points, typeof curators, time)
+  console.log('at1 status', curators, points, typeof curators, time, channel)
   try {
     const fontPath = path.join(process.cwd(), 'public', 'Inter-SemiBold.ttf');
     const fontData = fs.readFileSync(fontPath);
@@ -25,6 +25,11 @@ export default async function handler(req, res) {
       { value: '30d', label: '30 Days' },
       { value: 'all', label: 'All time' },
     ]
+
+    let channelText = null
+    if (channel && channel !== ' ') {
+      channelText = channel
+    }
     const timeText = timeframe.find(item => item.value === time);
     console.log('timeText', timeText)
 
@@ -81,7 +86,7 @@ export default async function handler(req, res) {
         <div style={{display: 'flex', flexDirection: 'column', color: 'white', 
         fontSize: '22px', alignItems: 'center', justifyContent: 'center'}}>
 
-          <div style={{display: 'flex', textAlign: 'center', color: '#220a4d', fontSize: '26px', border: '1px solid #eeeeeeaa', background: '#eeeeeeaa', margin: '65px 15px 15px 15px', padding: '10px 20px', width: '400px', borderRadius: '16px'}}>Multi-tip creators & builders curated by:</div>
+          <div style={{display: 'flex', textAlign: 'center', color: '#220a4d', fontSize: '26px', border: '1px solid #eeeeeeaa', background: '#eeeeeeaa', margin: '55px 15px 15px 15px', padding: '10px 20px', width: '400px', borderRadius: '16px'}}>Multi-tip creators & builders curated by:</div>
 
           {usernames?.length > 0 ? (<div style={{display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', border: '1px solid #eeeeeeaa', borderRadius: '16px', padding: '10px', margin: '45px 15px 45px 15px', background: '#eeeeeeaa', width: (usernames[0]?.username.length > 11) ? '450px' : '300px'}}>
 
@@ -95,28 +100,35 @@ export default async function handler(req, res) {
           )}
 
 
-          <div style={{display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', borderRadius: '0px', padding: '0px', margin: '15px', width: '500px'}}>
+          <div style={{display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', borderRadius: '0px', padding: '0px', margin: '15px', width: '500px', flexWrap: 'wrap'}}>
 
 
-            <div style={{display: 'flex', flexDirection: 'column', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '1px solid #eeeeeeaa', borderRadius: '16px', padding: '5px 10px', margin: '0 5px 3px 5px', background: '#eeeeeeaa', width: 'auto', justifyContent: 'center', alignItems: 'center'}}>
+            <div style={{display: 'flex', flexDirection: 'column', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '1px solid #eeeeeeaa', borderRadius: '16px', padding: '3px 10px', margin: '0 5px 3px 5px', background: '#eeeeeeaa', width: 'auto', justifyContent: 'center', alignItems: 'center'}}>
               <div style={{display: 'flex', textAlign: 'center', color: '#220a4d', fontSize: '16px', margin: '2px 0px', width: 'auto', justifyContent: 'center', alignItems: 'center', padding: '0 10px'}}>ecosystem</div>
               <div style={{display: 'flex', textAlign: 'center', color:  '#220a4d', fontSize: '19px', margin: '2px 0px', width: 'auto', justifyContent: 'center', alignItems: 'center', padding: '0 20px'}}>Abundance</div>
             </div>
 
 
-            <div style={{display: 'flex', flexDirection: 'column', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '1px solid #eeeeeeaa', borderRadius: '16px', padding: '5px 10px', margin: '0 5px 3px 5px', background: '#eeeeeeaa', width: 'auto', justifyContent: 'center', alignItems: 'center'}}>
+            <div style={{display: 'flex', flexDirection: 'column', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '1px solid #eeeeeeaa', borderRadius: '16px', padding: '3px 10px', margin: '0 5px 3px 5px', background: '#eeeeeeaa', width: 'auto', justifyContent: 'center', alignItems: 'center'}}>
               <div style={{display: 'flex', textAlign: 'center', color: '#220a4d', fontSize: '16px', margin: '2px 0px', width: 'auto', justifyContent: 'center', alignItems: 'center'}}>timeframe</div>
               <div style={{display: 'flex', textAlign: 'center', color:  '#220a4d', fontSize: '19px', margin: '2px 0px', width: 'auto', justifyContent: 'center', alignItems: 'center', padding: '0 20px'}}>{timeText?.label}</div>
             </div>
 
-            <div style={{display: 'flex', flexDirection: 'column', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '1px solid #eeeeeeaa', borderRadius: '16px', padding: '5px 10px', margin: '0 5px 3px 5px', background: '#eeeeeeaa', width: 'auto', justifyContent: 'center', alignItems: 'center'}}>
+            <div style={{display: 'flex', flexDirection: 'column', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '1px solid #eeeeeeaa', borderRadius: '16px', padding: '2px 10px', margin: '0 5px 3px 5px', background: '#eeeeeeaa', width: 'auto', justifyContent: 'center', alignItems: 'center'}}>
               <div style={{display: 'flex', textAlign: 'center', color: '#220a4d', fontSize: '16px', margin: '2px 0px', width: 'auto', justifyContent: 'center', alignItems: 'center'}}>curator reward</div>
               <div style={{display: 'flex', textAlign: 'center', color:  '#220a4d', fontSize: '19px', margin: '2px 0px', width: 'auto', justifyContent: 'center', alignItems: 'center', padding: '0 20px'}}>10%</div>
             </div>
 
+            {channelText ? (<div style={{display: 'flex', flexDirection: 'column', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '1px solid #eeeeeeaa', borderRadius: '16px', padding: '3px 10px', margin: '10px 5px 3px 5px', background: '#eeeeeeaa', width: 'auto', justifyContent: 'center', alignItems: 'center'}}>
+              <div style={{display: 'flex', textAlign: 'center', color: '#220a4d', fontSize: '16px', margin: '2px 0px', width: 'auto', justifyContent: 'center', alignItems: 'center'}}>channel</div>
+              <div style={{display: 'flex', textAlign: 'center', color:  '#220a4d', fontSize: '19px', margin: '2px 0px', width: 'auto', justifyContent: 'center', alignItems: 'center', padding: '0 20px'}}>{'/' + channelText}</div>
+            </div>) : (<div style={{fontSize: '10px', margin: '30px'}}>&nbsp;</div>)}
+
+
+
           </div>
 
-          <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '18px', margin: '55px 10px 0px 10px', width: 'auto', justifyContent: 'center', alignItems: 'center'}}>/impact by @abundance&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;explore curation in mini-app</div>
+          <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '18px', margin: usernames?.length > 0 ? '30px 10px 0px 10px' : '25px 10px 0px 10px', width: 'auto', justifyContent: 'center', alignItems: 'center'}}>/impact by @abundance&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;explore curation in mini-app</div>
         </div>
       </div>
       ,
