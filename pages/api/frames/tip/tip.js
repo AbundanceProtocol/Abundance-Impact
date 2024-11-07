@@ -465,15 +465,20 @@ export default async function handler(req, res) {
                 //   query.cast_tags = { $in: [tags] };
                 // }
             
-                if (req.query['channel[]'] && req.query['channel[]'].length > 0) {
+                // if (req.query['channel[]'] && req.query['channel[]'].length > 0) {
   
-                  if (typeof req.query['channel[]'] === 'string') {
-                    query.cast_channel = { $in: [req.query['channel[]']]};
-                  } else if (Array.isArray(req.query['channel[]']) && req.query['channel[]'].length > 0) {
-                    query.cast_channel = { $in: req.query['channel[]']};
-                  }
+                //   if (typeof req.query['channel[]'] === 'string') {
+                //     query.cast_channel = { $in: [req.query['channel[]']]};
+                //   } else if (Array.isArray(req.query['channel[]']) && req.query['channel[]'].length > 0) {
+                //     query.cast_channel = { $in: req.query['channel[]']};
+                //   }
                         
                   // query.cast_channel = { $in: [req.query['channel[]']] };
+                // }
+
+                if (channel) {
+                  console.log('channel', channel)
+                  query.channel_id = { $in: channel }
                 }
             
                 // if (text) {

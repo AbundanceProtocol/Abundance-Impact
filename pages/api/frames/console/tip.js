@@ -408,21 +408,26 @@ export default async function handler(req, res) {
               //   query.cast_tags = { $in: [tags] };
               // }
           
-              if (req.query['channel[]'] && req.query['channel[]'].length > 0) {
+              // if (req.query['channel[]'] && req.query['channel[]'].length > 0) {
 
-                if (typeof req.query['channel[]'] === 'string') {
-                  query.cast_channel = { $in: [req.query['channel[]']]};
-                } else if (Array.isArray(req.query['channel[]']) && req.query['channel[]'].length > 0) {
-                  query.cast_channel = { $in: req.query['channel[]']};
-                }
+              //   if (typeof req.query['channel[]'] === 'string') {
+              //     query.cast_channel = { $in: [req.query['channel[]']]};
+              //   } else if (Array.isArray(req.query['channel[]']) && req.query['channel[]'].length > 0) {
+              //     query.cast_channel = { $in: req.query['channel[]']};
+              //   }
                       
                 // query.cast_channel = { $in: [req.query['channel[]']] };
-              }
+              // }
           
               // if (text) {
               //   query.cast_text = { $regex: text, $options: 'i' }; // Case-insensitive search
               // }
-              
+              if (channel) {
+                console.log('channel', channel)
+                query.channel_id = { $in: channel }
+              }    
+
+
               function shuffleArray(array) {
                 for (let i = array.length - 1; i > 0; i--) {
                   const j = Math.floor(Math.random() * (i + 1));
