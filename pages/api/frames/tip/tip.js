@@ -476,7 +476,7 @@ export default async function handler(req, res) {
                   // query.cast_channel = { $in: [req.query['channel[]']] };
                 // }
 
-                if (channel) {
+                if (channel & channel !== ' ') {
                   console.log('channel', channel)
                   query.channel_id = { $in: channel }
                 }

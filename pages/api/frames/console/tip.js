@@ -422,7 +422,7 @@ export default async function handler(req, res) {
               // if (text) {
               //   query.cast_text = { $regex: text, $options: 'i' }; // Case-insensitive search
               // }
-              if (channel) {
+              if (channel & channel !== ' ') {
                 console.log('channel', channel)
                 query.channel_id = { $in: channel }
               }    
