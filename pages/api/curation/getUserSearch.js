@@ -121,10 +121,12 @@ export default async function handler(req, res) {
     // }
 
     if (req?.query?.channels) {
+      console.log('channels', req?.query?.channels)
       query.channel_id = { $in: req.query.channels }
     }
 
     if (req?.query?.channel) {
+      console.log('channel', req?.query?.channel)
       query.channel_id = { $in: req.query.channel }
     }
 
