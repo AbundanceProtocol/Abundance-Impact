@@ -422,7 +422,7 @@ export default async function handler(req, res) {
               // if (text) {
               //   query.cast_text = { $regex: text, $options: 'i' }; // Case-insensitive search
               // }
-              if (channel & channel !== ' ') {
+              if (channel && channel !== ' ') {
                 console.log('channel', channel)
                 query.channel_id = { $in: channel }
               }    
@@ -734,7 +734,7 @@ export default async function handler(req, res) {
             }
 
             if (curators && fid == curators) {
-              shareText = `I just multi-tipped ${userText} on /impact by @abundance.\n\nSupport my nominees here:`
+              shareText = `I just multi-tipped ${userText}on /impact by @abundance.\n\nSupport my nominees here:`
             } else if (curators?.length > 0) {
               const curatorName = await getCurator(curators, points)
               if (curatorName) {

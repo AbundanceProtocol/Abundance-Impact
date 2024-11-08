@@ -120,12 +120,12 @@ export default async function handler(req, res) {
     //   query.cast_tags = { $in: [req.query['tags[]']] };
     // }
 
-    if (req?.query?.channels) {
+    if (req?.query?.channels && req?.query?.channels !== ' ') {
       console.log('channels', req?.query?.channels)
       query.channel_id = { $in: req.query.channels }
     }
 
-    if (req?.query?.channel) {
+    if (req?.query?.channel && req?.query?.channel !== ' ') {
       console.log('channel', req?.query?.channel)
       query.channel_id = { $in: req.query.channel }
     }
