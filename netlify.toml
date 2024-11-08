@@ -1,12 +1,15 @@
 [build]
   command = "next build"
   publish = ".next"
-  functions = "netlify/functions"
 
 [functions]
+  directory = "netlify/functions"
   node_bundler = "esbuild"
   external_node_modules = ["mongodb", "mongoose"]
   included_files = ["utils/**", "libs/**", "models/**"]
+
+[functions."test-background"]
+  schedule = "55 10 * * *"
 
 [functions.scheduledTips-background]
   schedule = "40 23 * * *" # Runs at 6:40 PM EST daily
