@@ -15,5 +15,9 @@
   schedule = "40 23 * * *" # Runs at 6:40 PM EST daily
   queryParams = { code = "test", tipTime = "7pm" }
 
+[functions.scheduledTest-background]
+  schedule = "30 20 * * *" # Runs at 6:40 PM EST daily
+  queryParams = { code = "test", tipTime = "7pm" }
+
 [[plugins]]
   package = "@netlify/plugin-nextjs"
