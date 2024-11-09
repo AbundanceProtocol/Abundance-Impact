@@ -76,8 +76,8 @@ exports.handler = function(event, context) {
         for (const userCast of castData) {
           try {
             await new Promise(resolve => setTimeout(resolve, 60));
-            // const tipped = await sendTip(userCast, user?.uuid, user?.fid, user?.points);
-            const tipped = 1
+            const tipped = await sendTip(userCast, user?.uuid, user?.fid, user?.points);
+            // const tipped = 1
             if (tipped) {
               counter++;
             } else {
@@ -210,19 +210,19 @@ async function getAllowances(fid, currencies, percent, tipTime) {
   const allowances = [];
   for (const coin of currencies) {
     let allowance, tip, minTip;
-    if (coin == '$TN100x' && tipTime == '12am') {
+    if (coin == '$TN100x' && tipTime == '7pm') {
       allowance = await getHamAllowance(fid);
-      // console.log('$TN100x', allowance)
+      console.log('$TN100x', allowance)
       tip = Math.floor(allowance * percent / 100);
       allowances.push({token: coin, set: true, allowance: tip, totalTip: tip});
     } else if (coin == '$DEGEN' && tipTime == '7pm') {
       allowance = await getDegenAllowance(fid);
-      // console.log('$DEGEN', allowance)
+      console.log('$DEGEN', allowance)
       tip = Math.round(allowance * percent / 100);
       allowances.push({token: coin, set: true, allowance: tip, totalTip: tip});
     } else if (coin == '$HUNT' && tipTime == '7pm') {
       allowance = await getHuntAllowance(fid);
-      // console.log('$HUNT', allowance)
+      console.log('$HUNT', allowance)
       tip = Math.round(allowance * percent / 100);
       allowances.push({token: coin, set: true, allowance: tip, totalTip: tip});
     }
@@ -254,7 +254,7 @@ async function getDegenAllowance(fid) {
     // console.log(fid, data[0], Number(data[0]?.remaining_tip_allowance))
     if (data && data[0]?.remaining_tip_allowance) {
       if (Number(data[0]?.remaining_tip_allowance) >= 0 && (dayOfMonth % 3 == Number(fid) % 3)) {
-        return Number(data[0]?.remaining_tip_allowance)
+        return Number(data[0]?.remaining_tip_allowance) || 0
       } else {
         return 0
       }
@@ -299,8 +299,11 @@ async function getUserSearch(time, tags, channel, curator, points) {
     if (impactIds) query['impact_points'] = { $in: impactIds };
   }
   
-  if (channel && channel.length > 0) {
-    query.cast_channel = { $in: Array.isArray(channel) ? channel : [channel] };
+  // if (channel && channel.length > 0) {
+  //   query.cast_channel = { $in: Array.isArray(channel) ? channel : [channel] };
+  // }
+  if (channel && channel !== ' ') {
+    query.channel_id = channel
   }
 
   const { casts, totalCount } = await fetchCasts(query, limit);

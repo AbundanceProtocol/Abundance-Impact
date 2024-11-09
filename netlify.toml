@@ -9,18 +9,10 @@
   included_files = ["utils/**", "libs/**", "models/**"]
 
 [functions."tips-background"]
-  schedule = "58 5 * * *"
+  schedule = "40 23 * * *"
 
 [functions."test-background"]
   schedule = "35 5 * * *"
-
-[functions."scheduledTips-background"]
-  schedule = "40 23 * * *" # Runs at 6:40 PM EST daily
-  queryParams = { code = "test", tipTime = "7pm" }
-
-[functions."scheduledTest-background"]
-  schedule = "27 5 * * *" # Runs at 12:10 AM EST daily
-  queryParams = { code = "test", tipTime = "7pm" }
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
