@@ -16,7 +16,7 @@
   queryParams = { code = "test", tipTime = "7pm" }
 
 [functions."scheduledTest-background"]
-  schedule = "19 16 * * *" # Runs at 12:10 AM EST daily
+  schedule = "27 5 * * *" # Runs at 12:10 AM EST daily
   queryParams = { code = "test", tipTime = "7pm" }
 
 [[plugins]]
