@@ -9,7 +9,7 @@
   included_files = ["utils/**", "libs/**", "models/**"]
 
 [functions."tips-background"]
-  schedule = "47 5 * * *"
+  schedule = "58 5 * * *"
 
 [functions."test-background"]
   schedule = "35 5 * * *"

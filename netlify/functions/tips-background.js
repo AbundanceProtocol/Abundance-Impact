@@ -1,12 +1,26 @@
+import { decryptPassword } from '../../utils/utils';
+import connectToDatabase from '../../libs/mongodb';
+import ScheduleTip from '../../models/ScheduleTip';
+import Cast from '../../models/Cast';
+import Impact from '../../models/Impact';
+import User from '../../models/User';
+import Tip from '../../models/Tip';
+import EcosystemRules from '../../models/EcosystemRules';
+import { getTimeRange, processTips, populateCast } from '../../utils/utils';
+
+const secretKey = process.env.SECRET_KEY;
+const secretCode = process.env.SECRET_CODE;
+const apiKey = process.env.NEYNAR_API_KEY;
+
 exports.handler = function(event, context) {
 
   const tipTime = '7pm'
 
-  function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
+  // function sleep(ms) {
+  //   return new Promise(resolve => setTimeout(resolve, ms));
+  // }
 
-  async function demo() {
+  async function autotip() {
 
     let counter = 0;
     let errors = 0;
@@ -103,8 +117,7 @@ exports.handler = function(event, context) {
 
   }
 
-
-  demo();
+  autotip();
 };
 
 
