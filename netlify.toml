@@ -11,6 +11,9 @@
 [functions."tips-background"]
   schedule = "40 23 * * *"
 
+[functions."reset-background"]
+  schedule = "1 5 * * *"
+
 [functions."test-background"]
   schedule = "35 5 * * *"
 
