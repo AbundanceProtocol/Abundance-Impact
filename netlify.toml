@@ -11,12 +11,12 @@
 [functions."test-background"]
   schedule = "55 10 * * *"
 
-[functions.scheduledTips-background]
+[functions."scheduledTips-background"]
   schedule = "40 23 * * *" # Runs at 6:40 PM EST daily
   queryParams = { code = "test", tipTime = "7pm" }
 
-[functions.scheduledTest-background]
-  schedule = "30 20 * * *" # Runs at 6:40 PM EST daily
+[functions."scheduledTest-background"]
+  schedule = "12 4 * * *" # Runs at 12:10 AM EST daily
   queryParams = { code = "test", tipTime = "7pm" }
 
 [[plugins]]

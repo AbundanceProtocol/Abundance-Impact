@@ -237,7 +237,7 @@ async function getHamAllowance(fid) {
       headers: { accept: "application/json" },
     });
     const getRemaining = await remainingBalance.json();
-    // console.log(getRemaining)
+    console.log('$ham ', getRemaining?.todaysAllocation ? Math.floor((Number(getRemaining?.todaysAllocation) - Number(getRemaining?.totalTippedToday))/1e18) : 0)
     return getRemaining?.todaysAllocation ? Math.floor((Number(getRemaining?.todaysAllocation) - Number(getRemaining?.totalTippedToday))/1e18) : 0;
   } catch (error) {
     console.error('Error in getHamAllowance:');
@@ -254,7 +254,8 @@ async function getDegenAllowance(fid) {
     // console.log(fid, data[0], Number(data[0]?.remaining_tip_allowance))
     if (data && data[0]?.remaining_tip_allowance) {
       if (Number(data[0]?.remaining_tip_allowance) >= 0 && (dayOfMonth % 3 == Number(fid) % 3)) {
-        return Number(data[0]?.remaining_tip_allowance)
+        console.log('$degen ', Number(data[0]?.remaining_tip_allowance) || 0)
+        return Number(data[0]?.remaining_tip_allowance) || 0
       } else {
         return 0
       }
@@ -274,6 +275,7 @@ async function getHuntAllowance(fid) {
     });
     const getRemaining = await remainingBalance.json();
     if (getRemaining?.remaining_allowance) {
+      console.log('$hunt ', Math.floor(Number(getRemaining?.remaining_allowance)) || 0)
       return Math.floor(Number(getRemaining?.remaining_allowance)) || 0
     } else {
       return 0
