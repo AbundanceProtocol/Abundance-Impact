@@ -294,9 +294,10 @@ async function getUserSearch(time, tags, channel, curator, points) {
   // if (channel && channel.length > 0) {
   //   query.cast_channel = { $in: Array.isArray(channel) ? channel : [channel] };
   // }
-  if (channel && channel !== ' ') {
-    query.channel_id = channel
-  }
+
+  // if (channel && channel !== ' ') {
+  //   query.channel_id = channel
+  // }
 
   const { casts, totalCount } = await fetchCasts(query, limit);
   return { casts: casts || [], totalCount };
