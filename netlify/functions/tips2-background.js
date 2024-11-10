@@ -130,9 +130,9 @@ exports.handler = function(event, context) {
 
 
 async function getCasts(user) {
-
   try {
     const { casts } = await getUserSearch(user?.time, user?.tags, user?.channels, user?.curators, user?.points);
+    console.log('getCasts', casts?.length, user?.time, user?.tags, user?.channels, user?.curators, user?.points)
     if (!casts) {
       console.log('no casts')
       return {castData: [], coinTotals: 0}
