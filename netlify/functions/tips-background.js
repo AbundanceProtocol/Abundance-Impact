@@ -12,7 +12,7 @@ const secretKey = process.env.SECRET_KEY;
 const secretCode = process.env.SECRET_CODE;
 const apiKey = process.env.NEYNAR_API_KEY;
 
-exports.handler = function(event, context) {
+exports.handler = async function(event, context) {
 
   const tipTime = '7pm'
 
@@ -70,14 +70,14 @@ exports.handler = function(event, context) {
       }
   
       for (const user of users) {
-        console.log('Processing user:', user?.fid);
         const { castData } = await getCasts(user);
-  
+        
+        console.log('Processing user:', user?.fid, castData.length);
         for (const userCast of castData) {
           try {
-            await new Promise(resolve => setTimeout(resolve, 60));
-            const tipped = await sendTip(userCast, user?.uuid, user?.fid, user?.points);
-            // const tipped = 1
+            await new Promise(resolve => setTimeout(resolve, 40));
+            // const tipped = await sendTip(userCast, user?.uuid, user?.fid, user?.points);
+            const tipped = 1
             if (tipped) {
               counter++;
             } else {
@@ -90,34 +90,26 @@ exports.handler = function(event, context) {
         }
       }
   
-      console.log(`Processing complete. Success: ${counter}, Errors: ${errors}`);
-      
-      return {
-        statusCode: 200,
-        body: JSON.stringify({ 
-          message: 'Processing complete',
-          stats: {
-            success: counter,
-            errors: errors
-          }
-        })
-      };
+
+      return {counter, errors}
   
     } catch (error) {
       console.error('Background processing error:', error);
-      return {
-        statusCode: 500,
-        body: JSON.stringify({ 
-          error: 'Internal server error',
-          message: error.message 
-        })
-      };
+      return {counter: 0, errors: 0}
     }
 
 
   }
 
-  autotip();
+  const {counter, errors} = await autotip();
+
+  console.log(`Processing complete. Success: ${counter}, Errors: ${errors}`);
+
+  return {
+    statusCode: 200,
+    body: JSON.stringify({ message: `Processing complete. Success: ${counter}, Errors: ${errors}` })
+  };
+
 };
 
 
@@ -126,13 +118,10 @@ exports.handler = function(event, context) {
 
 
 
-
-
-
 async function getCasts(user) {
-
   try {
     const { casts } = await getUserSearch(user?.time, user?.tags, user?.channels, user?.curators, user?.points);
+    console.log('getCasts', casts?.length, user?.time, user?.tags, user?.channels, user?.curators, user?.points)
     if (!casts) {
       console.log('no casts')
       return {castData: [], coinTotals: 0}
@@ -302,9 +291,10 @@ async function getUserSearch(time, tags, channel, curator, points) {
   // if (channel && channel.length > 0) {
   //   query.cast_channel = { $in: Array.isArray(channel) ? channel : [channel] };
   // }
-  if (channel && channel !== ' ') {
-    query.channel_id = channel
-  }
+
+  // if (channel && channel !== ' ') {
+  //   query.channel_id = channel
+  // }
 
   const { casts, totalCount } = await fetchCasts(query, limit);
   return { casts: casts || [], totalCount };
@@ -336,7 +326,7 @@ async function fetchCasts(query, limit) {
     let returnedCasts = []
 
     totalCount = await Cast.countDocuments(query);
-
+    console.log('totalCount', totalCount)
     // Calculate the number of documents to be sampled from each range
     const top20PercentCount = Math.ceil(totalCount * 0.2);
     const middle40PercentCount = Math.ceil(totalCount * 0.4);
@@ -382,7 +372,7 @@ async function fetchCasts(query, limit) {
       returnedCasts = returnedCasts.slice(0, 10);
     }
 
-    // console.log('113', returnedCasts)
+    console.log('returnedCasts', returnedCasts?.length)
     if (!returnedCasts) {
       returnedCasts = []
     }

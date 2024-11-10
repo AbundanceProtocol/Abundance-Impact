@@ -7,12 +7,12 @@ import User from "../../../models/User";
 import Tip from "../../../models/Tip";
 import { setTimeout } from 'timers/promises';
 
-const savedCode = process.env.ECOSYSTEM_SECRET;
+// const savedCode = process.env.ECOSYSTEM_SECRET;
 
 const BATCH_SIZE = 100;
 const BATCH_DELAY = 1000;
 
-exports.handler = function(event, context) {
+exports.handler = async function(event, context) {
 
   async function resetPoints() {
     try {
@@ -42,35 +42,22 @@ exports.handler = function(event, context) {
 
       console.log('Processing complete')
 
-      return {
-        statusCode: 200,
-        body: JSON.stringify({ 
-          message: 'Processing complete',
-          stats: {
-            success: counter,
-            errors: errors
-          }
-        })
-      };
+      return uniqueEcoPoints
 
     } catch (error) {
       console.error('Background processing error:', error);
-      return {
-        statusCode: 500,
-        body: JSON.stringify({ 
-          error: 'Internal server error',
-          message: error.message 
-        })
-      };
+      return null
     }
-
-
-
 
 
   }
 
-  resetPoints();
+  const getPoints = await resetPoints();
+
+  return {
+    statusCode: 200,
+    body: JSON.stringify({ message: `Processing complete. ${getPoints}` })
+  };
 };
 
 
