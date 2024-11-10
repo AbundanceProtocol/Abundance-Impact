@@ -329,6 +329,7 @@ function shuffleArray(array) {
 }
 
 async function fetchCasts(query, limit) {
+  console.log('query', query)
   try {
     await connectToDatabase();
 
@@ -336,7 +337,7 @@ async function fetchCasts(query, limit) {
     let returnedCasts = []
 
     totalCount = await Cast.countDocuments(query);
-
+    console.log('totalCount', totalCount)
     // Calculate the number of documents to be sampled from each range
     const top20PercentCount = Math.ceil(totalCount * 0.2);
     const middle40PercentCount = Math.ceil(totalCount * 0.4);
@@ -382,7 +383,7 @@ async function fetchCasts(query, limit) {
       returnedCasts = returnedCasts.slice(0, 10);
     }
 
-    // console.log('113', returnedCasts)
+    console.log('113', returnedCasts?.length)
     if (!returnedCasts) {
       returnedCasts = []
     }
