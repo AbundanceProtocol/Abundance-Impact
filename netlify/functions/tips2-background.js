@@ -12,7 +12,7 @@ const secretKey = process.env.SECRET_KEY;
 const secretCode = process.env.SECRET_CODE;
 const apiKey = process.env.NEYNAR_API_KEY;
 
-exports.handler = function(event, context) {
+exports.handler = async function(event, context) {
 
   const tipTime = '7pm'
 
@@ -90,34 +90,26 @@ exports.handler = function(event, context) {
         }
       }
   
-      console.log(`Processing complete. Success: ${counter}, Errors: ${errors}`);
-      
-      return {
-        statusCode: 200,
-        body: JSON.stringify({ 
-          message: 'Processing complete',
-          stats: {
-            success: counter,
-            errors: errors
-          }
-        })
-      };
+
+      return {counter, errors}
   
     } catch (error) {
       console.error('Background processing error:', error);
-      return {
-        statusCode: 500,
-        body: JSON.stringify({ 
-          error: 'Internal server error',
-          message: error.message 
-        })
-      };
+      return {counter: 0, errors: 0}
     }
 
 
   }
 
-  autotip();
+  const {counter, errors} = await autotip();
+
+  console.log(`Processing complete. Success: ${counter}, Errors: ${errors}`);
+
+  return {
+    statusCode: 200,
+    body: JSON.stringify({ message: `Processing complete. Success: ${counter}, Errors: ${errors}` })
+  };
+
 };
 
 
@@ -329,7 +321,7 @@ function shuffleArray(array) {
 }
 
 async function fetchCasts(query, limit) {
-  console.log('query', query)
+  console.log('query', query?.impact_points?.$in?.lnegth)
   try {
     await connectToDatabase();
 
