@@ -321,12 +321,19 @@ function shuffleArray(array) {
 }
 
 async function fetchCasts(query, limit) {
-  console.log('query', query?.impact_points?.$in?.lnegth)
   try {
     await connectToDatabase();
 
     let totalCount;
     let returnedCasts = []
+
+    const allCasts = await Cast.find(query)
+    .sort({ impact_total: -1 })
+    .populate('impact_points')
+    .exec();
+    console.log('allCasts', allCasts.length)
+
+
 
     totalCount = await Cast.countDocuments(query);
     console.log('totalCount', totalCount)
