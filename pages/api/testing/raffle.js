@@ -105,7 +105,8 @@ export default async function handler(req, res) {
 
     
     try {
-      const userData = await getCombinedData()
+      let userData = await getCombinedData()
+      userData = userData.filter(user => user.fid !== '9326');
       console.log('adjustedData', userData)
       res.status(200).json({ message: 'nominations, tips', userData });
     } catch (error) {
