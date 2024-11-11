@@ -11,14 +11,11 @@ import { AccountContext } from '../../../../context';
 import cheerio from 'cheerio'
 import FrameButton from '../../../../components/Cast/Frame/Button';
 import qs from "querystring";
-import Circle from '../../../../models/Circle';
-import connectToDatabase from '../../../../libs/mongodb';
-import mongoose from "mongoose";
 
 // import useStore from '../../../utils/store';
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 
-export default function Tips({time, curators, channels, tags, eco, ecosystem, fids, text, username, id, tipperFid}) {
+export default function Tips({time, curators, channels, tags, eco, ecosystem}) {
   const { LoginPopup, fid, userBalances, isLogged } = useContext(AccountContext)
   const index = 0
   const router = useRouter();
@@ -46,33 +43,39 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem, fi
     {
       version: "vNext",
       title: "Multi-Tip",
-      image: `${baseURL}/images/frame36.gif`,
+      image: `${baseURL}/api/multi-tip/frame?${qs.stringify({ time, curators, points: '$' + eco, ecosystem, channel: channels })}`,
       image_aspect_ratio: "1:1",
       buttons: [
         {
           index: 1,
-          title: "Multi tip >",
+          title: "Multi-tip",
           action_type: "post",
-          target: `${baseURL}/api/frames/tips/tip?tip=0`
+          target: `${baseURL}/api/frames/tip/tip?tip=0`
         },
         {
           index: 2,
-          title: "Menu",
-          action_type: "post",
-          target: `${baseURL}/api/frames/tip/menu?`
+          title: "Explore",
+          action_type: "link",
+          target: `${baseURL}/api/frames/tip/menu`
         },
         {
           index: 3,
           title: "Auto-tip >",
           action_type: "post",
-          target: `${baseURL}/api/frames/tip/auto-tip?`
+          target: `${baseURL}/api/frames/tip/auto-tip`
         },
+        {
+          index: 4,
+          title: "Login",
+          action_type: "link",
+          target: `${baseURL}/api/frames/tip/opt-out-menu`
+        }
       ],
       input: {
         text: "Eg.: 1000 $Degen, 500 $HAM"
       },
       state: {},
-      frames_url: `${baseURL}/~/ecosystems/${ecosystem}/tips`
+      frames_url: `${baseURL}/~/ecosystems/${ecosystem}/tip`
     }
   const [frameData, setFrameData] = useState(initFrame)
   const initCast = {
@@ -100,11 +103,11 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem, fi
     quality_balance: 0
   }
   const [cast, setCast] = useState(initCast)
-  const initQuery = {time: 'all', curators: [], channels: [], tags: [], shuffle: true, referrer: null, eco: null, ecosystem: null}
+  const initQuery = {time: '&time=all', curators: '', channels: '', tags: '', shuffle: '&shuffle=true', referrer: '', eco: '&eco=IMPACT', ecosystem: '&ecosystem=abundance'}
   const [queryData, setQueryData] = useState(initQuery)
 
   useEffect(() => {
-    // console.log(time, curators, shuffle, referrer, eco, ecosystem)
+    console.log(time, curators, eco, ecosystem)
 
     let timeQuery = '&time=all'
     let curatorsQuery = ''
@@ -138,8 +141,6 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem, fi
       ...prev, 
       time: timeQuery, 
       curators: curatorsQuery, 
-      // shuffle: shuffleQuery, 
-      // referrer: referrerQuery, 
       eco: ecoQuery, 
       ecosystem: ecosystemQuery
     }))
@@ -162,14 +163,14 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem, fi
     console.log(queryData)
 
     const updatedFrameData = {...frameData}
-    updatedFrameData.buttons[0].target = `${baseURL}/api/frames/console/tip-tip?${qs.stringify({ time, curators, eco, ecosystem, channels, start: true })}`
+    updatedFrameData.buttons[0].target = `${baseURL}/api/frames/tip/tip?${qs.stringify({ time, curators, eco, ecosystem, channels })}`
 
-    updatedFrameData.buttons[1].target = `${baseURL}/api/frames/tip/menu?${qs.stringify({ time, curators, eco, ecosystem })}`
+    updatedFrameData.buttons[1].target = `https://warpcast.com/~/composer-action?view=prompt&url=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Fmini-app%2Fcurator%3Ffid%3D${curators}${(channels) ? '%26points%3D' + channels : ''}%26points%3D%24${eco}%26app%3Dmini`
 
-    updatedFrameData.buttons[2].target = `${baseURL}/api/frames/tip/auto-tip?${qs.stringify({ time, curators, eco, ecosystem })}`
+    updatedFrameData.buttons[2].target = `${baseURL}/api/frames/tip/auto-tip?${qs.stringify({ time, curators, eco, ecosystem, channels })}`
 
-    updatedFrameData.image = `${baseURL}/api/frames/tip/circle?${qs.stringify({ id })}`
-
+    updatedFrameData.buttons[3].target = `https://impact.abundance.id/?eco=$${eco}`
+    console.log(updatedFrameData)
     setFrameData(updatedFrameData)
   }, [queryData]);
 
@@ -301,37 +302,33 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem, fi
         <meta name="description" content={`Support builder and creators with Impact App`} />
         <meta name="viewport" content="width=device-width"/>
         <meta property="og:title" content="Multi-Tip" />
-        <meta property='og:image' content={`${baseURL}/api/frames/tip/circle?${qs.stringify({    
-          id })}`} />
+        <meta property='og:image' content={`${baseURL}/api/multi-tip/frame?${qs.stringify({ time, curators, points: '$' + eco, ecosystem, channels })}`} />
         <meta property="fc:frame" content="vNext" />
-        <meta property="fc:frame:image" content={`${baseURL}/api/frames/tip/circle?${qs.stringify({    
-          id })}`} />
+        <meta property="fc:frame:image" content={`${baseURL}/api/multi-tip/frame?${qs.stringify({ time, curators, points: '$' + eco, ecosystem, channel: channels })}`} />
         <meta property="fc:frame:image:aspect_ratio" content="1:1" />
+        
         <meta property="fc:frame:button:1" content='Multi-tip >' />
         <meta property="fc:frame:button:1:action" content="post" />
+        <meta property="fc:frame:button:1:target" content={`${baseURL}/api/frames/tip/tip?${qs.stringify({ time, curators, eco, ecosystem, channels })}`} />
 
-        <meta property="fc:frame:button:1:target" content={`${baseURL}/api/frames/tip/tip?${qs.stringify({    
-          time, curators, eco, ecosystem, channels, start: true
-        })}`} />
-
-        <meta property="fc:frame:button:2" content={'Menu'} />
-        <meta property="fc:frame:button:2:action" content="post" />
-        <meta property="fc:frame:button:2:target" content={`${baseURL}/api/frames/tip/menu?${qs.stringify({ time, curators, eco, ecosystem, channels })}`} />
+        <meta property="fc:frame:button:2" content='Explore' />
+        <meta property="fc:frame:button:2:action" content="link" />
+        <meta property="fc:frame:button:2:target" content={`https://warpcast.com/~/composer-action?view=prompt&url=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Fmini-app%2Fcurator%3Ffid%3D${curators}${(channels) ? '%26points%3D' + channels : ''}%26points%3D%24${eco}%26app%3Dmini`} />
 
         <meta property="fc:frame:button:3" content={'Auto-tip >'} />
         <meta property="fc:frame:button:3:action" content="post" />
         <meta property="fc:frame:button:3:target" content={`${baseURL}/api/frames/tip/auto-tip?${qs.stringify({ time, curators, eco, ecosystem, channels })}`} />
 
-        <meta property="fc:frame:button:4" content={'Explore'} />
+        <meta property="fc:frame:button:4" content={'Login'} />
         <meta property="fc:frame:button:4:action" content="link" />
-        <meta property="fc:frame:button:4:target" content={`https://warpcast.com/~/composer-action?view=prompt&url=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Fmini-app%2Fcurator%3Ffid%3D${tipperFid}%26id%3D${id}%26app%3Dmini`} />
+        <meta property="fc:frame:button:4:target" content={`https://impact.abundance.id/?eco=$${eco}`} />
 
         <meta name="fc:frame:input:text" content="Eg.: 1000 $Degen, 500 $HAM" />
       </Head>
     )}
+
     <div className="" style={{padding: '58px 0 0 0'}}>
     </div>
-
 
     <>{
     cast && (<div className="inner-container" style={{width: '100%', display: 'flex', flexDirection: 'row'}}>
@@ -535,61 +532,31 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem, fi
                 }}>
                 <ImArrowDown />
               </div>
+
             </div>
           </div>
         </div>
       </div>
     </div>)}</>
+
+
+
     </div>
   );
 }
 
 
 export async function getServerSideProps(context) {
+  // Fetch dynamic parameters from the context object
   const { query, params } = context;
-  const { id } = query;
+  const { time, curators, channels, tags, eco } = query;
   const { ecosystem } = params;
-  
-  async function getCircle(id) {
-    if (id) {
-      try {
-        const objectId = new mongoose.Types.ObjectId(id)
-        console.log(id)
-        await connectToDatabase();
-        let circle = await Circle.findOne({ _id: objectId }).exec();
-        if (circle) {
-          let eco = ''
-          if (circle.points) {
-            eco = circle?.points?.substring(1)
-          }
-          return { time: circle?.time, curators: circle?.curators, channels: circle?.channels, eco, username: circle?.username, tipperFid: circle?.fid }
-        } else {
-          return { time: 'all', curators: [], channels: [], eco: null, username: '', tipperFid: 9326 }
-        }
-      } catch (error) {
-        console.error("Error while fetching casts:", error);
-        return { time: 'all', curators: [], channels: [], eco: null, username: '', tipperFid: 9326 }
-      }  
-    } else {
-      return { time: 'all', curators: [], channels: [], eco: null, username: '', tipperFid: 9326 }
-    }
-  }
-  
-  const { time, curators, channels, eco, username, tipperFid } = await getCircle(id)
-  
-  let setId = ''
-  if (id) {
-    setId = id
-  }
-  let setUsername = ''
-  if (username) {
-    setUsername = username
-  }
+  console.log(time, curators, channels, tags, eco)
+  let setTime = 'all'
   let setEco = null
   if (eco) {
     setEco = eco
   }
-  let setTime = 'all'
   if (time) {
     setTime = time
   }
@@ -597,25 +564,32 @@ export async function getServerSideProps(context) {
   if (curators) {
     setCurators = Array.isArray(curators) ? parseInt(curators) : [parseInt(curators)]
   }  
-  let setChannels = []
-  if (channels) {
-    setChannels = Array.isArray(channels) ? channels : [channels]
+  let setChannels = null
+  if (channels && channels !== ' ') {
+    setChannels = channels
   }
-  let setTipperFid = 9326
-  if (tipperFid) {
-    setTipperFid = tipperFid
+  let setTags = []
+  if (tags) {
+    setTags = Array.isArray(tags) ? tags : [tags]
   }
-
+  // let setShuffle = false
+  // if (shuffle || shuffle == false) {
+  //   if (shuffle == 'true') {
+  //     setShuffle = true
+  //   } else if (shuffle == 'false') {
+  //     setShuffle = false
+  //   }
+  // }
+  // let setReferrer = referrer || null
+  console.log('192:', setTime, setCurators, setEco, ecosystem)
   return {
     props: {
       time: setTime,
       curators: setCurators,
       channels: setChannels,
+      tags: setTags,
       eco: setEco,
-      ecosystem: ecosystem,
-      username: setUsername,
-      id: setId,
-      tipperFid: setTipperFid
+      ecosystem: ecosystem
     },
   };
 }

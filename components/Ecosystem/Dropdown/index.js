@@ -206,8 +206,8 @@ export default function Dropdown({ title, setupEcosystem, target, button, condit
           <div style={{margin: '10px 5px 10px 0', width: '', flexGrow: title ? 0 : 1}}>
             <select value={value} onChange={handleChange} style={{backgroundColor: '#adf', borderRadius: '4px', padding: isMobile ? '7px 4px' : '6px', fontSize: isMobile ? '14px' : '16px', width: '100%', fontWeight: '600'}}>
               {conditions.map((condition) => (
-                <option key={condition.value} value={condition.value}>
-                  {condition.label}
+                <option key={condition?.value} value={condition?.value}>
+                  {condition?.label}
                 </option>
               ))}
             </select>

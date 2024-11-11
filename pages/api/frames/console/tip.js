@@ -408,21 +408,26 @@ export default async function handler(req, res) {
               //   query.cast_tags = { $in: [tags] };
               // }
           
-              if (req.query['channel[]'] && req.query['channel[]'].length > 0) {
+              // if (req.query['channel[]'] && req.query['channel[]'].length > 0) {
 
-                if (typeof req.query['channel[]'] === 'string') {
-                  query.cast_channel = { $in: [req.query['channel[]']]};
-                } else if (Array.isArray(req.query['channel[]']) && req.query['channel[]'].length > 0) {
-                  query.cast_channel = { $in: req.query['channel[]']};
-                }
+              //   if (typeof req.query['channel[]'] === 'string') {
+              //     query.cast_channel = { $in: [req.query['channel[]']]};
+              //   } else if (Array.isArray(req.query['channel[]']) && req.query['channel[]'].length > 0) {
+              //     query.cast_channel = { $in: req.query['channel[]']};
+              //   }
                       
                 // query.cast_channel = { $in: [req.query['channel[]']] };
-              }
+              // }
           
               // if (text) {
               //   query.cast_text = { $regex: text, $options: 'i' }; // Case-insensitive search
               // }
-              
+              if (channel && channel !== ' ') {
+                console.log('channel', channel)
+                query.channel_id = { $in: channel }
+              }    
+
+
               function shuffleArray(array) {
                 for (let i = array.length - 1; i > 0; i--) {
                   const j = Math.floor(Math.random() * (i + 1));
@@ -590,7 +595,7 @@ export default async function handler(req, res) {
               }
             }
       
-            const { castData, circle, pfps } = await processTips(displayedCasts, fid, allowances, ecoName, curatorPercent)
+            const { castData, circle, pfps, usernames } = await processTips(displayedCasts, fid, allowances, ecoName, curatorPercent)
             console.log('pfps', pfps)
             const jointFids = circle.join(',')
 
@@ -710,17 +715,35 @@ export default async function handler(req, res) {
               }
             }
 
+            let userText = ''
+
+            if (usernames && usernames?.length > 0) {
+              if (usernames && usernames?.length == 1) {
+                userText = '@' + usernames[0] + ' '
+              } else if (usernames && usernames?.length == 2) {
+                userText = '@' + usernames[0] + ' and @' + usernames[1] + ' '
+              } else if (usernames && usernames?.length == 3) {
+                userText = '@' + usernames[0] + ', @' + usernames[1] + ' and @' + usernames[2] + ' '
+              } else if (usernames && usernames?.length == 4) {
+                userText = '@' + usernames[0] + ', @' + usernames[1] + ', @' + usernames[2] + ' and @' + usernames[3] + ' '
+              } else if (usernames && usernames?.length == 5) {
+                userText = '@' + usernames[0] + ', @' + usernames[1] + ', @' + usernames[2] + ', @' + usernames[3] + ' and @' + usernames[4] + ' '
+              } else if (usernames && usernames?.length > 5) {
+                userText = '@' + usernames[0] + ', @' + usernames[1] + ', @' + usernames[2] + ', @' + usernames[3] + ', @' + usernames[4] + ' and other builders & creators '
+              }
+            }
+
             if (curators && fid == curators) {
-              shareText = 'I just multi-tipped builders & creators on /impact by @abundance.\n\nSupport my nominees here:'
+              shareText = `I just multi-tipped ${userText}on /impact by @abundance.\n\nSupport my nominees here:`
             } else if (curators?.length > 0) {
               const curatorName = await getCurator(curators, points)
               if (curatorName) {
-                shareText = `I just multi-tipped ${curatorName}'s curation of builders & creators thru /impact by @abundance.\n\nSupport ${curatorName}'s nominees here:`
+                shareText = `I just multi-tipped ${userText}curated by ${curatorName} thru /impact by @abundance.\n\nSupport ${curatorName}'s nominees here:`
               } else {
-                shareText = 'I just multi-tipped builders & creators on /impact by @abundance. Try it out here:'
+                shareText = `I just multi-tipped ${userText}on /impact by @abundance. Try it out here:`
               }
             } else {
-              shareText = 'I just multi-tipped builders & creators on /impact by @abundance. Try it out here:'
+              shareText = `I just multi-tipped ${userText}on /impact by @abundance. Try it out here:`
             }
             encodedShareText = encodeURIComponent(shareText)
           

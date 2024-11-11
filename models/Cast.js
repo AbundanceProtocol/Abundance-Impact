@@ -16,6 +16,7 @@ const castSchema = new mongoose.Schema({
     content_type: { type: String, required: true },
   }],
   cast_channel: { type: String, index: true },
+  channel_id: { type: String },
   cast_tags: [String],
   quality_balance: Number,
   impact_total: { type: Number, default: 0, index: true },
@@ -23,7 +24,8 @@ const castSchema = new mongoose.Schema({
   quality_absolute: { type: Number, default: 0 },
   impact_points: [{type: Schema.Types.ObjectId, ref: 'Impact'}],
   quality_points: [{type: Schema.Types.ObjectId, ref: 'Quality'}],
-  createdAt: { type: Date, default: () => new Date(), index: true }
+  wallet: { type: String },
+  createdAt: { type: Date, default: () => new Date(), index: true },
 });
 
 const Cast = mongoose.models.Cast || mongoose.model('Cast', castSchema);

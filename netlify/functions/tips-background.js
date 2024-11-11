@@ -12,126 +12,116 @@ const secretKey = process.env.SECRET_KEY;
 const secretCode = process.env.SECRET_CODE;
 const apiKey = process.env.NEYNAR_API_KEY;
 
-exports.handler = async (event, context) => {
-  // Set background function flag
-  context.callbackWaitsForEmptyEventLoop = false;
+exports.handler = async function(event, context) {
 
-  // Parse query parameters from event
-  const { code, tipTime } = event.queryStringParameters || {};
+  const tipTime = '7pm'
 
-  // if (code !== secretCode) {
-  //   return {
-  //     statusCode: 400,
-  //     body: JSON.stringify({ error: 'Bad Request', message: 'Invalid code' })
-  //   };
+  // function sleep(ms) {
+  //   return new Promise(resolve => setTimeout(resolve, ms));
   // }
 
-  // Return immediately to client
-  await context.done(null, {
-    statusCode: 202,
-    body: JSON.stringify({ message: 'Processing started' })
-  });
+  async function autotip() {
 
-  let counter = 0;
-  let errors = 0;
-
-  try {
-    await connectToDatabase();
-
-    const uniquePoints = await getUniquePoints();
-    let users = [];
-
-    for (const points of uniquePoints) {
-      const curatorPercent = await getCuratorPercent(points);
-      const uniqueFids = await getUniqueFids(points);
-      console.log('uniqueFids', uniqueFids);
-      
-      for (const fid of uniqueFids) {
-        await new Promise(resolve => setTimeout(resolve, 100));
-        let time = null;
-        let schedule = null;
-        let allowances = [];
+    let counter = 0;
+    let errors = 0;
+  
+    try {
+      await connectToDatabase();
+  
+      const uniquePoints = await getUniquePoints();
+      let users = [];
+  
+      for (const points of uniquePoints) {
+        const curatorPercent = await getCuratorPercent(points);
+        const uniqueFids = await getUniqueFids(points);
+        console.log('uniqueFids', uniqueFids);
         
-        try {
-          schedule = await getSchedule(fid, points);
-          time = schedule?.timeRange ? getTimeRange(schedule?.timeRange) : null;
-          allowances = await getAllowances(fid, schedule?.currencies || [], schedule?.percent, tipTime);
-        } catch (error) {
-          console.error(`Error fetching allowances or user search for fid ${fid}:`, error);
-          continue;
+        for (const fid of uniqueFids) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+          let time = null;
+          let schedule = null;
+          let allowances = [];
+          
+          try {
+            schedule = await getSchedule(fid, points);
+            time = schedule?.timeRange ? getTimeRange(schedule?.timeRange) : null;
+            allowances = await getAllowances(fid, schedule?.currencies || [], schedule?.percent, tipTime);
+          } catch (error) {
+            console.error(`Error fetching allowances or user search for fid ${fid}:`, error);
+            continue;
+          }
+  
+          if (!schedule?.percent || !schedule?.decryptedUuid || allowances?.length === 0) {
+            continue;
+          }
+          users.push({
+            points, 
+            fid, 
+            allowances, 
+            time, 
+            curators: schedule?.curators, 
+            tags: schedule?.tags, 
+            channels: schedule?.channels, 
+            ecosystem: schedule?.ecosystem, 
+            curatorPercent, 
+            uuid: schedule?.decryptedUuid
+          });
         }
-
-        if (!schedule?.percent || !schedule?.decryptedUuid || allowances?.length === 0) {
-          continue;
-        }
-        users.push({
-          points, 
-          fid, 
-          allowances, 
-          time, 
-          curators: schedule?.curators, 
-          tags: schedule?.tags, 
-          channels: schedule?.channels, 
-          ecosystem: schedule?.ecosystem, 
-          curatorPercent, 
-          uuid: schedule?.decryptedUuid
-        });
       }
-    }
-
-    for (const user of users) {
-      console.log('Processing user:', user?.fid);
-      const { castData } = await getCasts(user);
-
-      for (const userCast of castData) {
-        try {
-          await new Promise(resolve => setTimeout(resolve, 60));
-          const tipped = await sendTip(userCast, user?.uuid, user?.fid, user?.points);
-          if (tipped) {
-            counter++;
-          } else {
+  
+      for (const user of users) {
+        const { castData } = await getCasts(user);
+        
+        console.log('Processing user:', user?.fid, castData.length);
+        for (const userCast of castData) {
+          try {
+            await new Promise(resolve => setTimeout(resolve, 40));
+            const tipped = await sendTip(userCast, user?.uuid, user?.fid, user?.points);
+            // const tipped = 1
+            if (tipped) {
+              counter++;
+            } else {
+              errors++;
+            }
+          } catch(error) {
+            console.error('Error processing tip:', error);
             errors++;
           }
-        } catch(error) {
-          console.error('Error processing tip:', error);
-          errors++;
         }
       }
+  
+
+      return {counter, errors}
+  
+    } catch (error) {
+      console.error('Background processing error:', error);
+      return {counter: 0, errors: 0}
     }
 
-    console.log(`Processing complete. Success: ${counter}, Errors: ${errors}`);
-    
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ 
-        message: 'Processing complete',
-        stats: {
-          success: counter,
-          errors: errors
-        }
-      })
-    };
 
-  } catch (error) {
-    console.error('Background processing error:', error);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ 
-        error: 'Internal server error',
-        message: error.message 
-      })
-    };
   }
+
+  const {counter, errors} = await autotip();
+
+  console.log(`Processing complete. Success: ${counter}, Errors: ${errors}`);
+
+  return {
+    statusCode: 200,
+    body: JSON.stringify({ message: `Processing complete. Success: ${counter}, Errors: ${errors}` })
+  };
+
 };
 
 
 
 
 
-async function getCasts(user) {
 
+
+async function getCasts(user) {
   try {
     const { casts } = await getUserSearch(user?.time, user?.tags, user?.channels, user?.curators, user?.points);
+    console.log('getCasts', casts?.length, user?.time, user?.tags, user?.channels, user?.curators, user?.points)
     if (!casts) {
       console.log('no casts')
       return {castData: [], coinTotals: 0}
@@ -209,19 +199,19 @@ async function getAllowances(fid, currencies, percent, tipTime) {
   const allowances = [];
   for (const coin of currencies) {
     let allowance, tip, minTip;
-    if (coin == '$TN100x' && tipTime == '12am') {
+    if (coin == '$TN100x' && tipTime == '7pm') {
       allowance = await getHamAllowance(fid);
-      // console.log('$TN100x', allowance)
+      console.log('$TN100x', allowance)
       tip = Math.floor(allowance * percent / 100);
       allowances.push({token: coin, set: true, allowance: tip, totalTip: tip});
     } else if (coin == '$DEGEN' && tipTime == '7pm') {
       allowance = await getDegenAllowance(fid);
-      // console.log('$DEGEN', allowance)
+      console.log('$DEGEN', allowance)
       tip = Math.round(allowance * percent / 100);
       allowances.push({token: coin, set: true, allowance: tip, totalTip: tip});
     } else if (coin == '$HUNT' && tipTime == '7pm') {
       allowance = await getHuntAllowance(fid);
-      // console.log('$HUNT', allowance)
+      console.log('$HUNT', allowance)
       tip = Math.round(allowance * percent / 100);
       allowances.push({token: coin, set: true, allowance: tip, totalTip: tip});
     }
@@ -253,7 +243,7 @@ async function getDegenAllowance(fid) {
     // console.log(fid, data[0], Number(data[0]?.remaining_tip_allowance))
     if (data && data[0]?.remaining_tip_allowance) {
       if (Number(data[0]?.remaining_tip_allowance) >= 0 && (dayOfMonth % 3 == Number(fid) % 3)) {
-        return Number(data[0]?.remaining_tip_allowance)
+        return Number(data[0]?.remaining_tip_allowance) || 0
       } else {
         return 0
       }
@@ -298,9 +288,13 @@ async function getUserSearch(time, tags, channel, curator, points) {
     if (impactIds) query['impact_points'] = { $in: impactIds };
   }
   
-  if (channel && channel.length > 0) {
-    query.cast_channel = { $in: Array.isArray(channel) ? channel : [channel] };
-  }
+  // if (channel && channel.length > 0) {
+  //   query.cast_channel = { $in: Array.isArray(channel) ? channel : [channel] };
+  // }
+
+  // if (channel && channel !== ' ') {
+  //   query.channel_id = channel
+  // }
 
   const { casts, totalCount } = await fetchCasts(query, limit);
   return { casts: casts || [], totalCount };
@@ -332,7 +326,7 @@ async function fetchCasts(query, limit) {
     let returnedCasts = []
 
     totalCount = await Cast.countDocuments(query);
-
+    // console.log('totalCount', totalCount)
     // Calculate the number of documents to be sampled from each range
     const top20PercentCount = Math.ceil(totalCount * 0.2);
     const middle40PercentCount = Math.ceil(totalCount * 0.4);
@@ -378,7 +372,7 @@ async function fetchCasts(query, limit) {
       returnedCasts = returnedCasts.slice(0, 10);
     }
 
-    // console.log('113', returnedCasts)
+    console.log('returnedCasts', returnedCasts?.length)
     if (!returnedCasts) {
       returnedCasts = []
     }

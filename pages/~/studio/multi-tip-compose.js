@@ -10,6 +10,7 @@ import Description from '../../../components/Ecosystem/Description';
 import Dropdown from '../../../components/Ecosystem/Dropdown';
 import Modal from '../../../components/Layout/Modals/Modal';
 import qs from "querystring";
+import { getTimeRange } from '../../../utils/utils'
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 
 export default function MultiTip() {
@@ -25,13 +26,20 @@ export default function MultiTip() {
   const initialSubmit = {pass: false, target: null}
   const [submitCheck, setSubmitCheck] = useState(initialSubmit)
   const [frameTime, setFrameTime] = useState({frame: '7 Days', url: '7d', isSet: 'working', condition: '7d'})
-  const [sched, setSched] = useState({curators: false})
+  const [sched, setSched] = useState({curators: false, channels: false, docs: false})
   const [frameCurators, setFrameCurators] = useState({frame: [9326], url: [9326], isSet: 'working', condition: 'abundance'})
   const [frameEcosystem, setFrameEcosystem] = useState({frame: 'abundance', url: 'abundance', eco: 'IMPACT', isSet: 'working', condition: 'abundance'})
   const initEcosystems = [
     { value: 'abundance', label: 'Abundance ecosystem' , eco: 'IMPACT'},
   ]
   const [ecosystemOptions, setEcosystemOptions] = useState(initEcosystems)
+  const initChannels = [
+    { value: ' ', label: 'Choose channel'},
+    { value: 'impact', label: '/impact'},
+  ]
+  const [channelOptions, setChannelOptions] = useState(initChannels)
+  const [selectedChannel, setSelectedChannel] = useState(' ')
+  const [docNum, setDocNum] = useState(0)
 
   const initCurators = [
     { value: 'none', label: 'Choose curator', fid: null },
@@ -49,6 +57,75 @@ export default function MultiTip() {
     { value: 'all', label: 'All time' },
   ]
 
+  const updateChannel = (value) => {
+    setSelectedChannel(value)
+  };
+
+  async function getChannels(points) {
+    try {
+      const channelData = await axios.get('/api/curation/getChannelNames', { params: { points } })
+      if (channelData) {
+        const ecoChannels = channelData?.data?.channels
+        console.log('e1', ecoChannels)
+        const updatedChannels = ecoChannels.map(channel => ({ value: channel, label: `/${channel}` }));
+        
+        const finalChannels = [
+          { value: ' ', label: 'Choose channel' },
+          ...updatedChannels
+        ]
+        
+        setChannelOptions(finalChannels);
+      }
+    } catch (error) {
+      console.error('Error updating channels:', error);
+    }
+  }
+
+
+  useEffect(() => {
+    if (sched.docs) {
+      getDocs('$IMPACT', frameCurators?.url, selectedChannel, frameTime?.url)
+      setSched(prev => ({...prev, docs: false }))
+    } else {
+      const timeoutId = setTimeout(() => {
+        getDocs('$IMPACT', frameCurators?.url, selectedChannel, frameTime?.url)
+        setSched(prev => ({...prev, docs: false }))
+      }, 300);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [frameCurators, frameEcosystem, frameTime, selectedChannel, sched.docs])
+
+
+  async function getDocs(points, curators, channels, time) {
+    const getTime = getTimeRange(time)
+    try {
+      const docData = await axios.get('/api/curation/getDocNum', { params: { points, curators, channels, time: getTime } })
+      if (docData) {
+        setDocNum(docData?.data?.docs)
+      } else {
+        setDocNum(0)
+      }
+    } catch (error) {
+      console.error('Error updating channels:', error);
+      setDocNum(0)
+    }
+  }
+
+
+  useEffect(() => {
+    if (sched.channels) {
+      getChannels('$IMPACT')
+      setSched(prev => ({...prev, channels: false }))
+    } else {
+      const timeoutId = setTimeout(() => {
+        getChannels('$IMPACT')
+        setSched(prev => ({...prev, channels: false }))
+      }, 300);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [sched.channels])
+
+
   useEffect(() => {
     const { trigger, fid } = router.query;
     console.log('fid', fid)
@@ -56,46 +133,10 @@ export default function MultiTip() {
       setFrameFid(Number(fid))
     }
 
-
     if (trigger === 'createEcosystem') {
       setupEcosystem('start');
     }
   }, [router.query]);
-
-  // useEffect(() => {
-  //   if (newEcosystem && formController) {
-  //     let passed = true
-  //     for (const rule of newEcosystem.ecoRules) {
-  //       if (rule.isSet == 'error') {
-  //         passed = false
-  //       }
-  //     }
-  //     for (const incentive of newEcosystem.incentives) {
-  //       if (incentive.isSet == 'error') {
-  //         passed = false
-  //       }
-  //     }
-  //     for (const eligibility of newEcosystem.eligibility) {
-  //       if (eligibility.isSet == 'error') {
-  //         passed = false
-  //       }
-  //     }
-  //     if ((formController.name && formController.name !== 'working') || ( formController.points && formController.points !== 'working') || ( formController.handle && formController.handle !== 'working')) {
-  //       passed = false
-  //     }
-  //     if (passed) {
-  //       const pass = {pass: true, target: 'submit'}
-  //       setSubmitCheck(pass)
-  //       // updateEcosystemData()
-  //     } else {
-  //       const pass = {pass: false, target: null}
-  //       setSubmitCheck(pass)
-  //     }
-  //   } else {
-  //     const pass = {pass: false, target: null}
-  //     setSubmitCheck(pass)
-  //   }
-  // }, [newEcosystem, formController])
 
 
   useEffect(() => {
@@ -122,11 +163,11 @@ export default function MultiTip() {
 
   useEffect(() => {
     if (sched.curators) {
-        getCurators('$IMPACT')
+      getCurators('$IMPACT')
       setSched(prev => ({...prev, curators: false }))
     } else {
       const timeoutId = setTimeout(() => {
-          getCurators('$IMPACT')
+        getCurators('$IMPACT')
         setSched(prev => ({...prev, curators: false }))
       }, 300);
       return () => clearTimeout(timeoutId);
@@ -148,8 +189,7 @@ export default function MultiTip() {
         setCuratorOptions(updatedCurators);
       }
     } catch (error) {
-      console.error('Error creating post:', error);
-      setCuratorOptions(updatedCurators);
+      console.error('Error updating curators:', error);
     }
   }
 
@@ -174,7 +214,7 @@ export default function MultiTip() {
   function setupEcosystem(target) {
 
     console.log(frameEcosystem?.url, frameTime?.url, frameFid, frameEcosystem?.eco)
-    let shareUrl = `https://impact.abundance.id/~/ecosystems/${frameEcosystem?.url}/tip-v4?time=${frameTime?.url}&shuffle=true${frameCurators?.url ? '&curators=' + frameCurators?.url[0] : ''}&eco=${frameEcosystem?.eco}`
+    let shareUrl = `https://impact.abundance.id/~/ecosystems/${frameEcosystem?.url}/tip-v5?time=${frameTime?.url}&shuffle=true${frameCurators?.url ? '&curators=' + frameCurators?.url[0] : ''}&eco=${frameEcosystem?.eco}${ (selectedChannel !== ' ') ? '&channels=' + selectedChannel : ''}`
 
     console.log('shareUrl', shareUrl, frameFid)
     let shareText = ''
@@ -266,13 +306,6 @@ export default function MultiTip() {
     <div style={{padding: '58px 0 0 0', width: feedMax}}>
     </div>
 
-    {/* <div className='flex-row' style={{height: '30px', alignItems: 'center', justifyContent: 'flex-start', padding: '20px 0 30px 0'}}>
-      <div className='flex-row' style={{padding: '4px 8px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '20px', alignItems: 'center', gap: '0.25rem'}}>
-        <Link href={`/~/studio`}><div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>Studio</div></Link>
-        <div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px', padding: '0'}}>{'>'}</div>
-        <Link href={`/~/studio/multi-tip`}><div className='filter-item-on' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>multi-tip</div></Link>
-      </div>
-    </div> */}
 
     <div title='Cast Actions' className='flex-row' style={{alignItems: 'center', justifyContent: 'center', margin: '8px'}}>
       <p className='' style={{padding: '10px', color: '#fff', fontWeight: '700', fontSize: '20px'}}>Create Multi-tip Frame </p>
@@ -280,7 +313,7 @@ export default function MultiTip() {
 
 
     <div className='flex-row' style={{margin: '13px 3px 8px 3px', gap: '1rem', justifyContent: 'center'}}>
-    <img src={`${baseURL}/api/multi-tip/frame?${qs.stringify({ status: 'off', curators: frameCurators?.url, points: '$IMPACT', needLogin: false, time: frameTime?.url})}`} style={{width: '100%', height: 'auto', maxWidth: '400px', minWidth: 'auto', minHeight: 'auto', borderRadius: '15px', aspectRatio: '1 / 1', border: '3px solid #abc'}} /></div>
+    <img src={`${baseURL}/api/multi-tip/frame?${qs.stringify({ curators: frameCurators?.url, points: '$IMPACT', time: frameTime?.url, channel: selectedChannel })}`} style={{width: '100%', height: 'auto', maxWidth: '400px', minWidth: 'auto', minHeight: 'auto', borderRadius: '15px', aspectRatio: '1 / 1', border: '3px solid #abc'}} /></div>
 
     <div className='flex-row' style={{margin: '33px 3px 8px 3px', gap: '1rem'}}>
       <Description {...{show: true, text: 'Ecosystem:', padding: '0 0 0 10px' }} />
@@ -302,11 +335,17 @@ export default function MultiTip() {
 
     <Dropdown {...{key: 2, name: 0, value: frameTime.condition, setupEcosystem, target: 0, conditions: timeframe, cancel: false, isSet: frameTime.isSet, setCondition: setTimeframe, state: frameTime.state}} />
 
-    {/* <Description {...{show: true, text: 'Options:', padding: '20px 0 4px 10px' }} />
 
-    {true && (<div className={`active-nav-link btn-hvr flex-col`} style={{border: '1px solid #777', padding: '2px', borderRadius: '10px', margin: '3px 3px 13px 3px', backgroundColor: '', maxWidth: '100%', cursor: 'default', width: 'auto', justifyContent: 'flex-start'}}>
-      <Checkbox {...{option: newEcosystem.botReply, text: 'Earn 5% distribution reward', target: 'bot-reply', setupEcosystem}} />
-    </div>)} */}
+    <div className='flex-row' style={{margin: '33px 3px 8px 3px', gap: '1rem'}}>
+      <Description {...{show: true, text: 'Channel:', padding: '0 0 0 10px'}} />
+    </div>
+
+
+    <Dropdown {...{key: 3, name: 0, value: selectedChannel, setupEcosystem, target: 0, conditions: channelOptions, cancel: false, isSet: 'working', setCondition: updateChannel, state: true}} />
+
+    <div className='flex-row' style={{margin: '33px 3px 8px 3px', gap: '1rem'}}>
+      <Description {...{show: true, text: `Number of casts: ${docNum}`, padding: '0 0 0 10px'}} />
+    </div>
 
 
     <div className='flex-row' style={{margin: '33px 3px 8px 3px', gap: '1rem', justifyContent: 'center'}}>
