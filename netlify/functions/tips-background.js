@@ -76,8 +76,8 @@ exports.handler = async function(event, context) {
         for (const userCast of castData) {
           try {
             await new Promise(resolve => setTimeout(resolve, 40));
-            // const tipped = await sendTip(userCast, user?.uuid, user?.fid, user?.points);
-            const tipped = 1
+            const tipped = await sendTip(userCast, user?.uuid, user?.fid, user?.points);
+            // const tipped = 1
             if (tipped) {
               counter++;
             } else {
@@ -326,7 +326,7 @@ async function fetchCasts(query, limit) {
     let returnedCasts = []
 
     totalCount = await Cast.countDocuments(query);
-    console.log('totalCount', totalCount)
+    // console.log('totalCount', totalCount)
     // Calculate the number of documents to be sampled from each range
     const top20PercentCount = Math.ceil(totalCount * 0.2);
     const middle40PercentCount = Math.ceil(totalCount * 0.4);

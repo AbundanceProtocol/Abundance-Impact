@@ -64,6 +64,7 @@ exports.handler = async function(event, context) {
 
 async function getUniquePoints() {
   try {
+    await connectToDatabase();
     const uniquePoints = await ScheduleTip.distinct('points');
     return uniquePoints;
   } catch (error) {
