@@ -1,10 +1,11 @@
 import mongoose from 'mongoose';
 
 const tipSchema = new mongoose.Schema({
-  receiver_fid: Number,
-  tipper_fid: Number,
+  receiver_fid: { type: Number, index: true },
+  tipper_fid: { type: Number, index: true },
   cast_hash: String,
-  points: String,
+  auto_tip: { type: Boolean, default: false, index: true },
+  points: { type: String, index: true },
   tip: [{
     currency: String,
     amount: Number

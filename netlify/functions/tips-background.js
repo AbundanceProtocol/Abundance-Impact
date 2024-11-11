@@ -475,6 +475,7 @@ async function sendTip(cast, signer, fid, points) {
     await Tip.create({
       receiver_fid: cast.fid,
       tipper_fid: fid,
+      auto_tip: true,
       points: points,
       cast_hash: cast.castHash,
       tip: tips,
