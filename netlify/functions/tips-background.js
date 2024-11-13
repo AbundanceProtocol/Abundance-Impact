@@ -37,7 +37,7 @@ exports.handler = async function(event, context) {
         console.log('uniqueFids', uniqueFids);
         
         for (const fid of uniqueFids) {
-          await new Promise(resolve => setTimeout(resolve, 100));
+          await new Promise(resolve => setTimeout(resolve, 50));
           let time = null;
           let schedule = null;
           let allowances = [];
@@ -75,7 +75,7 @@ exports.handler = async function(event, context) {
         console.log('Processing user:', user?.fid, castData.length);
         for (const userCast of castData) {
           try {
-            await new Promise(resolve => setTimeout(resolve, 40));
+            await new Promise(resolve => setTimeout(resolve, 20));
             const tipped = await sendTip(userCast, user?.uuid, user?.fid, user?.points);
             // const tipped = 1
             if (tipped) {
