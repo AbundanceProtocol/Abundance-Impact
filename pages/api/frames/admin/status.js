@@ -1,6 +1,6 @@
 import { getSSLHubRpcClient, Message } from "@farcaster/hub-nodejs";
-import qs from "querystring";
-import { init, validateFramesMessage } from "@airstack/frames";
+// import qs from "querystring";
+// import { init, validateFramesMessage } from "@airstack/frames";
 
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 const HubURL = process.env.NEYNAR_HUB
@@ -8,19 +8,19 @@ const client = HubURL ? getSSLHubRpcClient(HubURL) : undefined;
 
 
 export default async function handler(req, res) {
-  init(process.env.AIRSTACK_API_KEY ?? '')
+  // init(process.env.AIRSTACK_API_KEY ?? '')
   const body = await req.body;
-  const {isValid, message} = await validateFramesMessage(body)
-  console.log('isValid:', isValid)
-  const { untrustedData } = req.body
-  const { confirmed } = req.query;
+  // const {isValid, message} = await validateFramesMessage(body)
+  // console.log('isValid:', isValid)
+  // const { untrustedData } = req.body
+  // const { confirmed } = req.query;
 
   if (req.method !== 'POST') {
     res.setHeader('Allow', ['POST']);
     res.status(405).end(`Method ${req.method} Not Allowed`);
   } else {
     
-    let balanceImg = `${baseURL}/api/frames/admin/frame?${qs.stringify({ confirmed: confirmed || null })}`
+    let balanceImg = `${baseURL}/api/frames/admin/frame`
 
     let button1 = ''
     let button2 = ''
@@ -75,7 +75,7 @@ export default async function handler(req, res) {
     } catch (error) {
 
       res.setHeader('Content-Type', 'text/html');
-      res.status(500).send(`
+      res.status(200).send(`
         <!DOCTYPE html>
         <html>
           <head>
