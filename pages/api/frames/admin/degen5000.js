@@ -23,6 +23,7 @@ export default async function handler(req, res) {
   init(process.env.AIRSTACK_API_KEY ?? '')
   const body = await req.body;
   const {isValid, message} = await validateFramesMessage(body)
+  console.log('message', message)
 
   if (req.method === 'POST') {
     // const points = req.query.pt
@@ -30,7 +31,7 @@ export default async function handler(req, res) {
     const curatorFid = message?.data?.fid
     const castHash = req.body.untrustedData.castId.hash
     const authorFid = message?.data?.frameActionBody?.castId?.fid
-
+    console.log('authorFid 01', authorFid, castHash, curatorFid)
 
     if (curatorFid !== 9326 && curatorFid !== userFid) {
       res.setHeader('Allow', ['POST']);
@@ -88,7 +89,7 @@ export default async function handler(req, res) {
 
     let balanceImg = ``
     if (tipped !== 0) {
-      balanceImg = `${baseURL}/api/frames/admin/frame?${qs.stringify({ confirmed: 10, error: null })}`
+      balanceImg = `${baseURL}/api/frames/admin/frame?${qs.stringify({ confirmed: 15, error: null })}`
     } else {
       balanceImg = `${baseURL}/api/frames/admin/frame?${qs.stringify({ confirmed: null, error: 404 })}`
     }
