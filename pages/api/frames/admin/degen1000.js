@@ -30,7 +30,7 @@ export default async function handler(req, res) {
     const curatorFid = message?.data?.fid
     const castHash = req.body.untrustedData.castId.hash
     const authorFid = message?.data?.frameActionBody?.castId?.fid
-
+    console.log('authorFid 01', authorFid, castHash, curatorFid)
 
     if (curatorFid !== 9326 && curatorFid !== userFid) {
       res.setHeader('Allow', ['POST']);
@@ -102,7 +102,7 @@ export default async function handler(req, res) {
     let postUrl = `<meta name="fc:frame:post_url" content='https://impact.abundance.id' />`
 
     let metatags = button1 + button2 + button3 + button4 + textField + postUrl
-
+    console.log('balanceImg', balanceImg)
     try {
 
       res.setHeader('Content-Type', 'text/html');

@@ -39,10 +39,10 @@ export default async function handler(req, res) {
 
 
     const decryptedUuid = decryptPassword(encryptedTipUuid, secretKey);
+    console.log('userFid', userFid, castHash, authorFid, curatorFid)
+    const castText = `I'm tipping:\n15 $DEGEN\nvia Abundance Ecosystem on /impact\n\n/impact lets you earn curator rewards while supporting your favorite creators & builders on Farcaster`
 
-    const castText = `I'm tipping:\n25 $DEGEN\nvia Abundance Ecosystem on /impact\n\n/impact lets you earn curator rewards while supporting your favorite creators & builders on Farcaster`
-
-    const tips = { currency: '$degen', amount: 25 }
+    const tips = { currency: '$degen', amount: 15 }
 
     async function sendTip(signer) {
       const base = "https://api.neynar.com/";
@@ -79,7 +79,7 @@ export default async function handler(req, res) {
     
         return 1;
       } catch (error) {
-        console.error(`Error in sendTip for ${cast.text}:`, error);
+        console.error(`Error in sendTip for ${castText}:`, error);
         return 0;
       }
     }
@@ -102,7 +102,7 @@ export default async function handler(req, res) {
     let postUrl = `<meta name="fc:frame:post_url" content='https://impact.abundance.id' />`
 
     let metatags = button1 + button2 + button3 + button4 + textField + postUrl
-
+    console.log('balanceImg', balanceImg)
     try {
 
       res.setHeader('Content-Type', 'text/html');
