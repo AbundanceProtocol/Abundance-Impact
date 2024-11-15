@@ -55,6 +55,7 @@ export default async function handler(req, res) {
       };
     
       try {
+        await connectToDatabase();
         const response = await fetch(url, {
           method: 'POST',
           headers: {
@@ -69,7 +70,6 @@ export default async function handler(req, res) {
           return 0;
         }
         
-        await connectToDatabase();
         await Tip.create({
           receiver_fid: authorFid,
           tipper_fid: 9326,
