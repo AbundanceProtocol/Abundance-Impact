@@ -88,7 +88,7 @@ export default async function handler(req, res) {
 
       let balanceImg = ``
       if (tipped !== 0) {
-        balanceImg = `${baseURL}/api/frames/admin/frame?${qs.stringify({ confirmed: 10 })}`
+        balanceImg = `${baseURL}/api/frames/admin/frame?${qs.stringify({ confirmed: 15 })}`
       } else {
         balanceImg = `${baseURL}/api/frames/admin/frame?${qs.stringify({ error: 404 })}`
       }

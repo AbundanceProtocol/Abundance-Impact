@@ -1,7 +1,7 @@
 import { getSSLHubRpcClient, Message } from "@farcaster/hub-nodejs";
 // import qs from "querystring";
 
-// import connectToDatabase from "../../../libs/mongodb";
+import connectToDatabase from "../../../libs/mongodb";
 // import User from '../../../models/User';
 // import Impact from '../../../models/Impact';
 // import Quality from '../../../models/Quality';
@@ -30,6 +30,7 @@ export default async function handler(req, res) {
     // const curatorFid = message?.data?.fid
 
     try {
+      await connectToDatabase();
 
       res.setHeader('Content-Type', 'application/json');
 
