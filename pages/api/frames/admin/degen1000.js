@@ -23,6 +23,7 @@ export default async function handler(req, res) {
   init(process.env.AIRSTACK_API_KEY ?? '')
   const body = await req.body;
   const {isValid, message} = await validateFramesMessage(body)
+  console.log('message', message)
 
   if (req.method === 'POST') {
     // const points = req.query.pt
