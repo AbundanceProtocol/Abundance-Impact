@@ -50,7 +50,7 @@ export default async function handler(req, res) {
     let metatags = button1 + button2 + button3 + button4 + textField + postUrl
 
     try {
-
+      console.log('x1')
       res.setHeader('Content-Type', 'text/html');
       res.status(200)
       .send(`
@@ -73,6 +73,7 @@ export default async function handler(req, res) {
       return;
 
     } catch (error) {
+      console.log('x2')
 
       res.setHeader('Content-Type', 'text/html');
       res.status(200).send(`
