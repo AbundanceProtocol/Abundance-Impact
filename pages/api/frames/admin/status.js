@@ -30,22 +30,22 @@ export default async function handler(req, res) {
     let postUrl = `<meta name="fc:frame:post_url" content='https://impact.abundance.id' />`
 
 
-    if (confirmed) {
-      console.log('1')
-      button1 = ``
-      button2 = ``
-    } else {
-      console.log('1b')
-      button1 = `<meta property="fc:frame:button:1" content='1000 $degen' />
-      <meta property="fc:frame:button:1:action" content="post" />
-      <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/admin/degen1000' />`
-      button2 = `<meta property="fc:frame:button:2" content='5000 $degen' />
-      <meta property="fc:frame:button:2:action" content="post" />
-      <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/admin/degen5000' />`
-      button3 = ''
-      button4 = ''
-      textField = ''
-    }
+    // if (confirmed) {
+    //   console.log('1')
+    //   button1 = ``
+    //   button2 = ``
+    // } else {
+    console.log('1b')
+    button1 = `<meta property="fc:frame:button:1" content='1000 $degen' />
+    <meta property="fc:frame:button:1:action" content="post" />
+    <meta property="fc:frame:button:1:target" content='https://impact.abundance.id/api/frames/admin/degen1000' />`
+    button2 = `<meta property="fc:frame:button:2" content='5000 $degen' />
+    <meta property="fc:frame:button:2:action" content="post" />
+    <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/admin/degen5000' />`
+    button3 = ''
+    button4 = ''
+    textField = ''
+    // }
 
     let metatags = button1 + button2 + button3 + button4 + textField + postUrl
 
