@@ -13,7 +13,6 @@ export default async function handler(req, res) {
     const fontPath = path.join(process.cwd(), 'public', 'Inter-SemiBold.ttf');
     const fontData = fs.readFileSync(fontPath);
 
-    
     async function getDegenAllowance(fid) {
       try {
         const response = await fetch(`https://api.degen.tips/airdrop2/allowances?fid=${fid}`);
@@ -28,7 +27,7 @@ export default async function handler(req, res) {
     let allowances = {coin: '$DEGEN', remaining: 0}
 
     allowances.remaining = await getDegenAllowance(9326)
-
+    console.log(confirmed, confirmed, allowances)
 
     const backgroundImg = `https://impact.abundance.id/images/backgroundframe.jpg`
 
