@@ -315,7 +315,7 @@ async function getUserSearch(time, tags, channel, curator, points, fid, allowanc
     const filterFids = await excludeTipForTip(fid)
 
     if (filterFids && filterFids?.length > 0) {
-      query['author_fid'] = { $nin: filterFids };
+      query['author_fid'] = { "$nin": filterFids };
     }
   }
 

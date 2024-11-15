@@ -431,7 +431,7 @@ export default async function handler(req, res) {
                 const filterFids = await excludeTipForTip(fid)
   
                 if (filterFids && filterFids?.length > 0) {
-                  query['author_fid'] = { $nin: filterFids };
+                  query['author_fid'] = { "$nin": filterFids };
                 }
               }
 

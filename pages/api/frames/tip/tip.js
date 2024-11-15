@@ -504,11 +504,12 @@ export default async function handler(req, res) {
                 }
 
                 const hasDegenAllowance = allowances.some(allowance => allowance.token === '$DEGEN');
+                console.log('hasDegenAllowance', hasDegenAllowance)
                 if (hasDegenAllowance) {
                   const filterFids = await excludeTipForTip(fid)
-    
+                  console.log('filterFids', filterFids)
                   if (filterFids && filterFids?.length > 0) {
-                    query['author_fid'] = { $nin: filterFids };
+                    query['author_fid'] = { "$nin": filterFids };
                   }
                 }
                 // if (text) {
