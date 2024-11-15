@@ -34,6 +34,7 @@ export default async function handler(req, res) {
     console.log('authorFid 01', authorFid, castHash, curatorFid)
 
     if ((curatorFid !== 9326 && curatorFid !== userFid) || authorFid == 9326) {
+      console.log('user check failed')
       res.setHeader('Allow', ['POST']);
       res.status(405).end(`Method ${req.method} Not Allowed`);
     } else {
@@ -53,7 +54,6 @@ export default async function handler(req, res) {
         };
       
         try {
-          await connectToDatabase();
           const response = await fetch(url, {
             method: 'POST',
             headers: {
@@ -66,18 +66,17 @@ export default async function handler(req, res) {
           if (!response.ok) {
             console.error(`Failed to send request for ${body.text}`);
             return 0;
+          } else {
+            await Tip.create({
+              receiver_fid: authorFid,
+              tipper_fid: 9326,
+              auto_tip: false,
+              points: '$IMPACT',
+              cast_hash: castHash,
+              tip: tips,
+            });
+            return 1;
           }
-          
-          await Tip.create({
-            receiver_fid: authorFid,
-            tipper_fid: 9326,
-            auto_tip: false,
-            points: '$IMPACT',
-            cast_hash: castHash,
-            tip: tips,
-          });
-      
-          return 1;
         } catch (error) {
           console.error(`Error in sendTip for ${castText}:`, error);
           return 0;
