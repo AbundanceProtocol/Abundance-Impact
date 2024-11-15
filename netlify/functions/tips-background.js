@@ -120,7 +120,7 @@ exports.handler = async function(event, context) {
 
 async function getCasts(user) {
   try {
-    const { casts } = await getUserSearch(user?.time, user?.tags, user?.channels, user?.curators, user?.points, user?.fid);
+    const { casts } = await getUserSearch(user?.time, user?.tags, user?.channels, user?.curators, user?.points, user?.fid, user?.allowances);
     console.log('getCasts', casts?.length, user?.time, user?.tags, user?.channels, user?.curators, user?.points)
     if (!casts) {
       console.log('no casts')
@@ -275,7 +275,7 @@ async function getHuntAllowance(fid) {
   }
 }
 
-async function getUserSearch(time, tags, channel, curator, points, fid) {
+async function getUserSearch(time, tags, channel, curator, points, fid, allowances) {
   const limit = 10;
   let query = {};
   
@@ -310,10 +310,13 @@ async function getUserSearch(time, tags, channel, curator, points, fid) {
     }
   }
 
-  const filterFids = await excludeTipForTip(fid)
+  const hasDegenAllowance = allowances.some(allowance => allowance.token === '$DEGEN');
+  if (hasDegenAllowance) {
+    const filterFids = await excludeTipForTip(fid)
 
-  if (filterFids && filterFids?.length > 0) {
-    query['author_fid'] = { $nin: filterFids };
+    if (filterFids && filterFids?.length > 0) {
+      query['author_fid'] = { $nin: filterFids };
+    }
   }
 
   // if (channel && channel.length > 0) {

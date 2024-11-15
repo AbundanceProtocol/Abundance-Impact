@@ -356,7 +356,7 @@ export default async function handler(req, res) {
   
             const {curatorPercent, ecoName } = await getCuratorPercent(points)
   
-            async function getUserSearch(time, tags, channel, curator, points) {
+            async function getUserSearch(time, tags, channel, curator, points, allowances) {
       
               const page = 1;
               const limit = 10;
@@ -426,10 +426,13 @@ export default async function handler(req, res) {
                 }
               }
 
-              const filterFids = await excludeTipForTip(fid)
-
-              if (filterFids && filterFids?.length > 0) {
-                query['author_fid'] = { $nin: filterFids };
+              const hasDegenAllowance = allowances.some(allowance => allowance.token === '$DEGEN');
+              if (hasDegenAllowance) {
+                const filterFids = await excludeTipForTip(fid)
+  
+                if (filterFids && filterFids?.length > 0) {
+                  query['author_fid'] = { $nin: filterFids };
+                }
               }
 
 
@@ -548,7 +551,7 @@ export default async function handler(req, res) {
             return { casts, totalCount }
             }  
         
-            const { casts } = await getUserSearch(timeRange, tags, channels, curators, points)
+            const { casts } = await getUserSearch(timeRange, tags, channels, curators, points, allowances)
   
             // console.log(casts)
             // console.log(casts[0].impact_points)
