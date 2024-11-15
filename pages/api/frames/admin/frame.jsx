@@ -27,7 +27,7 @@ export default async function handler(req, res) {
     let allowances = {coin: '$DEGEN', remaining: 0}
 
     allowances.remaining = await getDegenAllowance(9326)
-    console.log(confirmed, confirmed, allowances)
+    console.log('confirmed', confirmed, allowances)
 
     const backgroundImg = `https://impact.abundance.id/images/backgroundframe.jpg`
 
@@ -51,15 +51,15 @@ export default async function handler(req, res) {
           {/* <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '24px', margin: '5px 20px 5px 20px', padding: '0'}}>Admin Menu</div> */}
 
 
-          {error && (<div style={{display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', border: '1px solid #eeeeeeaa', borderRadius: '16px', padding: '10px', margin: '15px', background: '#eeeeeeaa', width: '500px'}}>
+          {error && (<div style={{display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', border: '1px solid #eeeeeeaa', borderRadius: '16px', padding: '10px', margin: '15px', background: '#eeeeeeaa', width: '200px'}}>
             {/* <div style={{display: 'flex', textAlign: 'left', color:  '#220a4d', fontSize: '18px', margin: '5px 10px 5px 10px', width: '100px'}}>Multi-tip:</div> */}
-            <div style={{display: 'flex', textAlign: 'left', color: '#220a4d', fontSize: '17px', margin: '5px 10px 5px 0px', width: '500px'}}>Tipping error</div>
+            <div style={{display: 'flex', textAlign: 'center', color: '#220a4d', fontSize: '27px', margin: '5px 10px 5px 0px', width: '200px', alignItems: 'center', justifyContent: 'center'}}>Tipping error</div>
           </div>)}
 
 
-          {confirmed && (<div style={{display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', border: '1px solid #eeeeeeaa', borderRadius: '16px', padding: '10px', margin: '15px', background: '#eeeeeeaa', width: '500px'}}>
+          {confirmed && (<div style={{display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', border: '1px solid #eeeeeeaa', borderRadius: '16px', padding: '10px', margin: '15px', background: '#eeeeeeaa', width: '200px'}}>
             {/* <div style={{display: 'flex', textAlign: 'left', color:  '#220a4d', fontSize: '18px', margin: '5px 10px 5px 10px', width: '100px'}}>Multi-tip:</div> */}
-            <div style={{display: 'flex', textAlign: 'left', color: '#220a4d', fontSize: '17px', margin: '5px 10px 5px 0px', width: '500px'}}>{confirmed} tip sent</div>
+            <div style={{display: 'flex', textAlign: 'center', color: '#220a4d', fontSize: '27px', margin: '5px 10px 5px 0px', width: '200px', alignItems: 'center', justifyContent: 'center'}}>{confirmed} tip sent</div>
           </div>)}
 
           {/* <div style={{display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', border: '1px solid #eeeeeeaa', borderRadius: '16px', padding: '10px', margin: '15px', background: '#eeeeeeaa', width: '500px'}}>
@@ -78,10 +78,10 @@ export default async function handler(req, res) {
 
           <div style={{display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', borderRadius: '0px', padding: '0px', margin: '15px', width: '500px'}}>
 
-            {allowances.map((allowance, index) => (<div key={index} style={{display: 'flex', flexDirection: 'column', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '1px solid #eeeeeeaa', borderRadius: '16px', padding: '3px', margin: '0 5px 3px 5px', background: '#eeeeeeaa', width: '110px', justifyContent: 'center', alignItems: 'center'}}>
-              <div style={{display: 'flex', textAlign: 'center', color:  '#220a4d', fontSize: '19px', margin: '2px 0px', width: '110px', justifyContent: 'center', alignItems: 'center'}}>{allowance.remaining}</div>
-              <div style={{display: 'flex', textAlign: 'center', color: '#220a4d', fontSize: '15px', margin: '2px 0px', width: '110px', justifyContent: 'center', alignItems: 'center'}}>{allowance.coin}</div>
-            </div>))}
+            {allowances && (<div style={{display: 'flex', flexDirection: 'column', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '1px solid #eeeeeeaa', borderRadius: '16px', padding: '3px', margin: '0 5px 3px 5px', background: '#eeeeeeaa', width: '110px', justifyContent: 'center', alignItems: 'center'}}>
+              <div style={{display: 'flex', textAlign: 'center', color:  '#220a4d', fontSize: '19px', margin: '2px 0px', width: '110px', justifyContent: 'center', alignItems: 'center'}}>{allowances.remaining}</div>
+              <div style={{display: 'flex', textAlign: 'center', color: '#220a4d', fontSize: '15px', margin: '2px 0px', width: '110px', justifyContent: 'center', alignItems: 'center'}}>{allowances.coin}</div>
+            </div>)}
 
           </div>
         
