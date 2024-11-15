@@ -486,6 +486,8 @@ export default async function handler(req, res) {
                     await connectToDatabase();
                     const receiverFidsWithMoreThan5Tips = await Tip.aggregate([
                       { $match: { tipper_fid: parseInt(fid), createdAt: { $gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1) } } },
+                      { $unwind: "$tip" },
+                      { $match: { 'tip.currency': '$degen' } },
                       { $group: { _id: "$receiver_fid", count: { $sum: 1 } } },
                       { $match: { count: { $gt: 7 } } }
                     ]);

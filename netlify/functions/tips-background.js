@@ -293,6 +293,8 @@ async function getUserSearch(time, tags, channel, curator, points, fid, allowanc
       await connectToDatabase();
       const receiverFidsWithMoreThan5Tips = await Tip.aggregate([
         { $match: { tipper_fid: parseInt(fid), createdAt: { $gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1) } } },
+        { $unwind: "$tip" },
+        { $match: { 'tip.currency': '$degen' } },
         { $group: { _id: "$receiver_fid", count: { $sum: 1 } } },
         { $match: { count: { $gt: 7 } } }
       ]);
@@ -310,14 +312,14 @@ async function getUserSearch(time, tags, channel, curator, points, fid, allowanc
     }
   }
 
-  const hasDegenAllowance = allowances.some(allowance => allowance.token === '$DEGEN');
-  if (hasDegenAllowance) {
-    const filterFids = await excludeTipForTip(fid)
+  // const hasDegenAllowance = allowances.some(allowance => allowance.token === '$DEGEN');
+  // if (hasDegenAllowance) {
+  //   const filterFids = await excludeTipForTip(fid)
 
-    if (filterFids && filterFids?.length > 0) {
-      query['author_fid'] = { "$nin": filterFids };
-    }
-  }
+  //   if (filterFids && filterFids?.length > 0) {
+  //     query['author_fid'] = { "$nin": filterFids };
+  //   }
+  // }
 
   // if (channel && channel.length > 0) {
   //   query.cast_channel = { $in: Array.isArray(channel) ? channel : [channel] };
