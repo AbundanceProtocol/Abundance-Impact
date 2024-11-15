@@ -404,6 +404,36 @@ export default async function handler(req, res) {
                 }
               }
               
+              async function excludeTipForTip(fid) {
+                try {
+                  await connectToDatabase();
+                  const receiverFidsWithMoreThan5Tips = await Tip.aggregate([
+                    { $match: { tipper_fid: parseInt(fid), createdAt: { $gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1) } } },
+                    { $group: { _id: "$receiver_fid", count: { $sum: 1 } } },
+                    { $match: { count: { $gt: 7 } } }
+                  ]);
+        
+                  const receiverFids = receiverFidsWithMoreThan5Tips.map(doc => doc._id);
+                  if (receiverFids.length > 0) {
+                    query['receiver_fid'] = { $in: receiverFids };
+                    return receiverFids;
+                  } else {
+                    return null
+                  }
+                } catch (error) {
+                  console.error("Error counting casts without wallet:", error);
+                  return null;
+                }
+              }
+
+              const filterFids = await excludeTipForTip(fid)
+
+              if (filterFids && filterFids?.length > 0) {
+                query['author_fid'] = { $nin: filterFids };
+              }
+
+
+
               // if (tags && tags.length > 0) {
               //   query.cast_tags = { $in: [tags] };
               // }

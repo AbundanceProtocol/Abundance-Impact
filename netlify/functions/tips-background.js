@@ -120,7 +120,7 @@ exports.handler = async function(event, context) {
 
 async function getCasts(user) {
   try {
-    const { casts } = await getUserSearch(user?.time, user?.tags, user?.channels, user?.curators, user?.points);
+    const { casts } = await getUserSearch(user?.time, user?.tags, user?.channels, user?.curators, user?.points, user?.fid);
     console.log('getCasts', casts?.length, user?.time, user?.tags, user?.channels, user?.curators, user?.points)
     if (!casts) {
       console.log('no casts')
@@ -275,7 +275,7 @@ async function getHuntAllowance(fid) {
   }
 }
 
-async function getUserSearch(time, tags, channel, curator, points) {
+async function getUserSearch(time, tags, channel, curator, points, fid) {
   const limit = 10;
   let query = {};
   
@@ -288,6 +288,34 @@ async function getUserSearch(time, tags, channel, curator, points) {
     if (impactIds) query['impact_points'] = { $in: impactIds };
   }
   
+  async function excludeTipForTip(fid) {
+    try {
+      await connectToDatabase();
+      const receiverFidsWithMoreThan5Tips = await Tip.aggregate([
+        { $match: { tipper_fid: parseInt(fid), createdAt: { $gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1) } } },
+        { $group: { _id: "$receiver_fid", count: { $sum: 1 } } },
+        { $match: { count: { $gt: 7 } } }
+      ]);
+
+      const receiverFids = receiverFidsWithMoreThan5Tips.map(doc => doc._id);
+      if (receiverFids.length > 0) {
+        query['receiver_fid'] = { $in: receiverFids };
+        return receiverFids;
+      } else {
+        return null
+      }
+    } catch (error) {
+      console.error("Error counting casts without wallet:", error);
+      return null;
+    }
+  }
+
+  const filterFids = await excludeTipForTip(fid)
+
+  if (filterFids && filterFids?.length > 0) {
+    query['author_fid'] = { $nin: filterFids };
+  }
+
   // if (channel && channel.length > 0) {
   //   query.cast_channel = { $in: Array.isArray(channel) ? channel : [channel] };
   // }
