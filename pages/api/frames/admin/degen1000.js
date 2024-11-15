@@ -69,6 +69,7 @@ export default async function handler(req, res) {
           return 0;
         }
         
+        await connectToDatabase();
         await Tip.create({
           receiver_fid: authorFid,
           tipper_fid: 9326,
@@ -89,9 +90,9 @@ export default async function handler(req, res) {
 
     let balanceImg = ``
     if (tipped !== 0) {
-      balanceImg = `${baseURL}/api/frames/admin/frame?${qs.stringify({ confirmed: 10, error: null })}`
+      balanceImg = `${baseURL}/api/frames/admin/frame?${qs.stringify({ confirmed: 10 })}`
     } else {
-      balanceImg = `${baseURL}/api/frames/admin/frame?${qs.stringify({ confirmed: null, error: 404 })}`
+      balanceImg = `${baseURL}/api/frames/admin/frame?${qs.stringify({ error: 404 })}`
     }
 
 

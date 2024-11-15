@@ -40,7 +40,7 @@ export default async function handler(req, res) {
 
 
     const decryptedUuid = decryptPassword(encryptedTipUuid, secretKey);
-    console.log('userFid', userFid, castHash, authorFid, curatorFid)
+    console.log('userFid', userFid, castHash, authorFid, curatorFid, typeof decryptedUuid)
     const castText = `I'm tipping:\n15 $DEGEN\nvia Abundance Ecosystem on /impact\n\n/impact lets you earn curator rewards while supporting your favorite creators & builders on Farcaster`
 
     const tips = { currency: '$degen', amount: 15 }
@@ -69,6 +69,7 @@ export default async function handler(req, res) {
           return 0;
         }
         
+        await connectToDatabase();
         await Tip.create({
           receiver_fid: authorFid,
           tipper_fid: 9326,
@@ -89,9 +90,9 @@ export default async function handler(req, res) {
 
     let balanceImg = ``
     if (tipped !== 0) {
-      balanceImg = `${baseURL}/api/frames/admin/frame?${qs.stringify({ confirmed: 15, error: null })}`
+      balanceImg = `${baseURL}/api/frames/admin/frame?${qs.stringify({ confirmed: 15 })}`
     } else {
-      balanceImg = `${baseURL}/api/frames/admin/frame?${qs.stringify({ confirmed: null, error: 404 })}`
+      balanceImg = `${baseURL}/api/frames/admin/frame?${qs.stringify({ error: 404 })}`
     }
 
 
