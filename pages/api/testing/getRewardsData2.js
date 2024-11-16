@@ -220,21 +220,21 @@ export default async function handler(req, res) {
       // dcText += 'Circle data: ' + circlesData + '\n'
       console.log('dcText', dcText)
       async function sendDc() {
-        const response = await fetch(
-          "https://api.warpcast.com/v2/ext-send-direct-cast",
-          {
-            method: "PUT",
-            headers: {
-              Authorization: `Bearer ${wcApiKey}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              recipientFid: 9326,
-              message: dcText,
-              idempotencyKey: Math.random().toString(36).substring(7),
-            }),
-          },
-        );
+        // const response = await fetch(
+        //   "https://api.warpcast.com/v2/ext-send-direct-cast",
+        //   {
+        //     method: "PUT",
+        //     headers: {
+        //       Authorization: `Bearer ${wcApiKey}`,
+        //       "Content-Type": "application/json",
+        //     },
+        //     body: JSON.stringify({
+        //       recipientFid: 9326,
+        //       message: dcText,
+        //       idempotencyKey: Math.random().toString(36).substring(7),
+        //     }),
+        //   },
+        // );
 
         const response2 = await fetch(
           "https://api.warpcast.com/v2/ext-send-direct-cast",
