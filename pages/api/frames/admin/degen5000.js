@@ -33,7 +33,7 @@ export default async function handler(req, res) {
     const authorFid = message?.data?.frameActionBody?.castId?.fid
     console.log('authorFid 01', authorFid, castHash, curatorFid)
 
-    if (curatorFid !== 9326 && curatorFid !== userFid) {
+    if (Number(curatorFid) !== 9326 && Number(curatorFid) !== Number(userFid)) {
       console.log('user check failed', curatorFid, userFid)
       res.setHeader('Allow', ['POST']);
       res.status(405).end(`Method ${req.method} Not Allowed`);
