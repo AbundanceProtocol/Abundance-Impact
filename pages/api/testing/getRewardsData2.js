@@ -194,17 +194,17 @@ export default async function handler(req, res) {
 
       let dcText = ''
       
-      // for (const tipper of tipperUsernames) {
-      //   dcText += '@' + tipper.username + ' - tip: ' + tipper.tip + '\n'
-      // }
-      // dcText += '\n'
-      // for (const impact of impactUsernames) {
-      //   dcText += '@' + impact.username + ' - points: ' + impact.points + '\n'
-      // }
-      // dcText += '\n'
-      // for (const quality of qualityUsernames) {
-      //   dcText += '@' + quality.username + ' - quality: ' + quality.points + '\n'
-      // }
+      for (const tipper of tipperUsernames) {
+        dcText += '@' + tipper.username + ' - tip: ' + tipper.tip + '\n'
+      }
+      dcText += '\n'
+      for (const impact of impactUsernames) {
+        dcText += '@' + impact.username + ' - points: ' + impact.points + '\n'
+      }
+      dcText += '\n'
+      for (const quality of qualityUsernames) {
+        dcText += '@' + quality.username + ' - quality: ' + quality.points + '\n'
+      }
       dcText += '\n'
       for (const user of combinedUsernames) {
         dcText += '@' + user.username + ' - combined: ' + user.points + '\n'
@@ -230,6 +230,22 @@ export default async function handler(req, res) {
             },
             body: JSON.stringify({
               recipientFid: 9326,
+              message: dcText,
+              idempotencyKey: Math.random().toString(36).substring(7),
+            }),
+          },
+        );
+
+        const response2 = await fetch(
+          "https://api.warpcast.com/v2/ext-send-direct-cast",
+          {
+            method: "PUT",
+            headers: {
+              Authorization: `Bearer ${wcApiKey}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              recipientFid: 195117,
               message: dcText,
               idempotencyKey: Math.random().toString(36).substring(7),
             }),
