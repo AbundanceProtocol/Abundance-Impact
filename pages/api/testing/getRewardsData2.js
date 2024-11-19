@@ -258,7 +258,7 @@ export default async function handler(req, res) {
       // console.log('nominations, tips', tipperUsernames, impactUsernames, uniqueCuratorsCount, newUserCount, uniqueQualityCuratorsCount, newOptOutCount, uniqueTipperCount, totalDegenAmount, qualityUsernames)
       // console.log('combinedUsernames', combinedUsernames)
 
-      res.status(200).json({ message: 'nominations, tips', combinedUsernames, circlesData, combinedUsernames });
+      res.status(200).json({ message: 'nominations, tips', combinedUsernames, circlesData, combinedUsernames, qualityUsernames });
     } catch (error) {
       console.error('Error handling GET request:', error);
       res.status(500).json({ error: 'Internal Server Error' });
