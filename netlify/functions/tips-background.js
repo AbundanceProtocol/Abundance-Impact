@@ -281,7 +281,7 @@ async function getUserSearch(time, tags, channel, curator, points, fid, allowanc
   
   if (time) query.createdAt = { $gte: time };
   if (points) query.points = points;
-  // query.impact_total = { $gte: 1 };
+
   if (curator && curator.length > 0) {
     const curatorFids = Array.isArray(curator) ? curator.map(fid => parseInt(fid)) : [parseInt(curator)];
     const impactIds = await getCuratorIds(curatorFids, points);
