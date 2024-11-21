@@ -441,7 +441,7 @@ export default async function handler(req, res) {
                   query.points = points
                 }
                 // query.impact_total = { $gte: 1 };
-                query.impact_total = { $ne: 0 };
+                // query.impact_total = { $ne: 0 };
 
                 if (curator && curator.length > 0) {
                   let curatorFids
