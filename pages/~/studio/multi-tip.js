@@ -257,12 +257,12 @@ export default function MultiTip() {
 
   useEffect(() => {
     console.log('frame', frameCurators.isSet, frameEcosystem.isSet, frameTime.isSet)
-    if (frameCurators.isSet == 'working' && frameEcosystem.isSet == 'working' &&frameTime.isSet == 'working') {
+    if (frameCurators.isSet == 'working' && frameEcosystem.isSet == 'working' && frameTime.isSet == 'working' && docNum > 0) {
       setSubmitCheck({pass: true, target: true})
     } else {
       setSubmitCheck({pass: false, target: false})
     }
-  }, [frameCurators, frameEcosystem, frameTime])
+  }, [frameCurators, frameEcosystem, frameTime, docNum])
 
 
 
