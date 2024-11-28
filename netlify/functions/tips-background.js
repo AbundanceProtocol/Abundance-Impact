@@ -37,7 +37,7 @@ exports.handler = async function(event, context) {
         console.log('uniqueFids', uniqueFids);
         
         for (const fid of uniqueFids) {
-          await new Promise(resolve => setTimeout(resolve, 50));
+          await new Promise(resolve => setTimeout(resolve, 20));
           let time = null;
           let schedule = null;
           let allowances = [];
