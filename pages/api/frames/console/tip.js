@@ -356,7 +356,7 @@ export default async function handler(req, res) {
   
             const {curatorPercent, ecoName } = await getCuratorPercent(points)
   
-            async function getUserSearch(time, tags, channel, curator, points) {
+            async function getUserSearch(time, tags, channel, curator, points, allowances) {
       
               const page = 1;
               const limit = 10;
@@ -383,7 +383,8 @@ export default async function handler(req, res) {
               if (points) {
                 query.points = points
               }
-            
+              query.impact_total = { $gte: 1 };
+              
               if (curator && curator.length > 0) {
                 let curatorFids
   
@@ -404,6 +405,41 @@ export default async function handler(req, res) {
                 }
               }
               
+              async function excludeTipForTip(fid) {
+                try {
+                  await connectToDatabase();
+                  const receiverFidsWithMoreThan5Tips = await Tip.aggregate([
+                    { $match: { tipper_fid: parseInt(fid), createdAt: { $gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1) } } },
+                    { $unwind: "$tip" },
+                    { $match: { 'tip.currency': '$degen' } },
+                    { $group: { _id: "$receiver_fid", count: { $sum: 1 } } },
+                    { $match: { count: { $gt: 7 } } }
+                  ]);
+        
+                  const receiverFids = receiverFidsWithMoreThan5Tips.map(doc => doc._id);
+                  if (receiverFids.length > 0) {
+                    query['receiver_fid'] = { $in: receiverFids };
+                    return receiverFids;
+                  } else {
+                    return null
+                  }
+                } catch (error) {
+                  console.error("Error counting casts without wallet:", error);
+                  return null;
+                }
+              }
+
+              const hasDegenAllowance = allowances.some(allowance => allowance.token === '$DEGEN');
+              if (hasDegenAllowance) {
+                const filterFids = await excludeTipForTip(fid)
+  
+                if (filterFids && filterFids?.length > 0) {
+                  query['author_fid'] = { "$nin": filterFids };
+                }
+              }
+
+
+
               // if (tags && tags.length > 0) {
               //   query.cast_tags = { $in: [tags] };
               // }
@@ -518,7 +554,7 @@ export default async function handler(req, res) {
             return { casts, totalCount }
             }  
         
-            const { casts } = await getUserSearch(timeRange, tags, channels, curators, points)
+            const { casts } = await getUserSearch(timeRange, tags, channels, curators, points, allowances)
   
             // console.log(casts)
             // console.log(casts[0].impact_points)

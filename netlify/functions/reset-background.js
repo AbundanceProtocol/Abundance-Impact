@@ -5,12 +5,11 @@ import Quality from "../../../models/Quality";
 import Impact from "../../../models/Impact";
 import User from "../../../models/User";
 import Tip from "../../../models/Tip";
-import { setTimeout } from 'timers/promises';
 
 // const savedCode = process.env.ECOSYSTEM_SECRET;
 
 const BATCH_SIZE = 100;
-const BATCH_DELAY = 1000;
+// const BATCH_DELAY = 1000;
 
 exports.handler = async function(event, context) {
 
@@ -177,7 +176,8 @@ async function processAllUsersInBatches(allUsers, ecosystem, lastDay, lastWeek, 
     await processUsersBatch(usersBatch, ecosystem, lastDay, lastWeek, ecoPoints);
     
     if (i + BATCH_SIZE < allUsers.length) {
-      await setTimeout(BATCH_DELAY);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      // await setTimeout(BATCH_DELAY);
     }
   }
 }

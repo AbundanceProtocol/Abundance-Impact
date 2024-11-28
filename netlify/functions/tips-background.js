@@ -37,7 +37,7 @@ exports.handler = async function(event, context) {
         console.log('uniqueFids', uniqueFids);
         
         for (const fid of uniqueFids) {
-          await new Promise(resolve => setTimeout(resolve, 100));
+          await new Promise(resolve => setTimeout(resolve, 20));
           let time = null;
           let schedule = null;
           let allowances = [];
@@ -75,7 +75,7 @@ exports.handler = async function(event, context) {
         console.log('Processing user:', user?.fid, castData.length);
         for (const userCast of castData) {
           try {
-            await new Promise(resolve => setTimeout(resolve, 40));
+            await new Promise(resolve => setTimeout(resolve, 20));
             const tipped = await sendTip(userCast, user?.uuid, user?.fid, user?.points);
             // const tipped = 1
             if (tipped) {
@@ -120,7 +120,7 @@ exports.handler = async function(event, context) {
 
 async function getCasts(user) {
   try {
-    const { casts } = await getUserSearch(user?.time, user?.tags, user?.channels, user?.curators, user?.points);
+    const { casts } = await getUserSearch(user?.time, user?.tags, user?.channels, user?.curators, user?.points, user?.fid, user?.allowances);
     console.log('getCasts', casts?.length, user?.time, user?.tags, user?.channels, user?.curators, user?.points)
     if (!casts) {
       console.log('no casts')
@@ -275,19 +275,53 @@ async function getHuntAllowance(fid) {
   }
 }
 
-async function getUserSearch(time, tags, channel, curator, points) {
+async function getUserSearch(time, tags, channel, curator, points, fid, allowances) {
   const limit = 10;
   let query = {};
   
   if (time) query.createdAt = { $gte: time };
   if (points) query.points = points;
-  
+  query.impact_total = { $gte: 1 };
+
   if (curator && curator.length > 0) {
     const curatorFids = Array.isArray(curator) ? curator.map(fid => parseInt(fid)) : [parseInt(curator)];
     const impactIds = await getCuratorIds(curatorFids, points);
     if (impactIds) query['impact_points'] = { $in: impactIds };
   }
   
+  async function excludeTipForTip(fid) {
+    try {
+      await connectToDatabase();
+      const receiverFidsWithMoreThan5Tips = await Tip.aggregate([
+        { $match: { tipper_fid: parseInt(fid), createdAt: { $gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1) } } },
+        { $unwind: "$tip" },
+        { $match: { 'tip.currency': '$degen' } },
+        { $group: { _id: "$receiver_fid", count: { $sum: 1 } } },
+        { $match: { count: { $gt: 7 } } }
+      ]);
+
+      const receiverFids = receiverFidsWithMoreThan5Tips.map(doc => doc._id);
+      if (receiverFids.length > 0) {
+        query['receiver_fid'] = { $in: receiverFids };
+        return receiverFids;
+      } else {
+        return null
+      }
+    } catch (error) {
+      console.error("Error counting casts without wallet:", error);
+      return null;
+    }
+  }
+
+  // const hasDegenAllowance = allowances.some(allowance => allowance.token === '$DEGEN');
+  // if (hasDegenAllowance) {
+  //   const filterFids = await excludeTipForTip(fid)
+
+  //   if (filterFids && filterFids?.length > 0) {
+  //     query['author_fid'] = { "$nin": filterFids };
+  //   }
+  // }
+
   // if (channel && channel.length > 0) {
   //   query.cast_channel = { $in: Array.isArray(channel) ? channel : [channel] };
   // }
@@ -475,6 +509,7 @@ async function sendTip(cast, signer, fid, points) {
     await Tip.create({
       receiver_fid: cast.fid,
       tipper_fid: fid,
+      auto_tip: true,
       points: points,
       cast_hash: cast.castHash,
       tip: tips,
