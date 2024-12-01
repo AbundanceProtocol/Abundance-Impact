@@ -42,8 +42,12 @@ export default async function handler(req, res) {
     button2 = `<meta property="fc:frame:button:2" content='5000 $degen' />
     <meta property="fc:frame:button:2:action" content="post" />
     <meta property="fc:frame:button:2:target" content='https://impact.abundance.id/api/frames/admin/degen5000' />`
-    button3 = ''
-    button4 = ''
+    button3 = `<meta property="fc:frame:button:3" content='975 $degen' />
+    <meta property="fc:frame:button:3:action" content="post" />
+    <meta property="fc:frame:button:3:target" content='https://impact.abundance.id/api/frames/admin/degen975' />`;
+    button4 = `<meta property="fc:frame:button:4" content='950 $degen' />
+    <meta property="fc:frame:button:4:action" content="post" />
+    <meta property="fc:frame:button:4:target" content='https://impact.abundance.id/api/frames/admin/degen950' />`;
     textField = ''
     // }
 
