@@ -142,7 +142,7 @@ export default function Curators() {
     </div>
 
     <div title='Cast Actions' className='flex-row' style={{alignItems: 'center', justifyContent: 'center', margin: '8px'}}>
-      <p className='' style={{padding: '10px', color: '#fff', fontWeight: '700', fontSize: '20px'}}>/impact Stat Dashboard </p>
+      <p className='' style={{padding: '10px', color: '#fff', fontWeight: '700', fontSize: '20px'}}>/impact Stats Dashboard </p>
     </div>
     
 
