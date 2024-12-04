@@ -1,13 +1,14 @@
 import mongoose from 'mongoose';
 
 const circleSchema = new mongoose.Schema({
-  fid: Number,
-  time: String,
+  fid: { type: Number, index: true },
+  time: { type: String, index: true },
   channels: { type: [String], default: [] },
   curators: { type: [Number], default: [] },
-  points: String,
+  points: { type: String, index: true },
   text: String,
-  username: String,
+  username: { type: String, index: true },
+  user_pfp: String,
   ecosystem: String,
   referrer: Number,
   circles: { type: [String], default: [] },
@@ -15,10 +16,10 @@ const circleSchema = new mongoose.Schema({
     {
       cast: { type: String, default: null },
       circle: { type: String, default: null },
-      username: { type: String, default: null }
+      username: { type: String, default: null },
     },
   ],
-  createdAt: { type: Date, default: () => new Date() },
+  createdAt: { type: Date, default: () => new Date(), index: true },
 });
 
 const Circle = mongoose.models.Circle || mongoose.model('Circle', circleSchema);
