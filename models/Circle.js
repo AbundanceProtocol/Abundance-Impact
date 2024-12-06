@@ -9,6 +9,13 @@ const circleSchema = new mongoose.Schema({
   text: String,
   username: { type: String, index: true },
   user_pfp: String,
+  curator: [
+    {
+      username: String,
+      pfp: String,
+      fid: Number,
+    },
+  ],
   ecosystem: String,
   referrer: Number,
   circles: { type: [String], default: [] },
@@ -17,6 +24,7 @@ const circleSchema = new mongoose.Schema({
       cast: { type: String, default: null },
       circle: { type: String, default: null },
       username: { type: String, default: null },
+      pfp: { type: String, default: null },
     },
   ],
   createdAt: { type: Date, default: () => new Date(), index: true },
