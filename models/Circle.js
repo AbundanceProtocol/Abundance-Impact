@@ -22,7 +22,6 @@ const circleSchema = new mongoose.Schema({
   showcase: [
     {
       cast: { type: String, default: null },
-      circle: { type: String, default: null },
       username: { type: String, default: null },
       pfp: { type: String, default: null },
     },
