@@ -86,7 +86,7 @@ const button = {
         icon: Actions
     },
     'Ecosystems': {
-        link: '/~/ecosystems',
+        link: '/~/ecosystems/abundance',
         menu: 'Ecosystems',
         description: 'Ecosystems',
         account: true,
