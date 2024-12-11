@@ -457,7 +457,7 @@ export default async function handler(req, res) {
               async function getUserSearch(time, tags, channel, curator, points, allowances) {
         
                 const page = 1;
-                const limit = 10;
+                const limit = 9;
                 const skip = (page - 1) * limit;
             
                 let query = {};
@@ -629,8 +629,8 @@ export default async function handler(req, res) {
                     returnedCasts = returnedCasts.slice(0, limit);
                   }
               
-                  if (returnedCasts && returnedCasts.length > 10) {
-                    returnedCasts = returnedCasts.slice(0, 10);
+                  if (returnedCasts && returnedCasts.length > 9) {
+                    returnedCasts = returnedCasts.slice(0, 9);
                   }
               
                   // console.log('113', returnedCasts)
