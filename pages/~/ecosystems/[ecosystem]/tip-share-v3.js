@@ -42,38 +42,37 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem, fi
     }
   }
   const [payload, setPayload] = useState(initPayload)
-  const initFrame = 
-    {
-      version: "vNext",
-      title: "Multi-Tip",
-      image: `${baseURL}/images/frame36.gif`,
-      image_aspect_ratio: "1:1",
-      buttons: [
-        {
-          index: 1,
-          title: "Multi tip >",
-          action_type: "post",
-          target: `${baseURL}/api/frames/tips/tip?tip=0`
-        },
-        {
-          index: 2,
-          title: "Menu",
-          action_type: "post",
-          target: `${baseURL}/api/frames/tip/menu?`
-        },
-        {
-          index: 3,
-          title: "Auto-tip >",
-          action_type: "post",
-          target: `${baseURL}/api/frames/tip/auto-tip?`
-        },
-      ],
-      input: {
-        text: "Eg.: 1000 $Degen, 500 $HAM"
+  const initFrame = {
+    version: "vNext",
+    title: "Multi-Tip",
+    image: `https://impact.abundance.id/images/backgroundframe.jpg`,
+    image_aspect_ratio: "1:1",
+    buttons: [
+      {
+        index: 1,
+        title: "Multi tip >",
+        action_type: "post",
+        target: `${baseURL}/api/frames/tips/tip?tip=0`,
       },
-      state: {},
-      frames_url: `${baseURL}/~/ecosystems/${ecosystem}/tips`
-    }
+      {
+        index: 2,
+        title: "Menu",
+        action_type: "post",
+        target: `${baseURL}/api/frames/tip/menu?`,
+      },
+      {
+        index: 3,
+        title: "Auto-tip >",
+        action_type: "post",
+        target: `${baseURL}/api/frames/tip/auto-tip?`,
+      },
+    ],
+    input: {
+      text: "Eg.: 1000 $Degen, 500 $HAM",
+    },
+    state: {},
+    frames_url: `${baseURL}/~/ecosystems/${ecosystem}/tips`,
+  };
   const [frameData, setFrameData] = useState(initFrame)
   const initCast = {
     author: {
@@ -104,44 +103,11 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem, fi
   const [queryData, setQueryData] = useState(initQuery)
 
   useEffect(() => {
-    // console.log(time, curators, shuffle, referrer, eco, ecosystem)
-
     let timeQuery = '&time=all'
-    let curatorsQuery = ''
-    // let shuffleQuery = '&shuffle=true'
-    // let referrerQuery = ''
-    let ecoQuery = '&eco=IMPACT'
-    let ecosystemQuery = '&ecosystem=abundance'
-    if (time) {
-      timeQuery = '&time=' + time
-    }
-    // if (curators) {
-    //   console.log(curators)
-    //   for (const curator of curators) {
-    //     curatorsQuery += '&curators=' + parseInt(curator)
-    //   }
-    // }
-    // if (shuffle || shuffle == false) {
-    //   shuffleQuery = '&shuffle=' + shuffle
-    // }
-    // if (referrer) {
-    //   referrerQuery = '&referrer=' + referrer
-    // }
-    if (eco) {
-      ecoQuery = '&eco=' + eco
-    }
-    if (ecosystem) {
-      ecosystemQuery = '&ecosystem=' + ecosystem
-    }
 
     setQueryData(prev => ({ 
       ...prev, 
       time: timeQuery, 
-      curators: curatorsQuery, 
-      // shuffle: shuffleQuery, 
-      // referrer: referrerQuery, 
-      eco: ecoQuery, 
-      ecosystem: ecosystemQuery
     }))
 
     const handleResize = () => {
@@ -159,7 +125,6 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem, fi
   }, [router]);
 
   useEffect(() => {
-    console.log(queryData)
 
     const updatedFrameData = {...frameData}
     updatedFrameData.buttons[0].target = `${baseURL}/api/frames/console/tip-tip?${qs.stringify({ time, curators, eco, ecosystem, channels, start: true })}`
@@ -168,7 +133,9 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem, fi
 
     updatedFrameData.buttons[2].target = `${baseURL}/api/frames/tip/auto-tip?${qs.stringify({ time, curators, eco, ecosystem })}`
 
-    updatedFrameData.image = `${baseURL}/api/frames/tip/circle?${qs.stringify({ id })}`
+    updatedFrameData.image = `${baseURL}/api/frames/tip/circle-v2?${qs.stringify(
+      { id }
+    )}`;
 
     setFrameData(updatedFrameData)
   }, [queryData]);
@@ -216,7 +183,6 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem, fi
   }, [screenWidth])
   
   const buttonAction = async (button) => {
-    console.log(queryData.time + queryData.curators + queryData.points + queryData.ecosystem)
     const updatedPayload = {...payload}
     updatedPayload.buttonIndex = button.index
     updatedPayload.inputText = inputText
@@ -293,253 +259,533 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem, fi
   }
 
   return (
-    <div className='flex-col' style={{width: 'auto', position: 'relative'}} ref={ref}>
-            
-    {queryData && (
-      <Head>
-        <title>Tips | Impact App</title>
-        <meta name="description" content={`Support builder and creators with Impact App`} />
-        <meta name="viewport" content="width=device-width"/>
-        <meta property="og:title" content="Multi-Tip" />
-        <meta property='og:image' content={`${baseURL}/api/frames/tip/circle?${qs.stringify({    
-          id })}`} />
-        <meta property="fc:frame" content="vNext" />
-        <meta property="fc:frame:image" content={`${baseURL}/api/frames/tip/circle?${qs.stringify({    
-          id })}`} />
-        <meta property="fc:frame:image:aspect_ratio" content="1:1" />
-        <meta property="fc:frame:button:1" content='Multi-tip >' />
-        <meta property="fc:frame:button:1:action" content="post" />
+    <div
+      className="flex-col"
+      style={{ width: "auto", position: "relative" }}
+      ref={ref}
+    >
+      {queryData && (
+        <Head>
+          <title>Tips | Impact App</title>
+          <meta
+            name="description"
+            content={`Support builder and creators with Impact App`}
+          />
+          <meta name="viewport" content="width=device-width" />
+          <meta property="og:title" content="Multi-Tip" />
+          <meta
+            property="og:image"
+            content={`${baseURL}/api/frames/tip/circle-v2?${qs.stringify({
+              id,
+            })}`}
+          />
+          <meta property="fc:frame" content="vNext" />
+          <meta
+            property="fc:frame:image"
+            content={`${baseURL}/api/frames/tip/circle-v2?${qs.stringify({
+              id,
+            })}`}
+          />
+          <meta property="fc:frame:image:aspect_ratio" content="1:1" />
+          <meta property="fc:frame:button:1" content="Multi-tip >" />
+          <meta property="fc:frame:button:1:action" content="post" />
 
-        <meta property="fc:frame:button:1:target" content={`${baseURL}/api/frames/tip/tip?${qs.stringify({    
-          time, curators, eco, ecosystem, channels, start: true
-        })}`} />
+          <meta
+            property="fc:frame:button:1:target"
+            content={`${baseURL}/api/frames/tip/tip?${qs.stringify({
+              time,
+              curators,
+              eco,
+              ecosystem,
+              channels,
+              start: true,
+            })}`}
+          />
 
-        <meta property="fc:frame:button:2" content={'Menu'} />
-        <meta property="fc:frame:button:2:action" content="post" />
-        <meta property="fc:frame:button:2:target" content={`${baseURL}/api/frames/tip/menu?${qs.stringify({ time, curators, eco, ecosystem, channels })}`} />
+          <meta property="fc:frame:button:2" content={"Menu"} />
+          <meta property="fc:frame:button:2:action" content="post" />
+          <meta
+            property="fc:frame:button:2:target"
+            content={`${baseURL}/api/frames/tip/menu?${qs.stringify({
+              time,
+              curators,
+              eco,
+              ecosystem,
+              channels,
+            })}`}
+          />
 
-        <meta property="fc:frame:button:3" content={'Auto-tip >'} />
-        <meta property="fc:frame:button:3:action" content="post" />
-        <meta property="fc:frame:button:3:target" content={`${baseURL}/api/frames/tip/auto-tip?${qs.stringify({ time, curators, eco, ecosystem, channels })}`} />
+          <meta property="fc:frame:button:3" content={"Auto-tip >"} />
+          <meta property="fc:frame:button:3:action" content="post" />
+          <meta
+            property="fc:frame:button:3:target"
+            content={`${baseURL}/api/frames/tip/auto-tip?${qs.stringify({
+              time,
+              curators,
+              eco,
+              ecosystem,
+              channels,
+            })}`}
+          />
 
-        <meta property="fc:frame:button:4" content={'Explore'} />
-        <meta property="fc:frame:button:4:action" content="link" />
-        <meta property="fc:frame:button:4:target" content={`https://warpcast.com/~/composer-action?view=prompt&url=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Fmini-app%2Fcurator%3Ffid%3D${tipperFid}%26id%3D${id}%26app%3Dmini`} />
+          <meta property="fc:frame:button:4" content={"Explore"} />
+          <meta property="fc:frame:button:4:action" content="link" />
+          <meta
+            property="fc:frame:button:4:target"
+            content={`https://warpcast.com/~/composer-action?view=prompt&url=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Fmini-app%2Fcurator%3Ffid%3D${tipperFid}%26id%3D${id}%26app%3Dmini`}
+          />
 
-        <meta name="fc:frame:input:text" content="Eg.: 1000 $Degen, 500 $HAM" />
-      </Head>
-    )}
-    <div className="" style={{padding: '58px 0 0 0'}}>
-    </div>
+          <meta
+            name="fc:frame:input:text"
+            content="Eg.: 1000 $Degen, 500 $HAM"
+          />
+        </Head>
+      )}
+      <div className="" style={{ padding: "58px 0 0 0" }}></div>
 
-
-    <>{
-    cast && (<div className="inner-container" style={{width: '100%', display: 'flex', flexDirection: 'row'}}>
-      <div className="flex-row">
-        <div className="flex-col" style={{alignItems: 'center', userSelect: 'none'}}>
-
-          <div className="" style={{margin: '0 10px 0 0'}}>
-            <a className="" title="" href={`/${cast.author.username}`} onClick={(event) => {
-                  if (!isLogged) {
-                    LoginPopup()
-                    event.preventDefault()
-                  } else {
-                    // goToUserProfile(event, cast.author)
-                  }
-                }}>
-              <img loading="lazy" src={cast.author.pfp_url} className="" alt={`${cast.author.display_name} avatar`} style={{width: '48px', height: '48px', maxWidth: '48px', maxHeight: '48px', borderRadius: '24px', border: '1px solid #000'}} />
-            </a>
-          </div>
-          {(userFid && userFid !== cast.author.fid || true) && (
-          <div className={`'flex-col' ${fail ? 'flash-fail' : ''}`} style={{margin: '10px 10px 0 0'}}>
-            <div className={`${fail ? 'flash-fail' : ''}`} style={{textAlign: 'center', fontSize: '18px', fontWeight: '700', color: '#555', margin: '-6px 0 0 0'}}>
-              <div>{cast.impact_balance || 0}</div>
-            </div>
-            <div className={`impact-arrow ${fail ? 'flash-fail' : ''}`} onClick={
-             () => {
-                if (!isLogged) {
-                  LoginPopup()
-                } else {
-                  if(userBalances.impact > 0) {
-                    // boostImpact(cast, 1)
-                  } else { 
-                    clickFailed()
-                  }
-                }
-              }
-            } style={{margin: `${shrinkMargin(cast.impact_balance)}px 0 ${shrinkMargin(cast.impact_balance)}px 0`}}>
-              <FaStar size={growPoints(cast.impact_balance)} className='' style={{fontSize: '25px'}} />
-            </div>
-          </div>
-          )}
-        </div>
-        <div className="flex-col" style={{width: 'auto', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.5rem'}}>
-        <div className="flex-col" style={{gap: '0.5rem'}}>
-          <div className="flex-row" style={{width: '100%', justifyContent: 'space-between', height: '', alignItems: 'flex-start', flexWrap: 'wrap'}}>
-            <div className="flex-row" style={{alignItems: 'center', gap: '0.25rem', flexWrap: 'wrap', userSelect: 'none'}}>
-              <span className="">
-                <a href={`/${cast.author.username}`} className="fc-lnk" title={cast.author.display_name} style={{cursor: 'pointer'}} onClick={(event) => {
-                  if (!isLogged) {
-                    LoginPopup()
-                    event.preventDefault()
-                  } else {
-                    // goToUserProfile(event, cast.author)
-                  }
-                }}>
-                  <div className="flex-row" style={{alignItems: 'center'}}>
-                    <span className="name-font">{cast.author.display_name}</span>
-                    <div className="" style={{margin: '0 0 0 3px'}}>
-                      {(cast.author.power_badge) && (<ActiveUser />)}
+      <>
+        {cast && (
+          <div
+            className="inner-container"
+            style={{ width: "100%", display: "flex", flexDirection: "row" }}
+          >
+            <div className="flex-row">
+              <div
+                className="flex-col"
+                style={{ alignItems: "center", userSelect: "none" }}
+              >
+                <div className="" style={{ margin: "0 10px 0 0" }}>
+                  <a
+                    className=""
+                    title=""
+                    href={`/${cast.author.username}`}
+                    onClick={(event) => {
+                      if (!isLogged) {
+                        LoginPopup();
+                        event.preventDefault();
+                      } else {
+                        // goToUserProfile(event, cast.author)
+                      }
+                    }}
+                  >
+                    <img
+                      loading="lazy"
+                      src={cast.author.pfp_url}
+                      className=""
+                      alt={`${cast.author.display_name} avatar`}
+                      style={{
+                        width: "48px",
+                        height: "48px",
+                        maxWidth: "48px",
+                        maxHeight: "48px",
+                        borderRadius: "24px",
+                        border: "1px solid #000",
+                      }}
+                    />
+                  </a>
+                </div>
+                {((userFid && userFid !== cast.author.fid) || true) && (
+                  <div
+                    className={`'flex-col' ${fail ? "flash-fail" : ""}`}
+                    style={{ margin: "10px 10px 0 0" }}
+                  >
+                    <div
+                      className={`${fail ? "flash-fail" : ""}`}
+                      style={{
+                        textAlign: "center",
+                        fontSize: "18px",
+                        fontWeight: "700",
+                        color: "#555",
+                        margin: "-6px 0 0 0",
+                      }}
+                    >
+                      <div>{cast.impact_balance || 0}</div>
+                    </div>
+                    <div
+                      className={`impact-arrow ${fail ? "flash-fail" : ""}`}
+                      onClick={() => {
+                        if (!isLogged) {
+                          LoginPopup();
+                        } else {
+                          if (userBalances.impact > 0) {
+                            // boostImpact(cast, 1)
+                          } else {
+                            clickFailed();
+                          }
+                        }
+                      }}
+                      style={{
+                        margin: `${shrinkMargin(
+                          cast.impact_balance
+                        )}px 0 ${shrinkMargin(cast.impact_balance)}px 0`,
+                      }}
+                    >
+                      <FaStar
+                        size={growPoints(cast.impact_balance)}
+                        className=""
+                        style={{ fontSize: "25px" }}
+                      />
                     </div>
                   </div>
-                </a>
-              </span>
-              <span className="user-font">
-                <a href={`/${cast.author.username}`} className="fc-lnk" title={cast.author.display_name} onClick={(event) => {
-                  if (!isLogged) {
-                    LoginPopup()
-                    event.preventDefault()
-                  } else {
-                    // goToUserProfile(event, cast.author)
-                  }
-                }}>@{cast.author.username}</a>
-              </span>
-              <div className="">·</div>
-              <a href={`/${cast.author.username}/casts/${cast.hash}`} className="fc-lnk" title="Navigate to cast" onClick={(event) => {
-                  if (!isLogged) {
-                    LoginPopup()
-                    event.preventDefault()
-                  } else {
-                    // goToCast(event, cast)
-                  }
-                }}>
-                <div className="user-font">{timePassed(cast.timestamp)}</div>
-              </a>
-            </div>
-            {/* <div className="">
+                )}
+              </div>
+              <div
+                className="flex-col"
+                style={{
+                  width: "auto",
+                  alignItems: "flex-start",
+                  justifyContent: "space-between",
+                  gap: "0.5rem",
+                }}
+              >
+                <div className="flex-col" style={{ gap: "0.5rem" }}>
+                  <div
+                    className="flex-row"
+                    style={{
+                      width: "100%",
+                      justifyContent: "space-between",
+                      height: "",
+                      alignItems: "flex-start",
+                      flexWrap: "wrap",
+                    }}
+                  >
+                    <div
+                      className="flex-row"
+                      style={{
+                        alignItems: "center",
+                        gap: "0.25rem",
+                        flexWrap: "wrap",
+                        userSelect: "none",
+                      }}
+                    >
+                      <span className="">
+                        <a
+                          href={`/${cast.author.username}`}
+                          className="fc-lnk"
+                          title={cast.author.display_name}
+                          style={{ cursor: "pointer" }}
+                          onClick={(event) => {
+                            if (!isLogged) {
+                              LoginPopup();
+                              event.preventDefault();
+                            } else {
+                              // goToUserProfile(event, cast.author)
+                            }
+                          }}
+                        >
+                          <div
+                            className="flex-row"
+                            style={{ alignItems: "center" }}
+                          >
+                            <span className="name-font">
+                              {cast.author.display_name}
+                            </span>
+                            <div className="" style={{ margin: "0 0 0 3px" }}>
+                              {cast.author.power_badge && <ActiveUser />}
+                            </div>
+                          </div>
+                        </a>
+                      </span>
+                      <span className="user-font">
+                        <a
+                          href={`/${cast.author.username}`}
+                          className="fc-lnk"
+                          title={cast.author.display_name}
+                          onClick={(event) => {
+                            if (!isLogged) {
+                              LoginPopup();
+                              event.preventDefault();
+                            } else {
+                              // goToUserProfile(event, cast.author)
+                            }
+                          }}
+                        >
+                          @{cast.author.username}
+                        </a>
+                      </span>
+                      <div className="">·</div>
+                      <a
+                        href={`/${cast.author.username}/casts/${cast.hash}`}
+                        className="fc-lnk"
+                        title="Navigate to cast"
+                        onClick={(event) => {
+                          if (!isLogged) {
+                            LoginPopup();
+                            event.preventDefault();
+                          } else {
+                            // goToCast(event, cast)
+                          }
+                        }}
+                      >
+                        <div className="user-font">
+                          {timePassed(cast.timestamp)}
+                        </div>
+                      </a>
+                    </div>
+                    {/* <div className="">
               <Kebab />
             </div> */}
-          </div>
-          <div className="">
-            <div style={{wordWrap: 'break-word', maxWidth: `100%`, width: textMax, whiteSpace: 'pre-line'}}>
-              {/* <CastText text={cast.text} embeds={cast.embeds} mentions={cast.mentioned_profiles} /> */}
-              {cast.text}
-              </div>
-            {(cast.embeds.length > 0) && (cast.embeds.map((embed, subindex) => (
-              
-            <div key={subindex} className='flex-col' style={{alignItems: 'center', display: hide ? 'flex' : 'flex'}}>
-            </div>
-            )))}
-          </div>
-          <div>
-            {frameData && (<div className="flex-col" style={{border: '1px solid #666', padding: '8px 8px', borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'flex-start', gap: '0.5rem'}}>
-              <div className="flex-row" style={{alignItems: 'center', gap: '0.25rem'}}>
-                <img src={frameData.image} style={{width: 'auto', height: 'auto', maxWidth: textMax, minWidth: 'auto', minHeight: 'auto', borderRadius: '5px', aspectRatio: frameData.image_aspect_ratio == '1:1' ? '1 / 1' : '16 / 9'}} />
-              </div>
-              <div className='flex-row' style={{width: '100%', justifyContent: 'space-evenly', gap: '0.5rem', flexWrap: 'wrap'}}>
+                  </div>
+                  <div className="">
+                    <div
+                      style={{
+                        wordWrap: "break-word",
+                        maxWidth: `100%`,
+                        width: textMax,
+                        whiteSpace: "pre-line",
+                      }}
+                    >
+                      {/* <CastText text={cast.text} embeds={cast.embeds} mentions={cast.mentioned_profiles} /> */}
+                      {cast.text}
+                    </div>
+                    {cast.embeds.length > 0 &&
+                      cast.embeds.map((embed, subindex) => (
+                        <div
+                          key={subindex}
+                          className="flex-col"
+                          style={{
+                            alignItems: "center",
+                            display: hide ? "flex" : "flex",
+                          }}
+                        ></div>
+                      ))}
+                  </div>
+                  <div>
+                    {frameData && (
+                      <div
+                        className="flex-col"
+                        style={{
+                          border: "1px solid #666",
+                          padding: "8px 8px",
+                          borderRadius: "5px",
+                          justifyContent: "flex-start",
+                          alignItems: "flex-start",
+                          gap: "0.5rem",
+                        }}
+                      >
+                        <div
+                          className="flex-row"
+                          style={{ alignItems: "center", gap: "0.25rem" }}
+                        >
+                          <img
+                            src={frameData.image}
+                            style={{
+                              width: "auto",
+                              height: "auto",
+                              maxWidth: textMax,
+                              minWidth: "auto",
+                              minHeight: "auto",
+                              borderRadius: "5px",
+                              aspectRatio:
+                                frameData.image_aspect_ratio == "1:1"
+                                  ? "1 / 1"
+                                  : "16 / 9",
+                            }}
+                          />
+                        </div>
+                        <div
+                          className="flex-row"
+                          style={{
+                            width: "100%",
+                            justifyContent: "space-evenly",
+                            gap: "0.5rem",
+                            flexWrap: "wrap",
+                          }}
+                        >
+                          {frameData?.input && (
+                            <input
+                              onChange={onInput}
+                              name="frame-input"
+                              placeholder={frameData.input.text}
+                              value={inputText}
+                              className="srch-btn"
+                              style={{
+                                width: "100%",
+                                backgroundColor: "#234",
+                                margin: "0",
+                                color: "#fff",
+                              }}
+                            />
+                          )}
 
-                {frameData?.input && (<input onChange={onInput} 
-                  name='frame-input' 
-                  placeholder={frameData.input.text} 
-                  value={inputText} 
-                  className='srch-btn' 
-                  style={{width: '100%', backgroundColor: '#234', margin: '0', color: '#fff'}} 
-                />)}
-                    
-                {frameData?.buttons && (frameData.buttons.map((button, index) => (
-                  <FrameButton key={index} {...{frameData, button, buttonAction, type: button.action_type, index}} />
-                )))}
-              </div>
-            </div>)}
-          </div>
-          {(typeof cast.channelName !== 'undefined') && (
-            <div className="flex-row" style={{border: '1px solid #666', padding: '2px 4px', borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'flex-start'}}>
-              <div className="flex-row" style={{alignItems: 'center', gap: '0.25rem'}}>
-                <img loading="lazy" src={cast.channelImg} className="" alt="Channel image" style={{width: '17px', height: '17px', minWidth: '17px', minHeight: '17px', borderRadius: '3px'}} />
-                <span className="channel-font">{cast.channelName}
-                </span>
-              </div>
-            </div>
-          )}
-          </div>
-          <div className="flex-row" style={{width: '100%', justifyContent: 'space-evenly'}}>
-            <div className="flex-row" style={{flex: 1, padding: '3px'}}>
-              <div className="">
-                <Message />
-              </div>
-              <span className="" style={{padding: '0 0 0 5px'}}>{cast.replies.count}</span>
-            </div>
-            <div className="flex-row" style={{flex: 1}}>
-              <div
-                ref={el => (recastRefs.current[index] = el)} 
-                className='flex-row recast-btn' 
-                style={{color: cast.viewer_context?.recasted ? '#191' : ''}}
-                onClick={() => {
-                  if (!isLogged) {
-                    LoginPopup()
-                  } else {
-                    // postRecast(cast.hash, index, cast.reactions.recasts_count)
-                  }
-                }}
+                          {frameData?.buttons &&
+                            frameData.buttons.map((button, index) => (
+                              <FrameButton
+                                key={index}
+                                {...{
+                                  frameData,
+                                  button,
+                                  buttonAction,
+                                  type: button.action_type,
+                                  index,
+                                }}
+                              />
+                            ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  {typeof cast.channelName !== "undefined" && (
+                    <div
+                      className="flex-row"
+                      style={{
+                        border: "1px solid #666",
+                        padding: "2px 4px",
+                        borderRadius: "5px",
+                        justifyContent: "flex-start",
+                        alignItems: "flex-start",
+                      }}
+                    >
+                      <div
+                        className="flex-row"
+                        style={{ alignItems: "center", gap: "0.25rem" }}
+                      >
+                        <img
+                          loading="lazy"
+                          src={cast.channelImg}
+                          className=""
+                          alt="Channel image"
+                          style={{
+                            width: "17px",
+                            height: "17px",
+                            minWidth: "17px",
+                            minHeight: "17px",
+                            borderRadius: "3px",
+                          }}
+                        />
+                        <span className="channel-font">{cast.channelName}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <div
+                  className="flex-row"
+                  style={{ width: "100%", justifyContent: "space-evenly" }}
                 >
-                <div className="">
-                  <Recast />
+                  <div className="flex-row" style={{ flex: 1, padding: "3px" }}>
+                    <div className="">
+                      <Message />
+                    </div>
+                    <span className="" style={{ padding: "0 0 0 5px" }}>
+                      {cast.replies.count}
+                    </span>
+                  </div>
+                  <div className="flex-row" style={{ flex: 1 }}>
+                    <div
+                      ref={(el) => (recastRefs.current[index] = el)}
+                      className="flex-row recast-btn"
+                      style={{
+                        color: cast.viewer_context?.recasted ? "#191" : "",
+                      }}
+                      onClick={() => {
+                        if (!isLogged) {
+                          LoginPopup();
+                        } else {
+                          // postRecast(cast.hash, index, cast.reactions.recasts_count)
+                        }
+                      }}
+                    >
+                      <div className="">
+                        <Recast />
+                      </div>
+                      <span className="" style={{ padding: "0 0 0 5px" }}>
+                        {cast.reactions.recasts_count}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex-row" style={{ flex: 4 }}>
+                    <div
+                      ref={(el) => (likeRefs.current[index] = el)}
+                      className="flex-row like-btn"
+                      style={{
+                        color: cast.viewer_context?.liked ? "#b33" : "",
+                      }}
+                      onClick={() => {
+                        if (!isLogged) {
+                          LoginPopup();
+                        } else {
+                          // postLike(cast.hash, index, cast.reactions.likes_count)
+                        }
+                      }}
+                    >
+                      <div className="">
+                        {cast.viewer_context?.liked ? <LikeOn /> : <Like />}
+                      </div>
+                      <span className="" style={{ padding: "0 0 0 5px" }}>
+                        {cast.reactions.likes_count}
+                      </span>
+                    </div>
+                  </div>
+                  <div
+                    className="flex-row"
+                    style={{ flex: 1, padding: "3px", gap: "0.5rem" }}
+                  >
+                    <div
+                      className={`impact-arrow ${fail ? "flash-fail" : ""}`}
+                      style={{ padding: "0px 1px 0 0px" }}
+                      onClick={() => {
+                        if (!isLogged) {
+                          LoginPopup();
+                        } else {
+                          // boostQuality(cast, 1)
+                        }
+                      }}
+                    >
+                      <ImArrowUp />
+                    </div>
+
+                    <span
+                      className={`flex-row ${fail ? "flash-fail" : ""}`}
+                      style={{
+                        padding: "0 0 0 5px",
+                        userSelect: "none",
+                        gap: "0.15rem",
+                      }}
+                    >
+                      <div>{cast.quality_balance || 0}</div>
+                      {cast.quality_absolute &&
+                      cast.quality_absolute !== 0 &&
+                      cast.quality_absolute !=
+                        Math.abs(cast.quality_balance) ? (
+                        <div
+                          style={{
+                            color: "#666",
+                            fontSize: "13px",
+                            padding: "2px 0 0 0",
+                          }}
+                        >{`(${cast.quality_absolute})`}</div>
+                      ) : (
+                        ""
+                      )}
+                    </span>
+
+                    <div
+                      className={`${fail ? "flash-fail" : ""}`}
+                      style={{ padding: "2px 10px 0 0px" }}
+                    >
+                      <Diamond />
+                    </div>
+
+                    <div
+                      className={`like-btn ${fail ? "flash-fail" : ""}`}
+                      style={{ padding: "2px 0 0 0px" }}
+                      onClick={() => {
+                        if (!isLogged) {
+                          LoginPopup();
+                        } else {
+                          // boostQuality(cast, -1)
+                        }
+                      }}
+                    >
+                      <ImArrowDown />
+                    </div>
+                  </div>
                 </div>
-                <span className="" style={{padding: '0 0 0 5px'}}>{cast.reactions.recasts_count}</span>
-              </div>
-            </div>
-            <div className="flex-row" style={{flex: 4}}>
-              <div 
-                ref={el => (likeRefs.current[index] = el)} 
-                className='flex-row like-btn' 
-                style={{color: cast.viewer_context?.liked ? '#b33' : ''}}
-                onClick={() => {
-                  if (!isLogged) {
-                    LoginPopup()
-                  } else {
-                    // postLike(cast.hash, index, cast.reactions.likes_count)
-                  }
-                }}>
-                <div className="">
-                  {cast.viewer_context?.liked ? <LikeOn /> : <Like />}
-                </div>
-                <span className="" style={{padding: '0 0 0 5px'}}>{cast.reactions.likes_count}</span>
-              </div>
-            </div>
-            <div className="flex-row" style={{flex: 1, padding: '3px', gap: '0.5rem'}}>
-              <div className={`impact-arrow ${fail ? 'flash-fail' : ''}`} style={{padding: '0px 1px 0 0px'}} onClick={() => {
-                if (!isLogged) {
-                  LoginPopup()
-                } else {
-                  // boostQuality(cast, 1)
-                }
-                }}>
-                <ImArrowUp />
-              </div>
-
-              <span className={`flex-row ${fail ? 'flash-fail' : ''}`} style={{padding: '0 0 0 5px', userSelect: 'none', gap: '0.15rem'}}>
-                <div>{cast.quality_balance || 0}</div>
-              {(cast.quality_absolute && cast.quality_absolute !== 0 && cast.quality_absolute != Math.abs(cast.quality_balance)) ? (<div style={{color: '#666', fontSize: '13px', padding: '2px 0 0 0'}}>{`(${cast.quality_absolute})`}</div>) : ''}
-              </span>
-
-              <div className={`${fail ? 'flash-fail' : ''}`} style={{padding: '2px 10px 0 0px'}}>
-                <Diamond />
-              </div>
-
-              <div className={`like-btn ${fail ? 'flash-fail' : ''}`} style={{padding: '2px 0 0 0px'}} onClick={() => {
-                if (!isLogged) {
-                  LoginPopup()
-                } else {
-                  // boostQuality(cast, -1)
-                }
-                }}>
-                <ImArrowDown />
               </div>
             </div>
           </div>
-        </div>
-      </div>
-    </div>)}</>
+        )}
+      </>
     </div>
   );
 }

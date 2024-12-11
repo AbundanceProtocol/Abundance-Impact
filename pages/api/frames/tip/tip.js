@@ -96,17 +96,16 @@ export default async function handler(req, res) {
     async function getSigner(fid) {
       try {
         await connectToDatabase();
-        const user = await User.findOne({ fid }).select('uuid username').exec();
+        const user = await User.findOne({ fid }).select('uuid username pfp').exec();
         if (user) {
           const signer = decryptPassword(user.uuid, secretKey)
-          // console.log(user)
-          return {decryptedUuid: signer, username: user.username}
+          return {decryptedUuid: signer, username: user.username, user_pfp: user.pfp || null}
         } else {
-          return {decryptedUuid: null, username: null}
+          return {decryptedUuid: null, username: null, user_pfp: null}
         }
       } catch (error) {
         console.error('Error getting User:', error)
-        return {decryptedUuid: null, username: null}
+        return {decryptedUuid: null, username: null, user_pfp: null}
       }
     }
 
@@ -154,11 +153,54 @@ export default async function handler(req, res) {
       }
     }
 
-    async function createCircle(fid, time, curators, text, ecosystem, username, points, circles) {
+    async function createCircle(fid, time, curators, text, ecosystem, username, points, circles, user_pfp, showcase) {
       try {
         await connectToDatabase();
-        let circle = new Circle({ 
-          fid, time, curators, text, ecosystem, username, points, circles
+
+        let curator = []
+        
+        if (curators && curators.length > 0) {
+          let curatorFids = []
+
+          if (typeof curators === "string") {
+            curatorFids = [parseInt(curators)];
+          } else if (Array.isArray(curators) && curators.length > 0) {
+            curatorFids = curators.map((fid) => parseInt(fid));
+          }
+
+          if (curatorFids && curatorFids.length > 0) {
+            const users = await User.find({ fid: { $in: curatorFids } })
+              .select('pfp fid username')
+              .lean();
+
+            const seenFids = new Set();
+            curator = users.reduce((acc, user) => {
+              const fid = Number(user.fid);
+              if (!seenFids.has(fid)) {
+                seenFids.add(fid);
+                acc.push({
+                  pfp: user.pfp,
+                  fid: fid,
+                  username: user.username
+                });
+              }
+              return acc;
+            }, []);
+          }
+        }
+
+        let circle = new Circle({
+          fid,
+          time,
+          curators,
+          text,
+          ecosystem,
+          username,
+          points,
+          circles,
+          user_pfp,
+          curator,
+          showcase
         });
         await circle.save()
         const objectIdString = circle._id.toString();
@@ -227,9 +269,9 @@ export default async function handler(req, res) {
 
         // const jointFids = circleFids.join(',')
 
-        circlesImg = `${baseURL}/api/frames/tip/circle?${qs.stringify({ id: circleFids })}`
+        circlesImg = `${baseURL}/api/frames/tip/circle-v2?${qs.stringify({ id: circleFids })}`
 
-        shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share-v2?${qs.stringify({ id: circleFids })}`
+        shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share-v3?${qs.stringify({ id: circleFids })}`
     
         encodedShareUrl = encodeURIComponent(shareUrl); 
         shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
@@ -355,8 +397,7 @@ export default async function handler(req, res) {
           return;
         } else {
         
-          const {decryptedUuid, username} = await getSigner(fid)
-    
+          const {decryptedUuid, username, user_pfp} = await getSigner(fid)
           if (!decryptedUuid) {
             console.log('d')
   
@@ -686,7 +727,7 @@ export default async function handler(req, res) {
                 }
               }
   
-              const { castData, circle, pfps, usernames } = await processTips(displayedCasts, fid, allowances, ecoName, curatorPercent)
+              const { castData, circle, pfps, usernames, showcase } = await processTips(displayedCasts, fid, allowances, ecoName, curatorPercent)
               console.log('pfps', pfps)
               const jointFids = circle.join(',')
   
@@ -749,20 +790,19 @@ export default async function handler(req, res) {
                     console.error(`Error occurred while sending request for ${castText}:`, error);
                   }
           
-                  await new Promise(resolve => setTimeout(resolve, 60));
+                  await new Promise(resolve => setTimeout(resolve, 30));
                 }
                 return tipCounter
               }
   
-              const circleId = await createCircle(fid, time, curators, tipText, eco, username, points, pfps)
+              const circleId = await createCircle(fid, time, curators, tipText, eco, username, points, pfps, user_pfp, showcase)
   
-              circlesImg = `${baseURL}/api/frames/tip/circle?${qs.stringify({ id: circleId })}`
+              circlesImg = `${baseURL}/api/frames/tip/circle-v2?${qs.stringify({ id: circleId })}`
   
               const remainingTip = await sendRequests(castData, decryptedUuid, apiKey);
               // const remainingTip = 0 
   
-              shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share-v2?${qs.stringify({    
-                id: circleId })}`
+              shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share-v3?${qs.stringify({ id: circleId })}`
               
               async function getCurator(curator, points) {
   
