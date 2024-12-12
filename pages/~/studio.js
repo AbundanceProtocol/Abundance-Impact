@@ -421,10 +421,6 @@ export default function ProfilePage() {
 
       let displayedCasts = await populateCast(sortedCasts)
 
-
-
-
-
       if (userFeed?.length == 0 || page == 1 || shuffle) {
         console.log('opt1-2')
         setUserFeed(displayedCasts)
@@ -450,22 +446,41 @@ export default function ProfilePage() {
 
 
   function shareFrame(event, tip) {
+    let tippedCreators = ''
+    if (tip?.showcase?.length > 0) {
+      tippedCreators = tip.showcase.reduce((str, creator, index, arr) => {
+        if (!str.includes(creator.username)) {
+          if (str === '') {
+            return '@' + creator.username;
+          }
+          if (index === arr.length - 1) {
+            return str + ' & @' + creator.username + ' ';
+          }
+          return str + ', @' + creator.username;
+        }
+        return str;
+      }, '');
+    }
     event.preventDefault();
-    let shareUrl = `https://impact.abundance.id/~/ecosystems/${tip?.handle}/tip-share-v2?${qs.stringify({ id: tip?._id })}`
+    let shareUrl = `https://impact.abundance.id/~/ecosystems/${
+      tip?.handle
+    }/tip-share-${(tip?.showcase?.length > 0) ? 'v3' : 'v2'}?${qs.stringify({
+      id: tip?._id,
+    })}`;
     let shareText = ''
 
     if (tip?.curators && tip?.curators[0]?.fid == fid) {
-      shareText = 'I just multi-tipped builders & creators on /impact by @abundance.\n\nSupport my nominees here:'
+      shareText = `I just multi-tipped ${tippedCreators !== '' ? tippedCreators : 'creators & builders '} thru /impact by @abundance.\n\nSupport my nominees here:`;
     } else if (tip?.curators?.length > 0) {
       // const curatorName = await getCurator(curators, points)
 
       if (tip?.curators[0]?.fid !== fid) {
-        shareText = `I just multi-tipped @${tip?.curators[0]?.username}'s curation of builders & creators thru /impact by @abundance.\n\nSupport @${tip?.curators[0]?.username}'s nominees here:`
+        shareText = `I multi-tipped ${tippedCreators !== '' ? tippedCreators : 'creators & builders '}thru /impact by @abundance.\n\nThese creators were curated by @${tip?.curators[0]?.username}. Support their nominees here:`;
       } else {
-        shareText = 'I just multi-tipped builders & creators on /impact by @abundance. Try it out here:'
+        shareText = `I multi-tipped ${tippedCreators !== '' ? tippedCreators : 'creators & builders '} thru /impact by @abundance. Try it out here:`
       }
     } else {
-      shareText = 'I just multi-tipped builders & creators on /impact by @abundance. Try it out here:'
+      shareText = `I multi-tipped ${tippedCreators !== '' ? tippedCreators : 'creators & builders '} thru /impact by @abundance. Try it out here:`
     }
 
     let encodedShareText = encodeURIComponent(shareText)
