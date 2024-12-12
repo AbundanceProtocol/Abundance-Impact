@@ -26,6 +26,7 @@ const circleSchema = new mongoose.Schema({
       pfp: { type: String, default: null },
     },
   ],
+  type: String,
   createdAt: { type: Date, default: () => new Date(), index: true },
 });
 
