@@ -847,35 +847,33 @@ export default async function handler(req, res) {
                 }
               }
   
-              let userText = ''
-
-              if (usernames && usernames?.length > 0) {
-                if (usernames && usernames?.length == 1) {
-                  userText = '@' + usernames[0] + ' '
-                } else if (usernames && usernames?.length == 2) {
-                  userText = '@' + usernames[0] + ' and @' + usernames[1] + ' '
-                } else if (usernames && usernames?.length == 3) {
-                  userText = '@' + usernames[0] + ', @' + usernames[1] + ' and @' + usernames[2] + ' '
-                } else if (usernames && usernames?.length == 4) {
-                  userText = '@' + usernames[0] + ', @' + usernames[1] + ', @' + usernames[2] + ' and @' + usernames[3] + ' '
-                } else if (usernames && usernames?.length == 5) {
-                  userText = '@' + usernames[0] + ', @' + usernames[1] + ', @' + usernames[2] + ', @' + usernames[3] + ' and @' + usernames[4] + ' '
-                } else if (usernames && usernames?.length > 5) {
-                  userText = '@' + usernames[0] + ', @' + usernames[1] + ', @' + usernames[2] + ', @' + usernames[3] + ', @' + usernames[4] + ' and other builders & creators '
-                }
+              let tippedCreators = ""
+              if (showcase?.length > 0) {
+                tippedCreators = showcase.reduce((str, creator, index, arr) => {
+                  if (!str.includes(creator.username)) {
+                    if (str === "") {
+                      return "@" + creator.username;
+                    }
+                    if (index === arr.length - 1) {
+                      return str + " & @" + creator.username + " ";
+                    }
+                    return str + ", @" + creator.username;
+                  }
+                  return str;
+                }, "");
               }
 
               if (curators && fid == curators) {
-                shareText = `I just multi-tipped ${userText}on /impact by @abundance.\n\nSupport my nominees here:`
+                shareText = `I just multi-tipped ${tippedCreators !== '' ? tippedCreators : 'creators & builders '} thru /impact by @abundance.\n\nSupport my nominees here:`
               } else if (curators?.length > 0) {
                 const curatorName = await getCurator(curators, points)
                 if (curatorName) {
-                  shareText = `I just multi-tipped ${userText}curated by ${curatorName} thru /impact by @abundance.\n\nSupport ${curatorName}'s nominees here:`
+                  shareText = `I just multi-tipped ${tippedCreators !== '' ? tippedCreators : 'creators & builders '}thru /impact by @abundance.\n\nThese creators were curated by @${curatorName}. Support their nominees here:`
                 } else {
-                  shareText = `I just multi-tipped ${userText}on /impact by @abundance. Try it out here:`
+                  shareText = `I just multi-tipped ${tippedCreators !== '' ? tippedCreators : 'creators & builders '} thru /impact by @abundance. Try it out here:`
                 }
               } else {
-                shareText = `I just multi-tipped ${userText}on /impact by @abundance. Try it out here:`
+                shareText = `I just multi-tipped ${tippedCreators !== '' ? tippedCreators : 'creators & builders '} thru /impact by @abundance. Try it out here:`
               }
               encodedShareText = encodeURIComponent(shareText)
   
