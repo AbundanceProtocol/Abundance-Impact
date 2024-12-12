@@ -200,7 +200,8 @@ export default async function handler(req, res) {
           circles,
           user_pfp,
           curator,
-          showcase
+          showcase,
+          type: "multi-tip"
         });
         await circle.save()
         const objectIdString = circle._id.toString();
