@@ -453,7 +453,7 @@ export default function ProfilePage() {
           if (str === '') {
             return '@' + creator.username;
           }
-          if (index === arr.length - 1) {
+          if (index === arr.length - 1 && index !== 0) {
             return str + ' & @' + creator.username + ' ';
           }
           return str + ', @' + creator.username;
@@ -470,7 +470,7 @@ export default function ProfilePage() {
     let shareText = ''
 
     if (tip?.curators && tip?.curators[0]?.fid == fid) {
-      shareText = `I just multi-tipped ${tippedCreators !== '' ? tippedCreators : 'creators & builders '} thru /impact by @abundance.\n\nSupport my nominees here:`;
+      shareText = `I multi-tipped ${tippedCreators !== '' ? tippedCreators : 'creators & builders '} thru /impact by @abundance.\n\nSupport my nominees here:`;
     } else if (tip?.curators?.length > 0) {
       // const curatorName = await getCurator(curators, points)
 

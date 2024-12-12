@@ -728,7 +728,7 @@ export default async function handler(req, res) {
               }
   
               const { castData, circle, pfps, usernames, showcase } = await processTips(displayedCasts, fid, allowances, ecoName, curatorPercent)
-              console.log('pfps', pfps)
+              // console.log('pfps', pfps)
               const jointFids = circle.join(',')
   
               async function sendRequests(data, signer, apiKey) {
@@ -854,7 +854,7 @@ export default async function handler(req, res) {
                     if (str === "") {
                       return "@" + creator.username;
                     }
-                    if (index === arr.length - 1) {
+                    if (index === arr.length - 1 && index !== 0) {
                       return str + " & @" + creator.username + " ";
                     }
                     return str + ", @" + creator.username;
