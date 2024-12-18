@@ -120,6 +120,7 @@ export default function Curators() {
           units: formatNum(units),
           casts: statData?.curatedCasts || 0,
           creators: statData?.uniqueCreators || 0,
+          uniqueTipped: statData?.uniqueCreatorsTipped || 0,
           autoTip: statData?.autoTips || 0,
         });
       } else {
@@ -167,6 +168,10 @@ export default function Curators() {
 
           <div className='curator-frame' style={{gap: '1.5rem', minWidth: isMobile ? '200px' : '250px'}}>
             <div style={{fontSize: isMobile ? '16px' : '17px', fontWeight: '400', color: '#eff'}}>Creators curated: {stat?.creators}</div>
+          </div>
+
+          <div className='curator-frame' style={{gap: '1.5rem', minWidth: isMobile ? '200px' : '250px'}}>
+            <div style={{fontSize: isMobile ? '16px' : '17px', fontWeight: '400', color: '#eff'}}>Creators tipped: {stat?.uniqueTipped}</div>
           </div>
 
           <div className='curator-frame' style={{gap: '1.5rem', minWidth: isMobile ? '200px' : '250px'}}>

@@ -250,6 +250,17 @@ export default async function handler(req, res) {
       return { result, countByNumber };
     }
 
+    async function countUniqueReceivers() {
+      try {
+        await connectToDatabase();
+        const uniqueCount = await Tip.distinct("receiver_fid").exec();
+        return uniqueCount.length;
+      } catch (error) {
+        console.error("Error counting unique receivers:", error);
+        return null;
+      }
+    }
+
     // async function getTipCountsAndAmountsByCastHash(tipper_fid) {
     //   await connectToDatabase();
 
@@ -335,12 +346,26 @@ export default async function handler(req, res) {
       const uniqueUsers = await countUniqueUsers()
       const uniqueCreators = await countUniqueCastAuthors()
       const curatedCasts = await countUniqueImpactedCasts()
+      const uniqueCreatorsTipped = await countUniqueReceivers()
       // const degenCuratorRewards = await getTotalDegenTipsForSetCasts()
       const autoTips = await countActiveScheduledTips();
       console.log('tips', getTips, uniqueTips, uniqueCurator, uniqueUsers, uniqueCreators, curatedCasts, autoTips)
       // const totalAmount = await getTotalTipsByAllCurrencies()
       // console.log('totalAmount', totalAmount)
-      res.status(200).json({ message: 'tips', getTips, uniqueTips, uniqueCurator, activeCurators, uniqueUsers, uniqueCreators, curatedCasts, autoTips });
+      res
+        .status(200)
+        .json({
+          message: "tips",
+          getTips,
+          uniqueTips,
+          uniqueCurator,
+          activeCurators,
+          uniqueUsers,
+          uniqueCreators,
+          curatedCasts,
+          uniqueCreatorsTipped, 
+          autoTips,
+        });
     } catch (error) {
       console.error('Error handling GET request:', error);
       res.status(500).json({ error: 'Internal Server Error' });
