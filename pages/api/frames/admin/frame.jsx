@@ -29,7 +29,7 @@ export default async function handler(req, res) {
     allowances.remaining = await getDegenAllowance(9326)
     console.log('confirmed', confirmed, allowances)
 
-    const backgroundImg = `https://impact.abundance.id/images/backgroundframe.jpg`
+    const backgroundImg = `${baseURL}/images/backgroundframe3.png`
 
     const svg = await satori(
       <div style={{

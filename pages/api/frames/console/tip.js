@@ -837,16 +837,16 @@ export default async function handler(req, res) {
             }
 
             if (curators && fid == curators) {
-              shareText = `I just multi-tipped ${tippedCreators !== '' ? tippedCreators : 'creators & builders '} thru /impact by @abundance.\n\nSupport my nominees here:`
+              shareText = `I just multi-tipped ${tippedCreators !== '' ? tippedCreators : 'creators & builders'} thru /impact by @abundance.\n\nSupport my nominees here:`
             } else if (curators?.length > 0) {
               const curatorName = await getCurator(curators, points)
               if (curatorName) {
-                shareText = `I just multi-tipped ${tippedCreators !== '' ? tippedCreators : 'creators & builders '}thru /impact by @abundance.\n\nThese creators were curated by @${curatorName}. Support their nominees here:`
+                shareText = `I just multi-tipped ${tippedCreators !== '' ? tippedCreators : 'creators & builders'} thru /impact by @abundance.\n\nThese creators were curated by @${curatorName}. Support their nominees here:`
               } else {
-                shareText = `I just multi-tipped ${tippedCreators !== '' ? tippedCreators : 'creators & builders '} thru /impact by @abundance. Try it out here:`
+                shareText = `I just multi-tipped ${tippedCreators !== '' ? tippedCreators : 'creators & builders'} thru /impact by @abundance. Try it out here:`
               }
             } else {
-              shareText = `I just multi-tipped ${tippedCreators !== '' ? tippedCreators : 'creators & builders '} thru /impact by @abundance. Try it out here:`
+              shareText = `I just multi-tipped ${tippedCreators !== '' ? tippedCreators : 'creators & builders'} thru /impact by @abundance. Try it out here:`
             }
             encodedShareText = encodeURIComponent(shareText)
           

@@ -54,8 +54,8 @@ export default async function handler(req, res) {
       time = '30 days'
     }
 
-    if (circles?.length > 10) {
-      circles = circles.slice(0, 10)
+    if (circles?.length > 9) {
+      circles = circles.slice(0, 9)
     }
 
     const splitCircles = (arr) => {
@@ -72,7 +72,7 @@ export default async function handler(req, res) {
     const [firstHalf, secondHalf] = splitCircles(circles);
 
 
-    const backgroundImg = `https://impact.abundance.id/images/backgroundframe.jpg`
+    const backgroundImg = `${baseURL}/images/backgroundframe3.png`
 
     const svg = await satori(
       <div style={{

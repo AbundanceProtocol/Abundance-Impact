@@ -45,7 +45,7 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem, fi
   const initFrame = {
     version: "vNext",
     title: "Multi-Tip",
-    image: `https://impact.abundance.id/images/backgroundframe.jpg`,
+    image: `${baseURL}/images/backgroundframe3.png`,
     image_aspect_ratio: "1:1",
     buttons: [
       {

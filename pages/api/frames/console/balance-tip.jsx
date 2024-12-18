@@ -38,7 +38,7 @@ export default async function handler(req, res) {
     let castQdauCount = qT || 0
     let castQdauBalance = qB || 0
 
-    const backgroundImg = `https://impact.abundance.id/images/backgroundframe.jpg`
+    const backgroundImg = `${baseURL}/images/backgroundframe3.png`
 
     const svg = await satori(
       <div style={{
