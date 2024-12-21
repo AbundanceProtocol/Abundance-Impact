@@ -332,11 +332,11 @@ export default function MultiTip() {
       showcase
     );
 
-    console.log(getCircleId);
+    // console.log(getCircleId);
 
-    let shareUrl = `https://impact.abundance.id/~/ecosystems/${frameEcosystem?.url}/curation-v1?id=${getCircleId || null}`
+    let shareUrl = `https://impact.abundance.id/~/ecosystems/${frameEcosystem?.url}/curation-v1?id=${getCircleId}`
 
-    // console.log('shareUrl', shareUrl)
+    console.log("shareUrl", getCircleId, shareUrl);
 
     let tippedCreators = "";
     if (showcase?.length > 0) {
