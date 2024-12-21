@@ -5,8 +5,8 @@
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
-  external_node_modules = ["mongodb", "mongoose"]
-  included_files = ["utils/**", "libs/**", "models/**"]
+  external_node_modules = ["mongodb", "mongoose", "sharp"]
+  included_files = ["utils/**", "libs/**", "models/**", "node_modules/sharp/**/*"]
 
 [functions."tips-background"]
   schedule = "40 22 * * *"
