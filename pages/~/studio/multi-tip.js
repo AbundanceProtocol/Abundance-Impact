@@ -126,7 +126,7 @@ export default function MultiTip() {
         }
       );
       if (response?.data) {
-        return response?.data;
+        return response?.data?.circleId;
       } else{
         return null
       }
