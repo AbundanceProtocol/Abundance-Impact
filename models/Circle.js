@@ -27,7 +27,7 @@ const circleSchema = new mongoose.Schema({
     },
   ],
   type: { type: String, index: true },
-  image: { type: String, default: null },
+  image: { type: Object, default: null },
   createdAt: { type: Date, default: () => new Date(), index: true },
 });
 

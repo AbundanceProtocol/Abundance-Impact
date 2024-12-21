@@ -1,7 +1,8 @@
 import React from 'react';
 import useMatchBreakpoints from '../../../hooks/useMatchBreakpoints';
+import Spinner from '../../Common/Spinner';
 
-export default function Button({ text, prevIcon: PrevIcon, postIcon: PostIcon, setupEcosystem, target, isSelected, size, submit }) {
+export default function Button({ text, prevIcon: PrevIcon, postIcon: PostIcon, setupEcosystem, target, isSelected, size, submit, loading, textLoading }) {
   const { isMobile } = useMatchBreakpoints();
   let mobileIcon = 18
   let desktopIcon = 20
@@ -30,7 +31,7 @@ export default function Button({ text, prevIcon: PrevIcon, postIcon: PostIcon, s
 
 
   return (
-    <div className='active-nav-btn btn-hvr' style={{border: `${isSelected ? '2px solid #9df' : '1px solid #777'}`, padding: '2px', borderRadius: '10px', backgroundColor: submit ? '#6f6' : '#999', maxWidth: 'fit-content', cursor: submit ? 'pointer' : 'default'}} onClick={() => {
+    <div className='active-nav-btn btn-hvr' style={{border: `${isSelected ? '2px solid #9df' : '1px solid #777'}`, padding: '2px', borderRadius: '10px', backgroundColor: submit && !loading ? '#6f6' : '#999', maxWidth: 'fit-content', cursor: submit ? 'pointer' : 'default'}} onClick={() => {
       if (target || submit) {
           console.log(target)
           setupEcosystem(target)
@@ -44,8 +45,14 @@ export default function Button({ text, prevIcon: PrevIcon, postIcon: PostIcon, s
               <PrevIcon size={isMobile ? mobileIcon : desktopIcon} />
             </div>
           </div>)}
-          {text && (<div style={{fontSize: isMobile ? mobileText : desktopText, fontWeight: '600', color: submit ? '#222' : '', padding: textPadding}}>
+          {text && !loading && (<div style={{fontSize: isMobile ? mobileText : desktopText, fontWeight: '600', color: submit ? '#222' : '', padding: textPadding}}>
             {text}
+          </div>)}
+          {loading && (<div className='flex-row' style={{height: '47px', justifyContent: 'center', alignItems: 'center', gap: '0.5rem'}}>
+            <Spinner size={26} color={'#eee'} />
+            {textLoading && (<div style={{fontSize: isMobile ? mobileText : desktopText, fontWeight: '600', color: '#eee', padding: textPadding}}>
+            {textLoading}
+          </div>)}
           </div>)}
           {PostIcon && (<div className={`flex-row`} style={{border: '0px solid #abc', padding: '0px 0px 0px 5px', borderRadius: '5px', justifyContent: 'flex-start', alignItems: 'center'}}>
             <div className={`flex-row`} style={{alignItems: 'center', gap: '0.3rem', padding: '0px 0px'}}>

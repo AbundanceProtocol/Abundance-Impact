@@ -159,7 +159,7 @@ export default function Curators() {
           </div>
 
           <div className='curator-frame' style={{gap: '1.5rem', minWidth: isMobile ? '200px' : '250px'}}>
-            <div style={{fontSize: isMobile ? '16px' : '17px', fontWeight: '400', color: '#eff'}}>Active curators: {stat?.activeCurators}</div>
+            <div style={{fontSize: isMobile ? '16px' : '17px', fontWeight: '400', color: '#eff'}}>Super curators: {stat?.activeCurators}</div>
           </div>
 
           <div className='curator-frame' style={{gap: '1.5rem', minWidth: isMobile ? '200px' : '250px'}}>
