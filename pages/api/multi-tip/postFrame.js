@@ -10,7 +10,7 @@ import Circle from "../../../models/Circle";
 import connectToDatabase from "../../../libs/mongodb";
 import { numToText } from "../../../utils/utils";
 import mongoose from 'mongoose';
-import sharp from "sharp";
+// import sharp from "sharp";
 
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 const cache = new NodeCache({ stdTTL: 60 });
@@ -217,15 +217,15 @@ export default async function handler(req, res) {
     const convertSvgToPng = promisify(svg2img);
     const pngBuffer = await convertSvgToPng(svgBuffer, { format: 'png', width: 600, height: 600 });
 
-    const compressedBuffer = await sharp(pngBuffer)
-      .png({ quality: 50, compressionLevel: 9 })
-      .toBuffer();
+    // const compressedBuffer = await sharp(pngBuffer)
+    //   .png({ quality: 50, compressionLevel: 9 })
+    //   .toBuffer();
 
     // Set the content type to PNG and send the response
     res.setHeader('Content-Type', 'image/png');
     res.setHeader('Cache-Control', 'max-age=10');
-    res.send(compressedBuffer);
-    // res.send(pngBuffer);
+    // res.send(compressedBuffer);
+    res.send(pngBuffer);
   } catch (error) {
     console.error(error);
     res.status(500).send('Error generating image');
