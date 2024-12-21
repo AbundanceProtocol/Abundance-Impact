@@ -76,6 +76,7 @@
     "react-player": "^2.10.1",
     "react-simplemde-editor": "^5.0.2",
     "satori": "^0.10.14",
+    "sharp": "^0.33.5",
     "svg2img": "^1.0.0-beta.2",
     "underscore": "^1.13.7",
     "web3modal": "^1.9.5",
