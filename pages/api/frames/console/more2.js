@@ -72,25 +72,30 @@ export default async function handler(req, res) {
 
     try {
 
-      res.setHeader('Content-Type', 'text/html');
-      res.status(200)
-      .send(`
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <title>Impact Nav</title>
-            <meta name="fc:frame" content="vNext">
-            <meta property="og:title" content="Impact Nav">
-            <meta property='og:image' content='${menuImg}' />
-            <meta property="fc:frame:image:aspect_ratio" content="1:1" />
-            <meta property="fc:frame:image" content='${menuImg}' />
-            ${metatags}
-          </head>
-          <body>
-            <div>Tip frame</div>
-          </body>
-        </html>
-      `);
+      res.setHeader('Content-Type', 'application/json');
+      res.status(400).json({ 
+        message: 'Please resend' 
+      });
+
+      // res.setHeader('Content-Type', 'text/html');
+      // res.status(200)
+      // .send(`
+      //   <!DOCTYPE html>
+      //   <html>
+      //     <head>
+      //       <title>Impact Nav</title>
+      //       <meta name="fc:frame" content="vNext">
+      //       <meta property="og:title" content="Impact Nav">
+      //       <meta property='og:image' content='${menuImg}' />
+      //       <meta property="fc:frame:image:aspect_ratio" content="1:1" />
+      //       <meta property="fc:frame:image" content='${menuImg}' />
+      //       ${metatags}
+      //     </head>
+      //     <body>
+      //       <div>Tip frame</div>
+      //     </body>
+      //   </html>
+      // `);
       return;
 
     } catch (error) {
