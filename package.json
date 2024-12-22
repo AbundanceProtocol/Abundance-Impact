@@ -68,8 +68,7 @@
     "eslint": "8.11.0",
     "eslint-config-next": "12.1.0",
     "typescript": "^5.5.4",
-    "urql": "^2.2.2",
-    "web3modal": "^1.9.5"
+    "urql": "^2.2.2"
   },
   "packageManager": "yarn@1.22.19"
 }

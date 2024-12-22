@@ -8760,7 +8760,6 @@ dockerode@2.5.8:
   resolved "https://registry.yarnpkg.com/dockerode/-/dockerode-2.5.8.tgz#1b661e36e1e4f860e25f56e0deabe9f87f1d0acc"
   integrity sha512-+7iOUYBeDTScmOmQqpUYQaE7F4vvIt6+gIZNHWhqAQEI887tiPFB9OvXI/HzQYqfUNvukMK+9myLW63oTJPZpw==
   dependencies:
-    concat-stream "~1.6.2"
     docker-modem "^1.0.8"
     tar-fs "~1.16.3"
 
@@ -11371,7 +11370,6 @@ http-basic@^8.1.1:
   integrity sha512-/EcDMwJZh3mABI2NhGfHOGOeOZITqfkEO4p/xK+l3NpyncIHUQBoMvCSF/b5GqvKtySC2srL/GGG3+EtlqlmCw==
   dependencies:
     caseless "^0.12.0"
-    concat-stream "^1.6.2"
     http-response-object "^3.0.1"
     parse-cache-control "^1.0.1"
 
@@ -11750,7 +11748,6 @@ ipfs-http-client@34.0.0:
     bs58 "^4.0.1"
     buffer "^5.4.2"
     cids "~0.7.1"
-    concat-stream "github:hugomrdias/concat-stream#feat/smaller"
     debug "^4.1.0"
     detect-node "^2.0.4"
     end-of-stream "^1.4.1"
@@ -13807,7 +13804,6 @@ mississippi@^3.0.0:
   resolved "https://registry.npmjs.org/mississippi/-/mississippi-3.0.0.tgz#ea0a3291f97e0b5e8776b363d5f0a12d94c67022"
   integrity sha512-x471SsVjUtBRtcvd4BzKE9kFC+/2TeWgKCgw0bZcw1b9l2X3QX5vCWgF+KaZaYm87Ss//rHnWryupDrgLvmSkA==
   dependencies:
-    concat-stream "^1.5.0"
     duplexify "^3.4.2"
     end-of-stream "^1.1.0"
     flush-write-stream "^1.0.0"
@@ -18117,12 +18113,10 @@ then-request@^6.0.0:
   resolved "https://registry.yarnpkg.com/then-request/-/then-request-6.0.2.tgz#ec18dd8b5ca43aaee5cb92f7e4c1630e950d4f0c"
   integrity sha512-3ZBiG7JvP3wbDzA9iNY5zJQcHL4jn/0BWtXIkagfz7QgOL/LqjCEOBQuJNZfu0XYnv5JhKh+cDxCPM4ILrqruA==
   dependencies:
-    "@types/concat-stream" "^1.6.0"
     "@types/form-data" "0.0.33"
     "@types/node" "^8.0.0"
     "@types/qs" "^6.2.31"
     caseless "~0.12.0"
-    concat-stream "^1.6.0"
     form-data "^2.2.0"
     http-basic "^8.1.1"
     http-response-object "^3.0.1"
