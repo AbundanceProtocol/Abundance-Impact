@@ -15,7 +15,7 @@ export default async function handler(req, res) {
       try {
         await connectToDatabase();
 
-        let latestCircles = await Circle.find({ fid })
+        let latestCircles = await Circle.find({ fid, type: { $ne: 'curation' } })
           .sort({ createdAt: -1 }).limit(5).exec();
 
         const uniquePoints = [...new Set(latestCircles.flatMap(circle => circle.points))];
