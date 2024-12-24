@@ -158,6 +158,7 @@ export default async function handler(req, res) {
     const points = '$' + eco
 
     const fid = untrustedData?.fid
+    const authorFid = untrustedData?.castId?.fid
     const loginImg = `${baseURL}/images/login.jpg`;
     const tipsImg = `${baseURL}/images/frame36.gif`
     const inputImg = `${baseURL}/images/input.jpg`;
@@ -181,7 +182,7 @@ export default async function handler(req, res) {
 
     const startPost = `${baseURL}/api/frames/tip/start?${qs.stringify({ time, curators, eco, ecosystem })}`
 
-    const loginUrl = `${baseURL}/?${qs.stringify({ eco: points })}`
+    const loginUrl = `${baseURL}/?${qs.stringify({ eco: points, referrer: authorFid })}`
 
     const sendPost = `${baseURL}/api/frames/tip/tip?${qs.stringify({ time, curators, eco, ecosystem })}`
 

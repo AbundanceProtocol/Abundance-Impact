@@ -33,7 +33,7 @@ export default function Home() {
   const [feedMax, setFeedMax ] = useState('620px')
   const [showPopup, setShowPopup] = useState({open: false, url: null})
   const router = useRouter()
-  const { eco } = router.query
+  const { eco, referrer } = router.query
   const { isMobile } = useMatchBreakpoints();
   const [display, setDisplay] = useState({personal: false, ecosystem: false})
   const store = useStore()
@@ -102,9 +102,10 @@ export default function Home() {
   useEffect(() => {
     if (isLogged) {
       let setEco = eco || '$IMPACT'
+      let setReferrer = referrer || null
       console.log('setEco', setEco)
       setPoints(setEco)
-      getRemainingBalances(store.fid, setEco, store.signer_uuid)
+      getRemainingBalances(store.fid, setEco, store.signer_uuid, setReferrer)
     }
   }, [eco, isLogged])
 

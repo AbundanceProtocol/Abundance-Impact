@@ -241,7 +241,7 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
 
   }, [store.isAuth, sched.login]);
 
-  const getRemainingBalances = async (fid, points, uuid) => {
+  const getRemainingBalances = async (fid, points, uuid, referrer) => {
     try {
       const response = await axios.get('/api/ecosystem/getBalances', {
         params: { fid, points } })
@@ -257,16 +257,16 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
         setEligibility(initialEligibility)
       } else {
         setUserBalances(prev => ({ ...prev, impact: 0, qdau: 0 }))
-        checkEcoEligibility(fid, points, uuid)
+        checkEcoEligibility(fid, points, uuid, referrer)
       }
     } catch (error) {
       console.error('Error, getRemainingBalances failed:', error)
-      checkEcoEligibility(fid, points, uuid)
+      checkEcoEligibility(fid, points, uuid, referrer)
       setUserBalances(prev => ({ ...prev, impact: 0, qdau: 0 }))
     }
   }
 
-  const checkEcoEligibility = async (fid, points, uuid) => {
+  const checkEcoEligibility = async (fid, points, uuid, referrer) => {
     console.log('c14', fid, points, prevPoints)
     if (!fid) {
       LoginPopup()
@@ -274,7 +274,7 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
       setPrevPoints(points)
       try {
         const response = await axios.get('/api/ecosystem/checkUserEligibility', {
-          params: { fid, points, uuid } })
+          params: { fid, points, uuid, referrer } })
         // console.log(response)
         if (response?.data?.eligibilityData) {
           let eligibilityData = response?.data?.eligibilityData

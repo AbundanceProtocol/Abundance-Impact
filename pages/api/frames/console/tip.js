@@ -24,6 +24,7 @@ export default async function handler(req, res) {
   console.log('isValid:', isValid)
   const { time, curators, channels, tags, eco, ecosystem, time1 } = req.query;
   const { untrustedData } = req.body
+  const authorFid = message?.data?.frameActionBody?.castId?.fid
 
   if (req.method !== 'POST' || !ecosystem || !eco) {
     res.setHeader('Allow', ['POST']);
@@ -261,7 +262,7 @@ export default async function handler(req, res) {
 
     const startPost = `${baseURL}/api/frames/tip/start?${qs.stringify({ time, curators, eco, ecosystem })}`
 
-    const loginUrl = `${baseURL}/?${qs.stringify({ eco: points })}`
+    const loginUrl = `${baseURL}/?${qs.stringify({ eco: points, referrer: authorFid })}`
 
     const sendPost = `${baseURL}/api/frames/tip/tip?${qs.stringify({ time, curators, eco, ecosystem })}`
 

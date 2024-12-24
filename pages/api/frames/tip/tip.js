@@ -240,7 +240,7 @@ export default async function handler(req, res) {
 
     const startPost = `${baseURL}/api/frames/tip/start?${qs.stringify({ time, curators, eco, ecosystem })}`
 
-    const loginUrl = `${baseURL}/?${qs.stringify({ eco: points })}`
+    const loginUrl = `${baseURL}/?${qs.stringify({ eco: points, referrer: authorFid })}`
 
     const sendPost = `${baseURL}/api/frames/tip/tip?${qs.stringify({ time, curators, eco, ecosystem })}`
 
