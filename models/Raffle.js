@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const scoreSchema = new mongoose.Schema({
+const raffleSchema = new mongoose.Schema({
   fid: { type: Number, index: true },
   pfp: String,
   username: String,
@@ -13,6 +13,6 @@ const scoreSchema = new mongoose.Schema({
   createdAt: { type: Date, default: () => new Date() }
 });
 
-const Score = mongoose.models.Score || mongoose.model('Score', scoreSchema);
+const Raffle = mongoose.models.Raffle || mongoose.model('Raffle', raffleSchema);
 
-export default Score;
+export default Raffle;
