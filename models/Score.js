@@ -4,6 +4,7 @@ const scoreSchema = new mongoose.Schema({
   fid: { type: Number, index: true },
   pfp: String,
   username: String,
+  points:  { type: String, default: '$IMPACT', index: true }, 
   degen_tip_all: { type: Number, default: 0, index: true },
   ham_tip_all: { type: Number, default: 0, index: true },
   curator_points_all: { type: Number, default: 0, index: true },
