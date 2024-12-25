@@ -15,7 +15,7 @@ import qs from "querystring";
 // import useStore from '../../../utils/store';
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 
-export default function Tips({time, curators, channels, tags, eco, ecosystem}) {
+export default function Tips({time, curators, channels, tags, eco, ecosystem, referrer}) {
   const { LoginPopup, fid, userBalances, isLogged } = useContext(AccountContext)
   const index = 0
   const router = useRouter();
@@ -164,13 +164,13 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem}) {
 
     const updatedFrameData = {...frameData}
     updatedFrameData.buttons[0].target = `${baseURL}/api/frames/tip/tip?${qs.stringify({    
-      time, curators, eco, ecosystem })}`
+      time, curators, eco, ecosystem, referrer })}`
 
-    updatedFrameData.buttons[1].target = `${baseURL}/api/frames/tip/menu?${qs.stringify({ time, curators, eco, ecosystem })}`
+    updatedFrameData.buttons[1].target = `${baseURL}/api/frames/tip/menu?${qs.stringify({ time, curators, eco, ecosystem, referrer })}`
 
-    updatedFrameData.buttons[2].target = `${baseURL}/api/frames/tip/auto-tip?${qs.stringify({ time, curators, eco, ecosystem })}`
+    updatedFrameData.buttons[2].target = `${baseURL}/api/frames/tip/auto-tip?${qs.stringify({ time, curators, eco, ecosystem, referrer })}`
 
-    updatedFrameData.buttons[3].target = `${baseURL}/api/frames/tip/opt-out-menu?${qs.stringify({ time, curators, eco, ecosystem })}`
+    updatedFrameData.buttons[3].target = `${baseURL}/api/frames/tip/opt-out-menu?${qs.stringify({ time, curators, eco, ecosystem, referrer })}`
     console.log(updatedFrameData)
     setFrameData(updatedFrameData)
   }, [queryData]);
@@ -311,19 +311,19 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem}) {
         <meta property="fc:frame:button:1" content='Multi-tip >' />
         <meta property="fc:frame:button:1:action" content="post" />
         <meta property="fc:frame:button:1:target" content={`${baseURL}/api/frames/tip/tip?${qs.stringify({    
-          time, curators, eco, ecosystem })}`} />
+          time, curators, eco, ecosystem, referrer })}`} />
 
         <meta property="fc:frame:button:2" content={'Menu'} />
         <meta property="fc:frame:button:2:action" content="post" />
-        <meta property="fc:frame:button:2:target" content={`${baseURL}/api/frames/tip/menu?${qs.stringify({ time, curators, eco, ecosystem })}`} />
+        <meta property="fc:frame:button:2:target" content={`${baseURL}/api/frames/tip/menu?${qs.stringify({ time, curators, eco, ecosystem, referrer })}`} />
 
         <meta property="fc:frame:button:3" content={'Auto-tip >'} />
         <meta property="fc:frame:button:3:action" content="post" />
-        <meta property="fc:frame:button:3:target" content={`${baseURL}/api/frames/tip/auto-tip?${qs.stringify({ time, curators, eco, ecosystem })}`} />
+        <meta property="fc:frame:button:3:target" content={`${baseURL}/api/frames/tip/auto-tip?${qs.stringify({ time, curators, eco, ecosystem, referrer })}`} />
 
         <meta property="fc:frame:button:4" content='Opt-out?' />
         <meta property="fc:frame:button:4:action" content="post" />
-        <meta property="fc:frame:button:4:target" content={`${baseURL}/api/frames/tip/opt-out-menu?${qs.stringify({ time, curators, eco, ecosystem })}`} />
+        <meta property="fc:frame:button:4:target" content={`${baseURL}/api/frames/tip/opt-out-menu?${qs.stringify({ time, curators, eco, ecosystem, referrer })}`} />
 
         <meta name="fc:frame:input:text" content="Eg.: 1000 $Degen, 500 $HAM" />
       </Head>
@@ -551,7 +551,7 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem}) {
 export async function getServerSideProps(context) {
   // Fetch dynamic parameters from the context object
   const { query, params } = context;
-  const { time, curators, channels, tags, eco } = query;
+  const { time, curators, channels, tags, eco, referrer } = query;
   const { ecosystem } = params;
   console.log(time, curators, channels, tags, eco)
   let setTime = 'all'
@@ -574,6 +574,10 @@ export async function getServerSideProps(context) {
   if (tags) {
     setTags = Array.isArray(tags) ? tags : [tags]
   }
+  let setReferrer = null
+  if (referrer) {
+    setReferrer = referrer
+  }
   // let setShuffle = false
   // if (shuffle || shuffle == false) {
   //   if (shuffle == 'true') {
@@ -591,7 +595,8 @@ export async function getServerSideProps(context) {
       channels: setChannels,
       tags: setTags,
       eco: setEco,
-      ecosystem: ecosystem
+      ecosystem: ecosystem,
+      referrer: setReferrer
     },
   };
 }

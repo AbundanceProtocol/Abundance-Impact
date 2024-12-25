@@ -22,7 +22,7 @@ export default async function handler(req, res) {
   const body = await req.body;
   const {isValid, message} = await validateFramesMessage(body)
   console.log('isValid:', isValid)
-  const { time, curators, channels, tags, eco, ecosystem, refresh, retry, start } = req.query;
+  const { time, curators, channels, tags, eco, ecosystem, refresh, retry, start, referrer } = req.query;
   const { untrustedData } = req.body
 
   if (req.method !== 'POST' || !ecosystem || !eco) {
@@ -47,7 +47,7 @@ export default async function handler(req, res) {
     
     console.log('14-3:', req.query)
 
-    let exploreLink = `${baseURL}/~/ecosystems/${ecosystem}?${qs.stringify({ time: 'all', curators })}`
+    let exploreLink = `${baseURL}/~/ecosystems/${ecosystem}?${qs.stringify({ time: 'all', curators, referrer })}`
 
     if (curators) {
       let curatorId = Array.isArray(curators) ? curators[0] : Number(curators);
@@ -60,15 +60,15 @@ export default async function handler(req, res) {
     }
     
 
-    const retryPost = `${baseURL}/api/frames/tip/start?${qs.stringify({ time, curators, eco, ecosystem })}`
+    const retryPost = `${baseURL}/api/frames/tip/start?${qs.stringify({ time, curators, eco, ecosystem, referrer })}`
 
-    const postLink = `${baseURL}/~/ecosystems/${ecosystem}/tip-login?${qs.stringify({ time, curators, eco })}`
+    const postLink = `${baseURL}/~/ecosystems/${ecosystem}/tip-login?${qs.stringify({ time, curators, eco, referrer })}`
 
     const getCastActionPost = `https://warpcast.com/~/add-cast-action?name=%24${eco}+Console&icon=star&actionType=post&postUrl=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Faction%2Fstatus%3Fpoints=${eco}&description=Curate+Casts+with+the+Impact+App`
 
     let button1 = `<meta name="fc:frame:button:1" content="What's /impact?">
     <meta name="fc:frame:button:1:action" content="post">
-    <meta name="fc:frame:button:1:target" content="${baseURL}/api/frames/tip/install?${qs.stringify({ time, curators, eco, ecosystem })}" />`
+    <meta name="fc:frame:button:1:target" content="${baseURL}/api/frames/tip/install?${qs.stringify({ time, curators, eco, ecosystem, referrer })}" />`
     let button2 = `<meta name="fc:frame:button:2" content="Explore curation">
     <meta name="fc:frame:button:2:action" content="link">
     <meta name="fc:frame:button:2:target" content="${exploreLink}" />`

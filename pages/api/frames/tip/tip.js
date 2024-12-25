@@ -22,7 +22,7 @@ export default async function handler(req, res) {
   const body = await req.body;
   const {isValid, message} = await validateFramesMessage(body)
   console.log('isValid:', isValid)
-  const { time, curators, channels, tags, eco, ecosystem, refresh, time1 } = req.query;
+  const { time, curators, channels, tags, eco, ecosystem, refresh, time1, referrer } = req.query;
   const { untrustedData } = req.body
 
   if (req.method !== 'POST' || !ecosystem || !eco) {
@@ -234,19 +234,19 @@ export default async function handler(req, res) {
 
     const impactLink = `https://warpcast.com/abundance/0x43ddd672`
 
-    const retryPost = `${baseURL}/api/frames/tip/start?${qs.stringify({ time, curators, eco, ecosystem })}`
+    const retryPost = `${baseURL}/api/frames/tip/start?${qs.stringify({ time, curators, eco, ecosystem, referrer })}`
 
-    const refreshPost = `${baseURL}/api/frames/tip/refresh?${qs.stringify({ time, curators, eco, ecosystem, time1: timeMinus3 })}`
+    const refreshPost = `${baseURL}/api/frames/tip/refresh?${qs.stringify({ time, curators, eco, ecosystem, time1: timeMinus3, referrer })}`
 
-    const startPost = `${baseURL}/api/frames/tip/start?${qs.stringify({ time, curators, eco, ecosystem })}`
+    const startPost = `${baseURL}/api/frames/tip/start?${qs.stringify({ time, curators, eco, ecosystem, referrer })}`
 
-    const loginUrl = `${baseURL}/?${qs.stringify({ eco: points, referrer: authorFid })}`
+    const loginUrl = `${baseURL}/?${qs.stringify({ eco: points, referrer: referrer || authorFid })}`
 
-    const sendPost = `${baseURL}/api/frames/tip/tip?${qs.stringify({ time, curators, eco, ecosystem })}`
+    const sendPost = `${baseURL}/api/frames/tip/tip?${qs.stringify({ time, curators, eco, ecosystem, referrer })}`
 
-    const postUrl = `${baseURL}/~/ecosystems/${ecosystem}/tip-login?${qs.stringify({ time, curators, eco })}`
+    const postUrl = `${baseURL}/~/ecosystems/${ecosystem}/tip-login?${qs.stringify({ time, curators, eco, referrer })}`
     
-    const autoTipPost = `${baseURL}/api/frames/tip/auto-tip?${qs.stringify({ time, curators, eco, ecosystem })}`
+    const autoTipPost = `${baseURL}/api/frames/tip/auto-tip?${qs.stringify({ time, curators, eco, ecosystem, referrer })}`
 
     let shareText = `I just multi-tipped builders and creators on /impact. Try it out here:`
 
