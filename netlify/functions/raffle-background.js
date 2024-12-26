@@ -20,7 +20,7 @@ exports.handler = async function(event, context) {
   async function updateRaffleScores() {
 
     try {
-      connectToDatabase()
+      await connectToDatabase()
       const oneWeek = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
       const threeDays = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
       const oneDay = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000);
