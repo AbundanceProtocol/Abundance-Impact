@@ -160,7 +160,7 @@ export default async function handler(req, res) {
             ) : showcase?.length == 3 || showcase?.length == 4 ? (
               showcase.map((show, index) => <img key={index} src={show.cast} height={190} style={{display: 'flex', justifyContent: 'center', alignItems: 'center', borderRadius: '10px', border: '2px solid #eee', backgroundColor: '#8363ca', minWidth: '110px', maxWidth: '265px'}} />)
             ) : showcase?.length >= 5 && showcase?.length <= 9 ? (
-              showcase.map((show, index) => <img key={index} src={show.cast} height={125} style={{display: 'flex', justifyContent: 'center', alignItems: 'center', borderRadius: '10px', border: '2px solid #eee', backgroundColor: '#8363ca', minWidth: '65px', maxWidth: '175px'}} />)
+              showcase.map((show, index) => <img key={index} src={show.cast} height={125} style={{display: 'flex', justifyContent: 'center', alignItems: 'center', borderRadius: '10px', border: '2px solid #eee', backgroundColor: '#8363ca', minWidth: '65px', maxWidth: '170px'}} />)
             ) : (
               <div key={index} className='frame-btn'>No casts</div>
             )

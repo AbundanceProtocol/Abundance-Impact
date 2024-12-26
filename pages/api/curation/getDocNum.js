@@ -121,7 +121,7 @@ export default async function handler(req, res) {
         const totalCount = await Cast.countDocuments(query);
         const latestCasts = await Cast.find(query)
           .sort({ createdAt: -1 })
-          .select("cast_hash author_username author_pfp cast_media")
+          .select("cast_hash author_username author_pfp cast_media impact_total cast_hash")
           .limit(9)
           .lean();
         const formattedCasts = latestCasts.map((cast) => ({
@@ -133,6 +133,8 @@ export default async function handler(req, res) {
               : `https://client.warpcast.com/v2/cast-image?castHash=${cast.cast_hash}`,
           username: cast.author_username,
           pfp: cast.author_pfp,
+          impact: cast.impact_total,
+          hash: cast.cast_hash,
         }));
         return { totalCount, latestCasts: formattedCasts };
       } catch (err) {
@@ -141,7 +143,7 @@ export default async function handler(req, res) {
       }
     }
     const { totalCount, latestCasts } = await fetchCasts(query);
-    console.log('totalCount', totalCount)
+    console.log('totalCount', totalCount, latestCasts)
     res.status(200).json({ docs: totalCount, casts: latestCasts, curator: curatorData, 
       message: 'User selection fetched successfully'
     });

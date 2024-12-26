@@ -592,7 +592,9 @@ export async function processTips(userFeed, userFid, tokenData, ecosystem, curat
                 feedItem.cast_media.length > 0 && 
                 feedItem.cast_media[0].content_type.startsWith('image/') 
             ? feedItem.cast_media[0].url
-            : `https://client.warpcast.com/v2/cast-image?castHash=${feedItem.hash}`
+            : `https://client.warpcast.com/v2/cast-image?castHash=${feedItem.hash}`,
+          impact: feedItem?.impact_balance,
+          hash: feedItem?.hash
         };
       }
       return null;
