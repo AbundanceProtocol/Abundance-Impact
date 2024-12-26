@@ -17,5 +17,8 @@
 [functions."test-background"]
   schedule = "35 5 * * *"
 
+[functions."raffle-background"]
+  schedule = "1 4 * * *"
+
 [[plugins]]
   package = "@netlify/plugin-nextjs"
