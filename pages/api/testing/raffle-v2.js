@@ -21,7 +21,7 @@ export default async function handler(req, res) {
     async function getCombinedData() {
       try {
         const impactScoreData = await Raffle.find({ impact_score_3d: { $gte: 0.25 } }, { fid: 1, impact_score_3d: 1 }).lean();
-        
+
         const usernames = await Promise.all(impactScoreData.map(async (item) => {
           const user = await User.findOne({ fid: item.fid.toString() }, { username: 1 }).lean();
           return user ? user.username : 'Unknown User';
@@ -41,7 +41,9 @@ export default async function handler(req, res) {
     
     try {
       let userData = await getCombinedData()
-      userData = userData.filter(user => user.fid !== 9326);
+      if (Array.isArray(userData)) {
+        userData = userData.filter(user => user.fid !== 9326);
+      }
       console.log('adjustedData', userData)
       res.status(200).json({ message: 'nominations, tips', userData });
     } catch (error) {
