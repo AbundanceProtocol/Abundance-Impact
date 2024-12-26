@@ -17,6 +17,9 @@
 [functions."test-background"]
   schedule = "35 5 * * *"
 
+[functions."score-background"]
+  schedule = "55 4 * * *"
+
 [functions."raffle-background"]
   schedule = "40 4 * * *"
 
