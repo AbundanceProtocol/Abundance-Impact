@@ -1,10 +1,10 @@
-import connectToDatabase from "../../../libs/mongodb";
-import EcosystemRules from "../../../models/EcosystemRules";
-import ScheduleTip from "../../../models/ScheduleTip";
-import Quality from "../../../models/Quality";
-import Impact from "../../../models/Impact";
-import User from "../../../models/User";
-import Tip from "../../../models/Tip";
+import connectToDatabase from "../../libs/mongodb";
+import EcosystemRules from "../../models/EcosystemRules";
+import ScheduleTip from "../../models/ScheduleTip";
+import Quality from "../../models/Quality";
+import Impact from "../../models/Impact";
+import User from "../../models/User";
+import Tip from "../../models/Tip";
 
 // const savedCode = process.env.ECOSYSTEM_SECRET;
 
