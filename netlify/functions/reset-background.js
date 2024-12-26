@@ -18,30 +18,31 @@ exports.handler = async function(event, context) {
       const lastDay = new Date(Date.now() - 24 * 60 * 60 * 1000);
       const lastWeek = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
-      const uniqueEcoPoints = await getUniquePoints();
+      // const uniqueEcoPoints = await getUniquePoints();
 
-      console.log('uniqueEcoPoints', uniqueEcoPoints)
+      // console.log('uniqueEcoPoints', uniqueEcoPoints)
 
-      for (const ecoPoints of uniqueEcoPoints) {
+      // for (const ecoPoints of uniqueEcoPoints) {
 
         let ecosystem = null
-        ecosystem = await getEcosystem(ecoPoints);
-        if (!ecosystem) {
-          continue;
-        }
+        ecosystem = await getEcosystem('$IMPACT');
+        // if (!ecosystem) {
+        //   continue;
+        // }
 
         let users = null
-        users = await getUsers(ecoPoints);
-        if (!users) {
-          continue;
-        }
-      
-        await processAllUsersInBatches(users, ecosystem, lastDay, lastWeek, ecoPoints);
-      }
+        users = await getUsers('$IMPACT');
+        // if (!users) {
+        //   continue;
+        // }
+        console.log('users', users)
+
+        await processAllUsersInBatches(users, ecosystem, lastDay, lastWeek, '$IMPACT');
+      // }
 
       console.log('Processing complete')
 
-      return uniqueEcoPoints
+      // return uniqueEcoPoints
 
     } catch (error) {
       console.error('Background processing error:', error);
