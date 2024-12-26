@@ -12,7 +12,7 @@
   schedule = "40 22 * * *"
 
 [functions."reset-background"]
-  schedule = "35 5 * * *"
+  schedule = "1 5 * * *"
 
 [functions."test-background"]
   schedule = "35 5 * * *"
