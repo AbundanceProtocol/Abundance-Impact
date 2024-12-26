@@ -25,7 +25,7 @@ exports.handler = async function(event, context) {
 
       const oneMonth = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
       // const oneWeek = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-      // const threeDays = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
+      const threeDays = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
       // const oneDay = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000);
 
       const uniqueCuratorFids = await Impact.distinct('curator_fid', { createdAt: { $gte: threeDays } });
