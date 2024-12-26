@@ -25,6 +25,7 @@ const circleSchema = new mongoose.Schema({
       username: { type: String, default: null },
       pfp: { type: String, default: null },
       impact: Number,
+      hash: { type: String, default: null },
     },
   ],
   type: { type: String, index: true },
