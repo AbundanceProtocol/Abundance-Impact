@@ -44,6 +44,7 @@ export default async function handler(req, res) {
 
     let {showcase, curator, timeframe, channels} = await getCircle(id);
 
+    console.log('curator', curator)
 
 
 
