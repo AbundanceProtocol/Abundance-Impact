@@ -44,9 +44,6 @@ export default async function handler(req, res) {
 
     let {showcase, curator, timeframe, channels} = await getCircle(id);
 
-    console.log('curator', curator)
-
-
 
     let time = 'all time'
     if (timeframe == '24h') {
@@ -90,7 +87,7 @@ export default async function handler(req, res) {
 
           <div style={{display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '1px solid #eeeeeeaa', borderRadius: '88px', padding: '3px 10px 3px 3px', background: '#eeeeeeaa', width: 'auto', margin: '0 5px 0 0'}}>
             {curator.length > 0 && curator[0]?.pfp && curator[0]?.pfp !== null && (<img src={curator[0]?.pfp} width={40} height={40} style={{borderRadius: '80px', border: '2px solid #eee', backgroundColor: '#8363ca'}} />)}
-            <div style={{display: 'flex', textAlign: 'center', color: '#220a4d', fontSize: '22px', margin: '0'}}>{curator && curator[0]?.username !== null ? `@${curator[0]?.username}` : ' Ecosystem'}</div>
+            <div style={{display: 'flex', textAlign: 'center', color: '#220a4d', fontSize: '22px', margin: '0'}}>{curator?.length > 0 && curator[0]?.username !== null ? `@${curator[0]?.username}` : ' Ecosystem'}</div>
           </div>
 
           <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '22px', margin: '0', padding: '0'}}>impact picks</div>

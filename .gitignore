@@ -10,6 +10,7 @@
 /coverage
 temp.js
 pages/temp.js
+/pages/api/testing
 
 # next.js
 /.next/
