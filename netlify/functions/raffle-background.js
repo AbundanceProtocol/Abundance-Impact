@@ -25,11 +25,11 @@ exports.handler = async function(event, context) {
       const threeDays = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
       const oneDay = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000);
 
-      const uniqueCuratorFids = await Impact.distinct('curator_fid', { createdAt: { $gte: threeDays } });
+      const uniqueCuratorFids = await Impact.distinct('curator_fid', { createdAt: { $gte: oneWeek } });
 
-      const uniqueQualityFids = await Quality.distinct('curator_fid', { createdAt: { $gte: threeDays } });
+      const uniqueQualityFids = await Quality.distinct('curator_fid', { createdAt: { $gte: oneWeek } });
 
-      const uniqueTipperFids = await Tip.distinct('tipper_fid', { createdAt: { $gte: threeDays } });
+      const uniqueTipperFids = await Tip.distinct('tipper_fid', { createdAt: { $gte: oneWeek } });
 
       const mergedFids = [...new Set([...uniqueCuratorFids, ...uniqueQualityFids, ...uniqueTipperFids])];
 
