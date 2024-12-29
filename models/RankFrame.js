@@ -45,8 +45,8 @@ const rankFrameSchema = new mongoose.Schema({
   creator_points_7d_rank: { type: Number, default: 0, index: true },
   promotion_points_7d: { type: Number, default: 0, index: true },
   promotion_points_7d_rank: { type: Number, default: 0, index: true },
-  raffle_score: { type: Number, default: 0, index: true },
   raffle_tickets: { type: Number, default: 0, index: true },
+  raffle_score: { type: Number, default: 0, index: true },
   impact_score_7d: { type: Number, default: 0, index: true },
   impact_score_7d_rank: { type: Number, default: 0, index: true },
   createdAt: { type: Date, default: () => new Date() }
