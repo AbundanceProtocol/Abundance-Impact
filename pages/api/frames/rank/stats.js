@@ -51,28 +51,28 @@ export default async function handler(req, res) {
     }
 
     async function followingChannel(fid) {
+      const channelOptions = {
+        method: 'GET',
+        headers: {accept: 'application/json'}
+      };
       try {
-        const url = `https://api.neynar.com/v2/farcaster/channel/member/list?channel_id=impact&fid=${fid}&limit=3`;
-        const options = {
-          method: 'GET',
-          headers: {
-            accept: 'application/json',
-            'x-neynar-experimental': 'false',
-            'x-api-key': apiKey
-          }
-        };
-
-        const followers = await fetch(url, options)
-        const followerInfo = await followers.json();
-        console.log(followerInfo?.members?.length)
-
-        if (followerInfo?.members?.length > 0) {
+        const channelData = await fetch(`https://api.warpcast.com/v1/user-channel?fid=${fid}&channelId=impact`, channelOptions);
+        if (!channelData.ok) {
           return true
         } else {
-          return false
+          const channelInfo = await channelData.json();
+          if (channelInfo && channelInfo?.result) {
+            let following = channelInfo.result?.following
+            if (!following) {
+              return false
+            } else {
+              return true
+            }
+          }
         }
       } catch (error) {
-        return false
+        console.error(`Error getting follower info: `, error)
+        return true
       }
     }
 
@@ -279,29 +279,29 @@ export default async function handler(req, res) {
     
     try {
 
-      // const isFollowing = await followingChannel(fid)
+      const isFollowing = await followingChannel(fid)
       
       const {username, user_pfp} = await getSigner(fid)
   
-      if (!username) {
+      if (!username && !isFollowing) {
         res.setHeader('Content-Type', 'application/json');
         res.status(400).json({ 
           message: 'Need to login app & follow /impact'
         });
         return;
-      // } else if (!username) {
-      //   res.setHeader('Content-Type', 'application/json');
-      //   res.status(400).json({ 
-      //     message: 'Need to login app'
-      //   });
-      //   return;
-      // } else if (!isFollowing) {
-      //   res.setHeader('Content-Type', 'application/json');
-      //   res.status(400).json({ 
-      //     message: 'Need to follow /impact'
-      //   });
-      //   return;
-      } else if (username) {
+      } else if (!username) {
+        res.setHeader('Content-Type', 'application/json');
+        res.status(400).json({ 
+          message: 'Need to login app'
+        });
+        return;
+      } else if (!isFollowing) {
+        res.setHeader('Content-Type', 'application/json');
+        res.status(400).json({ 
+          message: 'Need to follow /impact'
+        });
+        return;
+      } else if (username && isFollowing) {
 
         async function getUserStats(fid) {
           try {
