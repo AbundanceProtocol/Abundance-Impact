@@ -119,7 +119,7 @@ export default async function handler(req, res) {
             <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start', gap: '0.0rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '0'}}>
 
               <div style={{display: 'flex', flexDirection: 'column', color: 'black', alignItems: 'center', justifyContent: 'flex-start', gap: '0.15rem', border: '0px solid #eeeeeeaa', borderRadius: '16px', padding: '3px 5px', margin: '0', width: 'auto'}}>
-                <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '20px', margin: '0'}}>{`My Top Contributors:`}</div>
+                <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '20px', margin: '0'}}>{`My Top Supporters:`}</div>
                 <div style={{display: 'flex', textAlign: 'center', color: '#dee', fontSize: '14px', margin: '0'}}>{`($degen)`}</div>
               </div>
 
