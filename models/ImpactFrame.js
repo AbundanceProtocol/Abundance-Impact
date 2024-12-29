@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const rankFrameSchema = new mongoose.Schema({
+const impactFrameSchema = new mongoose.Schema({
   fid: Number,
   pfp: String,
   username: String,
@@ -23,8 +23,6 @@ const rankFrameSchema = new mongoose.Schema({
   points: { type: String, default: '$IMPACT', index: true }, 
   degen_received_all: { type: Number, default: 0, index: true },
   ham_received_all: { type: Number, default: 0, index: true },
-  // degen_received_7d: { type: Number, default: 0, index: true },
-  // ham_received_7d: { type: Number, default: 0, index: true },
   degen_tip_all: { type: Number, default: 0, index: true },
   degen_tip_all_rank: { type: Number, default: 0, index: true },
   ham_tip_all: { type: Number, default: 0, index: true },
@@ -35,23 +33,11 @@ const rankFrameSchema = new mongoose.Schema({
   creator_points_all_rank: { type: Number, default: 0, index: true },
   impact_score_all: { type: Number, default: 0, index: true },
   impact_score_all_rank: { type: Number, default: 0, index: true },
-  // degen_tip_7d: { type: Number, default: 0, index: true },
-  // degen_tip_7d_rank: { type: Number, default: 0, index: true },
-  // ham_tip_7d: { type: Number, default: 0, index: true },
-  // ham_tip_7d_rank: { type: Number, default: 0, index: true },
-  // curator_points_7d: { type: Number, default: 0, index: true },
-  // curator_points_7d_rank: { type: Number, default: 0, index: true },
-  // creator_points_7d: { type: Number, default: 0, index: true },
-  // creator_points_7d_rank: { type: Number, default: 0, index: true },
-  // promotion_points_7d: { type: Number, default: 0, index: true },
-  // promotion_points_7d_rank: { type: Number, default: 0, index: true },
   raffle_tickets: { type: Number, default: 0, index: true },
   raffle_score: { type: Number, default: 0, index: true },
-  // impact_score_7d: { type: Number, default: 0, index: true },
-  // impact_score_7d_rank: { type: Number, default: 0, index: true },
   createdAt: { type: Date, default: () => new Date() }
 });
 
-const RankFrame = mongoose.models.RankFrame || mongoose.model('RankFrame', rankFrameSchema);
+const ImpactFrame = mongoose.models.ImpactFrame || mongoose.model('ImpactFrame', impactFrameSchema);
 
-export default RankFrame;
+export default ImpactFrame;
