@@ -279,29 +279,29 @@ export default async function handler(req, res) {
     
     try {
 
-      const isFollowing = await followingChannel(fid)
+      // const isFollowing = await followingChannel(fid)
       
       const {username, user_pfp} = await getSigner(fid)
   
-      if (!username && !isFollowing) {
+      if (!username) {
         res.setHeader('Content-Type', 'application/json');
         res.status(400).json({ 
           message: 'Need to login app & follow /impact'
         });
         return;
-      } else if (!username) {
-        res.setHeader('Content-Type', 'application/json');
-        res.status(400).json({ 
-          message: 'Need to login app'
-        });
-        return;
-      } else if (!isFollowing) {
-        res.setHeader('Content-Type', 'application/json');
-        res.status(400).json({ 
-          message: 'Need to follow /impact'
-        });
-        return;
-      } else if (username && isFollowing) {
+      // } else if (!username) {
+      //   res.setHeader('Content-Type', 'application/json');
+      //   res.status(400).json({ 
+      //     message: 'Need to login app'
+      //   });
+      //   return;
+      // } else if (!isFollowing) {
+      //   res.setHeader('Content-Type', 'application/json');
+      //   res.status(400).json({ 
+      //     message: 'Need to follow /impact'
+      //   });
+      //   return;
+      } else if (username) {
 
         async function getUserStats(fid) {
           try {
