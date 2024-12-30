@@ -21,9 +21,17 @@ exports.handler = async function(event, context) {
 
     try {
       await connectToDatabase()
-      const oneWeek = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-      const threeDays = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
       const oneDay = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000);
+      const threeDays = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
+      const oneWeek = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+      const oneDayShift = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
+      const threeDaysShift = new Date(Date.now() - 4 * 24 * 60 * 60 * 1000);
+      const oneWeekShift = new Date(Date.now() - 8 * 24 * 60 * 60 * 1000);
+
+      const oneDayFrame = { $gte: oneDayShift, $lte: oneDay }
+      const threeDaysFrame = { $gte: threeDaysShift, $lte: oneDay }
+      const oneWeekFrame = { $gte: oneWeekShift, $lte: oneDay }
 
       const uniqueCuratorFids = await Impact.distinct('curator_fid', { createdAt: { $gte: oneWeek } });
 
@@ -42,9 +50,9 @@ exports.handler = async function(event, context) {
 
       for (const userFid of mergedFids) {
 
-        const userdata_7d = await getUserData(userFid, oneWeek);
-        const userdata_3d = await getUserData(userFid, threeDays);
-        const userdata_24h = await getUserData(userFid, oneDay);
+        const userdata_7d = await getUserData(userFid, oneWeekFrame);
+        const userdata_3d = await getUserData(userFid, threeDaysFrame);
+        const userdata_24h = await getUserData(userFid, oneDayFrame);
 
         const update = {
           $set: {
@@ -109,9 +117,9 @@ async function getUserData(fid, time) {
     tipperQuery.points = '$IMPACT'
 
     if (time) {
-      curatorQuery.createdAt = { $gte: time }
+      curatorQuery.createdAt = time
       // creatorQuery.createdAt = { $gte: time }
-      tipperQuery.createdAt = { $gte: time }
+      tipperQuery.createdAt = time
     }
     
     const curatorImpact = await Impact.aggregate([
