@@ -13,7 +13,6 @@ import qs from "querystring";
 import { getTimeRange } from '../../../utils/utils';
 import Spinner from '../../../components/Common/Spinner';
 // import Circle from '../../../models/Circle';
-
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 
 export default function MultiTip() {
@@ -24,20 +23,15 @@ export default function MultiTip() {
   const [screenHeight, setScreenHeight] = useState(undefined)
   const [textMax, setTextMax] = useState('562px')
   const [feedMax, setFeedMax ] = useState('620px')
-
   const router = useRouter()
-
   const [modal, setModal] = useState({on: false, success: false, text: ''})
-
   const initialSubmit = {pass: false, target: null}
   const [submitCheck, setSubmitCheck] = useState(initialSubmit)
-
   const [frameTime, setFrameTime] = useState({frame: '7 Days', url: '7d', isSet: 'working', condition: '7d'})
   const [sched, setSched] = useState({curators: false})
   const [frameCurators, setFrameCurators] = useState({frame: [9326], url: [9326], isSet: 'working', condition: 'abundance'})
   const [frameEcosystem, setFrameEcosystem] = useState({frame: 'abundance', url: 'abundance', eco: 'IMPACT', isSet: 'working', condition: 'abundance'})
   const [loading, setLoading] = useState(false)
-
   const initEcosystems = [
     { value: 'abundance', label: 'Abundance ecosystem' , eco: 'IMPACT'},
   ]
@@ -57,7 +51,6 @@ export default function MultiTip() {
     { value: 'abundance', label: '@abundance', fid: 9326 },
   ]
   const [curatorOptions, setCuratorOptions] = useState(initCurators)
-  
   const timeframe = [
     { value: 'none', label: 'Choose timeframe' },
     { value: '24h', label: '24 Hours' },
@@ -298,7 +291,6 @@ export default function MultiTip() {
       }
     } catch (error) {
       console.error('Error creating post:', error);
-      setCuratorOptions(updatedCurators);
     }
   }
 
