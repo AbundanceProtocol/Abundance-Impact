@@ -242,7 +242,7 @@ async function getDegenAllowance(fid) {
     const dayOfMonth = today.getDate();
     // console.log(fid, data[0], Number(data[0]?.remaining_tip_allowance))
     if (data && data[0]?.remaining_tip_allowance) {
-      if (Number(data[0]?.remaining_tip_allowance) >= 0 && (dayOfMonth % 3 == Number(fid) % 3)) {
+      if (Number(data[0]?.remaining_tip_allowance) >= 0 && (Number(dayOfMonth) % 2 == Number(fid) % 2)) {
         return Number(data[0]?.remaining_tip_allowance) || 0
       } else {
         return 0
