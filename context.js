@@ -145,6 +145,8 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
       router.route !== "/~/ecosystems/[ecosystem]/tip-share" &&
       router.route !== "/~/ecosystems/[ecosystem]/tip-share-v2" &&
       router.route !== "/~/ecosystems/[ecosystem]/tip-share-v3" &&
+      router.route !== "/~/ecosystems/[ecosystem]/rank-v1" &&
+      router.route !== "/~/ecosystems/[ecosystem]/curation-v1" &&
       router.route !== "/~/studio/multi-tip-compose"
     ) {
       console.log("c5 triggered []");
@@ -175,6 +177,8 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
       router.route !== "/~/ecosystems/[ecosystem]/tip-share" &&
       router.route !== "/~/ecosystems/[ecosystem]/tip-share-v2" &&
       router.route !== "/~/ecosystems/[ecosystem]/tip-share-v3" &&
+      router.route !== "/~/ecosystems/[ecosystem]/rank-v1" &&
+      router.route !== "/~/ecosystems/[ecosystem]/curation-v1" &&
       router.route !== "/~/studio/multi-tip-compose"
     ) {
       if (sched.ecoData) {
@@ -224,6 +228,8 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
       router.route !== "/~/ecosystems/[ecosystem]/tip-share" &&
       router.route !== "/~/ecosystems/[ecosystem]/tip-share-v2" &&
       router.route !== "/~/ecosystems/[ecosystem]/tip-share-v3" &&
+      router.route !== "/~/ecosystems/[ecosystem]/rank-v1" &&
+      router.route !== "/~/ecosystems/[ecosystem]/curation-v1" &&
       router.route !== "/~/studio/multi-tip-compose" &&
       !miniApp
     ) {

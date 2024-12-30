@@ -32,26 +32,9 @@ export default async function handler(req, res) {
     // console.log('at2 login', login, needLogin)
 
 
-    async function getCircle(id) {
-      try {
-        const objectId = new mongoose.Types.ObjectId(id)
-        console.log(id)
-        await connectToDatabase();
-        let circle = await Circle.findOne({ _id: objectId }).exec();
-        if (circle) {
-          return {circles: circle.circles, text: circle.text, username: circle.username, showcase: circle.showcase, userPfp: circle.user_pfp || null, curator: circle.curator || [], timeframe: circle.time || '', channels: circle.channels || []}
-        } else {
-          return {circles: [], text: '', username: '', showcase: [], userPfp: null, curator: [], timeframe: '', channels: []}
-        }
-      } catch (error) {
-        console.error("Error while fetching casts:", error);
-        return {circles: [], text: '', username: '', showcase: [], userPfp: null, curator: [], timeframe: '', channels: []}
-      }  
+    if (showcase?.length > 0 && showcase[0]?.impact) {
+      showcase.sort((a, b) => b.impact - a.impact);
     }
-
-    // let {showcase, curator, timeframe, channels} = await getCircle(id);
-
-
 
 
     let time = 'all time'
@@ -176,18 +159,37 @@ export default async function handler(req, res) {
 
           <div style={{gap: '0.5rem', display: 'flex', flexWrap: 'wrap', justifyContent: 'center', flexDirection: 'row'}}>
           
-            {showcase?.length == 0 ? (
-              <div style={{height: '130px'}}>No casts</div>
-            ) : showcase?.length == 1 ? (
+          {showcase?.length == 0 ? (
+              <div style={{height: '130px', color: '#fff', fontSize: '17px'}}>No casts</div>
+            ) : showcase?.length == 1 ? (<div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', minWidth: '180px', maxWidth: '560px', position: 'relative'}}>
               <img src={showcase[0].cast} height={390} style={{display: 'flex', justifyContent: 'center', alignItems: 'center', borderRadius: '10px', border: '2px solid #eee', backgroundColor: '#8363ca', minWidth: '180px', maxWidth: '560px'}} />
+              {showcase[0]?.impact && (<div style={{position: 'absolute', bottom: 0, right: 0, transform: 'translate(-0%, -0%)', backgroundColor: '#86c', color: '#fff', fontSize: '15px', padding: '2px 4px', borderRadius: '3px' }}>
+                {showcase[0].impact.toString()}
+              </div>)}
+            </div>
             ) : showcase?.length == 2 ? (
-              showcase.map((show, index) => <img key={index} src={show.cast} height={210} style={{display: 'flex', justifyContent: 'center', alignItems: 'center', borderRadius: '10px', border: '2px solid #eee', backgroundColor: '#8363ca', minWidth: '110px', maxWidth: '265px'}} />)
+              showcase.map((show, index) => (<div key={index} style={{display: 'flex', justifyContent: 'center', alignItems: 'center', minWidth: '110px', maxWidth: '265px', position: 'relative'}}>
+                <img src={show.cast} height={210} style={{display: 'flex', justifyContent: 'center', alignItems: 'center', borderRadius: '10px', border: '2px solid #eee', backgroundColor: '#8363ca', minWidth: '110px', maxWidth: '265px'}} />
+                {show?.impact && (<div style={{position: 'absolute', bottom: 0, right: 0, transform: 'translate(-0%, -0%)', backgroundColor: '#86c', color: '#fff', fontSize: '15px', padding: '2px 4px', borderRadius: '3px' }}>
+                  {show.impact.toString()}
+                </div>)}
+              </div>))
             ) : showcase?.length == 3 || showcase?.length == 4 ? (
-              showcase.map((show, index) => <img key={index} src={show.cast} height={190} style={{display: 'flex', justifyContent: 'center', alignItems: 'center', borderRadius: '10px', border: '2px solid #eee', backgroundColor: '#8363ca', minWidth: '110px', maxWidth: '265px'}} />)
+              showcase.map((show, index) => (<div key={index} style={{display: 'flex', justifyContent: 'center', alignItems: 'center', minWidth: '110px', maxWidth: '265px', position: 'relative'}}>
+                <img src={show.cast} height={190} style={{display: 'flex', justifyContent: 'center', alignItems: 'center', borderRadius: '10px', border: '2px solid #eee', backgroundColor: '#8363ca', minWidth: '110px', maxWidth: '265px'}} />
+                {show?.impact && (<div style={{position: 'absolute', bottom: 0, right: 0, transform: 'translate(-0%, -0%)', backgroundColor: '#86c', color: '#fff', fontSize: '15px', padding: '2px 4px', borderRadius: '3px' }}>
+                  {show.impact.toString()}
+                </div>)}
+              </div>))
             ) : showcase?.length >= 5 && showcase?.length <= 9 ? (
-              showcase.map((show, index) => <img key={index} src={show.cast} height={125} style={{display: 'flex', justifyContent: 'center', alignItems: 'center', borderRadius: '10px', border: '2px solid #eee', backgroundColor: '#8363ca', minWidth: '65px', maxWidth: '170px'}} />)
+              showcase.map((show, index) => (<div key={index} style={{display: 'flex', justifyContent: 'center', alignItems: 'center', minWidth: '65px', maxWidth: '170px', position: 'relative'}}>
+                <img src={show.cast} height={125} style={{display: 'flex', justifyContent: 'center', alignItems: 'center', borderRadius: '10px', border: '2px solid #eee', backgroundColor: '#8363ca', minWidth: '65px', maxWidth: '170px'}} />
+                {show?.impact && (<div style={{position: 'absolute', bottom: 0, right: 0, transform: 'translate(-0%, -0%)', backgroundColor: '#86c', color: '#fff', fontSize: '15px', padding: '2px 4px', borderRadius: '3px' }}>
+                  {show.impact.toString()}
+                </div>)}
+              </div>))
             ) : (
-              <div key={index} className='frame-btn'>No casts</div>
+              <div key={index} className='frame-btn' style={{color: '#fff', fontSize: '17px'}}>No casts</div>
             )
             
             }

@@ -582,7 +582,7 @@ export async function processTips(userFeed, userFid, tokenData, ecosystem, curat
   
     // console.log("finalTips", finalTips.length, finalTips);
 
-    const showcase = finalTips.map(tip => {
+    let showcase = finalTips.map(tip => {
       const feedItem = userFeed.find(feed => feed.hash === tip.castHash);
       if (feedItem) {
         return {
@@ -600,7 +600,9 @@ export async function processTips(userFeed, userFid, tokenData, ecosystem, curat
       return null;
     }).filter(item => item !== null);
 
-    console.log("showcase", showcase);
+    if (showcase?.length > 0 && showcase[0]?.impact) {
+      showcase.sort((a, b) => b.impact - a.impact);
+    }
     
     const circle = finalTips.map(finalTip => {
       const feedItem = userFeed.find(feedItem => feedItem.author.fid === finalTip.fid);

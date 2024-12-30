@@ -188,12 +188,19 @@ export default function MultiTip() {
         console.log("casts", docData?.data?.curator);
         setDocNum(docData?.data?.docs)
         setCuratorData(docData?.data?.curator);
-        setShowcase(docData?.data?.casts);
+        let showcaseData = []
+        if (docData?.data?.casts?.length > 0) {
+          showcaseData = docData?.data?.casts
+          if (showcaseData?.length > 0 && showcaseData[0]?.impact) {
+            showcaseData.sort((a, b) => b.impact - a.impact);
+          }
+        }
+        setShowcase(showcaseData);
         updateImage(
           docData?.data?.curator,
           channels,
           time,
-          docData?.data?.casts,
+          showcaseData,
           docData?.data?.docs
         );
       } else {

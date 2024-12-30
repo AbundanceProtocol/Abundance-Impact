@@ -44,6 +44,10 @@ export default async function handler(req, res) {
 
     let {showcase, curator, timeframe, channels} = await getCircle(id);
 
+    if (showcase?.length > 0 && showcase[0]?.impact) {
+      showcase.sort((a, b) => b.impact - a.impact);
+    }
+
 
     let time = 'all time'
     if (timeframe == '24h') {
@@ -117,19 +121,6 @@ export default async function handler(req, res) {
             <div style={{display: 'flex', textAlign: 'center', color: '#220a4d', fontSize: '18px', margin: '0'}}>{`${channels?.length > 0 && channels[0] !== ' ' && channels[0] !== null ? '/' + channels[0] : 'all channels'}`}</div>
           </div>
 
-
-
-
-          {/* <div style={{display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '1px solid #eeeeeeaa', borderRadius: '16px', padding: '3px 10px', margin: '0', background: '#eeeeeeaa', width: 'auto'}}>
-            <div style={{display: 'flex', textAlign: 'center', color: '#220a4d', fontSize: '18px', margin: '0'}}>{text}</div>
-          </div>
-
-          <div style={{display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', borderRadius: '16px', padding: '3px 5px', margin: '0', width: 'auto'}}>
-            <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '18px', margin: '0'}}>{`to ${numToText(showcase?.length)} creator`}{showcase?.length > 1 && `s`}</div>
-          </div> */}
-
-
-
         </div>
  
 
@@ -149,18 +140,37 @@ export default async function handler(req, res) {
 
           <div style={{gap: '0.5rem', display: 'flex', flexWrap: 'wrap', justifyContent: 'center', flexDirection: 'row'}}>
           
-            {showcase?.length == 0 ? (
-              <div style={{height: '130px'}}>No casts</div>
-            ) : showcase?.length == 1 ? (
+          {showcase?.length == 0 ? (
+              <div style={{height: '130px', color: '#fff', fontSize: '17px'}}>No casts</div>
+            ) : showcase?.length == 1 ? (<div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', minWidth: '180px', maxWidth: '560px', position: 'relative'}}>
               <img src={showcase[0].cast} height={390} style={{display: 'flex', justifyContent: 'center', alignItems: 'center', borderRadius: '10px', border: '2px solid #eee', backgroundColor: '#8363ca', minWidth: '180px', maxWidth: '560px'}} />
+              {showcase[0]?.impact && (<div style={{position: 'absolute', bottom: 0, right: 0, transform: 'translate(-0%, -0%)', backgroundColor: '#86c', color: '#fff', fontSize: '15px', padding: '2px 4px', borderRadius: '3px' }}>
+                {showcase[0].impact.toString()}
+              </div>)}
+            </div>
             ) : showcase?.length == 2 ? (
-              showcase.map((show, index) => <img key={index} src={show.cast} height={210} style={{display: 'flex', justifyContent: 'center', alignItems: 'center', borderRadius: '10px', border: '2px solid #eee', backgroundColor: '#8363ca', minWidth: '110px', maxWidth: '265px'}} />)
+              showcase.map((show, index) => (<div key={index} style={{display: 'flex', justifyContent: 'center', alignItems: 'center', minWidth: '110px', maxWidth: '265px', position: 'relative'}}>
+                <img src={show.cast} height={210} style={{display: 'flex', justifyContent: 'center', alignItems: 'center', borderRadius: '10px', border: '2px solid #eee', backgroundColor: '#8363ca', minWidth: '110px', maxWidth: '265px'}} />
+                {show?.impact && (<div style={{position: 'absolute', bottom: 0, right: 0, transform: 'translate(-0%, -0%)', backgroundColor: '#86c', color: '#fff', fontSize: '15px', padding: '2px 4px', borderRadius: '3px' }}>
+                  {show.impact.toString()}
+                </div>)}
+              </div>))
             ) : showcase?.length == 3 || showcase?.length == 4 ? (
-              showcase.map((show, index) => <img key={index} src={show.cast} height={190} style={{display: 'flex', justifyContent: 'center', alignItems: 'center', borderRadius: '10px', border: '2px solid #eee', backgroundColor: '#8363ca', minWidth: '110px', maxWidth: '265px'}} />)
+              showcase.map((show, index) => (<div key={index} style={{display: 'flex', justifyContent: 'center', alignItems: 'center', minWidth: '110px', maxWidth: '265px', position: 'relative'}}>
+                <img src={show.cast} height={190} style={{display: 'flex', justifyContent: 'center', alignItems: 'center', borderRadius: '10px', border: '2px solid #eee', backgroundColor: '#8363ca', minWidth: '110px', maxWidth: '265px'}} />
+                {show?.impact && (<div style={{position: 'absolute', bottom: 0, right: 0, transform: 'translate(-0%, -0%)', backgroundColor: '#86c', color: '#fff', fontSize: '15px', padding: '2px 4px', borderRadius: '3px' }}>
+                  {show.impact.toString()}
+                </div>)}
+              </div>))
             ) : showcase?.length >= 5 && showcase?.length <= 9 ? (
-              showcase.map((show, index) => <img key={index} src={show.cast} height={125} style={{display: 'flex', justifyContent: 'center', alignItems: 'center', borderRadius: '10px', border: '2px solid #eee', backgroundColor: '#8363ca', minWidth: '65px', maxWidth: '170px'}} />)
+              showcase.map((show, index) => (<div key={index} style={{display: 'flex', justifyContent: 'center', alignItems: 'center', minWidth: '65px', maxWidth: '170px', position: 'relative'}}>
+                <img src={show.cast} height={125} style={{display: 'flex', justifyContent: 'center', alignItems: 'center', borderRadius: '10px', border: '2px solid #eee', backgroundColor: '#8363ca', minWidth: '65px', maxWidth: '170px'}} />
+                {show?.impact && (<div style={{position: 'absolute', bottom: 0, right: 0, transform: 'translate(-0%, -0%)', backgroundColor: '#86c', color: '#fff', fontSize: '15px', padding: '2px 4px', borderRadius: '3px' }}>
+                  {show.impact.toString()}
+                </div>)}
+              </div>))
             ) : (
-              <div key={index} className='frame-btn'>No casts</div>
+              <div key={index} className='frame-btn' style={{color: '#fff', fontSize: '17px'}}>No casts</div>
             )
             
             }
