@@ -35,7 +35,7 @@ export default function Curators() {
   // const [jobScheduled, setJobScheduled] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [ecoPoints, setEcoPoints] = useState(null)
-  const [timeframe, setTimeframe] = useState('24h')
+  const [timeframe, setTimeframe] = useState('3d')
   const [page, setPage] = useState(1)
   const { ecosystem } = router.query;
   const [sched, setSched] = useState({autotip: false, setPoints: false})
@@ -44,7 +44,7 @@ export default function Curators() {
     // const { trigger } = router.query;
     console.log('points', points, page)
     function updatePoints() {
-      setTimeframe('24h')
+      setTimeframe('3d')
       if (points) {
         setEcoPoints(points)
       } else {

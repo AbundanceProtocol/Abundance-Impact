@@ -367,7 +367,7 @@ export async function processTips(userFeed, userFid, tokenData, ecosystem, curat
 
   } else {
 
-    // console.log(userFeed)
+    // console.log("userFeed", userFeed.length, userFeed);
   
     let casts = filterObjects(userFeed, userFid)
   
@@ -580,8 +580,30 @@ export async function processTips(userFeed, userFid, tokenData, ecosystem, curat
   
     let finalTips = cleanTips.filter(cast => cast.text.length > 0)
   
-    // console.log('finalTips', userFid, finalTips)
+    // console.log("finalTips", finalTips.length, finalTips);
 
+    let showcase = finalTips.map(tip => {
+      const feedItem = userFeed.find(feed => feed.hash === tip.castHash);
+      if (feedItem) {
+        return {
+          pfp: feedItem.author.pfp_url,
+          username: feedItem.author.username,
+          cast: feedItem.cast_media && 
+                feedItem.cast_media.length > 0 && 
+                feedItem.cast_media[0].content_type.startsWith('image/') 
+            ? feedItem.cast_media[0].url
+            : `https://client.warpcast.com/v2/cast-image?castHash=${feedItem.hash}`,
+          impact: feedItem?.impact_balance,
+          hash: feedItem?.hash
+        };
+      }
+      return null;
+    }).filter(item => item !== null);
+
+    if (showcase?.length > 0 && showcase[0]?.impact) {
+      showcase.sort((a, b) => b.impact - a.impact);
+    }
+    
     const circle = finalTips.map(finalTip => {
       const feedItem = userFeed.find(feedItem => feedItem.author.fid === finalTip.fid);
       if (feedItem) {
@@ -602,7 +624,7 @@ export async function processTips(userFeed, userFid, tokenData, ecosystem, curat
 
     let uniqueUsernames = usernames.filter((username, index, self) => self.indexOf(username) === index);
 
-    return { castData: finalTips, coinTotals: coinTotals, circle, pfps: uniquePfPs, usernames: uniqueUsernames || [] }
+    return { castData: finalTips, coinTotals: coinTotals, circle, pfps: uniquePfPs, usernames: uniqueUsernames || [], showcase: showcase || [] }
   }
 }
 

@@ -21,17 +21,29 @@ export default function ProfilePage() {
 
   async function getCuratorData() {
     try {
-      const response = await axios.get('/api/testing/raffle')
+      const response = await axios.get('/api/curation/raffle-v2')
       if (response?.data) {
         const userData = response?.data?.userData
-
+        console.log('userData', userData)
         let username = []
 
         for (const user of userData) {
-          for (let i = 0; i < user.total; i = i + 10) {
+          for (let i = 0; i < user.impact_score_3d; i = i + 1) {
             username.push(user.username)
           }
         }
+
+      // const response = await axios.get('/api/testing/raffle')
+      // if (response?.data) {
+      //   const userData = response?.data?.userData
+
+      //   let username = []
+
+      //   for (const user of userData) {
+      //     for (let i = 0; i < user.total; i = i + 10) {
+      //       username.push(user.username)
+      //     }
+      //   }
 
 
         setData(username)

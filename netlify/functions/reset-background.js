@@ -1,10 +1,10 @@
-import connectToDatabase from "../../../libs/mongodb";
-import EcosystemRules from "../../../models/EcosystemRules";
-import ScheduleTip from "../../../models/ScheduleTip";
-import Quality from "../../../models/Quality";
-import Impact from "../../../models/Impact";
-import User from "../../../models/User";
-import Tip from "../../../models/Tip";
+import connectToDatabase from "../../libs/mongodb";
+import EcosystemRules from "../../models/EcosystemRules";
+import ScheduleTip from "../../models/ScheduleTip";
+import Quality from "../../models/Quality";
+import Impact from "../../models/Impact";
+import User from "../../models/User";
+import Tip from "../../models/Tip";
 
 // const savedCode = process.env.ECOSYSTEM_SECRET;
 
@@ -125,7 +125,7 @@ async function getTipValue(fid, points, lastDay) {
   }
 }
 
-async function getVoteBalance(fid, points, lastDay, lastWeek) {
+async function getVoteBalance(fid, points, lastDay, lastWeek, ecosystem) {
   try {
     await connectToDatabase();
     const castHashes = await Impact.find({curator_fid: fid, createdAt: { $gte: lastWeek } }).select('target_cast_hash').exec();
@@ -153,7 +153,7 @@ async function processUsersBatch(users, ecosystem, lastDay, lastWeek, ecoPoints)
       }
 
       if (ecosystem.upvote_value && ecosystem.downvote_value) {
-        const voteBalance = await getVoteBalance(user.fid, ecoPoints, lastDay, lastWeek);
+        const voteBalance = await getVoteBalance(user.fid, ecoPoints, lastDay, lastWeek, ecosystem);
         userBonus += voteBalance;
       }
 

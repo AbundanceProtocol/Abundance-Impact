@@ -26,10 +26,10 @@ export default async function handler(req, res) {
   const {isValid, message} = await validateFramesMessage(body)
 
   const { untrustedData } = req.body
-  const { time, curators, eco, ecosystem } = req.query;
+  const { time, curators, eco, ecosystem, referrer } = req.query;
 
   if (req.method === 'POST') {
-    const params = { time, curators, eco, ecosystem }
+    const params = { time, curators, eco, ecosystem, referrer }
     const points = pt
     const eco = points?.substring(1)
     const curatorFid = message?.data?.fid

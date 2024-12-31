@@ -26,14 +26,14 @@ export default async function handler(req, res) {
   const {isValid, message} = await validateFramesMessage(body)
 
   const { untrustedData } = req.body
-  const { time, curators, eco, ecosystem } = req.query;
+  const { time, curators, eco, ecosystem, referrer } = req.query;
 
   if (req.method === 'POST') {
-    const params = { time, curators, eco, ecosystem }
+    const params = { time, curators, eco, ecosystem, referrer }
     const points = '$' + eco
     const curatorFid = message?.data?.fid
     // const castHash = req.body.untrustedData.castId.hash
-    // const authorFid = message?.data?.frameActionBody?.castId?.fid
+    const authorFid = message?.data?.frameActionBody?.castId?.fid
     // console.log('28', points, curatorFid, castHash)
 
     let autoTipImg = `${baseURL}/api/frames/tip/auto-tipping?${qs.stringify({ status: 'self', curators: [curatorFid], points })}`
@@ -67,7 +67,7 @@ export default async function handler(req, res) {
     if (!encryptedUuid) {
       autoTipImg = `${baseURL}/api/frames/tip/auto-tipping?${qs.stringify({ status: 'off', curators: [], points })}`
 
-      button1 = metaButton(1, 'login', params, points)
+      button1 = metaButton(1, 'login', params, points, referrer || authorFid)
       button2 = metaButton(2, 'refresh', params)
       button3 = metaButton(3, 'back', params)
       button4 = ''

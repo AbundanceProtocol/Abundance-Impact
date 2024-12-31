@@ -13,7 +13,18 @@ export default async function handler(req, res) {
 
     let query = {};
 
-
+    async function getCuratorData(fid) {
+      try {
+        await connectToDatabase();
+        const user = await User.findOne({ fid: String(fid) }).select('pfp username');
+        if (!user) return null;
+        let curator = {pfp: user.pfp, fid: fid, username: user.username}
+        return curator;
+      } catch (error) {
+        console.error("Error while fetching curator:", error);
+        return null
+      }   
+    }
 
     async function getCuratorIds(fids) {
       try {
@@ -43,8 +54,7 @@ export default async function handler(req, res) {
       query.createdAt = { $gte: req?.query?.time } ;
     }
 
-    
-
+    let curatorData = null
 
     if (req?.query['curators[]'] && req?.query['curators[]'].length > 0) {
       console.log('37', req?.query['curators[]'])
@@ -59,6 +69,8 @@ export default async function handler(req, res) {
 
       let impactIds
       if (curatorFids) {
+        curatorData = await getCuratorData(curatorFids[0]);
+        console.log('curatorData', curatorData);
         impactIds = await getCuratorIds(curatorFids)
       }
       if (impactIds) {
@@ -107,16 +119,32 @@ export default async function handler(req, res) {
       try {
         await connectToDatabase();
         const totalCount = await Cast.countDocuments(query);
-    
-        return totalCount
+        const latestCasts = await Cast.find(query)
+          .sort({ createdAt: -1 })
+          .select("cast_hash author_username author_pfp cast_media impact_total cast_hash")
+          .limit(9)
+          .lean();
+        const formattedCasts = latestCasts.map((cast) => ({
+          cast:
+            cast.cast_media &&
+            cast.cast_media.length > 0 &&
+            cast.cast_media[0].content_type.startsWith("image/")
+              ? cast.cast_media[0].url
+              : `https://client.warpcast.com/v2/cast-image?castHash=${cast.cast_hash}`,
+          username: cast.author_username,
+          pfp: cast.author_pfp,
+          impact: cast.impact_total,
+          hash: cast.cast_hash,
+        }));
+        return { totalCount, latestCasts: formattedCasts };
       } catch (err) {
         console.error(err);
-        return 0;
+        return { totalCount: 0, latestCasts: [] };
       }
     }
-    const totalCount = await fetchCasts(query);
-    console.log('totalCount', totalCount)
-    res.status(200).json({ docs: totalCount,
+    const { totalCount, latestCasts } = await fetchCasts(query);
+    console.log('totalCount', totalCount, latestCasts)
+    res.status(200).json({ docs: totalCount, casts: latestCasts, curator: curatorData, 
       message: 'User selection fetched successfully'
     });
   } else {

@@ -11,12 +11,18 @@ export default async function handler(req, res) {
   const BaseAlchemyKey = process.env.ALCHEMY_BASE_API_KEY
   const OpAlchemyKey = process.env.ALCHEMY_OP_API_KEY
   const ArbAlchemyKey = process.env.ALCHEMY_ARB_API_KEY
-  const { fid, points, uuid } = req.query;
+  const { fid, points, uuid, referrer } = req.query;
 
   if (req.method !== 'GET' || !fid || !points || !uuid ) {
     res.status(405).json({ error: 'Method Not Allowed' });
   } else {
     const encryptedUuid = encryptPassword(uuid, secretKey);
+
+    console.log('referrer', referrer)
+    let setReferrer = null
+    if (referrer) {
+      setReferrer = Number(referrer)
+    }
 
     async function getEcosystem(points) {
       try {
@@ -391,6 +397,7 @@ export default async function handler(req, res) {
           }
 
           createUser = await User.create({
+            invited_by: setReferrer,
             fid: user.fid,
             uuid: encryptedUuid,
             ecosystem_points: ecosystem.ecosystem_points_name,

@@ -115,12 +115,12 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem, fi
     if (time) {
       timeQuery = '&time=' + time
     }
-    if (curators) {
-      console.log(curators)
-      for (const curator of curators) {
-        curatorsQuery += '&curators=' + parseInt(curator)
-      }
-    }
+    // if (curators) {
+    //   console.log(curators)
+    //   for (const curator of curators) {
+    //     curatorsQuery += '&curators=' + parseInt(curator)
+    //   }
+    // }
     // if (shuffle || shuffle == false) {
     //   shuffleQuery = '&shuffle=' + shuffle
     // }

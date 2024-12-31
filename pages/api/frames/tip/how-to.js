@@ -8,7 +8,7 @@ const client = HubURL ? getSSLHubRpcClient(HubURL) : undefined;
 
 export default async function handler(req, res) {
 
-  const { time, curators, eco, ecosystem } = req.query;
+  const { time, curators, eco, ecosystem, referrer } = req.query;
 
   if (req.method !== 'POST') {
     res.setHeader('Allow', ['POST']);
@@ -20,11 +20,11 @@ export default async function handler(req, res) {
 
     <meta property="fc:frame:button:1" content="What's /impact?" />
     <meta property="fc:frame:button:1:action" content="post" />
-    <meta property="fc:frame:button:1:target" content='${baseURL}/api/frames/tip/install?${qs.stringify({ time, curators, eco, ecosystem })}' />
+    <meta property="fc:frame:button:1:target" content='${baseURL}/api/frames/tip/install?${qs.stringify({ time, curators, eco, ecosystem, referrer })}' />
 
     <meta property="fc:frame:button:2" content='< Back' />
     <meta property="fc:frame:button:2:action" content="post" />
-    <meta property="fc:frame:button:2:target" content='${baseURL}/api/frames/tip/start?${qs.stringify({ time, curators, eco, ecosystem })}' />
+    <meta property="fc:frame:button:2:target" content='${baseURL}/api/frames/tip/start?${qs.stringify({ time, curators, eco, ecosystem, referrer })}' />
 
     <meta name="fc:frame:post_url" content='${baseURL}' />`
 

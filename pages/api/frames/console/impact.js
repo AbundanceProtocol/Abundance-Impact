@@ -187,7 +187,11 @@ export default async function handler(req, res) {
 
                     async function nominationCast(user, curator, ecosystem, hash, signer, handle, fid, eco) {
                       let text = ''
-                      if (inputText && inputText !== '') {
+                      let safeText = true
+                      if (inputText && inputText?.length > 0 && inputText?.toLowerCase()?.includes("$degen")) {
+                        safeText = false
+                      }
+                      if (inputText && inputText !== '' && safeText) {
                         text = `@${curator} comment: "${inputText}"\n\n`
                       }
                       try {

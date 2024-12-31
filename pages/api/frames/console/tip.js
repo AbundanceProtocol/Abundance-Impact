@@ -24,6 +24,7 @@ export default async function handler(req, res) {
   console.log('isValid:', isValid)
   const { time, curators, channels, tags, eco, ecosystem, time1 } = req.query;
   const { untrustedData } = req.body
+  const authorFid = message?.data?.frameActionBody?.castId?.fid
 
   if (req.method !== 'POST' || !ecosystem || !eco) {
     res.setHeader('Allow', ['POST']);
@@ -92,7 +93,7 @@ export default async function handler(req, res) {
         totalTip: combinedAmounts[coin],
         token: coin,
         set: true,
-        min: 200
+        min: 180,
       }));
     
       return {result, text: sanitizedInput};
@@ -101,17 +102,21 @@ export default async function handler(req, res) {
     async function getSigner(fid) {
       try {
         await connectToDatabase();
-        const user = await User.findOne({ fid }).select('uuid username').exec();
+        const user = await User.findOne({ fid }).select('uuid username pfp').exec();
         if (user) {
           const signer = decryptPassword(user.uuid, secretKey)
           // console.log(user)
-          return {decryptedUuid: signer, username: user.username}
+          return {
+            decryptedUuid: signer,
+            username: user.username,
+            user_pfp: user.pfp,
+          };
         } else {
-          return {decryptedUuid: null, username: null}
+          return {decryptedUuid: null, username: null, user_pfp: null}
         }
       } catch (error) {
         console.error('Error getting User:', error)
-        return {decryptedUuid: null, username: null}
+        return { decryptedUuid: null, username: null, user_pfp: null };
       }
     }
 
@@ -162,18 +167,72 @@ export default async function handler(req, res) {
       }
     }
 
-    async function createCircle(fid, time, curators, text, ecosystem, username, points, circles) {
+    async function createCircle(
+      fid,
+      time,
+      curators,
+      text,
+      ecosystem,
+      username,
+      points,
+      circles,
+      user_pfp,
+      showcase
+    ) {
       try {
         await connectToDatabase();
-        let circle = new Circle({ 
-          fid, time, curators, text, ecosystem, username, points, circles
+
+        let curator = []
+        
+        if (curators && curators.length > 0) {
+          let curatorFids = []
+
+          if (typeof curators === "string") {
+            curatorFids = [parseInt(curators)];
+          } else if (Array.isArray(curators) && curators.length > 0) {
+            curatorFids = curators.map((fid) => parseInt(fid));
+          }
+
+          if (curatorFids && curatorFids.length > 0) {
+            const users = await User.find({ fid: { $in: curatorFids } })
+              .select('pfp fid username')
+              .lean();
+
+            const seenFids = new Set();
+            curator = users.reduce((acc, user) => {
+              const fid = Number(user.fid);
+              if (!seenFids.has(fid)) {
+                seenFids.add(fid);
+                acc.push({
+                  pfp: user.pfp,
+                  fid: fid,
+                  username: user.username
+                });
+              }
+              return acc;
+            }, []);
+          }
+        }
+        let circle = new Circle({
+          fid,
+          time,
+          curators,
+          text,
+          ecosystem,
+          username,
+          points,
+          circles,
+          user_pfp,
+          curator,
+          showcase,
+          type: 'multi-tip'
         });
-        await circle.save()
+        await circle.save();
         const objectIdString = circle._id.toString();
-        return objectIdString
+        return objectIdString;
       } catch (error) {
         console.error("Error while fetching circles:", error);
-        return null
+        return null;
       }
     }
 
@@ -193,7 +252,7 @@ export default async function handler(req, res) {
     
     console.log('14-1:', req.query)
 
-    const exploreLink = `${baseURL}/~/ecosystems/${ecosystem}?${qs.stringify({ time, curators, eco })}`
+    // const exploreLink = `${baseURL}/~/ecosystems/${ecosystem}?${qs.stringify({ time, curators, eco })}`
 
     const impactLink = `https://warpcast.com/abundance/0x43ddd672`
 
@@ -203,7 +262,7 @@ export default async function handler(req, res) {
 
     const startPost = `${baseURL}/api/frames/tip/start?${qs.stringify({ time, curators, eco, ecosystem })}`
 
-    const loginUrl = `${baseURL}/?${qs.stringify({ eco: points })}`
+    const loginUrl = `${baseURL}/?${qs.stringify({ eco: points, referrer: authorFid })}`
 
     const sendPost = `${baseURL}/api/frames/tip/tip?${qs.stringify({ time, curators, eco, ecosystem })}`
 
@@ -298,7 +357,7 @@ export default async function handler(req, res) {
         return;
       } else {
       
-        const {decryptedUuid, username} = await getSigner(fid)
+        const {decryptedUuid, username, user_pfp} = await getSigner(fid)
   
         if (!decryptedUuid) {
           console.log('d')
@@ -335,7 +394,7 @@ export default async function handler(req, res) {
         } else {
   
           try {
-  
+
             async function getCuratorPercent(points) {
               try {
                 await connectToDatabase();
@@ -359,7 +418,7 @@ export default async function handler(req, res) {
             async function getUserSearch(time, tags, channel, curator, points, allowances) {
       
               const page = 1;
-              const limit = 10;
+              const limit = 9;
               const skip = (page - 1) * limit;
           
               let query = {};
@@ -533,8 +592,8 @@ export default async function handler(req, res) {
                   returnedCasts = returnedCasts.slice(0, limit);
                 }
             
-                if (returnedCasts && returnedCasts.length > 10) {
-                  returnedCasts = returnedCasts.slice(0, 10);
+                if (returnedCasts && returnedCasts.length > 9) {
+                  returnedCasts = returnedCasts.slice(0, 9);
                 }
             
                 // console.log('113', returnedCasts)
@@ -631,8 +690,8 @@ export default async function handler(req, res) {
               }
             }
       
-            const { castData, circle, pfps, usernames } = await processTips(displayedCasts, fid, allowances, ecoName, curatorPercent)
-            console.log('pfps', pfps)
+            const { castData, circle, pfps, usernames, showcase } = await processTips(displayedCasts, fid, allowances, ecoName, curatorPercent)
+            // console.log('pfps', pfps)
             const jointFids = circle.join(',')
 
             async function sendRequests(data, signer, apiKey) {
@@ -694,19 +753,30 @@ export default async function handler(req, res) {
                   console.error(`Error occurred while sending request for ${castText}:`, error);
                 }
         
-                await new Promise(resolve => setTimeout(resolve, 60));
+                await new Promise(resolve => setTimeout(resolve, 30));
               }
               return tipCounter
             }
 
-            const circleId = await createCircle(fid, time, curators, tipText, eco, username, points, pfps)
+            const circleId = await createCircle(
+              fid,
+              time,
+              curators,
+              tipText,
+              eco,
+              username,
+              points,
+              pfps,
+              user_pfp,
+              showcase
+            );
 
-            circlesImg = `${baseURL}/api/frames/tip/circle?${qs.stringify({ id: circleId })}`
+            circlesImg = `${baseURL}/api/frames/tip/circle-v2?${qs.stringify({ id: circleId })}`
 
             const remainingTip = await sendRequests(castData, decryptedUuid, apiKey);
             // const remainingTip = 0 
 
-            shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share-v2?${qs.stringify({ id: circleId })}`
+            shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share-v3?${qs.stringify({ id: circleId })}`
           
             async function getCurator(curator, points) {
 
@@ -751,35 +821,33 @@ export default async function handler(req, res) {
               }
             }
 
-            let userText = ''
-
-            if (usernames && usernames?.length > 0) {
-              if (usernames && usernames?.length == 1) {
-                userText = '@' + usernames[0] + ' '
-              } else if (usernames && usernames?.length == 2) {
-                userText = '@' + usernames[0] + ' and @' + usernames[1] + ' '
-              } else if (usernames && usernames?.length == 3) {
-                userText = '@' + usernames[0] + ', @' + usernames[1] + ' and @' + usernames[2] + ' '
-              } else if (usernames && usernames?.length == 4) {
-                userText = '@' + usernames[0] + ', @' + usernames[1] + ', @' + usernames[2] + ' and @' + usernames[3] + ' '
-              } else if (usernames && usernames?.length == 5) {
-                userText = '@' + usernames[0] + ', @' + usernames[1] + ', @' + usernames[2] + ', @' + usernames[3] + ' and @' + usernames[4] + ' '
-              } else if (usernames && usernames?.length > 5) {
-                userText = '@' + usernames[0] + ', @' + usernames[1] + ', @' + usernames[2] + ', @' + usernames[3] + ', @' + usernames[4] + ' and other builders & creators '
-              }
+            let tippedCreators = "";
+            if (showcase?.length > 0) {
+              tippedCreators = showcase.reduce((str, creator, index, arr) => {
+                if (!str.includes(creator.username)) {
+                  if (str === "") {
+                    return "@" + creator.username;
+                  }
+                  if (index === arr.length - 1 && index !== 0) {
+                    return str + " & @" + creator.username + " ";
+                  }
+                  return str + ", @" + creator.username;
+                }
+                return str;
+              }, "");
             }
 
             if (curators && fid == curators) {
-              shareText = `I just multi-tipped ${userText}on /impact by @abundance.\n\nSupport my nominees here:`
+              shareText = `I just multi-tipped ${tippedCreators !== '' ? tippedCreators : 'creators & builders'} thru /impact by @abundance.\n\nSupport my nominees here:`
             } else if (curators?.length > 0) {
               const curatorName = await getCurator(curators, points)
               if (curatorName) {
-                shareText = `I just multi-tipped ${userText}curated by ${curatorName} thru /impact by @abundance.\n\nSupport ${curatorName}'s nominees here:`
+                shareText = `I just multi-tipped ${tippedCreators !== '' ? tippedCreators : 'creators & builders'} thru /impact by @abundance.\n\nThese creators were curated by ${curatorName}. Support their nominees here:`
               } else {
-                shareText = `I just multi-tipped ${userText}on /impact by @abundance. Try it out here:`
+                shareText = `I just multi-tipped ${tippedCreators !== '' ? tippedCreators : 'creators & builders'} thru /impact by @abundance. Try it out here:`
               }
             } else {
-              shareText = `I just multi-tipped ${userText}on /impact by @abundance. Try it out here:`
+              shareText = `I just multi-tipped ${tippedCreators !== '' ? tippedCreators : 'creators & builders'} thru /impact by @abundance. Try it out here:`
             }
             encodedShareText = encodeURIComponent(shareText)
           

@@ -8,7 +8,7 @@ const apiKey = process.env.MORALIS_API_KEY
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 
 // shorten a hash address
-export function metaButton(i, type, params, points) {
+export function metaButton(i, type, params, points, referrer) {
 
   if (type === 'refresh') {
     return `<meta property="fc:frame:button:${i}" content='Refresh' />
@@ -17,7 +17,7 @@ export function metaButton(i, type, params, points) {
   } else if (type === 'login') {
     return `<meta property="fc:frame:button:${i}" content='Login' />
     <meta property="fc:frame:button:${i}:action" content="link" />
-    <meta property="fc:frame:button:${i}:target" content='${baseURL}/?eco=${points}' />`
+    <meta property="fc:frame:button:${i}:target" content='${baseURL}/?eco=${points}${referrer ? '&referrer=' + referrer : ''}' />`
   } else if (type === 'back') {
     return `<meta property="fc:frame:button:${i}" content='< Back' />
     <meta property="fc:frame:button:${i}:action" content="post" />

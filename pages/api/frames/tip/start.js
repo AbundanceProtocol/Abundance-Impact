@@ -17,7 +17,7 @@ const secretKey = process.env.SECRET_KEY
 const apiKey = process.env.NEYNAR_API_KEY
 
 export default async function handler(req, res) {
-  const { time, curators, channels, tags, eco, ecosystem, refresh, retry, start } = req.query;
+  const { time, curators, channels, tags, eco, ecosystem, refresh, retry, start, referrer } = req.query;
   const { untrustedData } = req.body
 
   if (req.method !== 'POST' || !ecosystem || !eco) {
@@ -33,6 +33,7 @@ export default async function handler(req, res) {
     const points = '$' + eco
 
     const fid = untrustedData?.fid
+    const authorFid = untrustedData?.castId?.fid
     const loginImg = `${baseURL}/images/login.jpg`;
     const tipsImg = `${baseURL}/images/frame36.gif`
     const inputImg = `${baseURL}/images/input.jpg`;
@@ -45,23 +46,23 @@ export default async function handler(req, res) {
 
     const impactLink = `https://warpcast.com/abundance/0x43ddd672`
 
-    const retryPost = `${baseURL}/api/frames/tip/start?${qs.stringify({ time, curators, eco, ecosystem })}`
+    const retryPost = `${baseURL}/api/frames/tip/start?${qs.stringify({ time, curators, eco, ecosystem, referrer })}`
 
-    const refreshPost = `${baseURL}/api/frames/tip/refresh?${qs.stringify({ time, curators, eco, ecosystem, time1: timeMinus3 })}`
+    const refreshPost = `${baseURL}/api/frames/tip/refresh?${qs.stringify({ time, curators, eco, ecosystem, time1: timeMinus3, referrer })}`
 
-    const startPost = `${baseURL}/api/frames/tip/start?${qs.stringify({ time, curators, eco, ecosystem })}`
+    const startPost = `${baseURL}/api/frames/tip/start?${qs.stringify({ time, curators, eco, ecosystem, referrer })}`
 
-    const loginUrl = `${baseURL}/?${qs.stringify({ eco: points })}`
+    const loginUrl = `${baseURL}/?${qs.stringify({ eco: points, referrer: referrer || authorFid })}`
 
-    const sendPost = `${baseURL}/api/frames/tip/tip?${qs.stringify({ time, curators, eco, ecosystem })}`
+    const sendPost = `${baseURL}/api/frames/tip/tip?${qs.stringify({ time, curators, eco, ecosystem, referrer })}`
 
-    const postUrl = `${baseURL}/~/ecosystems/${ecosystem}/tip-login?${qs.stringify({ time, curators, eco })}`
+    const postUrl = `${baseURL}/~/ecosystems/${ecosystem}/tip-login?${qs.stringify({ time, curators, eco, referrer })}`
     
     const shareText = 'I just multi-tipped builders and creators on /impact. Try it out here:'
 
-    const autoTipPost = `${baseURL}/api/frames/tip/auto-tip?${qs.stringify({ time, curators, eco, ecosystem })}`
+    const autoTipPost = `${baseURL}/api/frames/tip/auto-tip?${qs.stringify({ time, curators, eco, ecosystem, referrer })}`
 
-    const optOutPost = `${baseURL}/api/frames/tip/opt-out-menu?${qs.stringify({ time, curators, eco, ecosystem })}`
+    const optOutPost = `${baseURL}/api/frames/tip/opt-out-menu?${qs.stringify({ time, curators, eco, ecosystem, referrer })}`
 
     let shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share-v2?${qs.stringify({ time, curators, eco })}`
 

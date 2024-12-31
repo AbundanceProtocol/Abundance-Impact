@@ -25,14 +25,14 @@ export default async function handler(req, res) {
   const {isValid, message} = await validateFramesMessage(body)
   
   console.log('isValid:', isValid)
-  const { time, curators, channels, tags, eco, ecosystem, refresh, time1 } = req.query;
+  const { time, curators, channels, tags, eco, ecosystem, refresh, time1, referrer } = req.query;
   const { untrustedData } = req.body
 
   if (req.method !== 'POST' || !ecosystem || !eco) {
     res.setHeader('Allow', ['POST']);
     res.status(405).end(`Method ${req.method} Not Allowed`);
   } else {
-    const params = { time, curators, channels, tags, eco, ecosystem, refresh, time1 }
+    const params = { time, curators, channels, tags, eco, ecosystem, refresh, time1, referrer }
 
     const points = '$' + eco
 

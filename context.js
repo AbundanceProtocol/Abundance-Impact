@@ -138,11 +138,21 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
   }
 
   useEffect(() => {
-    if (router.route !== "/~/ecosystems/[ecosystem]/tip" && router.route !== "/~/ecosystems/[ecosystem]/[eco]/[curators]/tip" && router.route !== "/~/ecosystems/[ecosystem]/tip-basic" && router.route !== "/~/ecosystems/[ecosystem]/tip-share" && router.route !== "/~/ecosystems/[ecosystem]/tip-share-v2" && router.route !== "/~/studio/multi-tip-compose") {
-      console.log('c5 triggered []')
-      console.log('c6', store.points, points)
-      getEcosystems(store.points || points)
-      console.log('c7', router)
+    if (
+      router.route !== "/~/ecosystems/[ecosystem]/tip" &&
+      router.route !== "/~/ecosystems/[ecosystem]/[eco]/[curators]/tip" &&
+      router.route !== "/~/ecosystems/[ecosystem]/tip-basic" &&
+      router.route !== "/~/ecosystems/[ecosystem]/tip-share" &&
+      router.route !== "/~/ecosystems/[ecosystem]/tip-share-v2" &&
+      router.route !== "/~/ecosystems/[ecosystem]/tip-share-v3" &&
+      router.route !== "/~/ecosystems/[ecosystem]/rank-v1" &&
+      router.route !== "/~/ecosystems/[ecosystem]/curation-v1" &&
+      router.route !== "/~/studio/multi-tip-compose"
+    ) {
+      console.log("c5 triggered []");
+      console.log("c6", store.points, points);
+      getEcosystems(store.points || points);
+      console.log("c7", router);
     }
   }, [])
 
@@ -160,14 +170,24 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
       }
     }
 
-    if (router.route !== "/~/ecosystems/[ecosystem]/tip" && router.route !== "/~/ecosystems/[ecosystem]/[eco]/[curators]/tip" && router.route !== "/~/ecosystems/[ecosystem]/tip-basic" && router.route !== "/~/ecosystems/[ecosystem]/tip-share" && router.route !== "/~/ecosystems/[ecosystem]/tip-share-v2" && router.route !== "/~/studio/multi-tip-compose") {
+    if (
+      router.route !== "/~/ecosystems/[ecosystem]/tip" &&
+      router.route !== "/~/ecosystems/[ecosystem]/[eco]/[curators]/tip" &&
+      router.route !== "/~/ecosystems/[ecosystem]/tip-basic" &&
+      router.route !== "/~/ecosystems/[ecosystem]/tip-share" &&
+      router.route !== "/~/ecosystems/[ecosystem]/tip-share-v2" &&
+      router.route !== "/~/ecosystems/[ecosystem]/tip-share-v3" &&
+      router.route !== "/~/ecosystems/[ecosystem]/rank-v1" &&
+      router.route !== "/~/ecosystems/[ecosystem]/curation-v1" &&
+      router.route !== "/~/studio/multi-tip-compose"
+    ) {
       if (sched.ecoData) {
-        updateEcoData()
-        setSched(prev => ({...prev, ecoData: false }))
+        updateEcoData();
+        setSched((prev) => ({ ...prev, ecoData: false }));
       } else {
         const timeoutId = setTimeout(() => {
-          updateEcoData()
-          setSched(prev => ({...prev, ecoData: false }))
+          updateEcoData();
+          setSched((prev) => ({ ...prev, ecoData: false }));
         }, 300);
         return () => clearTimeout(timeoutId);
       }
@@ -201,14 +221,25 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
     }
 
     console.log('c13-2', router.route, router.route !== "/~/ecosystems/[ecosystem]/tip-basic")
-    if (router.route !== "/~/ecosystems/[ecosystem]/tip" && router.route !== "/~/ecosystems/[ecosystem]/[eco]/[curators]/tip" && router.route !== "/~/ecosystems/[ecosystem]/tip-basic" && router.route !== "/~/ecosystems/[ecosystem]/tip-share" && router.route !== "/~/ecosystems/[ecosystem]/tip-share-v2" && router.route !== "/~/studio/multi-tip-compose" && !miniApp) {
+    if (
+      router.route !== "/~/ecosystems/[ecosystem]/tip" &&
+      router.route !== "/~/ecosystems/[ecosystem]/[eco]/[curators]/tip" &&
+      router.route !== "/~/ecosystems/[ecosystem]/tip-basic" &&
+      router.route !== "/~/ecosystems/[ecosystem]/tip-share" &&
+      router.route !== "/~/ecosystems/[ecosystem]/tip-share-v2" &&
+      router.route !== "/~/ecosystems/[ecosystem]/tip-share-v3" &&
+      router.route !== "/~/ecosystems/[ecosystem]/rank-v1" &&
+      router.route !== "/~/ecosystems/[ecosystem]/curation-v1" &&
+      router.route !== "/~/studio/multi-tip-compose" &&
+      !miniApp
+    ) {
       if (sched.login) {
-        updateLogin()
-        setSched(prev => ({...prev, login: false }))
+        updateLogin();
+        setSched((prev) => ({ ...prev, login: false }));
       } else {
         const timeoutId = setTimeout(() => {
-          updateLogin()
-          setSched(prev => ({...prev, login: false }))
+          updateLogin();
+          setSched((prev) => ({ ...prev, login: false }));
         }, 300);
         return () => clearTimeout(timeoutId);
       }
@@ -216,7 +247,7 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
 
   }, [store.isAuth, sched.login]);
 
-  const getRemainingBalances = async (fid, points, uuid) => {
+  const getRemainingBalances = async (fid, points, uuid, referrer) => {
     try {
       const response = await axios.get('/api/ecosystem/getBalances', {
         params: { fid, points } })
@@ -232,16 +263,16 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
         setEligibility(initialEligibility)
       } else {
         setUserBalances(prev => ({ ...prev, impact: 0, qdau: 0 }))
-        checkEcoEligibility(fid, points, uuid)
+        checkEcoEligibility(fid, points, uuid, referrer)
       }
     } catch (error) {
       console.error('Error, getRemainingBalances failed:', error)
-      checkEcoEligibility(fid, points, uuid)
+      checkEcoEligibility(fid, points, uuid, referrer)
       setUserBalances(prev => ({ ...prev, impact: 0, qdau: 0 }))
     }
   }
 
-  const checkEcoEligibility = async (fid, points, uuid) => {
+  const checkEcoEligibility = async (fid, points, uuid, referrer) => {
     console.log('c14', fid, points, prevPoints)
     if (!fid) {
       LoginPopup()
@@ -249,7 +280,7 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
       setPrevPoints(points)
       try {
         const response = await axios.get('/api/ecosystem/checkUserEligibility', {
-          params: { fid, points, uuid } })
+          params: { fid, points, uuid, referrer } })
         // console.log(response)
         if (response?.data?.eligibilityData) {
           let eligibilityData = response?.data?.eligibilityData
