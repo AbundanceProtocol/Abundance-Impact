@@ -5,7 +5,7 @@ import Cast from '../../models/Cast';
 import Impact from '../../models/Impact';
 import Quality from '../../models/Quality';
 import Raffle from '../../models/Raffle';
-// import User from '../../models/User';
+import User from '../../models/User';
 import Tip from '../../models/Tip';
 // import EcosystemRules from '../../models/EcosystemRules';
 // import { getTimeRange, processTips, populateCast } from '../../utils/utils';
@@ -21,17 +21,13 @@ exports.handler = async function(event, context) {
 
     try {
       await connectToDatabase()
-      const oneDay = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000);
-      const threeDays = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
+
       const oneWeek = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+      const twoWeeks = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);
 
-      const oneDayShift = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
-      const threeDaysShift = new Date(Date.now() - 4 * 24 * 60 * 60 * 1000);
-      const oneWeekShift = new Date(Date.now() - 8 * 24 * 60 * 60 * 1000);
+      let uniqueNewUsers = await User.distinct('fid', { invited_by: { "$ne": null }, createdAt: { $gte: twoWeeks } });
 
-      const oneDayFrame = { $gte: oneDayShift, $lte: oneDay }
-      const threeDaysFrame = { $gte: threeDaysShift, $lte: oneDay }
-      const oneWeekFrame = { $gte: oneWeekShift, $lte: oneDay }
+      uniqueNewUsers = uniqueNewUsers.map(Number);
 
       const uniqueCuratorFids = await Impact.distinct('curator_fid', { createdAt: { $gte: oneWeek } });
 
@@ -42,17 +38,17 @@ exports.handler = async function(event, context) {
       const mergedFids = [...new Set([...uniqueCuratorFids, ...uniqueQualityFids, ...uniqueTipperFids])];
 
 
-      const updateOptions = {
-        upsert: true,
-        new: true,
-        setDefaultsOnInsert: true,
-      };
+      async function updateUsers(userFid) {
 
-      for (const userFid of mergedFids) {
+        const updateOptions = {
+          upsert: true,
+          new: true,
+          setDefaultsOnInsert: true,
+        };
 
-        const userdata_7d = await getUserData(userFid, oneWeekFrame);
-        const userdata_3d = await getUserData(userFid, threeDaysFrame);
-        const userdata_24h = await getUserData(userFid, oneDayFrame);
+        const userdata_7d = await getUserData(userFid, '7d');
+        const userdata_3d = await getUserData(userFid, '3d');
+        const userdata_24h = await getUserData(userFid, '24h');
 
         const update = {
           $set: {
@@ -60,26 +56,51 @@ exports.handler = async function(event, context) {
             degen_tip_7d: userdata_7d[0]?.degen_tip || 0,
             ham_tip_7d: userdata_7d[0]?.ham_tip || 0,
             curator_points_7d: userdata_7d[0]?.curator_points || 0,
+            promotion_points_7d: userdata_7d[0]?.promoter_points || 0,
             impact_score_7d: userdata_7d[0]?.impact_score || 0,
             degen_tip_3d: userdata_3d[0]?.degen_tip || 0,
             ham_tip_3d: userdata_3d[0]?.ham_tip || 0,
             curator_points_3d: userdata_3d[0]?.curator_points || 0,
+            promotion_points_3d: userdata_3d[0]?.promoter_points || 0,
             impact_score_3d: userdata_3d[0]?.impact_score || 0,
             degen_tip_24h: userdata_24h[0]?.degen_tip || 0,
             ham_tip_24h: userdata_24h[0]?.ham_tip || 0,
             curator_points_24h: userdata_24h[0]?.curator_points || 0,
+            promotion_points_24h: userdata_24h[0]?.promoter_points || 0,
             impact_score_24h: userdata_24h[0]?.impact_score || 0,
           }
         }
 
         try {
           const updatedDoc = await Raffle.findOneAndUpdate({ fid: userFid }, update, updateOptions);
-          // console.log(`Raffle document for fid ${userFid} updated:`, updatedDoc);
+          return updatedDoc
         } catch (error) {
           console.error(`Error updating Raffle document for fid ${userFid}:`, error);
+          return null
         }
       }
-      
+
+      let counter = 0
+      let error = 0
+      for (const userFid of uniqueNewUsers) {
+        const doc = await updateUsers(userFid)
+        if (doc) {
+          counter++
+        } else {
+          error++
+        }
+      }
+
+      console.log('counter', counter, error)
+      for (const userFid of mergedFids) {
+        const doc = await updateUsers(userFid)
+        if (doc) {
+          counter++
+        } else {
+          error++
+        }
+      }
+      console.log('counter', counter, error)
       
       return mergedFids
     } catch (error) {
@@ -106,6 +127,31 @@ async function getUserData(fid, time) {
   try {
     await connectToDatabase();
     // const oneWeek = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+        
+    const oneDay = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000);
+
+    const oneDayShift = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
+    const threeDaysShift = new Date(Date.now() - 4 * 24 * 60 * 60 * 1000);
+    const oneWeekShift = new Date(Date.now() - 8 * 24 * 60 * 60 * 1000);
+
+    const oneDayFrame = { $gte: oneDayShift, $lte: oneDay }
+    const threeDaysFrame = { $gte: threeDaysShift, $lte: oneDay }
+    const oneWeekFrame = { $gte: oneWeekShift, $lte: oneDay }
+    
+    let promotionScore = "$impact_score_24h"
+    let setTime = null
+    if (time == '24h') {
+      setTime = oneDayFrame
+      promotionScore = "$impact_score_24h"
+    } else if (time == '3d') {
+      setTime = threeDaysFrame
+      promotionScore = "$impact_score_3d"
+    } else if (time == '7d') {
+      setTime = oneWeekFrame
+      promotionScore = "$impact_score_7d"
+    }
+
+    const oneMonth = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
 
     let curatorQuery = {};
     // let creatorQuery = {};
@@ -116,10 +162,10 @@ async function getUserData(fid, time) {
     tipperQuery.tipper_fid = fid
     tipperQuery.points = '$IMPACT'
 
-    if (time) {
-      curatorQuery.createdAt = time
+    if (setTime) {
+      curatorQuery.createdAt = setTime
       // creatorQuery.createdAt = { $gte: time }
-      tipperQuery.createdAt = time
+      tipperQuery.createdAt = setTime
     }
     
     const curatorImpact = await Impact.aggregate([
@@ -213,6 +259,20 @@ async function getUserData(fid, time) {
     // });
 
 
+    //// PROMOTER POINTS
+    let invitedUsers = await User.distinct('fid', { invited_by: fid, createdAt: { $gte: oneMonth } });
+
+    invitedUsers = invitedUsers.map(Number);
+
+
+    const totalImpactScore = await Raffle.aggregate([
+      { $match: { fid: { $in: invitedUsers } } },
+      { $group: { _id: null, totalImpactScore: { $sum: { "$cond": { if: { $gt: [promotionScore, 0] }, then: promotionScore, else: 0 } } } } }
+    ]);
+
+    const totalImpactScoreValue = totalImpactScore.length > 0 ? totalImpactScore[0].totalImpactScore : 0;
+
+
 
     //// MERGE POINTS
     const tipperMap = Object.fromEntries(
@@ -243,6 +303,7 @@ async function getUserData(fid, time) {
       degen_tip: tipperMap[fid]?.degen_tip || 0,
       ham_tip: tipperMap[fid]?.ham_tip || 0,
       curator_points: curatorMap[fid]?.curator_points || 0,
+      promoter_points: totalImpactScoreValue || 0,
       // creator_points: creatorMap[fid]?.creator_points || 0,
     }));
   
@@ -258,7 +319,7 @@ async function getUserData(fid, time) {
 
     //// CALCULATE IMPACT SCORE
     mergedDataset.forEach(entry => {
-      entry.impact_score = (10 * entry.curator_points + 5 * entry.degen_tip + entry.ham_tip) / 1000;
+      entry.impact_score = (10 * entry.curator_points + 5 * entry.degen_tip + entry.ham_tip) / 1000 + (entry.promoter_points / 2);
     });
 
     mergedDataset.sort((a, b) => b.impact_score - a.impact_score);

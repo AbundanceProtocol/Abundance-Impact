@@ -21,7 +21,7 @@ export default function ProfilePage() {
 
   async function getCuratorData() {
     try {
-      const response = await axios.get('/api/testing/raffle-v2')
+      const response = await axios.get('/api/curation/raffle-v2')
       if (response?.data) {
         const userData = response?.data?.userData
         console.log('userData', userData)

@@ -20,7 +20,28 @@ export default async function handler(req, res) {
 
     async function getCombinedData() {
       try {
-        const impactScoreData = await Raffle.find({ impact_score_3d: { $gte: 0.25 } }, { fid: 1, impact_score_3d: 1 }).lean();
+        await connectToDatabase();
+
+        const threeWeeksAgo = new Date(Date.now() - 21 * 24 * 60 * 60 * 1000);
+
+        const threeTimeWinners = await Tip.aggregate([
+          { $match: { 
+            tipper_fid: 9326,
+            "tip.amount": 5000,
+            "tip.currency": { $regex: /^\$degen$/i },
+            createdAt: { $gte: threeWeeksAgo }
+          }},
+          { $group: {
+            _id: "$receiver_fid",
+            count: { $sum: 1 }
+          }},
+          { $match: { count: { $gte: 3 } } },
+          { $sort: { _id: 1 } },
+          { $project: { _id: 1 } }
+        ]).then(tips => tips.map(tip => tip._id));
+
+
+        const impactScoreData = await Raffle.find({ impact_score_3d: { $gte: 0.25 }, fid: { $nin: threeTimeWinners } }, { fid: 1, impact_score_3d: 1 }).lean();
 
         const usernames = await Promise.all(impactScoreData.map(async (item) => {
           const user = await User.findOne({ fid: item.fid.toString() }, { username: 1 }).lean();
