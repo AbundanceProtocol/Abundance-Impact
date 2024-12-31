@@ -61,6 +61,28 @@ export default async function handler(req, res) {
       }  
     }
 
+    async function getImageFileSize(url) {
+      try {
+        const response = await fetch(url, { method: 'HEAD' });
+        if (response.ok) {
+          const contentLength = response.headers.get('content-length');
+          if (contentLength) {
+            // typical "Cast preview unavailable" image size
+            if (parseInt(contentLength, 10) > 12000 && parseInt(contentLength, 10) < 14500) {
+              return true
+            }
+          }
+          return false
+        } else {
+          console.error('Failed to fetch the image:', response.status, response.statusText);
+          return false;
+        }
+      } catch (error) {
+        console.error('Error fetching the image size:', error);
+        return false;
+      }
+    }
+
 
     let {circles, text, username, showcase, userPfp, curator, timeframe, image} = await getCircle(id);
 
@@ -80,6 +102,15 @@ export default async function handler(req, res) {
     } else {
       if (showcase?.length > 0 && showcase[0]?.impact) {
         showcase.sort((a, b) => b.impact - a.impact);
+
+        for (let show of showcase) {
+          if (show?.cast?.startsWith('https://client.warpcast.com/v2/cast-image?castHash=')) {
+            const isUnavailable = await getImageFileSize(show?.cast)
+            if (isUnavailable) {
+              show.cast = show?.pfp
+            }
+          }
+        }
       }
   
       let time = 'all time'
