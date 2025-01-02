@@ -68,7 +68,7 @@ export default async function handler(req, res) {
           const contentLength = response.headers.get('content-length');
           if (contentLength) {
             // typical "Cast preview unavailable" image size
-            if (parseInt(contentLength, 10) > 12000 && parseInt(contentLength, 10) < 14500) {
+            if (parseInt(contentLength, 10) < 14500) {
               return true
             }
           }
