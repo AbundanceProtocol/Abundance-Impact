@@ -195,48 +195,32 @@ export default async function handler(req, res) {
       let dcText = ''
       
       for (const tipper of tipperUsernames) {
-        dcText += '@' + tipper.username + ' - tip: ' + tipper.tip + '\n'
+        dcText += '@' + tipper.username + ' - tip: ' + tipper.tip + ' \n'
       }
       dcText += '\n'
       for (const impact of impactUsernames) {
-        dcText += '@' + impact.username + ' - points: ' + impact.points + '\n'
+        dcText += '@' + impact.username + ' - points: ' + impact.points + ' \n'
       }
       dcText += '\n'
       for (const quality of qualityUsernames) {
-        dcText += '@' + quality.username + ' - quality: ' + quality.points + '\n'
+        dcText += '@' + quality.username + ' - quality: ' + quality.points + ' \n'
       }
       dcText += '\n'
       for (const user of combinedUsernames) {
-        dcText += '@' + user.username + ' - combined: ' + user.points + '\n'
+        dcText += '@' + user.username + ' - combined: ' + user.points + ' \n'
       }
 
 
-      dcText += '\nCurators staking: ' + uniqueCuratorsCount.length + '\n'
-      dcText += 'New users: ' + newUserCount + '\n'
-      dcText += 'Curators qDAU: ' + uniqueQualityCuratorsCount.length + '\n'
-      dcText += 'New opt outs: ' + newOptOutCount + '\n'
-      dcText += 'Users tipping: ' + uniqueTipperCount.length + '\n'
-      dcText += 'Total $degen: ' + totalDegenAmount[0].totalAmount + '\n'
+      dcText += '\nCurators staking: ' + uniqueCuratorsCount.length + ' \n'
+      dcText += 'New users: ' + newUserCount + ' \n'
+      dcText += 'Curators qDAU: ' + uniqueQualityCuratorsCount.length + ' \n'
+      dcText += 'New opt outs: ' + newOptOutCount + ' \n'
+      dcText += 'Users tipping: ' + uniqueTipperCount.length + ' \n'
+      dcText += 'Total $degen: ' + totalDegenAmount[0].totalAmount + ' \n'
       // dcText += 'Circle data: ' + circlesData + '\n'
       console.log('dcText', dcText)
       async function sendDc() {
-        // const response = await fetch(
-        //   "https://api.warpcast.com/v2/ext-send-direct-cast",
-        //   {
-        //     method: "PUT",
-        //     headers: {
-        //       Authorization: `Bearer ${wcApiKey}`,
-        //       "Content-Type": "application/json",
-        //     },
-        //     body: JSON.stringify({
-        //       recipientFid: 9326,
-        //       message: dcText,
-        //       idempotencyKey: Math.random().toString(36).substring(7),
-        //     }),
-        //   },
-        // );
-
-        const response2 = await fetch(
+        const response = await fetch(
           "https://api.warpcast.com/v2/ext-send-direct-cast",
           {
             method: "PUT",
@@ -245,20 +229,36 @@ export default async function handler(req, res) {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              recipientFid: 195117,
+              recipientFid: 9326,
               message: dcText,
               idempotencyKey: Math.random().toString(36).substring(7),
             }),
           },
         );
+        return response
+        // const response2 = await fetch(
+        //   "https://api.warpcast.com/v2/ext-send-direct-cast",
+        //   {
+        //     method: "PUT",
+        //     headers: {
+        //       Authorization: `Bearer ${wcApiKey}`,
+        //       "Content-Type": "application/json",
+        //     },
+        //     body: JSON.stringify({
+        //       recipientFid: 195117,
+        //       message: dcText,
+        //       idempotencyKey: Math.random().toString(36).substring(7),
+        //     }),
+        //   },
+        // );
       }
       
-      sendDc();
+      await sendDc();
 
-      // console.log('nominations, tips', tipperUsernames, impactUsernames, uniqueCuratorsCount, newUserCount, uniqueQualityCuratorsCount, newOptOutCount, uniqueTipperCount, totalDegenAmount, qualityUsernames)
-      // console.log('combinedUsernames', combinedUsernames)
+      console.log('nominations, tips', tipperUsernames, impactUsernames, uniqueCuratorsCount, newUserCount, uniqueQualityCuratorsCount, newOptOutCount, uniqueTipperCount, totalDegenAmount, qualityUsernames)
+      console.log('combinedUsernames', combinedUsernames)
 
-      res.status(200).json({ message: 'nominations, tips', combinedUsernames, circlesData, combinedUsernames, qualityUsernames });
+      res.status(200).json({ message: 'nominations, tips', combinedUsernames, circlesData, combinedUsernames, qualityUsernames, userdata: dcText });
     } catch (error) {
       console.error('Error handling GET request:', error);
       res.status(500).json({ error: 'Internal Server Error' });
