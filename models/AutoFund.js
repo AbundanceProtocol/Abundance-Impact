@@ -9,9 +9,9 @@ const autoFundSchema = new mongoose.Schema({
   active: { type: Boolean, default: false, index: true },
   remaining: { type: Boolean, default: false, index: true },
   points: { type: String, default: '$IMPACT', index: true },
-  growth_fund: { type: Number, default: 15 },
+  growth_fund: { type: Number, default: 10 },
   development_fund: { type: Number, default: 10 },
-  creator_fund: { type: Number, default: 75 },
+  creator_fund: { type: Number, default: 80 },
   createdAt: { type: Date, default: () => new Date(), index: true }
 });
 

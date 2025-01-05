@@ -10,7 +10,7 @@ const scheduleTipSchema = new mongoose.Schema({
   search_channels: { type: [String], default: []},
   search_curators: { type: [Number], default: []},
   percent_tip: Number,
-  points: { type: String, index: true },
+  points: { type: String, default: '$IMPACT', index: true },
   currencies: { type: [String], default: ['$DEGEN', '$TN100x', '$HUNT']},
   schedule_time: String,
   schedule_count: Number,
@@ -18,6 +18,13 @@ const scheduleTipSchema = new mongoose.Schema({
   ecosystem_name: String,
   cron_job_id: Number,
   active_cron: { type: Boolean, default: false},
+  percent_allowance: { type: Number, default: 25 },
+  percent_allowance_active: { type: Boolean, default: false, index: true },
+  amount_degen_allowance: { type: Number, default: 0 },
+  amount_degen_allowance_active: { type: Boolean, default: false, index: true },
+  creator_fund: { type: Number, default: 80 },
+  development_fund: { type: Number, default: 10 },
+  growth_fund: { type: Number, default: 10 },
   createdAt: { type: Date, default: () => new Date(), index: true }
 });
 
