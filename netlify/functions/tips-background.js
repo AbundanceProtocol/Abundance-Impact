@@ -77,8 +77,8 @@ exports.handler = async function(event, context) {
         for (const userCast of castData) {
           try {
             await new Promise(resolve => setTimeout(resolve, 20));
-            const tipped = await sendTip(userCast, user?.uuid, user?.fid, user?.points);
-            // const tipped = 1
+            // const tipped = await sendTip(userCast, user?.uuid, user?.fid, user?.points);
+            const tipped = 1
             if (tipped) {
               counter++;
             } else {
