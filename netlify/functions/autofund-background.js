@@ -1,8 +1,8 @@
 import { decryptPassword } from '../../utils/utils';
 import connectToDatabase from '../../libs/mongodb';
-import User from '../../../models/User';
-import ScheduleTip from '../../../models/ScheduleTip';
-import Fund from '../../../models/Fund';
+import User from '../../models/User';
+import ScheduleTip from '../../models/ScheduleTip';
+import Fund from '../../models/Fund';
 
 const secretKey = process.env.SECRET_KEY;
 const apiKey = process.env.NEYNAR_API_KEY;
