@@ -15,6 +15,7 @@ const fundSchema = new mongoose.Schema({
   creator_degen_amount: { type: Number, default: 0 },
   creator_ham_amount: { type: Number, default: 0 },
   funding_type: { type: String, default: 'remaining' },
+  curator_fid: { type: [Number], default: [] },
   createdAt: { type: Date, default: () => new Date(), index: true }
 });
 

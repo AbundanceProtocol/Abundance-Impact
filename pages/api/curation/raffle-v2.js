@@ -8,7 +8,6 @@ import Quality from '../../../models/Quality';
 import OptOut from '../../../models/OptOut';
 
 const dataCode = process.env.DATA_CODE
-const wcApiKey = process.env.WC_API_KEY
 
 export default async function handler(req, res) {
   const { code } = req.query
