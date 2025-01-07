@@ -9,7 +9,7 @@
   included_files = ["utils/**", "libs/**", "models/**", "node_modules/sharp/**/*"]
 
 [functions."autofund-background"]
-  schedule = "40 22 * * *"
+  schedule = "5 23 * * *"
 
 [functions."reset-background"]
   schedule = "1 5 * * *"
