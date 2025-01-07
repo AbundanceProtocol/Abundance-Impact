@@ -12,7 +12,7 @@ exports.handler = async function(event, context) {
   async function autoFund() {
     try {
       await connectToDatabase()
-      let testFids = [195117, 388571] // testing 
+      let testFids = [195117, 388571, 512380, 321795] // testing 
       let userSchedules = await ScheduleTip.find({ active_cron: true, points: '$IMPACT', fid: { $in: testFids } }).select('fid search_curators currencies uuid creator_fund development_fund growth_fund').limit(10).exec()
 
       let userData = await getFundingData(userSchedules)
