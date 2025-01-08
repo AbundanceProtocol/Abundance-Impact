@@ -220,6 +220,10 @@ exports.handler = async function(event, context) {
         // dcText += 'Circle data: ' + circlesData + '\n'
         console.log('dcText', dcText)
 
+        if (dcText?.length >= 990) {
+          dcText = dcText.substring(0, 990);
+        }
+
   
         async function sendDc(text, fid) {
           try {
