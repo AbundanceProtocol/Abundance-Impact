@@ -190,7 +190,6 @@ async function getFundingData(userSchedules) {
   // console.log('userSchedules', userSchedules)
   let userData = []
   for (let user of userSchedules) {
-    await new Promise(resolve => setTimeout(resolve, 10));
     let allowances = await getAllowances(user.fid, user.currencies, 100, '7pm')
 
     let curators = []
@@ -222,6 +221,7 @@ async function getFundingData(userSchedules) {
 }
 
 async function getAllowances(fid, currencies, percent, tipTime) {
+  await new Promise(resolve => setTimeout(resolve, 30));
   const allowances = [];
   for (const coin of currencies) {
     let allowance, tip;
