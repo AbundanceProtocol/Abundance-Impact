@@ -151,10 +151,10 @@ exports.handler = async function(event, context) {
   
   
         
-        const tipperUsernames = await Promise.all(getTopTips.map(async (tip) => {
-          const user = await User.findOne({ fid: tip._id.toString() });
-          return {username: user ? user.username : 'Unknown User', tip: tip.totalTips};
-        }));
+        // const tipperUsernames = await Promise.all(getTopTips.map(async (tip) => {
+        //   const user = await User.findOne({ fid: tip._id.toString() });
+        //   return {username: user ? user.username : 'Unknown User', tip: tip.totalTips};
+        // }));
     
   
   
@@ -194,13 +194,13 @@ exports.handler = async function(event, context) {
   
         let dcText = ''
         
-        for (const tipper of tipperUsernames) {
-          dcText += '@' + tipper.username + ' - tip: ' + tipper.tip + ' \n'
-        }
-        dcText += '\n'
-        for (const impact of impactUsernames) {
-          dcText += '@' + impact.username + ' - points: ' + impact.points + ' \n'
-        }
+        // for (const tipper of tipperUsernames) {
+        //   dcText += '@' + tipper.username + ' - tip: ' + tipper.tip + ' \n'
+        // }
+        // dcText += '\n'
+        // for (const impact of impactUsernames) {
+        //   dcText += '@' + impact.username + ' - points: ' + impact.points + ' \n'
+        // }
         dcText += '\n'
         for (const quality of qualityUsernames) {
           dcText += '@' + quality.username + ' - quality: ' + quality.points + ' \n'

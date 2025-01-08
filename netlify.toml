@@ -24,7 +24,7 @@
   schedule = "40 4 * * *"
 
 [functions."rewards-background"]
-  schedule = "54 4 * * *"
+  schedule = "58 5 * * *"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
