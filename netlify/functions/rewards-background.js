@@ -5,6 +5,7 @@ import Quality from '../../models/Quality';
 import Circle from '../../models/Circle';
 import User from '../../models/User';
 import Tip from '../../models/Tip';
+import { v4 as uuid } from 'uuid'
 
 const wcApiKey = process.env.WC_API_KEY
 const userFid = process.env.USER_FID
