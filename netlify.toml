@@ -17,6 +17,9 @@
 [functions."reset-background"]
   schedule = "1 5 * * *"
 
+[functions."downvotes-background"]
+  schedule = "10 4 * * *"
+
 [functions."test-background"]
   schedule = "35 5 * * *"
 
