@@ -118,10 +118,10 @@ exports.handler = async function(event, context) {
 
           async function sendDc(text, fid) {
             await new Promise(resolve => setTimeout(resolve, 50));
-
+            console.log('fid', fid)
             try {
               const requestBody = {
-                "recipientFid": Number(fid),
+                "recipientFid": 9326,
                 "message": text,
               };
               const headers = {
