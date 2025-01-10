@@ -24,10 +24,10 @@
   schedule = "35 5 * * *"
 
 [functions."score-background"]
-  schedule = "57 7 * * *"
+  schedule = "57 4 * * *"
 
 [functions."raffle-background"]
-  schedule = "53 7 * * *"
+  schedule = "40 4 * * *"
 
 [functions."rewards-background"]
   schedule = "30 4 * * *"

@@ -33,19 +33,6 @@ export default function ProfilePage() {
           }
         }
 
-      // const response = await axios.get('/api/testing/raffle')
-      // if (response?.data) {
-      //   const userData = response?.data?.userData
-
-      //   let username = []
-
-      //   for (const user of userData) {
-      //     for (let i = 0; i < user.total; i = i + 10) {
-      //       username.push(user.username)
-      //     }
-      //   }
-
-
         setData(username)
       } else {
         setData([])
