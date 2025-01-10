@@ -18,7 +18,7 @@
   schedule = "1 5 * * *"
 
 [functions."downvotes-background"]
-  schedule = "52 4 * * *"
+  schedule = "2 5 * * *"
 
 [functions."test-background"]
   schedule = "35 5 * * *"
