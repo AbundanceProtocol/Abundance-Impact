@@ -226,6 +226,8 @@ exports.handler = async function(event, context) {
 
   
         async function sendDc(text, fid) {
+          await new Promise(resolve => setTimeout(resolve, 50));
+
           try {
             const requestBody = {
               "recipientFid": fid,
@@ -251,6 +253,14 @@ exports.handler = async function(event, context) {
   
         await sendDc(dcText, 9326);
         await sendDc(dcText, Number(userFid));
+
+        const getTipDcs = await getTips()
+
+        for (const dc of getTipDcs) {
+          await sendDc(dc, 9326);
+          await sendDc(dc, Number(userFid));
+        }
+
         return dcText
 
       } catch (error) {
@@ -276,3 +286,132 @@ exports.handler = async function(event, context) {
 
 };
 
+
+
+
+async function getTips() {
+  try {
+    await connectToDatabase()
+    const oneDay = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    let fundData = await Fund.find({ createdAt: { $gte: oneDay } }).select('-_id fid degen_amount ham_amount');
+
+
+
+    const totalDegen = await Tip.aggregate([
+      {
+        $unwind: "$tip",
+      },
+      {
+        $match: {
+          "tip.currency": "$DEGEN",
+          createdAt: { $gte: oneDay }
+        },
+      },
+      {
+        $group: {
+          _id: "$tipper_fid",
+          degen_amount: { $sum: "$tip.amount" },
+        },
+      },
+    ]);
+
+
+
+    let totalHam = await Tip.aggregate([
+      {
+        $unwind: "$tip",
+      },
+      {
+        $match: {
+          "tip.currency": "$TN100x",
+          createdAt: { $gte: oneDay }
+        },
+      },
+      {
+        $group: {
+          _id: "$tipper_fid",
+          ham_amount: { $sum: "$tip.amount" },
+        },
+      },
+    ]);
+
+    let combinedData = totalDegen.map(degen => {
+      const hamData = totalHam.find(ham => ham._id === degen._id);
+      return {
+        fid: degen._id,
+        degen_amount: degen.degen_amount,
+        ham_amount: hamData ? hamData.ham_amount : 0,
+      };
+    });
+
+
+    totalHam.forEach(ham => {
+      if (!combinedData.some(degen => degen.fid === ham._id)) {
+        combinedData.push({
+          fid: ham._id,
+          degen_amount: 0,
+          ham_amount: ham.ham_amount,
+        });
+      }
+    });
+
+    let combinedAllData = combinedData.map(degen => {
+      const fundDataItem = fundData.find(fund => fund.fid === degen.fid);
+      return {
+        fid: degen.fid,
+        degen_amount: degen.degen_amount + (fundDataItem ? fundDataItem.degen_amount : 0),
+        ham_amount: degen.ham_amount + (fundDataItem ? fundDataItem.ham_amount : 0),
+      };
+    });
+
+    fundData.forEach(fund => {
+      if (!combinedAllData.some(degen => degen.fid === fund.fid)) {
+        combinedAllData.push({
+          fid: fund.fid,
+          degen_amount: fund.degen_amount,
+          ham_amount: fund.ham_amount,
+        });
+      }
+    });
+
+    combinedAllData.sort((a, b) => a.fid - b.fid);
+
+             
+    let combinedTipData = await Promise.all(combinedAllData.map(async (fund) => {
+      const user = await User.findOne({ fid: fund.fid.toString() }).select('username');
+      return {
+        username: user ? user.username : 'Unknown',
+        fid: fund.fid,
+        degen: fund.degen_amount,
+        ham: fund.ham_amount,
+        score: (5 * fund.degen_amount + fund.ham_amount) / 1000
+      };
+    }));
+    
+    combinedTipData.sort((a, b) => b.score - a.score);
+        
+    let dcs = []
+    
+    let dcText = ''
+    for (const user of combinedTipData) {
+      const addition = `@${user.username} degen: ${user.degen} ham: ${user.ham} rank: ${user.score}\n`;
+      if (dcText.length + addition.length < 900) {
+        dcText += addition;
+      } else {
+        dcs.push(dcText);
+        dcText = '';
+      }
+    }
+    dcs.push(dcText)
+
+    // for (const dc of dcs) {
+    //   console.log('dc', dc)
+    // }
+
+    // console.log('dcs', dcs)
+    return dcs
+  } catch (error) {
+    console.error('Error in getDegenAllowance:');
+    return [];
+  }
+}
