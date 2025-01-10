@@ -2,7 +2,7 @@ import connectToDatabase from '../../libs/mongodb';
 import Impact from '../../models/Impact';
 import Quality from '../../models/Quality';
 import User from '../../models/User';
-import Cast from '../../../models/Cast';
+import Cast from '../../models/Cast';
 import { v4 as uuid } from 'uuid'
 
 const wcApiKey = process.env.WC_API_KEY
