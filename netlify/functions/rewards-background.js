@@ -294,7 +294,7 @@ async function getTips() {
   try {
     await connectToDatabase()
     const oneDay = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    let fundData = await Fund.find({ createdAt: { $gte: oneDay } }).select('-_id fid degen_amount ham_amount');
+    let fundData = await Fund.find({ createdAt: { $gte: oneDay }, valid: true }).select('-_id fid degen_amount ham_amount');
 
 
 

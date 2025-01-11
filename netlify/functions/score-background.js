@@ -113,6 +113,7 @@ async function getUserData(fid, time) {
     tipperQuery.tipper_fid = fid
     tipperQuery.points = '$IMPACT'
     fundQuery.fid = fid
+    fundQuery.valid = true
 
     if (time) {
       curatorQuery.createdAt = { $gte: time }

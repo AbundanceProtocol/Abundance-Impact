@@ -62,6 +62,7 @@ export default async function handler(req, res) {
       ]);
 
       let devFunds = await Fund.aggregate([
+        { $match: {valid: true} },
         { $group: {
           _id: null,
           // total_dev_degen: {
