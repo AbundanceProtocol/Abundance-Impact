@@ -22,9 +22,9 @@ const scheduleTipSchema = new mongoose.Schema({
   percent_allowance_active: { type: Boolean, default: false, index: true },
   amount_degen_allowance: { type: Number, default: 0 },
   amount_degen_allowance_active: { type: Boolean, default: false, index: true },
-  creator_fund: { type: Number, default: 80 },
-  development_fund: { type: Number, default: 10 },
-  growth_fund: { type: Number, default: 10 },
+  creator_fund: { type: Number, default: 100 },
+  development_fund: { type: Number, default: 0 },
+  growth_fund: { type: Number, default: 0 },
   createdAt: { type: Date, default: () => new Date(), index: true }
 });
 
