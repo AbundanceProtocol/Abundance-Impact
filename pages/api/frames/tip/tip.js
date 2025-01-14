@@ -557,6 +557,7 @@ export default async function handler(req, res) {
                     query['author_fid'] = { "$nin": filterFids };
                   }
                 }
+
                 // if (text) {
                 //   query.cast_text = { $regex: text, $options: 'i' }; // Case-insensitive search
                 // }
@@ -587,47 +588,55 @@ export default async function handler(req, res) {
                     // console.log('63', returnedCasts)
                   } else {
           
-                    totalCount = await Cast.countDocuments(query);
+                    totalCount = await Cast.countDocuments(query) || 0;
               
-                    // Calculate the number of documents to be sampled from each range
-                    const top20PercentCount = Math.ceil(totalCount * 0.2);
-                    const middle40PercentCount = Math.ceil(totalCount * 0.4);
-                    const bottom40PercentCount = totalCount - top20PercentCount - middle40PercentCount;
-              
-                    // Fetch documents from each range
-                    const top20PercentCasts = await Cast.find(query)
+                    if (totalCount <= 9) {
+                      returnedCasts = await Cast.find(query)
                       .sort({ impact_total: -1 })
                       .populate('impact_points')
-                      .limit(top20PercentCount)
                       .exec();
-                    const middle40PercentCasts = await Cast.find(query)
-                      .sort({ impact_total: -1 })
-                      .populate('impact_points')
-                      .skip(top20PercentCount)
-                      .limit(middle40PercentCount)
-                      .exec();
-                    const bottom40PercentCasts = await Cast.find(query)
-                      .sort({ impact_total: -1 })
-                      .populate('impact_points')
-                      .skip(top20PercentCount + middle40PercentCount)
-                      .limit(bottom40PercentCount)
-                      .exec();
-              
-                    returnedCasts = top20PercentCasts.concat(middle40PercentCasts, bottom40PercentCasts);
-              
-                    returnedCasts.sort((a, b) => b.impact_total - a.impact_total);
-              
-                    returnedCasts = returnedCasts.reduce((acc, current) => {
-                      const existingItem = acc.find(item => item._id === current._id);
-                      if (!existingItem) {
-                        acc.push(current);
-                      }
-                      return acc;
-                    }, [])
-          
-                    returnedCasts = shuffleArray(returnedCasts);
-              
-                    returnedCasts = returnedCasts.slice(0, limit);
+                      returnedCasts.sort((a, b) => b.impact_total - a.impact_total);
+                    } else {
+                      // Calculate the number of documents to be sampled from each range
+                      const top20PercentCount = Math.ceil(totalCount * 0.2);
+                      const middle40PercentCount = Math.ceil(totalCount * 0.4);
+                      const bottom40PercentCount = totalCount - top20PercentCount - middle40PercentCount;
+                
+                      // Fetch documents from each range
+                      const top20PercentCasts = await Cast.find(query)
+                        .sort({ impact_total: -1 })
+                        .populate('impact_points')
+                        .limit(top20PercentCount)
+                        .exec();
+                      const middle40PercentCasts = await Cast.find(query)
+                        .sort({ impact_total: -1 })
+                        .populate('impact_points')
+                        .skip(top20PercentCount)
+                        .limit(middle40PercentCount)
+                        .exec();
+                      const bottom40PercentCasts = await Cast.find(query)
+                        .sort({ impact_total: -1 })
+                        .populate('impact_points')
+                        .skip(top20PercentCount + middle40PercentCount)
+                        .limit(bottom40PercentCount)
+                        .exec();
+                
+                      returnedCasts = top20PercentCasts.concat(middle40PercentCasts, bottom40PercentCasts);
+                
+                      returnedCasts.sort((a, b) => b.impact_total - a.impact_total);
+                
+                      returnedCasts = returnedCasts.reduce((acc, current) => {
+                        const existingItem = acc.find(item => item._id === current._id);
+                        if (!existingItem) {
+                          acc.push(current);
+                        }
+                        return acc;
+                      }, [])
+            
+                      returnedCasts = shuffleArray(returnedCasts);
+                
+                      returnedCasts = returnedCasts.slice(0, limit);
+                    }
                   }
               
                   if (returnedCasts && returnedCasts.length > 9) {
