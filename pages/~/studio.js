@@ -1408,7 +1408,7 @@ export default function ProfilePage() {
 
               <div className='flex-row' style={{height: '30px', alignItems: 'center', justifyContent: 'center', padding: '0px 0'}}>
                 <div className='flex-row' style={{padding: '4px 8px', backgroundColor: '#002244ee', border: '1px solid #666', borderRadius: '20px', alignItems: 'center', gap: '0.25rem'}}>
-                  <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>RAFFLE</div>
+                  <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>REWARD</div>
 
                   <div className={scoreTime == '24h' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateScore('24h')}}>24hr</div>
                   <div className={scoreTime == '3d' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateScore('3d')}}>3d</div>
