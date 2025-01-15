@@ -32,11 +32,13 @@ export default async function handler(req, res) {
           } else if (schedule == 'on') {
             updated = await ScheduleTip.findOneAndUpdate({ fid }, { active_cron: true }, { new: true, select: '-uuid' });
           } else if (schedule == 'standard') {
-            updated = await ScheduleTip.findOneAndUpdate({ fid }, { active_cron: true, creator_fund: 100, development_fund: 0, growth_fund: 0 }, { new: true, select: '-uuid' });
+            updated = await ScheduleTip.findOneAndUpdate({ fid }, { active_cron: true, creator_fund: 100, development_fund: 0, growth_fund: 0, special_fund: 0 }, { new: true, select: '-uuid' });
           } else if (schedule == 'optimized') {
-            updated = await ScheduleTip.findOneAndUpdate({ fid }, { active_cron: true, creator_fund: 80, development_fund: 10, growth_fund: 10 }, { new: true, select: '-uuid' });
+            updated = await ScheduleTip.findOneAndUpdate({ fid }, { active_cron: true, creator_fund: 80, development_fund: 10, growth_fund: 10, special_fund: 0 }, { new: true, select: '-uuid' });
           } else if (schedule == 'accelerated') {
-            updated = await ScheduleTip.findOneAndUpdate({ fid }, { active_cron: true, creator_fund: 60, development_fund: 20, growth_fund: 20 }, { new: true, select: '-uuid' });
+            updated = await ScheduleTip.findOneAndUpdate({ fid }, { active_cron: true, creator_fund: 60, development_fund: 20, growth_fund: 20, special_fund: 0 }, { new: true, select: '-uuid' });
+          } else if (schedule == 'special') {
+            updated = await ScheduleTip.findOneAndUpdate({ fid }, { active_cron: true, creator_fund: 0, development_fund: 0, growth_fund: 0, special_fund: 100 }, { new: true, select: '-uuid' });
           } else {
             updated = null
           }
@@ -113,6 +115,7 @@ export default async function handler(req, res) {
           let creator_fund = null
           let development_fund = null
           let growth_fund = null
+          let special_fund = null
 
           if (schedule == 'off') {
             active_cron = false
@@ -123,16 +126,25 @@ export default async function handler(req, res) {
             creator_fund = 100
             development_fund = 0
             growth_fund = 0
+            special_fund = 0
           } else if (schedule == 'optimized') {
             active_cron = true
             creator_fund = 80
             development_fund = 10
             growth_fund = 10
+            special_fund = 0
           } else if (schedule == 'accelerated') {
             active_cron = true
             creator_fund = 60
             development_fund = 20
             growth_fund = 20
+            special_fund = 0
+          } else if (schedule == 'special') {
+            active_cron = true
+            creator_fund = 0
+            development_fund = 0
+            growth_fund = 0
+            special_fund = 100
           }
 
           let newSchedule = null
@@ -182,6 +194,7 @@ export default async function handler(req, res) {
               ...(creator_fund !== null ? { creator_fund } : {}),
               ...(development_fund !== null ? { development_fund } : {}),
               ...(growth_fund !== null ? { growth_fund } : {}),
+              ...(special_fund !== null ? { special_fund } : {}),
             });
             
             await newSchedule.save()

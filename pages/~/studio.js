@@ -9,7 +9,7 @@ import Item from '../../components/Ecosystem/ItemWrap/Item';
 import Description from '../../components/Ecosystem/Description';
 import ItemWrap from '../../components/Ecosystem/ItemWrap';
 import { BiSortDown, BiSortUp } from "react-icons/bi";
-import { FaLock, FaGlobe, FaRegStar, FaAngleDown, FaShareAlt as Share } from "react-icons/fa";
+import { FaLock, FaFire, FaGlobe, FaRegStar, FaAngleDown, FaShareAlt as Share } from "react-icons/fa";
 import { PiSquaresFourLight as Actions, PiClockClockwiseBold as ClockForward, PiClockCounterClockwiseBold as ClockBack, PiBankFill } from "react-icons/pi";
 import { GrSchedulePlay as Sched } from "react-icons/gr";
 import { GiRibbonMedal as Medal } from "react-icons/gi";
@@ -1544,7 +1544,7 @@ export default function ProfilePage() {
 
           </div>)}
           
-          <div
+          {/* <div
             className="flex-row"
             style={{
               color: "#9df",
@@ -1555,7 +1555,7 @@ export default function ProfilePage() {
             }}
           >
             How to boost your impact
-          </div>
+          </div> */}
 
           </>)}
         </div>
@@ -1704,7 +1704,7 @@ export default function ProfilePage() {
           >
 
             <div className='flex-row' style={{fontSize: '13px', justifyContent: isMobile ? "center" : "space-between", alignItems: 'center', gap: '0.75rem', margin: '20px 0', flexWrap: 'wrap', width: '100%'}}>
-              <div className={`flex-col btn-select ${userFunding?.active_cron && userFunding?.creator_fund == 100 ? 'cast-act-lt btn-brd-lt' : 'blu-drk btn-brd'}`} style={{minWidth: isMobile ? '185px' : '180px', color: userFunding?.active_cron && userFunding?.creator_fund == 100 ? '#000' : '#cde'}} onClick={() => {setFundingSchedule('standard')}}>
+              <div className={`flex-col btn-select ${userFunding?.active_cron && userFunding?.creator_fund == 100 ? 'cast-act-lt btn-brd-lt' : 'blu-drk btn-brd'}`} style={{minWidth: isMobile ? '185px' : '180px', color: userFunding?.active_cron && userFunding?.creator_fund == 100 ? '#000' : '#cde', height: '133px'}} onClick={() => {setFundingSchedule('standard')}}>
                 <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
                   <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0'}}>Standard</div>
                 </div>
@@ -1727,7 +1727,7 @@ export default function ProfilePage() {
                   <div>1.0x Score Boost</div>
                 </div>
               </div>
-              <div className={`flex-col btn-select ${userFunding?.active_cron && userFunding?.creator_fund == 80 ? 'cast-act-lt btn-brd-lt' : 'blu-drk btn-brd'}`} style={{minWidth: isMobile ? '185px' : '180px', color: userFunding?.active_cron && userFunding?.creator_fund == 80 ? '#000' : '#cde'}} onClick={() => {setFundingSchedule('optimized')}}>
+              <div className={`flex-col btn-select ${userFunding?.active_cron && userFunding?.creator_fund == 80 ? 'cast-act-lt btn-brd-lt' : 'blu-drk btn-brd'}`} style={{minWidth: isMobile ? '185px' : '180px', color: userFunding?.active_cron && userFunding?.creator_fund == 80 ? '#000' : '#cde', height: '133px'}} onClick={() => {setFundingSchedule('optimized')}}>
                 <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
                   <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0'}}>Optimized</div>
                 </div>
@@ -1750,7 +1750,7 @@ export default function ProfilePage() {
                   <div>1.25x Score Boost</div>
                 </div>
               </div>
-              <div className={`flex-col btn-select ${userFunding?.active_cron && userFunding?.creator_fund == 60 ? 'cast-act-lt btn-brd-lt' : 'blu-drk btn-brd'}`} style={{minWidth: isMobile ? '185px' : '180px', color: userFunding?.active_cron && userFunding?.creator_fund == 60 ? '#000' : '#cde'}} onClick={() => {setFundingSchedule('accelerated')}}>
+              <div className={`flex-col btn-select ${userFunding?.active_cron && userFunding?.creator_fund == 60 ? 'cast-act-lt btn-brd-lt' : 'blu-drk btn-brd'}`} style={{minWidth: isMobile ? '185px' : '180px', color: userFunding?.active_cron && userFunding?.creator_fund == 60 ? '#000' : '#cde', height: '133px'}} onClick={() => {setFundingSchedule('accelerated')}}>
                 <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
                   <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0'}}>Accelerated</div>
                 </div>
@@ -1773,7 +1773,29 @@ export default function ProfilePage() {
                   <div>1.33x Score Boost</div>
                 </div>
               </div>
-              
+              <div className={`flex-col btn-select ${userFunding?.active_cron && userFunding?.special_fund == 100 ? 'cast-act-lt btn-brd-lt' : 'blu-drk btn-brd'}`} style={{minWidth: isMobile ? '185px' : '180px', color: userFunding?.active_cron && userFunding?.special_fund == 100 ? '#000' : '#cde', height: '133px'}} onClick={() => {setFundingSchedule('special')}}>
+                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
+                  <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0'}}>Special Fund</div>
+                </div>
+                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.5rem'}}>
+                  {/* <IoBuild size={15} color={userFunding?.active_cron && userFunding?.special_fund == 100 ? '#147' : '#5af'} />
+                  <div>Dev</div> */}
+                  {/* <div style={{fontSize: '14px', fontWeight: '700'}}>&nbsp;</div> */}
+                </div>
+                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.5rem', height: '90px'}}>
+                  <FaFire size={15} color={userFunding?.active_cron && userFunding?.special_fund == 100 ? '#147' : '#5af'} />
+                  {/* <div></div> */}
+                  <div className='text-c' style={{fontSize: '14px', fontWeight: '700', maxWidth: '88px'}}>LA Wildfire Relief&nbsp;&nbsp;100%</div>
+                </div>
+                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.5rem'}}>
+                  {/* <IoIosRocket size={15} color={userFunding?.active_cron && userFunding?.special_fund == 100 ? '#147' : '#5af'} />
+                  <div>Growth</div> */}
+                  {/* <div style={{fontSize: '14px', fontWeight: '700'}}>&nbsp;</div> */}
+                </div>
+                <div className='flex-row' style={{margin: '5px 0 0 0', color: userFunding?.active_cron && userFunding?.special_fund == 100 ? '#111' : "#9df", fontSize: '11px'}}>
+                  <div>&nbsp;</div>
+                </div>
+              </div>
             </div>
 
 

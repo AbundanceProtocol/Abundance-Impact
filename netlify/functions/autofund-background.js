@@ -5,6 +5,7 @@ import ScheduleTip from '../../models/ScheduleTip';
 import Fund from '../../models/Fund';
 
 const secretKey = process.env.SECRET_KEY;
+const special = process.env.SPECIAL_KEY;
 const apiKey = process.env.NEYNAR_API_KEY;
 
 exports.handler = async function(event, context) {
@@ -59,9 +60,11 @@ async function sendTip(user) {
   let growthDegen = 0
   let creatorDegen = 0
   let devDegen = 0
+  let specialDegen = 0
   let growthHam = 0
   let creatorHam = 0
   let devHam = 0
+  let specialHam = 0
 
   const signer = decryptPassword(user?.uuid, secretKey)
 
@@ -77,10 +80,12 @@ async function sendTip(user) {
 
   growthDegen = Math.floor(degen * user?.growth_fund / 100) || 0
   creatorDegen = Math.floor(degen * user?.creator_fund / 100) || 0
-  devDegen = degen - growthDegen - creatorDegen
+  specialDegen = Math.floor(degen * user?.special_fund / 100) || 0
+  devDegen = degen - growthDegen - creatorDegen - specialDegen
   growthHam = Math.floor(ham * user?.growth_fund / 100) || 0
   creatorHam = Math.floor(ham * user?.creator_fund / 100) || 0
-  devHam = ham - growthHam - creatorHam
+  specialHam = Math.floor(ham * user?.special_fund / 100) || 0
+  devHam = ham - growthHam - creatorHam - specialHam
 
   const base = "https://api.neynar.com/";
   const url = `${base}v2/farcaster/cast`;
@@ -119,6 +124,9 @@ async function sendTip(user) {
         creator_fund: user?.creator_fund || 0,
         creator_degen_amount: creatorDegen,
         creator_ham_amount: creatorHam,
+        special_fund: user?.special_fund,
+        special_degen_amount: specialDegen || 0,
+        special_ham_amount: specialHam || 0,
         funding_type: 'remaining',
         curator_fid: user?.curator_fids || [],
       });
@@ -180,6 +188,9 @@ function getCastText(user, allowances, curators) {
   if (user?.development_fund > 0) {
     castText += `\n\nDevelopment Fund: ${user?.development_fund}%`
   }
+  if (user?.special_fund > 0) {
+    castText += `\n\n${special} Fund: ${user?.special_fund}%`
+  }
   return castText
 }
 
@@ -212,6 +223,7 @@ async function getFundingData(userSchedules) {
       creator_fund: user?.creator_fund, 
       development_fund: user?.development_fund, 
       growth_fund: user?.growth_fund, 
+      special_fund: user?.special_fund, 
       allowances, 
       castText
      };

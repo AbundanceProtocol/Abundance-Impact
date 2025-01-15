@@ -20,9 +20,9 @@ export default Buttons;
 const button = {
     // 'top-menu': ['main', 'user'],
     'top-menu': ['main'],
-    'side-menu': ['Impact', 'Ecosystems', 'Studio'],
+    'side-menu': ['Impact', 'Ecosystem', 'Studio'],
     // 'side-menu': ['Impact', 'Search', 'Ecosystem', 'Reviews', 'Notifications', 'Studio', 'Funding', 'Challenge', 'Propose', 'Cast'],
-    'bottom-nav': ['Impact', 'Ecosystems', 'Studio', 'Cast Actions'],
+    'bottom-nav': ['Impact', 'Ecosystem'],
     // 'bottom-nav': ['Impact', 'Search', 'Ecosystem', 'Reviews', 'Notifications'],
     'nav-menu': {
         'main': ['Impact', 'Studio'],
@@ -85,10 +85,10 @@ const button = {
         working: true,
         icon: Actions
     },
-    'Ecosystems': {
+    'Ecosystem': {
         link: '/~/ecosystems/abundance',
-        menu: 'Ecosystems',
-        description: 'Ecosystems',
+        menu: 'Ecosystem',
+        description: 'Ecosystem',
         account: true,
         working: true,
         icon: FaGlobe

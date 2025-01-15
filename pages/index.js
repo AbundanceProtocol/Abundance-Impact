@@ -8,7 +8,7 @@ import Item from '../components/Ecosystem/ItemWrap/Item';
 import Description from '../components/Ecosystem/Description';
 import ItemWrap from '../components/Ecosystem/ItemWrap';
 import useMatchBreakpoints from '../hooks/useMatchBreakpoints';
-import { FaLock, FaUser, FaGlobe, FaPlus, FaRegStar, FaCoins, FaAngleDown, FaShareAlt as Share } from "react-icons/fa";
+import { FaLock, FaUsers, FaUser, FaGlobe, FaPlus, FaRegStar, FaCoins, FaAngleDown, FaShareAlt as Share } from "react-icons/fa";
 import { HiOutlineAdjustmentsHorizontal as Adjust } from "react-icons/hi2";
 import { GrSchedulePlay as Sched } from "react-icons/gr";
 import { AiFillSafetyCertificate as Aligned } from "react-icons/ai";
@@ -19,9 +19,10 @@ import { RiVerifiedBadgeFill as Quality } from "react-icons/ri";
 import LoginButton from '../components/Layout/Modals/FrontSignin';
 import EcosystemMenu from '../components/Layout/EcosystemNav/EcosystemMenu';
 import { IoInformationCircleOutline as Info } from "react-icons/io5";
-import { PiSquaresFourLight as Actions } from "react-icons/pi";
+import { PiSquaresFourLight as Actions, PiBankFill } from "react-icons/pi";
 import { Logo } from './assets';
 import useStore from '../utils/store';
+import ProfilePage from './~/studio';
 
 export default function Home() {
   const ref2 = useRef(null)
@@ -119,14 +120,14 @@ export default function Home() {
           content={`Building the global superalignment layer`}
         />
       </Head>
-      <div
-        style={{
-          padding: isMobile ? "58px 0 20px 0" : "58px 0 60px 0",
-          width: feedMax,
-        }}
-      ></div>
+    {!isLogged && (<div
+      style={{
+        padding: isMobile ? "58px 0 20px 0" : "58px 0 60px 0",
+        width: feedMax,
+      }}
+    ></div>)}
 
-      <div style={{ padding: "0px 4px 80px 4px", width: feedMax }}>
+      {!isLogged && (<div style={{ padding: "0px 4px 80px 4px", width: feedMax }}>
         <div
           className="flex-col"
           style={{
@@ -155,16 +156,44 @@ export default function Home() {
             style={{
               color: "#ace",
               width: "100%",
+              fontSize: isMobile ? "18px" : "25px",
+              padding: "0px 10px 5px 10px",
+              textAlign: "center",
+              justifyContent: "center",
+            }}
+          >
+            /impact rewards you for your impact
+          </div>
+
+          <div
+            className="flex-row"
+            style={{
+              color: "#ace",
+              width: "100%",
               fontSize: isMobile ? "24px" : "33px",
               padding: "0px 10px 35px 10px",
               textAlign: "center",
               justifyContent: "center",
             }}
           >
-            boost & reward creators on farcaster
+            make an impact - get rewards
           </div>
 
           <div
+            className="flex-row"
+            style={{
+              color: "#ace",
+              width: "100%",
+              fontSize: isMobile ? "18px" : "23px",
+              padding: "30px 10px 15px 10px",
+              textAlign: "center",
+              justifyContent: "center",
+            }}
+          >
+            login to get started:
+          </div>
+
+          {/* <div
             className="flex-row"
             style={{
               color: "#ace",
@@ -180,9 +209,9 @@ export default function Home() {
               <strong>Attention Economy</strong> to a{" "}
               <strong>Creation Economy</strong>
             </p>
-          </div>
+          </div> */}
 
-          <div
+          {/* <div
             className="flex-row"
             style={{
               color: "#8ac",
@@ -195,9 +224,9 @@ export default function Home() {
             }}
           >
             Currently building (alpha):
-          </div>
+          </div> */}
 
-          <div
+          {/* <div
             className="flex-row"
             style={{
               gap: "0.75rem",
@@ -206,8 +235,8 @@ export default function Home() {
               justifyContent: "center",
               alignItems: "center",
             }}
-          >
-            <div
+          > */}
+            {/* <div
               onClick={() =>
                 document
                   .getElementById("personal")
@@ -236,7 +265,7 @@ export default function Home() {
                   Abundance Ecosystem
                 </p>
               </div>
-            </div>
+            </div> */}
 
             {/* <div onClick={() => document.getElementById('ecosystem').scrollIntoView({ behavior: 'smooth' })}>
             <div className='flex-row cast-act-lt' style={{borderRadius: '8px', padding: '8px 8px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
@@ -244,9 +273,9 @@ export default function Home() {
               <p style={{padding: '0px', fontSize: '15px', fontWeight: '500', textWrap: 'nowrap'}}>[Your] Ecosystem</p>
             </div>
           </div> */}
-          </div>
+          {/* </div> */}
 
-          <div
+          {/* <div
             className={isMobile ? "flex-col" : "flex-row"}
             style={{ alignItems: "center", gap: "1.5rem" }}
           >
@@ -292,7 +321,7 @@ export default function Home() {
                 effort, and the ecosystem grows
               </p>
             </div>
-          </div>
+          </div> */}
 
           {!isLogged && (
             <>
@@ -326,8 +355,7 @@ export default function Home() {
                   textAlign: "center",
                 }}
               >
-                /impact needs your permission to create tipping casts and
-                follows on your behalf
+                /impact needs your permission to create tipping casts on your behalf
               </div>
             </>
           )}
@@ -358,11 +386,11 @@ export default function Home() {
               padding: "16px 0 0 0",
             }}
           >
-            <FaGlobe style={{ fill: "#cde" }} size={24} />
+            {/* <FaGlobe style={{ fill: "#cde" }} size={24} /> */}
             <Description
               {...{
                 show: true,
-                text: "Abundance Ecosystem",
+                text: "How it works",
                 padding: "4px 0 4px 10px",
                 size: "large",
               }}
@@ -395,7 +423,7 @@ export default function Home() {
               justifyContent: "center",
             }}
           >
-            <ItemWrap>
+            {/* <ItemWrap>
               <div
                 className="flex-row"
                 style={{
@@ -456,16 +484,33 @@ export default function Home() {
                   />
                 </>
               )}
-            </ItemWrap>
+            </ItemWrap> */}
 
             <ItemWrap>
               <Item
                 {...{
                   icon: Medal,
-                  text: "Stake",
+                  text: "Curate",
                   description:
-                    "Stake $IMPACT points on casts based on the value to the ecosystem",
+                    `You get a daily allowance of $IMPACT points`,
                 }}
+              />
+              <Item
+                {...{
+                  noIcon: true,
+                  description: `Stake these points on casts based on their value to the Farcaster ecosystem`,
+                }}
+              />
+              <Item
+                {...{ 
+                  noIcon: true,
+                  description: `Overvaluing casts can result in a downvote, which lowers your future $IMPACT allowance` }}
+              />
+              <Item
+                {...{ 
+                  noIcon: true,
+                  description: `
+                  90% of rewards flow to creators, and 10% to curators` }}
               />
             </ItemWrap>
 
@@ -476,25 +521,37 @@ export default function Home() {
             <ItemWrap>
               <Item
                 {...{
-                  icon: Sched,
-                  text: "Auto-tip / Multi-tip",
-                  description: `Don't let your allowance go to waste. Schedule recurring tips, or multi-tip your nominees through a frame`,
+                  icon: PiBankFill,
+                  text: "Auto-Fund",
+                  description: `Don't let your allowance go to waste `,
                 }}
+              />
+              <Item
+                {...{ 
+                  noIcon: true,
+                  description: `
+                  Auto-Fund automatically distributes your remaining $degen & $ham allowances to impactful builders and creators on Farcaster - and rewwards you in the process` }}
               />
             </ItemWrap>
 
             <ItemWrap>
               <Item
                 {...{
-                  icon: Share,
-                  text: "Share",
+                  icon: FaUsers,
+                  text: "Invite",
                   description:
-                    "Share tipping frame of your nominations and let your friends tip also. You get 10% of tips",
+                    "Invite your friends to use Impact Alpha - win rewards. ",
                 }}
+              />
+              <Item
+                {...{ 
+                  noIcon: true,
+                  description: `
+                  any /impact frame you share has your referral` }}
               />
             </ItemWrap>
 
-            <div
+            {/* <div
               className="flex-col"
               style={{
                 margin: "15px 0 10px 0",
@@ -691,9 +748,9 @@ export default function Home() {
                   </div>
                 )}
               </div>
-            </div>
+            </div> */}
           </div>
-          <div className="flex-col" style={{alignItems: 'center', margin: '10px 0 10px 0'}}>
+          {/* <div className="flex-col" style={{alignItems: 'center', margin: '10px 0 10px 0'}}>
             <Link href="/~/ecosystems/abundance">
               <div
                 className="flex-row cast-act-lt"
@@ -720,9 +777,9 @@ export default function Home() {
                 </p>
               </div>
             </Link>
-          </div>
+          </div> */}
         </div>
-      </div>
+      </div>)}
 
       {/* <div id="ecosystem" style={{padding: '40px 4px 80px 4px', width: feedMax}}>
       <div style={{padding: '8px', backgroundColor: '#335566aa', borderRadius: '15px', border: '1px solid #000'}}>
@@ -825,7 +882,8 @@ export default function Home() {
         </div>
       </div>
     </div> */}
-      <div ref={ref}>&nbsp;</div>
+      {!isLogged && (<div ref={ref}>&nbsp;</div>)}
+      {isLogged && <ProfilePage />}
     </div>
   );
 }
