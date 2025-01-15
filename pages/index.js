@@ -18,7 +18,8 @@ import { FaArrowTrendUp as Grow } from "react-icons/fa6";
 import { RiVerifiedBadgeFill as Quality } from "react-icons/ri";
 import LoginButton from '../components/Layout/Modals/FrontSignin';
 import EcosystemMenu from '../components/Layout/EcosystemNav/EcosystemMenu';
-import { IoInformationCircleOutline as Info } from "react-icons/io5";
+import { IoMdTrophy } from "react-icons/io";
+import { IoInformationCircleOutline as Info, IoLogIn } from "react-icons/io5";
 import { PiSquaresFourLight as Actions, PiBankFill } from "react-icons/pi";
 import { Logo } from './assets';
 import useStore from '../utils/store';
@@ -120,14 +121,14 @@ export default function Home() {
           content={`Building the global superalignment layer`}
         />
       </Head>
-    {!isLogged && (<div
+    {!isLogged && (<div id="log in"
       style={{
         padding: isMobile ? "58px 0 20px 0" : "58px 0 60px 0",
         width: feedMax,
       }}
     ></div>)}
 
-      {!isLogged && (<div style={{ padding: "0px 4px 80px 4px", width: feedMax }}>
+      {!isLogged && (<div style={{ padding: "0px 4px 140px 4px", width: feedMax }}>
         <div
           className="flex-col"
           style={{
@@ -179,6 +180,139 @@ export default function Home() {
             make an impact - get rewards
           </div>
 
+
+          <div className='flex-row' style={{justifyContent: 'center', margin: '0 0 10px 0'}}>
+
+
+          {/* WHAT IS IMPACT BUTTON */}
+
+            <div
+              className="flex-col"
+              style={{
+                // width: "100%",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+
+
+
+              <div
+                className="flex-row"
+                style={{
+                  gap: "0.75rem",
+                  margin: "20px 8px 8px 8px",
+                  flexWrap: "wrap",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <div
+                  onClick={() =>
+                    document
+                      .getElementById("what is impact")
+                      .scrollIntoView({ behavior: "smooth" })
+                  }
+                >
+                  <div
+                    className="flex-row cast-act-lt"
+                    style={{
+                      borderRadius: "8px",
+                      padding: "8px 8px",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "0.25rem",
+                    }}
+                  >
+                    {/* {!isMobile && <IoMdTrophy size={14} />} */}
+                    <p
+                      style={{
+                        padding: "0px",
+                        fontSize: isMobile ? '13px' : '15px',
+                        fontWeight: "500",
+                        textWrap: "nowrap",
+                      }}
+                    >
+                      What is /impact
+                    </p>
+                  </div>
+                </div>
+
+
+              </div>
+
+            </div>
+
+          {/* HOW IT WORKS BUTTON */}
+
+            <div
+              className="flex-col"
+              style={{
+                // width: "100%",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+
+
+
+              <div
+                className="flex-row"
+                style={{
+                  gap: "0.75rem",
+                  margin: "20px 8px 8px 8px",
+                  flexWrap: "wrap",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <div
+                  onClick={() =>
+                    document
+                      .getElementById("how it works")
+                      .scrollIntoView({ behavior: "smooth" })
+                  }
+                >
+                  <div
+                    className="flex-row cast-act-lt"
+                    style={{
+                      borderRadius: "8px",
+                      padding: "8px 8px",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "0.25rem",
+                    }}
+                  >
+                    {/* {!isMobile && <PiBankFill size={14} />} */}
+                    <p
+                      style={{
+                        padding: "0px",
+                        fontSize: isMobile ? '13px' : '15px',
+                        fontWeight: "500",
+                        textWrap: "nowrap",
+                      }}
+                    >
+                      How it works
+                    </p>
+                  </div>
+                </div>
+
+
+              </div>
+
+            </div>
+
+
+
+
+
+
+
+
+          </div>
+
+
+
           <div
             className="flex-row"
             style={{
@@ -193,135 +327,7 @@ export default function Home() {
             login to get started:
           </div>
 
-          {/* <div
-            className="flex-row"
-            style={{
-              color: "#ace",
-              width: "95%",
-              fontSize: isMobile ? "17px" : "22px",
-              padding: "10px 10px 25px 10px",
-              textAlign: "center",
-              fontWeight: "400",
-            }}
-          >
-            <p>
-              /impact aims to accelerate Farcaster&apos;s transition from an{" "}
-              <strong>Attention Economy</strong> to a{" "}
-              <strong>Creation Economy</strong>
-            </p>
-          </div> */}
 
-          {/* <div
-            className="flex-row"
-            style={{
-              color: "#8ac",
-              width: "90%",
-              fontSize: isMobile ? "14px" : "18px",
-              padding: "0px 10px 5px 10px",
-              textAlign: "center",
-              fontWeight: "400",
-              justifyContent: "center",
-            }}
-          >
-            Currently building (alpha):
-          </div> */}
-
-          {/* <div
-            className="flex-row"
-            style={{
-              gap: "0.75rem",
-              margin: "8px",
-              flexWrap: "wrap",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          > */}
-            {/* <div
-              onClick={() =>
-                document
-                  .getElementById("personal")
-                  .scrollIntoView({ behavior: "smooth" })
-              }
-            >
-              <div
-                className="flex-row cast-act-lt"
-                style={{
-                  borderRadius: "8px",
-                  padding: "8px 8px",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "0.25rem",
-                }}
-              >
-                <FaGlobe size={14} />
-                <p
-                  style={{
-                    padding: "0px",
-                    fontSize: "15px",
-                    fontWeight: "500",
-                    textWrap: "nowrap",
-                  }}
-                >
-                  Abundance Ecosystem
-                </p>
-              </div>
-            </div> */}
-
-            {/* <div onClick={() => document.getElementById('ecosystem').scrollIntoView({ behavior: 'smooth' })}>
-            <div className='flex-row cast-act-lt' style={{borderRadius: '8px', padding: '8px 8px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
-              <FaGlobe size={14} />
-              <p style={{padding: '0px', fontSize: '15px', fontWeight: '500', textWrap: 'nowrap'}}>[Your] Ecosystem</p>
-            </div>
-          </div> */}
-          {/* </div> */}
-
-          {/* <div
-            className={isMobile ? "flex-col" : "flex-row"}
-            style={{ alignItems: "center", gap: "1.5rem" }}
-          >
-            <div
-              className="flex-row"
-              style={{
-                color: "#579",
-                width: isMobile ? "90%" : "50%",
-                fontSize: isMobile ? "14px" : "15px",
-                padding: isMobile
-                  ? "40px 10px 15px 10px"
-                  : "60px 10px 75px 10px",
-                textAlign: "center",
-                fontWeight: "400",
-              }}
-            >
-              <p>
-                In an{" "}
-                <strong style={{ color: "#8bf" }}>Attention Economy</strong> you
-                build or create content or art, and then try to get attention
-                for your work. The better you are at getting attention the more
-                successful you are.
-              </p>
-            </div>
-
-            <div
-              className="flex-row"
-              style={{
-                color: "#68a",
-                width: isMobile ? "90%" : "50%",
-                fontSize: isMobile ? "14px" : "15px",
-                padding: isMobile
-                  ? "0px 10px 65px 10px"
-                  : "60px 10px 75px 10px",
-                textAlign: "center",
-                fontWeight: "400",
-              }}
-            >
-              <p>
-                In a <strong style={{ color: "#8bf" }}>Creation Economy</strong>{" "}
-                users seek to fairly value your work in an Impact Market. More
-                impact means more success, curators get rewarded for their
-                effort, and the ecosystem grows
-              </p>
-            </div>
-          </div> */}
 
           {!isLogged && (
             <>
@@ -350,9 +356,10 @@ export default function Home() {
                   color: "#59b",
                   width: isMobile ? "75%" : "50%",
                   fontSize: isMobile ? "13px" : "15px",
-                  padding: "10px 10px 95px 10px",
+                  padding: "10px 10px 15px 10px",
                   justifyContent: "center",
                   textAlign: "center",
+                  margin: '0 0 100px 0'
                 }}
               >
                 /impact needs your permission to create tipping casts on your behalf
@@ -361,13 +368,119 @@ export default function Home() {
           )}
         </div>
 
+
+
+
+
+
+
         <div
-          id="personal"
+          id="what is impact"
           style={{
             padding: isMobile ? "28px 0 20px 0" : "28px 0 20px 0",
             width: "40%",
           }}
         ></div>
+
+
+
+
+
+
+
+
+        <div
+          style={{
+            padding: "8px",
+            backgroundColor: "#11448888",
+            borderRadius: "15px",
+            border: "1px solid #11447799",
+          }}
+        >
+          <div
+            className="flex-row"
+            style={{
+              width: "100%",
+              justifyContent: "center",
+              alignItems: "center",
+              padding: "16px 0 0 0",
+            }}
+          >
+            {/* <FaGlobe style={{ fill: "#cde" }} size={24} /> */}
+            <Description
+              {...{
+                show: true,
+                text: "What is /impact",
+                padding: "4px 0 4px 10px",
+                size: "large",
+              }}
+            />
+          </div>
+
+          <div className='flex-row page-t3' style={{ fontSize: isMobile ? "15px" : "17px" }} >
+            /impact is working toward an 'Impact = Profit' economy.
+          </div>
+
+          <div className='flex-row page-t3' style={{ fontSize: isMobile ? "15px" : "17px" }} >
+            We want everyone on Farcaster (and beyond) to prosper simply by making meaning contributions in their community & the world. /impact is the first step in that journey.
+          </div>
+
+
+          <div className='flex-row page-t3' style={{ fontSize: isMobile ? "15px" : "17px" }} >
+            We're creating an Impact Market where curators are rewarded for proactively finding and evaluating impactful content and work on Farcaster.
+          </div>
+
+
+          <div className='flex-row page-t3' style={{ fontSize: isMobile ? "15px" : "17px" }} >
+            We're then rewarding members for growing this ecosystem and tipping impactful creators & builders.
+          </div>
+
+          <div className='flex-row page-t3' style={{ fontSize: isMobile ? "15px" : "17px" }} >
+            As the ecosystem grows a feedback loop will start forming between the impact created and the Network Economy.
+          </div>
+
+          <div className='flex-row page-t3' style={{ fontSize: isMobile ? "15px" : "17px", display: 'inline-block' }} >
+            Read about the <Link href="https://paragraph.xyz/@abundance/the-secret-impact-alpha-master-plan" target="_blank">
+              <span style={{ textDecoration: "underline" }} >Secret Impact Alpha Master Plan</span>
+            </Link>
+          </div>
+
+
+          
+
+
+          <div
+            className="flex-row"
+            style={{
+              padding: "0px 0 0 0",
+              width: "100%",
+              flexWrap: "wrap",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+
+
+
+
+          </div>
+
+        </div>
+
+
+
+
+        <div
+          id="how it works"
+          style={{
+            padding: isMobile ? "128px 0 20px 0" : "128px 0 20px 0",
+            width: "40%",
+          }}
+        ></div>
+
+
+
+
 
         <div
           style={{
@@ -391,27 +504,12 @@ export default function Home() {
               {...{
                 show: true,
                 text: "How it works",
-                padding: "4px 0 4px 10px",
+                padding: "4px 0 14px 10px",
                 size: "large",
               }}
             />
           </div>
 
-          <div
-            className="flex-row"
-            style={{
-              color: "#9df",
-              width: "100%",
-              fontSize: isMobile ? "15px" : "17px",
-              padding: "10px 10px 15px 10px",
-              justifyContent: "center",
-            }}
-          >
-            With Impact Alpha creators and builders can focus on making the most
-            impactful work for the Farcaster community, while curators are
-            incentivized to proactively look for great content and drive
-            discovery (and tips) to it
-          </div>
 
           <div
             className="flex-row"
@@ -423,68 +521,27 @@ export default function Home() {
               justifyContent: "center",
             }}
           >
-            {/* <ItemWrap>
-              <div
-                className="flex-row"
-                style={{
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  cursor: "pointer",
+
+
+            <ItemWrap>
+              <Item
+                {...{
+                  icon: IoMdTrophy,
+                  text: "Impact Score",
+                  description:
+                    `/impact is currently running a daily 5000 $degen raffle`,
                 }}
-                onClick={() => {
-                  toggleMenu("personal");
-                }}
-              >
-                <Item {...{ text: "How it works" }} />
-                <FaAngleDown
-                  size={28}
-                  style={{
-                    margin: "5px 15px 5px 5px",
-                    transform: display.personal
-                      ? "rotate(180deg)"
-                      : "rotate(0deg)",
-                    transition: "transform 0.3s ease",
-                  }}
-                />
-              </div>
-              {display.personal && (
-                <>
-                  <Item
-                    {...{
-                      description: `1) Connect to Farcaster to enable multi-tipping`,
-                    }}
-                  />
-                  <Item
-                    {...{ description: `2) Install Cast Actions (below) ` }}
-                  />
-                  <Item
-                    {...{
-                      description: `3a) Use $IMPACT Cast Actions to stake points on valuable casts`,
-                    }}
-                  />
-                  <Item
-                    {...{
-                      description: `3b) Tips are weighted by adding more $IMPACT points on a cast`,
-                    }}
-                  />
-                  <Item
-                    {...{
-                      description: `4a) Use Multi-tipping Frame to tip any of your token allowances (eg. 1000 $degen 700 $ham)`,
-                    }}
-                  />
-                  <Item
-                    {...{
-                      description: `4b) You can also schedule recurring tips on the app`,
-                    }}
-                  />
-                  <Item
-                    {...{
-                      description: `5) Share Multi-tipping Frame of your nominations with your friends. You get 10% of all tips`,
-                    }}
-                  />
-                </>
-              )}
-            </ItemWrap> */}
+              />
+
+              <Item
+                {...{ 
+                  noIcon: true,
+                  description: `Your chance to win Impact Rewards grow the more you curate, contribute and invite quality members into the ecosystem` }}
+              />
+
+            </ItemWrap>
+
+
 
             <ItemWrap>
               <Item
@@ -530,7 +587,7 @@ export default function Home() {
                 {...{ 
                   noIcon: true,
                   description: `
-                  Auto-Fund automatically distributes your remaining $degen & $ham allowances to impactful builders and creators on Farcaster - and rewwards you in the process` }}
+                  Auto-Fund automatically distributes your remaining $degen & $ham allowances to impactful builders and creators on Farcaster - and rewards you in the process` }}
               />
             </ItemWrap>
 
@@ -550,6 +607,46 @@ export default function Home() {
                   any /impact frame you share has your referral` }}
               />
             </ItemWrap>
+
+            <ItemWrap>
+              <Item
+                {...{
+                  icon: PiBankFill,
+                  text: "Auto-Fund",
+                  description: `Don't let your allowance go to waste `,
+                }}
+              />
+              <Item
+                {...{ 
+                  noIcon: true,
+                  description: `
+                  Auto-Fund automatically distributes your remaining $degen & $ham allowances to impactful builders and creators on Farcaster - and rewards you in the process` }}
+              />
+            </ItemWrap>
+
+            <ItemWrap>
+              <div onClick={() =>
+              document
+                .getElementById("log in")
+                .scrollIntoView({ behavior: "smooth" })
+              }>
+                <Item
+                  {...{
+                    icon: IoLogIn,
+                    text: "Login",
+                    description:
+                      "Log in to get started",
+                  }}
+                />
+              </div>
+              {/* <Item
+                {...{ 
+                  noIcon: true,
+                  description: `
+                  any /impact frame you share has your referral` }}
+              /> */}
+            </ItemWrap>
+
 
             {/* <div
               className="flex-col"
@@ -779,109 +876,12 @@ export default function Home() {
             </Link>
           </div> */}
         </div>
+
+
+
       </div>)}
 
-      {/* <div id="ecosystem" style={{padding: '40px 4px 80px 4px', width: feedMax}}>
-      <div style={{padding: '8px', backgroundColor: '#335566aa', borderRadius: '15px', border: '1px solid #000'}}>
-        <div className='flex-row' style={{width: '100%', justifyContent: 'center', alignItems: 'center', padding: '16px 0 0 0'}}>
-          <FaGlobe style={{fill: '#cde'}} size={24} />
-          <Description {...{show: true, text: '[Your] Ecosystem', padding: '4px 0 4px 10px', size: 'large' }} />
-        </div>
 
-        <div className='flex-row' style={{color: '#9df', width: '100%', fontSize: isMobile ? '15px' : '17px', padding: '10px 10px 15px 10px', justifyContent: 'center'}}>Let your community curate your channel/ecosystem. Ensure quality curation. Reward contributors and curators. Grow your community</div>
-
-        <div className='flex-row' style={{padding: '0px 0 0 0', width: '100%', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center'}}>
-
-          <ItemWrap>
-            <div className='flex-row' style={{justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer'}} onClick={() => {toggleMenu('ecosystem')}}>
-              <Item {...{text: 'How it works'}} />
-              <FaAngleDown size={28} style={{margin: '5px 15px 5px 5px', transform: display.ecosystem ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s ease'}} />
-            </div>
-            {display.ecosystem && (<>
-              <Item {...{description: `1) Connect to Farcaster to enable multi-tipping & Ecosystem creation`}} />
-              <Item {...{description: `2) Create Ecosystem with rules, curator eligibility criteria, curator and contributor incentives, etc.`}} />
-              <Item {...{description: `3) Install Ecosystem Cast Actions`}} />
-              <Item {...{description: `4a) Eligible curators get daily point allowance they can 'stake' on casts thru Cast Actions`}} />
-              <Item {...{description: `4b) Curators get % of tips in proportion to 'staked' points`}} />
-              <Item {...{description: `4c) Other curators can up/downvote 'staked' casts, which results in increase/decrease to curator's daily allownance, and maintains quality of curation`}} />
-              <Item {...{description: `4d) Curator goal is to 'stake' points based on value of cast to the community - this maximizes daily allowance & expected tips`}} />
-              <Item {...{description: `5) Curations can be used to moderate channels`}} />
-              <Item {...{description: `6) Adjust incentives to promote contributions that better benefit the ecosystem`}} />
-            </>)}
-          </ItemWrap>
-
-          <ItemWrap>
-            <Item {...{icon: Aligned, text: 'Aligned curators', description: 'Quality curation needs community alignment. Select criteria for who can curate (NFT, token-gating, channel follow, etc.)'}} />
-          </ItemWrap>
-
-          <ItemWrap>
-            <Item {...{icon: FaCoins, text: 'Rewards & Incentives', description: 'Create incentives to drive growth in your channel & ecosystem, maintain curation quality. Curators can get % of tips'}} />
-          </ItemWrap>
-
-          <ItemWrap>
-            <Item {...{icon: Quality, text: 'Quality control', description: `Built in incentives & mechanisms to ensure high-quality curation`}} />
-          </ItemWrap>
-
-          <ItemWrap>
-            <Item {...{icon: Mod, text: 'Channel mod', description: `Let your curators moderate your channel. Set channel rules, select moderators manually or based on criteria`}} />
-          </ItemWrap>
-
-          <ItemWrap>
-            <Item {...{icon: Grow, text: 'Grow ecosystem', description: 'Capture and distribute value in your ecosystem.'}} />
-          </ItemWrap>
-
-          <div className='flex-col' style={{margin: '15px 0 10px 0', gap: '1rem', alignItems: 'center'}}>
-
-            <div className='flex-row' style={{alignItems: 'center', gap: '0.75rem'}}>
-              <div style={{fontSize: isMobile ? '15px' : '18px', fontWeight:'500', color: '#ace'}}>Choose ecosystem:</div>
-              {isLogged ? (
-                <EcosystemMenu size={'large'} />
-              ) : (
-                <div className={`flex-row`}>
-                  <div onClick={lockedSelect} style={{margin: '0', maxWidth: '237px', width: 'auto'}}>
-                    <div style={{backgroundColor: '#334455ee', borderRadius: '16px', padding: '0px', border: '0px solid #678', color: '#fff', fontWeight: '700', alignItems:' center', fontSize: '20px'}}>
-                      <div className='flex-row' style={{gap: '0.5rem', cursor: 'pointer'}}>
-                        <select id="minuteSelect" value={'Select'} style={{backgroundColor: '#bbb', borderRadius: '4px', fontSize: isMobile ? '15px' : '18px', fontWeight: '600', padding: isMobile ?  '4px 1px' : '4px 3px', pointerEvents: 'none', color: '#222'}}>
-                          <option key={'Select'} value={'Select'}>
-                            {'Select'}
-                          </option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-                  <div style={{position: 'relative', fontSize: '0', width: '0', height: '100%'}}>
-                    <div className='top-layer' style={{position: 'absolute', top: 0, left: 0, transform: 'translate(-50%, -50%)' }}>
-                      <FaLock size={8} color='#999' />
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {isLogged ? (<div onClick={createEcosystem}>
-              <div className='flex-row cast-act-lt' style={{borderRadius: '8px', padding: '8px 4px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem'}}>
-                <div style={{width: '2px', fontSize: '0px'}}>&nbsp;</div>
-                <FaPlus size={14} />
-                <p style={{padding: '0px', fontSize: '14px', fontWeight: '500', textWrap: 'nowrap'}}>Create Ecosystem</p>
-                <div style={{width: '2px', fontSize: '0px'}}>&nbsp;</div>
-              </div>
-            </div>) : (<div className={`flex-row`} onClick={LoginPopup}>
-              <div className='flex-row cast-act-lt' style={{borderRadius: '8px', padding: '8px 4px', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', backgroundColor: '#bbb'}}>
-                <div style={{width: '2px', fontSize: '0px'}}>&nbsp;</div>
-                <FaPlus size={14} />
-                <p style={{padding: '0px', fontSize: '14px', fontWeight: '500', textWrap: 'nowrap', color: '#222'}}>Create Ecosystem</p>
-                <div style={{width: '2px', fontSize: '0px'}}>&nbsp;</div>
-              </div>
-              <div style={{position: 'relative', fontSize: '0', width: '0', height: '100%'}}>
-                <div className='top-layer' style={{position: 'absolute', top: 0, left: 0, transform: 'translate(-50%, -50%)' }}>
-                  <FaLock size={8} color='#999' />
-                </div>
-              </div>
-            </div>)}
-          </div>
-        </div>
-      </div>
-    </div> */}
       {!isLogged && (<div ref={ref}>&nbsp;</div>)}
       {isLogged && <ProfilePage />}
     </div>
