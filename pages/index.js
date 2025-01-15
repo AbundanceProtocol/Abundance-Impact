@@ -608,21 +608,6 @@ export default function Home() {
               />
             </ItemWrap>
 
-            <ItemWrap>
-              <Item
-                {...{
-                  icon: PiBankFill,
-                  text: "Auto-Fund",
-                  description: `Don't let your allowance go to waste `,
-                }}
-              />
-              <Item
-                {...{ 
-                  noIcon: true,
-                  description: `
-                  Auto-Fund automatically distributes your remaining $degen & $ham allowances to impactful builders and creators on Farcaster - and rewards you in the process` }}
-              />
-            </ItemWrap>
 
             <ItemWrap>
               <div onClick={() =>
