@@ -25,6 +25,7 @@ const scheduleTipSchema = new mongoose.Schema({
   creator_fund: { type: Number, default: 100 },
   development_fund: { type: Number, default: 0 },
   growth_fund: { type: Number, default: 0 },
+  special_fund: { type: Number, default: 0 },
   createdAt: { type: Date, default: () => new Date(), index: true }
 });
 
