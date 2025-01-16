@@ -1758,18 +1758,18 @@ blockquote {
 }
 
 .pop-menu, .grey-menu {
-    /* width: '280px' !important; */
-    /* padding: '10px' !important; */
-    /* margin: '10px' !important; */
-    /* border-radius: '15px' !important; */
-    /* background-color: #ace !important; */
+    width: '280px' !important; 
+    padding: '10px' !important;
+    margin: '10px' !important;
+    border-radius: '15px' !important;
+    background-color: #ace !important;
 }
 
 .red-menu {
-    /* width: '280px' !important;
+    width: '280px' !important;
     padding: '10px' !important;
     margin: '10px' !important;
-    border-radius: '15px' !important; */
+    border-radius: '15px' !important;
     background-color: #eee !important;
 }
 
