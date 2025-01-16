@@ -89,7 +89,7 @@ export default async function handler(req, res) {
 
       const {encryptedUuid, ecoName} = await getUuid(fid, '$IMPACT')
 
-      console.log('data3', encryptedUuid, ecoName)
+      // console.log('data3', encryptedUuid, ecoName)
 
 
 

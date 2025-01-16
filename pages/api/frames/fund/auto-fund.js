@@ -1,0 +1,277 @@
+import { getSSLHubRpcClient, Message } from "@farcaster/hub-nodejs";
+import connectToDatabase from "../../../../libs/mongodb";
+import User from "../../../../models/User";
+// import Tip from  "../../../../models/Tip";
+// import Cast from  "../../../../models/Cast";
+// import ImpactFrame from  "../../../../models/ImpactFrame";
+// import Raffle from  "../../../../models/Raffle";
+// import Impact from  "../../../../models/Impact";
+// import Score from  "../../../../models/Score";
+import ScheduleTip from  "../../../../models/ScheduleTip";
+
+// import EcosystemRules from  "../../../../models/EcosystemRules";
+// import { decryptPassword, getTimeRange, processTips, populateCast } from "../../../../utils/utils";
+import _ from "lodash";
+import qs from "querystring";
+import { init, validateFramesMessage } from "@airstack/frames";
+
+const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
+const HubURL = process.env.NEYNAR_HUB
+const client = HubURL ? getSSLHubRpcClient(HubURL) : undefined;
+// const secretKey = process.env.SECRET_KEY
+// const apiKey = process.env.NEYNAR_API_KEY
+
+export default async function handler(req, res) {
+  // init(process.env.AIRSTACK_API_KEY ?? '')
+  // const body = await req.body;
+  // const {isValid, message} = await validateFramesMessage(body)
+  // console.log('isValid:', isValid)
+  const { ecosystem } = req.query;
+  const { untrustedData } = req.body
+  // const authorFid = message?.data?.frameActionBody?.castId?.fid
+
+  if (req.method !== 'POST' || !ecosystem) {
+    res.setHeader('Allow', ['POST']);
+    res.status(405).end(`Method ${req.method} Not Allowed`);
+  } else {
+
+    async function getSigner(fid) {
+      try {
+        await connectToDatabase();
+        const user = await User.findOne({ fid }).select('username').exec();
+        if (user) {
+          return {
+            username: user.username,
+            // user_pfp: user.pfp,
+          };
+        } else {
+          return {username: null}
+        }
+      } catch (error) {
+        console.error('Error getting User:', error)
+        return { username: null };
+      }
+    }
+
+
+    const fid = untrustedData?.fid
+    let circlesImg = ''
+    console.log('fid', ecosystem, fid)
+    const stopFund = `${baseURL}/api/frames/fund/stop-auto-fund?${qs.stringify({ ecosystem })}`
+
+    const loginUrl = `${baseURL}?${qs.stringify({ referrer: fid })}`
+    
+    let shareText = ``
+
+    let shareUrl = ``
+
+    let encodedShareText = encodeURIComponent(shareText); 
+    let encodedShareUrl = encodeURIComponent(shareUrl); 
+    let shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
+    
+    try {
+     
+      const {username} = await getSigner(fid)
+  
+      if (!username) {
+        res.setHeader('Content-Type', 'application/json');
+        res.status(400).json({ 
+          message: 'Need to login app'
+        });
+        return;
+
+      } else if (username) {
+
+        async function getSchedule(fid, points) {
+          try {
+            await connectToDatabase();
+            let fundSchedule = await ScheduleTip.findOne({ fid }).exec();
+            return fundSchedule || null
+          } catch (error) {
+            console.error("Error while fetching data:", error);
+            return null
+          }  
+        }
+
+        let schedId = null
+        let fundSchedule = await getSchedule(fid, '$IMPACT')
+
+
+        if (fundSchedule) {
+
+          async function updateSchedule(fid) {
+            try {
+              await connectToDatabase();
+              let updated = await ScheduleTip.findOneAndUpdate({ fid }, { active_cron: true, creator_fund: 0, development_fund: 0, growth_fund: 0, special_fund: 100 }, { new: true, select: '-uuid' });
+
+              const objectIdString = updated._id.toString();
+              return objectIdString;
+            } catch (error) {
+              console.error("Error while fetching data:", error);
+              return null
+            }  
+          }
+
+          schedId = await updateSchedule(fid)
+          console.log('schedId1', schedId)
+        } else {
+  
+          async function getUuid(fid, points) {
+            try {
+              await connectToDatabase();
+              let userData = await User.findOne({ fid, ecosystem_points: points }).select('uuid ecosystem_name').exec();
+              
+              if (userData) {
+                return {encryptedUuid: userData.uuid, ecoName: userData.ecosystem_name}
+              } else {
+                return {encryptedUuid: null, ecoName: null}
+              }
+            } catch (error) {
+              console.error("Error while fetching data:", error);
+              return {encryptedUuid: null, ecoName: null}
+            }  
+          }
+  
+          const {encryptedUuid, ecoName} = await getUuid(fid, '$IMPACT')
+  
+    
+  
+          if (!encryptedUuid) {
+
+            res.setHeader('Content-Type', 'application/json');
+            res.status(400).json({ 
+              message: 'Need to login app'
+            });
+            return;
+          
+          } else {
+  
+            async function setSchedule(fid, points, ecoName, encryptedUuid, curators) {
+    
+  
+              let newSchedule = null
+              try {
+                await connectToDatabase();
+                newSchedule = new ScheduleTip({ 
+                  fid: fid,
+                  uuid: encryptedUuid,
+                  search_shuffle: true,
+                  search_time: 'all',
+                  search_tags: [],
+                  search_channels: [],
+                  search_curators: [],
+                  points: points,
+                  percent_tip: 100,
+                  ecosystem_name: ecoName,
+                  currencies: ['$DEGEN', '$TN100x'],
+                  schedule_time: "45 18 * * *",
+                  schedule_count: 1,
+                  schedule_total: 1,
+                  active_cron,
+                  creator_fund: 0,
+                  development_fund: 0,
+                  growth_fund: 0,
+                  special_fund: 100,
+                });
+                
+                await newSchedule.save()
+
+                const objectIdString = newSchedule._id.toString();
+                return objectIdString;
+              } catch (error) {
+                console.error("Error while fetching data:", error);
+                return null
+              }  
+            }
+      
+            schedId = await setSchedule(fid, '$IMPACT', ecoName, encryptedUuid, [])
+
+            console.log('schedId2', schedId)
+
+          }
+
+
+
+          if (schedId) {
+
+            circlesImg = `${baseURL}/api/frames/fund/frame?${qs.stringify({ id: schedId })}`
+
+            shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem || 'abundance'}/fund-v1?${qs.stringify({ referrer: fid, id: schedId })}`
+
+            shareText = `I just started auto-funding the LA wildfire Relief Special Impact Fund on /impact\n\nHelp farcasters supprting the LA wildfire relief effort with your daily (remaining) $degen & $ham thru @impactfund 👇`
+
+            encodedShareText = encodeURIComponent(shareText)
+      
+            encodedShareUrl = encodeURIComponent(shareUrl); 
+            shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
+
+
+            let metatags = `
+            <meta name="fc:frame:button:1" content="Share">
+            <meta name="fc:frame:button:1:action" content="link">
+            <meta name="fc:frame:button:1:target" content="${shareLink}" />
+            <meta name="fc:frame:button:2" content="Stop Auto-Fund">
+            <meta name="fc:frame:button:2:action" content="post">
+            <meta name="fc:frame:button:2:target" content="${stopFund}" />
+            <meta property="og:image" content="${circlesImg}">
+            <meta name="fc:frame:image" content="${circlesImg}">
+            <meta name="fc:frame:post_url" content="${loginUrl}">`
+      
+    
+            try {
+    
+              res.setHeader('Content-Type', 'text/html');
+              res.status(200)
+              .send(`
+                <!DOCTYPE html>
+                <html>
+                  <head>
+                    <title>Auto-Fund | Impact Alpha</title>
+                    <meta name="fc:frame" content="vNext">
+                    <meta property="og:title" content="Auto-Fund">
+                    <meta property="fc:frame:image:aspect_ratio" content="1.91:1" />
+                    ${metatags}
+                  </head>
+                  <body>
+                    <div>Tip frame</div>
+                  </body>
+                </html>
+              `);
+              return;
+
+            } catch (error) {
+              res.setHeader('Content-Type', 'application/json');
+              res.status(400).json({ 
+                message: 'Retry Auto-Funding'
+              });
+              return;
+      
+            }
+
+          } else {
+
+            res.setHeader('Content-Type', 'application/json');
+            res.status(400).json({ 
+              message: 'Retry Auto-Funding'
+            });
+            return;
+
+          }
+        }
+  
+      }
+      
+    } catch (error) {
+      console.log(error, 'g')
+
+      res.setHeader('Content-Type', 'application/json');
+      res.status(400).json({ 
+        message: 'Need to login app'
+      });
+      return;
+
+    }
+  }
+}
+
+
