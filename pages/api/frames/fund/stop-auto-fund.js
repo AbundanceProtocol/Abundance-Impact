@@ -30,7 +30,7 @@ export default async function handler(req, res) {
   const { untrustedData } = req.body
   // const authorFid = message?.data?.frameActionBody?.castId?.fid
 
-  if (req.method !== 'POST' || !ecosystem) {
+  if (req.method !== 'POST') {
     res.setHeader('Allow', ['POST']);
     res.status(405).end(`Method ${req.method} Not Allowed`);
   } else {

@@ -30,7 +30,7 @@ export default async function handler(req, res) {
   const { untrustedData } = req.body
   // const authorFid = message?.data?.frameActionBody?.castId?.fid
   console.log('ecosystem', ecosystem)
-  if (req.method !== 'POST' || !ecosystem) {
+  if (req.method !== 'POST') {
     res.setHeader('Allow', ['POST']);
     res.status(405).end(`Method ${req.method} Not Allowed`);
   } else {
@@ -58,7 +58,7 @@ export default async function handler(req, res) {
     // const fid = 9326
     let circlesImg = ''
     console.log('fid', ecosystem, fid)
-    const stopFund = `${baseURL}/api/frames/fund/stop-auto-fund?${qs.stringify({ ecosystem })}`
+    const stopFund = `${baseURL}/api/frames/fund/stop-auto-fund?${qs.stringify({ ecosystem: ecosystem || 'abundance' })}`
 
     const loginUrl = `${baseURL}?${qs.stringify({ referrer: fid })}`
     
