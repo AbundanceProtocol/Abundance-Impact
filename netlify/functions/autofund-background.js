@@ -17,7 +17,7 @@ exports.handler = async function(event, context) {
       const twoHours = new Date(Date.now() - 2 * 60 * 60 * 1000);
       let fundedFids = await Fund.distinct("fid", { createdAt: { $gte: twoHours }, points: '$IMPACT' });
 
-      let userSchedules = await ScheduleTip.find({ active_cron: true, points: '$IMPACT', fid: { "$nin": fundedFids } }).select('fid search_curators currencies uuid creator_fund development_fund growth_fund').exec()
+      let userSchedules = await ScheduleTip.find({ active_cron: true, points: '$IMPACT', fid: { "$nin": fundedFids } }).select('fid search_curators currencies uuid creator_fund development_fund growth_fund special_fund').exec()
 
       let userData = await getFundingData(userSchedules)
 

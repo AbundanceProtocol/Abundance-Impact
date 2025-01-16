@@ -45,7 +45,7 @@ export default function Tips({ecosystem, referrer, id}) {
 
   const shareText = `Auto-fund farcasters supporting the LA wildfire relief effort with your daily (remaining) $degen & $ham thru /impact's @impactfund 👇`
 
-  let shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/fund-v1?${qs.stringify({referrer: referrer || null})}`
+  let shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem || 'abundance'}/fund-v1?${qs.stringify({referrer: referrer || null})}`
   
   const encodedShareText = encodeURIComponent(shareText); 
   let encodedShareUrl = encodeURIComponent(shareUrl); 
@@ -89,7 +89,7 @@ export default function Tips({ecosystem, referrer, id}) {
       //   text: "Eg.: 1000 $Degen, 500 $HAM"
       // },
       state: {},
-      frames_url: `${baseURL}/~/ecosystems/${ecosystem}/fund-v1`
+      frames_url: `${baseURL}/~/ecosystems/${ecosystem || 'abundance'}/fund-v1`
     }
   const [frameData, setFrameData] = useState(initFrame)
   const initCast = {
@@ -147,9 +147,9 @@ export default function Tips({ecosystem, referrer, id}) {
     // if (eco) {
     //   ecoQuery = '&eco=' + eco
     // }
-    if (ecosystem) {
-      ecosystemQuery = '&ecosystem=' + ecosystem
-    }
+    // if (ecosystem) {
+    //   ecosystemQuery = '&ecosystem=' + ecosystem
+    // }
 
     setQueryData(prev => ({ 
       ...prev, 
@@ -179,7 +179,7 @@ export default function Tips({ecosystem, referrer, id}) {
     console.log(queryData)
 
     const updatedFrameData = {...frameData}
-    updatedFrameData.buttons[0].target = `${baseURL}/api/frames/fund/auto-fund?${qs.stringify({ ecosystem })}`
+    updatedFrameData.buttons[0].target = `${baseURL}/api/frames/fund/auto-fund?${qs.stringify({ ecosystem: ecosystem || 'abundance' })}`
 
     updatedFrameData.buttons[1].target = `${baseURL}?${qs.stringify({ referrer })}`
 
@@ -324,7 +324,7 @@ export default function Tips({ecosystem, referrer, id}) {
         <meta property="fc:frame:image:aspect_ratio" content="1.91:1" />
         <meta property="fc:frame:button:1" content='Auto-Fund' />
         <meta property="fc:frame:button:1:action" content="post" />
-        <meta property="fc:frame:button:1:target" content={`${baseURL}/api/frames/fund/auto-fund?${qs.stringify({ ecosystem })}`} />
+        <meta property="fc:frame:button:1:target" content={`${baseURL}/api/frames/fund/auto-fund?${qs.stringify({ ecosystem: ecosystem || 'abundance' })}`} />
         <meta property="fc:frame:button:2" content='Share' />
         <meta property="fc:frame:button:2:action" content="link" />
         <meta property="fc:frame:button:2:target" content={shareLink} />
@@ -565,6 +565,10 @@ export async function getServerSideProps(context) {
   if (id) {
     setId = id
   }
+  let setEcosystem = 'abundance'
+  if (ecosystem) {
+    setEcosystem = ecosystem
+  }
   // let setEco = '$IMPACT'
   // if (eco) {
   //   setEco = eco
@@ -575,7 +579,7 @@ export async function getServerSideProps(context) {
   }
   return {
     props: {
-      ecosystem: ecosystem,
+      ecosystem: setEcosystem,
       referrer: setReferrer,
       // eco: setEco,
       id: setId,
