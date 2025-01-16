@@ -43,7 +43,7 @@ export default function Tips({ecosystem, referrer, id}) {
   }
   const [payload, setPayload] = useState(initPayload)
 
-  const shareText = `Auto-fund farcasters supporting the LA wildfire relief effort with your daily (remaining) $degen & $ham thru /impact's @impactfund 👇`
+  const shareText = `Auto-fund farcasters who support the LA wildfire relief effort with your daily (remaining) $degen & $ham thru /impact's @impactfund 👇`
 
   let shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem || 'abundance'}/fund-v1?${qs.stringify({referrer: referrer || null})}`
   

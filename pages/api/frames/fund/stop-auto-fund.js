@@ -101,7 +101,7 @@ export default async function handler(req, res) {
 
         shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem || 'abundance'}/fund-v1?${qs.stringify({ referrer: fid })}`
 
-        shareText = `Auto-fund farcasters supporting the LA wildfire relief effort with your daily (remaining) $degen & $ham thru /impact's @impactfund 👇`
+        shareText = `Auto-fund farcasters who support the LA wildfire relief effort with your daily (remaining) $degen & $ham thru /impact's @impactfund 👇`
 
         encodedShareText = encodeURIComponent(shareText)
   
