@@ -71,12 +71,9 @@ export default async function handler(req, res) {
     let shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
     
     try {
-      console.log('step1')
 
       const {username} = await getSigner(fid)
-      console.log('step2', username)
       if (!username) {
-        console.log('step3')
 
         res.setHeader('Content-Type', 'application/json');
         res.status(400).json({ 
@@ -85,7 +82,6 @@ export default async function handler(req, res) {
         return;
 
       } else if (username) {
-        console.log('step4')
 
         async function getSchedule(fid, points) {
           try {
@@ -101,10 +97,8 @@ export default async function handler(req, res) {
         let schedId = null
         let fundSchedule = await getSchedule(fid, '$IMPACT')
 
-        console.log('step5', fundSchedule)
 
         if (fundSchedule) {
-          console.log('step6')
 
           async function updateSchedule(fid) {
             try {
@@ -120,9 +114,7 @@ export default async function handler(req, res) {
           }
 
           schedId = await updateSchedule(fid)
-          console.log('schedId1', schedId)
         } else {
-          console.log('step7')
 
           async function getUuid(fid, points) {
             try {
@@ -142,7 +134,6 @@ export default async function handler(req, res) {
   
           const {encryptedUuid, ecoName} = await getUuid(fid, '$IMPACT')
   
-          console.log('step8', ecoName)
 
   
           if (!encryptedUuid) {
@@ -203,7 +194,6 @@ export default async function handler(req, res) {
         }
 
         if (schedId) {
-          console.log('step11')
 
           circlesImg = `${baseURL}/api/frames/fund/frame?${qs.stringify({ id: schedId })}`
 
@@ -230,7 +220,6 @@ export default async function handler(req, res) {
     
   
           try {
-            console.log('step12')
 
             res.setHeader('Content-Type', 'text/html');
             res.status(200)
@@ -252,7 +241,6 @@ export default async function handler(req, res) {
             return;
 
           } catch (error) {
-            console.log('step13')
 
             res.setHeader('Content-Type', 'application/json');
             res.status(400).json({ 
@@ -266,7 +254,6 @@ export default async function handler(req, res) {
 
 
         } else {
-          console.log('step14')
 
           res.setHeader('Content-Type', 'application/json');
           res.status(400).json({ 

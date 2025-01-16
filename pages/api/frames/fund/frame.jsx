@@ -72,7 +72,12 @@ export default async function handler(req, res) {
       }  
     }
 
-    let user = await getSched(id);
+    let user = null
+
+    if (id) {
+      user = await getSched(id);
+    }
+    
 
     console.log('user', user)
 
