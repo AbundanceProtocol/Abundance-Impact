@@ -13,7 +13,7 @@ import ScheduleTip from  "../../../../models/ScheduleTip";
 // import { decryptPassword, getTimeRange, processTips, populateCast } from "../../../../utils/utils";
 import _ from "lodash";
 import qs from "querystring";
-import { init, validateFramesMessage } from "@airstack/frames";
+// import { init, validateFramesMessage } from "@airstack/frames";
 
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 const HubURL = process.env.NEYNAR_HUB
@@ -29,7 +29,7 @@ export default async function handler(req, res) {
   const { ecosystem } = req.query;
   const { untrustedData } = req.body
   // const authorFid = message?.data?.frameActionBody?.castId?.fid
-
+  console.log('ecosystem', ecosystem)
   if (req.method !== 'POST' || !ecosystem) {
     res.setHeader('Allow', ['POST']);
     res.status(405).end(`Method ${req.method} Not Allowed`);
@@ -55,6 +55,7 @@ export default async function handler(req, res) {
 
 
     const fid = untrustedData?.fid
+    // const fid = 9326
     let circlesImg = ''
     console.log('fid', ecosystem, fid)
     const stopFund = `${baseURL}/api/frames/fund/stop-auto-fund?${qs.stringify({ ecosystem })}`
@@ -70,10 +71,13 @@ export default async function handler(req, res) {
     let shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
     
     try {
-     
+      console.log('step1')
+
       const {username} = await getSigner(fid)
-  
+      console.log('step2', username)
       if (!username) {
+        console.log('step3')
+
         res.setHeader('Content-Type', 'application/json');
         res.status(400).json({ 
           message: 'Need to login app'
@@ -81,6 +85,7 @@ export default async function handler(req, res) {
         return;
 
       } else if (username) {
+        console.log('step4')
 
         async function getSchedule(fid, points) {
           try {
@@ -96,8 +101,10 @@ export default async function handler(req, res) {
         let schedId = null
         let fundSchedule = await getSchedule(fid, '$IMPACT')
 
+        console.log('step5', fundSchedule)
 
         if (fundSchedule) {
+          console.log('step6')
 
           async function updateSchedule(fid) {
             try {
@@ -115,7 +122,8 @@ export default async function handler(req, res) {
           schedId = await updateSchedule(fid)
           console.log('schedId1', schedId)
         } else {
-  
+          console.log('step7')
+
           async function getUuid(fid, points) {
             try {
               await connectToDatabase();
@@ -134,9 +142,11 @@ export default async function handler(req, res) {
   
           const {encryptedUuid, ecoName} = await getUuid(fid, '$IMPACT')
   
-    
+          console.log('step8', ecoName)
+
   
           if (!encryptedUuid) {
+            console.log('step9')
 
             res.setHeader('Content-Type', 'application/json');
             res.status(400).json({ 
@@ -145,7 +155,8 @@ export default async function handler(req, res) {
             return;
           
           } else {
-  
+            console.log('step10')
+
             async function setSchedule(fid, points, ecoName, encryptedUuid, curators) {
     
   
@@ -189,75 +200,82 @@ export default async function handler(req, res) {
             console.log('schedId2', schedId)
 
           }
+        }
 
+        if (schedId) {
+          console.log('step11')
 
+          circlesImg = `${baseURL}/api/frames/fund/frame?${qs.stringify({ id: schedId })}`
 
-          if (schedId) {
+          shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem || 'abundance'}/fund-v1?${qs.stringify({ referrer: fid, id: schedId })}`
 
-            circlesImg = `${baseURL}/api/frames/fund/frame?${qs.stringify({ id: schedId })}`
+          shareText = `I just started auto-funding the LA wildfire Relief Special Impact Fund on /impact\n\nHelp farcasters supprting the LA wildfire relief effort with your daily (remaining) $degen & $ham thru @impactfund 👇`
 
-            shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem || 'abundance'}/fund-v1?${qs.stringify({ referrer: fid, id: schedId })}`
-
-            shareText = `I just started auto-funding the LA wildfire Relief Special Impact Fund on /impact\n\nHelp farcasters supprting the LA wildfire relief effort with your daily (remaining) $degen & $ham thru @impactfund 👇`
-
-            encodedShareText = encodeURIComponent(shareText)
-      
-            encodedShareUrl = encodeURIComponent(shareUrl); 
-            shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
-
-
-            let metatags = `
-            <meta name="fc:frame:button:1" content="Share">
-            <meta name="fc:frame:button:1:action" content="link">
-            <meta name="fc:frame:button:1:target" content="${shareLink}" />
-            <meta name="fc:frame:button:2" content="Stop Auto-Fund">
-            <meta name="fc:frame:button:2:action" content="post">
-            <meta name="fc:frame:button:2:target" content="${stopFund}" />
-            <meta property="og:image" content="${circlesImg}">
-            <meta name="fc:frame:image" content="${circlesImg}">
-            <meta name="fc:frame:post_url" content="${loginUrl}">`
-      
+          encodedShareText = encodeURIComponent(shareText)
     
-            try {
+          encodedShareUrl = encodeURIComponent(shareUrl); 
+          shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
+
+
+          let metatags = `
+          <meta name="fc:frame:button:1" content="Share">
+          <meta name="fc:frame:button:1:action" content="link">
+          <meta name="fc:frame:button:1:target" content="${shareLink}" />
+          <meta name="fc:frame:button:2" content="Stop Auto-Fund">
+          <meta name="fc:frame:button:2:action" content="post">
+          <meta name="fc:frame:button:2:target" content="${stopFund}" />
+          <meta property="og:image" content="${circlesImg}">
+          <meta name="fc:frame:image" content="${circlesImg}">
+          <meta name="fc:frame:post_url" content="${loginUrl}">`
     
-              res.setHeader('Content-Type', 'text/html');
-              res.status(200)
-              .send(`
-                <!DOCTYPE html>
-                <html>
-                  <head>
-                    <title>Auto-Fund | Impact Alpha</title>
-                    <meta name="fc:frame" content="vNext">
-                    <meta property="og:title" content="Auto-Fund">
-                    <meta property="fc:frame:image:aspect_ratio" content="1.91:1" />
-                    ${metatags}
-                  </head>
-                  <body>
-                    <div>Tip frame</div>
-                  </body>
-                </html>
-              `);
-              return;
+  
+          try {
+            console.log('step12')
 
-            } catch (error) {
-              res.setHeader('Content-Type', 'application/json');
-              res.status(400).json({ 
-                message: 'Retry Auto-Funding'
-              });
-              return;
-      
-            }
+            res.setHeader('Content-Type', 'text/html');
+            res.status(200)
+            .send(`
+              <!DOCTYPE html>
+              <html>
+                <head>
+                  <title>Auto-Fund | Impact Alpha</title>
+                  <meta name="fc:frame" content="vNext">
+                  <meta property="og:title" content="Auto-Fund">
+                  <meta property="fc:frame:image:aspect_ratio" content="1.91:1" />
+                  ${metatags}
+                </head>
+                <body>
+                  <div>Tip frame</div>
+                </body>
+              </html>
+            `);
+            return;
 
-          } else {
+          } catch (error) {
+            console.log('step13')
 
             res.setHeader('Content-Type', 'application/json');
             res.status(400).json({ 
               message: 'Retry Auto-Funding'
             });
             return;
-
+    
           }
+
+
+
+
+        } else {
+          console.log('step14')
+
+          res.setHeader('Content-Type', 'application/json');
+          res.status(400).json({ 
+            message: 'Retry Auto-Funding'
+          });
+          return;
+
         }
+        
   
       }
       

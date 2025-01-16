@@ -35,24 +35,6 @@ export default async function handler(req, res) {
     res.status(405).end(`Method ${req.method} Not Allowed`);
   } else {
 
-    async function getSigner(fid) {
-      try {
-        await connectToDatabase();
-        const user = await User.findOne({ fid }).select('username').exec();
-        if (user) {
-          return {
-            username: user.username,
-            // user_pfp: user.pfp,
-          };
-        } else {
-          return {username: null}
-        }
-      } catch (error) {
-        console.error('Error getting User:', error)
-        return { username: null };
-      }
-    }
-
 
     const fid = untrustedData?.fid
     let circlesImg = ''
@@ -119,7 +101,7 @@ export default async function handler(req, res) {
 
         shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem || 'abundance'}/fund-v1?${qs.stringify({ referrer: fid })}`
 
-        shareText = `Auto-fund farcasters supprting the LA wildfire relief effort with your daily (remaining) $degen & $ham thru /impact's @impactfund 👇`
+        shareText = `Auto-fund farcasters supporting the LA wildfire relief effort with your daily (remaining) $degen & $ham thru /impact's @impactfund 👇`
 
         encodedShareText = encodeURIComponent(shareText)
   
