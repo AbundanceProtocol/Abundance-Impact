@@ -84,6 +84,13 @@ html, body {
     color: #9df;
 }
 
+.shadow {
+    box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.1), 0 6px 10px 0 rgba(0, 0, 0, 0.2);
+}
+
+.shadow:hover {
+    box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.1), 0 6px 16px 0 rgba(0, 0, 0, 0.4);
+}
 
 .blu-lt {
     background-color: #002244ee;

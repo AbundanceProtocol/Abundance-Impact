@@ -29,7 +29,7 @@ import LoginButton from '../../components/Layout/Modals/FrontSignin';
 import useMatchBreakpoints from '../../hooks/useMatchBreakpoints';
 import { AccountContext } from '../../context';
 import { FiShare } from "react-icons/fi";
-import { Logo } from '../assets'
+import { Logo, Degen } from '../assets'
 import qs from "querystring";
 // import ScoreDashboard from '../../components/Common/ScoreDashboard';
 import Modal from '../../components/Layout/Modals/Modal';
@@ -83,6 +83,8 @@ export default function ProfilePage() {
   }
   const [eco, setEco] = useState(initialEco)
   const [userScore, setUserScore] = useState(null)
+  const [impactFunds, setImpactFunds] = useState(null)
+  const [fundToggle, setFundToggle] = useState(true)
   const [userFunding, setUserFunding] = useState(null)
   const [isSelected, setIsSelected] = useState('none')
   const [userSearch, setUserSearch] = useState({ search: '' })
@@ -281,7 +283,8 @@ export default function ProfilePage() {
   useEffect(() => {
     if (fid) {
       // getTips(fid)
-      getFunding(fid)
+      getSched(fid)
+      getFunds(fid)
       getCuratorData(fid)
       setUserQuery({
         ...userQuery,
@@ -292,9 +295,44 @@ export default function ProfilePage() {
   }, [fid]);
 
 
-  async function getFunding(fid) {
+  async function getFunds(fid) {
     try {
-      const response = await axios.get('/api/fund/getFunding', {
+      const response = await axios.get('/api/fund/getFunds', {
+        params: { fid }
+      })
+      if (response?.data) {
+        setImpactFunds(response?.data)
+        // const fundingData = response?.data?.schedule || null
+        console.log('response?.data', response?.data)
+        // if (fundingData) {
+        //   // setUserFunding(fundingData)
+        //   if (fundingData.active_cron) {
+        //     setIsOn(true)
+        //   } else {
+        //     setIsOn(false)
+        //   }
+        // } else {
+        //   // setUserFunding(null)
+        // }
+      } else {
+        // setUserFunding(null)
+        setImpactFunds(null)
+      }
+      // setLoading(prev => ({...prev, score: false }))
+      // setScoreLoading(false)
+    } catch (error) {
+      console.error('Error submitting data:', error)
+      // setUserFunding(null)
+      setFundLoading(false)
+      // setLoading(prev => ({...prev, score: false }))
+      // setScoreLoading(false)
+    }
+  }
+
+
+  async function getSched(fid) {
+    try {
+      const response = await axios.get('/api/fund/getSched', {
         params: { fid }
       })
       if (response?.data) {
@@ -1667,6 +1705,77 @@ export default function ProfilePage() {
                 />
               </div>
           </div>
+
+
+
+
+          <div className='flex-row' style={{height: '30px', alignItems: 'center', justifyContent: 'center', padding: '20px 0 0 0'}}>
+            <div className='flex-row' style={{padding: '4px 8px', backgroundColor: '#002244ee', border: '1px solid #666', borderRadius: '20px', alignItems: 'center', gap: '0.25rem'}}>
+              <div className={fundToggle == true ? 'filter-item-on' : 'filter-item'} onClick={() => {setFundToggle(true)}} style={{fontSize: '12px', fontWeight: '600'}}>Total Funds</div>
+              <div className={fundToggle == false ? 'filter-item-on' : 'filter-item'} onClick={() => {setFundToggle(false)}} style={{fontSize: '12px', fontWeight: '600'}}>My Contribution</div>
+            </div>
+          </div>
+
+
+
+
+
+          <div className='flex-row' style={{fontSize: '13px', justifyContent: isMobile ? "center" : "space-between", alignItems: 'center', gap: '0.75rem', margin: '20px 0', flexWrap: 'wrap', width: '100%'}}>
+              <div className={`flex-col btn-select blu-drk shadow`} style={{minWidth: isMobile ? '135px' : '130px', color: userFunding?.active_cron && userFunding?.creator_fund == 100 ? '#000' : '#cde', height: '133px', width: '22%'}}>
+                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
+                  <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0', color: '#44aaff'}}>Creator Fund</div>
+                </div>
+                <div className='flex-col' style={{justifyContent: "center", alignItems: 'center', gap: '0.25rem'}}>
+                  {/* <Impact size={15} color={userFunding?.active_cron && userFunding?.creator_fund == 100 ? '#147' : '#5af'} /> */}
+                  <div style={{fontSize: '16px', fontWeight: '700'}}>{fundToggle ? formatNum(impactFunds?.totalFunds[0]?.creator_degen || 0) || '--' : formatNum(impactFunds?.userFunds[0]?.creator_degen || 0) || '--'}</div>
+                  <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$DEGEN</div>
+
+                  <div style={{fontSize: '16px', fontWeight: '700', margin: '10px 0 0 0'}}>{fundToggle ? formatNum(impactFunds?.totalFunds[0]?.creator_ham || 0) || '--' : formatNum(impactFunds?.userFunds[0]?.creator_ham || 0) || '--'}</div>
+                  <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$HAM</div>
+                </div>
+              </div>
+              <div className={`flex-col btn-select blu-drk shadow`} style={{minWidth: isMobile ? '135px' : '130px', color: userFunding?.active_cron && userFunding?.creator_fund == 80 ? '#000' : '#cde', height: '133px', width: '22%'}}>
+                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
+                  <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0', color: '#44aaff'}}>Dev Fund</div>
+                </div>
+                <div className='flex-col' style={{justifyContent: "center", alignItems: 'center', gap: '0.25rem'}}>
+                  <div style={{fontSize: '16px', fontWeight: '700'}}>{fundToggle ? formatNum(impactFunds?.totalFunds[0]?.dev_degen || 0) || '--' : formatNum(impactFunds?.userFunds[0]?.dev_degen || 0) || '--'}</div>
+                  <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$DEGEN</div>
+
+                  <div style={{fontSize: '16px', fontWeight: '700', margin: '10px 0 0 0'}}>{fundToggle ? formatNum(impactFunds?.totalFunds[0]?.dev_ham || 0) || '--' : formatNum(impactFunds?.userFunds[0]?.dev_ham || 0) || '--'}</div>
+                  <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$HAM</div>
+                </div>
+              </div>
+              <div className={`flex-col btn-select blu-drk shadow`} style={{minWidth: isMobile ? '135px' : '130px', color: userFunding?.active_cron && userFunding?.creator_fund == 80 ? '#000' : '#cde', height: '133px', width: '22%'}}>
+                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
+                  <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0', color: '#44aaff'}}>Growth Fund</div>
+                </div>
+                <div className='flex-col' style={{justifyContent: "center", alignItems: 'center', gap: '0.25rem'}}>
+                  <div style={{fontSize: '16px', fontWeight: '700'}}>{fundToggle ? formatNum(impactFunds?.totalFunds[0]?.growth_degen || 0) || '--' : formatNum(impactFunds?.userFunds[0]?.growth_degen || 0) || '--'}</div>
+                  <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$DEGEN</div>
+
+                  <div style={{fontSize: '16px', fontWeight: '700', margin: '10px 0 0 0'}}>{fundToggle ? formatNum(impactFunds?.totalFunds[0]?.growth_ham || 0) || '--' : formatNum(impactFunds?.userFunds[0]?.growth_ham || 0) || '--'}</div>
+                  <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$HAM</div>
+                </div>
+              </div>
+              <div className={`flex-col btn-select blu-drk shadow`} style={{minWidth: isMobile ? '135px' : '130px', color: userFunding?.active_cron && userFunding?.creator_fund == 80 ? '#000' : '#cde', height: '133px', width: '22%'}}>
+                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
+                  <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0', color: '#44aaff'}}>Special Fund</div>
+                </div>
+                <div className='flex-col' style={{justifyContent: "center", alignItems: 'center', gap: '0.25rem'}}>
+                  <div style={{fontSize: '16px', fontWeight: '700'}}>{fundToggle ? formatNum(impactFunds?.totalFunds[0]?.special_degen || 0) || '--' : formatNum(impactFunds?.userFunds[0]?.special_degen || 0) || '--'}</div>
+                  <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$DEGEN</div>
+
+                  <div style={{fontSize: '16px', fontWeight: '700', margin: '10px 0 0 0'}}>{fundToggle ? formatNum(impactFunds?.totalFunds[0]?.special_ham || 0) || '--' : formatNum(impactFunds?.userFunds[0]?.special_ham || 0) || '--'}</div>
+                  <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$HAM</div>
+                </div>
+              </div>
+            </div>
+
+
+
+
+
 
           <div
             className="flex-row"
