@@ -1311,7 +1311,7 @@ export default function ProfilePage() {
           }}
         ></div>
 
-        <div
+        <div className='shadow'
           style={{
             padding: "8px",
             backgroundColor: "#11448888",
@@ -1644,7 +1644,7 @@ export default function ProfilePage() {
           }}
         ></div>
 
-        <div
+        <div className='shadow'
           style={{
             padding: "8px",
             backgroundColor: "#11448888",
@@ -1989,7 +1989,7 @@ export default function ProfilePage() {
           }}
         ></div>
 
-        <div
+        <div className='shadow'
           style={{
             padding: "8px",
             backgroundColor: "#11448888",
@@ -2419,7 +2419,7 @@ export default function ProfilePage() {
           }}
         ></div>
 
-        <div
+        <div className='shadow'
           style={{
             padding: "8px",
             backgroundColor: "#11448888",

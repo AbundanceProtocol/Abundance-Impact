@@ -110,7 +110,7 @@ const CuratorData = ({ user, textMax, show, type }) => {
 
   return (
     show && (
-      <div className="inner-container flex-col" style={{width: '100%', display: 'flex', flexDirection: 'col', justifyContent: 'space-between', backgroundColor: '#11448888', gap: '1rem'}}>
+      <div className="inner-container flex-col shadow" style={{width: '100%', display: 'flex', flexDirection: 'col', justifyContent: 'space-between', backgroundColor: '#11448888', gap: '1rem'}}>
         <div className='flex-row' style={{gap: '0.5rem'}}>
           <div style={{width: '100%'}}>
             <div className="flex-row">

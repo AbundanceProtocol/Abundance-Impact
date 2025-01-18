@@ -23,7 +23,7 @@ const BottomMenu = () => {
       </>
     ) : (
       <>
-        {isLogged && router.route !== '/~/studio/multi-tip-compose' && (<div ref={ref1} className='flex-row' style={{position: 'fixed', top: 0, backgroundColor: '#002244ee', height: '46px', width: `100%`, borderRadius: '0px', padding: '0', border: '0px solid #678', boxSizing: 'border-box', justifyContent: 'center'}}>
+        {isLogged && router.route !== '/~/studio/multi-tip-compose' && (<div ref={ref1} className='flex-row shadow' style={{position: 'fixed', top: 0, backgroundColor: '#002244ee', height: '54px', width: `100%`, borderRadius: '0px', padding: '0', border: '0px solid #678', boxSizing: 'border-box', justifyContent: 'center'}}>
           <div className='flex-row' style={{position: 'relative', maxWidth: '620px', width: '100%', justifyContent: 'center', padding: '0 10px'}}>
           {button['bottom-nav'].map((btn, index) => (
             <BottomNav buttonName={btn} key={index} /> ))}
