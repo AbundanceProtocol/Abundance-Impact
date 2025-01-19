@@ -1721,7 +1721,7 @@ export default function ProfilePage() {
 
 
           <div className='flex-row' style={{fontSize: '13px', justifyContent: isMobile ? "center" : "space-between", alignItems: 'center', gap: '0.75rem', margin: '20px 0', flexWrap: 'wrap', width: '100%'}}>
-              <div className={`flex-col btn-select blu-drk shadow`} style={{minWidth: isMobile ? '135px' : '130px', color: userFunding?.active_cron && userFunding?.creator_fund == 100 ? '#000' : '#cde', height: '133px', width: '22%'}}>
+              <div className={`flex-col btn-select blu-drk shadow`} style={{minWidth: isMobile ? '135px' : '130px', color: '#cde', height: '133px', width: '22%'}}>
                 <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
                   <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0', color: '#44aaff'}}>Creator Fund</div>
                 </div>
@@ -1734,7 +1734,7 @@ export default function ProfilePage() {
                   <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$HAM</div>
                 </div>
               </div>
-              <div className={`flex-col btn-select blu-drk shadow`} style={{minWidth: isMobile ? '135px' : '130px', color: userFunding?.active_cron && userFunding?.creator_fund == 80 ? '#000' : '#cde', height: '133px', width: '22%'}}>
+              <div className={`flex-col btn-select blu-drk shadow`} style={{minWidth: isMobile ? '135px' : '130px', color: '#cde', height: '133px', width: '22%'}}>
                 <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
                   <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0', color: '#44aaff'}}>Dev Fund</div>
                 </div>
@@ -1746,7 +1746,7 @@ export default function ProfilePage() {
                   <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$HAM</div>
                 </div>
               </div>
-              <div className={`flex-col btn-select blu-drk shadow`} style={{minWidth: isMobile ? '135px' : '130px', color: userFunding?.active_cron && userFunding?.creator_fund == 80 ? '#000' : '#cde', height: '133px', width: '22%'}}>
+              <div className={`flex-col btn-select blu-drk shadow`} style={{minWidth: isMobile ? '135px' : '130px', color: '#cde', height: '133px', width: '22%'}}>
                 <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
                   <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0', color: '#44aaff'}}>Growth Fund</div>
                 </div>
@@ -1758,7 +1758,7 @@ export default function ProfilePage() {
                   <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$HAM</div>
                 </div>
               </div>
-              <div className={`flex-col btn-select blu-drk shadow`} style={{minWidth: isMobile ? '135px' : '130px', color: userFunding?.active_cron && userFunding?.creator_fund == 80 ? '#000' : '#cde', height: '133px', width: '22%'}}>
+              <div className={`flex-col btn-select blu-drk shadow`} style={{minWidth: isMobile ? '135px' : '130px', color: '#cde', height: '133px', width: '22%'}}>
                 <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
                   <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0', color: '#44aaff'}}>Special Fund</div>
                 </div>
