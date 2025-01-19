@@ -94,7 +94,7 @@ export default async function handler(req, res) {
               <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '25px', margin: '5px 20px 5px 20px', padding: '5px 15px'}}>{`User opted out of /impact`}</div>
             </div>
           ) : (
-            <div>
+            <div style={{display: 'flex', flexDirection: 'column'}}>
               <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '26px', margin: '15px 0px 0px 0px', padding: '0 0 10px 0'}}>How impactful is this cast?</div>
               <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '16px', margin: '5px 0px 15px 0px', padding: '0 0 10px 0'}}>(Stake points based on the cast's impact on Farcaster)</div>
 
