@@ -94,9 +94,9 @@ export default async function handler(req, res) {
               <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '25px', margin: '5px 20px 5px 20px', padding: '5px 15px'}}>{`User opted out of /impact`}</div>
             </div>
           ) : (
-            <div style={{display: 'flex', flexDirection: 'column'}}>
-              <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '26px', margin: '15px 0px 0px 0px', padding: '0 0 10px 0'}}>How impactful is this cast?</div>
-              <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '16px', margin: '5px 0px 15px 0px', padding: '0 0 10px 0'}}>(Stake points based on the cast's impact on Farcaster)</div>
+            <div style={{display: 'flex', flexDirection: 'column', textAlign: 'center', alignItems: 'center', justifyContent: 'center'}}>
+              <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '26px', margin: '35px 0px 0px 0px', padding: '0 0 10px 0'}}>How impactful is this cast?</div>
+              <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '17px', margin: '5px 0px 0px 0px', padding: '0 0 10px 0'}}>(Stake points based on the cast's impact on Farcaster)</div>
 
               <div style={{display: 'flex', flexDirection: 'column', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', border: '2px solid #686cae99', borderRadius: '16px', padding: '10px 0 20px 0', margin: '45px 0 30px 0', background: '#220a4dbb', width: '500px'}}>
 
