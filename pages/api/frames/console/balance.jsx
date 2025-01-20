@@ -5,13 +5,13 @@ import { promisify } from 'util';
 import svg2img from 'svg2img';
 import fetch from 'isomorphic-unfetch';
 import NodeCache from 'node-cache';
-import Tip from "../../../../models/Tip";
-import Cast from "../../../../models/Cast";
-import Circle from "../../../../models/Circle";
+// import Tip from "../../../../models/Tip";
+// import Cast from "../../../../models/Cast";
+// import Circle from "../../../../models/Circle";
 import connectToDatabase from "../../../../libs/mongodb";
-import { numToText } from "../../../../utils/utils";
-import mongoose from 'mongoose';
-import { FaUser } from "react-icons/fa";
+// import { numToText } from "../../../../utils/utils";
+// import mongoose from 'mongoose';
+// import { FaUser } from "react-icons/fa";
 
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 const cache = new NodeCache({ stdTTL: 60 });
@@ -94,7 +94,11 @@ export default async function handler(req, res) {
               <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '25px', margin: '5px 20px 5px 20px', padding: '5px 15px'}}>{`User opted out of /impact`}</div>
             </div>
           ) : (
-            <div style={{display: 'flex', flexDirection: 'column', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', border: '2px solid #686cae99', borderRadius: '16px', padding: '10px 0 20px 0', margin: '45px 0 30px 0', background: '#220a4dbb', width: '500px'}}>
+            <div style={{display: 'flex', flexDirection: 'column', textAlign: 'center', alignItems: 'center', justifyContent: 'center'}}>
+              <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '26px', margin: '45px 0px 0px 0px', padding: '0 0 10px 0'}}>How impactful is this cast?</div>
+              <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '17px', margin: '5px 0px 0px 0px', padding: '0 0 10px 0'}}>(Stake points based on the cast's impact on Farcaster)</div>
+
+              <div style={{display: 'flex', flexDirection: 'column', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', border: '2px solid #686cae99', borderRadius: '16px', padding: '10px 0 20px 0', margin: '15px 0 30px 0', background: '#220a4dbb', width: '500px'}}>
 
               <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '25px', margin: '5px 20px 5px 20px', padding: '5px 15px'}}>{`@${username}'s cast`}</div>
 
@@ -120,6 +124,7 @@ export default async function handler(req, res) {
 
                 </div>
               </div>
+            </div>
             </div>
           )}
         </div>
