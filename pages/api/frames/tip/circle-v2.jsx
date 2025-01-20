@@ -32,15 +32,15 @@ export default async function handler(req, res) {
         await connectToDatabase();
         let circle = await Circle.findOne({ _id: objectId }).exec();
         if (circle && !circle?.image) {
-          return {circles: circle.circles, text: circle.text, username: circle.username, showcase: circle.showcase, userPfp: circle.user_pfp || null, curator: circle.curator || [], timeframe: circle.time || '', image: null}
+          return {circles: circle.circles, text: circle.text, username: circle.username, showcase: circle.showcase, userPfp: circle.user_pfp || null, curator: circle.curator || [], timeframe: circle.time || '', channels: circle.channels || [], image: null}
         } else if (circle && circle?.image) {
-          return {circles: circle.circles, text: circle.text, username: circle.username, showcase: circle.showcase, userPfp: circle.user_pfp || null, curator: circle.curator || [], timeframe: circle.time || '', image: circle.image}
+          return {circles: circle.circles, text: circle.text, username: circle.username, showcase: circle.showcase, userPfp: circle.user_pfp || null, curator: circle.curator || [], timeframe: circle.time || '', image: circle.image, channels: circle.channels || []}
         } else {
           return {circles: [], text: '', username: '', showcase: [], userPfp: null, curator: [], timeframe: '', image: null}
         }
       } catch (error) {
         console.error("Error while fetching casts:", error);
-        return {circles: [], text: '', username: '', showcase: [], userPfp: null, curator: [], timeframe: '', image: null}
+        return {circles: [], text: '', username: '', showcase: [], userPfp: null, curator: [], timeframe: '', channels: [], image: null}
       }  
     }
 
@@ -84,7 +84,18 @@ export default async function handler(req, res) {
     }
 
 
-    let {circles, text, username, showcase, userPfp, curator, timeframe, image} = await getCircle(id);
+    let {circles, text, username, showcase, userPfp, curator, timeframe, channels, image} = await getCircle(id);
+
+
+    let threshold = true
+
+    if (text) {
+      const numbers = text.match(/\d+/g).map(Number);
+      const numTest = numbers.some(number => number > 100);
+      if (!numTest) {
+        threshold = false
+      }
+    }
 
     if (image) {
       try {
@@ -161,9 +172,67 @@ export default async function handler(req, res) {
   
   
   
+
+
+
+
+
+
+
+
+
+
+
+  {!threshold && <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '5px 5px 15px 5px'}}>
+  
+  <div style={{display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '1px solid #eeeeeeaa', borderRadius: '88px', padding: '3px 10px 3px 3px', background: '#eeeeeeaa', width: 'auto', margin: '0 5px 0 0'}}>
+    {curator.length > 0 && curator[0]?.pfp && curator[0]?.pfp !== null && (<img src={curator[0]?.pfp} width={40} height={40} style={{borderRadius: '80px', border: '2px solid #eee', backgroundColor: '#8363ca'}} />)}
+    <div style={{display: 'flex', textAlign: 'center', color: '#220a4d', fontSize: '22px', margin: '0'}}>{curator?.length > 0 && curator[0]?.username !== null ? `@${curator[0]?.username}` : ' Ecosystem'}</div>
+  </div>
+
+  <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '22px', margin: '0', padding: '0'}}>impact picks</div>
+
+
+</div>}
+
+
+
+
+
+
+
+{!threshold && (<div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.0rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '0px 5px 0px 5px'}}>
+
+  <div style={{display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', borderRadius: '16px', padding: '3px 5px', margin: '0', width: 'auto'}}>
+    <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '18px', margin: '0'}}>{`picked over`}{time !== 'all time' && ' the last'}</div>
+  </div>
+
+  <div style={{display: 'flex', flexDirection: 'row', color: '#220a4d', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '1px solid #eeeeeeaa', borderRadius: '16px', padding: '3px 10px', background: '#eeeeeeaa', width: 'auto', margin: '0', fontSize: '18px'}}>{time}</div>
+
+  <div style={{display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', borderRadius: '16px', padding: '3px 5px', margin: '0', width: 'auto'}}>
+    <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '18px', margin: '0'}}>{`in`}</div>
+  </div>
+
+  <div style={{display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '1px solid #eeeeeeaa', borderRadius: '16px', padding: '3px 10px', background: '#eeeeeeaa', width: 'auto', margin: '0', fontSize: '18px'}}>
+    <div style={{display: 'flex', textAlign: 'center', color: '#220a4d', fontSize: '18px', margin: '0'}}>{`${channels?.length > 0 && channels[0] !== ' ' && channels[0] !== null ? '/' + channels[0] : 'all channels'}`}</div>
+  </div>
+
+</div>)}
+
+
+{!threshold && (<div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.0rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '3px 5px 10px 2px'}}>
+
+  <div style={{display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', borderRadius: '16px', padding: '3px 5px', margin: '0', width: 'auto'}}>
+    <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '18px', margin: '0'}}>{`picks feature:`}</div>
+  </div>
+
+</div>)}
+
+
+
   
   
-          <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '5px 5px 15px 5px'}}>
+          {threshold && (<div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '5px 5px 15px 5px'}}>
   
             <div style={{display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '1px solid #eeeeeeaa', borderRadius: '88px', padding: '3px 10px 3px 3px', background: '#eeeeeeaa', width: 'auto', margin: '0 5px 0 0'}}>
               {userPfp && (<img src={userPfp} width={40} height={40} style={{borderRadius: '80px', border: '2px solid #eee', backgroundColor: '#8363ca'}} />)}
@@ -173,7 +242,7 @@ export default async function handler(req, res) {
             <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '22px', margin: '0', padding: '0'}}>multi-tipped</div>
   
   
-          </div>
+          </div>)}
   
   
   
@@ -181,7 +250,7 @@ export default async function handler(req, res) {
   
   
   
-          <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.0rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '0px 5px 0px 5px'}}>
+          {threshold && (<div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.0rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '0px 5px 0px 5px'}}>
   
             <div style={{display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '1px solid #eeeeeeaa', borderRadius: '16px', padding: '3px 10px', margin: '0', background: '#eeeeeeaa', width: 'auto'}}>
               <div style={{display: 'flex', textAlign: 'center', color: '#220a4d', fontSize: '18px', margin: '0'}}>{text}</div>
@@ -190,10 +259,10 @@ export default async function handler(req, res) {
             <div style={{display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', borderRadius: '16px', padding: '3px 5px', margin: '0', width: 'auto'}}>
               <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '18px', margin: '0'}}>{`to ${numToText(showcase?.length)} creator`}{showcase?.length > 1 && `s`}</div>
             </div>
-          </div>
+          </div>)}
    
   
-          <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.0rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '3px 5px 10px 2px'}}>
+          {threshold && (<div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.0rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '3px 5px 10px 2px'}}>
   
             <div style={{display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', borderRadius: '16px', padding: '3px 5px', margin: '0', width: 'auto'}}>
               <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '18px', margin: '0'}}>{`curated over`}{time !== 'all time' && ' the last'}</div>
@@ -210,8 +279,18 @@ export default async function handler(req, res) {
               <div style={{display: 'flex', textAlign: 'center', color: '#220a4d', fontSize: '18px', margin: '0'}}>{`@${curator[0]?.username}`}</div>
             </div>
   
-          </div>
+          </div>)}
   
+  
+
+
+
+
+
+
+
+
+
   
   
   
