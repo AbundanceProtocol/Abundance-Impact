@@ -108,6 +108,7 @@ export default async function handler(req, res) {
                       {
                         $match: {
                           curator_fid: curator,
+                          points: '$IMPACT'
                         }
                       },
                       {
@@ -164,23 +165,11 @@ export default async function handler(req, res) {
                 }
 
 
-                // console.log('curatorSet', curatorSet)
-
-                // console.log('finalCuratorDataset', finalCuratorDataset)
-
-
-
-
-
-
               }
 
               // console.log('curators', set?.curators)
 
               let uniqueTargetCastHashes = await Impact.distinct('target_cast_hash', { curator_fid: { $in: curators } });
-
-              // let creators = await Cast.distinct('author_fid', { cast_hash: { $in: uniqueTargetCastHashes } });
-              // console.log('creators', creators?.length)
 
 
 
@@ -188,7 +177,8 @@ export default async function handler(req, res) {
                 {
                   $match: {
                     cast_hash: { $in: uniqueTargetCastHashes },
-                    author_fid: { "$nin": [funds[0]?._id] }
+                    author_fid: { "$nin": [funds[0]?._id] },
+                    points: '$IMPACT'
                   }
                 },
                 {
@@ -218,7 +208,8 @@ export default async function handler(req, res) {
                 {
                   $match: {
                     cast_hash: { $in: uniqueTargetCastHashes },
-                    author_fid: { "$nin": [funds[0]?._id] }
+                    author_fid: { "$nin": [funds[0]?._id] },
+                    points: '$IMPACT'
                   }
                 },
                 {
@@ -244,7 +235,8 @@ export default async function handler(req, res) {
                 {
                   $match: {
                     cast_hash: { $in: uniqueTargetCastHashes },
-                    author_fid: { "$nin": [funds[0]?._id] }
+                    author_fid: { "$nin": [funds[0]?._id] },
+                    points: '$IMPACT'
                   }
                 },
                 {
@@ -258,12 +250,7 @@ export default async function handler(req, res) {
               // console.log('total_points', total_points[0]?.total_points)
 
               const pointsTotal = total_points[0]?.total_points || 0
-              // console.log('pointsTotal', pointsTotal)
 
-
-              // for (const curator of curators) {
-                
-              // }
 
 
               let creatorList = []
@@ -298,119 +285,17 @@ export default async function handler(req, res) {
 
 
               }
-              // let counter = 0
-              // for (const user of creator_points) {
-              //   counter += user.total_points
-              // }
-              // console.log('creatorList', creatorList)
+
 
             } else if (set?.degen_total > 0 || set?.ham_total > 0) {
-
-
-
-
-              
-              // let curators = set?.curators
-
-              // for (const curator of curators) {
-              //   if (curator !== funds[0]?._id) {
-              //     ratio = 0.9
-              //   }
-              // }
-
-              // if (ratio == 0.9) {
-              //   set?.degen_total
-              //   // console.log('set?.degen_total', set?.degen_total)
-              //   // console.log('set?.ham_total', set?.ham_total)
-              //   let curatorSet = []
-              //   for (const curator of curators) {
-              //     // console.log('curator', curator)
-              //     if (curator !== funds[0]?._id) {
-              //       const total_points = await Impact.aggregate([
-              //         {
-              //           $match: {
-              //             curator_fid: curator,
-              //           }
-              //         },
-              //         {
-              //           $group: {
-              //             _id: null,
-              //             total_points: { $sum: "$impact_points" },
-              //           }
-              //         }
-              //       ])
-              //       const curatorTotals = total_points[0]?.total_points || 0
-
-              //       // console.log('curatorTotals 1', curatorTotals)
-              //       let curatorData = {fid: curator, points: curatorTotals, degen: 0, ham: 0}
-              //       curatorSet.push(curatorData)
-              //     } else {
-              //       // console.log('curator 2', curator)
-
-              //     }
-              //   }
-
-
-              //   let totalPoints = 0
-              //   for (const curator of curatorSet) {
-              //     totalPoints += curator?.points
-              //   }
-              //   if (curatorSet?.length > 0 && totalPoints > 0) {
-              //     for (let curator of curatorSet) {
-              //       let degen = Math.floor(set?.degen_total * 0.1 * curator?.points / totalPoints * 100) / 100
-              //       let ham = Math.floor(set?.ham_total * 0.1 * curator?.points / totalPoints * 100) / 100
-              //       curator.degen = degen
-              //       curator.ham = ham
-              //     }
-              //   }
-
-
-              //   for (const creator of curatorSet) {
-
-              //     const index = finalCuratorDataset.findIndex(object => object.fid === creator?.fid);
-              //     // console.log('index', index)
-              //     if (index !== -1) {
-              //       // finalCuratorDataset[index].points += creator?.points
-              //       finalCuratorDataset[index].degen += Math.floor(creator?.degen * 100) / 100
-              //       finalCuratorDataset[index].ham += Math.floor(creator?.ham * 100) / 100
-              //     } else {
-              //       let newCurator = {fid: creator?.fid, points: creator?.points || 0, degen: creator?.degen || 0, ham: creator?.ham || 0}
-              //       finalCuratorDataset.push(newCurator)
-              //     }
-              //   }
-
-
-              //   for (let curator of finalCuratorDataset) {
-              //     curator.degen = Math.floor(curator.degen * 100) / 100
-              //     curator.ham = Math.floor(curator.ham * 100) / 100
-              //   }
-
-
-              //   // console.log('curatorSet', curatorSet)
-
-              //   // console.log('finalCuratorDataset', finalCuratorDataset)
-
-
-
-
-
-
-              // }
-
-              // console.log('curators', set?.curators)
-
-              // let uniqueTargetCastHashes = await Impact.distinct('target_cast_hash', { curator_fid: { $in: curators } });
-
-              // let creators = await Cast.distinct('author_fid', { cast_hash: { $in: uniqueTargetCastHashes } });
-              // console.log('creators', creators?.length)
-
 
 
               const creator_points = await Cast.aggregate([
                 {
                   $match: {
                     // cast_hash: { $in: uniqueTargetCastHashes },
-                    // author_fid: { "$nin": [funds[0]?._id] }
+                    // author_fid: { "$nin": [funds[0]?._id] },
+                    points: '$IMPACT'
                   }
                 },
                 {
@@ -438,7 +323,9 @@ export default async function handler(req, res) {
 
               const total_creators = await Cast.aggregate([
                 {
-                  $match: {}
+                  $match: {
+                    points: '$IMPACT'
+                  }
                 },
                 {
                   $group: {
@@ -463,7 +350,8 @@ export default async function handler(req, res) {
                 {
                   $match: {
                     // cast_hash: { $in: uniqueTargetCastHashes },
-                    // author_fid: { "$nin": [funds[0]?._id] }
+                    // author_fid: { "$nin": [funds[0]?._id] },
+                    points: '$IMPACT'
                   }
                 },
                 {
@@ -477,12 +365,7 @@ export default async function handler(req, res) {
               // console.log('total_points', total_points[0]?.total_points)
 
               const pointsTotal = total_points[0]?.total_points || 0
-              // console.log('pointsTotal', pointsTotal)
 
-
-              // for (const curator of curators) {
-                
-              // }
 
 
               let creatorList = []
@@ -517,22 +400,6 @@ export default async function handler(req, res) {
 
 
               }
-              // let counter = 0
-              // for (const user of creator_points) {
-              //   counter += user.total_points
-              // }
-              // console.log('creatorList', creatorList)
-
-
-
-
-
-
-
-
-
-
-
 
             }
           }
