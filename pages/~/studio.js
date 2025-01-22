@@ -39,7 +39,7 @@ export default function ProfilePage() {
   const [ref, inView] = useInView()
   const { ecosystem, username, app, userFid, pass } = router.query
   const [user, setUser] = useState(null)
-  const { LoginPopup, isLogged, showLogin, setShowLogin, setPoints, setIsLogged, setFid, miniApp, setMiniApp, fid } = useContext(AccountContext)
+  const { LoginPopup, isLogged, showLogin, setShowLogin, setPoints, setIsLogged, setFid, miniApp, setMiniApp, fid, ecoData } = useContext(AccountContext)
   const ref1 = useRef(null)
   const [textMax, setTextMax] = useState('430px')
   const [screenWidth, setScreenWidth ] = useState(undefined)
@@ -48,12 +48,15 @@ export default function ProfilePage() {
   const userButtons = ['Curation', 'Casts', 'Casts + Replies']
   const [searchSelect, setSearchSelect ] = useState('Curation')
   const { isMobile } = useMatchBreakpoints();
-  const [display, setDisplay] = useState({fund: false, ecosystem: false, multitip: false, promotion: false, curation: false, score: false})
+  const [display, setDisplay] = useState({fund: false, ecosystem: false, multitip: false, promotion: false, curation: false, score: false, distribution: false})
   const [isOn, setIsOn] = useState(false);
   const [scoreTime , setScoreTime ] = useState('all');
   const [scoreLoading , setScoreLoading ] = useState(false);
   const [fundLoading , setFundLoading ] = useState(true);
   const [userFeed, setUserFeed] = useState(null)
+  const [distLoading, setDistLoading] = useState(false)
+  const [funds, setFunds] = useState({curatorDegen: 0, curatorHam: 0, fundDegen: 0, fundHam: 0})
+  const [distribution, setDistribution] = useState(null)
   const [prevSearch, setPrevSearch] = useState({getTime: null, channel: null, username: null, text: null, shuffle: null, ecosystem: null, page: 0, order: -1, timeSort: null})
   const [showPopup, setShowPopup] = useState({open: false, url: null})
   const initialEco = {
@@ -212,12 +215,16 @@ export default function ProfilePage() {
   }
 
   function toggleMenu(target) {
+    console.log('1')
     if (!display[target]) {
       if (target == "score" && fid && !userScore) {
         setScoreLoading(true)
         getScores(fid, scoreTime || 'all')
       } else if (target == "multitip" && fid && multitips?.length == 0) {
         getTips(fid)
+      } else if (target == 'distribution' && fid) {
+        console.log('2')
+        getDistribution(fid)
       }
     }
     setDisplay(prev => ({...prev, [target]: !display[target] }))
@@ -230,6 +237,54 @@ export default function ProfilePage() {
       feedRouter()
     }
   }, [display.curation])
+
+
+
+  async function getDistribution(fid) {
+    setLoading(prev => ({...prev, distribution: true }))
+    setDistLoading(true)
+    try {
+      const response = await axios.get('/api/fund/getDistribution', {
+        params: { fid } })
+      if (response?.data) {
+        const distData = response?.data
+        console.log('distData', distData)
+        const funds = distData?.funds || []
+        let curatorDegen = 0
+        let curatorHam = 0
+        let fundDegen = 0
+        let fundHam = 0
+        for (const fund of funds) {
+          if (fund?.curators?.length == 0) {
+            fundDegen += fund?.degen_total
+            fundHam += fund?.ham_total
+          } else {
+            curatorDegen += fund?.degen_total
+            curatorHam += fund?.ham_total
+          }
+        }
+        setFunds({curatorDegen, curatorHam, fundDegen, fundHam})
+        
+        setDistribution(distData)
+      } else {
+        setDistribution([])
+      }
+      setDistLoading(false)
+      setLoading(prev => ({...prev, distribution: false }))
+      // setLoaded(true)
+    } catch (error) {
+      console.error('Error submitting data:', error)
+      // setLoaded(true)
+      setLoading(prev => ({...prev, distribution: false }))
+      setDistribution([])
+      setDistLoading(false)
+    }
+  }
+
+
+
+
+
 
 
 
@@ -1955,6 +2010,10 @@ export default function ProfilePage() {
                 }}
               />
             </ItemWrap>
+              
+            {/* <div style={{margin: '40px 10px 20px 10px', width: '100%', borderTop: '1px solid #48b'}}>
+            </div> */}
+
 
           </div></>)}
         </div>
@@ -2408,7 +2467,7 @@ export default function ProfilePage() {
 
       {/* MULTI-TIPS */}
 
-      <div style={{ padding: "0px 4px 80px 4px", width: feedMax }}>
+      <div style={{ padding: "0px 4px 0px 4px", width: feedMax }}>
 
 
         <div
@@ -2545,6 +2604,326 @@ export default function ProfilePage() {
 
 
 
+
+
+      {/* FUNDING DISTRIBUTION */}
+
+      {(impactFunds?.userFunds[0]?.creator_degen > 0 || impactFunds?.userFunds[0]?.creator_ham > 0) && (<div style={{ padding: "0px 4px 0px 4px", width: feedMax }}>
+
+
+        <div
+          id="distribution"
+          style={{
+            padding: isMobile ? "28px 0 20px 0" : "28px 0 20px 0",
+            width: "40%",
+          }}
+        ></div>
+
+        <div className='shadow'
+          style={{
+            padding: "8px",
+            backgroundColor: "#11448888",
+            borderRadius: "15px",
+            border: "1px solid #11447799",
+          }}
+        >
+          <div
+            className="flex-row"
+            style={{
+              width: "100%",
+              justifyContent: "center",
+              alignItems: "center",
+              padding: "16px 0 0 0",
+            }}
+          >
+            <FaCoins style={{ fill: "#cde" }} size={27} onClick={() => {
+                toggleMenu("distribution");
+              }}/>
+            <div onClick={() => {
+                toggleMenu("distribution");
+              }}>
+            <Description
+              {...{
+                show: true,
+                text: "Fund Distribution",
+                padding: "4px 0 4px 10px",
+                size: "large",
+              }}
+            />
+            </div>
+              <div
+                className="flex-row"
+                style={{
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  cursor: "pointer",
+                }}
+                onClick={() => {
+                  toggleMenu("distribution");
+                }}
+              >
+                {/* <Item {...{ text: "How it works" }} /> */}
+                <FaAngleDown
+                  size={28} color={"#cde"}
+                  style={{
+                    margin: "5px 15px 5px 5px",
+                    transform: display.distribution
+                      ? "rotate(180deg)"
+                      : "rotate(0deg)",
+                    transition: "transform 0.3s ease",
+                  }}
+                />
+              </div>
+          </div>
+
+          <div
+            className="flex-row"
+            style={{
+              color: "#9df",
+              width: "100%",
+              textAlign: 'center',
+              fontSize: isMobile ? "15px" : "17px",
+              padding: "10px 10px 15px 10px",
+              justifyContent: "center",
+              userSelect: 'none'
+            }}
+          >
+            See how your auto-funding is distributed among creators and curators on Farcaster
+          </div>
+
+          {(display.distribution && <>
+            {loading.distribution ? (
+            <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
+              <Spinner size={31} color={'#468'} />
+            </div>
+          ) : (<div
+            className="flex-row"
+            style={{
+              padding: "0px 0 0 0",
+              width: "100%",
+              flexWrap: "wrap",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+
+
+            <div className='flex-col' style={{padding: '0', flexWrap: 'wrap', minWidth: feedMax, gap: '0.0rem', justifyContent: 'center', maxWidth: textMax}}>
+
+
+
+
+
+            <div className='flex-row' style={{fontSize: '13px', justifyContent: isMobile ? "center" : "space-between", alignItems: 'center', gap: '0.75rem', margin: '0px 0', flexWrap: 'wrap', width: '100%', padding: '0 18px'}}>
+              <div className={`flex-col btn-select blu-drk shadow`} style={{minWidth: isMobile ? '135px' : '130px', color: '#cde', height: '90px', width: '22%'}}>
+                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
+                  <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0', color: '#44aaff'}}>Ecosystem-wide</div>
+                </div>
+                <div className='flex-col' style={{justifyContent: "center", alignItems: 'center', gap: '0.25rem'}}>
+                  {/* <Impact size={15} color={userFunding?.active_cron && userFunding?.creator_fund == 100 ? '#147' : '#5af'} /> */}
+                  <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.5rem'}}>
+
+                  <div style={{fontSize: '16px', fontWeight: '700'}}>{funds?.fundDegen > 0 ? formatNum(funds?.fundDegen || 0) : '--'}</div>
+                  <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$DEGEN</div>
+                  </div>
+
+                  <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.5rem'}}>
+
+                  <div style={{fontSize: '16px', fontWeight: '700', margin: '0'}}>{funds?.fundHam > 0 ? formatNum(funds?.fundHam || 0) : '--'}</div>
+                  <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$HAM</div>
+                  </div>
+                </div>
+              </div>
+              <div className={`flex-col btn-select blu-drk shadow`} style={{minWidth: isMobile ? '135px' : '130px', color: '#cde', height: '90px', width: '22%'}}>
+                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
+                  <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0', color: '#44aaff'}}>Curator Set</div>
+                </div>
+                <div className='flex-col' style={{justifyContent: "center", alignItems: 'center', gap: '0.25rem'}}>
+                  <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.5rem'}}>
+                    <div style={{fontSize: '16px', fontWeight: '700'}}>{funds?.curatorDegen > 0 ? formatNum(funds?.curatorDegen || 0) : '--'}</div>
+                    <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$DEGEN</div>
+                  </div>
+
+                  <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.5rem'}}>
+                    <div style={{fontSize: '16px', fontWeight: '700', margin: '0'}}>{funds?.curatorHam > 0 ? formatNum(funds?.curatorHam || 0) : '--'}</div>
+                    <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$HAM</div>
+                  </div>
+                </div>
+              </div>
+              {/* <div className={`flex-col btn-select blu-drk shadow`} style={{minWidth: isMobile ? '135px' : '130px', color: '#cde', height: '133px', width: '22%'}}>
+                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
+                  <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0', color: '#44aaff'}}>Growth Fund</div>
+                </div>
+                <div className='flex-col' style={{justifyContent: "center", alignItems: 'center', gap: '0.25rem'}}>
+                  <div style={{fontSize: '16px', fontWeight: '700'}}>{fundToggle ? formatNum(impactFunds?.totalFunds[0]?.growth_degen || 0) || '--' : formatNum(impactFunds?.userFunds[0]?.growth_degen || 0) || '--'}</div>
+                  <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$DEGEN</div>
+
+                  <div style={{fontSize: '16px', fontWeight: '700', margin: '10px 0 0 0'}}>{fundToggle ? formatNum(impactFunds?.totalFunds[0]?.growth_ham || 0) || '--' : formatNum(impactFunds?.userFunds[0]?.growth_ham || 0) || '--'}</div>
+                  <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$HAM</div>
+                </div> */}
+              {/* </div>
+              <div className={`flex-col btn-select blu-drk shadow`} style={{minWidth: isMobile ? '135px' : '130px', color: '#cde', height: '133px', width: '22%'}}>
+                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
+                  <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0', color: '#44aaff'}}>Special Fund</div>
+                </div>
+                <div className='flex-col' style={{justifyContent: "center", alignItems: 'center', gap: '0.25rem'}}>
+                  <div style={{fontSize: '16px', fontWeight: '700'}}>{fundToggle ? formatNum(impactFunds?.totalFunds[0]?.special_degen || 0) || '--' : formatNum(impactFunds?.userFunds[0]?.special_degen || 0) || '--'}</div>
+                  <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$DEGEN</div>
+
+                  <div style={{fontSize: '16px', fontWeight: '700', margin: '10px 0 0 0'}}>{fundToggle ? formatNum(impactFunds?.totalFunds[0]?.special_ham || 0) || '--' : formatNum(impactFunds?.userFunds[0]?.special_ham || 0) || '--'}</div>
+                  <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$HAM</div>
+                </div>
+              </div> */}
+            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+              {distribution?.curatorDataset?.length > 0 && (<div className='flex-row' style={{alignItems: 'center', justifyContent: 'center', padding: '22px 25px 0px 25px', width: '100%'}}>
+                <div style={{fontSize: '18px', fontWeight: '600', width: '100%', padding: '6px 10px 10px 10px', textWrap: 'nowrap', color: '#cde', borderBottom: '1px solid #48b', justifyContent: 'center', alignItems: 'center', center: '100%', textAlign: 'center'}}>Curators</div>
+              </div>)}
+
+
+              {distribution?.curatorDataset?.length > 0 && (<div className='flex-row' style={{alignItems: 'center', justifyContent: 'flex-start', padding: '0px 25px', width: '100%'}}>
+                
+              
+                <div className='flex-row' style={{padding: '0', margin: '0', width: isMobile ? '50%' : '60%', borderBottom: '1px solid #48b', backgroundColor: '#024e'}}>
+
+                  <div style={{fontSize: '10px', fontWeight: '700', width: '28px', padding: '0', color: '#cde'}}>&nbsp;</div>
+
+
+
+                  <div style={{fontSize: '12px', fontWeight: '500', width: '100%', padding: '6px 13px 6px 13px', textWrap: 'nowrap', color: '#8cf'}}>curator</div>
+
+
+                </div>
+                
+
+                {/* {!isMobile && (<div style={{fontSize: '12px', fontWeight: '500', width: '20%', padding: '6px 13px 6px 13px', textWrap: 'nowrap', color: '#8cf', borderBottom: '1px solid #48b', backgroundColor: '#024e'}}>points</div>)} */}
+                <div style={{fontSize: '12px', fontWeight: '500', width: isMobile ? '25%' : '20%', padding: '6px 13px 6px 13px', textWrap: 'nowrap', color: '#8cf', borderBottom: '1px solid #48b', backgroundColor: '#024e'}}>$DEGEN</div>
+                <div style={{fontSize: '12px', fontWeight: '500', width: isMobile ? '25%' : '20%', padding: '6px 13px 6px 13px', textWrap: 'nowrap', color: '#8cf', borderBottom: '1px solid #48b', backgroundColor: '#024e'}}>$HAM</div>
+              </div>)}
+
+  
+  
+  
+                {distribution?.curatorDataset?.length > 0 ? distribution?.curatorDataset?.map((curator, index) => { return (
+  
+  
+                <div key={index} className='flex-row' style={{alignItems: 'center', justifyContent: 'flex-start', padding: '2px 25px', width: '100%'}}>
+                  {/* <div style={{fontSize: '15px', fontWeight: '700', width: '15px', padding: '6px 35px 6px 0', color: '#cde'}}>{index + 1}</div> */}
+                  <div className='flex-row' style={{padding: '0', margin: '0', width: isMobile ? '50%' : '60%', borderBottom: '1px solid #48b'}}>
+                    <img loading="lazy" src={curator?.pfp} className="" alt={`${curator?.username} avatar`} style={{width: '28px', height: '28px', maxWidth: '28px', maxHeight: '28px', borderRadius: '24px', border: '1px solid #000'}} />
+                    <div style={{fontSize: '15px', fontWeight: '500', width: '100%', padding: '6px 10px 10px 10px', textWrap: 'nowrap', color: '#def'}}><Link className="fc-lnk" href={`/~/ecosystems/${ecoData?.ecosystem_handle || 'abundance'}/curators/${curator?.username}`}>@{curator?.username}</Link></div>
+                  </div>
+  
+                  {/* {!isMobile && (<div style={{fontSize: '14px', fontWeight: '500', width: '20%', padding: '6px 10px 10px 10px', textWrap: 'nowrap', color: '#cde', borderBottom: '1px solid #48b'}}>{curator?.points}</div>)} */}
+                  <div style={{fontSize: '14px', fontWeight: '500', width: isMobile ? '25%' : '20%', padding: '7px 10px 10px 10px', textWrap: 'nowrap', color: '#cde', borderBottom: '1px solid #48b'}}>{curator?.degen}</div>
+                  <div style={{fontSize: '14px', fontWeight: '500', width: isMobile ? '25%' : '20%', padding: '7px 10px 10px 10px', textWrap: 'nowrap', color: '#cde', borderBottom: '1px solid #48b'}}>{curator?.ham}</div>
+                </div>
+  
+  
+                )}) : (
+                <>
+                  {distLoading ? (<div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
+                    <Spinner size={31} color={'#468'} />
+                  </div>) : (<div style={{fontSize: '20px', color: '#def', textAlign: 'center', padding: '0px'}}>&nbsp;</div>)}
+                </>
+                )}
+  
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+              {distribution?.creatorDataset?.length > 0 && (<div className='flex-row' style={{alignItems: 'center', justifyContent: 'center', padding: '22px 25px 0px 25px', width: '100%'}}>
+                <div style={{fontSize: '18px', fontWeight: '600', width: '100%', padding: '6px 10px 10px 10px', textWrap: 'nowrap', color: '#cde', borderBottom: '1px solid #48b', justifyContent: 'center', alignItems: 'center', center: '100%', textAlign: 'center'}}>Creators</div>
+              </div>)}
+
+
+              {distribution?.creatorDataset?.length > 0 && (<div className='flex-row' style={{alignItems: 'center', justifyContent: 'flex-start', padding: '0px 25px', width: '100%'}}>
+                  
+                
+                <div className='flex-row' style={{padding: '0', margin: '0', width: isMobile ? '50%' : '60%', borderBottom: '1px solid #48b', backgroundColor: '#024e'}}>
+
+                  <div style={{fontSize: '10px', fontWeight: '700', width: '28px', padding: '0', color: '#cde'}}>&nbsp;</div>
+
+
+
+                  <div style={{fontSize: '12px', fontWeight: '500', width: '100%', padding: '6px 13px 6px 13px', textWrap: 'nowrap', color: '#8cf'}}>creator</div>
+
+
+                </div>
+                
+
+                {/* {!isMobile && (<div style={{fontSize: '12px', fontWeight: '500', width: '20%', padding: '6px 13px 6px 13px', textWrap: 'nowrap', color: '#8cf', borderBottom: '1px solid #48b', backgroundColor: '#024e'}}>points</div>)} */}
+                <div style={{fontSize: '12px', fontWeight: '500', width: isMobile ? '25%' : '20%', padding: '6px 13px 6px 13px', textWrap: 'nowrap', color: '#8cf', borderBottom: '1px solid #48b', backgroundColor: '#024e'}}>$DEGEN</div>
+                <div style={{fontSize: '12px', fontWeight: '500', width: isMobile ? '25%' : '20%', padding: '6px 13px 6px 13px', textWrap: 'nowrap', color: '#8cf', borderBottom: '1px solid #48b', backgroundColor: '#024e'}}>$HAM</div>
+              </div>)}
+
+
+
+              {distribution?.creatorDataset?.length > 0 ? distribution?.creatorDataset?.map((creator, index) => { return (
+
+
+                <div key={index} className='flex-row' style={{alignItems: 'center', justifyContent: 'flex-start', padding: '2px 25px', width: '100%'}}>
+                  {/* <div style={{fontSize: '15px', fontWeight: '700', width: '15px', padding: '6px 35px 6px 0', color: '#cde'}}>{index + 1}</div> */}
+                  <div className='flex-row' style={{padding: '0', margin: '0', width: isMobile ? '50%' : '60%', borderBottom: '1px solid #48b'}}>
+                    <img loading="lazy" src={creator?.pfp} className="" alt={`${creator?.username} avatar`} style={{width: '28px', height: '28px', maxWidth: '28px', maxHeight: '28px', borderRadius: '24px', border: '1px solid #000'}} />
+                    <div style={{fontSize: '15px', fontWeight: '500', width: '100%', padding: '6px 10px 10px 10px', textWrap: 'nowrap', color: '#def'}}><Link className="fc-lnk" href={`/~/ecosystems/${ecoData?.ecosystem_handle || 'abundance'}/creators/${creator?.username}`}>@{creator?.username}</Link></div>
+                  </div>
+
+                  {/* {!isMobile && (<div style={{fontSize: '14px', fontWeight: '500', width: '20%', padding: '6px 10px 10px 10px', textWrap: 'nowrap', color: '#cde', borderBottom: '1px solid #48b'}}>{creator?.points}</div>)} */}
+                  <div style={{fontSize: '14px', fontWeight: '500', width: isMobile ? '25%' : '20%', padding: '7px 10px 10px 10px', textWrap: 'nowrap', color: '#cde', borderBottom: '1px solid #48b'}}>{creator?.degen}</div>
+                  <div style={{fontSize: '14px', fontWeight: '500', width: isMobile ? '25%' : '20%', padding: '7px 10px 10px 10px', textWrap: 'nowrap', color: '#cde', borderBottom: '1px solid #48b'}}>{creator?.ham}</div>
+                </div>
+
+
+              )}) : (
+                <>
+                  {distLoading ? (<div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
+                    <Spinner size={31} color={'#468'} />
+                  </div>) : (<div style={{fontSize: '20px', color: '#def', textAlign: 'center', padding: '20px'}}>no creators found</div>)}
+                </>
+              )}
+
+
+
+                {distribution?.creatorDataset?.length > 0 && (<div className='flex-row' style={{alignItems: 'center', justifyContent: 'center', padding: '2px 25px', width: '100%'}}>
+                  <div style={{fontSize: '14px', fontWeight: '500', width: '100%', padding: '6px 10px 10px 10px', textWrap: 'nowrap', color: '#abc', borderBottom: '1px solid #48b', justifyContent: 'center', alignItems: 'center', center: '100%', textAlign: 'center'}}>{distribution?.totalEcoCreators > 0 ? distribution?.totalEcoCreators + ' ecosystem creators' : distribution?.totalCreators > 20 && distribution?.totalCreators + ' total creators'}</div>
+                </div>)}
+
+
+
+            </div>
+          </div>)}
+          </>)}
+        </div>
+      </div>)}
+
+      <div style={{padding: '0 0 80px 0'}}>&nbsp;</div>
 
       <ExpandImg  {...{show: showPopup.open, closeImagePopup, embed: {showPopup}, screenWidth, screenHeight }} />
       <Modal modal={modal} />
