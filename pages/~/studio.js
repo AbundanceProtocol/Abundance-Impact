@@ -2572,7 +2572,16 @@ export default function ProfilePage() {
 
 
             <div className='flex-row' style={{padding: '10px 5px 20px 5px', flexWrap: 'wrap', minWidth: feedMax, gap: '0.5rem', justifyContent: 'center', maxWidth: textMax}}>
-              {multitips?.length > 0 ? multitips.map((multitip, index) => { return (
+              {multitips?.length > 0 ? multitips.map((multitip, index) => { 
+                let showButton = true;
+                if (multitip?.text) {
+                  const numbers = multitip?.text?.match(/\d+/g)?.map(Number) || [];
+                  showButton = numbers.some((number) => number >= 100);
+                }
+                
+                
+                
+                return (
                 <Link className='btn-blu' key={index} href={`/~/studio/tip/${multitip?._id}`} style={{minWidth: isMobile ? '190px' : '190px'}}>
                   <div className='' style={{gap: '1.5rem'}}>
                     <div className='flex-row' style={{gap: '1rem', paddingBottom: '0px', justifyContent: 'flex-end'}}>
@@ -2580,7 +2589,7 @@ export default function ProfilePage() {
                       <div className='flex-row' style={{flexWrap: 'wrap'}}>
                         {(multitip?.text) && (<div className='curator-button-off' style={{fontSize: isMobile ? '8px' : '9px', border: '0px'}}>TIP: {multitip?.text}</div>)}
                         {(multitip?.createdAt) && (<div className='curator-button-off' style={{fontSize: isMobile ? '8px' : '9px', border: '0px'}}>{timePassed(multitip?.createdAt)}</div>)}
-                        {(multitip) && (<div className='curator-button' style={{fontSize: isMobile ? '8px' : '9px', border: '1px solid #999'}} onClick={(event) => {shareFrame(event, multitip)}}><FiShare size={9} color={'#eff'} /></div>)}
+                        {(multitip && showButton) && (<div className='curator-button' style={{fontSize: isMobile ? '8px' : '9px', border: '1px solid #999'}} onClick={(event) => {shareFrame(event, multitip)}}><FiShare size={9} color={'#eff'} /></div>)}
 
                       </div>
                     </div>

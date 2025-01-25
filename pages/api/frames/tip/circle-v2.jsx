@@ -91,7 +91,7 @@ export default async function handler(req, res) {
 
     if (text) {
       const numbers = text.match(/\d+/g).map(Number);
-      const numTest = numbers.some(number => number > 100);
+      const numTest = numbers.some(number => number >= 100);
       if (!numTest) {
         threshold = false
       }
