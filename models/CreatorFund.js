@@ -9,6 +9,7 @@ const creatorFundSchema = new mongoose.Schema({
   points: { type: String, default: '$IMPACT', index: true },
   ham: { type: Number, default: 0, index: true },
   degen: { type: Number, default: 0, index: true },
+  season: { type: Number, index: true },
   createdAt: { type: Date, default: () => new Date(), index: true }
 });
 
