@@ -86,8 +86,21 @@ export default async function handler(req, res) {
         </div>)}
 
 
+        {(Math.floor(reward?.degen) > 0 || Math.floor(reward?.ham) > 0) && (<div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '3rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '5px 5px 15px 5px'}}>
 
-        {(Math.floor(reward?.degen) > 0 || Math.floor(reward?.ham) > 0) && (<div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '10px 5px 0px 5px'}}>
+          {Math.floor(reward?.degen) > 0 && (<div style={{display: 'flex', flexDirection: 'column', textAlign: 'center', color: '#dee', margin: '0', padding: '0 5px 0 0', justifyContent: 'center', alignItems: 'center'}}>
+            <div style={{display: 'flex', fontSize: '66px'}}>{Math.floor(reward?.degen) || 0}</div>
+            <div style={{display: 'flex', fontSize: '15px'}}>$DEGEN</div>
+          </div>)}
+
+          {Math.floor(reward?.ham) > 0 && (<div style={{display: 'flex', flexDirection: 'column', textAlign: 'center', color: '#dee', margin: '0', padding: '0 5px 0 0', justifyContent: 'center', alignItems: 'center'}}>
+            <div style={{display: 'flex', fontSize: '66px'}}>{Math.floor(reward?.ham) || 0}</div>
+            <div style={{display: 'flex', fontSize: '15px'}}>$HAM</div>
+          </div>)}
+
+        </div>)}
+
+        {(Math.floor(reward?.degen) > 0 || Math.floor(reward?.ham) > 0) && (<div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '0px 5px 0px 5px'}}>
 
           <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '26px', margin: '0', padding: '0px 0 0 0'}}>Impact Creator Fund</div>
 
@@ -99,19 +112,6 @@ export default async function handler(req, res) {
 
         </div>)}
 
-        {(Math.floor(reward?.degen) > 0 || Math.floor(reward?.ham) > 0) && (<div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '2.5rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '5px 5px 15px 5px'}}>
-
-          {Math.floor(reward?.degen) > 0 && (<div style={{display: 'flex', flexDirection: 'column', textAlign: 'center', color: '#dee', margin: '0', padding: '0 5px 0 0', justifyContent: 'center', alignItems: 'center'}}>
-            <div style={{display: 'flex', fontSize: '42px'}}>{Math.floor(reward?.degen) || 0}</div>
-            <div style={{display: 'flex', fontSize: '15px'}}>$DEGEN</div>
-          </div>)}
-
-          {Math.floor(reward?.ham) > 0 && (<div style={{display: 'flex', flexDirection: 'column', textAlign: 'center', color: '#dee', margin: '0', padding: '0 5px 0 0', justifyContent: 'center', alignItems: 'center'}}>
-            <div style={{display: 'flex', fontSize: '42px'}}>{Math.floor(reward?.ham) || 0}</div>
-            <div style={{display: 'flex', fontSize: '15px'}}>$HAM</div>
-          </div>)}
-
-        </div>)}
 
         {(!reward || Math.floor(reward?.degen) == 0 && Math.floor(reward?.ham) == 0) && (<div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '60px 5px 60px 5px'}}>
 
