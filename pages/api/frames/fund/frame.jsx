@@ -30,25 +30,6 @@ export default async function handler(req, res) {
     await connectToDatabase();
 
 
-    // async function getUser(fid) {
-    //   try {
-    //     await connectToDatabase();
-    //     const user = await User.findOne({ fid }).select('username pfp').exec();
-    //     if (user) {
-    //       return {
-    //         username: user.username,
-    //         user_pfp: user.pfp,
-    //       };
-    //     } else {
-    //       return {username: null, user_pfp: null}
-    //     }
-    //   } catch (error) {
-    //     console.error('Error getting User:', error)
-    //     return { username: null, user_pfp: null };
-    //   }
-    // }
-
-
 
     async function getSched(id) {
       try {
@@ -124,83 +105,6 @@ export default async function handler(req, res) {
 
         <div style={{height: '250px', margin: '120px'}}>&nbsp;</div>
 
-
-        {/* <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '5px 5px 0px 5px'}}>
-
-          <div style={{display: 'flex', textAlign: 'center', color: '#dee', fontSize: '32px', margin: '0', padding: '0 5px 0 0'}}>impact score:</div>
-
-          <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '26px', margin: '0', padding: '5px 0 0 0'}}>{rank?.impact_score_all && ' ' + rank?.impact_score_all || 0}</div>
-
-        </div>
-
-
-        <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '0px 5px 0px 5px'}}>
-
-          <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '16px', margin: '0', padding: '0px 0 0 0'}}>{rank?.impact_score_all_rank ? 'Higher than ' + rank?.impact_score_all_rank + '% of users' : 'Higher than 0% of users'}</div>
-
-        </div>
-
-        <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '10px 5px 0px 5px'}}>
-
-          <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '16px', margin: '0', padding: '0px 0 0 0'}}>{rank?.raffle_score ? 'Raffle Score: ' + rank?.raffle_score + '  -  Raffle tickets: ' + rank?.raffle_tickets : 'Raffle Score: 0  -  Raffle tickets: 0'}</div>
-
-        </div>
-
- 
-
-
-        <div style={{display: 'flex', flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'flex-start', gap: '2.0rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '0px'}}>
-
-
-          <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', gap: '0.5rem', border: '0px solid #eeeeeeaa', width: '260px', margin: '30px 5px 10px 2px'}}>
-
-            <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start', gap: '0.0rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '0'}}>
-
-              <div style={{display: 'flex', flexDirection: 'column', color: 'black', alignItems: 'center', justifyContent: 'flex-start', gap: '0.15rem', border: '0px solid #eeeeeeaa', borderRadius: '16px', padding: '3px 5px', margin: '0', width: 'auto'}}>
-                <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '20px', margin: '0'}}>{`My Top Supporters:`}</div>
-                <div style={{display: 'flex', textAlign: 'center', color: '#dee', fontSize: '14px', margin: '0'}}>{`($degen)`}</div>
-              </div>
-
-            </div>
-
-
-            {rank?.contributor?.length > 0 ? (
-              rank?.contributor?.map((user, index) => (<div key={index} style={{display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.5rem'}}>
-                <div style={{display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '1px solid #eeeeeeaa', borderRadius: '16px', padding: '2px 5px', background: '#eeeeeeaa', width: 'auto', margin: '0'}}>
-                  {user && (<img src={user?.pfp} width={25} height={25} style={{borderRadius: '80px', border: '1px solid #eee', backgroundColor: '#8363ca'}} />)}
-                  <div style={{display: 'flex', textAlign: 'center', color: '#220a4d', fontSize: '16px', margin: '0'}}>{`@${user?.username}`}</div>
-                </div>
-                <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '15px', margin: '0', padding: '0'}}>{user?.degen && formatNum(user?.degen || 0)}</div>
-              </div>))
-            ) : (<div style={{display: 'flex', textAlign: 'center', color: '#dee', fontSize: '18px', margin: '0'}}>{`No contributors found`}</div>)}
-          </div>
-
-
-
-          <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', gap: '0.5rem', border: '0px solid #eeeeeeaa', width: '260px', margin: '30px 5px 10px 2px'}}>
-
-          <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.0rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '0'}}>
-
-            <div style={{display: 'flex', flexDirection: 'column', color: 'black', alignItems: 'center', justifyContent: 'flex-start', gap: '0.15rem', border: '0px solid #eeeeeeaa', borderRadius: '16px', padding: '3px 5px', margin: '0', width: 'auto'}}>
-              <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '20px', margin: '0'}}>{`My Top Curators:`}</div>
-              <div style={{display: 'flex', textAlign: 'center', color: '#dee', fontSize: '14px', margin: '0'}}>{`(pts)`}</div>
-            </div>
-
-          </div>
-
-
-          {rank?.curator?.length > 0 ? (
-            rank?.curator?.map((user, index) => (<div key={index} style={{display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.5rem'}}>
-              <div style={{display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '1px solid #eeeeeeaa', borderRadius: '16px', padding: '2px 5px', background: '#eeeeeeaa', width: 'auto', margin: '0'}}>
-                {user && (<img src={user?.pfp} width={25} height={25} style={{borderRadius: '80px', border: '1px solid #eee', backgroundColor: '#8363ca'}} />)}
-                <div style={{display: 'flex', textAlign: 'center', color: '#220a4d', fontSize: '16px', margin: '0'}}>{`@${user?.username}`}</div>
-              </div>
-              <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '15px', margin: '0', padding: '0'}}>{user?.impact && user?.impact}</div>
-            </div>))
-          ) : (<div style={{display: 'flex', textAlign: 'center', color: '#dee', fontSize: '18px', margin: '0'}}>{`No curators found`}</div>)}
-        </div>
-
-        </div> */}
 
 
       </div>
