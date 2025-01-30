@@ -315,7 +315,7 @@ export default async function handler(req, res) {
                   
                         let body = {
                           signer_uuid: signer,
-                          text: `@${user} has been nominated by @${curator} to the ${ecosystem} Ecosystem on /impact\n\nHelp support @${curator}'s nominees.\n\nOpt out of /impact nominations in frame`,
+                          text: `@${curator} just staked $impact on @${user}'s cast.\n\n/impact rewards creators & builders for their impact on Farcaster\n\nSupport @${curator}'s nominees by multi-tipping or subscribing to auto-tip their curation.\n\nOpt out of /impact nominations in frame`,
                         };
                         
                         const frameUrl = `https://impact.abundance.id/~/ecosystems/${handle}/tip-v3?time=all&shuffle=true&curators=${fid}&eco=${eco}&referrer=${fid}`
