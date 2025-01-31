@@ -42,7 +42,7 @@ export default async function handler(req, res) {
       console.log('userFid', userFid, castHash, authorFid, curatorFid)
       const castText = `I'm tipping:\n975 $DEGEN\nvia Abundance Ecosystem on /impact\n\n/impact lets you earn curator rewards while supporting your favorite creators & builders on Farcaster`
 
-      const tips = { currency: '$DEGEN', amount: 975 }
+      const tips = { currency: '$DEGEN', amount: 50 }
 
       async function sendTip(signer) {
         const base = "https://api.neynar.com/";
@@ -87,7 +87,7 @@ export default async function handler(req, res) {
 
       let balanceImg = ``
       if (tipped !== 0) {
-        balanceImg = `${baseURL}/api/frames/admin/frame?${qs.stringify({ confirmed: 975 })}`
+        balanceImg = `${baseURL}/api/frames/admin/frame?${qs.stringify({ confirmed: 50 })}`
       } else {
         balanceImg = `${baseURL}/api/frames/admin/frame?${qs.stringify({ error: 404 })}`
       }
