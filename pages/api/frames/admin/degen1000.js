@@ -40,7 +40,7 @@ export default async function handler(req, res) {
     } else {
       const decryptedUuid = decryptPassword(encryptedTipUuid, secretKey);
       console.log('userFid', userFid, castHash, authorFid, curatorFid)
-      const castText = `I'm tipping:\n5000 $DEGEN\nvia Abundance Ecosystem on /impact\n\n/impact lets you earn curator rewards while supporting your favorite creators & builders on Farcaster`
+      const castText = `I'm tipping:\n1000 $DEGEN\nvia Abundance Ecosystem on /impact\n\n/impact lets you earn curator rewards while supporting your favorite creators & builders on Farcaster`
 
       const tips = { currency: '$DEGEN', amount: 1000 }
 
