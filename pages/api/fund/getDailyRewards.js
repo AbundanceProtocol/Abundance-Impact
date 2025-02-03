@@ -36,9 +36,9 @@ export default async function handler(req, res) {
         try {
           // const objectId = new mongoose.Types.ObjectId(id)
           // console.log(id)
-          let getFid = 453
+          // let getFid = 453
           await connectToDatabase();
-          let reward = await Claim.findOne({ fid: getFid }).sort({ createdAt: -1 }).exec();
+          let reward = await Claim.findOne({ fid: fid }).sort({ createdAt: -1 }).exec();
           if (reward) {
             return reward
           } else {
