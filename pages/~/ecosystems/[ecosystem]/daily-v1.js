@@ -303,7 +303,7 @@ export default function Tips({ecosystem, referrer, id, start}) {
         <meta property="og:title" content="Impact Score" />
         <meta property='og:image' content={`${baseURL}/api/frames/reward/daily-frame?${qs.stringify({ id, start })}`} />
         <meta property="fc:frame" content="vNext" />
-        <meta property="fc:frame:image" content={`${baseURL}/api/frames/reward/daily-frame?${qs.stringify({ id })}`} />
+        <meta property="fc:frame:image" content={`${baseURL}/api/frames/reward/daily-frame?${qs.stringify({ id, start })}`} />
         <meta property="fc:frame:image:aspect_ratio" content="1.91:1" />
         <meta property="fc:frame:button:1" content='My Reward' />
         <meta property="fc:frame:button:1:action" content="post" />
