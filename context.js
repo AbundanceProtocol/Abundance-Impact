@@ -148,6 +148,7 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
       router.route !== "/~/ecosystems/[ecosystem]/rank-v1" &&
       router.route !== "/~/ecosystems/[ecosystem]/fund-v1" &&
       router.route !== "/~/ecosystems/[ecosystem]/rewards-v1" &&
+      router.route !== "/~/ecosystems/[ecosystem]/daily-v1" &&
       router.route !== "/~/ecosystems/[ecosystem]/curation-v1" &&
       router.route !== "/~/studio/multi-tip-compose"
     ) {
@@ -182,6 +183,7 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
       router.route !== "/~/ecosystems/[ecosystem]/rank-v1" &&
       router.route !== "/~/ecosystems/[ecosystem]/fund-v1" &&
       router.route !== "/~/ecosystems/[ecosystem]/rewards-v1" &&
+      router.route !== "/~/ecosystems/[ecosystem]/daily-v1" &&
       router.route !== "/~/ecosystems/[ecosystem]/curation-v1" &&
       router.route !== "/~/studio/multi-tip-compose"
     ) {
@@ -235,6 +237,7 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
       router.route !== "/~/ecosystems/[ecosystem]/rank-v1" &&
       router.route !== "/~/ecosystems/[ecosystem]/fund-v1" &&
       router.route !== "/~/ecosystems/[ecosystem]/rewards-v1" &&
+      router.route !== "/~/ecosystems/[ecosystem]/daily-v1" &&
       router.route !== "/~/ecosystems/[ecosystem]/curation-v1" &&
       router.route !== "/~/studio/multi-tip-compose" &&
       !miniApp
