@@ -535,6 +535,43 @@ html, body {
 }
 
 
+.btn-on {
+    background-color: #007bff;
+    color: #111;
+    cursor: pointer;
+}
+
+.btn-on:hover {
+    background-color: #229bff;
+}
+
+
+.btn-act {
+    background-color: transparent;
+    border: 1px solid #00ff0b;
+    color: #00ff0b;
+    cursor: pointer;
+}
+
+.btn-act:hover {
+    background-color: #ffffff22;
+    border: 1px solid #22ff2b;
+    color: #22ff2b;
+}
+
+.btn-off {
+    background-color: transparent;
+    border: 1px solid #007bff;
+    color: #007bff;
+    cursor: pointer;
+}
+
+.btn-off:hover {
+    background-color: transparent;
+    border: 1px solid #229bff;
+    color: #229bff;
+}
+
 @media only screen and (min-width: 1380px) {
     .top-left {
         width: 260px;
