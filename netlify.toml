@@ -23,6 +23,9 @@
 [functions."score-background"]
   schedule = "57 4 * * *"
 
+[functions."daily-background"]
+  schedule = "5 5 * * *"
+
 [functions."raffle-background"]
   schedule = "40 4 * * *"
 

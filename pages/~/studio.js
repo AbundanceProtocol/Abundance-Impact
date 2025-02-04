@@ -16,7 +16,7 @@ import { GiRibbonMedal as Medal } from "react-icons/gi";
 import { IoShuffleOutline as ShuffleIcon, IoBuild  } from "react-icons/io5";
 import { BiGift } from "react-icons/bi";
 import { FaStar, FaCoins } from "react-icons/fa6";
-import { IoIosRocket, IoMdTrophy } from "react-icons/io";
+import { IoIosRocket, IoMdTrophy, IoMdRefresh as Refresh} from "react-icons/io";
 import { confirmUser, timePassed } from '../../utils/utils';
 import Spinner from '../../components/Common/Spinner';
 import ExpandImg from '../../components/Cast/ExpandImg';
@@ -92,6 +92,8 @@ export default function ProfilePage() {
   const [creatorLoading, setCreatorLoading] = useState(true)
   const [dailyRewards, setDailyRewards] = useState(null)
   const [dailyLoading, setDailyLoading] = useState(true)
+  const [totalClaims, setTotalClaims] = useState(0)
+  const [claimsLoading, setClaimsLoading] = useState(true)
   const [fundToggle, setFundToggle] = useState(true)
   const [userFunding, setUserFunding] = useState(null)
   const [isSelected, setIsSelected] = useState('none')
@@ -347,6 +349,7 @@ export default function ProfilePage() {
       getFunds(fid)
       getCreatorRewards(fid)
       getDailyRewards(fid)
+      getTotalClaims(fid)
       getCuratorData(fid)
       setUserQuery({
         ...userQuery,
@@ -374,6 +377,28 @@ export default function ProfilePage() {
       setCreatorLoading(false)
     }
   }
+
+  
+  async function getTotalClaims(fid) {
+    try {
+      const response = await axios.get('/api/fund/getTotalClaims', {
+        params: { fid }
+      })
+      console.log('getTotalClaims1', response)
+      if (response?.data?.data) {
+        setTotalClaims(response?.data?.data)
+        console.log('getTotalClaims2', response?.data?.data)
+      } else {
+        setTotalClaims(0)
+      }
+      setClaimsLoading(false)
+
+    } catch (error) {
+      console.error('Error submitting data:', error)
+      setClaimsLoading(false)
+    }
+  }
+
 
   async function getDailyRewards(fid) {
     try {
@@ -1816,74 +1841,37 @@ export default function ProfilePage() {
 
 
 
-          <div className='flex-row' style={{fontSize: '13px', justifyContent: isMobile ? "center" : "space-between", alignItems: 'center', gap: '0.75rem', margin: '0px 0', flexWrap: 'wrap', width: '100%', padding: '0 18px 10px 18px'}}>
-              <div className={`flex-col btn-select blu-drk shadow`} style={{minWidth: isMobile ? '135px' : '130px', color: '#cde', height: '120px', width: '22%'}}>
-                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
-                  <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0', color: '#44aaff'}}>Creator Fund</div>
-                </div>
-                {creatorLoading ? (
-                  <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '0 20px'}}>
-                      <Spinner size={31} color={'#468'} />
-                  </div>) : (<div className='flex-col' style={{justifyContent: "center", alignItems: 'center', gap: '0.25rem'}}>
-                  {/* <Impact size={15} color={userFunding?.active_cron && userFunding?.creator_fund == 100 ? '#147' : '#5af'} /> */}
-                  <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.5rem'}}>
+          <div className='flex-col' style={{fontSize: '13px', justifyContent: isMobile ? "center" : "center", alignItems: 'center', gap: '0.75rem', margin: '0px 0 20px 0', flexWrap: 'wrap', width: '100%', padding: '0 18px 10px 18px'}}>
 
-                  <div style={{fontSize: '16px', fontWeight: '700'}}>{creatorRewards?.degen > 0 ? Math.floor(creatorRewards?.degen).toLocaleString() || 0 : '--'}</div>
-                  <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$DEGEN</div>
-                  </div>
-
-                  <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.5rem'}}>
-
-                  <div style={{fontSize: '16px', fontWeight: '700', margin: '0'}}>{creatorRewards?.ham > 0 ? Math.floor(creatorRewards?.ham).toLocaleString() || 0 : '--'}</div>
-                  <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$HAM</div>
-                  </div>
-
-
-
-                </div>)}
-                <div
-                  className={`flex-row ${creatorLoading ? 'btn-off' : ((creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet) ? 'btn-on' : 'btn-off'}`}
-                  style={{
-                    borderRadius: "8px",
-                    padding: "2px 5px",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "0.25rem",
-                    margin: '5px 0 2px 0'
-                  }}
-                  >
-                  <p
-                    style={{
-                      padding: "0 2px",
-                      fontSize: "12px",
-                      fontWeight: "500",
-                      textWrap: "nowrap",
-                    }}
-                  >
-                    {creatorLoading ? 'Loading...' : ((creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet) ? 'Airdropped' : ((creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet == null) ? 'Missing wallet' : 'No rewards'}
-                  </p>
-                </div>
+            <div className={`flex-col btn-select blu-drk shadow`} style={{minWidth: isMobile ? '135px' : '130px', color: '#cde', height: '120px', width: '50%', cursor: 'default'}}>
+              <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
+                <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0', color: '#44aaff'}}>Daily Rewards</div>
               </div>
-              <div className={`flex-col btn-select blu-drk shadow`} style={{minWidth: isMobile ? '135px' : '130px', color: '#cde', height: '120px', width: '22%'}}>
-                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
-                  <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0', color: '#44aaff'}}>Daily Rewards</div>
+              {dailyLoading ? (
+                <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '0 20px'}}>
+                  <Spinner size={31} color={'#468'} />
+                </div>) : (<div className='flex-col' style={{justifyContent: "center", alignItems: 'center', gap: '0.25rem', padding: '8px'}}>
+                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.5rem'}}>
+                  <div style={{fontSize: '21px', fontWeight: '700'}}>{dailyRewards?.degen_total > 0 ? Math.floor(dailyRewards?.degen_total || 0) : '--'}</div>
+                  <div style={{fontSize: '14px', fontWeight: '400', color: '#8cf'}}>$DEGEN</div>
                 </div>
-                {dailyLoading ? (
-                  <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '0 20px'}}>
-                      <Spinner size={31} color={'#468'} />
-                  </div>) : (<div className='flex-col' style={{justifyContent: "center", alignItems: 'center', gap: '0.25rem', padding: '8px'}}>
-                  <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.5rem'}}>
-                    <div style={{fontSize: '21px', fontWeight: '700'}}>{dailyRewards?.degen_total > 0 ? Math.floor(dailyRewards?.degen_total || 0) : '--'}</div>
-                    <div style={{fontSize: '14px', fontWeight: '400', color: '#8cf'}}>$DEGEN</div>
-                  </div>
 
-                  {/* <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.5rem'}}>
-                    <div style={{fontSize: '16px', fontWeight: '700', margin: '0'}}>{dailyRewards?.curatorHam > 0 ? Math.floor(dailyRewards?.curatorHam || 0) : '--'}</div>
-                    <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$HAM</div>
-                  </div> */}
+                {/* <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.5rem'}}>
+                  <div style={{fontSize: '16px', fontWeight: '700', margin: '0'}}>{dailyRewards?.curatorHam > 0 ? Math.floor(dailyRewards?.curatorHam || 0) : '--'}</div>
+                  <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$HAM</div>
+                </div> */}
 
 
-                </div>)}
+              </div>)}
+
+
+
+
+
+
+
+
+              <div className='flex-row' style={{alignContent: 'center', alignItems: 'center', gap: '0.25rem'}}>
                 <div
                   className={`flex-row ${dailyLoading ? 'btn-off' : (dailyRewards?.degen_total > 0 && dailyRewards?.claimed == false) ? 'btn-act' : (dailyRewards?.degen_total > 0 && dailyRewards?.claimed == true) ? 'btn-on' : 'btn-off'}`}
                   style={{
@@ -1892,14 +1880,169 @@ export default function ProfilePage() {
                     alignItems: "center",
                     justifyContent: "center",
                     gap: "0.25rem",
-                    margin: '5px 0 2px 0'
-                  }} 
-                  onClick={(event) => {
+                    margin: '5px 0 2px 0',
+                    cursor: (dailyRewards?.degen_total > 0 && dailyRewards?.claimed == false) ? 'pointer' : 'default'
+                  }} onClick={(event) => {
                     if (dailyRewards?.degen_total > 0 && dailyRewards?.claimed == false) {
                       claimReward(event, dailyRewards)
                     }
                   }}
+                >
+                  <p
+                    style={{
+                      padding: "0 2px",
+                      fontSize: "12px",
+                      fontWeight: "500",
+                      textWrap: "nowrap"
+                    }}
                   >
+                    {dailyLoading ? 'Loading...' : (dailyRewards?.degen_total > 0 && dailyRewards?.claimed == false) ? 'Claim' : (dailyRewards?.degen_total > 0 && dailyRewards?.claimed == true) ? 'Claimed' : 'Check Score'}
+                  </p>
+                </div>
+                <div style={{
+                    padding: "0px 5px",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    margin: '4px 0 -2px 0',
+                    cursor: 'pointer'
+                  }} onClick={() => {
+                    getDailyRewards(fid)
+                    }}>
+                  <Refresh className='' color={'#0077bf'} size={20} />
+                </div>
+              </div>
+
+
+
+
+
+
+
+              {/* <div
+                className={`flex-row ${dailyLoading ? 'btn-off' : (dailyRewards?.degen_total > 0 && dailyRewards?.claimed == false) ? 'btn-act' : (dailyRewards?.degen_total > 0 && dailyRewards?.claimed == true) ? 'btn-on' : 'btn-off'}`}
+                style={{
+                  borderRadius: "8px",
+                  padding: "2px 5px",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "0.25rem",
+                  margin: '5px 0 2px 0'
+                }} 
+                onClick={(event) => {
+                  if (dailyRewards?.degen_total > 0 && dailyRewards?.claimed == false) {
+                    claimReward(event, dailyRewards)
+                  }
+                }}
+                >
+                <p
+                  style={{
+                    padding: "0 2px",
+                    fontSize: "12px",
+                    fontWeight: "500",
+                    textWrap: "nowrap",
+                  }}
+                >
+                  {dailyLoading ? 'Loading...' : (dailyRewards?.degen_total > 0 && dailyRewards?.claimed == false) ? 'Claim' : (dailyRewards?.degen_total > 0 && dailyRewards?.claimed == true) ? 'Claimed' : 'Check Score'}
+                </p>
+              </div> */}
+            </div>
+          </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          <div className='flex-row' style={{fontSize: '13px', justifyContent: isMobile ? "center" : "space-between", alignItems: 'center', gap: '0.75rem', margin: '0px 0', flexWrap: 'wrap', width: '100%', padding: '0 18px 10px 18px'}}>
+            <div className={`flex-col btn-select blu-drk shadow`} style={{minWidth: isMobile ? '135px' : '130px', color: '#cde', height: '120px', width: '22%', cursor: 'default'}}>
+              <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
+                <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0', color: '#44aaff'}}>Creator Fund</div>
+              </div>
+              {creatorLoading ? (
+                <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '0 20px'}}>
+                    <Spinner size={31} color={'#468'} />
+                </div>) : (<div className='flex-col' style={{justifyContent: "center", alignItems: 'center', gap: '0.25rem'}}>
+                {/* <Impact size={15} color={userFunding?.active_cron && userFunding?.creator_fund == 100 ? '#147' : '#5af'} /> */}
+                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.5rem'}}>
+
+                <div style={{fontSize: '16px', fontWeight: '700'}}>{creatorRewards?.degen > 0 ? Math.floor(creatorRewards?.degen).toLocaleString() || 0 : '--'}</div>
+                <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$DEGEN</div>
+                </div>
+
+                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.5rem'}}>
+
+                <div style={{fontSize: '16px', fontWeight: '700', margin: '0'}}>{creatorRewards?.ham > 0 ? Math.floor(creatorRewards?.ham).toLocaleString() || 0 : '--'}</div>
+                <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$HAM</div>
+                </div>
+
+
+
+              </div>)}
+              <div
+                className={`flex-row ${creatorLoading ? 'btn-off' : ((creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet) ? 'btn-on' : 'btn-off'}`}
+                style={{
+                  borderRadius: "8px",
+                  padding: "2px 5px",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "0.25rem",
+                  margin: '5px 0 2px 0',
+                  cursor: 'default'
+                }}
+                >
+                <p
+                  style={{
+                    padding: "0 2px",
+                    fontSize: "12px",
+                    fontWeight: "500",
+                    textWrap: "nowrap",
+                  }}
+                >
+                  {creatorLoading ? 'Loading...' : ((creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet) ? 'Airdropped' : ((creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet == null) ? 'Missing wallet' : 'No rewards'}
+                </p>
+              </div>
+            </div>
+            <div className={`flex-col btn-select blu-drk shadow`} style={{minWidth: isMobile ? '135px' : '130px', color: '#cde', height: '120px', width: '22%', cursor: 'default'}}>
+              <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
+                <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0', color: '#44aaff'}}>Total Claimed</div>
+              </div>
+              {claimsLoading ? (
+                <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '0 20px'}}>
+                  <Spinner size={31} color={'#468'} />
+                </div>) : (<div className='flex-col' style={{justifyContent: "center", alignItems: 'center', gap: '0.25rem', padding: '8px'}}>
+                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.5rem'}}>
+                  <div style={{fontSize: '21px', fontWeight: '700'}}>{totalClaims > 0 ? Math.floor(totalClaims || 0) : '--'}</div>
+                  <div style={{fontSize: '14px', fontWeight: '400', color: '#8cf'}}>$DEGEN</div>
+                </div>
+
+                {/* <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.5rem'}}>
+                  <div style={{fontSize: '16px', fontWeight: '700', margin: '0'}}>{dailyRewards?.curatorHam > 0 ? Math.floor(dailyRewards?.curatorHam || 0) : '--'}</div>
+                  <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$HAM</div>
+                </div> */}
+
+
+              </div>)}
+              <div className='flex-row' style={{alignContent: 'center', alignItems: 'center', gap: '0.25rem'}}>
+                <div
+                  className={`flex-row ${claimsLoading ? 'btn-off' : (totalClaims > 0) ? 'btn-on' : 'btn-off'}`}
+                  style={{
+                    borderRadius: "8px",
+                    padding: "2px 5px",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "0.25rem",
+                    margin: '5px 0 2px 0',
+                    cursor: 'default'
+                  }}
+                >
                   <p
                     style={{
                       padding: "0 2px",
@@ -1908,209 +2051,23 @@ export default function ProfilePage() {
                       textWrap: "nowrap",
                     }}
                   >
-                    {dailyLoading ? 'Loading...' : (dailyRewards?.degen_total > 0 && dailyRewards?.claimed == false) ? 'Claim' : (dailyRewards?.degen_total > 0 && dailyRewards?.claimed == true) ? 'Claimed' : 'Check Score'}
+                    {claimsLoading ? 'Loading...' : (totalClaims > 0) ? 'Claimed' : 'Check Score'}
                   </p>
                 </div>
-              </div>
-
-            </div>
-
-
-
-
-          {/* {(display.rewards && <>{loading.rewards ? (
-            <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
-              <Spinner size={31} color={'#468'} />
-            </div>
-          ) : (<div
-            className={isMobile ? "flex-col" : "flex-row"}
-            style={{
-              padding: "0px 0 0 0",
-              width: "100%",
-              height: 'auto',
-              // flexWrap: "wrap",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-
-
-
-            <div className={'flex-col btn-select'} style={{minWidth: isMobile ? '155px' : '120px', width: isMobile ? '100%' : '50%', padding: isMobile ? '22px 12px 12px 12px' : '10px', flexGrow: 1 }}>
-
-              <div style={{width: '167px', position: 'relative'}}>
-                <div style={{mask: `linear-gradient(rgba(0, 0, 0, 0) 0px, rgba(0, 0, 0, 0) 0px) content-box intersect, conic-gradient(rgb(0, 0, 0) ${userScore?.impactRank * 2.7 || 0}deg, rgba(0, 0, 0, 0) 0deg)`, transform: 'rotate(-135deg)', width: '100%', transition: 'mask-image 0.3s ease'}} className="top-layer absolute blu-std p-5 rounded-full aspect-square"></div>
-                <div className="blu-std-drk p-5 rounded-full aspect-square" style={{mask: 'linear-gradient(rgba(0, 0, 0, 0) 0px, rgba(0, 0, 0, 0) 0px) content-box intersect, conic-gradient(rgb(0, 0, 0) 270deg, rgba(0, 0, 0, 0) 0deg)', transform: 'rotate(-135deg)', width: '100%'}}></div>
-                <div className="absolute flex flex-col justify-c items-c text-c">
-                  {scoreLoading ? (
-                      <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
-                        <Spinner size={31} color={'#468'} />
-                      </div>
-                    ) : (<div>
-                    <div style={{fontSize: '28px', fontWeight: '700'}}>{userScore?.impactScore || 0}</div>
-                    <div style={{fontSize: '13px'}}>Top {userScore?.impactRank || 0}%
-                    </div>
-                  </div>)}
-                </div>
-              </div>
-
-
-              <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
-                <div style={{fontSize: '18px', fontWeight: '600', margin: '-10px 0 3px 0'}}>{(scoreTime == 'all' || scoreTime == '30d') ? 'Impact ' : 'Reward '}Score</div>
-              </div>
-
-
-
-              <div className='flex-row text-c' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem', margin: '10px 0 0 0', width: isMobile ? '60%' : '90%', padding: '8px', borderRadius: '10px', border: '1px solid #246', backgroundColor: '#00224466'}}>
-                <div style={{fontSize: isMobile ? '12px' : '12px', fontWeight: '400'}}>{(scoreTime == 'all' || scoreTime == '30d') ? 'Impact Score = Creator Score + Curator Score + Contributor Score' : 'Reward Score = Curator Score + Contributor Score + Invite Score'} </div>
-              </div>
-
-
-
-
-            <div className={isMobile ? 'flex-row' : 'flex-col'} style={{gap: isMobile ? '0.5rem' : '0.25rem', margin: isMobile ? '5px 0 0 0' : '30px 0 0 0'}}>
-
-
-              <div className='flex-row' style={{height: '30px', alignItems: 'center', justifyContent: 'center', padding: '0px 0'}}>
-                <div className='flex-row' style={{padding: '4px 8px', backgroundColor: '#002244ee', border: '1px solid #666', borderRadius: '20px', alignItems: 'center', gap: '0.25rem'}}>
-                  <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>REWARD</div>
-
-                  <div className={scoreTime == '24h' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateScore('24h')}}>24hr</div>
-                  <div className={scoreTime == '3d' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateScore('3d')}}>3d</div>
-                  <div className={scoreTime == '7d' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateScore('7d')}}>7d</div>
-                </div>
-              </div>
-
-              <div className='flex-row' style={{height: '30px', alignItems: 'center', justifyContent: 'center', padding: '0px 0'}}>
-                <div className='flex-row' style={{padding: '4px 8px', backgroundColor: '#002244ee', border: '1px solid #666', borderRadius: '20px', alignItems: 'center', gap: '0.25rem'}}>
-                  <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>IMPACT</div>
-                  <div className={scoreTime == '30d' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateScore('30d')}}>30d</div>
-                  <div className={scoreTime == 'all' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateScore('all')}}>all</div>
+                <div style={{
+                    padding: "0px 5px",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    margin: '4px 0 -2px 0',
+                    cursor: 'pointer'
+                  }} onClick={() => {getTotalClaims(fid)}}>
+                  <Refresh className='' color={'#0077bf'} size={20} />
                 </div>
               </div>
             </div>
+          </div>
 
 
-
-            </div>
-
-
-
-            <div className={'flex-row'} style={{color: "#cde", fontSize: '13px', justifyContent: isMobile ? "center" : "space-between", gap: '0.75rem', margin: '0px 0', flexWrap: 'wrap', width: isMobile ? '100%' : '60%', height: isMobile ? 'auto' : '400px', flexGrow: 1}}>
-              <div className='flex-col btn-select blu-lt' style={{minWidth: isMobile ? '125px' : '120px', width: isMobile ? '42%' : '42%', padding: isMobile ? '22px 12px 12px 12px' : '10px' }}>
-
-                <div style={{width: '127px', position: 'relative'}}>
-                  <div style={{mask: `linear-gradient(rgba(0, 0, 0, 0) 0px, rgba(0, 0, 0, 0) 0px) content-box intersect, conic-gradient(rgb(0, 0, 0) ${(scoreTime == 'all' || scoreTime == '30d') ? userScore?.creatorRank * 2.7 || 0 : 0}deg, rgba(0, 0, 0, 0) 0deg)`, transform: 'rotate(-135deg)', width: '100%'}} className="top-layer absolute blu-std p-5 rounded-full aspect-square"></div>
-                  <div className="blu-std-drk p-5 rounded-full aspect-square" style={{mask: 'linear-gradient(rgba(0, 0, 0, 0) 0px, rgba(0, 0, 0, 0) 0px) content-box intersect, conic-gradient(rgb(0, 0, 0) 270deg, rgba(0, 0, 0, 0) 0deg)', transform: 'rotate(-135deg)', width: '100%'}}></div>
-                  <div className="absolute flex flex-col justify-c items-c text-c">
-                    {scoreLoading ? (
-                      <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
-                        <Spinner size={31} color={'#468'} />
-                      </div>
-                    ) : (<div>
-                      <div style={{fontSize: '24px', fontWeight: '700'}}>{(scoreTime == 'all' || scoreTime == '30d') ? userScore?.creatorScore / 20 || 0 : '--'}</div>
-                      <div style={{fontSize: '10px'}}>Top {(scoreTime == 'all' || scoreTime == '30d') ? userScore?.creatorRank || 0 : 0}%
-                      </div>
-                    </div>)}
-                  </div>
-                </div>
-
-
-                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
-                  <div className='t-box-m1'>Creator Score</div>
-                </div>
-
-              </div>
-
-
-
-
-
-
-              <div className='flex-col btn-select blu-lt' style={{minWidth: isMobile ? '125px' : '120px', width: isMobile ? '42%' : '42%', padding: isMobile ? '22px 12px 12px 12px' : '10px' }}>
-
-                <div style={{width: '127px', position: 'relative'}}>
-                  <div style={{mask: `linear-gradient(rgba(0, 0, 0, 0) 0px, rgba(0, 0, 0, 0) 0px) content-box intersect, conic-gradient(rgb(0, 0, 0) ${userScore?.curatorRank * 2.7 || 0}deg, rgba(0, 0, 0, 0) 0deg)`, transform: 'rotate(-135deg)', width: '100%'}} className="top-layer absolute blu-std p-5 rounded-full aspect-square"></div>
-                  <div className="blu-std-drk p-5 rounded-full aspect-square" style={{mask: 'linear-gradient(rgba(0, 0, 0, 0) 0px, rgba(0, 0, 0, 0) 0px) content-box intersect, conic-gradient(rgb(0, 0, 0) 270deg, rgba(0, 0, 0, 0) 0deg)', transform: 'rotate(-135deg)', width: '100%'}}></div>
-                  <div className="absolute flex flex-col justify-c items-c text-c">
-                    {scoreLoading ? (
-                      <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
-                        <Spinner size={31} color={'#468'} />
-                      </div>
-                    ) : (<div>
-                      <div style={{fontSize: '24px', fontWeight: '700'}}>{userScore?.curatorScore / 100 || 0}</div>
-                      <div style={{fontSize: '10px'}}>Top {userScore?.curatorRank || 0}%
-                      </div>
-                    </div>)}
-                  </div>
-                </div>
-
-
-                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
-                  <div className='t-box-m1'>Curator Score</div>
-                </div>
-
-              </div>
-
-
-              <div className='flex-col btn-select blu-lt' style={{minWidth: isMobile ? '125px' : '120px', width: isMobile ? '42%' : '42%', padding: isMobile ? '22px 12px 12px 12px' : '10px' }}>
-
-                <div style={{width: '127px', position: 'relative'}}>
-                  <div style={{mask: `linear-gradient(rgba(0, 0, 0, 0) 0px, rgba(0, 0, 0, 0) 0px) content-box intersect, conic-gradient(rgb(0, 0, 0) ${userScore?.contributorRank * 2.7 || 0}deg, rgba(0, 0, 0, 0) 0deg)`, transform: 'rotate(-135deg)', width: '100%'}} className="top-layer absolute blu-std p-5 rounded-full aspect-square"></div>
-                  <div className="blu-std-drk p-5 rounded-full aspect-square" style={{mask: 'linear-gradient(rgba(0, 0, 0, 0) 0px, rgba(0, 0, 0, 0) 0px) content-box intersect, conic-gradient(rgb(0, 0, 0) 270deg, rgba(0, 0, 0, 0) 0deg)', transform: 'rotate(-135deg)', width: '100%'}}></div>
-                  <div className="absolute flex flex-col justify-c items-c text-c">
-                    {scoreLoading ? (
-                      <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
-                        <Spinner size={31} color={'#468'} />
-                      </div>
-                    ) : (<div>
-                      <div style={{fontSize: '24px', fontWeight: '700'}}>{userScore?.contributorScore || 0}</div>
-                      <div style={{fontSize: '10px'}}>Top {userScore?.contributorRank || 0}%
-                      </div>
-                    </div>)}
-                  </div>
-                </div>
-
-
-                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
-                  <div className='t-box-m1'>Contributor Score</div>
-                </div>
-
-              </div>
-
-
-
-              <div className='flex-col btn-select blu-lt' style={{minWidth: isMobile ? '125px' : '120px', width: isMobile ? '42%' : '42%', padding: isMobile ? '22px 12px 12px 12px' : '10px' }}>
-
-              <div style={{width: '127px', position: 'relative'}}>
-                <div style={{mask: `linear-gradient(rgba(0, 0, 0, 0) 0px, rgba(0, 0, 0, 0) 0px) content-box intersect, conic-gradient(rgb(0, 0, 0) ${(scoreTime == 'all' || scoreTime == '30d') ? 0 : userScore?.inviteRank * 2.7 || 0}deg, rgba(0, 0, 0, 0) 0deg)`, transform: 'rotate(-135deg)', width: '100%'}} className="top-layer absolute blu-std p-5 rounded-full aspect-square"></div>
-                <div className="blu-std-drk p-5 rounded-full aspect-square" style={{mask: 'linear-gradient(rgba(0, 0, 0, 0) 0px, rgba(0, 0, 0, 0) 0px) content-box intersect, conic-gradient(rgb(0, 0, 0) 270deg, rgba(0, 0, 0, 0) 0deg)', transform: 'rotate(-135deg)', width: '100%'}}></div>
-                <div className="absolute flex flex-col justify-c items-c text-c">
-                  {scoreLoading ? (
-                    <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
-                      <Spinner size={31} color={'#468'} />
-                    </div>
-                  ) : (<div>
-                    <div style={{fontSize: '24px', fontWeight: '700'}}>{(scoreTime == 'all' || scoreTime == '30d') ? '--' : userScore?.inviteScore || 0}</div>
-                    <div style={{fontSize: '10px'}}>Top {userScore?.inviteRank || 0}%
-                    </div>
-                  </div>)}
-                </div>
-              </div>
-
-
-              <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
-                <div className='t-box-m1'>Invite Score</div>
-              </div>
-
-              </div>
-
-            </div>
-
-          </div>)}
-          
-
-          </>)} */}
         </div>
       </div>
 
