@@ -197,9 +197,9 @@ export default async function handler(req, res) {
 
           circlesImg = `${baseURL}/api/frames/fund/frame?${qs.stringify({ id: schedId })}`
 
-          shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem || 'abundance'}/fund-v1?${qs.stringify({ referrer: fid, id: schedId })}`
+          shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem || 'abundance'}/fund-v2?${qs.stringify({ referrer: fid, id: schedId })}`
 
-          shareText = `I just started auto-funding the LA wildfire Relief Special Impact Fund on /impact\n\nHelp farcasters who support the LA wildfire relief effort with your daily (remaining) $degen & $ham thru @impactfund 👇`
+          shareText = `I just started auto-funding the Open Source Devs Special Impact Fund on /impact\n\nSupport open source builders on Farcaster with your daily (remaining) $degen & $ham thru @impactfund 👇`
 
           encodedShareText = encodeURIComponent(shareText)
     
