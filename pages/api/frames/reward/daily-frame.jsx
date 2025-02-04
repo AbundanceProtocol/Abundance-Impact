@@ -51,14 +51,14 @@ export default async function handler(req, res) {
             },
           };
 
-          const updateClaim = await Claim.findOneAndUpdate({ _id: objectId }, update, updateOptions);
+          const user = await Claim.findOneAndUpdate({ _id: objectId }, update, updateOptions);
 
-          const userFid = await Claim.findOne({ _id: objectId }).select('fid').exec().then(doc => doc.fid);
+          // const userFid = await Claim.findOne({ _id: objectId }).select('fid').exec().then(doc => doc.fid);
 
-          console.log('userFid', userFid, updateClaim)
+          console.log('user', user)
           const lastFourDays = new Date(Date.now() - 4 * 24 * 60 * 60 * 1000);
 
-          const updatedDocs = await Claim.updateMany({ fid: userFid, createdAt: { $gt: lastFourDays } }, update, updateOptions);
+          const updatedDocs = await Claim.updateMany({ fid: user?.fid, createdAt: { $gt: lastFourDays } }, update, updateOptions);
         }
 
         if (rank) {
