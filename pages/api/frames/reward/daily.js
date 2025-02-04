@@ -83,7 +83,7 @@ export default async function handler(req, res) {
     // const points = '$IMPACT'
 
     const fid = untrustedData?.fid
-    // const fid = 511479
+
     const castHash = untrustedData?.castId?.hash
 
     // const fid = 9326
