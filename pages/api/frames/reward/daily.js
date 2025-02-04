@@ -157,14 +157,14 @@ export default async function handler(req, res) {
     
         let reward = await getReward(fid);
 
-        console.log('reward', reward, reward?.degen_amount)
+        console.log('reward', reward, reward?.degen_total)
 
         circlesImg = `${baseURL}/api/frames/reward/daily-frame?${qs.stringify({ id: reward?._id.toString(), shared: 1 })}`
 
         shareUrl = `https://impact.abundance.id/~/ecosystems/${'abundance'}/daily-v1?${qs.stringify({ id: reward?._id.toString() })}`
 
 
-        shareText = `I just claimed ${reward?.degen_amount} $degen in Impact Rewards for contributing to /impact (frame by @abundance)\n\n/impact gives out daily rewards to those who curate, auto-fund or invite contributors to use Impact Alpha. Check your reward here 👇`
+        shareText = `I just claimed ${reward?.degen_total} $degen in Impact Rewards for contributing to /impact (frame by @abundance)\n\n/impact gives out daily rewards to those who curate, auto-fund or invite contributors to use Impact Alpha. Check your reward here 👇`
 
         encodedShareText = encodeURIComponent(shareText)
       
@@ -173,7 +173,7 @@ export default async function handler(req, res) {
 
         let metatags = ``
 
-        if (reward && reward?.degen_amount > 0) {
+        if (reward && reward?.degen_total > 0) {
           metatags = `
           <meta name="fc:frame:button:1" content="Share">
           <meta name="fc:frame:button:1:action" content="link">

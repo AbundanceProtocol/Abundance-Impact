@@ -681,7 +681,7 @@ export default function ProfilePage() {
     let shareUrl = `https://impact.abundance.id/~/ecosystems/abundance/daily-v1?${qs.stringify({
       id: reward?._id,
     })}`;
-    let shareText = `I just claimed ${reward?.degen_amount} $degen in Impact Rewards for contributing to /impact (frame by @abundance)\n\n/impact gives out daily rewards to those who curate, auto-fund or invite contributors to use Impact Alpha. Check your reward here 👇`
+    let shareText = `I just claimed ${reward?.degen_total} $degen in Impact Rewards for contributing to /impact (frame by @abundance)\n\n/impact gives out daily rewards to those who curate, auto-fund or invite contributors to use Impact Alpha. Check your reward here 👇`
 
     let encodedShareText = encodeURIComponent(shareText)
     let encodedShareUrl = encodeURIComponent(shareUrl); 
@@ -1873,7 +1873,7 @@ export default function ProfilePage() {
                       <Spinner size={31} color={'#468'} />
                   </div>) : (<div className='flex-col' style={{justifyContent: "center", alignItems: 'center', gap: '0.25rem', padding: '8px'}}>
                   <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.5rem'}}>
-                    <div style={{fontSize: '21px', fontWeight: '700'}}>{dailyRewards?.degen_amount > 0 ? Math.floor(dailyRewards?.degen_amount || 0) : '--'}</div>
+                    <div style={{fontSize: '21px', fontWeight: '700'}}>{dailyRewards?.degen_total > 0 ? Math.floor(dailyRewards?.degen_total || 0) : '--'}</div>
                     <div style={{fontSize: '14px', fontWeight: '400', color: '#8cf'}}>$DEGEN</div>
                   </div>
 
@@ -1885,7 +1885,7 @@ export default function ProfilePage() {
 
                 </div>)}
                 <div
-                  className={`flex-row ${dailyLoading ? 'btn-off' : (dailyRewards?.degen_amount > 0 && dailyRewards?.claimed == false) ? 'btn-act' : (dailyRewards?.degen_amount > 0 && dailyRewards?.claimed == true) ? 'btn-on' : 'btn-off'}`}
+                  className={`flex-row ${dailyLoading ? 'btn-off' : (dailyRewards?.degen_total > 0 && dailyRewards?.claimed == false) ? 'btn-act' : (dailyRewards?.degen_total > 0 && dailyRewards?.claimed == true) ? 'btn-on' : 'btn-off'}`}
                   style={{
                     borderRadius: "8px",
                     padding: "2px 5px",
@@ -1895,7 +1895,7 @@ export default function ProfilePage() {
                     margin: '5px 0 2px 0'
                   }} 
                   onClick={(event) => {
-                    if (dailyRewards?.degen_amount > 0 && dailyRewards?.claimed == false) {
+                    if (dailyRewards?.degen_total > 0 && dailyRewards?.claimed == false) {
                       claimReward(event, dailyRewards)
                     }
                   }}
@@ -1908,7 +1908,7 @@ export default function ProfilePage() {
                       textWrap: "nowrap",
                     }}
                   >
-                    {dailyLoading ? 'Loading...' : (dailyRewards?.degen_amount > 0 && dailyRewards?.claimed == false) ? 'Claim' : (dailyRewards?.degen_amount > 0 && dailyRewards?.claimed == true) ? 'Claimed' : 'Check Score'}
+                    {dailyLoading ? 'Loading...' : (dailyRewards?.degen_total > 0 && dailyRewards?.claimed == false) ? 'Claim' : (dailyRewards?.degen_total > 0 && dailyRewards?.claimed == true) ? 'Claimed' : 'Check Score'}
                   </p>
                 </div>
               </div>

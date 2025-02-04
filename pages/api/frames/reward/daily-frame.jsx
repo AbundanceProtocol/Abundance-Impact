@@ -99,7 +99,7 @@ export default async function handler(req, res) {
 
 
 
-        {(Math.floor(reward?.degen_amount) > 0) && (<div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '5px 5px 15px 5px'}}>
+        {(Math.floor(reward?.degen_total) > 0) && (<div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '5px 5px 15px 5px'}}>
 
           <div style={{display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '1px solid #eeeeeeaa', borderRadius: '88px', padding: '3px 10px 3px 3px', background: '#eeeeeeaa', width: 'auto', margin: '0 5px 0 0'}}>
             {reward && reward?.pfp && reward?.pfp !== null && (<img src={reward?.pfp} width={30} height={30} style={{borderRadius: '80px', border: '2px solid #eee', backgroundColor: '#8363ca'}} />)}
@@ -109,7 +109,7 @@ export default async function handler(req, res) {
         </div>)}
 
 
-        {(Math.floor(reward?.degen_amount) > 0) && (<div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '0px 5px 0px 5px'}}>
+        {(Math.floor(reward?.degen_total) > 0) && (<div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '0px 5px 0px 5px'}}>
 
           <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '26px', margin: '0', padding: '0px 0 0 0'}}>I just claimed</div>
 
@@ -117,10 +117,10 @@ export default async function handler(req, res) {
 
 
 
-        {(Math.floor(reward?.degen_amount) > 0) && (<div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '0px 5px 15px 5px'}}>
+        {(Math.floor(reward?.degen_total) > 0) && (<div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '0px 5px 15px 5px'}}>
 
-          {Math.floor(reward?.degen_amount) > 0 && (<div style={{display: 'flex', flexDirection: 'column', textAlign: 'center', color: '#dee', margin: '0', padding: '0 5px 0 0', justifyContent: 'center', alignItems: 'center'}}>
-            <div style={{display: 'flex', fontSize: '86px'}}>{Math.floor(reward?.degen_amount).toLocaleString() || 0}</div>
+          {Math.floor(reward?.degen_total) > 0 && (<div style={{display: 'flex', flexDirection: 'column', textAlign: 'center', color: '#dee', margin: '0', padding: '0 5px 0 0', justifyContent: 'center', alignItems: 'center'}}>
+            <div style={{display: 'flex', fontSize: '86px'}}>{Math.floor(reward?.degen_total).toLocaleString() || 0}</div>
             <div style={{display: 'flex', fontSize: '25px', margin: '-10px 0 0 0'}}>$DEGEN</div>
           </div>)}
 
@@ -133,7 +133,7 @@ export default async function handler(req, res) {
 
 
 
-        {(Math.floor(reward?.degen_amount) > 0) && (<div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.0rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '5px 5px 10px 5px'}}>
+        {(Math.floor(reward?.degen_total) > 0) && (<div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.0rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '5px 5px 10px 5px'}}>
           <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '15px', margin: '0', padding: '5px 0 0 0', fontWeight: '400'}}>curate, auto-fund or invite to /impact to win</div>
 
           <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '25px', margin: '0px 0 0 0', padding: '0px 0 0 0'}}>Impact Daily Rewards</div>
@@ -141,7 +141,7 @@ export default async function handler(req, res) {
         </div>)}
 
 
-        {(!reward || Math.floor(reward?.degen_amount) == 0) && (<div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '60px 5px 60px 5px'}}>
+        {(!reward || Math.floor(reward?.degen_total) == 0) && (<div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '60px 5px 60px 5px'}}>
 
           <div style={{display: 'flex', textAlign: 'center', color: '#cdd', fontSize: '30px', margin: '0', padding: '20px 0 20px 0'}}>{start ? 'check your rewards' : 'no rewards to claim today'}</div>
           {/* <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '36px', margin: '0', padding: '0px 0 0 0'}}>Impact Alpha</div> */}
