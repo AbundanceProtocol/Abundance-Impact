@@ -55,13 +55,13 @@ export default function Embed({ url, index, subindex, textMax }) {
         )}
         <div className='flex-col' style={{border: '1px solid #888', borderRadius: '0 0 8px 8px', padding: '10px'}}>
           {(embed?.title) && (
-            <div style={{fontSize: '13px', color: '#333', fontWeight: '600'}}>{embed?.title}</div>
+            <div style={{fontSize: '13px', color: '#333', fontWeight: '600', wordBreak: 'break-all', wordWrap: 'break-word'}}>{embed?.title}</div>
           )}
           {(embed?.description) && (
-            <div style={{fontSize: '11px', color: '#333', fontWeight: '500'}}>{embed?.description}</div>
+            <div style={{fontSize: '11px', color: '#333', fontWeight: '500', wordBreak: 'break-all', wordWrap: 'break-word'}}>{embed?.description}</div>
           )}
           {(embed?.metadata && embed?.domain) && (
-            <div style={{fontSize: '11px', color: '#555', fontWeight: '400'}}>{embed?.domain}</div>
+            <div style={{fontSize: '11px', color: '#555', fontWeight: '400', wordBreak: 'break-all', wordWrap: 'break-word'}}>{embed?.domain}</div>
           )}
         </div>
       </div>

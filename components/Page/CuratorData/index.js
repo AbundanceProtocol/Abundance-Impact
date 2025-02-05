@@ -110,7 +110,7 @@ const CuratorData = ({ user, textMax, show, type }) => {
 
   return (
     show && (
-      <div className="inner-container flex-col" style={{width: '100%', display: 'flex', flexDirection: 'col', justifyContent: 'space-between', backgroundColor: '#33445588', gap: '1rem'}}>
+      <div className="inner-container flex-col shadow" style={{width: '100%', display: 'flex', flexDirection: 'col', justifyContent: 'space-between', backgroundColor: '#11448888', gap: '1rem'}}>
         <div className='flex-row' style={{gap: '0.5rem'}}>
           <div style={{width: '100%'}}>
             <div className="flex-row">
@@ -137,7 +137,7 @@ const CuratorData = ({ user, textMax, show, type }) => {
                     </span>
                     <div className="">·</div>
                     <a className="fc-lnk" title="Navigate to cast" href={`https://warpcast.com/${user?.username}`}>
-                      <div className="fid-btn" style={{backgroundColor: '#355', color: '#cdd'}}>fid: {user?.fid}</div>
+                      <div className="fid-btn" style={{backgroundColor: '#003366', color: '#cdd'}}>fid: {user?.fid}</div>
                     </a>
                   </div>
                 </div>

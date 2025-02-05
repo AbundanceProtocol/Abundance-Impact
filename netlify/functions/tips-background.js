@@ -46,6 +46,7 @@ exports.handler = async function(event, context) {
             schedule = await getSchedule(fid, points);
             time = schedule?.timeRange ? getTimeRange(schedule?.timeRange) : null;
             allowances = await getAllowances(fid, schedule?.currencies || [], schedule?.percent, tipTime);
+            console.log('allowances', fid, allowances)
           } catch (error) {
             console.error(`Error fetching allowances or user search for fid ${fid}:`, error);
             continue;
@@ -76,8 +77,8 @@ exports.handler = async function(event, context) {
         for (const userCast of castData) {
           try {
             await new Promise(resolve => setTimeout(resolve, 20));
-            const tipped = await sendTip(userCast, user?.uuid, user?.fid, user?.points);
-            // const tipped = 1
+            // const tipped = await sendTip(userCast, user?.uuid, user?.fid, user?.points);
+            const tipped = 1
             if (tipped) {
               counter++;
             } else {

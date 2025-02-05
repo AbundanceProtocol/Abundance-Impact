@@ -5,6 +5,7 @@ import Cast from '../../../models/Cast';
 import Impact from '../../../models/Impact';
 import User from '../../../models/User';
 import Tip from '../../../models/Tip';
+import Fund from '../../../models/Fund';
 import EcosystemRules from '../../../models/EcosystemRules';
 import { getTimeRange, processTips, populateCast } from '../../../utils/utils';
 
@@ -49,7 +50,7 @@ export default async function handler(req, res) {
     async function aggregateTipsByCurrency() {
       await connectToDatabase();
 
-      const result = await Tip.aggregate([
+      let result = await Tip.aggregate([
         { $unwind: "$tip" },
         {
           $group: {
@@ -60,6 +61,48 @@ export default async function handler(req, res) {
         { $sort: { totalAmount: -1 } }
       ]);
 
+      let devFunds = await Fund.aggregate([
+        { $match: {valid: true} },
+        { $group: {
+          _id: null,
+          // total_dev_degen: {
+          //   $sum: "$development_degen_amount"
+          // },
+          // total_growth_degen: {
+          //   $sum: "$growth_degen_amount"
+          // },
+          // total_creator_degen: {
+          //   $sum: "$creator_degen_amount"
+          // },
+          total_degen: {
+            $sum: "$degen_amount"
+          },
+          // total_growth_ham: {
+          //   $sum: "$growth_ham_amount"
+          // },
+          // total_creator_ham: {
+          //   $sum: "$creator_ham_amount"
+          // },
+          // total_dev_ham: {
+          //   $sum: "$development_ham_amount"
+          // },
+          total_ham: {
+            $sum: "$ham_amount"
+          }
+        } },
+      ])
+
+      if (devFunds?.length > 0 && result?.length > 0) {
+        const degenIndex = result.findIndex(item => item._id === '$degen');
+        if (degenIndex !== -1) {
+          result[degenIndex].totalAmount += devFunds[0].total_degen;
+        }
+        const hamIndex = result.findIndex(item => item._id === '$tn100x');
+        if (hamIndex !== -1) {
+          result[hamIndex].totalAmount += devFunds[0].total_ham;
+        }
+      }
+      
       return result;
     }
 
@@ -349,7 +392,7 @@ export default async function handler(req, res) {
       const uniqueCreatorsTipped = await countUniqueReceivers()
       // const degenCuratorRewards = await getTotalDegenTipsForSetCasts()
       const autoTips = await countActiveScheduledTips();
-      console.log('tips', getTips, uniqueTips, uniqueCurator, uniqueUsers, uniqueCreators, curatedCasts, autoTips)
+      // console.log('tips', getTips, uniqueTips, uniqueCurator, uniqueUsers, uniqueCreators, curatedCasts, autoTips)
       // const totalAmount = await getTotalTipsByAllCurrencies()
       // console.log('totalAmount', totalAmount)
       res

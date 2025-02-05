@@ -543,22 +543,50 @@ export default async function handler(req, res) {
               console.log('e')
               console.log('parentHash', parentHash, hash, req.body.untrustedData.castId.hash)
 
-              let metatags = `
-              <meta name="fc:frame:button:1" content="Share contribution">
-              <meta name="fc:frame:button:1:action" content="link">
-              <meta name="fc:frame:button:1:target" content="${shareLink}" />
-              <meta name="fc:frame:button:2" content="Tip more >">
-              <meta name="fc:frame:button:2:action" content="post">
-              <meta name="fc:frame:button:2:target" content="${startPost}" />
-              <meta name="fc:frame:button:3" content="What's /impact">
-              <meta name="fc:frame:button:3:action" content="link">
-              <meta name="fc:frame:button:3:target" content="${impactLink}" />
-              <meta name="fc:frame:button:4" content="Refresh">
-              <meta name="fc:frame:button:4:action" content="post">
-              <meta name="fc:frame:button:4:target" content="${refreshPost}" />
-              <meta property="og:image" content="${circlesImg}">
-              <meta name="fc:frame:image" content="${circlesImg}">
-              <meta name="fc:frame:post_url" content="${postUrl}">`
+              let threshold = true
+
+              if (inputText) {
+                const numbers = inputText.match(/\d+/g).map(Number);
+                const numTest = numbers.some(number => number >= 100);
+                if (!numTest) {
+                  threshold = false
+                }
+              }
+          
+              let metatags = ''
+
+              if (threshold) {
+                metatags = `
+                <meta name="fc:frame:button:1" content="Share contribution">
+                <meta name="fc:frame:button:1:action" content="link">
+                <meta name="fc:frame:button:1:target" content="${shareLink}" />
+                <meta name="fc:frame:button:2" content="Tip more >">
+                <meta name="fc:frame:button:2:action" content="post">
+                <meta name="fc:frame:button:2:target" content="${startPost}" />
+                <meta name="fc:frame:button:3" content="Auto-tip >">
+                <meta name="fc:frame:button:3:action" content="post">
+                <meta name="fc:frame:button:3:target" content="${autoTipPost}" />
+                <meta name="fc:frame:button:4" content="Refresh">
+                <meta name="fc:frame:button:4:action" content="post">
+                <meta name="fc:frame:button:4:target" content="${refreshPost}" />
+                <meta property="og:image" content="${circlesImg}">
+                <meta name="fc:frame:image" content="${circlesImg}">
+                <meta name="fc:frame:post_url" content="${postUrl}">`
+              } else {
+                metatags = `
+                <meta name="fc:frame:button:1" content="Tip more >">
+                <meta name="fc:frame:button:1:action" content="post">
+                <meta name="fc:frame:button:1:target" content="${startPost}" />
+                <meta name="fc:frame:button:2" content="Auto-tip >">
+                <meta name="fc:frame:button:2:action" content="post">
+                <meta name="fc:frame:button:2:target" content="${autoTipPost}" />
+                <meta name="fc:frame:button:3" content="Refresh">
+                <meta name="fc:frame:button:3:action" content="post">
+                <meta name="fc:frame:button:3:target" content="${refreshPost}" />
+                <meta property="og:image" content="${circlesImg}">
+                <meta name="fc:frame:image" content="${circlesImg}">
+                <meta name="fc:frame:post_url" content="${postUrl}">`
+              }
         
               res.setHeader('Content-Type', 'text/html');
               res.status(200)

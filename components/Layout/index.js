@@ -13,11 +13,11 @@ const Layout = ({ children }) => {
 
   return (
     <div ref={ref} className='flex-col' style={{position: 'absolute', display: 'flex', minHeight: '100%', height: '100%', width: '100%', overflowX: 'hidden'}}>
-      <Mobile />
+      {/* <Mobile /> */}
       <div className='flex-row' style={{justifyContent: 'center', width: 'auto'}}>
-        <LeftMenu />
+        {/* <LeftMenu /> */}
         <CenterMenu>{children}</CenterMenu>
-        <RightMenu />
+        {/* <RightMenu /> */}
       </div>
       <ShowActionNav />
       <BottomMenu />

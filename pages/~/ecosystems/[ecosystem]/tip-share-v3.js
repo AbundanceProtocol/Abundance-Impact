@@ -127,7 +127,7 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem, fi
   useEffect(() => {
 
     const updatedFrameData = {...frameData}
-    updatedFrameData.buttons[0].target = `${baseURL}/api/frames/console/tip-tip?${qs.stringify({ time, curators, eco, ecosystem, channels, start: true })}`
+    updatedFrameData.buttons[0].target = `${baseURL}/api/frames/tip/tip?${qs.stringify({ time, curators, eco, ecosystem, channels, start: true })}`
 
     updatedFrameData.buttons[1].target = `${baseURL}/api/frames/tip/menu?${qs.stringify({ time, curators, eco, ecosystem })}`
 

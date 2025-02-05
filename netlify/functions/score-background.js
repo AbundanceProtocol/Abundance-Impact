@@ -2,6 +2,7 @@
 import connectToDatabase from '../../libs/mongodb';
 // import ScheduleTip from '../../models/ScheduleTip';
 import Cast from '../../models/Cast';
+import Fund from '../../models/Fund';
 import Impact from '../../models/Impact';
 import Quality from '../../models/Quality';
 // import Raffle from '../../models/Raffle';
@@ -30,11 +31,13 @@ exports.handler = async function(event, context) {
 
       const uniqueCuratorFids = await Impact.distinct('curator_fid', { createdAt: { $gte: threeDays } });
 
+      const uniqueAutoFundFids = await Fund.distinct('fid', { createdAt: { $gte: threeDays } });
+
       const uniqueQualityFids = await Quality.distinct('curator_fid', { createdAt: { $gte: threeDays } });
 
       const uniqueTipperFids = await Tip.distinct('tipper_fid', { createdAt: { $gte: threeDays } });
 
-      const mergedFids = [...new Set([...uniqueCuratorFids, ...uniqueQualityFids, ...uniqueTipperFids])];
+      const mergedFids = [...new Set([...uniqueCuratorFids, ...uniqueQualityFids, ...uniqueTipperFids, ...uniqueAutoFundFids])];
 
 
       const updateOptions = {
@@ -54,11 +57,13 @@ exports.handler = async function(event, context) {
             degen_tip_all: userdata_all[0]?.degen_tip || 0,
             ham_tip_all: userdata_all[0]?.ham_tip || 0,
             curator_points_all: userdata_all[0]?.curator_points || 0,
+            contributor_points_all: userdata_all[0]?.contributor_score || 0,
             creator_points_all: userdata_all[0]?.creator_points || 0,
             impact_score_all: userdata_all[0]?.impact_score || 0,
             degen_tip_30d: userdata_30d[0]?.degen_tip || 0,
             ham_tip_30d: userdata_30d[0]?.ham_tip || 0,
             curator_points_30d: userdata_30d[0]?.curator_points || 0,
+            contributor_points_30d: userdata_30d[0]?.contributor_score || 0,
             creator_points_30d: userdata_30d[0]?.creator_points || 0,
             impact_score_30d: userdata_30d[0]?.impact_score || 0,
           },
@@ -101,16 +106,20 @@ async function getUserData(fid, time) {
     let curatorQuery = {};
     let creatorQuery = {};
     let tipperQuery = {};
+    let fundQuery = {};
     curatorQuery.curator_fid = fid
     creatorQuery.author_fid = fid
     creatorQuery.points = '$IMPACT'
     tipperQuery.tipper_fid = fid
     tipperQuery.points = '$IMPACT'
+    fundQuery.fid = fid
+    fundQuery.valid = true
 
     if (time) {
       curatorQuery.createdAt = { $gte: time }
       creatorQuery.createdAt = { $gte: time }
       tipperQuery.createdAt = { $gte: time }
+      fundQuery.createdAt = { $gte: time }
     }
     
     const curatorImpact = await Impact.aggregate([
@@ -164,6 +173,24 @@ async function getUserData(fid, time) {
       }},
     ]);
 
+    let fundData = await Fund.aggregate([
+      { $match: fundQuery },
+      {
+        $group: {
+          _id: "$fid",
+          degen_tip: { $sum: "$degen_amount" },
+          ham_tip: { $sum: "$degen_amount" },
+        },
+      },
+    ]);
+
+    fundData = fundData.map(data => {
+      data.fid = data._id;
+      delete data._id;
+      return data;
+    });
+
+
     const tipperDataset = uniqueTippers.reduce((acc, tipper) => {
       const { _id: { tipper_fid, currency }, totalTips } = tipper;
       const existingTipper = acc.find(t => t.fid === tipper_fid);
@@ -183,6 +210,24 @@ async function getUserData(fid, time) {
       return acc;
     }, []).sort((a, b) => a.fid - b.fid);
 
+    let mergedTipperDataset = tipperDataset.map(tipper => {
+      const fund = fundData.find(f => f.fid === tipper.fid);
+      return {
+        fid: tipper.fid,
+        degen_tip: tipper.degen_tip + (fund ? fund.degen_tip : 0),
+        ham_tip: tipper.ham_tip + (fund ? fund.ham_tip : 0),
+      };
+    });
+
+    fundData.forEach(fund => {
+      if (!tipperDataset.some(tipper => tipper.fid === fund.fid)) {
+        mergedTipperDataset.push({
+          fid: fund.fid,
+          degen_tip: fund.degen_tip,
+          ham_tip: fund.ham_tip,
+        });
+      }
+    });
 
 
     //// CREATOR POINTS
@@ -207,7 +252,7 @@ async function getUserData(fid, time) {
 
     //// MERGE POINTS
     const tipperMap = Object.fromEntries(
-      tipperDataset.map((entry) => [
+      mergedTipperDataset.map((entry) => [
         entry.fid,
         { degen_tip: entry.degen_tip, ham_tip: entry.ham_tip },
       ])
@@ -223,7 +268,7 @@ async function getUserData(fid, time) {
   
     // Get the union of all fids
     const allFids = new Set([
-      ...tipperDataset.map((entry) => entry.fid),
+      ...mergedTipperDataset.map((entry) => entry.fid),
       ...curatorDataset.map((entry) => entry.fid),
       ...creatorDataset.map((entry) => entry.fid),
     ]);
@@ -249,6 +294,7 @@ async function getUserData(fid, time) {
     //// CALCULATE IMPACT SCORE
     mergedDataset.forEach(entry => {
       entry.impact_score = (10 * entry.curator_points + 5 * entry.degen_tip + entry.ham_tip + 50 * entry.creator_points) / 1000;
+      entry.contributor_score = (5 * entry.degen_tip + entry.ham_tip) / 1000 || 0
     });
 
     mergedDataset.sort((a, b) => b.impact_score - a.impact_score);

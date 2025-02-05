@@ -8,7 +8,6 @@ import Quality from '../../../models/Quality';
 import OptOut from '../../../models/OptOut';
 
 const dataCode = process.env.DATA_CODE
-const wcApiKey = process.env.WC_API_KEY
 
 export default async function handler(req, res) {
   const { code } = req.query
@@ -24,7 +23,8 @@ export default async function handler(req, res) {
 
         const threeWeeksAgo = new Date(Date.now() - 21 * 24 * 60 * 60 * 1000);
 
-        const threeTimeWinners = await Tip.aggregate([
+        let threeTimeWinners = []
+        threeTimeWinners = await Tip.aggregate([
           { $match: { 
             tipper_fid: 9326,
             "tip.amount": 5000,
@@ -40,6 +40,7 @@ export default async function handler(req, res) {
           { $project: { _id: 1 } }
         ]).then(tips => tips.map(tip => tip._id));
 
+        threeTimeWinners.push(388571) // exclude @impactbot from raffle
 
         const impactScoreData = await Raffle.find({ impact_score_3d: { $gte: 0.25 }, fid: { $nin: threeTimeWinners } }, { fid: 1, impact_score_3d: 1 }).lean();
 

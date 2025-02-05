@@ -74,8 +74,9 @@ export default async function handler(req, res) {
 
       res.setHeader('Content-Type', 'application/json');
       res.status(400).json({ 
-        message: 'Please resend' 
+        message: 'Please resend' // <= 90 characters
       });
+      
 
       // res.setHeader('Content-Type', 'text/html');
       // res.status(200)

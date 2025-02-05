@@ -9,11 +9,13 @@ const scoreSchema = new mongoose.Schema({
   ham_tip_all: { type: Number, default: 0, index: true },
   curator_points_all: { type: Number, default: 0, index: true },
   creator_points_all: { type: Number, default: 0, index: true },
+  contributor_points_all: { type: Number, default: 0, index: true },
   impact_score_all: { type: Number, default: 0, index: true },
   degen_tip_30d: { type: Number, default: 0, index: true },
   ham_tip_30d: { type: Number, default: 0, index: true },
   curator_points_30d: { type: Number, default: 0, index: true },
   creator_points_30d: { type: Number, default: 0, index: true },
+  contributor_points_30d: { type: Number, default: 0, index: true },
   impact_score_30d: { type: Number, default: 0, index: true },
   createdAt: { type: Date, default: () => new Date() }
 });

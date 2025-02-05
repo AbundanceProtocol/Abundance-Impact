@@ -29,7 +29,7 @@ export default async function handler(req, res) {
 
   if (req.method === 'POST') {
     const points = pt
-    const eco = points?.substring(1)
+    const eco = points?.substring(1) || 'IMPACT'
     const curatorFid = message?.data?.fid
 
     let autoTipImg = `${baseURL}/api/frames/console/auto-tipping?${qs.stringify({ status: 'all', curators: [], points: pt })}`

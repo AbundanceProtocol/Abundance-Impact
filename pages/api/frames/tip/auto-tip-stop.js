@@ -30,8 +30,9 @@ export default async function handler(req, res) {
 
   if (req.method === 'POST') {
     const params = { time, curators, eco, ecosystem, referrer }
-    const points = pt
-    const eco = points?.substring(1)
+    console.log('eco', eco)
+    const points = '$' + eco
+    // const eco = points?.substring(1)
     const curatorFid = message?.data?.fid
 
     let autoTipImg = `${baseURL}/api/frames/tip/auto-tipping?${qs.stringify({ status: 'all', curators: [], points })}`
