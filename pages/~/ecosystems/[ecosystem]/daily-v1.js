@@ -542,51 +542,51 @@ export async function getServerSideProps(context) {
 
 
 
-  async function getReward(id) {
-    try {
-      const objectId = new mongoose.Types.ObjectId(id)
-      console.log(id)
-      await connectToDatabase();
-      let rank = await Claim.findOne({ _id: objectId, claimed: false }).select('fid').exec();
+  // async function getReward(id) {
+  //   try {
+  //     const objectId = new mongoose.Types.ObjectId(id)
+  //     console.log(id)
+  //     await connectToDatabase();
+  //     let rank = await Claim.findOne({ _id: objectId, claimed: false }).select('fid').exec();
 
-      if (rank) {
-        const updateOptions = {
-          upsert: false,
-          new: true,
-          setDefaultsOnInsert: true,
-        };
+  //     if (rank) {
+  //       const updateOptions = {
+  //         upsert: false,
+  //         new: true,
+  //         setDefaultsOnInsert: true,
+  //       };
 
-        const update = {
-          $set: {
-            claimed: true
-          },
-        };
+  //       const update = {
+  //         $set: {
+  //           claimed: true
+  //         },
+  //       };
 
-        const lastFourDays = new Date(Date.now() - 4 * 24 * 60 * 60 * 1000);
+  //       const lastFourDays = new Date(Date.now() - 4 * 24 * 60 * 60 * 1000);
 
-        let claimIds = await Claim.distinct("_id", { fid: rank?.fid, createdAt: { $gt: lastFourDays }, claimed: false });
+  //       let claimIds = await Claim.distinct("_id", { fid: rank?.fid, createdAt: { $gt: lastFourDays }, claimed: false });
 
-        for (const claimId of claimIds) {
-          const user = await Claim.findOneAndUpdate({ _id: claimId }, update, updateOptions);
-          console.log('user', user, claimId)
-        }
-      }
+  //       for (const claimId of claimIds) {
+  //         const user = await Claim.findOneAndUpdate({ _id: claimId }, update, updateOptions);
+  //         console.log('user', user, claimId)
+  //       }
+  //     }
 
-      if (rank) {
-        return rank
-      } else {
-        return null
-      }
+  //     if (rank) {
+  //       return rank
+  //     } else {
+  //       return null
+  //     }
 
-    } catch (error) {
-      console.error("Error while fetching casts:", error);
-      return null
-    }  
-  }
+  //   } catch (error) {
+  //     console.error("Error while fetching casts:", error);
+  //     return null
+  //   }  
+  // }
 
-  if (id) {
-    const data = await getReward(id)
-  }
+  // if (id) {
+  //   const data = await getReward(id)
+  // }
 
   
   let setId = null

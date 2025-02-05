@@ -38,36 +38,28 @@ export default async function handler(req, res) {
         await connectToDatabase();
         let rank = await Claim.findOne({ _id: objectId }).exec();
 
-        // if (shared) {
-        //   const updateOptions = {
-        //     upsert: false,
-        //     new: true,
-        //     setDefaultsOnInsert: true,
-        //   };
-
-        //   const update = {
-        //     $set: {
-        //       claimed: true
-        //     },
-        //   };
-
-        //   const user = await Claim.findOneAndUpdate({ _id: objectId }, update, updateOptions);
-
-        //   // const userFid = await Claim.findOne({ _id: objectId }).select('fid').exec().then(doc => doc.fid);
-
-        //   console.log('user', user)
-        //   const lastFourDays = new Date(Date.now() - 4 * 24 * 60 * 60 * 1000);
-
-        //   const claims = await Claim.find({ fid: user?.fid, createdAt: { $gt: lastFourDays }, claimed: false }).select('_id')
-
-
-        //   let claimIds = await Claim.distinct("_id", { fid: user?.fid, createdAt: { $gt: lastFourDays }, claimed: false });
-
-        //   for (const claimId of claimIds) {
-        //     const user = await Claim.findOneAndUpdate({ _id: claimId }, update, updateOptions);
-        //   }
-        //   // const updatedDocs = await Claim.updateMany({ fid: user?.fid, createdAt: { $gt: lastFourDays }, claimed: false }, update, updateOptions);
-        // }
+        if (rank) {
+          const updateOptions = {
+            upsert: false,
+            new: true,
+            setDefaultsOnInsert: true,
+          };
+  
+          const update = {
+            $set: {
+              claimed: true
+            },
+          };
+  
+          const lastFourDays = new Date(Date.now() - 4 * 24 * 60 * 60 * 1000);
+  
+          let claimIds = await Claim.distinct("_id", { fid: rank?.fid, createdAt: { $gt: lastFourDays }, claimed: false });
+  
+          for (const claimId of claimIds) {
+            const user = await Claim.findOneAndUpdate({ _id: claimId }, update, updateOptions);
+            console.log('user', user, claimId)
+          }
+        }
 
         if (rank) {
           return rank
