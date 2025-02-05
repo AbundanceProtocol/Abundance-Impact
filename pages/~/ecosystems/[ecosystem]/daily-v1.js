@@ -11,6 +11,7 @@ import { AccountContext } from '../../../../context';
 import cheerio from 'cheerio'
 import FrameButton from '../../../../components/Cast/Frame/Button';
 import qs from "querystring";
+import Claim from '../../../../models/Claim';
 // import Circle from '../../../../models/Circle';
 // import connectToDatabase from '../../../../libs/mongodb';
 import mongoose from "mongoose";
@@ -538,34 +539,55 @@ export default function Tips({ecosystem, referrer, id, start}) {
 export async function getServerSideProps(context) {
   const { query, params } = context;
   const { id, referrer, start } = query;
-  // const { ecosystem } = params;
-  
-  // async function getCircle(id) {
-  //   if (id) {
-  //     try {
-  //       const objectId = new mongoose.Types.ObjectId(id)
-  //       console.log(id)
-  //       await connectToDatabase();
-  //       let circle = await Circle.findOne({ _id: objectId }).exec();
-  //       if (circle) {
-  //         let eco = ''
-  //         if (circle.points) {
-  //           eco = circle?.points?.substring(1)
-  //         }
-  //         return { time: circle?.time, curators: circle?.curators, channels: circle?.channels, eco, username: circle?.username, tipperFid: circle?.fid }
-  //       } else {
-  //         return { time: 'all', curators: [], channels: [], eco: null, username: '', tipperFid: 9326 }
-  //       }
-  //     } catch (error) {
-  //       console.error("Error while fetching casts:", error);
-  //       return { time: 'all', curators: [], channels: [], eco: null, username: '', tipperFid: 9326 }
-  //     }  
-  //   } else {
-  //     return { time: 'all', curators: [], channels: [], eco: null, username: '', tipperFid: 9326 }
-  //   }
-  // }
-  
-  // const { time, curators, channels, eco, username, tipperFid } = await getCircle(id)
+
+
+
+  async function getReward(id) {
+    try {
+      const objectId = new mongoose.Types.ObjectId(id)
+      console.log(id)
+      await connectToDatabase();
+      let rank = await Claim.findOne({ _id: objectId, claimed: false }).select('fid').exec();
+
+      if (rank) {
+        const updateOptions = {
+          upsert: false,
+          new: true,
+          setDefaultsOnInsert: true,
+        };
+
+        const update = {
+          $set: {
+            claimed: true
+          },
+        };
+
+        const lastFourDays = new Date(Date.now() - 4 * 24 * 60 * 60 * 1000);
+
+        let claimIds = await Claim.distinct("_id", { fid: rank?.fid, createdAt: { $gt: lastFourDays }, claimed: false });
+
+        for (const claimId of claimIds) {
+          const user = await Claim.findOneAndUpdate({ _id: claimId }, update, updateOptions);
+          console.log('user', user, claimId)
+        }
+      }
+
+      if (rank) {
+        return rank
+      } else {
+        return null
+      }
+
+    } catch (error) {
+      console.error("Error while fetching casts:", error);
+      return null
+    }  
+  }
+
+  if (id) {
+    const data = await getReward(id)
+  }
+
   
   let setId = null
   if (id) {
@@ -575,19 +597,14 @@ export async function getServerSideProps(context) {
   if (start) {
     setStart = start
   }
-  // let setEco = '$IMPACT'
-  // if (eco) {
-  //   setEco = eco
-  // }
+
   let setReferrer = null
   if (referrer) {
     setReferrer = referrer
   }
   return {
     props: {
-      // ecosystem: ecosystem,
       referrer: setReferrer,
-      // eco: setEco,
       id: setId,
       start: setStart
     },
