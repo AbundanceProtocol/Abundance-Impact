@@ -145,6 +145,7 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
       router.route !== "/~/ecosystems/[ecosystem]/tip-share" &&
       router.route !== "/~/ecosystems/[ecosystem]/tip-share-v2" &&
       router.route !== "/~/ecosystems/[ecosystem]/tip-share-v3" &&
+      router.route !== "/~/ecosystems/[ecosystem]/tip-share-v4" &&
       router.route !== "/~/ecosystems/[ecosystem]/rank-v1" &&
       router.route !== "/~/ecosystems/[ecosystem]/fund-v1" &&
       router.route !== "/~/ecosystems/[ecosystem]/fund-v2" &&
@@ -181,6 +182,7 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
       router.route !== "/~/ecosystems/[ecosystem]/tip-share" &&
       router.route !== "/~/ecosystems/[ecosystem]/tip-share-v2" &&
       router.route !== "/~/ecosystems/[ecosystem]/tip-share-v3" &&
+      router.route !== "/~/ecosystems/[ecosystem]/tip-share-v4" &&
       router.route !== "/~/ecosystems/[ecosystem]/rank-v1" &&
       router.route !== "/~/ecosystems/[ecosystem]/fund-v1" &&
       router.route !== "/~/ecosystems/[ecosystem]/fund-v2" &&
@@ -236,6 +238,7 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
       router.route !== "/~/ecosystems/[ecosystem]/tip-share" &&
       router.route !== "/~/ecosystems/[ecosystem]/tip-share-v2" &&
       router.route !== "/~/ecosystems/[ecosystem]/tip-share-v3" &&
+      router.route !== "/~/ecosystems/[ecosystem]/tip-share-v4" &&
       router.route !== "/~/ecosystems/[ecosystem]/rank-v1" &&
       router.route !== "/~/ecosystems/[ecosystem]/fund-v1" &&
       router.route !== "/~/ecosystems/[ecosystem]/fund-v2" &&
