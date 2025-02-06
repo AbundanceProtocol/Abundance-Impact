@@ -42,7 +42,7 @@
     "isomorphic-unfetch": "^4.0.2",
     "lodash": "^4.17.21",
     "mongodb": "^6.8.0",
-    "mongoose": "^8.6.1",
+    "mongoose": "^8.10.0",
     "moralis": "^2.26.4",
     "netlify-cli": "^17.37.2",
     "netlify-lambda": "^2.0.16",

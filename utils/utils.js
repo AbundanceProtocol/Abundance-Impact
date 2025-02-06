@@ -557,15 +557,15 @@ export async function processTips(userFeed, userFid, tokenData, ecosystem, curat
         for (const coin of cast.allCoins) {
           let coinText = ''
           if (coin.coin == '$TN100x' && coin.tip > 0) {
-            coinText = `🍖x${coin.tip} \n`
+            coinText = `🍖x${coin.tip} `
             cast.text += coinText
           } else if (coin.tip > 0) {
-            coinText = `${coin.tip} ${coin.coin} \n`
+            coinText = `${coin.tip} ${coin.coin} `
             cast.text += coinText
           }
         }
         if (cast.text.length > 0) {
-          cast.text = `I'm tipping:\n${cast.text}via ${ecosystemName}/impact\n\n/impact lets you earn curator rewards while supporting your favorite creators & builders on Farcaster`
+          cast.text = `/impact multi-tip: ${cast.text}\n\n/impact rewards you for your impact`
         }
       }
     }

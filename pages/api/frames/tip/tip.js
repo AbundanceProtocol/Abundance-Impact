@@ -109,6 +109,32 @@ export default async function handler(req, res) {
       }
     }
 
+    async function followingChannel(fid) {
+      const channelOptions = {
+        method: 'GET',
+        headers: {accept: 'application/json'}
+      };
+      try {
+        const channelData = await fetch(`https://api.warpcast.com/v1/user-channel?fid=${fid}&channelId=impact`, channelOptions);
+        if (!channelData.ok) {
+          return true
+        } else {
+          const channelInfo = await channelData.json();
+          if (channelInfo && channelInfo?.result) {
+            let following = channelInfo.result?.following
+            if (!following) {
+              return false
+            } else {
+              return true
+            }
+          }
+        }
+      } catch (error) {
+        console.error(`Error getting follower info: `, error)
+        return true
+      }
+    }
+
     async function checkTips(fid, points, startTime, endTime) {
       try {
         await connectToDatabase();
@@ -272,7 +298,7 @@ export default async function handler(req, res) {
 
         circlesImg = `${baseURL}/api/frames/tip/circle-v2?${qs.stringify({ id: circleFids })}`
 
-        shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share-v3?${qs.stringify({ id: circleFids })}`
+        shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share-v4?${qs.stringify({ id: circleFids })}`
     
         encodedShareUrl = encodeURIComponent(shareUrl); 
         shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
@@ -284,7 +310,7 @@ export default async function handler(req, res) {
         <meta name="fc:frame:button:2" content="Tip more >">
         <meta name="fc:frame:button:2:action" content="post">
         <meta name="fc:frame:button:2:target" content="${startPost}" />
-        <meta name="fc:frame:button:3" content="Auto-tip">
+        <meta name="fc:frame:button:3" content="Auto-Fund">
         <meta name="fc:frame:button:3:action" content="post">
         <meta name="fc:frame:button:3:target" content="${autoTipPost}" />
         <meta name="fc:frame:button:4" content="Refresh">
@@ -335,31 +361,10 @@ export default async function handler(req, res) {
         let allowances = []
     
         if (!inputText || inputText == '') {
-          let metatags = `
-          <meta name="fc:frame:button:1" content="Retry">
-          <meta name="fc:frame:button:1:action" content="post">
-          <meta name="fc:frame:button:1:target" content="${retryPost}" />
-          <meta property="og:image" content="${inputImg}">
-          <meta name="fc:frame:image" content="${inputImg}">
-          <meta name="fc:frame:post_url" content="${postUrl}">`
-    
-          res.setHeader('Content-Type', 'text/html');
-          res.status(200)
-          .send(`
-            <!DOCTYPE html>
-            <html>
-              <head>
-                <title>Tips | Impact App</title>
-                <meta name="fc:frame" content="vNext">
-                <meta property="og:title" content="Multi-Tip">
-                <meta property="fc:frame:image:aspect_ratio" content="1:1" />
-                ${metatags}
-              </head>
-              <body>
-                <div>Tip frame</div>
-              </body>
-            </html>
-          `);
+          res.setHeader('Content-Type', 'application/json');
+          res.status(400).json({ 
+            message: 'Provide valid tip input'
+          });
           return;
         } else {
     
@@ -370,69 +375,36 @@ export default async function handler(req, res) {
         }
     
         if (allowances?.length == 0) {
-          let metatags = `
-          <meta name="fc:frame:button:1" content="Retry">
-          <meta name="fc:frame:button:1:action" content="post">
-          <meta name="fc:frame:button:1:target" content="${retryPost}" />
-          <meta property="og:image" content="${inputImg}">
-          <meta name="fc:frame:image" content="${inputImg}">
-          <meta name="fc:frame:post_url" content="${postUrl}">`
-    
-          res.setHeader('Content-Type', 'text/html');
-          res.status(200)
-          .send(`
-            <!DOCTYPE html>
-            <html>
-              <head>
-                <title>Tips | Impact App</title>
-                <meta name="fc:frame" content="vNext">
-                <meta property="og:title" content="Multi-Tip">
-                <meta property="fc:frame:image:aspect_ratio" content="1:1" />
-                ${metatags}
-              </head>
-              <body>
-                <div>Tip frame</div>
-              </body>
-            </html>
-          `);
+          res.setHeader('Content-Type', 'application/json');
+          res.status(400).json({ 
+            message: 'Provide valid tip input'
+          });
           return;
         } else {
         
           const {decryptedUuid, username, user_pfp} = await getSigner(fid)
-          if (!decryptedUuid) {
-            console.log('d')
-  
-            let metatags = `
-            <meta name="fc:frame:button:1" content="Login /impact">
-            <meta name="fc:frame:button:1:action" content="link">
-            <meta name="fc:frame:button:1:target" content="${loginUrl}" />
-            <meta name="fc:frame:button:2" content="Refresh">
-            <meta name="fc:frame:button:2:action" content="post">
-            <meta name="fc:frame:button:2:target" content="${retryPost}" />
-            <meta property="og:image" content="${loginImg}">
-            <meta name="fc:frame:image" content="${loginImg}">
-            <meta name="fc:frame:post_url" content="${postUrl}">`
-    
-            res.setHeader('Content-Type', 'text/html');
-            res.status(200)
-            .send(`
-              <!DOCTYPE html>
-              <html>
-                <head>
-                  <title>Tips | Impact App</title>
-                  <meta name="fc:frame" content="vNext">
-                  <meta property="og:title" content="Multi-Tip">
-                  <meta property="fc:frame:image:aspect_ratio" content="1:1" />
-                  ${metatags}
-                </head>
-                <body>
-                  <div>Tip frame</div>
-                </body>
-              </html>
-            `);
+
+          const isFollowing = await followingChannel(fid)
+
+          if (!decryptedUuid && !isFollowing) {
+            res.setHeader('Content-Type', 'application/json');
+            res.status(400).json({ 
+              message: 'Need to login app & follow /impact'
+            });
             return;
-          } else {
-    
+          } else if (!decryptedUuid) {
+            res.setHeader('Content-Type', 'application/json');
+            res.status(400).json({ 
+              message: 'Need to login app'
+            });
+            return;
+          } else if (!isFollowing) {
+            res.setHeader('Content-Type', 'application/json');
+            res.status(400).json({ 
+              message: 'Need to follow /impact'
+            });
+            return;            
+          } else if (decryptedUuid && isFollowing) {    
             try {
     
               async function getCuratorPercent(points) {
@@ -737,6 +709,14 @@ export default async function handler(req, res) {
                 }
               }
   
+              if (!displayedCasts || displayedCasts?.length == 0) {
+                res.setHeader('Content-Type', 'application/json');
+                res.status(400).json({ 
+                  message: 'No casts tipped. Please retry'
+                });
+                return;  
+              }
+
               const { castData, circle, pfps, usernames, showcase } = await processTips(displayedCasts, fid, allowances, ecoName, curatorPercent)
               // console.log('pfps', pfps)
               const jointFids = circle.join(',')
@@ -800,7 +780,7 @@ export default async function handler(req, res) {
                     console.error(`Error occurred while sending request for ${castText}:`, error);
                   }
           
-                  await new Promise(resolve => setTimeout(resolve, 30));
+                  await new Promise(resolve => setTimeout(resolve, 10));
                 }
                 return tipCounter
               }
@@ -812,7 +792,7 @@ export default async function handler(req, res) {
               const remainingTip = await sendRequests(castData, decryptedUuid, apiKey);
               // const remainingTip = 0 
   
-              shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share-v3?${qs.stringify({ id: circleId })}`
+              shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share-v4?${qs.stringify({ id: circleId })}`
               
               async function getCurator(curator, points) {
   
@@ -857,38 +837,6 @@ export default async function handler(req, res) {
                 }
               }
   
-              let tippedCreators = ""
-              if (showcase?.length > 0) {
-                tippedCreators = showcase.reduce((str, creator, index, arr) => {
-                  if (!str.includes(creator.username)) {
-                    if (str === "") {
-                      return "@" + creator.username;
-                    }
-                    if (index === arr.length - 1 && index !== 0) {
-                      return str + " & @" + creator.username + " ";
-                    }
-                    return str + ", @" + creator.username;
-                  }
-                  return str;
-                }, "");
-              }
-
-              if (curators && fid == curators) {
-                shareText = `I just multi-tipped ${tippedCreators !== '' ? tippedCreators : 'creators & builders'} thru /impact by @abundance.\n\nSupport my nominees here:`
-              } else if (curators?.length > 0) {
-                const curatorName = await getCurator(curators, points)
-                if (curatorName) {
-                  shareText = `I just multi-tipped ${tippedCreators !== '' ? tippedCreators : 'creators & builders'} thru /impact by @abundance.\n\nThese creators were curated by ${curatorName}. Support their nominees here:`
-                } else {
-                  shareText = `I just multi-tipped ${tippedCreators !== '' ? tippedCreators : 'creators & builders'} thru /impact by @abundance. Try it out here:`
-                }
-              } else {
-                shareText = `I just multi-tipped ${tippedCreators !== '' ? tippedCreators : 'creators & builders'} thru /impact by @abundance. Try it out here:`
-              }
-              encodedShareText = encodeURIComponent(shareText)
-  
-              encodedShareUrl = encodeURIComponent(shareUrl); 
-              shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
   
               if (remainingTip || remainingTip == 0) {
                 console.log('e')
@@ -923,6 +871,40 @@ export default async function handler(req, res) {
                   <meta name="fc:frame:image" content="${circlesImg}">
                   <meta name="fc:frame:post_url" content="${postUrl}">`
                 } else {
+
+                  let tippedCreators = ""
+                  if (showcase?.length > 0) {
+                    tippedCreators = showcase.reduce((str, creator, index, arr) => {
+                      if (!str.includes(creator.username)) {
+                        if (str === "") {
+                          return "@" + creator.username;
+                        }
+                        if (index === arr.length - 1 && index !== 0) {
+                          return str + " & @" + creator.username + " ";
+                        }
+                        return str + ", @" + creator.username;
+                      }
+                      return str;
+                    }, "");
+                  }
+    
+                  if (curators && fid == curators) {
+                    shareText = `I just multi-tipped ${tippedCreators !== '' ? tippedCreators : 'creators & builders'} thru /impact by @abundance.\n\nSupport my nominees here:`
+                  } else if (curators?.length > 0) {
+                    const curatorName = await getCurator(curators, points)
+                    if (curatorName) {
+                      shareText = `I just multi-tipped ${tippedCreators !== '' ? tippedCreators : 'creators & builders'} thru /impact by @abundance.\n\nThese creators were curated by ${curatorName}. Support their nominees here:`
+                    } else {
+                      shareText = `I just multi-tipped ${tippedCreators !== '' ? tippedCreators : 'creators & builders'} thru /impact by @abundance. Try it out here:`
+                    }
+                  } else {
+                    shareText = `I just multi-tipped ${tippedCreators !== '' ? tippedCreators : 'creators & builders'} thru /impact by @abundance. Try it out here:`
+                  }
+                  encodedShareText = encodeURIComponent(shareText)
+      
+                  encodedShareUrl = encodeURIComponent(shareUrl); 
+                  shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
+
                   metatags = `
                   <meta name="fc:frame:button:1" content="Tip more >">
                   <meta name="fc:frame:button:1:action" content="post">
