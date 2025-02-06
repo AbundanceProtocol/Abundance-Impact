@@ -11,7 +11,7 @@ import { AccountContext } from '../../../../context';
 import cheerio from 'cheerio'
 import FrameButton from '../../../../components/Cast/Frame/Button';
 import qs from "querystring";
-import Claim from '../../../../models/Claim';
+// import Claim from '../../../../models/Claim';
 // import Circle from '../../../../models/Circle';
 // import connectToDatabase from '../../../../libs/mongodb';
 import mongoose from "mongoose";
