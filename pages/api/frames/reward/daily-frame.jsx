@@ -53,7 +53,7 @@ export default async function handler(req, res) {
           console.log('shared', shared)
           const lastFourDays = new Date(Date.now() - 4 * 24 * 60 * 60 * 1000);
   
-          let claimIds = await Claim.distinct("_id", { fid: rank?.fid, createdAt: { $gt: lastFourDays }, claimed: false });
+          let claimIds = await Claim.distinct("_id", { fid: rank?.fid, createdAt: { $gt: lastFourDays, $lte: rank?.createdAt }, claimed: false });
   
           for (const claimId of claimIds) {
             const user = await Claim.findOneAndUpdate({ _id: claimId }, update, updateOptions);

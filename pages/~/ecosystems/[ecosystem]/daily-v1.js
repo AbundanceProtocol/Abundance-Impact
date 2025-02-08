@@ -19,7 +19,7 @@ import mongoose from "mongoose";
 // import useStore from '../../../utils/store';
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 
-export default function Tips({ecosystem, referrer, id, start}) {
+export default function Tips({referrer, id, start}) {
   const { LoginPopup, fid, userBalances, isLogged } = useContext(AccountContext)
   const index = 0
   const router = useRouter();
@@ -73,7 +73,7 @@ export default function Tips({ecosystem, referrer, id, start}) {
       //   text: "Eg.: 1000 $Degen, 500 $HAM"
       // },
       state: {},
-      frames_url: `${baseURL}/~/ecosystems/${ecosystem}/tips`
+      frames_url: `${baseURL}/~/ecosystems/abundance/tips`
     }
   const [frameData, setFrameData] = useState(initFrame)
   const initCast = {
@@ -233,7 +233,7 @@ export default function Tips({ecosystem, referrer, id, start}) {
         // console.log(response)
   
         if (response.headers['content-type'].includes('text/html')) {
-          const $ = cheerio.load(response.data);
+          const $ = cheerio.load(response?.data);
           const metadata = {};
   
           $('meta').each((i, elem) => {
