@@ -2951,7 +2951,7 @@ export default function ProfilePage() {
                   <div style={{display: 'flex', textAlign: 'center', fontSize: '16px', margin: '0', cursor: 'pointer', fontWeight: '600'}} onClick={() => {
                     getInput(searchInput, 'true')}}>&nbsp;Ecosystem-wide</div>
                 </div>
-              </div>) : userFunding?.search_channels?.length > 0 ? (userFunding?.search_channels?.map((channel, index) => (
+              </div>) : userFunding?.search_channels?.length > 0 ? (<><div style={{fontSize: '15px', color: '#eff', fontWeight: '600', padding: '3px', margin: '7px 5px'}}>Channels:</div>{userFunding?.search_channels?.map((channel, index) => (
                 (<div key={index} style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '7px 5px'}} onClick={() => {
                   setFundingSchedule('remove-channel', channel)}}>
                   <div className='cast-act-lt' style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', borderRadius: '88px', padding: '3px 10px 3px 3px', width: 'auto', margin: '0 5px 0 0'}}>
@@ -2960,7 +2960,7 @@ export default function ProfilePage() {
                     <IoCloseCircle size={18} color={'#a00'} />
                   </div>
                 </div>)
-              ))) : curatorList?.length > 0 ? (curatorList?.map((curator, index) => (
+              ))}</>) : curatorList?.length > 0 ? (<><div style={{fontSize: '15px', color: '#eff', fontWeight: '600', padding: '3px', margin: '7px 5px'}}>Curators:</div>{curatorList?.map((curator, index) => (
                 (<div key={index} style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '7px 5px'}} onClick={() => {
                   setFundingSchedule('remove-curator', curator?.fid)}}>
                   <div className='cast-act-lt' style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', borderRadius: '88px', padding: '3px 10px 3px 3px', width: 'auto', margin: '0 5px 0 0'}}>
@@ -2969,7 +2969,7 @@ export default function ProfilePage() {
                     <IoCloseCircle size={18} color={'#a00'} />
                   </div>
                 </div>)
-              ))) : (<div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '7px 5px'}}>
+              ))}</>) : (<div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '7px 5px'}}>
                 <div className='cast-act-lt' style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', borderRadius: '88px', padding: '3px 10px 3px 3px', width: 'auto', margin: '0 5px 0 0'}}>
                   <div style={{display: 'flex', textAlign: 'center', fontSize: '16px', margin: '0', cursor: 'pointer', fontWeight: '600'}} onClick={() => {
                     getInput(searchInput, 'true')}}>&nbsp;Ecosystem-wide</div>
