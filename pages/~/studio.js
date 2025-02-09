@@ -2952,21 +2952,21 @@ export default function ProfilePage() {
                     getInput(searchInput, 'true')}}>&nbsp;Ecosystem-wide</div>
                 </div>
               </div>) : userFunding?.search_channels?.length > 0 ? (<><div style={{fontSize: '15px', color: '#eff', fontWeight: '600', padding: '3px', margin: '7px 5px'}}>Channels:</div>{userFunding?.search_channels?.map((channel, index) => (
-                (<div key={index} style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '7px 5px'}} onClick={() => {
-                  setFundingSchedule('remove-channel', channel)}}>
+                (<div key={index} style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '7px 5px'}}>
                   <div className='cast-act-lt' style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', borderRadius: '88px', padding: '3px 10px 3px 3px', width: 'auto', margin: '0 5px 0 0'}}>
                     {/* {channel?.imageUrl && (<img src={channel?.imageUrl} width={20} height={20} style={{borderRadius: '80px', border: '2px solid #eee', backgroundColor: '#8363ca'}} />)} */}
                     <div style={{display: 'flex', textAlign: 'center', fontSize: '15px', margin: '0', padding: '0 0 0 5px'}}>{channel ? `/${channel}` : ' channel not found'}</div>
-                    <IoCloseCircle size={18} color={'#a00'} />
+                    <IoCloseCircle size={18} color={'#a00'} onClick={() => {
+                      setFundingSchedule('remove-channel', channel)}} />
                   </div>
                 </div>)
-              ))}</>) : curatorList?.length > 0 ? (<><div style={{fontSize: '15px', color: '#eff', fontWeight: '600', padding: '3px', margin: '7px 5px'}}>Curators:</div>{curatorList?.map((curator, index) => (
-                (<div key={index} style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '7px 5px'}} onClick={() => {
-                  setFundingSchedule('remove-curator', curator?.fid)}}>
+              ))}</>) : curatorList?.length > 0 ? (<><div style={{fontSize: '15px', color: '#eff', fontWeight: '600', padding: '3px', margin: '7px 5px'}}>Channels:</div>{curatorList?.map((curator, index) => (
+                (<div key={index} style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '7px 5px'}}>
                   <div className='cast-act-lt' style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', borderRadius: '88px', padding: '3px 10px 3px 3px', width: 'auto', margin: '0 5px 0 0'}}>
                     {curator?.pfp && (<img src={curator?.pfp} width={20} height={20} style={{borderRadius: '80px', border: '2px solid #eee', backgroundColor: '#8363ca'}} />)}
                     <div style={{display: 'flex', textAlign: 'center', fontSize: '15px', margin: '0', padding: curator?.pfp ? '0' : '0 0 0 5px'}}>{curator ? `@${curator?.username}` : ' curator not found'}</div>
-                    <IoCloseCircle size={18} color={'#a00'} />
+                    <IoCloseCircle size={18} color={'#a00'} onClick={() => {
+                      setFundingSchedule('remove-curator', curator?.fid)}} />
                   </div>
                 </div>)
               ))}</>) : (<div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '7px 5px'}}>
