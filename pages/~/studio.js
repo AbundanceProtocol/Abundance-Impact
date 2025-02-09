@@ -102,6 +102,7 @@ export default function ProfilePage() {
   const [totalClaims, setTotalClaims] = useState(0)
   const [claimsLoading, setClaimsLoading] = useState(true)
   const [fundToggle, setFundToggle] = useState(true)
+  const [seasonToggle, setSeasonToggle] = useState('s2')
   const [userFunding, setUserFunding] = useState(null)
   const [isSelected, setIsSelected] = useState('none')
   const [userSearch, setUserSearch] = useState({ search: '' })
@@ -528,7 +529,7 @@ export default function ProfilePage() {
       })
       if (response?.data) {
         setImpactFunds(response?.data)
-        console.log('response?.data', response?.data)
+        console.log('getFunds', response?.data)
       } else {
         setImpactFunds(null)
       }
@@ -1003,42 +1004,6 @@ export default function ProfilePage() {
 		setUserSearch( () => ({ ...userSearch, [e.target.name]: e.target.value }) )
 	}
 
-  // async function getChannels(name) {
-  //   console.log(name)
-  //   try {
-  //     const response = await axios.get('/api/getChannels', {
-  //       params: {
-  //         name: name,
-  //       }
-  //     })
-  //     if (response) {
-  //       const channels = response.data.channels.channels
-  //       console.log(channels)
-  //       setChannels(channels)
-  //     }
-  //   } catch (error) {
-  //     console.error('Error submitting data:', error)
-  //   }
-  // }
-
-  // async function getChannels(points) {
-  //   try {
-  //     const channelData = await axios.get('/api/curation/getChannelNames', { params: { points } })
-  //     if (channelData) {
-  //       const ecoChannels = channelData?.data?.channels
-  //       console.log('e1', ecoChannels)
-
-  //       const updatedChannels = [
-  //         ' ',
-  //         ...ecoChannels
-  //       ];
-  //       setChannelOptions(updatedChannels);
-  //     }
-  //   } catch (error) {
-  //     console.error('Error updating channels:', error);
-  //   }
-  // }
-
 
   const channelKeyDown = (event) => {
     if (event.key === 'Enter') {
@@ -1083,21 +1048,6 @@ export default function ProfilePage() {
     setScoreLoading(true)
     setScoreTime(time)
     getScores(fid, time)
-
-    // setUserFeed([])
-    // setTimeframe(time)
-    console.log('time', time)
-
-    // setUserQuery({
-    //   ...userQuery,
-    //   time: time
-    // })
-
-    // setUserQuery({
-    //   ...userQuery,
-    //   curators: [fid], points: points || null
-    // })
-
   }
 
 
@@ -1122,12 +1072,6 @@ export default function ProfilePage() {
       ...userQuery,
       time: time
     })
-
-    // setUserQuery({
-    //   ...userQuery,
-    //   curators: [fid], points: points || null
-    // })
-
   }
 
   function updateOrder(order) {
@@ -1261,6 +1205,76 @@ export default function ProfilePage() {
       </div>
     );
   }
+
+
+  const FundPanel = ({fundName, fundData}) => {
+    let userDegen = 0
+    let totalDegen = 0
+    let userHam = 0
+    let totalHam = 0
+
+    let totalIndex = 0
+    let userIndex = 0
+
+    let degenKey = 'creator_degen'
+    let hamKey = 'creator_ham'
+    if (fundName == 'Creator Fund') {
+      degenKey = 'creator_degen'
+      hamKey = 'creator_ham'      
+    } else if (fundName == 'Dev Fund') {
+      degenKey = 'dev_degen'
+      hamKey = 'dev_ham'         
+    } else if (fundName == 'Growth Fund') {
+      degenKey = 'growth_degen'
+      hamKey = 'growth_ham'   
+    } else if (fundName == 'Special Fund') {
+      degenKey = 'special_degen'
+      hamKey = 'special_ham'   
+    }
+
+    if (seasonToggle == 's1') {
+      totalIndex = fundData?.totalFunds?.findIndex(data => data._id === 1);
+      userIndex = fundData?.userFunds?.findIndex(data => data._id === 1);
+    } else if (seasonToggle == 's2') {
+      totalIndex = fundData?.totalFunds?.findIndex(data => data._id === 2);
+      userIndex = fundData?.userFunds?.findIndex(data => data._id === 2);
+    }
+
+    if (seasonToggle == 'all') {
+      for (const fund of fundData.userFunds) {
+        userDegen += fund?.[degenKey]
+        userHam += fund?.[hamKey]
+      }
+      for (const fund of fundData.totalFunds) {
+        totalDegen += fund?.[degenKey]
+        totalHam += fund?.[hamKey]
+      }
+    } else {
+      userDegen = fundData?.userFunds[userIndex]?.[degenKey]
+      totalDegen = fundData?.totalFunds[totalIndex]?.[degenKey]
+      userHam = fundData?.userFunds[userIndex]?.[hamKey]
+      totalHam = fundData?.totalFunds[totalIndex]?.[hamKey]
+    }
+  
+    return (
+      <div className={`flex-col btn-select blu-drk shadow`} style={{minWidth: isMobile ? '135px' : '130px', color: '#cde', height: '133px', width: '22%', cursor: 'default'}}>
+        <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
+          <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0', color: '#44aaff'}}>{fundName}</div>
+        </div>
+        <div className='flex-col' style={{justifyContent: "center", alignItems: 'center', gap: '0.25rem'}}>
+          <div style={{fontSize: '16px', fontWeight: '700'}}>{fundToggle ? formatNum(totalDegen || 0) || '--' : formatNum(userDegen || 0) || '--'}</div>
+          <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$DEGEN</div>
+
+          <div style={{fontSize: '16px', fontWeight: '700', margin: '10px 0 0 0'}}>{fundToggle ? formatNum(totalHam || 0) || '--' : formatNum(userHam || 0) || '--'}</div>
+          <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$HAM</div>
+        </div>
+      </div>
+    );
+  }
+
+
+
+
 
   const updateCast = (index, newData) => {
     const updatedFeed = [...userFeed]
@@ -2269,69 +2283,35 @@ export default function ProfilePage() {
 
 
 
-
-          <div className='flex-row' style={{height: '30px', alignItems: 'center', justifyContent: 'center', padding: '20px 0 0 0'}}>
-            <div className='flex-row' style={{padding: '4px 8px', backgroundColor: '#002244ee', border: '1px solid #666', borderRadius: '20px', alignItems: 'center', gap: '0.25rem'}}>
-              <div className={fundToggle == true ? 'filter-item-on' : 'filter-item'} onClick={() => {setFundToggle(true)}} style={{fontSize: '12px', fontWeight: '600'}}>Total Funds</div>
-              <div className={fundToggle == false ? 'filter-item-on' : 'filter-item'} onClick={() => {setFundToggle(false)}} style={{fontSize: '12px', fontWeight: '600'}}>My Contribution</div>
+          <div className={isMobile ? 'flex-col' : 'flex-row'} style={{justifyContent: 'center', gap: '0.5rem'}}>
+            <div className='flex-row' style={{height: '30px', alignItems: 'center', justifyContent: 'center', padding: '20px 0 0 0'}}>
+              <div className='flex-row' style={{padding: '4px 8px', backgroundColor: '#002244ee', border: '1px solid #666', borderRadius: '20px', alignItems: 'center', gap: '0.25rem'}}>
+                <div className={seasonToggle == 'all' ? 'filter-item-on' : 'filter-item'} onClick={() => {setSeasonToggle('all')}} style={{fontSize: '12px', fontWeight: '600'}}>All</div>
+                <div className={seasonToggle == 's1' ? 'filter-item-on' : 'filter-item'} onClick={() => {setSeasonToggle('s1')}} style={{fontSize: '12px', fontWeight: '600'}}>Season 1</div>
+                <div className={seasonToggle == 's2' ? 'filter-item-on' : 'filter-item'} onClick={() => {setSeasonToggle('s2')}} style={{fontSize: '12px', fontWeight: '600'}}>Season 2</div>
+              </div>
             </div>
+
+            <div className='flex-row' style={{height: '30px', alignItems: 'center', justifyContent: 'center', padding: '20px 0 0 0'}}>
+              <div className='flex-row' style={{padding: '4px 8px', backgroundColor: '#002244ee', border: '1px solid #666', borderRadius: '20px', alignItems: 'center', gap: '0.25rem'}}>
+                <div className={fundToggle == true ? 'filter-item-on' : 'filter-item'} onClick={() => {setFundToggle(true)}} style={{fontSize: '12px', fontWeight: '600'}}>Total Funds</div>
+                <div className={fundToggle == false ? 'filter-item-on' : 'filter-item'} onClick={() => {setFundToggle(false)}} style={{fontSize: '12px', fontWeight: '600'}}>My Contribution</div>
+              </div>
+            </div>
+
+
           </div>
 
 
 
-
-
           <div className='flex-row' style={{fontSize: '13px', justifyContent: isMobile ? "center" : "space-between", alignItems: 'center', gap: '0.75rem', margin: '20px 0', flexWrap: 'wrap', width: '100%'}}>
-              <div className={`flex-col btn-select blu-drk shadow`} style={{minWidth: isMobile ? '135px' : '130px', color: '#cde', height: '133px', width: '22%', cursor: 'default'}}>
-                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
-                  <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0', color: '#44aaff'}}>Creator Fund</div>
-                </div>
-                <div className='flex-col' style={{justifyContent: "center", alignItems: 'center', gap: '0.25rem'}}>
-                  {/* <Impact size={15} color={userFunding?.active_cron && userFunding?.creator_fund == 100 ? '#147' : '#5af'} /> */}
-                  <div style={{fontSize: '16px', fontWeight: '700'}}>{fundToggle ? formatNum(impactFunds?.totalFunds[0]?.creator_degen || 0) || '--' : formatNum(impactFunds?.userFunds[0]?.creator_degen || 0) || '--'}</div>
-                  <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$DEGEN</div>
+            <FundPanel {...{fundName: 'Creator Fund', fundData: impactFunds}} />
+            <FundPanel {...{fundName: 'Dev Fund', fundData: impactFunds}} />
+            <FundPanel {...{fundName: 'Growth Fund', fundData: impactFunds}} />
+            <FundPanel {...{fundName: 'Special Fund', fundData: impactFunds}} />
 
-                  <div style={{fontSize: '16px', fontWeight: '700', margin: '10px 0 0 0'}}>{fundToggle ? formatNum(impactFunds?.totalFunds[0]?.creator_ham || 0) || '--' : formatNum(impactFunds?.userFunds[0]?.creator_ham || 0) || '--'}</div>
-                  <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$HAM</div>
-                </div>
-              </div>
-              <div className={`flex-col btn-select blu-drk shadow`} style={{minWidth: isMobile ? '135px' : '130px', color: '#cde', height: '133px', width: '22%', cursor: 'default'}}>
-                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
-                  <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0', color: '#44aaff'}}>Dev Fund</div>
-                </div>
-                <div className='flex-col' style={{justifyContent: "center", alignItems: 'center', gap: '0.25rem'}}>
-                  <div style={{fontSize: '16px', fontWeight: '700'}}>{fundToggle ? formatNum(impactFunds?.totalFunds[0]?.dev_degen || 0) || '--' : formatNum(impactFunds?.userFunds[0]?.dev_degen || 0) || '--'}</div>
-                  <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$DEGEN</div>
 
-                  <div style={{fontSize: '16px', fontWeight: '700', margin: '10px 0 0 0'}}>{fundToggle ? formatNum(impactFunds?.totalFunds[0]?.dev_ham || 0) || '--' : formatNum(impactFunds?.userFunds[0]?.dev_ham || 0) || '--'}</div>
-                  <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$HAM</div>
-                </div>
-              </div>
-              <div className={`flex-col btn-select blu-drk shadow`} style={{minWidth: isMobile ? '135px' : '130px', color: '#cde', height: '133px', width: '22%', cursor: 'default'}}>
-                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
-                  <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0', color: '#44aaff'}}>Growth Fund</div>
-                </div>
-                <div className='flex-col' style={{justifyContent: "center", alignItems: 'center', gap: '0.25rem'}}>
-                  <div style={{fontSize: '16px', fontWeight: '700'}}>{fundToggle ? formatNum(impactFunds?.totalFunds[0]?.growth_degen || 0) || '--' : formatNum(impactFunds?.userFunds[0]?.growth_degen || 0) || '--'}</div>
-                  <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$DEGEN</div>
-
-                  <div style={{fontSize: '16px', fontWeight: '700', margin: '10px 0 0 0'}}>{fundToggle ? formatNum(impactFunds?.totalFunds[0]?.growth_ham || 0) || '--' : formatNum(impactFunds?.userFunds[0]?.growth_ham || 0) || '--'}</div>
-                  <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$HAM</div>
-                </div>
-              </div>
-              <div className={`flex-col btn-select blu-drk shadow`} style={{minWidth: isMobile ? '135px' : '130px', color: '#cde', height: '133px', width: '22%', cursor: 'default'}}>
-                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
-                  <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0', color: '#44aaff'}}>Special Fund</div>
-                </div>
-                <div className='flex-col' style={{justifyContent: "center", alignItems: 'center', gap: '0.25rem'}}>
-                  <div style={{fontSize: '16px', fontWeight: '700'}}>{fundToggle ? formatNum(impactFunds?.totalFunds[0]?.special_degen || 0) || '--' : formatNum(impactFunds?.userFunds[0]?.special_degen || 0) || '--'}</div>
-                  <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$DEGEN</div>
-
-                  <div style={{fontSize: '16px', fontWeight: '700', margin: '10px 0 0 0'}}>{fundToggle ? formatNum(impactFunds?.totalFunds[0]?.special_ham || 0) || '--' : formatNum(impactFunds?.userFunds[0]?.special_ham || 0) || '--'}</div>
-                  <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$HAM</div>
-                </div>
-              </div>
-            </div>
+          </div>
 
 
 
@@ -2352,15 +2332,6 @@ export default function ProfilePage() {
             Discover how Impact Fund works
           </div>)}
 
-          {/* <div className='flex-row' style={{margin: '0 0 10px 0', width: "100%", justifyContent: "center"}}>
-            <div className='flex-row' style={{width: '100px', position: 'relative'}}>
-            <ToggleSwitch />
-            {fundLoading && (<div className='flex-row' style={{height: '20px', alignItems: 'center', width: '20px', justifyContent: 'center', padding: '0px', position: 'absolute', right: '-8%', top: '-3px'}}>
-              <Spinner size={20} color={'#468'} />
-            </div>)}
-            </div>
-          </div> */}
-
 
           {(display.fund && <><div
             className="flex-row"
@@ -2372,187 +2343,6 @@ export default function ProfilePage() {
               justifyContent: "center",
             }}
           >
-
-
-          {/* <div
-            className="flex-row"
-            style={{
-              color: "#9df",
-              width: "100%",
-              fontSize: isMobile ? "15px" : "16px",
-              padding: "20px 10px 0px 10px",
-              justifyContent: "center",
-              userSelect: 'none',
-              fontWeight: '600'
-            }}
-          >
-            My overall allocation:
-          </div> */}
-
-
-            {/* <div className='flex-row' style={{fontSize: '13px', justifyContent: isMobile ? "center" : "space-between", alignItems: 'center', gap: '0.75rem', margin: '20px 0', flexWrap: 'wrap', width: '100%'}}>
-              <div className={`flex-col btn-select ${userFunding?.active_cron && userFunding?.creator_fund == 100 ? 'cast-act-lt btn-brd-lt' : 'blu-drk btn-brd'}`} style={{minWidth: isMobile ? '185px' : '180px', color: userFunding?.active_cron && userFunding?.creator_fund == 100 ? '#000' : '#cde', height: '133px'}} onClick={() => {setFundingSchedule('standard')}}>
-                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
-                  <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0'}}>Standard</div>
-                </div>
-                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.5rem'}}>
-                  <Impact size={15} color={userFunding?.active_cron && userFunding?.creator_fund == 100 ? '#147' : '#5af'} />
-                  <div>Creator</div>
-                  <div style={{fontSize: '14px', fontWeight: '700'}}>100%</div>
-                </div>
-                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.5rem'}}>
-                  <IoBuild size={15} color={userFunding?.active_cron && userFunding?.creator_fund == 100 ? '#147' : '#5af'} />
-                  <div>Dev</div>
-                  <div style={{fontSize: '14px', fontWeight: '700'}}>0%</div>
-                </div>
-                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.5rem'}}>
-                  <IoIosRocket size={15} color={userFunding?.active_cron && userFunding?.creator_fund == 100 ? '#147' : '#5af'} />
-                  <div>Growth</div>
-                  <div style={{fontSize: '14px', fontWeight: '700'}}>0%</div>
-                </div>
-                <div className='flex-row' style={{margin: '5px 0 0 0', color: userFunding?.active_cron && userFunding?.creator_fund == 100 ? '#111' : "#9df", fontSize: '11px'}}>
-                  <div>1.0x Score Boost</div>
-                </div>
-              </div>
-              <div className={`flex-col btn-select ${userFunding?.active_cron && userFunding?.creator_fund == 80 ? 'cast-act-lt btn-brd-lt' : 'blu-drk btn-brd'}`} style={{minWidth: isMobile ? '185px' : '180px', color: userFunding?.active_cron && userFunding?.creator_fund == 80 ? '#000' : '#cde', height: '133px'}} onClick={() => {setFundingSchedule('optimized')}}>
-                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
-                  <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0'}}>Optimized</div>
-                </div>
-                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
-                  <Impact size={15} color={userFunding?.active_cron && userFunding?.creator_fund == 80 ? '#147' : '#5af'} />
-                  <div>Creator</div>
-                  <div style={{fontSize: '14px', fontWeight: '700'}}>80%</div>
-                </div>
-                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
-                  <IoBuild size={15} color={userFunding?.active_cron && userFunding?.creator_fund == 80 ? '#147' : '#5af'} />
-                  <div>Dev</div>
-                  <div style={{fontSize: '14px', fontWeight: '700'}}>10%</div>
-                </div>
-                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
-                  <IoIosRocket size={15} color={userFunding?.active_cron && userFunding?.creator_fund == 80 ? '#147' : '#5af'} />
-                  <div>Growth</div>
-                  <div style={{fontSize: '14px', fontWeight: '700'}}>10%</div>
-                </div>
-                <div className='flex-row' style={{margin: '5px 0 0 0', color: userFunding?.active_cron && userFunding?.creator_fund == 80 ? '#111' : "#9df", fontSize: '11px'}}>
-                  <div>1.25x Score Boost</div>
-                </div>
-              </div>
-              <div className={`flex-col btn-select ${userFunding?.active_cron && userFunding?.creator_fund == 60 ? 'cast-act-lt btn-brd-lt' : 'blu-drk btn-brd'}`} style={{minWidth: isMobile ? '185px' : '180px', color: userFunding?.active_cron && userFunding?.creator_fund == 60 ? '#000' : '#cde', height: '133px'}} onClick={() => {setFundingSchedule('accelerated')}}>
-                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
-                  <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0'}}>Accelerated</div>
-                </div>
-                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
-                  <Impact size={15} color={userFunding?.active_cron && userFunding?.creator_fund == 60 ? '#147' : '#5af'} />
-                  <div>Creator</div>
-                  <div style={{fontSize: '14px', fontWeight: '700'}}>60%</div>
-                </div>
-                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
-                  <IoBuild size={15} color={userFunding?.active_cron && userFunding?.creator_fund == 60 ? '#147' : '#5af'} />
-                  <div>Dev</div>
-                  <div style={{fontSize: '14px', fontWeight: '700'}}>20%</div>
-                </div>
-                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
-                  <IoIosRocket size={15} color={userFunding?.active_cron && userFunding?.creator_fund == 60 ? '#147' : '#5af'} />
-                  <div>Growth</div>
-                  <div style={{fontSize: '14px', fontWeight: '700'}}>20%</div>
-                </div>
-                <div className='flex-row' style={{margin: '5px 0 0 0', color: userFunding?.active_cron && userFunding?.creator_fund == 60 ? '#111' : "#9df", fontSize: '11px'}}>
-                  <div>1.33x Score Boost</div>
-                </div>
-              </div>
-              <div className={`flex-col btn-select ${userFunding?.active_cron && userFunding?.special_fund == 100 ? 'cast-act-lt btn-brd-lt' : 'blu-drk btn-brd'}`} style={{minWidth: isMobile ? '185px' : '180px', color: userFunding?.active_cron && userFunding?.special_fund == 100 ? '#000' : '#cde', height: '133px'}} onClick={() => {setFundingSchedule('special')}}>
-                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
-                  <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0'}}>Special Fund</div>
-                </div>
-                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.5rem'}}>
-
-                </div>
-                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.5rem', height: '90px'}}>
-                  <FaCode size={15} color={userFunding?.active_cron && userFunding?.special_fund == 100 ? '#147' : '#5af'} />
-                  <div></div>
-                  <div className='text-c' style={{fontSize: '14px', fontWeight: '700', maxWidth: '88px'}}>Open Source Devs&nbsp;&nbsp;100%</div>
-                </div>
-                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.5rem'}}>
-
-                </div>
-                <div className='flex-row' style={{margin: '5px 0 0 0', color: userFunding?.active_cron && userFunding?.special_fund == 100 ? '#111' : "#9df", fontSize: '11px'}}>
-                  <div>&nbsp;</div>
-                </div>
-              </div>
-            </div> */}
-
-
-
-
-            {/* {userFunding?.creator_fund > 0 && (<div
-              className="flex-row"
-              style={{
-                color: "#9df",
-                width: "100%",
-                fontSize: isMobile ? "15px" : "16px",
-                padding: "20px 10px 10px 10px",
-                justifyContent: "center",
-                userSelect: 'none',
-                fontWeight: '600'
-              }}
-            >
-              My Creator Fund allocation:
-            </div>)} */}
-
-            {/* {userFunding?.creator_fund > 0 && (<div className='flex-row' style={{width: '100%', justifyContent: 'center', flexWrap: "wrap"}}>
-
-              {(userFunding?.search_channels?.length == 0 && userFunding?.search_curators?.length == 0 && userFunding?.creator_fund > 0) ? (<div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '7px 5px'}}>
-                <div className='cast-act-lt' style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', borderRadius: '88px', padding: '3px 10px 3px 3px', width: 'auto', margin: '0 5px 0 0'}}>
-                  <div style={{display: 'flex', textAlign: 'center', fontSize: '16px', margin: '0', cursor: 'pointer', fontWeight: '600'}} onClick={() => {
-                    getInput(searchInput, 'true')}}>&nbsp;Ecosystem-wide</div>
-                </div>
-              </div>) : (<div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '7px 5px'}}>
-                <div className='cast-act-lt' style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', borderRadius: '88px', padding: '3px 10px 3px 3px', width: 'auto', margin: '0 5px 0 0'}}>
-                  <div style={{display: 'flex', textAlign: 'center', fontSize: '16px', margin: '0', cursor: 'pointer', fontWeight: '600'}} onClick={() => {
-                    getInput(searchInput, 'true')}}>&nbsp;Ecosystem-wide</div>
-                </div>
-              </div>)}
-            </div>)} */}
-
-
-
-
-            {/* <div className='flex-col' style={{height: '30px', alignItems: 'center', justifyContent: 'center', padding: '40px 0 20px 0'}}>
-                <div className='flex-row' style={{padding: '4px 8px', backgroundColor: '#002244ee', border: '1px solid #666', borderRadius: '20px', alignItems: 'center', gap: '0.25rem'}}>
-
-                  <FaSearch size={15} color={'#eff'} style={{margin: '0 2px 0 2px'}} />
-
-                  <div className={fundSearch == 'Curators' ? 'filter-item-on' : 'filter-item'} style={{fontSize: '12px'}} onClick={() => {updateSearch('Curators')}}>Curators</div>
-                  <div className={fundSearch == 'Channels' ? 'filter-item-on' : 'filter-item'} style={{fontSize: '12px'}} onClick={() => {updateSearch('Channels')}}>Channels</div>
-
-                  <input type="text" value={searchInput} onChange={(e) => getInput(e.target.value, null)} style={{backgroundColor: '#adf', borderRadius: '8px', padding: isMobile ? '2px 4px' : '2px 4px', fontSize: isMobile ? '12px' : '14px', width: '150px', fontWeight: '600', margin: '0 0 0 4px'}} placeholder={"Search " + fundSearch.toLowerCase()} />
-
-                </div>
-              </div> */}
-
-
-
-
-            {/* {userFunding?.creator_fund > 0 && (<div className='flex-row' style={{width: '100%', justifyContent: 'center', flexWrap: "wrap"}}>
-              {channelData?.length > 0 && (channelData?.map((channel, index) => (
-                (<div key={index} style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '7px 5px'}} onClick={() => {
-                  updateSchedule(channel?.channelId, 'true')}}>
-                  <div className='cast-act-lt' style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', borderRadius: '88px', padding: '3px 10px 3px 3px', width: 'auto', margin: '0 5px 0 0'}}>
-                    {channel?.imageUrl && (<img src={channel?.imageUrl} width={20} height={20} style={{borderRadius: '80px', border: '2px solid #eee', backgroundColor: '#8363ca'}} />)}
-                    <div style={{display: 'flex', textAlign: 'center', fontSize: '15px', margin: '0'}}>{channel?.channelId ? `/${channel?.channelId}  (${channel?.followerCount})` : ' channel not found'}</div>
-                  </div>
-                </div>)
-              )))}
-              {channelsLength > 20 && (<div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '7px 5px'}}>
-                <div className='cast-act-lt' style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', borderRadius: '88px', padding: '3px 10px 3px 3px', width: 'auto', margin: '0 5px 0 0'}}>
-                  <div style={{display: 'flex', textAlign: 'center', fontSize: '15px', margin: '0', cursor: 'pointer'}} onClick={() => {
-                    getInput(searchInput, 'true')}}>&nbsp;+{channelsLength - 20}</div>
-                </div>
-              </div>)}
-            </div>)} */}
-
-
-
 
 
             <div
@@ -2603,9 +2393,6 @@ export default function ProfilePage() {
               />
             </ItemWrap>
               
-            {/* <div style={{margin: '40px 10px 20px 10px', width: '100%', borderTop: '1px solid #48b'}}>
-            </div> */}
-
 
           </div></>)}
         </div>
@@ -2708,73 +2495,6 @@ export default function ProfilePage() {
                 />
               </div>
           </div>
-
-
-
-
-          {/* <div className='flex-row' style={{height: '30px', alignItems: 'center', justifyContent: 'center', padding: '20px 0 0 0'}}>
-            <div className='flex-row' style={{padding: '4px 8px', backgroundColor: '#002244ee', border: '1px solid #666', borderRadius: '20px', alignItems: 'center', gap: '0.25rem'}}>
-              <div className={fundToggle == true ? 'filter-item-on' : 'filter-item'} onClick={() => {setFundToggle(true)}} style={{fontSize: '12px', fontWeight: '600'}}>Total Funds</div>
-              <div className={fundToggle == false ? 'filter-item-on' : 'filter-item'} onClick={() => {setFundToggle(false)}} style={{fontSize: '12px', fontWeight: '600'}}>My Contribution</div>
-            </div>
-          </div> */}
-
-
-
-
-
-          {/* <div className='flex-row' style={{fontSize: '13px', justifyContent: isMobile ? "center" : "space-between", alignItems: 'center', gap: '0.75rem', margin: '20px 0', flexWrap: 'wrap', width: '100%'}}>
-              <div className={`flex-col btn-select blu-drk shadow`} style={{minWidth: isMobile ? '135px' : '130px', color: '#cde', height: '133px', width: '22%', cursor: 'default'}}>
-                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
-                  <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0', color: '#44aaff'}}>Creator Fund</div>
-                </div>
-                <div className='flex-col' style={{justifyContent: "center", alignItems: 'center', gap: '0.25rem'}}>
-                  <div style={{fontSize: '16px', fontWeight: '700'}}>{fundToggle ? formatNum(impactFunds?.totalFunds[0]?.creator_degen || 0) || '--' : formatNum(impactFunds?.userFunds[0]?.creator_degen || 0) || '--'}</div>
-                  <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$DEGEN</div>
-
-                  <div style={{fontSize: '16px', fontWeight: '700', margin: '10px 0 0 0'}}>{fundToggle ? formatNum(impactFunds?.totalFunds[0]?.creator_ham || 0) || '--' : formatNum(impactFunds?.userFunds[0]?.creator_ham || 0) || '--'}</div>
-                  <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$HAM</div>
-                </div>
-              </div>
-              <div className={`flex-col btn-select blu-drk shadow`} style={{minWidth: isMobile ? '135px' : '130px', color: '#cde', height: '133px', width: '22%', cursor: 'default'}}>
-                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
-                  <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0', color: '#44aaff'}}>Dev Fund</div>
-                </div>
-                <div className='flex-col' style={{justifyContent: "center", alignItems: 'center', gap: '0.25rem'}}>
-                  <div style={{fontSize: '16px', fontWeight: '700'}}>{fundToggle ? formatNum(impactFunds?.totalFunds[0]?.dev_degen || 0) || '--' : formatNum(impactFunds?.userFunds[0]?.dev_degen || 0) || '--'}</div>
-                  <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$DEGEN</div>
-
-                  <div style={{fontSize: '16px', fontWeight: '700', margin: '10px 0 0 0'}}>{fundToggle ? formatNum(impactFunds?.totalFunds[0]?.dev_ham || 0) || '--' : formatNum(impactFunds?.userFunds[0]?.dev_ham || 0) || '--'}</div>
-                  <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$HAM</div>
-                </div>
-              </div>
-              <div className={`flex-col btn-select blu-drk shadow`} style={{minWidth: isMobile ? '135px' : '130px', color: '#cde', height: '133px', width: '22%', cursor: 'default'}}>
-                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
-                  <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0', color: '#44aaff'}}>Growth Fund</div>
-                </div>
-                <div className='flex-col' style={{justifyContent: "center", alignItems: 'center', gap: '0.25rem'}}>
-                  <div style={{fontSize: '16px', fontWeight: '700'}}>{fundToggle ? formatNum(impactFunds?.totalFunds[0]?.growth_degen || 0) || '--' : formatNum(impactFunds?.userFunds[0]?.growth_degen || 0) || '--'}</div>
-                  <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$DEGEN</div>
-
-                  <div style={{fontSize: '16px', fontWeight: '700', margin: '10px 0 0 0'}}>{fundToggle ? formatNum(impactFunds?.totalFunds[0]?.growth_ham || 0) || '--' : formatNum(impactFunds?.userFunds[0]?.growth_ham || 0) || '--'}</div>
-                  <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$HAM</div>
-                </div>
-              </div>
-              <div className={`flex-col btn-select blu-drk shadow`} style={{minWidth: isMobile ? '135px' : '130px', color: '#cde', height: '133px', width: '22%', cursor: 'default'}}>
-                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
-                  <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0', color: '#44aaff'}}>Special Fund</div>
-                </div>
-                <div className='flex-col' style={{justifyContent: "center", alignItems: 'center', gap: '0.25rem'}}>
-                  <div style={{fontSize: '16px', fontWeight: '700'}}>{fundToggle ? formatNum(impactFunds?.totalFunds[0]?.special_degen || 0) || '--' : formatNum(impactFunds?.userFunds[0]?.special_degen || 0) || '--'}</div>
-                  <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$DEGEN</div>
-
-                  <div style={{fontSize: '16px', fontWeight: '700', margin: '10px 0 0 0'}}>{fundToggle ? formatNum(impactFunds?.totalFunds[0]?.special_ham || 0) || '--' : formatNum(impactFunds?.userFunds[0]?.special_ham || 0) || '--'}</div>
-                  <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$HAM</div>
-                </div>
-              </div>
-            </div> */}
-
-
 
 
 
@@ -3041,62 +2761,6 @@ export default function ProfilePage() {
               </div>)}
 
             </div>)}
-
-
-
-
-{/* 
-          <div
-            className="flex-row"
-            style={{
-              color: "#9df",
-              width: "100%",
-              textAlign: 'center',
-              fontSize: isMobile ? "12px" : "14px",
-              padding: "50px 10px 15px 10px",
-              justifyContent: "center",
-            }}
-          >
-            How it works: Auto-Fund automatically distributes your leftover $degen and $ham allowances before allowances reset to Impact Fund based on your preference.
-          </div>
-
-
-            <ItemWrap bgColor={'#002244ee'} brdr={'0px'}>
-              <Item
-                {...{
-                  icon: Impact,
-                  text: "Creator Fund",
-                  description:
-                    `Rewards builders & creators on Farcaster based on their contribution to the ecosystem (impact = profit). 90% of funds go to creators and 10% to curators`,
-                }}
-              />
-            </ItemWrap>
-
-
-            <ItemWrap bgColor={'#002244ee'} brdr={'0px'}>
-              <Item
-                {...{
-                  icon: IoBuild,
-                  text: "Development Fund",
-                  description: `Helps offset some of the costs of full-time work on Impact Alpha, and the broader vision of creating a new economic paradigm. Since the project is open source those who contribute to its development can also be rewarded through this fund`,
-                }}
-              />
-            </ItemWrap>
-
-            <ItemWrap bgColor={'#002244ee'} brdr={'0px'}>
-              <Item
-                {...{
-                  icon: IoIosRocket,
-                  text: "Growth Fund",
-                  description:
-                    `Adds incentives and rewards to those who curate, contribute and spread the word about Impact Alpha while the system gets to the scale where it can operate self-sustainably`,
-                }}
-              />
-            </ItemWrap> */}
-              
-            {/* <div style={{margin: '40px 10px 20px 10px', width: '100%', borderTop: '1px solid #48b'}}>
-            </div> */}
-
 
           </div></>)}
         </div>
