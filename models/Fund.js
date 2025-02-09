@@ -19,6 +19,7 @@ const fundSchema = new mongoose.Schema({
   special_ham_amount: { type: Number, default: 0 },
   funding_type: { type: String, default: 'remaining' },
   curator_fid: { type: [Number], default: [] },
+  channel_id: { type: [String], default: [] },
   season: { type: Number, default: 1 },
   valid: { type: Boolean, default: true },
   createdAt: { type: Date, default: () => new Date(), index: true }

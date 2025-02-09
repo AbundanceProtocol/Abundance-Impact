@@ -9,7 +9,7 @@ import Item from '../../components/Ecosystem/ItemWrap/Item';
 import Description from '../../components/Ecosystem/Description';
 import ItemWrap from '../../components/Ecosystem/ItemWrap';
 import { BiSortDown, BiSortUp } from "react-icons/bi";
-import { FaLock, FaFire, FaGlobe, FaRegStar, FaAngleDown, FaShareAlt as Share, FaCode } from "react-icons/fa";
+import { FaLock, FaFire, FaGlobe, FaRegStar, FaAngleDown, FaShareAlt as Share, FaCode, FaSearch } from "react-icons/fa";
 import { PiSquaresFourLight as Actions, PiClockClockwiseBold as ClockForward, PiClockCounterClockwiseBold as ClockBack, PiBankFill } from "react-icons/pi";
 import { GrSchedulePlay as Sched } from "react-icons/gr";
 import { GiRibbonMedal as Medal } from "react-icons/gi";
@@ -49,13 +49,20 @@ export default function ProfilePage() {
   const userButtons = ['Curation', 'Casts', 'Casts + Replies']
   const [searchSelect, setSearchSelect ] = useState('Curation')
   const { isMobile } = useMatchBreakpoints();
-  const [display, setDisplay] = useState({fund: false, ecosystem: false, multitip: false, promotion: false, curation: false, score: false, distribution: false, rewards: false})
+  const [display, setDisplay] = useState({fund: false, ecosystem: false, multitip: false, promotion: false, curation: false, score: false, distribution: false, rewards: false, autoFund: false})
   const [isOn, setIsOn] = useState(false);
   const [scoreTime , setScoreTime ] = useState('all');
   const [scoreLoading , setScoreLoading ] = useState(false);
   const [fundLoading , setFundLoading ] = useState(true);
   const [userFeed, setUserFeed] = useState(null)
   const [distLoading, setDistLoading] = useState(false)
+  const [searchInput, setSearchInput] = useState('')
+  const [channelData, setChannelData] = useState([])
+  const [curatorData, setCuratorData] = useState([])
+  const [channelsLength, setChannelsLength] = useState(0)
+  const [curatorsLength, setCuratorsLength] = useState(0)
+  const [fundSearch, setFundSearch] = useState('Curators')
+  const [curatorList, setCuratorList] = useState([])
   const [funds, setFunds] = useState({curatorDegen: 0, curatorHam: 0, fundDegen: 0, fundHam: 0})
   const [distribution, setDistribution] = useState(null)
   const [prevSearch, setPrevSearch] = useState({getTime: null, channel: null, username: null, text: null, shuffle: null, ecosystem: null, page: 0, order: -1, timeSort: null})
@@ -378,6 +385,100 @@ export default function ProfilePage() {
     }
   }
 
+  async function updateChannels(text, more) {
+    setCuratorData([])
+    setCuratorsLength(0)
+    if (text?.length > 0) {
+      try {
+        const response = await axios.get('/api/curation/getChannels', {
+          params: { channel: text, more }
+        })
+        const sortedData = response?.data?.data.sort((a, b) => a.channelId.localeCompare(b.channelId));
+        setChannelData(sortedData);
+        setChannelsLength(response?.data?.length)
+        // setChannelData(response?.data?.data)
+        console.log('response', response?.data?.data)
+      } catch (error) {
+        console.error('Error submitting data:', error)
+        // setUser(null)
+        setChannelData([])
+        setChannelsLength(0)
+      }
+    } else {
+      setChannelData([])
+      setChannelsLength(0)
+    }
+  }
+
+  async function updateCurators(text, more) {
+    setChannelData([])
+    setChannelsLength(0)
+    if (text?.length > 0) {
+      try {
+        const response = await axios.get('/api/curation/getCurators', {
+          params: { name: text, more }
+        })
+        const sortedData = response?.data?.users.sort((a, b) => a.username.localeCompare(b.username));
+        setCuratorData(sortedData);
+        setCuratorsLength(response?.data?.length)
+        // setChannelData(response?.data?.data)
+        console.log('response', response?.data?.users)
+      } catch (error) {
+        console.error('Error submitting data:', error)
+        // setUser(null)
+        setCuratorData([])
+        setCuratorsLength(0)
+      }
+    } else {
+      setCuratorData([])
+      setCuratorsLength(0)
+    }
+  }
+
+  async function getInput(text, more) {
+    console.log(text)
+    setSearchInput(text)
+    if (text.length < 3) {
+      setTimeout(() => {
+        console.log('Second delay for short text');
+      }, 20000);
+    }
+    if (text.length > 0 && fundSearch == 'Channels') {
+      updateChannels(text, more)
+    } else if (text.length > 0 && fundSearch == 'Curators') {
+      updateCurators(text, more)
+    } else {
+      setChannelData([])
+      setChannelsLength(0)
+      setCuratorData([])
+      setCuratorsLength(0)
+    }
+  }
+
+
+  async function updateSchedule(data, search) {
+    setChannelData([])
+    setChannelsLength(0)
+    setCuratorData([])
+    setCuratorsLength(0)
+    setSearchInput('')
+
+    if (search == 'Channels') {
+      const channelIncluded = userFunding.search_channels.includes(data);
+      if (channelIncluded) {
+        setFundingSchedule('remove-channel', data)
+      } else {
+        setFundingSchedule('add-channel', data)
+      }
+    } else if (search == 'Curators') {
+      const curatorIncluded = userFunding.search_curators.includes(data);
+      if (curatorIncluded) {
+        setFundingSchedule('remove-curator', data)
+      } else {
+        setFundingSchedule('add-curator', data)
+      }
+    }
+  }
   
   async function getTotalClaims(fid) {
     try {
@@ -445,9 +546,11 @@ export default function ProfilePage() {
       })
       if (response?.data) {
         const fundingData = response?.data?.schedule || null
-        console.log('fundingData', fundingData)
+        console.log('fundingData', response?.data)
         if (fundingData) {
           setUserFunding(fundingData)
+          setCuratorList(response?.data?.curators)
+
           if (fundingData.active_cron) {
             setIsOn(true)
           } else {
@@ -455,9 +558,11 @@ export default function ProfilePage() {
           }
         } else {
           setUserFunding(null)
+          setCuratorList([])
         }
       } else {
         setUserFunding(null)
+        setCuratorList([])
       }
       setFundLoading(false)
       // setLoading(prev => ({...prev, score: false }))
@@ -465,6 +570,7 @@ export default function ProfilePage() {
     } catch (error) {
       console.error('Error submitting data:', error)
       setUserFunding(null)
+      setCuratorList([])
       setFundLoading(false)
       // setLoading(prev => ({...prev, score: false }))
       // setScoreLoading(false)
@@ -995,6 +1101,17 @@ export default function ProfilePage() {
   }
 
 
+  function updateSearch(search) {
+    console.log('search', search)
+    setChannelData([])
+    setChannelsLength(0)
+    setCuratorData([])
+    setCuratorsLength(0)
+    setSearchInput('')
+    setFundSearch(search)
+  }
+
+
   function updateTime(time) {
     setUserFeed([])
     // setTimeframe(time)
@@ -1070,14 +1187,15 @@ export default function ProfilePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  async function setFundingSchedule(schedule) {
+  async function setFundingSchedule(schedule, data) {
     setFundLoading(true)
     try {
       console.log(fid, schedule)
-      const response = await axios.post('/api/fund/postSchedule', { fid, schedule });
+      const response = await axios.post('/api/fund/postSchedule', { fid, schedule, data });
       if (response?.data) {
         console.log('response', response?.data)
         setUserFunding(response?.data?.updatedSchedule)
+        setCuratorList(response?.data?.curators)
         if (response?.data?.updatedSchedule?.active_cron) {
           setIsOn(true)
         } else {
@@ -1090,7 +1208,7 @@ export default function ProfilePage() {
       } else {
         console.log('no auto-fund response')
         setUserFunding(null)
-
+        setCuratorList([])
         setModal({on: true, success: false, text: 'Auto-Fund failed to update'});
         setTimeout(() => {
           setModal({on: false, success: false, text: ''});
@@ -1912,39 +2030,6 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-
-
-
-
-
-
-              {/* <div
-                className={`flex-row ${dailyLoading ? 'btn-off' : (dailyRewards?.degen_total > 0 && dailyRewards?.claimed == false) ? 'btn-act' : (dailyRewards?.degen_total > 0 && dailyRewards?.claimed == true) ? 'btn-on' : 'btn-off'}`}
-                style={{
-                  borderRadius: "8px",
-                  padding: "2px 5px",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "0.25rem",
-                  margin: '5px 0 2px 0'
-                }} 
-                onClick={(event) => {
-                  if (dailyRewards?.degen_total > 0 && dailyRewards?.claimed == false) {
-                    claimReward(event, dailyRewards)
-                  }
-                }}
-                >
-                <p
-                  style={{
-                    padding: "0 2px",
-                    fontSize: "12px",
-                    fontWeight: "500",
-                    textWrap: "nowrap",
-                  }}
-                >
-                  {dailyLoading ? 'Loading...' : (dailyRewards?.degen_total > 0 && dailyRewards?.claimed == false) ? 'Claim' : (dailyRewards?.degen_total > 0 && dailyRewards?.claimed == true) ? 'Claimed' : 'Check Score'}
-                </p>
-              </div> */}
             </div>
           </div>
 
@@ -2068,6 +2153,21 @@ export default function ProfilePage() {
           </div>
 
 
+          <div
+            className="flex-row"
+            style={{
+              color: "#9df",
+              width: "100%",
+              textAlign: 'center',
+              fontSize: isMobile ? "12px" : "14px",
+              padding: "20px 10px 15px 10px",
+              justifyContent: "center",
+            }}
+          >
+            Note: Daily Rewards accumulate for up to 4 days. Rewards expire after 4 days if unclaimed - they are then moved to the Creator Fund 
+          </div>
+
+
         </div>
       </div>
 
@@ -2131,7 +2231,7 @@ export default function ProfilePage() {
               <Description
                 {...{
                   show: true,
-                  text: "Auto-Fund",
+                  text: "Impact Fund",
                   padding: "4px 0 4px 10px",
                   size: "large",
                 }}
@@ -2182,7 +2282,7 @@ export default function ProfilePage() {
 
 
           <div className='flex-row' style={{fontSize: '13px', justifyContent: isMobile ? "center" : "space-between", alignItems: 'center', gap: '0.75rem', margin: '20px 0', flexWrap: 'wrap', width: '100%'}}>
-              <div className={`flex-col btn-select blu-drk shadow`} style={{minWidth: isMobile ? '135px' : '130px', color: '#cde', height: '133px', width: '22%'}}>
+              <div className={`flex-col btn-select blu-drk shadow`} style={{minWidth: isMobile ? '135px' : '130px', color: '#cde', height: '133px', width: '22%', cursor: 'default'}}>
                 <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
                   <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0', color: '#44aaff'}}>Creator Fund</div>
                 </div>
@@ -2195,7 +2295,7 @@ export default function ProfilePage() {
                   <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$HAM</div>
                 </div>
               </div>
-              <div className={`flex-col btn-select blu-drk shadow`} style={{minWidth: isMobile ? '135px' : '130px', color: '#cde', height: '133px', width: '22%'}}>
+              <div className={`flex-col btn-select blu-drk shadow`} style={{minWidth: isMobile ? '135px' : '130px', color: '#cde', height: '133px', width: '22%', cursor: 'default'}}>
                 <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
                   <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0', color: '#44aaff'}}>Dev Fund</div>
                 </div>
@@ -2207,7 +2307,7 @@ export default function ProfilePage() {
                   <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$HAM</div>
                 </div>
               </div>
-              <div className={`flex-col btn-select blu-drk shadow`} style={{minWidth: isMobile ? '135px' : '130px', color: '#cde', height: '133px', width: '22%'}}>
+              <div className={`flex-col btn-select blu-drk shadow`} style={{minWidth: isMobile ? '135px' : '130px', color: '#cde', height: '133px', width: '22%', cursor: 'default'}}>
                 <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
                   <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0', color: '#44aaff'}}>Growth Fund</div>
                 </div>
@@ -2219,7 +2319,7 @@ export default function ProfilePage() {
                   <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$HAM</div>
                 </div>
               </div>
-              <div className={`flex-col btn-select blu-drk shadow`} style={{minWidth: isMobile ? '135px' : '130px', color: '#cde', height: '133px', width: '22%'}}>
+              <div className={`flex-col btn-select blu-drk shadow`} style={{minWidth: isMobile ? '135px' : '130px', color: '#cde', height: '133px', width: '22%', cursor: 'default'}}>
                 <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
                   <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0', color: '#44aaff'}}>Special Fund</div>
                 </div>
@@ -2232,6 +2332,447 @@ export default function ProfilePage() {
                 </div>
               </div>
             </div>
+
+
+
+
+
+
+          {!display.fund && (<div
+            className="flex-row"
+            style={{
+              color: "#9df",
+              width: "100%",
+              fontSize: isMobile ? "15px" : "17px",
+              padding: "10px 10px 15px 10px",
+              justifyContent: "center",
+              userSelect: 'none'
+            }}
+          >
+            Discover how Impact Fund works
+          </div>)}
+
+          {/* <div className='flex-row' style={{margin: '0 0 10px 0', width: "100%", justifyContent: "center"}}>
+            <div className='flex-row' style={{width: '100px', position: 'relative'}}>
+            <ToggleSwitch />
+            {fundLoading && (<div className='flex-row' style={{height: '20px', alignItems: 'center', width: '20px', justifyContent: 'center', padding: '0px', position: 'absolute', right: '-8%', top: '-3px'}}>
+              <Spinner size={20} color={'#468'} />
+            </div>)}
+            </div>
+          </div> */}
+
+
+          {(display.fund && <><div
+            className="flex-row"
+            style={{
+              padding: "0px 0 0 0",
+              width: "100%",
+              flexWrap: "wrap",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+
+
+          {/* <div
+            className="flex-row"
+            style={{
+              color: "#9df",
+              width: "100%",
+              fontSize: isMobile ? "15px" : "16px",
+              padding: "20px 10px 0px 10px",
+              justifyContent: "center",
+              userSelect: 'none',
+              fontWeight: '600'
+            }}
+          >
+            My overall allocation:
+          </div> */}
+
+
+            {/* <div className='flex-row' style={{fontSize: '13px', justifyContent: isMobile ? "center" : "space-between", alignItems: 'center', gap: '0.75rem', margin: '20px 0', flexWrap: 'wrap', width: '100%'}}>
+              <div className={`flex-col btn-select ${userFunding?.active_cron && userFunding?.creator_fund == 100 ? 'cast-act-lt btn-brd-lt' : 'blu-drk btn-brd'}`} style={{minWidth: isMobile ? '185px' : '180px', color: userFunding?.active_cron && userFunding?.creator_fund == 100 ? '#000' : '#cde', height: '133px'}} onClick={() => {setFundingSchedule('standard')}}>
+                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
+                  <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0'}}>Standard</div>
+                </div>
+                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.5rem'}}>
+                  <Impact size={15} color={userFunding?.active_cron && userFunding?.creator_fund == 100 ? '#147' : '#5af'} />
+                  <div>Creator</div>
+                  <div style={{fontSize: '14px', fontWeight: '700'}}>100%</div>
+                </div>
+                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.5rem'}}>
+                  <IoBuild size={15} color={userFunding?.active_cron && userFunding?.creator_fund == 100 ? '#147' : '#5af'} />
+                  <div>Dev</div>
+                  <div style={{fontSize: '14px', fontWeight: '700'}}>0%</div>
+                </div>
+                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.5rem'}}>
+                  <IoIosRocket size={15} color={userFunding?.active_cron && userFunding?.creator_fund == 100 ? '#147' : '#5af'} />
+                  <div>Growth</div>
+                  <div style={{fontSize: '14px', fontWeight: '700'}}>0%</div>
+                </div>
+                <div className='flex-row' style={{margin: '5px 0 0 0', color: userFunding?.active_cron && userFunding?.creator_fund == 100 ? '#111' : "#9df", fontSize: '11px'}}>
+                  <div>1.0x Score Boost</div>
+                </div>
+              </div>
+              <div className={`flex-col btn-select ${userFunding?.active_cron && userFunding?.creator_fund == 80 ? 'cast-act-lt btn-brd-lt' : 'blu-drk btn-brd'}`} style={{minWidth: isMobile ? '185px' : '180px', color: userFunding?.active_cron && userFunding?.creator_fund == 80 ? '#000' : '#cde', height: '133px'}} onClick={() => {setFundingSchedule('optimized')}}>
+                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
+                  <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0'}}>Optimized</div>
+                </div>
+                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
+                  <Impact size={15} color={userFunding?.active_cron && userFunding?.creator_fund == 80 ? '#147' : '#5af'} />
+                  <div>Creator</div>
+                  <div style={{fontSize: '14px', fontWeight: '700'}}>80%</div>
+                </div>
+                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
+                  <IoBuild size={15} color={userFunding?.active_cron && userFunding?.creator_fund == 80 ? '#147' : '#5af'} />
+                  <div>Dev</div>
+                  <div style={{fontSize: '14px', fontWeight: '700'}}>10%</div>
+                </div>
+                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
+                  <IoIosRocket size={15} color={userFunding?.active_cron && userFunding?.creator_fund == 80 ? '#147' : '#5af'} />
+                  <div>Growth</div>
+                  <div style={{fontSize: '14px', fontWeight: '700'}}>10%</div>
+                </div>
+                <div className='flex-row' style={{margin: '5px 0 0 0', color: userFunding?.active_cron && userFunding?.creator_fund == 80 ? '#111' : "#9df", fontSize: '11px'}}>
+                  <div>1.25x Score Boost</div>
+                </div>
+              </div>
+              <div className={`flex-col btn-select ${userFunding?.active_cron && userFunding?.creator_fund == 60 ? 'cast-act-lt btn-brd-lt' : 'blu-drk btn-brd'}`} style={{minWidth: isMobile ? '185px' : '180px', color: userFunding?.active_cron && userFunding?.creator_fund == 60 ? '#000' : '#cde', height: '133px'}} onClick={() => {setFundingSchedule('accelerated')}}>
+                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
+                  <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0'}}>Accelerated</div>
+                </div>
+                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
+                  <Impact size={15} color={userFunding?.active_cron && userFunding?.creator_fund == 60 ? '#147' : '#5af'} />
+                  <div>Creator</div>
+                  <div style={{fontSize: '14px', fontWeight: '700'}}>60%</div>
+                </div>
+                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
+                  <IoBuild size={15} color={userFunding?.active_cron && userFunding?.creator_fund == 60 ? '#147' : '#5af'} />
+                  <div>Dev</div>
+                  <div style={{fontSize: '14px', fontWeight: '700'}}>20%</div>
+                </div>
+                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
+                  <IoIosRocket size={15} color={userFunding?.active_cron && userFunding?.creator_fund == 60 ? '#147' : '#5af'} />
+                  <div>Growth</div>
+                  <div style={{fontSize: '14px', fontWeight: '700'}}>20%</div>
+                </div>
+                <div className='flex-row' style={{margin: '5px 0 0 0', color: userFunding?.active_cron && userFunding?.creator_fund == 60 ? '#111' : "#9df", fontSize: '11px'}}>
+                  <div>1.33x Score Boost</div>
+                </div>
+              </div>
+              <div className={`flex-col btn-select ${userFunding?.active_cron && userFunding?.special_fund == 100 ? 'cast-act-lt btn-brd-lt' : 'blu-drk btn-brd'}`} style={{minWidth: isMobile ? '185px' : '180px', color: userFunding?.active_cron && userFunding?.special_fund == 100 ? '#000' : '#cde', height: '133px'}} onClick={() => {setFundingSchedule('special')}}>
+                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
+                  <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0'}}>Special Fund</div>
+                </div>
+                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.5rem'}}>
+
+                </div>
+                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.5rem', height: '90px'}}>
+                  <FaCode size={15} color={userFunding?.active_cron && userFunding?.special_fund == 100 ? '#147' : '#5af'} />
+                  <div></div>
+                  <div className='text-c' style={{fontSize: '14px', fontWeight: '700', maxWidth: '88px'}}>Open Source Devs&nbsp;&nbsp;100%</div>
+                </div>
+                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.5rem'}}>
+
+                </div>
+                <div className='flex-row' style={{margin: '5px 0 0 0', color: userFunding?.active_cron && userFunding?.special_fund == 100 ? '#111' : "#9df", fontSize: '11px'}}>
+                  <div>&nbsp;</div>
+                </div>
+              </div>
+            </div> */}
+
+
+
+
+            {/* {userFunding?.creator_fund > 0 && (<div
+              className="flex-row"
+              style={{
+                color: "#9df",
+                width: "100%",
+                fontSize: isMobile ? "15px" : "16px",
+                padding: "20px 10px 10px 10px",
+                justifyContent: "center",
+                userSelect: 'none',
+                fontWeight: '600'
+              }}
+            >
+              My Creator Fund allocation:
+            </div>)} */}
+
+            {/* {userFunding?.creator_fund > 0 && (<div className='flex-row' style={{width: '100%', justifyContent: 'center', flexWrap: "wrap"}}>
+
+              {(userFunding?.search_channels?.length == 0 && userFunding?.search_curators?.length == 0 && userFunding?.creator_fund > 0) ? (<div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '7px 5px'}}>
+                <div className='cast-act-lt' style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', borderRadius: '88px', padding: '3px 10px 3px 3px', width: 'auto', margin: '0 5px 0 0'}}>
+                  <div style={{display: 'flex', textAlign: 'center', fontSize: '16px', margin: '0', cursor: 'pointer', fontWeight: '600'}} onClick={() => {
+                    getInput(searchInput, 'true')}}>&nbsp;Ecosystem-wide</div>
+                </div>
+              </div>) : (<div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '7px 5px'}}>
+                <div className='cast-act-lt' style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', borderRadius: '88px', padding: '3px 10px 3px 3px', width: 'auto', margin: '0 5px 0 0'}}>
+                  <div style={{display: 'flex', textAlign: 'center', fontSize: '16px', margin: '0', cursor: 'pointer', fontWeight: '600'}} onClick={() => {
+                    getInput(searchInput, 'true')}}>&nbsp;Ecosystem-wide</div>
+                </div>
+              </div>)}
+            </div>)} */}
+
+
+
+
+            {/* <div className='flex-col' style={{height: '30px', alignItems: 'center', justifyContent: 'center', padding: '40px 0 20px 0'}}>
+                <div className='flex-row' style={{padding: '4px 8px', backgroundColor: '#002244ee', border: '1px solid #666', borderRadius: '20px', alignItems: 'center', gap: '0.25rem'}}>
+
+                  <FaSearch size={15} color={'#eff'} style={{margin: '0 2px 0 2px'}} />
+
+                  <div className={fundSearch == 'Curators' ? 'filter-item-on' : 'filter-item'} style={{fontSize: '12px'}} onClick={() => {updateSearch('Curators')}}>Curators</div>
+                  <div className={fundSearch == 'Channels' ? 'filter-item-on' : 'filter-item'} style={{fontSize: '12px'}} onClick={() => {updateSearch('Channels')}}>Channels</div>
+
+                  <input type="text" value={searchInput} onChange={(e) => getInput(e.target.value, null)} style={{backgroundColor: '#adf', borderRadius: '8px', padding: isMobile ? '2px 4px' : '2px 4px', fontSize: isMobile ? '12px' : '14px', width: '150px', fontWeight: '600', margin: '0 0 0 4px'}} placeholder={"Search " + fundSearch.toLowerCase()} />
+
+                </div>
+              </div> */}
+
+
+
+
+            {/* {userFunding?.creator_fund > 0 && (<div className='flex-row' style={{width: '100%', justifyContent: 'center', flexWrap: "wrap"}}>
+              {channelData?.length > 0 && (channelData?.map((channel, index) => (
+                (<div key={index} style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '7px 5px'}} onClick={() => {
+                  updateSchedule(channel?.channelId, 'true')}}>
+                  <div className='cast-act-lt' style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', borderRadius: '88px', padding: '3px 10px 3px 3px', width: 'auto', margin: '0 5px 0 0'}}>
+                    {channel?.imageUrl && (<img src={channel?.imageUrl} width={20} height={20} style={{borderRadius: '80px', border: '2px solid #eee', backgroundColor: '#8363ca'}} />)}
+                    <div style={{display: 'flex', textAlign: 'center', fontSize: '15px', margin: '0'}}>{channel?.channelId ? `/${channel?.channelId}  (${channel?.followerCount})` : ' channel not found'}</div>
+                  </div>
+                </div>)
+              )))}
+              {channelsLength > 20 && (<div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '7px 5px'}}>
+                <div className='cast-act-lt' style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', borderRadius: '88px', padding: '3px 10px 3px 3px', width: 'auto', margin: '0 5px 0 0'}}>
+                  <div style={{display: 'flex', textAlign: 'center', fontSize: '15px', margin: '0', cursor: 'pointer'}} onClick={() => {
+                    getInput(searchInput, 'true')}}>&nbsp;+{channelsLength - 20}</div>
+                </div>
+              </div>)}
+            </div>)} */}
+
+
+
+
+
+            <div
+            className="flex-row"
+            style={{
+              color: "#9df",
+              width: "100%",
+              textAlign: 'center',
+              fontSize: isMobile ? "12px" : "14px",
+              padding: "20px 10px 15px 10px",
+              justifyContent: "center",
+            }}
+          >
+            How it works: Auto-Fund automatically distributes your leftover $degen and $ham allowances before allowances reset to Impact Fund based on your preference.
+          </div>
+
+
+            <ItemWrap bgColor={'#002244ee'} brdr={'0px'}>
+              <Item
+                {...{
+                  icon: Impact,
+                  text: "Creator Fund",
+                  description:
+                    `Rewards builders & creators on Farcaster based on their contribution to the ecosystem (impact = profit). 90% of funds go to creators and 10% to curators`,
+                }}
+              />
+            </ItemWrap>
+
+
+            <ItemWrap bgColor={'#002244ee'} brdr={'0px'}>
+              <Item
+                {...{
+                  icon: IoBuild,
+                  text: "Development Fund",
+                  description: `Helps offset some of the costs of full-time work on Impact Alpha, and the broader vision of creating a new economic paradigm. Since the project is open source those who contribute to its development can also be rewarded through this fund`,
+                }}
+              />
+            </ItemWrap>
+
+            <ItemWrap bgColor={'#002244ee'} brdr={'0px'}>
+              <Item
+                {...{
+                  icon: IoIosRocket,
+                  text: "Growth Fund",
+                  description:
+                    `Adds incentives and rewards to those who curate, contribute and spread the word about Impact Alpha while the system gets to the scale where it can operate self-sustainably`,
+                }}
+              />
+            </ItemWrap>
+              
+            {/* <div style={{margin: '40px 10px 20px 10px', width: '100%', borderTop: '1px solid #48b'}}>
+            </div> */}
+
+
+          </div></>)}
+        </div>
+      </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      {/* MY AUTO FUND */}
+
+
+      <div style={{ padding: "0px 4px 0px 4px", width: feedMax }}>
+
+
+
+
+
+
+
+
+
+        <div
+          id="autoFund"
+          style={{
+            padding: isMobile ? "28px 0 20px 0" : "28px 0 20px 0",
+            width: "40%",
+          }}
+        ></div>
+
+        <div className='shadow'
+          style={{
+            padding: "8px",
+            backgroundColor: "#11448888",
+            borderRadius: "15px",
+            border: "1px solid #11447799",
+          }}
+        >
+          <div
+            className="flex-row"
+            style={{
+              width: "100%",
+              justifyContent: "center",
+              alignItems: "center",
+              padding: "16px 0 0 0",
+            }}
+          >
+            <PiBankFill style={{ fill: "#cde" }} size={27}             onClick={() => {
+              toggleMenu("autoFund");
+            }} />
+            <div onClick={() => {
+              toggleMenu("autoFund");
+            }}>
+              <Description
+                {...{
+                  show: true,
+                  text: "My Auto-Fund",
+                  padding: "4px 0 4px 10px",
+                  size: "large",
+                }}
+              />
+            </div>
+
+
+              <div
+                className="flex-row"
+                style={{
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  cursor: "pointer",
+                }}
+                onClick={() => {
+                  toggleMenu("autoFund");
+                }}
+              >
+                {/* <Item {...{ text: "How it works" }} /> */}
+
+
+
+                <FaAngleDown
+                  size={28} color={"#cde"}
+                  style={{
+                    margin: "5px 15px 5px 5px",
+                    transform: display.autoFund
+                      ? "rotate(180deg)"
+                      : "rotate(0deg)",
+                    transition: "transform 0.3s ease",
+                  }}
+                />
+              </div>
+          </div>
+
+
+
+
+          {/* <div className='flex-row' style={{height: '30px', alignItems: 'center', justifyContent: 'center', padding: '20px 0 0 0'}}>
+            <div className='flex-row' style={{padding: '4px 8px', backgroundColor: '#002244ee', border: '1px solid #666', borderRadius: '20px', alignItems: 'center', gap: '0.25rem'}}>
+              <div className={fundToggle == true ? 'filter-item-on' : 'filter-item'} onClick={() => {setFundToggle(true)}} style={{fontSize: '12px', fontWeight: '600'}}>Total Funds</div>
+              <div className={fundToggle == false ? 'filter-item-on' : 'filter-item'} onClick={() => {setFundToggle(false)}} style={{fontSize: '12px', fontWeight: '600'}}>My Contribution</div>
+            </div>
+          </div> */}
+
+
+
+
+
+          {/* <div className='flex-row' style={{fontSize: '13px', justifyContent: isMobile ? "center" : "space-between", alignItems: 'center', gap: '0.75rem', margin: '20px 0', flexWrap: 'wrap', width: '100%'}}>
+              <div className={`flex-col btn-select blu-drk shadow`} style={{minWidth: isMobile ? '135px' : '130px', color: '#cde', height: '133px', width: '22%', cursor: 'default'}}>
+                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
+                  <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0', color: '#44aaff'}}>Creator Fund</div>
+                </div>
+                <div className='flex-col' style={{justifyContent: "center", alignItems: 'center', gap: '0.25rem'}}>
+                  <div style={{fontSize: '16px', fontWeight: '700'}}>{fundToggle ? formatNum(impactFunds?.totalFunds[0]?.creator_degen || 0) || '--' : formatNum(impactFunds?.userFunds[0]?.creator_degen || 0) || '--'}</div>
+                  <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$DEGEN</div>
+
+                  <div style={{fontSize: '16px', fontWeight: '700', margin: '10px 0 0 0'}}>{fundToggle ? formatNum(impactFunds?.totalFunds[0]?.creator_ham || 0) || '--' : formatNum(impactFunds?.userFunds[0]?.creator_ham || 0) || '--'}</div>
+                  <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$HAM</div>
+                </div>
+              </div>
+              <div className={`flex-col btn-select blu-drk shadow`} style={{minWidth: isMobile ? '135px' : '130px', color: '#cde', height: '133px', width: '22%', cursor: 'default'}}>
+                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
+                  <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0', color: '#44aaff'}}>Dev Fund</div>
+                </div>
+                <div className='flex-col' style={{justifyContent: "center", alignItems: 'center', gap: '0.25rem'}}>
+                  <div style={{fontSize: '16px', fontWeight: '700'}}>{fundToggle ? formatNum(impactFunds?.totalFunds[0]?.dev_degen || 0) || '--' : formatNum(impactFunds?.userFunds[0]?.dev_degen || 0) || '--'}</div>
+                  <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$DEGEN</div>
+
+                  <div style={{fontSize: '16px', fontWeight: '700', margin: '10px 0 0 0'}}>{fundToggle ? formatNum(impactFunds?.totalFunds[0]?.dev_ham || 0) || '--' : formatNum(impactFunds?.userFunds[0]?.dev_ham || 0) || '--'}</div>
+                  <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$HAM</div>
+                </div>
+              </div>
+              <div className={`flex-col btn-select blu-drk shadow`} style={{minWidth: isMobile ? '135px' : '130px', color: '#cde', height: '133px', width: '22%', cursor: 'default'}}>
+                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
+                  <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0', color: '#44aaff'}}>Growth Fund</div>
+                </div>
+                <div className='flex-col' style={{justifyContent: "center", alignItems: 'center', gap: '0.25rem'}}>
+                  <div style={{fontSize: '16px', fontWeight: '700'}}>{fundToggle ? formatNum(impactFunds?.totalFunds[0]?.growth_degen || 0) || '--' : formatNum(impactFunds?.userFunds[0]?.growth_degen || 0) || '--'}</div>
+                  <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$DEGEN</div>
+
+                  <div style={{fontSize: '16px', fontWeight: '700', margin: '10px 0 0 0'}}>{fundToggle ? formatNum(impactFunds?.totalFunds[0]?.growth_ham || 0) || '--' : formatNum(impactFunds?.userFunds[0]?.growth_ham || 0) || '--'}</div>
+                  <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$HAM</div>
+                </div>
+              </div>
+              <div className={`flex-col btn-select blu-drk shadow`} style={{minWidth: isMobile ? '135px' : '130px', color: '#cde', height: '133px', width: '22%', cursor: 'default'}}>
+                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
+                  <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0', color: '#44aaff'}}>Special Fund</div>
+                </div>
+                <div className='flex-col' style={{justifyContent: "center", alignItems: 'center', gap: '0.25rem'}}>
+                  <div style={{fontSize: '16px', fontWeight: '700'}}>{fundToggle ? formatNum(impactFunds?.totalFunds[0]?.special_degen || 0) || '--' : formatNum(impactFunds?.userFunds[0]?.special_degen || 0) || '--'}</div>
+                  <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$DEGEN</div>
+
+                  <div style={{fontSize: '16px', fontWeight: '700', margin: '10px 0 0 0'}}>{fundToggle ? formatNum(impactFunds?.totalFunds[0]?.special_ham || 0) || '--' : formatNum(impactFunds?.userFunds[0]?.special_ham || 0) || '--'}</div>
+                  <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$HAM</div>
+                </div>
+              </div>
+            </div> */}
 
 
 
@@ -2262,7 +2803,7 @@ export default function ProfilePage() {
           </div>
 
 
-          {(display.fund && <><div
+          {(display.autoFund && <><div
             className="flex-row"
             style={{
               padding: "0px 0 0 0",
@@ -2272,6 +2813,23 @@ export default function ProfilePage() {
               justifyContent: "center",
             }}
           >
+
+
+          <div
+            className="flex-row"
+            style={{
+              color: "#9df",
+              width: "100%",
+              fontSize: isMobile ? "15px" : "16px",
+              padding: "20px 10px 0px 10px",
+              justifyContent: "center",
+              userSelect: 'none',
+              fontWeight: '600'
+            }}
+          >
+            My overall allocation:
+          </div>
+
 
             <div className='flex-row' style={{fontSize: '13px', justifyContent: isMobile ? "center" : "space-between", alignItems: 'center', gap: '0.75rem', margin: '20px 0', flexWrap: 'wrap', width: '100%'}}>
               <div className={`flex-col btn-select ${userFunding?.active_cron && userFunding?.creator_fund == 100 ? 'cast-act-lt btn-brd-lt' : 'blu-drk btn-brd'}`} style={{minWidth: isMobile ? '185px' : '180px', color: userFunding?.active_cron && userFunding?.creator_fund == 100 ? '#000' : '#cde', height: '133px'}} onClick={() => {setFundingSchedule('standard')}}>
@@ -2369,14 +2927,131 @@ export default function ProfilePage() {
             </div>
 
 
-            <div
+
+
+            {userFunding?.creator_fund > 0 && (<div
+              className="flex-row"
+              style={{
+                color: "#9df",
+                width: "100%",
+                fontSize: isMobile ? "15px" : "16px",
+                padding: "20px 10px 10px 10px",
+                justifyContent: "center",
+                userSelect: 'none',
+                fontWeight: '600'
+              }}
+            >
+              My Creator Fund allocation:
+            </div>)}
+
+            {userFunding?.creator_fund > 0 && (<div className='flex-row' style={{width: '100%', justifyContent: 'center', flexWrap: "wrap"}}>
+
+              {(userFunding?.search_channels?.length == 0 && userFunding?.search_curators?.length == 0 && userFunding?.creator_fund > 0) ? (<div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '7px 5px'}}>
+                <div className='cast-act-lt' style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', borderRadius: '88px', padding: '3px 10px 3px 3px', width: 'auto', margin: '0 5px 0 0'}}>
+                  <div style={{display: 'flex', textAlign: 'center', fontSize: '16px', margin: '0', cursor: 'pointer', fontWeight: '600'}} onClick={() => {
+                    getInput(searchInput, 'true')}}>&nbsp;Ecosystem-wide</div>
+                </div>
+              </div>) : userFunding?.search_channels?.length > 0 ? (userFunding?.search_channels?.map((channel, index) => (
+                (<div key={index} style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '7px 5px'}} onClick={() => {
+                  setFundingSchedule('remove-channel', channel)}}>
+                  <div className='cast-act-lt' style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', borderRadius: '88px', padding: '3px 10px 3px 3px', width: 'auto', margin: '0 5px 0 0'}}>
+                    {/* {channel?.imageUrl && (<img src={channel?.imageUrl} width={20} height={20} style={{borderRadius: '80px', border: '2px solid #eee', backgroundColor: '#8363ca'}} />)} */}
+                    <div style={{display: 'flex', textAlign: 'center', fontSize: '15px', margin: '0', padding: '0 0 0 5px'}}>{channel ? `/${channel}` : ' channel not found'}</div>
+                  </div>
+                </div>)
+              ))) : curatorList?.length > 0 ? (curatorList?.map((curator, index) => (
+                (<div key={index} style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '7px 5px'}} onClick={() => {
+                  setFundingSchedule('remove-curator', curator?.fid)}}>
+                  <div className='cast-act-lt' style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', borderRadius: '88px', padding: '3px 10px 3px 3px', width: 'auto', margin: '0 5px 0 0'}}>
+                    {curator?.pfp && (<img src={curator?.pfp} width={20} height={20} style={{borderRadius: '80px', border: '2px solid #eee', backgroundColor: '#8363ca'}} />)}
+                    <div style={{display: 'flex', textAlign: 'center', fontSize: '15px', margin: '0', padding: curator?.pfp ? '0' : '0 0 0 5px'}}>{curator ? `@${curator?.username}` : ' curator not found'}</div>
+                  </div>
+                </div>)
+              ))) : (<div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '7px 5px'}}>
+                <div className='cast-act-lt' style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', borderRadius: '88px', padding: '3px 10px 3px 3px', width: 'auto', margin: '0 5px 0 0'}}>
+                  <div style={{display: 'flex', textAlign: 'center', fontSize: '16px', margin: '0', cursor: 'pointer', fontWeight: '600'}} onClick={() => {
+                    getInput(searchInput, 'true')}}>&nbsp;Ecosystem-wide</div>
+                </div>
+              </div>) }
+            </div>)}
+
+
+
+
+            {userFunding?.creator_fund > 0 && (<div className='flex-col' style={{height: '30px', alignItems: 'center', justifyContent: 'center', padding: '40px 0 30px 0'}}>
+                <div className='flex-row' style={{padding: '4px 8px', backgroundColor: '#002244ee', border: '1px solid #666', borderRadius: '20px', alignItems: 'center', gap: '0.25rem'}}>
+
+                  <FaSearch size={15} color={'#eff'} style={{margin: '0 2px 0 2px'}} />
+                  {/* <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '12px' : '13px'}}>SEARCH</div> */}
+
+                  <div className={fundSearch == 'Curators' ? 'filter-item-on' : 'filter-item'} style={{fontSize: '12px'}} onClick={() => {updateSearch('Curators')}}>Curators</div>
+                  <div className={fundSearch == 'Channels' ? 'filter-item-on' : 'filter-item'} style={{fontSize: '12px'}} onClick={() => {updateSearch('Channels')}}>Channels</div>
+
+                  <input type="text" value={searchInput} onChange={(e) => getInput(e.target.value, null)} style={{backgroundColor: '#adf', borderRadius: '8px', padding: isMobile ? '2px 4px' : '2px 4px', fontSize: isMobile ? '12px' : '14px', width: '150px', fontWeight: '600', margin: '0 0 0 4px'}} placeholder={"search " + fundSearch.toLowerCase()} />
+
+                </div>
+              </div>)}
+
+
+
+
+            {userFunding?.creator_fund > 0 && (<div className='flex-row' style={{width: '100%', justifyContent: 'center', flexWrap: "wrap"}}>
+
+              {channelData?.length > 0 && (channelData?.map((channel, index) => (
+                (<div key={index} style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '7px 5px'}} onClick={() => {
+                  updateSchedule(channel?.channelId, 'Channels')}}>
+                  <div className='cast-act-lt' style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', borderRadius: '88px', padding: '3px 10px 3px 3px', width: 'auto', margin: '0 5px 0 0'}}>
+                    {channel?.imageUrl && (<img src={channel?.imageUrl} width={20} height={20} style={{borderRadius: '80px', border: '2px solid #eee', backgroundColor: '#8363ca'}} />)}
+                    <div style={{display: 'flex', textAlign: 'center', fontSize: '15px', margin: '0'}}>{channel?.channelId ? `/${channel?.channelId}  (${channel?.followerCount})` : ' channel not found'}</div>
+                  </div>
+                </div>)
+              )))}
+              {channelsLength > 20 && (<div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '7px 5px'}}>
+                <div className='cast-act-lt' style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', borderRadius: '88px', padding: '3px 10px 3px 3px', width: 'auto', margin: '0 5px 0 0'}}>
+                  <div style={{display: 'flex', textAlign: 'center', fontSize: '15px', margin: '0', cursor: 'pointer'}} onClick={() => {
+                    if (fundSearch == 'Curators') {
+                      getInput(searchInput, 'true')
+                    } else {
+
+                    }
+                    
+                    }}>&nbsp;+{channelsLength - 20}</div>
+                </div>
+              </div>)}
+
+
+              {curatorData?.length > 0 && (curatorData?.map((curator, index) => (
+                (<div key={index} style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '7px 5px'}} onClick={() => {
+                  updateSchedule(curator?.fid, 'Curators')}}>
+                  <div className='cast-act-lt' style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', borderRadius: '88px', padding: '3px 10px 3px 3px', width: 'auto', margin: '0 5px 0 0'}}>
+                    {curator?.pfp && (<img src={curator?.pfp} width={20} height={20} style={{borderRadius: '80px', border: '2px solid #eee', backgroundColor: '#8363ca'}} />)}
+                    <div style={{display: 'flex', textAlign: 'center', fontSize: '15px', margin: '0'}}>{curator?.username ? `@${curator?.username}` : ' curator not found'}</div>
+                  </div>
+                </div>)
+              )))}
+              {curatorsLength > 20 && (<div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '7px 5px'}}>
+                <div className='cast-act-lt' style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', borderRadius: '88px', padding: '3px 10px 3px 3px', width: 'auto', margin: '0 5px 0 0'}}>
+                  <div style={{display: 'flex', textAlign: 'center', fontSize: '15px', margin: '0', cursor: 'pointer'}} onClick={() => {
+                    if (fundSearch == 'Curators') {
+                      getInput(searchInput, 'true')
+                    }}}>&nbsp;+{curatorsLength - 20}</div>
+                </div>
+              </div>)}
+
+            </div>)}
+
+
+
+
+{/* 
+          <div
             className="flex-row"
             style={{
               color: "#9df",
               width: "100%",
               textAlign: 'center',
               fontSize: isMobile ? "12px" : "14px",
-              padding: "10px 10px 15px 10px",
+              padding: "50px 10px 15px 10px",
               justifyContent: "center",
             }}
           >
@@ -2415,7 +3090,7 @@ export default function ProfilePage() {
                     `Adds incentives and rewards to those who curate, contribute and spread the word about Impact Alpha while the system gets to the scale where it can operate self-sustainably`,
                 }}
               />
-            </ItemWrap>
+            </ItemWrap> */}
               
             {/* <div style={{margin: '40px 10px 20px 10px', width: '100%', borderTop: '1px solid #48b'}}>
             </div> */}
@@ -2424,20 +3099,6 @@ export default function ProfilePage() {
           </div></>)}
         </div>
       </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -2748,47 +3409,9 @@ export default function ProfilePage() {
 
 
 
-            {/* <div className='flex-row' style={{padding: '10px 5px 20px 5px', flexWrap: 'wrap', minWidth: feedMax, gap: '0.5rem', justifyContent: 'center', maxWidth: textMax}}>
-              {multitips?.length > 0 ? multitips.map((multitip, index) => { return (
-                <Link className='btn-blu' key={index} href={`/~/studio/tip/${multitip?._id}`} style={{minWidth: isMobile ? '190px' : '190px'}}>
-                  <div className='' style={{gap: '1.5rem'}}>
-                    <div className='flex-row' style={{gap: '1rem', paddingBottom: '0px', justifyContent: 'flex-end'}}>
-
-                      <div className='flex-row' style={{flexWrap: 'wrap'}}>
-                        {(multitip?.text) && (<div className='curator-button-off' style={{fontSize: isMobile ? '8px' : '9px', border: '0px'}}>TIP: {multitip?.text}</div>)}
-                        {(multitip?.createdAt) && (<div className='curator-button-off' style={{fontSize: isMobile ? '8px' : '9px', border: '0px'}}>{timePassed(multitip?.createdAt)}</div>)}
-                        {(multitip) && (<div className='curator-button' style={{fontSize: isMobile ? '8px' : '9px', border: '1px solid #999'}} onClick={(event) => {shareFrame(event, multitip)}}><FiShare size={9} color={'#eff'} /></div>)}
-
-                      </div>
-                    </div>
-                    <div style={{fontSize: isMobile ? '17px' : '18px', fontWeight: '500', color: '#eff'}}>{(multitip?.text) && (<div className='flex-row' style={{fontSize: isMobile ? '11px' : '12px', border: '0px', alignItems: 'center'}}>CURATOR: {multitip?.curators?.length > 0 && (multitip?.curators.map((curator, index) => (
-                      (<Link key={index} href={`/~/ecosystems/${curator?.handle || 'abundance'}/curators/${curator?.username}`}><div className='filter-item' style={{fontSize: isMobile ? '11px' : '12px'}}>@{curator?.username}</div></Link>)
-                    )))}</div>)}</div>
-                  </div>
-                </Link>
-              )}) : (
-                <>
-                  {!loaded ? (<div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
-                    <Spinner size={31} color={'#468'} />
-                  </div>) : (<div style={{fontSize: '20px', color: '#def'}}>No tips found</div>)}
-                </>
-              )}
-            </div> */}
-
-
-
-
             {searchSelect == 'Curation' && (
 
             <div className={'flex-row'} style={{justifyContent: 'center', marginTop: '15px', marginBottom: '30px', gap: isMobile ? '0.15rem' : '0.15rem', flexWrap: 'wrap'}}>
-              {/* <div className='flex-row' style={{gap: '0.5rem'}}>
-                <TopPicks handleSelection={handleSelection} selection={'picks'} />
-                <Shuffle handleSelect={handleSelect} selection={'shuffle'} userQuery={userQuery} />
-              </div>
-
-              <Time handleSelection={handleSelection} handleSelect={handleSelect} userQuery={userQuery} options={queryOptions.time} selection={'time'} isSelected={isSelected} isMobile={isMobile} btnText={btnText} /> */}
-
-
 
               <div className='flex-row' style={{height: '30px', alignItems: 'center', justifyContent: 'center', padding: '20px 0'}}>
                 <div className='flex-row' style={{padding: '4px 8px', backgroundColor: '#002244ee', border: '1px solid #666', borderRadius: '20px', alignItems: 'center', gap: '0.25rem'}}>
