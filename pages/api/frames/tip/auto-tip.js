@@ -66,20 +66,56 @@ export default async function handler(req, res) {
       }  
     }
 
+    async function followingChannel(fid) {
+      const channelOptions = {
+        method: 'GET',
+        headers: {accept: 'application/json'}
+      };
+      try {
+        const channelData = await fetch(`https://api.warpcast.com/v1/user-channel?fid=${fid}&channelId=impact`, channelOptions);
+        if (!channelData.ok) {
+          return true
+        } else {
+          const channelInfo = await channelData.json();
+          if (channelInfo && channelInfo?.result) {
+            let following = channelInfo.result?.following
+            if (!following) {
+              return false
+            } else {
+              return true
+            }
+          }
+        }
+      } catch (error) {
+        console.error(`Error getting follower info: `, error)
+        return true
+      }
+    }
+
     const encryptedUuid = await getUuid(curatorFid, points)
 
-    if (!encryptedUuid) {
+    const isFollowing = await followingChannel(curatorFid)
 
-      autoTipImg = `${baseURL}/api/frames/tip/auto-tipping?${qs.stringify({ status: 'off', curators: [], points, needLogin: true })}`
-      console.log('77', autoTipImg)
+    if (!encryptedUuid && !isFollowing) {
+      res.setHeader('Content-Type', 'application/json');
+      res.status(400).json({ 
+        message: 'Need to login app & follow /impact'
+      });
+      return;
+    } else if (!encryptedUuid) {
+      res.setHeader('Content-Type', 'application/json');
+      res.status(400).json({ 
+        message: 'Need to login app'
+      });
+      return;
+    } else if (!isFollowing) {
+      res.setHeader('Content-Type', 'application/json');
+      res.status(400).json({ 
+        message: 'Need to follow /impact'
+      });
+      return;  
 
-      button1 = metaButton(1, 'login', params, points, referrer || authorFid)
-      button2 = metaButton(2, 'refresh', params)
-      button3 = metaButton(3, 'back', params)
-      button4 = ''
-      textField = ''
-
-    } else {
+    } else if (encryptedUuid && isFollowing) {
 
       const code = generateRandomString(12)
     
