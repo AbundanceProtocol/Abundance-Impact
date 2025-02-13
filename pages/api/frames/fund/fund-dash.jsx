@@ -19,7 +19,7 @@ const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_
 const cache = new NodeCache({ stdTTL: 60 });
 
 export default async function handler(req, res) {
-  const { fid } = req.query
+  const { fid, fund } = req.query
 
   console.log('fid', fid)
   try {
@@ -168,7 +168,7 @@ export default async function handler(req, res) {
 
 
         <div style={{display: 'flex', flexDirection: 'row', fontSize: '13px', justifyContent: "center", alignItems: 'center', gap: '0.75rem', margin: '20px 0', flexWrap: 'wrap', width: '100%'}}>
-          <div className={`btn-select ${schedule?.active_cron && schedule?.creator_fund == 0 ? 'cast-act-lt btn-brd-lt' : 'blu-drk btn-brd'}`} style={{display: 'flex', flexDirection: 'column', minWidth: '150px', color: schedule?.active_cron && schedule?.creator_fund == 100 ? '#000' : '#cde', height: '113px', border: '1px solid #eee', borderRadius: '16px', justifyContent: 'center', backgroundColor: schedule?.active_cron && schedule?.creator_fund == 100 ? '#eeeeeebb' : '#111122bb'}}>
+          <div className={`btn-select ${schedule?.active_cron && schedule?.creator_fund == 0 ? 'cast-act-lt btn-brd-lt' : 'blu-drk btn-brd'}`} style={{display: 'flex', flexDirection: 'column', minWidth: '150px', color: (schedule?.active_cron && schedule?.creator_fund == 100 || (fund == 'standard' && fund !== 'off')) ? '#000' : '#cde', height: '113px', border: '1px solid #eee', borderRadius: '16px', justifyContent: 'center', backgroundColor: (schedule?.active_cron && schedule?.creator_fund == 100 || (fund == 'standard' && fund !== 'off')) ? '#eeeeeebb' : '#111122bb'}}>
             <div style={{display: 'flex', flexDirection: 'row', justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
               <div style={{fontSize: '17px', fontWeight: '700', margin: '0 0 5px 0'}}>Standard</div>
             </div>
@@ -191,7 +191,7 @@ export default async function handler(req, res) {
               <div>1.0x Score Boost</div>
             </div> */}
           </div>
-          <div className={`btn-select ${schedule?.active_cron && schedule?.creator_fund == 80 ? 'cast-act-lt btn-brd-lt' : 'blu-drk btn-brd'}`} style={{display: 'flex', flexDirection: 'column', minWidth: '150px', color: schedule?.active_cron && schedule?.creator_fund == 80 ? '#000' : '#cde', height: '113px', border: '1px solid #eee', borderRadius: '16px', justifyContent: 'center', backgroundColor: schedule?.active_cron && schedule?.creator_fund == 80 ? '#eeeeeebb' : '#111122bb'}}>
+          <div className={`btn-select ${schedule?.active_cron && schedule?.creator_fund == 80 ? 'cast-act-lt btn-brd-lt' : 'blu-drk btn-brd'}`} style={{display: 'flex', flexDirection: 'column', minWidth: '150px', color: (schedule?.active_cron && schedule?.creator_fund == 80 || (fund == 'optimized' && fund !== 'off')) ? '#000' : '#cde', height: '113px', border: '1px solid #eee', borderRadius: '16px', justifyContent: 'center', backgroundColor: (schedule?.active_cron && schedule?.creator_fund == 80 || (fund == 'optimized' && fund !== 'off')) ? '#eeeeeebb' : '#111122bb'}}>
             <div style={{display: 'flex', flexDirection: 'row', justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
               <div style={{fontSize: '17px', fontWeight: '700', margin: '0 0 5px 0'}}>Optimized</div>
             </div>
@@ -214,7 +214,7 @@ export default async function handler(req, res) {
               <div>1.25x Score Boost</div>
             </div> */}
           </div>
-          <div className={`btn-select ${schedule?.active_cron && schedule?.creator_fund == 60 ? 'cast-act-lt btn-brd-lt' : 'blu-drk btn-brd'}`} style={{display: 'flex', flexDirection: 'column', minWidth: '150px', color: schedule?.active_cron && schedule?.creator_fund == 60 ? '#000' : '#cde', height: '113px', border: '1px solid #eee', borderRadius: '16px', justifyContent: 'center', backgroundColor: schedule?.active_cron && schedule?.creator_fund == 60 ? '#eeeeeebb' : '#111122bb'}}>
+          <div className={`btn-select ${schedule?.active_cron && schedule?.creator_fund == 60 ? 'cast-act-lt btn-brd-lt' : 'blu-drk btn-brd'}`} style={{display: 'flex', flexDirection: 'column', minWidth: '150px', color: (schedule?.active_cron && schedule?.creator_fund == 60 || (fund == 'accelerated' && fund !== 'off')) ? '#000' : '#cde', height: '113px', border: '1px solid #eee', borderRadius: '16px', justifyContent: 'center', backgroundColor: (schedule?.active_cron && schedule?.creator_fund == 60 || (fund == 'accelerated' && fund !== 'off')) ? '#eeeeeebb' : '#111122bb'}}>
             <div style={{display: 'flex', flexDirection: 'row', justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
               <div style={{fontSize: '17px', fontWeight: '700', margin: '0 0 5px 0'}}>Accelerated</div>
             </div>
