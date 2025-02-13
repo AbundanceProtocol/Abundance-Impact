@@ -97,7 +97,7 @@ export default async function handler(req, res) {
 
       if (schedId) {
 
-        circlesImg = `${baseURL}/api/frames/fund/fund-dash${qs.stringify({ fid })}`
+        circlesImg = `${baseURL}/api/frames/fund/fund-dash?${qs.stringify({ fid })}`
 
         // shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem || 'abundance'}/fund-v3?${qs.stringify({ referrer: fid })}`
 
