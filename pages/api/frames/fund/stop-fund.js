@@ -56,7 +56,7 @@ export default async function handler(req, res) {
       async function getSchedule(fid, points) {
         try {
           await connectToDatabase();
-          let fundSchedule = await ScheduleTip.findOne({ fid }).exec();
+          let fundSchedule = await ScheduleTip.findOne({ fid: Number(fid) }).exec();
           return fundSchedule || null
         } catch (error) {
           console.error("Error while fetching data:", error);
@@ -73,7 +73,7 @@ export default async function handler(req, res) {
         async function updateSchedule(fid) {
           try {
             await connectToDatabase();
-            let updated = await ScheduleTip.findOneAndUpdate({ fid }, { active_cron: false }, { new: true, select: '-uuid' });
+            let updated = await ScheduleTip.findOneAndUpdate({ fid: Number(fid) }, { active_cron: false }, { new: true, select: '-uuid' });
 
             const objectIdString = updated._id.toString();
             return objectIdString;
