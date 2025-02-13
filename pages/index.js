@@ -24,6 +24,7 @@ import { PiSquaresFourLight as Actions, PiBankFill } from "react-icons/pi";
 import { Logo } from './assets';
 import useStore from '../utils/store';
 import ProfilePage from './~/studio';
+import axios from 'axios';
 
 export default function Home() {
   const ref2 = useRef(null)
@@ -35,7 +36,7 @@ export default function Home() {
   const [feedMax, setFeedMax ] = useState('620px')
   const [showPopup, setShowPopup] = useState({open: false, url: null})
   const router = useRouter()
-  const { eco, referrer } = router.query
+  const { eco, referrer, autoFund } = router.query
   const { isMobile } = useMatchBreakpoints();
   const [display, setDisplay] = useState({personal: false, ecosystem: false})
   const store = useStore()
@@ -108,8 +109,19 @@ export default function Home() {
       console.log('setEco', setEco)
       setPoints(setEco)
       getRemainingBalances(store.fid, setEco, store.signer_uuid, setReferrer)
+      if (autoFund && store.fid && setReferrer) {
+        setAutoFundInvite(store.fid, referrer, store.signer_uuid)
+      }
     }
   }, [eco, isLogged])
+
+  async function setAutoFundInvite(fid, referrer, uuid) {
+    try {
+      const response = await axios.post('/api/curation/postInvite', { fid, referrer, uuid });
+    } catch (error) {
+      console.error('Error setting invite:', error)
+    }
+  }
 
 
   return (
