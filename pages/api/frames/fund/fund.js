@@ -26,10 +26,10 @@ export default async function handler(req, res) {
   // const body = await req.body;
   // const {isValid, message} = await validateFramesMessage(body)
   // console.log('isValid:', isValid)
-  const { ecosystem, fund } = req.query;
+  const { fund } = req.query;
   const { untrustedData } = req.body
   // const authorFid = message?.data?.frameActionBody?.castId?.fid
-  console.log('ecosystem', ecosystem)
+  // console.log('ecosystem', ecosystem)
   if (req.method !== 'POST') {
     res.setHeader('Allow', ['POST']);
     res.status(405).end(`Method ${req.method} Not Allowed`);
@@ -75,7 +75,7 @@ export default async function handler(req, res) {
     const fid = untrustedData?.fid
     // const fid = 9326
     let circlesImg = ''
-    console.log('fid', ecosystem, fid)
+    console.log('fid', fid)
     const stopFund = `${baseURL}/api/frames/fund/stop-fund`
     // const stopFund = `${baseURL}/api/frames/fund/stop-fund?${qs.stringify({ ecosystem: ecosystem || 'abundance' })}`
     const loginUrl = `${baseURL}?${qs.stringify({ referrer: fid, autoFund: 'true' })}`
@@ -213,9 +213,11 @@ export default async function handler(req, res) {
 
         if (schedId) {
 
+          console.log('fid', fid)
+
           circlesImg = `${baseURL}/api/frames/fund/fund-dash?${qs.stringify({ fid })}`
 
-          shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem || 'abundance'}/fund-v3?${qs.stringify({ referrer: fid })}`
+          shareUrl = `https://impact.abundance.id/~/ecosystems/abundance/fund-v3?${qs.stringify({ referrer: fid })}`
 
           shareText = `I just started auto-funding 2700+ impactful creators & builders on Farcaster with /impact's @impactfund\n\nThis is how we grow Farcaster 👇`
 
