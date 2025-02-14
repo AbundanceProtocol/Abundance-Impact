@@ -1,5 +1,6 @@
 import connectToDatabase from '../../../libs/mongodb';
 import ScheduleTip from '../../../models/ScheduleTip';
+import User from '../../../models/User';
 // import Raffle from '../../../models/Raffle';
 // import { decryptPassword } from '../../../utils/utils';
 const secretKey = process.env.SECRET_KEY
@@ -27,8 +28,29 @@ export default async function handler(req, res) {
     try {
       
       let schedule = await getSchedule(fid)
-      console.log('schedule', schedule)
-      res.status(200).json({ schedule });
+
+      async function getCurators(updatedSchedule) {
+        try {
+          let curators = []
+          if (updatedSchedule.search_curators.length > 0) {
+            const curatorFids = updatedSchedule.search_curators.map(curator => curator.toString());
+            const curatorDetails = await Promise.all(curatorFids.map(async fid => {
+              const user = await User.findOne({fid, ecosystem_points: '$IMPACT'}).select('fid username pfp');
+              return { fid: Number(user?.fid), username: user.username, pfp: user.pfp };
+            }));
+            curators = curatorDetails;
+          }
+          return curators
+        } catch (error) {
+          console.error("Error while fetching data:", error);
+          return []
+        } 
+      }
+
+      let curators = await getCurators(schedule)
+
+      console.log('schedule', schedule, curators)
+      res.status(200).json({ schedule, curators });
     } catch (error) {
       console.error('Error submitting data:', error)
       res.status(500).json({ error: 'Internal Server Error' });

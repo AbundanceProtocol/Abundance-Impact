@@ -50,7 +50,7 @@ export default async function handler(req, res) {
       res.status(200).json({ 
         type: 'form',
         title: 'Curator page',
-        url: `${baseURL}/~/ecosystems/${ecosystem}$/curator/${username}?${qs.stringify({ points, app: 'mini' })}`,
+        url: `${baseURL}/~/ecosystems/${ecosystem}$/curators/${username}?${qs.stringify({ points, app: 'mini' })}`,
       });
       return
 
@@ -60,7 +60,7 @@ export default async function handler(req, res) {
       res.status(200).json({ 
         type: 'form',
         title: 'Curator page',
-        url: `${baseURL}/~/ecosystems/${ecosystem}$/curator/${username}`,
+        url: `${baseURL}/~/ecosystems/${ecosystem}$/curators/${username}`,
       });
       return
 
@@ -72,7 +72,7 @@ export default async function handler(req, res) {
       "name": "Curator page",
       "icon": "person",
       "description": "Curator",
-      "aboutUrl": `${baseURL}/~/ecosystems/${ecosystem}$/curator/${username}?${qs.stringify({ points, app: 'mini' })}`,
+      "aboutUrl": `${baseURL}/~/ecosystems/${ecosystem}$/curators/${username}?${qs.stringify({ points, app: 'mini' })}`,
       "imageUrl": `${baseURL}/images/input.jpg`,
       "action": {
         "type": "post",

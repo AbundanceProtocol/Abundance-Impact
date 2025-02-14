@@ -26,10 +26,10 @@ export default async function handler(req, res) {
   // const body = await req.body;
   // const {isValid, message} = await validateFramesMessage(body)
   // console.log('isValid:', isValid)
-  const { ecosystem } = req.query;
+  const { fund } = req.query;
   const { untrustedData } = req.body
   // const authorFid = message?.data?.frameActionBody?.castId?.fid
-  console.log('ecosystem', ecosystem)
+  // console.log('ecosystem', ecosystem)
   if (req.method !== 'POST') {
     res.setHeader('Allow', ['POST']);
     res.status(405).end(`Method ${req.method} Not Allowed`);
@@ -53,14 +53,32 @@ export default async function handler(req, res) {
       }
     }
 
+    let creator_fund = 100
+    let development_fund = 0
+    let growth_fund = 0
+    if (fund == 'standard') {
+      creator_fund = 100
+      development_fund = 0
+      growth_fund = 0
+    } else if (fund == 'optimized') {
+      creator_fund = 80
+      development_fund = 10
+      growth_fund = 10
+    } else if (fund == 'accelerated') {
+      creator_fund = 60
+      development_fund = 20
+      growth_fund = 20
+    }
+
+
 
     const fid = untrustedData?.fid
     // const fid = 9326
     let circlesImg = ''
-    console.log('fid', ecosystem, fid)
-    const stopFund = `${baseURL}/api/frames/fund/stop-auto-fund?${qs.stringify({ ecosystem: ecosystem || 'abundance' })}`
-
-    const loginUrl = `${baseURL}?${qs.stringify({ referrer: fid })}`
+    console.log('fid', fid)
+    const stopFund = `${baseURL}/api/frames/fund/stop-fund`
+    // const stopFund = `${baseURL}/api/frames/fund/stop-fund?${qs.stringify({ ecosystem: ecosystem || 'abundance' })}`
+    const loginUrl = `${baseURL}?${qs.stringify({ referrer: fid, autoFund: 'true' })}`
     
     let shareText = ``
 
@@ -86,7 +104,7 @@ export default async function handler(req, res) {
         async function getSchedule(fid, points) {
           try {
             await connectToDatabase();
-            let fundSchedule = await ScheduleTip.findOne({ fid }).exec();
+            let fundSchedule = await ScheduleTip.findOne({ fid: Number(fid) }).exec();
             return fundSchedule || null
           } catch (error) {
             console.error("Error while fetching data:", error);
@@ -103,7 +121,7 @@ export default async function handler(req, res) {
           async function updateSchedule(fid) {
             try {
               await connectToDatabase();
-              let updated = await ScheduleTip.findOneAndUpdate({ fid }, { active_cron: true, creator_fund: 0, development_fund: 0, growth_fund: 0, special_fund: 100 }, { new: true, select: '-uuid' });
+              let updated = await ScheduleTip.findOneAndUpdate({ fid: Number(fid) }, { active_cron: true, creator_fund, development_fund, growth_fund, special_fund: 0 }, { new: true, select: '-uuid' });
 
               const objectIdString = updated._id.toString();
               return objectIdString;
@@ -155,7 +173,7 @@ export default async function handler(req, res) {
               try {
                 await connectToDatabase();
                 newSchedule = new ScheduleTip({ 
-                  fid: fid,
+                  fid: Number(fid),
                   uuid: encryptedUuid,
                   search_shuffle: true,
                   search_time: 'all',
@@ -170,10 +188,10 @@ export default async function handler(req, res) {
                   schedule_count: 1,
                   schedule_total: 1,
                   active_cron: true,
-                  creator_fund: 0,
-                  development_fund: 0,
-                  growth_fund: 0,
-                  special_fund: 100,
+                  creator_fund,
+                  development_fund,
+                  growth_fund,
+                  special_fund: 0,
                 });
                 
                 await newSchedule.save()
@@ -195,11 +213,13 @@ export default async function handler(req, res) {
 
         if (schedId) {
 
-          circlesImg = `${baseURL}/api/frames/fund/frame?${qs.stringify({ id: schedId })}`
+          console.log('fid', fid)
 
-          shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem || 'abundance'}/fund-v2?${qs.stringify({ referrer: fid, id: schedId })}`
+          circlesImg = `${baseURL}/api/frames/fund/fund-dash?${qs.stringify({ fid, fund })}`
 
-          shareText = `I just started auto-funding the Open Source Devs Special Impact Fund on /impact\n\nSupport open source builders on Farcaster with your daily (remaining) $degen & $ham thru @impactfund 👇`
+          shareUrl = `https://impact.abundance.id/~/ecosystems/abundance/fund-v3?${qs.stringify({ referrer: fid })}`
+
+          shareText = `I just started auto-funding 2700+ impactful creators & builders on Farcaster with /impact's @impactfund\n\nThis is how we grow Farcaster 👇`
 
           encodedShareText = encodeURIComponent(shareText)
     

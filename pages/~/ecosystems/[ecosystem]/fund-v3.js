@@ -19,7 +19,7 @@ import mongoose from "mongoose";
 // import useStore from '../../../utils/store';
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 
-export default function Tips({referrer, id, start}) {
+export default function Tips({referrer}) {
   const { LoginPopup, fid, userBalances, isLogged } = useContext(AccountContext)
   const index = 0
   const router = useRouter();
@@ -46,21 +46,33 @@ export default function Tips({referrer, id, start}) {
   const initFrame = 
     {
       version: "vNext",
-      title: "Multi-Tip",
-      image: `${baseURL}/api/frames/reward/daily-frame?${qs.stringify({ id, start })}`,
+      title: "Impact Fund",
+      image: `${baseURL}/api/frames/fund/fund-dash?${qs.stringify({ fid: referrer })}`,
       image_aspect_ratio: "1.91:1",
       buttons: [
         {
           index: 1,
-          title: "My Reward",
+          title: "Standard",
           action_type: "post",
-          target: `${baseURL}/api/frames/reward/daily`
+          target: `${baseURL}/api/frames/fund/fund?fund=standard`
         },
         {
           index: 2,
+          title: "Optimized",
+          action_type: "post",
+          target: `${baseURL}/api/frames/fund/fund?fund=optimized`
+        },
+        {
+          index: 3,
+          title: "Accelerated",
+          action_type: "post",
+          target: `${baseURL}/api/frames/fund/fund?fund=accelerated`
+        },
+        {
+          index: 4,
           title: "Login /impact",
           action_type: "link",
-          target: `${baseURL}`
+          target: `${baseURL}?${qs.stringify({ referrer, autoFund: 'true' })}`
         },
         // {
         //   index: 3,
@@ -169,7 +181,7 @@ export default function Tips({referrer, id, start}) {
 
     // updatedFrameData.buttons[2].target = `${baseURL}/api/frames/tip/auto-tip?${qs.stringify({ time, curators, eco, ecosystem })}`
 
-    updatedFrameData.image = `${baseURL}/api/frames/reward/daily-frame?${qs.stringify({ id, start })}`
+    updatedFrameData.image = `${baseURL}/api/frames/fund/fund-dash?${qs.stringify({ fid: referrer })}`
 
     setFrameData(updatedFrameData)
   }, [queryData]);
@@ -298,21 +310,26 @@ export default function Tips({referrer, id, start}) {
             
     {queryData && (
       <Head>
-        <title>Daily Reward | Impact App</title>
+        <title>Impact Fund | Impact App</title>
         <meta name="description" content={`Support builder and creators with Impact App`} />
         <meta name="viewport" content="width=device-width"/>
-        <meta property="og:title" content="Impact Score" />
-        <meta property='og:image' content={`${baseURL}/api/frames/reward/daily-frame?${qs.stringify({ id, start })}`} />
+        <meta property="og:title" content="Impact Fund" />
+        <meta property='og:image' content={`${baseURL}/api/frames/fund/fund-dash?${qs.stringify({ fid: referrer })}`} />
         <meta property="fc:frame" content="vNext" />
-        <meta property="fc:frame:image" content={`${baseURL}/api/frames/reward/daily-frame?${qs.stringify({ id, start })}`} />
+        <meta property="fc:frame:image" content={`${baseURL}/api/frames/fund/fund-dash?${qs.stringify({ fid: referrer })}`} />
         <meta property="fc:frame:image:aspect_ratio" content="1.91:1" />
-        <meta property="fc:frame:button:1" content='My Reward' />
+        <meta property="fc:frame:button:1" content='Standard' />
         <meta property="fc:frame:button:1:action" content="post" />
-        <meta property="fc:frame:button:1:target" content={`${baseURL}/api/frames/reward/daily`} />
-
-        <meta property="fc:frame:button:2" content='Login /impact' />
-        <meta property="fc:frame:button:2:action" content="link" />
-        <meta property="fc:frame:button:2:target" content={`${baseURL}?${qs.stringify({ referrer })}`} />
+        <meta property="fc:frame:button:1:target" content={`${baseURL}/api/frames/fund/fund?fund=standard`} />
+        <meta property="fc:frame:button:2" content='Optimized' />
+        <meta property="fc:frame:button:2:action" content="post" />
+        <meta property="fc:frame:button:2:target" content={`${baseURL}/api/frames/fund/fund?fund=optimized`} />
+        <meta property="fc:frame:button:3" content='Accelerated' />
+        <meta property="fc:frame:button:3:action" content="post" />
+        <meta property="fc:frame:button:3:target" content={`${baseURL}/api/frames/fund/fund?fund=accelerated`} />
+        <meta property="fc:frame:button:4" content='Login /impact' />
+        <meta property="fc:frame:button:4:action" content="link" />
+        <meta property="fc:frame:button:4:target" content={`${baseURL}?${qs.stringify({ referrer, autoFund: 'true' })}`} />
 
         {/* <meta property="fc:frame:button:3" content={'Auto-tip'} />
         <meta property="fc:frame:button:3:action" content="post" />
@@ -538,7 +555,7 @@ export default function Tips({referrer, id, start}) {
 
 export async function getServerSideProps(context) {
   const { query, params } = context;
-  const { id, referrer, start } = query;
+  const { referrer } = query;
 
 
 
@@ -589,14 +606,18 @@ export async function getServerSideProps(context) {
   // }
 
   
-  let setId = null
-  if (id) {
-    setId = id
-  }
-  let setStart = null
-  if (start) {
-    setStart = start
-  }
+  // let setId = null
+  // if (id) {
+  //   setId = id
+  // }
+  // let setFid = null
+  // if (fid) {
+  //   setFid = fid
+  // }
+  // let setStart = null
+  // if (start) {
+  //   setStart = start
+  // }
 
   let setReferrer = null
   if (referrer) {
@@ -605,8 +626,9 @@ export async function getServerSideProps(context) {
   return {
     props: {
       referrer: setReferrer,
-      id: setId,
-      start: setStart
+      // id: setId,
+      // fid: setFid,
+      // start: setStart
     },
   };
 }

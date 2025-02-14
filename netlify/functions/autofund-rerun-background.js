@@ -130,6 +130,7 @@ async function sendTip(user) {
         funding_type: 'remaining',
         season: 2,
         curator_fid: user?.curator_fids || [],
+        channel_id: user?.channels || [],
       });
   
       return 1;
@@ -182,6 +183,13 @@ function getCastText(user, allowances, curators) {
       }
       castText += `)`
     }
+    if (user?.search_channels?.length > 0) {
+      castText += `\n(curations for`
+      for (const channel of user?.search_channels) {
+        castText += ` /${channel}`
+      }
+      castText += `)`
+    }
   }
   if (user?.growth_fund > 0) {
     castText += `\n\nGrowth Fund: ${user?.growth_fund}%`
@@ -221,6 +229,7 @@ async function getFundingData(userSchedules) {
       uuid: user?.uuid, 
       curator_fids: user?.search_curators,
       curators: curators, 
+      channels: user?.search_channels,
       creator_fund: user?.creator_fund, 
       development_fund: user?.development_fund, 
       growth_fund: user?.growth_fund, 

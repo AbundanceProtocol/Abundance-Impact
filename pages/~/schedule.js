@@ -102,7 +102,7 @@ export default function Schedule() {
   const tokenInfo = [{token: '$DEGEN', set: true}, {token: '$TN100x', set: true}, {token: '$HUNT', set: true}]
   const [tokenData, setTokenData] = useState(tokenInfo)
   const [tokensSelected, setTokensSelected] = useState(['$DEGEN'])
-  const availableTokens = ['$DEGEN', '$TN100x', '$HUNT']
+  const availableTokens = ['$DEGEN']
   const [tipPercent, setTipPercent] = useState(50)
 
   function btnText(type) {

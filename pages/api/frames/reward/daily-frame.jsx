@@ -50,10 +50,10 @@ export default async function handler(req, res) {
               claimed: true
             },
           };
-  
+          console.log('shared', shared)
           const lastFourDays = new Date(Date.now() - 4 * 24 * 60 * 60 * 1000);
   
-          let claimIds = await Claim.distinct("_id", { fid: rank?.fid, createdAt: { $gt: lastFourDays }, claimed: false });
+          let claimIds = await Claim.distinct("_id", { fid: rank?.fid, createdAt: { $gt: lastFourDays, $lte: rank?.createdAt }, claimed: false });
   
           for (const claimId of claimIds) {
             const user = await Claim.findOneAndUpdate({ _id: claimId }, update, updateOptions);
@@ -176,6 +176,26 @@ export default async function handler(req, res) {
     const svgBuffer = Buffer.from(svg);
     const convertSvgToPng = promisify(svg2img);
     const pngBuffer = await convertSvgToPng(svgBuffer, { format: 'png', width: 600, height: 314 });
+
+
+    async function updateHash(id) {
+      try {
+        const objectId = new mongoose.Types.ObjectId(id)
+        console.log(id)
+        await connectToDatabase();
+        let claim = await Claim.findOne({ _id: objectId }).exec();
+        if (claim) {
+          claim.cast_hash = 'true';
+          await claim.save();
+        }
+        return 
+      } catch (error) {
+        console.error("Error while fetching claim:", error);
+        return
+      }  
+    }
+
+    const updated = await updateHash(id)
 
     // Set the content type to PNG and send the response
     res.setHeader('Content-Type', 'image/png');

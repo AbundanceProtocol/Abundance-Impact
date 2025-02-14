@@ -3,7 +3,7 @@ import User from '../../../models/User';
 import ScheduleTip from '../../../models/ScheduleTip';
 
 export default async function handler(req, res) {
-  const { fid, schedule, curators } = req.body;
+  const { fid, schedule, data } = req.body;
   // console.log(fid, castHash, qualityAmount)
   
   if (req.method !== 'POST' || !fid || !schedule) {
@@ -39,6 +39,18 @@ export default async function handler(req, res) {
             updated = await ScheduleTip.findOneAndUpdate({ fid }, { active_cron: true, creator_fund: 60, development_fund: 20, growth_fund: 20, special_fund: 0 }, { new: true, select: '-uuid' });
           } else if (schedule == 'special') {
             updated = await ScheduleTip.findOneAndUpdate({ fid }, { active_cron: true, creator_fund: 0, development_fund: 0, growth_fund: 0, special_fund: 100 }, { new: true, select: '-uuid' });
+          } else if (schedule == 'add-channel') {
+            let channel = data
+            updated = await ScheduleTip.findOneAndUpdate({ fid }, { active_cron: true, $addToSet: { search_channels: channel }, search_curators: [] }, { new: true, select: '-uuid' });
+          } else if (schedule == 'remove-channel') {
+            let channel = data
+            updated = await ScheduleTip.findOneAndUpdate({ fid }, { active_cron: true, $pull: { search_channels: channel }, search_curators: [] }, { new: true, select: '-uuid' });
+          } else if (schedule == 'add-curator') {
+            let curator = Number(data)
+            updated = await ScheduleTip.findOneAndUpdate({ fid }, { active_cron: true, $addToSet: { search_curators: curator }, search_channels: [] }, { new: true, select: '-uuid' });
+          } else if (schedule == 'remove-curator') {
+            let curator = Number(data)
+            updated = await ScheduleTip.findOneAndUpdate({ fid }, { active_cron: true, $pull: { search_curators: curator }, search_channels: [] }, { new: true, select: '-uuid' });
           } else {
             updated = null
           }
@@ -49,6 +61,25 @@ export default async function handler(req, res) {
           return null
         }  
       }
+
+      async function getCurators(updatedSchedule) {
+        try {
+          let curators = []
+          if (updatedSchedule.search_curators.length > 0) {
+            const curatorFids = updatedSchedule.search_curators.map(curator => curator.toString());
+            const curatorDetails = await Promise.all(curatorFids.map(async fid => {
+              const user = await User.findOne({fid, ecosystem_points: '$IMPACT'}).select('fid username pfp');
+              return { fid: Number(user?.fid), username: user.username, pfp: user.pfp };
+            }));
+            curators = curatorDetails;
+          }
+          return curators
+        } catch (error) {
+          console.error("Error while fetching data:", error);
+          return []
+        } 
+      }
+
 
       console.log('data', fid, schedule)
 
@@ -62,7 +93,10 @@ export default async function handler(req, res) {
         const updatedSchedule = await updateSchedule(fid, schedule)
 
         if (updatedSchedule) {
-          res.status(200).json({ updatedSchedule });
+
+          let curators = await getCurators(updatedSchedule)
+
+          res.status(200).json({ updatedSchedule, curators });
           return
         } else {
           res.status(404).json({ message: 'Could not update Auto-Fund' });
@@ -171,7 +205,7 @@ export default async function handler(req, res) {
             //   schedule.points = points
             //   schedule.percent_tip = 100
             //   schedule.ecosystem_name = ecoName
-            //   schedule.currencies = ['$DEGEN', '$TN100x', '$HUNT']
+            //   schedule.currencies = ['$DEGEN']
             //   schedule.schedule_time = "45 18 * * *"
             //   schedule.active_cron = true
             // } else {
@@ -186,7 +220,7 @@ export default async function handler(req, res) {
               points: points,
               percent_tip: 100,
               ecosystem_name: ecoName,
-              currencies: ['$DEGEN', '$TN100x'],
+              currencies: ['$DEGEN'],
               schedule_time: "45 18 * * *",
               schedule_count: 1,
               schedule_total: 1,
@@ -208,8 +242,11 @@ export default async function handler(req, res) {
     
         const updatedSchedule = await setSchedule(fid, '$IMPACT', ecoName, encryptedUuid, [])
         console.log('schedule 111', updatedSchedule)
+
+        let curators = await getCurators(updatedSchedule)
+
         if (updatedSchedule) {
-          res.status(200).json({ updatedSchedule });
+          res.status(200).json({ updatedSchedule, curators });
         } else {
           res.status(404).json({ message: 'No auto-fund created' });
         }

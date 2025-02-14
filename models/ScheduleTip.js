@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 
 const scheduleTipSchema = new mongoose.Schema({
   fid: { type: Number, index: true },
+  invited_by: { type: Number, default: null },
   uuid: String, //encrypted
   code: { type: String, index: true },
   search_shuffle: { type: Boolean, default: true},

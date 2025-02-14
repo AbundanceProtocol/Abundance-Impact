@@ -41,7 +41,7 @@ export default async function handler(req, res) {
           let userFunds = await Fund.aggregate([
             { $match: {valid: true, fid: Number(fid) } },
             { $group: {
-              _id: null,
+              _id: "$season",
               dev_degen: {
                 $sum: "$development_degen_amount"
               },
@@ -80,7 +80,7 @@ export default async function handler(req, res) {
           let totalFunds = await Fund.aggregate([
             { $match: {valid: true} },
             { $group: {
-              _id: null,
+              _id: "$season",
               dev_degen: {
                 $sum: "$development_degen_amount"
               },

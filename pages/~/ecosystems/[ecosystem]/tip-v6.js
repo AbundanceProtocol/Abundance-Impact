@@ -11,15 +11,11 @@ import { AccountContext } from '../../../../context';
 import cheerio from 'cheerio'
 import FrameButton from '../../../../components/Cast/Frame/Button';
 import qs from "querystring";
-// import Claim from '../../../../models/Claim';
-// import Circle from '../../../../models/Circle';
-// import connectToDatabase from '../../../../libs/mongodb';
-import mongoose from "mongoose";
 
 // import useStore from '../../../utils/store';
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 
-export default function Tips({referrer, id, start}) {
+export default function Tips({time, curators, channels, tags, eco, ecosystem, referrer}) {
   const { LoginPopup, fid, userBalances, isLogged } = useContext(AccountContext)
   const index = 0
   const router = useRouter();
@@ -47,33 +43,33 @@ export default function Tips({referrer, id, start}) {
     {
       version: "vNext",
       title: "Multi-Tip",
-      image: `${baseURL}/api/frames/reward/daily-frame?${qs.stringify({ id, start })}`,
+      image: `${baseURL}/api/frames/tip/auto-fund?${qs.stringify({ fid: referrer })}`,
       image_aspect_ratio: "1.91:1",
       buttons: [
         {
           index: 1,
-          title: "My Reward",
+          title: "Auto-Fund >",
           action_type: "post",
-          target: `${baseURL}/api/frames/reward/daily`
+          target: `${baseURL}/api/frames/tip/tip?tip=0`
         },
         {
           index: 2,
           title: "Login /impact",
           action_type: "link",
-          target: `${baseURL}`
+          target: `${baseURL}/api/frames/tip/menu`
         },
-        // {
-        //   index: 3,
-        //   title: "Auto-tip >",
-        //   action_type: "post",
-        //   target: `${baseURL}/api/frames/tip/auto-tip?`
-        // },
+        {
+          index: 3,
+          title: "Opt-out?",
+          action_type: "post",
+          target: `${baseURL}/api/frames/tip/opt-out-menu`
+        },
       ],
       // input: {
       //   text: "Eg.: 1000 $Degen, 500 $HAM"
       // },
       state: {},
-      frames_url: `${baseURL}/~/ecosystems/abundance/tips`
+      frames_url: `${baseURL}/~/ecosystems/${ecosystem}/tip`
     }
   const [frameData, setFrameData] = useState(initFrame)
   const initCast = {
@@ -101,46 +97,44 @@ export default function Tips({referrer, id, start}) {
     quality_balance: 0
   }
   const [cast, setCast] = useState(initCast)
-  const initQuery = {time: 'all', curators: [], channels: [], tags: [], shuffle: true, referrer: null, eco: null, ecosystem: null}
+  const initQuery = {time: '&time=all', curators: '', channels: '', tags: '', shuffle: '&shuffle=true', referrer: '', eco: '&eco=IMPACT', ecosystem: '&ecosystem=abundance'}
   const [queryData, setQueryData] = useState(initQuery)
 
   useEffect(() => {
-    // console.log(time, curators, shuffle, referrer, eco, ecosystem)
+    console.log(time, curators, eco, ecosystem)
 
-    // let timeQuery = '&time=all'
-    // let curatorsQuery = ''
+    let timeQuery = '&time=all'
+    let curatorsQuery = ''
     // let shuffleQuery = '&shuffle=true'
     // let referrerQuery = ''
     let ecoQuery = '&eco=IMPACT'
     let ecosystemQuery = '&ecosystem=abundance'
-    // if (time) {
-    //   timeQuery = '&time=' + time
-    // }
-    // if (curators) {
-    //   console.log(curators)
-    //   for (const curator of curators) {
-    //     curatorsQuery += '&curators=' + parseInt(curator)
-    //   }
-    // }
+    if (time) {
+      timeQuery = '&time=' + time
+    }
+    if (curators) {
+      console.log(curators)
+      for (const curator of curators) {
+        curatorsQuery += '&curators=' + parseInt(curator)
+      }
+    }
     // if (shuffle || shuffle == false) {
     //   shuffleQuery = '&shuffle=' + shuffle
     // }
     // if (referrer) {
     //   referrerQuery = '&referrer=' + referrer
     // }
-    // if (eco) {
-    //   ecoQuery = '&eco=' + eco
-    // }
-    // if (ecosystem) {
-    //   ecosystemQuery = '&ecosystem=' + ecosystem
-    // }
+    if (eco) {
+      ecoQuery = '&eco=' + eco
+    }
+    if (ecosystem) {
+      ecosystemQuery = '&ecosystem=' + ecosystem
+    }
 
     setQueryData(prev => ({ 
       ...prev, 
-      // time: timeQuery, 
-      // curators: curatorsQuery, 
-      // shuffle: shuffleQuery, 
-      // referrer: referrerQuery, 
+      time: timeQuery, 
+      curators: curatorsQuery, 
       eco: ecoQuery, 
       ecosystem: ecosystemQuery
     }))
@@ -163,14 +157,14 @@ export default function Tips({referrer, id, start}) {
     console.log(queryData)
 
     const updatedFrameData = {...frameData}
-    updatedFrameData.buttons[0].target = `${baseURL}/api/frames/reward/daily`
+    updatedFrameData.buttons[0].target = `${baseURL}/api/frames/tip/auto-tip?${qs.stringify({ time, curators, eco, ecosystem, referrer })}`
 
     updatedFrameData.buttons[1].target = `${baseURL}?${qs.stringify({ referrer })}`
 
-    // updatedFrameData.buttons[2].target = `${baseURL}/api/frames/tip/auto-tip?${qs.stringify({ time, curators, eco, ecosystem })}`
+    updatedFrameData.buttons[2].target = `${baseURL}/api/frames/tip/opt-out-menu?${qs.stringify({ time, curators, eco, ecosystem, referrer })}`
 
-    updatedFrameData.image = `${baseURL}/api/frames/reward/daily-frame?${qs.stringify({ id, start })}`
-
+    // updatedFrameData.buttons[3].target = `${baseURL}/api/frames/tip/opt-out-menu?${qs.stringify({ time, curators, eco, ecosystem, referrer })}`
+    console.log(updatedFrameData)
     setFrameData(updatedFrameData)
   }, [queryData]);
 
@@ -233,7 +227,7 @@ export default function Tips({referrer, id, start}) {
         // console.log(response)
   
         if (response.headers['content-type'].includes('text/html')) {
-          const $ = cheerio.load(response?.data);
+          const $ = cheerio.load(response.data);
           const metadata = {};
   
           $('meta').each((i, elem) => {
@@ -298,31 +292,42 @@ export default function Tips({referrer, id, start}) {
             
     {queryData && (
       <Head>
-        <title>Daily Reward | Impact App</title>
+        <title>Tips | Impact App</title>
         <meta name="description" content={`Support builder and creators with Impact App`} />
         <meta name="viewport" content="width=device-width"/>
-        <meta property="og:title" content="Impact Score" />
-        <meta property='og:image' content={`${baseURL}/api/frames/reward/daily-frame?${qs.stringify({ id, start })}`} />
+        <meta property="og:title" content="Multi-Tip" />
+        <meta property='og:image' content={`${baseURL}/api/frames/tip/auto-fund?${qs.stringify({ fid: referrer })}`} />
         <meta property="fc:frame" content="vNext" />
-        <meta property="fc:frame:image" content={`${baseURL}/api/frames/reward/daily-frame?${qs.stringify({ id, start })}`} />
+        <meta property="fc:frame:image" content={`${baseURL}/api/frames/tip/auto-fund?${qs.stringify({ fid: referrer })}`} />
         <meta property="fc:frame:image:aspect_ratio" content="1.91:1" />
-        <meta property="fc:frame:button:1" content='My Reward' />
+        
+        {/* <meta property="fc:frame:button:1" content='Multi-tip >' />
         <meta property="fc:frame:button:1:action" content="post" />
-        <meta property="fc:frame:button:1:target" content={`${baseURL}/api/frames/reward/daily`} />
+        <meta property="fc:frame:button:1:target" content={`${baseURL}/api/frames/tip/tip?${qs.stringify({    
+          time, curators, eco, ecosystem, referrer })}`} />
+
+        <meta property="fc:frame:button:2" content={'Menu'} />
+        <meta property="fc:frame:button:2:action" content="post" />
+        <meta property="fc:frame:button:2:target" content={`${baseURL}/api/frames/tip/menu?${qs.stringify({ time, curators, eco, ecosystem, referrer })}`} /> */}
+
+        <meta property="fc:frame:button:1" content={'Auto-Fund >'} />
+        <meta property="fc:frame:button:1:action" content="post" />
+        <meta property="fc:frame:button:1:target" content={`${baseURL}/api/frames/tip/auto-tip?${qs.stringify({ time, curators, eco, ecosystem, referrer })}`} />
 
         <meta property="fc:frame:button:2" content='Login /impact' />
         <meta property="fc:frame:button:2:action" content="link" />
         <meta property="fc:frame:button:2:target" content={`${baseURL}?${qs.stringify({ referrer })}`} />
 
-        {/* <meta property="fc:frame:button:3" content={'Auto-tip'} />
+        <meta property="fc:frame:button:3" content='Opt-out?' />
         <meta property="fc:frame:button:3:action" content="post" />
-        <meta property="fc:frame:button:3:target" content={`${baseURL}/api/frames/tip/auto-tip?${qs.stringify({ id, referrer })}`} /> */}
+        <meta property="fc:frame:button:3:target" content={`${baseURL}/api/frames/tip/opt-out-menu?${qs.stringify({ time, curators, eco, ecosystem, referrer })}`} />
 
+        {/* <meta name="fc:frame:input:text" content="Eg.: 1000 $Degen, 500 $HAM" /> */}
       </Head>
     )}
+
     <div className="" style={{padding: '58px 0 0 0'}}>
     </div>
-
 
     <>{
     cast && (<div className="inner-container" style={{width: '100%', display: 'flex', flexDirection: 'row'}}>
@@ -526,87 +531,69 @@ export default function Tips({referrer, id, start}) {
                 }}>
                 <ImArrowDown />
               </div>
+
             </div>
           </div>
         </div>
       </div>
     </div>)}</>
+
+
+
     </div>
   );
 }
 
 
 export async function getServerSideProps(context) {
+  // Fetch dynamic parameters from the context object
   const { query, params } = context;
-  const { id, referrer, start } = query;
-
-
-
-  // async function getReward(id) {
-  //   try {
-  //     const objectId = new mongoose.Types.ObjectId(id)
-  //     console.log(id)
-  //     await connectToDatabase();
-  //     let rank = await Claim.findOne({ _id: objectId, claimed: false }).select('fid').exec();
-
-  //     if (rank) {
-  //       const updateOptions = {
-  //         upsert: false,
-  //         new: true,
-  //         setDefaultsOnInsert: true,
-  //       };
-
-  //       const update = {
-  //         $set: {
-  //           claimed: true
-  //         },
-  //       };
-
-  //       const lastFourDays = new Date(Date.now() - 4 * 24 * 60 * 60 * 1000);
-
-  //       let claimIds = await Claim.distinct("_id", { fid: rank?.fid, createdAt: { $gt: lastFourDays }, claimed: false });
-
-  //       for (const claimId of claimIds) {
-  //         const user = await Claim.findOneAndUpdate({ _id: claimId }, update, updateOptions);
-  //         console.log('user', user, claimId)
-  //       }
-  //     }
-
-  //     if (rank) {
-  //       return rank
-  //     } else {
-  //       return null
-  //     }
-
-  //   } catch (error) {
-  //     console.error("Error while fetching casts:", error);
-  //     return null
-  //   }  
-  // }
-
-  // if (id) {
-  //   const data = await getReward(id)
-  // }
-
-  
-  let setId = null
-  if (id) {
-    setId = id
+  const { time, curators, channels, tags, eco, referrer } = query;
+  const { ecosystem } = params;
+  console.log(time, curators, channels, tags, eco)
+  let setTime = 'all'
+  let setEco = null
+  if (eco) {
+    setEco = eco
   }
-  let setStart = null
-  if (start) {
-    setStart = start
+  if (time) {
+    setTime = time
   }
-
+  let setCurators = []
+  if (curators) {
+    setCurators = Array.isArray(curators) ? parseInt(curators) : [parseInt(curators)]
+  }  
+  let setChannels = []
+  if (channels) {
+    setChannels = Array.isArray(channels) ? channels : [channels]
+  }
+  let setTags = []
+  if (tags) {
+    setTags = Array.isArray(tags) ? tags : [tags]
+  }
   let setReferrer = null
   if (referrer) {
     setReferrer = referrer
   }
+  // let setShuffle = false
+  // if (shuffle || shuffle == false) {
+  //   if (shuffle == 'true') {
+  //     setShuffle = true
+  //   } else if (shuffle == 'false') {
+  //     setShuffle = false
+  //   }
+  // }
+  // let setReferrer = referrer || null
+  console.log('192:', setTime, setCurators, setEco, ecosystem)
   return {
     props: {
-      referrer: setReferrer,
-      id: setId,
-      start: setStart
+      time: setTime,
+      curators: setCurators,
+      channels: setChannels,
+      tags: setTags,
+      eco: setEco,
+      ecosystem: ecosystem,
+      referrer: setReferrer
     },
   };
 }
