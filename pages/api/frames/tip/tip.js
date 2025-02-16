@@ -854,7 +854,6 @@ export default async function handler(req, res) {
                 let metatags = ''
 
                 if (threshold) {
-
                   let tippedCreators = ""
                   if (showcase?.length > 0) {
                     tippedCreators = showcase.reduce((str, creator, index, arr) => {
