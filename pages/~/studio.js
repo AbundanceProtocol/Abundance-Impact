@@ -1250,10 +1250,10 @@ export default function ProfilePage() {
         totalHam += fund?.[hamKey]
       }
     } else {
-      userDegen = fundData?.userFunds[userIndex]?.[degenKey]
-      totalDegen = fundData?.totalFunds[totalIndex]?.[degenKey]
-      userHam = fundData?.userFunds[userIndex]?.[hamKey]
-      totalHam = fundData?.totalFunds[totalIndex]?.[hamKey]
+      userDegen = fundData?.userFunds?.[userIndex]?.[degenKey] ?? null
+      totalDegen = fundData?.totalFunds?.[totalIndex]?.[degenKey] ?? null
+      userHam = fundData?.userFunds?.[userIndex]?.[hamKey] ?? null
+      totalHam = fundData?.totalFunds?.[totalIndex]?.[hamKey] ?? null
     }
   
     return (
@@ -3311,8 +3311,7 @@ export default function ProfilePage() {
 
 
       {/* FUNDING DISTRIBUTION */}
-
-      {(impactFunds?.userFunds[0]?.creator_degen > 0 || impactFunds?.userFunds[0]?.creator_ham > 0) && (<div style={{ padding: "0px 4px 0px 4px", width: feedMax }}>
+      {impactFunds?.userFunds && ( impactFunds?.userFunds[0]?.creator_degen > 0 || impactFunds?.userFunds[0]?.creator_ham > 0) && (<div style={{ padding: "0px 4px 0px 4px", width: feedMax }}>
 
 
         <div
