@@ -854,6 +854,40 @@ export default async function handler(req, res) {
                 let metatags = ''
 
                 if (threshold) {
+
+                  let tippedCreators = ""
+                  if (showcase?.length > 0) {
+                    tippedCreators = showcase.reduce((str, creator, index, arr) => {
+                      if (!str.includes(creator.username)) {
+                        if (str === "") {
+                          return "@" + creator.username;
+                        }
+                        if (index === arr.length - 1 && index !== 0) {
+                          return str + " & @" + creator.username + " ";
+                        }
+                        return str + ", @" + creator.username;
+                      }
+                      return str;
+                    }, "");
+                  }
+    
+                  if (curators && fid == curators) {
+                    shareText = `I just multi-tipped ${tippedCreators !== '' ? tippedCreators : 'creators & builders'} thru /impact by @abundance.\n\nSupport my nominees here:`
+                  } else if (curators?.length > 0) {
+                    const curatorName = await getCurator(curators, points)
+                    if (curatorName) {
+                      shareText = `I just multi-tipped ${tippedCreators !== '' ? tippedCreators : 'creators & builders'} thru /impact by @abundance.\n\nThese creators were curated by ${curatorName}. Support their nominees here:`
+                    } else {
+                      shareText = `I just multi-tipped ${tippedCreators !== '' ? tippedCreators : 'creators & builders'} thru /impact by @abundance. Try it out here:`
+                    }
+                  } else {
+                    shareText = `I just multi-tipped ${tippedCreators !== '' ? tippedCreators : 'creators & builders'} thru /impact by @abundance. Try it out here:`
+                  }
+                  encodedShareText = encodeURIComponent(shareText)
+      
+                  encodedShareUrl = encodeURIComponent(shareUrl); 
+                  shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
+
                   metatags = `
                   <meta name="fc:frame:button:1" content="Share contribution">
                   <meta name="fc:frame:button:1:action" content="link">
