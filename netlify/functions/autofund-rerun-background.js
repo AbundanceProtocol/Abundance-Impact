@@ -15,7 +15,7 @@ exports.handler = async function(event, context) {
       await connectToDatabase()
       // let testFids = [195117, 388571, 512380, 321795, 476047] // testing 
       const twoHours = new Date(Date.now() - 2 * 60 * 60 * 1000);
-      let fundedFids = await Fund.distinct("fid", { createdAt: { $gte: twoHours }, points: '$IMPACT' });
+      let fundedFids = await Fund.distinct("fid", { createdAt: { $gte: twoHours }, points: '$IMPACT', funding_type: 'remaining' });
 
       let userSchedules = await ScheduleTip.find({ active_cron: true, points: '$IMPACT', fid: { "$nin": fundedFids } }).select('fid search_curators currencies uuid creator_fund development_fund growth_fund special_fund').exec()
 

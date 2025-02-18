@@ -9,7 +9,7 @@ import Item from '../../components/Ecosystem/ItemWrap/Item';
 import Description from '../../components/Ecosystem/Description';
 import ItemWrap from '../../components/Ecosystem/ItemWrap';
 import { BiSortDown, BiSortUp } from "react-icons/bi";
-import { FaLock, FaFire, FaGlobe, FaRegStar, FaAngleDown, FaShareAlt as Share, FaCode, FaSearch } from "react-icons/fa";
+import { FaLock, FaFire, FaGlobe, FaRegStar, FaAngleDown, FaShareAlt as Share, FaCode, FaSearch, FaUsers } from "react-icons/fa";
 import { PiSquaresFourLight as Actions, PiClockClockwiseBold as ClockForward, PiClockCounterClockwiseBold as ClockBack, PiBankFill } from "react-icons/pi";
 import { GrSchedulePlay as Sched } from "react-icons/gr";
 import { GiRibbonMedal as Medal } from "react-icons/gi";
@@ -49,7 +49,7 @@ export default function ProfilePage() {
   const userButtons = ['Curation', 'Casts', 'Casts + Replies']
   const [searchSelect, setSearchSelect ] = useState('Curation')
   const { isMobile } = useMatchBreakpoints();
-  const [display, setDisplay] = useState({fund: false, ecosystem: false, multitip: false, promotion: false, curation: false, score: false, distribution: false, rewards: false, autoFund: false})
+  const [display, setDisplay] = useState({fund: false, ecosystem: false, multitip: false, promotion: false, curation: false, score: false, distribution: false, rewards: false, autoFund: false, invites: false})
   const [isOn, setIsOn] = useState(false);
   const [scoreTime , setScoreTime ] = useState('all');
   const [scoreLoading , setScoreLoading ] = useState(false);
@@ -59,6 +59,7 @@ export default function ProfilePage() {
   const [searchInput, setSearchInput] = useState('')
   const [channelData, setChannelData] = useState([])
   const [curatorData, setCuratorData] = useState([])
+  const [invites, setInvites] = useState([])
   const [channelsLength, setChannelsLength] = useState(0)
   const [curatorsLength, setCuratorsLength] = useState(0)
   const [fundSearch, setFundSearch] = useState('Curators')
@@ -163,7 +164,7 @@ export default function ProfilePage() {
   const [sortBy, setSortBy] = useState('down')
   const [shuffled, setShuffled] = useState(false)
   const [multitips, setMultitips] = useState([])
-  const [loading, setLoading] = useState({fund: true, ecosystem: true, multitip: true, promotion: true, curation: true, score: true});
+  const [loading, setLoading] = useState({fund: true, ecosystem: true, multitip: true, promotion: true, curation: true, score: true, invites: true});
   const [loaded, setLoaded] = useState(false);
   const initChannels = [
     ' ',
@@ -240,6 +241,9 @@ export default function ProfilePage() {
       } else if (target == 'distribution' && fid) {
         console.log('2')
         getDistribution(fid)
+      } else if (target == 'invites' && fid) {
+        console.log('2')
+        getInvites(fid)
       }
     }
     setDisplay(prev => ({...prev, [target]: !display[target] }))
@@ -252,6 +256,53 @@ export default function ProfilePage() {
       feedRouter()
     }
   }, [display.curation])
+
+
+
+
+  async function getInvites(fid) {
+    setLoading(prev => ({...prev, invites: true }))
+    setDistLoading(true)
+    try {
+      const response = await axios.get('/api/curation/getInvites', {
+        params: { fid } })
+        console.log('getInvites', response)
+      if (response?.data) {
+        const userInvites = response?.data?.data || []
+        setInvites(userInvites)
+        // const funds = distData?.funds || []
+        // let curatorDegen = 0
+        // let curatorHam = 0
+        // let fundDegen = 0
+        // let fundHam = 0
+        // for (const fund of funds) {
+        //   if (fund?.curators?.length == 0) {
+        //     fundDegen += fund?.degen_total
+        //     fundHam += fund?.ham_total
+        //   } else {
+        //     curatorDegen += fund?.degen_total
+        //     curatorHam += fund?.ham_total
+        //   }
+        // }
+        // setFunds({curatorDegen, curatorHam, fundDegen, fundHam})
+        
+        // setDistribution(distData)
+      } else {
+        setInvites([])
+
+        // setDistribution([])
+      }
+      // setDistLoading(false)
+      setLoading(prev => ({...prev, invites: false }))
+      // setLoaded(true)
+    } catch (error) {
+      console.error('Error submitting data:', error)
+      // setLoaded(true)
+      setLoading(prev => ({...prev, invites: false }))
+      // setDistribution([])
+      // setDistLoading(false)
+    }
+  }
 
 
 
@@ -3157,6 +3208,195 @@ export default function ProfilePage() {
           </div></>)}
         </div>
       </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      {/* INVITES */}
+
+      <div style={{ padding: "0px 4px 0px 4px", width: feedMax }}>
+
+
+        <div
+          id="invites"
+          style={{
+            padding: isMobile ? "28px 0 20px 0" : "28px 0 20px 0",
+            width: "40%",
+          }}
+        ></div>
+
+        <div className='shadow'
+          style={{
+            padding: "8px",
+            backgroundColor: "#11448888",
+            borderRadius: "15px",
+            border: "1px solid #11447799",
+          }}
+        >
+          <div
+            className="flex-row"
+            style={{
+              width: "100%",
+              justifyContent: "center",
+              alignItems: "center",
+              padding: "16px 0 0 0",
+            }}
+          >
+            <FaUsers style={{ fill: "#cde" }} size={27} onClick={() => {
+                toggleMenu("invites");
+              }}/>
+            <div onClick={() => {
+                toggleMenu("invites");
+              }}>
+            <Description
+              {...{
+                show: true,
+                text: "Invites",
+                padding: "4px 0 4px 10px",
+                size: "large",
+              }}
+            />
+            </div>
+              <div
+                className="flex-row"
+                style={{
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  cursor: "pointer",
+                }}
+                onClick={() => {
+                  toggleMenu("invites");
+                }}
+              >
+                {/* <Item {...{ text: "How it works" }} /> */}
+                <FaAngleDown
+                  size={28} color={"#cde"}
+                  style={{
+                    margin: "5px 15px 5px 5px",
+                    transform: display.invites
+                      ? "rotate(180deg)"
+                      : "rotate(0deg)",
+                    transition: "transform 0.3s ease",
+                  }}
+                />
+              </div>
+          </div>
+
+          <div
+            className="flex-row"
+            style={{
+              color: "#9df",
+              width: "100%",
+              fontSize: isMobile ? "15px" : "17px",
+              padding: "10px 10px 15px 10px",
+              justifyContent: "center",
+              userSelect: 'none'
+            }}
+          >
+            Your invited contributors
+          </div>
+
+          {(display.invites && <>
+            {loading.invites ? (
+            <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
+              <Spinner size={31} color={'#468'} />
+            </div>
+          ) : (<div
+            className="flex-row"
+            style={{
+              padding: "0px 0 0 0",
+              width: "100%",
+              flexWrap: "wrap",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+
+
+
+            <div className='flex-row' style={{padding: '10px 5px 20px 5px', flexWrap: 'wrap', minWidth: feedMax, gap: '0.5rem', justifyContent: 'center', maxWidth: textMax}}>
+              {invites?.length > 0 ? invites.map((invite, index) => { return (
+                <Link key={index} target="_blank" href={`https://warpcast.com/${invite.username}`}
+                //  href={`/~/ecosystems/${eco?.ecosystem_handle || 'abundance'}/curators/${invite?.username}`}
+                 >
+                  <div className='btn-blu' style={{gap: '1.5rem', minWidth: isMobile ? '290px' : '250px'}}>
+                    <div className='flex-row' style={{gap: '0.5rem', paddingBottom: '0px', justifyContent: 'flex-start', alignItems: 'center'}}>
+                      <img loading="lazy" src={invite?.pfp} className="" alt={`${invite?.username} avatar`} style={{width: '36px', height: '36px', maxWidth: '36px', maxHeight: '36px', borderRadius: '24px', border: '1px solid #000'}} />
+
+                      <div style={{fontSize: isMobile ? '16px' : '15px', fontWeight: '400', color: '#eff'}}>@{invite?.username}</div>
+                    </div>
+
+                    <div style={{width: '100%', borderBottom: '1px solid #68a', fontSize: '1px', margin: '10px 0 0 0'}}>&nbsp;</div>
+
+                    {/* <div style={{fontSize: isMobile ? '12px' : '13px', fontWeight: '400', color: '#abc', padding: '10px 0 0 0'}}>Impact Score: {invite?.score}</div> */}
+
+                    {invite?.score >= 0 && (<div className='flex-row' style={{padding: '10px 0 0 0', alignItems: 'flex-end', gap: '0.25rem'}}>
+                      <div style={{fontSize: isMobile ? '12px' : '13px', fontWeight: '600', color: '#abc'}}>Impact Score:</div>
+                      <div style={{fontSize: isMobile ? '11px' : '12px', fontWeight: '400', color: invite?.score > 0 ? '#0c0' : '#abc'}}>{invite?.score}</div>
+                    </div>)}
+
+                    {invite?.staked >= 0 && (<div className='flex-row' style={{padding: '10px 0 0 0', alignItems: 'flex-end', gap: '0.25rem'}}>
+                      <div style={{fontSize: isMobile ? '12px' : '13px', fontWeight: '600', color: '#abc'}}>Staked:</div>
+                      <div style={{fontSize: isMobile ? '11px' : '12px', fontWeight: '400', color: invite?.staked > 0 ? '#0c0' : '#abc'}}>{invite?.staked ? invite?.staked + ' $impact' : 0}</div>
+                    </div>)}
+
+
+                    {(<div className='flex-row' style={{padding: '10px 0 0 0', alignItems: 'flex-end', gap: '0.25rem'}}>
+                      <div style={{fontSize: isMobile ? '12px' : '13px', fontWeight: '600', color: '#abc'}}>Auto-funding:</div>
+                      <div style={{fontSize: isMobile ? '11px' : '12px', fontWeight: '400', color: invite?.active ? '#0c0' : '#f66'}}>{invite?.active ? 'on' : 'off'}</div>
+                    </div>)}
+
+
+                    {invite?.autoFund >= 0 && (<div className='flex-row' style={{padding: '10px 0 0 0', alignItems: 'flex-end', gap: '0.25rem'}}>
+                      <div style={{fontSize: isMobile ? '12px' : '13px', fontWeight: '600', color: '#abc'}}>Referral:</div>
+                      <div style={{fontSize: isMobile ? '11px' : '12px', fontWeight: '400', color: invite?.autoFund > 0 ? '#0c0' : '#abc'}}>{invite?.autoFund ? invite?.autoFund + ' $degen' : 0}</div>
+                    </div>)}
+
+                  </div>
+                </Link>
+              )}) : (
+                <div style={{fontSize: '20px', color: '#def'}}>No invites found</div>)}
+            </div>
+          </div>)}
+          </>)}
+        </div>
+      </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
