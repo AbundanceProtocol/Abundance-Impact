@@ -44,8 +44,10 @@ export default async function handler(req, res) {
               staked = Math.floor(totalStaked[0].total) || 0
             }
 
+            let feb = new Date('2025-02-01T00:00:00Z')
+
             let degenAmountSum = await Fund.aggregate([
-              { $match: { fid: Number(user.fid) } },
+              { $match: { fid: Number(user.fid), createdAt: { $gte: feb } } },
               { $group: { _id: null, total: { $sum: "$degen_amount" } } }
             ]).exec()
             console.log('degenAmountSum', degenAmountSum)
