@@ -2082,15 +2082,19 @@ export default function ProfilePage() {
                     {dailyLoading ? 'Loading...' : (dailyRewards?.degen_total > 0 && dailyRewards?.claimed == false) ? 'Claim' : (dailyRewards?.degen_total > 0 && dailyRewards?.claimed == true) ? 'Claimed' : 'Check Score'}
                   </p>
                 </div>
-                <div style={{
+                <div 
+                  style={{
                     padding: "0px 5px",
                     alignItems: "center",
                     justifyContent: "center",
                     margin: '4px 0 -2px 0',
                     cursor: 'pointer'
-                  }} onClick={() => {
+                  }} 
+                  onClick={() => {
                     getDailyRewards(fid)
-                    }}>
+                    getTotalClaims(fid)
+                  }}
+                >
                   <Refresh className='' color={'#0077bf'} size={20} />
                 </div>
               </div>
@@ -2204,13 +2208,19 @@ export default function ProfilePage() {
                     {claimsLoading ? 'Loading...' : (totalClaims > 0) ? 'Claimed' : 'Check Score'}
                   </p>
                 </div>
-                <div style={{
+                <div 
+                  style={{
                     padding: "0px 5px",
                     alignItems: "center",
                     justifyContent: "center",
                     margin: '4px 0 -2px 0',
                     cursor: 'pointer'
-                  }} onClick={() => {getTotalClaims(fid)}}>
+                  }} 
+                  onClick={() => {
+                    getDailyRewards(fid)
+                    getTotalClaims(fid)
+                  }}
+                >
                   <Refresh className='' color={'#0077bf'} size={20} />
                 </div>
               </div>
@@ -2731,7 +2741,7 @@ export default function ProfilePage() {
                       setFundingSchedule('remove-channel', channel)}} />
                   </div>
                 </div>)
-              ))}</>) : curatorList?.length > 0 ? (<><div style={{fontSize: '15px', color: '#eff', fontWeight: '600', padding: '3px', margin: '7px 5px'}}>Channels:</div>{curatorList?.map((curator, index) => (
+              ))}</>) : curatorList?.length > 0 ? (<><div style={{fontSize: '15px', color: '#eff', fontWeight: '600', padding: '3px', margin: '7px 5px'}}>Curators:</div>{curatorList?.map((curator, index) => (
                 (<div key={index} style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '7px 5px'}}>
                   <div className='cast-act-lt' style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', borderRadius: '88px', padding: '3px 10px 3px 3px', width: 'auto', margin: '0 5px 0 0'}}>
                     {curator?.pfp && (<img src={curator?.pfp} width={20} height={20} style={{borderRadius: '80px', border: '2px solid #eee', backgroundColor: '#8363ca'}} />)}
