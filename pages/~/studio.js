@@ -103,7 +103,7 @@ export default function ProfilePage() {
   const [totalClaims, setTotalClaims] = useState(0)
   const [claimsLoading, setClaimsLoading] = useState(true)
   const [fundToggle, setFundToggle] = useState(true)
-  const [seasonToggle, setSeasonToggle] = useState('s2')
+  const [seasonToggle, setSeasonToggle] = useState('s3')
   const [userFunding, setUserFunding] = useState(null)
   const [isSelected, setIsSelected] = useState('none')
   const [userSearch, setUserSearch] = useState({ search: '' })
@@ -1289,6 +1289,9 @@ export default function ProfilePage() {
     } else if (seasonToggle == 's2') {
       totalIndex = fundData?.totalFunds?.findIndex(data => data._id === 2);
       userIndex = fundData?.userFunds?.findIndex(data => data._id === 2);
+    } else if (seasonToggle == 's3') {
+      totalIndex = fundData?.totalFunds?.findIndex(data => data._id === 3);
+      userIndex = fundData?.userFunds?.findIndex(data => data._id === 3);
     }
 
     if (seasonToggle == 'all') {
@@ -2160,7 +2163,7 @@ export default function ProfilePage() {
                     textWrap: "nowrap",
                   }}
                 >
-                  {creatorLoading ? 'Loading...' : ((creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet) ? 'Airdropped' : ((creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet == null) ? 'Missing wallet' : 'No rewards'}
+                  {creatorLoading ? 'Loading...' : ((creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet) ? 'S2 Airdropped' : ((creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet == null) ? 'Missing wallet' : 'No rewards'}
                 </p>
               </div>
             </div>
@@ -2241,7 +2244,19 @@ export default function ProfilePage() {
           >
             Note: Daily Rewards accumulate for up to 4 days. Rewards expire after 4 days if unclaimed - they are then moved to the Creator Fund 
           </div>
-
+          <div
+            className="flex-row"
+            style={{
+              color: "#9df",
+              width: "100%",
+              textAlign: 'center',
+              fontSize: isMobile ? "12px" : "14px",
+              padding: "5px 10px 15px 10px",
+              justifyContent: "center",
+            }}
+          >
+            Daily Rewards are accumulated throughout the Season. They are then airdropped to your wallet after Claim Day.
+          </div>
 
         </div>
       </div>
@@ -2347,9 +2362,10 @@ export default function ProfilePage() {
           <div className={isMobile ? 'flex-col' : 'flex-row'} style={{justifyContent: 'center', gap: '0.5rem'}}>
             <div className='flex-row' style={{height: '30px', alignItems: 'center', justifyContent: 'center', padding: '20px 0 0 0'}}>
               <div className='flex-row' style={{padding: '4px 8px', backgroundColor: '#002244ee', border: '1px solid #666', borderRadius: '20px', alignItems: 'center', gap: '0.25rem'}}>
-                <div className={seasonToggle == 'all' ? 'filter-item-on' : 'filter-item'} onClick={() => {setSeasonToggle('all')}} style={{fontSize: '12px', fontWeight: '600'}}>All</div>
-                <div className={seasonToggle == 's1' ? 'filter-item-on' : 'filter-item'} onClick={() => {setSeasonToggle('s1')}} style={{fontSize: '12px', fontWeight: '600'}}>Season 1</div>
-                <div className={seasonToggle == 's2' ? 'filter-item-on' : 'filter-item'} onClick={() => {setSeasonToggle('s2')}} style={{fontSize: '12px', fontWeight: '600'}}>Season 2</div>
+                <div className={seasonToggle == 'all' ? 'filter-item-on' : 'filter-item'} onClick={() => {setSeasonToggle('all')}} style={{fontSize: '12px', fontWeight: '600'}}>All Seasons</div>
+                <div className={seasonToggle == 's1' ? 'filter-item-on' : 'filter-item'} onClick={() => {setSeasonToggle('s1')}} style={{fontSize: '12px', fontWeight: '600'}}>S1</div>
+                <div className={seasonToggle == 's2' ? 'filter-item-on' : 'filter-item'} onClick={() => {setSeasonToggle('s2')}} style={{fontSize: '12px', fontWeight: '600'}}>S2</div>
+                <div className={seasonToggle == 's3' ? 'filter-item-on' : 'filter-item'} onClick={() => {setSeasonToggle('s3')}} style={{fontSize: '12px', fontWeight: '600'}}>S3</div>
               </div>
             </div>
 
