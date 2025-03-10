@@ -13,7 +13,7 @@ import { FaLock, FaFire, FaGlobe, FaRegStar, FaAngleDown, FaShareAlt as Share, F
 import { PiSquaresFourLight as Actions, PiClockClockwiseBold as ClockForward, PiClockCounterClockwiseBold as ClockBack, PiBankFill } from "react-icons/pi";
 import { GrSchedulePlay as Sched } from "react-icons/gr";
 import { GiRibbonMedal as Medal } from "react-icons/gi";
-import { IoShuffleOutline as ShuffleIcon, IoBuild, IoCloseCircle } from "react-icons/io5";
+import { IoShuffleOutline as ShuffleIcon, IoBuild, IoCloseCircle, IoLogIn } from "react-icons/io5";
 import { BiGift } from "react-icons/bi";
 import { FaStar, FaCoins } from "react-icons/fa6";
 import { IoIosRocket, IoMdTrophy, IoMdRefresh as Refresh} from "react-icons/io";
@@ -1615,7 +1615,395 @@ export default function ProfilePage() {
 
 
 
+      {/* WHAT IS IMPACT */}
 
+      <div style={{ padding: "0px 4px 0px 4px", width: feedMax }}>
+
+
+
+
+        <div
+          id="what"
+          style={{
+            padding: isMobile ? "28px 0 20px 0" : "28px 0 20px 0",
+            width: "40%",
+          }}
+        ></div>
+
+        <div className='shadow'
+          style={{
+            padding: "8px",
+            backgroundColor: "#11448888",
+            borderRadius: "15px",
+            border: "1px solid #11447799",
+          }}
+        >
+          <div
+            className="flex-row"
+            style={{
+              width: "100%",
+              justifyContent: "center",
+              alignItems: "center",
+              padding: "16px 0 0 0",
+            }}
+          >
+            {/* <IoMdTrophy style={{ fill: "#cde" }} size={27} onClick={() => {
+              toggleMenu("what");
+            }} /> */}
+            <div onClick={() => {
+              toggleMenu("what");
+            }}>
+              <Description
+                {...{
+                  show: true,
+                  text: "What is /impact?",
+                  padding: "4px 0 4px 10px",
+                  size: "large",
+                }}
+              />
+            </div>
+
+              <div
+                className="flex-row"
+                style={{
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  cursor: "pointer",
+                }}
+                onClick={() => {
+                  toggleMenu("what");
+                }}
+              >
+                {/* <Item {...{ text: "How it works" }} /> */}
+
+
+
+              <FaAngleDown
+                size={28} color={"#cde"}
+                style={{
+                  margin: "5px 15px 5px 5px",
+                  transform: display.what
+                    ? "rotate(180deg)"
+                    : "rotate(0deg)",
+                  transition: "transform 0.3s ease",
+                }}
+              />
+            </div>
+          </div>
+
+          {(!display.what && <div
+            className="flex-row"
+            style={{
+              color: "#9df",
+              width: "100%",
+              fontSize: isMobile ? "15px" : "17px",
+              padding: "10px 10px 15px 10px",
+              justifyContent: "center",
+              userSelect: 'none'
+            }}
+          >
+            Find out about /impact's vision
+          </div>)}
+
+
+
+          {(display.what && (<div
+            className={isMobile ? "flex-col" : "flex-col"}
+            style={{
+              padding: "0px 0 0 0",
+              width: "100%",
+              height: 'auto',
+              // flexWrap: "wrap",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+
+
+          <div className='flex-row page-t3' style={{ fontSize: isMobile ? "15px" : "17px" }} >
+            /impact is working toward an 'Impact = Profit' economy.
+          </div>
+
+          <div className='flex-row page-t3' style={{ fontSize: isMobile ? "15px" : "17px" }} >
+            We want everyone on Farcaster (and beyond) to prosper simply by making meaning contributions in their community & the world. /impact is the first step in that journey.
+          </div>
+
+
+          <div className='flex-row page-t3' style={{ fontSize: isMobile ? "15px" : "17px" }} >
+            We're creating an Impact Market where curators are rewarded for proactively finding and evaluating impactful content and work on Farcaster.
+          </div>
+
+
+          <div className='flex-row page-t3' style={{ fontSize: isMobile ? "15px" : "17px" }} >
+            We're then rewarding members for growing this ecosystem and tipping impactful creators & builders.
+          </div>
+
+          <div className='flex-row page-t3' style={{ fontSize: isMobile ? "15px" : "17px" }} >
+            As the ecosystem grows a feedback loop will start forming between the impact created and the Network Economy.
+          </div>
+
+          <div className='flex-row page-t3' style={{ fontSize: isMobile ? "15px" : "17px", display: 'inline-block' }} >
+            Read about the <Link href="https://paragraph.xyz/@abundance/the-secret-impact-alpha-master-plan" target="_blank">
+              <span style={{ textDecoration: "underline" }} >Secret Impact Alpha Master Plan</span>
+            </Link>
+          </div>
+
+
+
+          </div>))}
+          
+
+
+          
+        </div>
+      </div>
+
+
+
+
+      {/* HOW IT WORKS */}
+
+      <div style={{ padding: "0px 4px 0px 4px", width: '100%' }}>
+
+
+
+
+        <div
+          id="how"
+          style={{
+            padding: isMobile ? "28px 0 20px 0" : "28px 0 20px 0",
+            width: "100%",
+          }}
+        ></div>
+
+        <div className='shadow'
+          style={{
+            padding: "8px",
+            backgroundColor: "#11448888",
+            borderRadius: "15px",
+            border: "1px solid #11447799",
+          }}
+        >
+          <div
+            className="flex-row"
+            style={{
+              width: "100%",
+              justifyContent: "center",
+              alignItems: "center",
+              padding: "16px 0 0 0",
+            }}
+          >
+            {/* <IoMdTrophy style={{ fill: "#cde" }} size={27} onClick={() => {
+              toggleMenu("how");
+            }} /> */}
+            <div onClick={() => {
+              toggleMenu("how");
+            }}>
+              <Description
+                {...{
+                  show: true,
+                  text: "How it works",
+                  padding: "4px 0 4px 10px",
+                  size: "large",
+                }}
+              />
+            </div>
+
+              <div
+                className="flex-row"
+                style={{
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  cursor: "pointer",
+                }}
+                onClick={() => {
+                  toggleMenu("how");
+                }}
+              >
+                {/* <Item {...{ text: "How it works" }} /> */}
+
+
+
+              <FaAngleDown
+                size={28} color={"#cde"}
+                style={{
+                  margin: "5px 15px 5px 5px",
+                  transform: display.how
+                    ? "rotate(180deg)"
+                    : "rotate(0deg)",
+                  transition: "transform 0.3s ease",
+                }}
+              />
+            </div>
+          </div>
+
+          {(!display.how && <div
+            className="flex-row"
+            style={{
+              color: "#9df",
+              width: "100%",
+              fontSize: isMobile ? "15px" : "17px",
+              padding: "10px 10px 15px 10px",
+              justifyContent: "center",
+              userSelect: 'none'
+            }}
+          >
+            Learn how to make the most out of /impact
+          </div>)}
+
+
+
+          {(display.how && (<div
+            className={isMobile ? "flex-col" : "flex-col"}
+            style={{
+              padding: "10px 0 0 0",
+              width: "100%",
+              height: 'auto',
+              // flexWrap: "wrap",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+
+
+            <div onClick={() =>
+              document
+                .getElementById("score")
+                .scrollIntoView({ behavior: "smooth" })
+              } style={{width: '100%', cursor: 'pointer !important'}}>
+              <ItemWrap>
+                <Item
+                  {...{
+                    icon: IoMdTrophy,
+                    text: "Impact Score",
+                    description:
+                      `/impact is currently running Daily Impact Rewards`,
+                  }}
+                />
+                <Item
+                  {...{ 
+                    noIcon: true,
+                    description: `You need a 3-day Impact Score of min 0.25 to be eligible` }}
+                />
+                <Item
+                  {...{ 
+                    noIcon: true,
+                    description: `Your chance to win Impact Rewards grow the more you curate, contribute and invite quality members into the ecosystem` }}
+                />
+
+              </ItemWrap>
+            </div>
+
+
+            <div onClick={() =>
+              document
+                .getElementById("curation")
+                .scrollIntoView({ behavior: "smooth" })
+              } style={{width: '100%'}}>
+              <ItemWrap>
+                <Item
+                  {...{
+                    icon: Medal,
+                    text: "Curate",
+                    description:
+                      `You get a daily allowance of $IMPACT points`,
+                  }}
+                />
+                <Item
+                  {...{
+                    noIcon: true,
+                    description: `Stake these points on casts based on their value to the Farcaster ecosystem`,
+                  }}
+                />
+                <Item
+                  {...{ 
+                    noIcon: true,
+                    description: `Overvaluing casts can result in a downvote, which lowers your future $IMPACT allowance` }}
+                />
+                <Item
+                  {...{ 
+                    noIcon: true,
+                    description: `
+                    90% of rewards flow to creators, and 10% to curators` }}
+                />
+              </ItemWrap>
+            </div>
+
+            <div onClick={() =>
+              document
+                .getElementById("autoFund")
+                .scrollIntoView({ behavior: "smooth" })
+              } style={{width: '100%'}}>
+              <ItemWrap>
+                <Item
+                  {...{
+                    icon: PiBankFill,
+                    text: "Auto-Fund",
+                    description: `Don't let your allowance go to waste `,
+                  }}
+                />
+                <Item
+                  {...{ 
+                    noIcon: true,
+                    description: `
+                    Auto-Fund automatically distributes your remaining $degen & $ham allowances to impactful builders and creators on Farcaster - and rewards you in the process` }}
+                />
+              </ItemWrap>
+            </div>
+
+            <div onClick={() =>
+              document
+                .getElementById("invites")
+                .scrollIntoView({ behavior: "smooth" })
+              } style={{width: '100%'}}>
+
+              <ItemWrap>
+                <Item
+                  {...{
+                    icon: FaUsers,
+                    text: "Invite",
+                    description:
+                      "Invite your friends to use Impact Alpha - win rewards. ",
+                  }}
+                />
+                <Item
+                  {...{ 
+                    noIcon: true,
+                    description: `
+                    any /impact frame you share has your referral` }}
+                />
+              </ItemWrap>
+            </div>
+
+            {/* <div style={{width: '100%'}}>
+              <ItemWrap>
+                <div onClick={() =>
+                document
+                  .getElementById("log in")
+                  .scrollIntoView({ behavior: "smooth" })
+                }>
+                  <Item
+                    {...{
+                      icon: IoLogIn,
+                      text: "Login",
+                      description:
+                        "Log in to get started",
+                    }}
+                  />
+                </div>
+              </ItemWrap>
+            </div> */}
+
+
+
+
+          </div>))}
+          
+
+
+          
+        </div>
+      </div>
 
 
 
@@ -1935,7 +2323,7 @@ export default function ProfilePage() {
 
 
 
-      {/* IMPACT SCORE */}
+      {/* MY REWARDS */}
 
       <div style={{ padding: "0px 4px 0px 4px", width: feedMax }}>
 

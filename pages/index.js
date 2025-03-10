@@ -541,8 +541,13 @@ export default function Home() {
                   icon: IoMdTrophy,
                   text: "Impact Score",
                   description:
-                    `/impact is currently running a daily 5000 $degen raffle`,
+                    `/impact is currently running Daily Impact Rewards`,
                 }}
+              />
+              <Item
+                {...{ 
+                  noIcon: true,
+                  description: `You need a 3-day Impact Score of min 0.25 to be eligible` }}
               />
 
               <Item
