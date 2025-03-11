@@ -1871,7 +1871,7 @@ export default function ProfilePage() {
                 .getElementById("score")
                 .scrollIntoView({ behavior: "smooth" })
               } style={{width: '100%', cursor: 'pointer !important'}}>
-              <ItemWrap>
+              <ItemWrap crsr={true}>
                 <Item
                   {...{
                     icon: IoMdTrophy,
@@ -1900,7 +1900,7 @@ export default function ProfilePage() {
                 .getElementById("curation")
                 .scrollIntoView({ behavior: "smooth" })
               } style={{width: '100%'}}>
-              <ItemWrap>
+              <ItemWrap crsr={true}>
                 <Item
                   {...{
                     icon: Medal,
@@ -1934,7 +1934,7 @@ export default function ProfilePage() {
                 .getElementById("autoFund")
                 .scrollIntoView({ behavior: "smooth" })
               } style={{width: '100%'}}>
-              <ItemWrap>
+              <ItemWrap crsr={true}>
                 <Item
                   {...{
                     icon: PiBankFill,
@@ -1957,7 +1957,7 @@ export default function ProfilePage() {
                 .scrollIntoView({ behavior: "smooth" })
               } style={{width: '100%'}}>
 
-              <ItemWrap>
+              <ItemWrap crsr={true}>
                 <Item
                   {...{
                     icon: FaUsers,

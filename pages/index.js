@@ -623,7 +623,7 @@ export default function Home() {
             </ItemWrap>
 
 
-            <ItemWrap>
+            <ItemWrap crsr={true}>
               <div onClick={() =>
               document
                 .getElementById("log in")
