@@ -108,7 +108,7 @@ export default async function handler(req, res) {
 
         {(Math.floor(reward?.degen) > 0 || Math.floor(reward?.ham) > 0) && (<div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '0px 5px 10px 5px'}}>
 
-          <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '18px', margin: '0', padding: '0px 0 0 0'}}>Season 1 expected rewards</div>
+          <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '18px', margin: '0', padding: '0px 0 0 0'}}>Season 2 Airdrop</div>
 
         </div>)}
 

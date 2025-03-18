@@ -9,11 +9,11 @@ import Item from '../../components/Ecosystem/ItemWrap/Item';
 import Description from '../../components/Ecosystem/Description';
 import ItemWrap from '../../components/Ecosystem/ItemWrap';
 import { BiSortDown, BiSortUp } from "react-icons/bi";
-import { FaLock, FaFire, FaGlobe, FaRegStar, FaAngleDown, FaShareAlt as Share, FaCode, FaSearch } from "react-icons/fa";
+import { FaLock, FaFire, FaGlobe, FaRegStar, FaAngleDown, FaShareAlt as Share, FaCode, FaSearch, FaUsers } from "react-icons/fa";
 import { PiSquaresFourLight as Actions, PiClockClockwiseBold as ClockForward, PiClockCounterClockwiseBold as ClockBack, PiBankFill } from "react-icons/pi";
 import { GrSchedulePlay as Sched } from "react-icons/gr";
 import { GiRibbonMedal as Medal } from "react-icons/gi";
-import { IoShuffleOutline as ShuffleIcon, IoBuild, IoCloseCircle } from "react-icons/io5";
+import { IoShuffleOutline as ShuffleIcon, IoBuild, IoCloseCircle, IoLogIn } from "react-icons/io5";
 import { BiGift } from "react-icons/bi";
 import { FaStar, FaCoins } from "react-icons/fa6";
 import { IoIosRocket, IoMdTrophy, IoMdRefresh as Refresh} from "react-icons/io";
@@ -49,7 +49,7 @@ export default function ProfilePage() {
   const userButtons = ['Curation', 'Casts', 'Casts + Replies']
   const [searchSelect, setSearchSelect ] = useState('Curation')
   const { isMobile } = useMatchBreakpoints();
-  const [display, setDisplay] = useState({fund: false, ecosystem: false, multitip: false, promotion: false, curation: false, score: false, distribution: false, rewards: false, autoFund: false})
+  const [display, setDisplay] = useState({fund: false, ecosystem: false, multitip: false, promotion: false, curation: false, score: false, distribution: false, rewards: false, autoFund: false, invites: false})
   const [isOn, setIsOn] = useState(false);
   const [scoreTime , setScoreTime ] = useState('all');
   const [scoreLoading , setScoreLoading ] = useState(false);
@@ -59,6 +59,7 @@ export default function ProfilePage() {
   const [searchInput, setSearchInput] = useState('')
   const [channelData, setChannelData] = useState([])
   const [curatorData, setCuratorData] = useState([])
+  const [invites, setInvites] = useState([])
   const [channelsLength, setChannelsLength] = useState(0)
   const [curatorsLength, setCuratorsLength] = useState(0)
   const [fundSearch, setFundSearch] = useState('Curators')
@@ -102,7 +103,7 @@ export default function ProfilePage() {
   const [totalClaims, setTotalClaims] = useState(0)
   const [claimsLoading, setClaimsLoading] = useState(true)
   const [fundToggle, setFundToggle] = useState(true)
-  const [seasonToggle, setSeasonToggle] = useState('s2')
+  const [seasonToggle, setSeasonToggle] = useState('s3')
   const [userFunding, setUserFunding] = useState(null)
   const [isSelected, setIsSelected] = useState('none')
   const [userSearch, setUserSearch] = useState({ search: '' })
@@ -163,7 +164,7 @@ export default function ProfilePage() {
   const [sortBy, setSortBy] = useState('down')
   const [shuffled, setShuffled] = useState(false)
   const [multitips, setMultitips] = useState([])
-  const [loading, setLoading] = useState({fund: true, ecosystem: true, multitip: true, promotion: true, curation: true, score: true});
+  const [loading, setLoading] = useState({fund: true, ecosystem: true, multitip: true, promotion: true, curation: true, score: true, invites: true});
   const [loaded, setLoaded] = useState(false);
   const initChannels = [
     ' ',
@@ -240,6 +241,9 @@ export default function ProfilePage() {
       } else if (target == 'distribution' && fid) {
         console.log('2')
         getDistribution(fid)
+      } else if (target == 'invites' && fid) {
+        console.log('2')
+        getInvites(fid)
       }
     }
     setDisplay(prev => ({...prev, [target]: !display[target] }))
@@ -252,6 +256,53 @@ export default function ProfilePage() {
       feedRouter()
     }
   }, [display.curation])
+
+
+
+
+  async function getInvites(fid) {
+    setLoading(prev => ({...prev, invites: true }))
+    setDistLoading(true)
+    try {
+      const response = await axios.get('/api/curation/getInvites', {
+        params: { fid } })
+        console.log('getInvites', response)
+      if (response?.data) {
+        const userInvites = response?.data?.data || []
+        setInvites(userInvites)
+        // const funds = distData?.funds || []
+        // let curatorDegen = 0
+        // let curatorHam = 0
+        // let fundDegen = 0
+        // let fundHam = 0
+        // for (const fund of funds) {
+        //   if (fund?.curators?.length == 0) {
+        //     fundDegen += fund?.degen_total
+        //     fundHam += fund?.ham_total
+        //   } else {
+        //     curatorDegen += fund?.degen_total
+        //     curatorHam += fund?.ham_total
+        //   }
+        // }
+        // setFunds({curatorDegen, curatorHam, fundDegen, fundHam})
+        
+        // setDistribution(distData)
+      } else {
+        setInvites([])
+
+        // setDistribution([])
+      }
+      // setDistLoading(false)
+      setLoading(prev => ({...prev, invites: false }))
+      // setLoaded(true)
+    } catch (error) {
+      console.error('Error submitting data:', error)
+      // setLoaded(true)
+      setLoading(prev => ({...prev, invites: false }))
+      // setDistribution([])
+      // setDistLoading(false)
+    }
+  }
 
 
 
@@ -1238,6 +1289,9 @@ export default function ProfilePage() {
     } else if (seasonToggle == 's2') {
       totalIndex = fundData?.totalFunds?.findIndex(data => data._id === 2);
       userIndex = fundData?.userFunds?.findIndex(data => data._id === 2);
+    } else if (seasonToggle == 's3') {
+      totalIndex = fundData?.totalFunds?.findIndex(data => data._id === 3);
+      userIndex = fundData?.userFunds?.findIndex(data => data._id === 3);
     }
 
     if (seasonToggle == 'all') {
@@ -1561,7 +1615,395 @@ export default function ProfilePage() {
 
 
 
+      {/* WHAT IS IMPACT */}
 
+      <div style={{ padding: "0px 4px 0px 4px", width: feedMax }}>
+
+
+
+
+        <div
+          id="what"
+          style={{
+            padding: isMobile ? "28px 0 20px 0" : "28px 0 20px 0",
+            width: "40%",
+          }}
+        ></div>
+
+        <div className='shadow'
+          style={{
+            padding: "8px",
+            backgroundColor: "#11448888",
+            borderRadius: "15px",
+            border: "1px solid #11447799",
+          }}
+        >
+          <div
+            className="flex-row"
+            style={{
+              width: "100%",
+              justifyContent: "center",
+              alignItems: "center",
+              padding: "16px 0 0 0",
+            }}
+          >
+            {/* <IoMdTrophy style={{ fill: "#cde" }} size={27} onClick={() => {
+              toggleMenu("what");
+            }} /> */}
+            <div onClick={() => {
+              toggleMenu("what");
+            }}>
+              <Description
+                {...{
+                  show: true,
+                  text: "What is /impact?",
+                  padding: "4px 0 4px 10px",
+                  size: "large",
+                }}
+              />
+            </div>
+
+              <div
+                className="flex-row"
+                style={{
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  cursor: "pointer",
+                }}
+                onClick={() => {
+                  toggleMenu("what");
+                }}
+              >
+                {/* <Item {...{ text: "How it works" }} /> */}
+
+
+
+              <FaAngleDown
+                size={28} color={"#cde"}
+                style={{
+                  margin: "5px 15px 5px 5px",
+                  transform: display.what
+                    ? "rotate(180deg)"
+                    : "rotate(0deg)",
+                  transition: "transform 0.3s ease",
+                }}
+              />
+            </div>
+          </div>
+
+          {(!display.what && <div
+            className="flex-row"
+            style={{
+              color: "#9df",
+              width: "100%",
+              fontSize: isMobile ? "15px" : "17px",
+              padding: "10px 10px 15px 10px",
+              justifyContent: "center",
+              userSelect: 'none'
+            }}
+          >
+            Find out about /impact's vision
+          </div>)}
+
+
+
+          {(display.what && (<div
+            className={isMobile ? "flex-col" : "flex-col"}
+            style={{
+              padding: "0px 0 0 0",
+              width: "100%",
+              height: 'auto',
+              // flexWrap: "wrap",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+
+
+          <div className='flex-row page-t3' style={{ fontSize: isMobile ? "15px" : "17px" }} >
+            /impact is working toward an 'Impact = Profit' economy.
+          </div>
+
+          <div className='flex-row page-t3' style={{ fontSize: isMobile ? "15px" : "17px" }} >
+            We want everyone on Farcaster (and beyond) to prosper simply by making meaning contributions in their community & the world. /impact is the first step in that journey.
+          </div>
+
+
+          <div className='flex-row page-t3' style={{ fontSize: isMobile ? "15px" : "17px" }} >
+            We're creating an Impact Market where curators are rewarded for proactively finding and evaluating impactful content and work on Farcaster.
+          </div>
+
+
+          <div className='flex-row page-t3' style={{ fontSize: isMobile ? "15px" : "17px" }} >
+            We're then rewarding members for growing this ecosystem and tipping impactful creators & builders.
+          </div>
+
+          <div className='flex-row page-t3' style={{ fontSize: isMobile ? "15px" : "17px" }} >
+            As the ecosystem grows a feedback loop will start forming between the impact created and the Network Economy.
+          </div>
+
+          <div className='flex-row page-t3' style={{ fontSize: isMobile ? "15px" : "17px", display: 'inline-block' }} >
+            Read about the <Link href="https://paragraph.xyz/@abundance/the-secret-impact-alpha-master-plan" target="_blank">
+              <span style={{ textDecoration: "underline" }} >Secret Impact Alpha Master Plan</span>
+            </Link>
+          </div>
+
+
+
+          </div>))}
+          
+
+
+          
+        </div>
+      </div>
+
+
+
+
+      {/* HOW IT WORKS */}
+
+      <div style={{ padding: "0px 4px 0px 4px", width: '100%' }}>
+
+
+
+
+        <div
+          id="how"
+          style={{
+            padding: isMobile ? "28px 0 20px 0" : "28px 0 20px 0",
+            width: "100%",
+          }}
+        ></div>
+
+        <div className='shadow'
+          style={{
+            padding: "8px",
+            backgroundColor: "#11448888",
+            borderRadius: "15px",
+            border: "1px solid #11447799",
+          }}
+        >
+          <div
+            className="flex-row"
+            style={{
+              width: "100%",
+              justifyContent: "center",
+              alignItems: "center",
+              padding: "16px 0 0 0",
+            }}
+          >
+            {/* <IoMdTrophy style={{ fill: "#cde" }} size={27} onClick={() => {
+              toggleMenu("how");
+            }} /> */}
+            <div onClick={() => {
+              toggleMenu("how");
+            }}>
+              <Description
+                {...{
+                  show: true,
+                  text: "How it works",
+                  padding: "4px 0 4px 10px",
+                  size: "large",
+                }}
+              />
+            </div>
+
+              <div
+                className="flex-row"
+                style={{
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  cursor: "pointer",
+                }}
+                onClick={() => {
+                  toggleMenu("how");
+                }}
+              >
+                {/* <Item {...{ text: "How it works" }} /> */}
+
+
+
+              <FaAngleDown
+                size={28} color={"#cde"}
+                style={{
+                  margin: "5px 15px 5px 5px",
+                  transform: display.how
+                    ? "rotate(180deg)"
+                    : "rotate(0deg)",
+                  transition: "transform 0.3s ease",
+                }}
+              />
+            </div>
+          </div>
+
+          {(!display.how && <div
+            className="flex-row"
+            style={{
+              color: "#9df",
+              width: "100%",
+              fontSize: isMobile ? "15px" : "17px",
+              padding: "10px 10px 15px 10px",
+              justifyContent: "center",
+              userSelect: 'none'
+            }}
+          >
+            Learn how to make the most out of /impact
+          </div>)}
+
+
+
+          {(display.how && (<div
+            className={isMobile ? "flex-col" : "flex-col"}
+            style={{
+              padding: "10px 0 0 0",
+              width: "100%",
+              height: 'auto',
+              // flexWrap: "wrap",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+
+
+            <div onClick={() =>
+              document
+                .getElementById("score")
+                .scrollIntoView({ behavior: "smooth" })
+              } style={{width: '100%', cursor: 'pointer !important'}}>
+              <ItemWrap crsr={true}>
+                <Item
+                  {...{
+                    icon: IoMdTrophy,
+                    text: "Impact Score",
+                    description:
+                      `/impact is currently running Daily Impact Rewards`,
+                  }}
+                />
+                <Item
+                  {...{ 
+                    noIcon: true,
+                    description: `You need a 3-day Impact Score of min 0.25 to be eligible` }}
+                />
+                <Item
+                  {...{ 
+                    noIcon: true,
+                    description: `Your chance to win Impact Rewards grow the more you curate, contribute and invite quality members into the ecosystem` }}
+                />
+
+              </ItemWrap>
+            </div>
+
+
+            <div onClick={() =>
+              document
+                .getElementById("curation")
+                .scrollIntoView({ behavior: "smooth" })
+              } style={{width: '100%'}}>
+              <ItemWrap crsr={true}>
+                <Item
+                  {...{
+                    icon: Medal,
+                    text: "Curate",
+                    description:
+                      `You get a daily allowance of $IMPACT points`,
+                  }}
+                />
+                <Item
+                  {...{
+                    noIcon: true,
+                    description: `Stake these points on casts based on their value to the Farcaster ecosystem`,
+                  }}
+                />
+                <Item
+                  {...{ 
+                    noIcon: true,
+                    description: `Overvaluing casts can result in a downvote, which lowers your future $IMPACT allowance` }}
+                />
+                <Item
+                  {...{ 
+                    noIcon: true,
+                    description: `
+                    90% of rewards flow to creators, and 10% to curators` }}
+                />
+              </ItemWrap>
+            </div>
+
+            <div onClick={() =>
+              document
+                .getElementById("autoFund")
+                .scrollIntoView({ behavior: "smooth" })
+              } style={{width: '100%'}}>
+              <ItemWrap crsr={true}>
+                <Item
+                  {...{
+                    icon: PiBankFill,
+                    text: "Auto-Fund",
+                    description: `Don't let your allowance go to waste `,
+                  }}
+                />
+                <Item
+                  {...{ 
+                    noIcon: true,
+                    description: `
+                    Auto-Fund automatically distributes your remaining $degen & $ham allowances to impactful builders and creators on Farcaster - and rewards you in the process` }}
+                />
+              </ItemWrap>
+            </div>
+
+            <div onClick={() =>
+              document
+                .getElementById("invites")
+                .scrollIntoView({ behavior: "smooth" })
+              } style={{width: '100%'}}>
+
+              <ItemWrap crsr={true}>
+                <Item
+                  {...{
+                    icon: FaUsers,
+                    text: "Invite",
+                    description:
+                      "Invite your friends to use Impact Alpha - win rewards. ",
+                  }}
+                />
+                <Item
+                  {...{ 
+                    noIcon: true,
+                    description: `
+                    any /impact frame you share has your referral` }}
+                />
+              </ItemWrap>
+            </div>
+
+            {/* <div style={{width: '100%'}}>
+              <ItemWrap>
+                <div onClick={() =>
+                document
+                  .getElementById("log in")
+                  .scrollIntoView({ behavior: "smooth" })
+                }>
+                  <Item
+                    {...{
+                      icon: IoLogIn,
+                      text: "Login",
+                      description:
+                        "Log in to get started",
+                    }}
+                  />
+                </div>
+              </ItemWrap>
+            </div> */}
+
+
+
+
+          </div>))}
+          
+
+
+          
+        </div>
+      </div>
 
 
 
@@ -1881,7 +2323,7 @@ export default function ProfilePage() {
 
 
 
-      {/* IMPACT SCORE */}
+      {/* MY REWARDS */}
 
       <div style={{ padding: "0px 4px 0px 4px", width: feedMax }}>
 
@@ -2031,15 +2473,19 @@ export default function ProfilePage() {
                     {dailyLoading ? 'Loading...' : (dailyRewards?.degen_total > 0 && dailyRewards?.claimed == false) ? 'Claim' : (dailyRewards?.degen_total > 0 && dailyRewards?.claimed == true) ? 'Claimed' : 'Check Score'}
                   </p>
                 </div>
-                <div style={{
+                <div 
+                  style={{
                     padding: "0px 5px",
                     alignItems: "center",
                     justifyContent: "center",
                     margin: '4px 0 -2px 0',
                     cursor: 'pointer'
-                  }} onClick={() => {
+                  }} 
+                  onClick={() => {
                     getDailyRewards(fid)
-                    }}>
+                    getTotalClaims(fid)
+                  }}
+                >
                   <Refresh className='' color={'#0077bf'} size={20} />
                 </div>
               </div>
@@ -2105,7 +2551,7 @@ export default function ProfilePage() {
                     textWrap: "nowrap",
                   }}
                 >
-                  {creatorLoading ? 'Loading...' : ((creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet) ? 'Airdropped' : ((creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet == null) ? 'Missing wallet' : 'No rewards'}
+                  {creatorLoading ? 'Loading...' : ((creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet) ? 'S2 Airdropped' : ((creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet == null) ? 'Missing wallet' : 'No rewards'}
                 </p>
               </div>
             </div>
@@ -2153,13 +2599,19 @@ export default function ProfilePage() {
                     {claimsLoading ? 'Loading...' : (totalClaims > 0) ? 'Claimed' : 'Check Score'}
                   </p>
                 </div>
-                <div style={{
+                <div 
+                  style={{
                     padding: "0px 5px",
                     alignItems: "center",
                     justifyContent: "center",
                     margin: '4px 0 -2px 0',
                     cursor: 'pointer'
-                  }} onClick={() => {getTotalClaims(fid)}}>
+                  }} 
+                  onClick={() => {
+                    getDailyRewards(fid)
+                    getTotalClaims(fid)
+                  }}
+                >
                   <Refresh className='' color={'#0077bf'} size={20} />
                 </div>
               </div>
@@ -2180,7 +2632,19 @@ export default function ProfilePage() {
           >
             Note: Daily Rewards accumulate for up to 4 days. Rewards expire after 4 days if unclaimed - they are then moved to the Creator Fund 
           </div>
-
+          <div
+            className="flex-row"
+            style={{
+              color: "#9df",
+              width: "100%",
+              textAlign: 'center',
+              fontSize: isMobile ? "12px" : "14px",
+              padding: "5px 10px 15px 10px",
+              justifyContent: "center",
+            }}
+          >
+            Daily Rewards are accumulated throughout the Season. They are then airdropped to your wallet after Claim Day.
+          </div>
 
         </div>
       </div>
@@ -2286,9 +2750,10 @@ export default function ProfilePage() {
           <div className={isMobile ? 'flex-col' : 'flex-row'} style={{justifyContent: 'center', gap: '0.5rem'}}>
             <div className='flex-row' style={{height: '30px', alignItems: 'center', justifyContent: 'center', padding: '20px 0 0 0'}}>
               <div className='flex-row' style={{padding: '4px 8px', backgroundColor: '#002244ee', border: '1px solid #666', borderRadius: '20px', alignItems: 'center', gap: '0.25rem'}}>
-                <div className={seasonToggle == 'all' ? 'filter-item-on' : 'filter-item'} onClick={() => {setSeasonToggle('all')}} style={{fontSize: '12px', fontWeight: '600'}}>All</div>
-                <div className={seasonToggle == 's1' ? 'filter-item-on' : 'filter-item'} onClick={() => {setSeasonToggle('s1')}} style={{fontSize: '12px', fontWeight: '600'}}>Season 1</div>
-                <div className={seasonToggle == 's2' ? 'filter-item-on' : 'filter-item'} onClick={() => {setSeasonToggle('s2')}} style={{fontSize: '12px', fontWeight: '600'}}>Season 2</div>
+                <div className={seasonToggle == 'all' ? 'filter-item-on' : 'filter-item'} onClick={() => {setSeasonToggle('all')}} style={{fontSize: '12px', fontWeight: '600'}}>All Seasons</div>
+                <div className={seasonToggle == 's1' ? 'filter-item-on' : 'filter-item'} onClick={() => {setSeasonToggle('s1')}} style={{fontSize: '12px', fontWeight: '600'}}>S1</div>
+                <div className={seasonToggle == 's2' ? 'filter-item-on' : 'filter-item'} onClick={() => {setSeasonToggle('s2')}} style={{fontSize: '12px', fontWeight: '600'}}>S2</div>
+                <div className={seasonToggle == 's3' ? 'filter-item-on' : 'filter-item'} onClick={() => {setSeasonToggle('s3')}} style={{fontSize: '12px', fontWeight: '600'}}>S3</div>
               </div>
             </div>
 
@@ -2680,7 +3145,7 @@ export default function ProfilePage() {
                       setFundingSchedule('remove-channel', channel)}} />
                   </div>
                 </div>)
-              ))}</>) : curatorList?.length > 0 ? (<><div style={{fontSize: '15px', color: '#eff', fontWeight: '600', padding: '3px', margin: '7px 5px'}}>Channels:</div>{curatorList?.map((curator, index) => (
+              ))}</>) : curatorList?.length > 0 ? (<><div style={{fontSize: '15px', color: '#eff', fontWeight: '600', padding: '3px', margin: '7px 5px'}}>Curators:</div>{curatorList?.map((curator, index) => (
                 (<div key={index} style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '7px 5px'}}>
                   <div className='cast-act-lt' style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', borderRadius: '88px', padding: '3px 10px 3px 3px', width: 'auto', margin: '0 5px 0 0'}}>
                     {curator?.pfp && (<img src={curator?.pfp} width={20} height={20} style={{borderRadius: '80px', border: '2px solid #eee', backgroundColor: '#8363ca'}} />)}
@@ -3157,6 +3622,195 @@ export default function ProfilePage() {
           </div></>)}
         </div>
       </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      {/* INVITES */}
+
+      <div style={{ padding: "0px 4px 0px 4px", width: feedMax }}>
+
+
+        <div
+          id="invites"
+          style={{
+            padding: isMobile ? "28px 0 20px 0" : "28px 0 20px 0",
+            width: "40%",
+          }}
+        ></div>
+
+        <div className='shadow'
+          style={{
+            padding: "8px",
+            backgroundColor: "#11448888",
+            borderRadius: "15px",
+            border: "1px solid #11447799",
+          }}
+        >
+          <div
+            className="flex-row"
+            style={{
+              width: "100%",
+              justifyContent: "center",
+              alignItems: "center",
+              padding: "16px 0 0 0",
+            }}
+          >
+            <FaUsers style={{ fill: "#cde" }} size={27} onClick={() => {
+                toggleMenu("invites");
+              }}/>
+            <div onClick={() => {
+                toggleMenu("invites");
+              }}>
+            <Description
+              {...{
+                show: true,
+                text: "Invites",
+                padding: "4px 0 4px 10px",
+                size: "large",
+              }}
+            />
+            </div>
+              <div
+                className="flex-row"
+                style={{
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  cursor: "pointer",
+                }}
+                onClick={() => {
+                  toggleMenu("invites");
+                }}
+              >
+                {/* <Item {...{ text: "How it works" }} /> */}
+                <FaAngleDown
+                  size={28} color={"#cde"}
+                  style={{
+                    margin: "5px 15px 5px 5px",
+                    transform: display.invites
+                      ? "rotate(180deg)"
+                      : "rotate(0deg)",
+                    transition: "transform 0.3s ease",
+                  }}
+                />
+              </div>
+          </div>
+
+          <div
+            className="flex-row"
+            style={{
+              color: "#9df",
+              width: "100%",
+              fontSize: isMobile ? "15px" : "17px",
+              padding: "10px 10px 15px 10px",
+              justifyContent: "center",
+              userSelect: 'none'
+            }}
+          >
+            Your invited contributors
+          </div>
+
+          {(display.invites && <>
+            {loading.invites ? (
+            <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
+              <Spinner size={31} color={'#468'} />
+            </div>
+          ) : (<div
+            className="flex-row"
+            style={{
+              padding: "0px 0 0 0",
+              width: "100%",
+              flexWrap: "wrap",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+
+
+
+            <div className='flex-row' style={{padding: '10px 5px 20px 5px', flexWrap: 'wrap', minWidth: feedMax, gap: '0.5rem', justifyContent: 'center', maxWidth: textMax}}>
+              {invites?.length > 0 ? invites.map((invite, index) => { return (
+                <Link key={index} target="_blank" href={`https://warpcast.com/${invite.username}`}
+                //  href={`/~/ecosystems/${eco?.ecosystem_handle || 'abundance'}/curators/${invite?.username}`}
+                 >
+                  <div className='btn-blu' style={{gap: '1.5rem', minWidth: isMobile ? '290px' : '250px'}}>
+                    <div className='flex-row' style={{gap: '0.5rem', paddingBottom: '0px', justifyContent: 'flex-start', alignItems: 'center'}}>
+                      <img loading="lazy" src={invite?.pfp} className="" alt={`${invite?.username} avatar`} style={{width: '36px', height: '36px', maxWidth: '36px', maxHeight: '36px', borderRadius: '24px', border: '1px solid #000'}} />
+
+                      <div style={{fontSize: isMobile ? '16px' : '15px', fontWeight: '400', color: '#eff'}}>@{invite?.username}</div>
+                    </div>
+
+                    <div style={{width: '100%', borderBottom: '1px solid #68a', fontSize: '1px', margin: '10px 0 0 0'}}>&nbsp;</div>
+
+                    {/* <div style={{fontSize: isMobile ? '12px' : '13px', fontWeight: '400', color: '#abc', padding: '10px 0 0 0'}}>Impact Score: {invite?.score}</div> */}
+
+                    {invite?.score >= 0 && (<div className='flex-row' style={{padding: '10px 0 0 0', alignItems: 'flex-end', gap: '0.25rem'}}>
+                      <div style={{fontSize: isMobile ? '12px' : '13px', fontWeight: '600', color: '#abc'}}>Impact Score:</div>
+                      <div style={{fontSize: isMobile ? '11px' : '12px', fontWeight: '400', color: invite?.score > 0 ? '#0c0' : '#abc'}}>{invite?.score}</div>
+                    </div>)}
+
+                    {invite?.staked >= 0 && (<div className='flex-row' style={{padding: '10px 0 0 0', alignItems: 'flex-end', gap: '0.25rem'}}>
+                      <div style={{fontSize: isMobile ? '12px' : '13px', fontWeight: '600', color: '#abc'}}>Staked:</div>
+                      <div style={{fontSize: isMobile ? '11px' : '12px', fontWeight: '400', color: invite?.staked > 0 ? '#0c0' : '#abc'}}>{invite?.staked ? invite?.staked + ' $impact' : 0}</div>
+                    </div>)}
+
+
+                    {(<div className='flex-row' style={{padding: '10px 0 0 0', alignItems: 'flex-end', gap: '0.25rem'}}>
+                      <div style={{fontSize: isMobile ? '12px' : '13px', fontWeight: '600', color: '#abc'}}>Auto-funding:</div>
+                      <div style={{fontSize: isMobile ? '11px' : '12px', fontWeight: '400', color: invite?.active ? '#0c0' : '#f66'}}>{invite?.active ? 'on' : 'off'}</div>
+                    </div>)}
+
+
+                    {invite?.autoFund >= 0 && (<div className='flex-row' style={{padding: '10px 0 0 0', alignItems: 'flex-end', gap: '0.25rem'}}>
+                      <div style={{fontSize: isMobile ? '12px' : '13px', fontWeight: '600', color: '#abc'}}>Referral:</div>
+                      <div style={{fontSize: isMobile ? '11px' : '12px', fontWeight: '400', color: invite?.autoFund > 0 ? '#0c0' : '#abc'}}>{invite?.autoFund ? invite?.autoFund + ' $degen' : 0}</div>
+                    </div>)}
+
+                  </div>
+                </Link>
+              )}) : (
+                <div style={{fontSize: '20px', color: '#def'}}>No invites found</div>)}
+            </div>
+          </div>)}
+          </>)}
+        </div>
+      </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
