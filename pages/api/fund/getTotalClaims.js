@@ -36,7 +36,7 @@ export default async function handler(req, res) {
         try {
           await connectToDatabase();
           let totalClaims = await Claim.aggregate([
-            { $match: { fid: fid, claimed: true, season: 3 } },
+            { $match: { fid: fid, claimed: true, season: 4 } },
             { $group: { _id: null, total: { $sum: "$degen_amount" } } }
           ]).exec();
           if (totalClaims.length > 0) {
