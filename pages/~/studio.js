@@ -180,19 +180,27 @@ export default function ProfilePage() {
         params: { fid }
       })
       if (response?.data) {
-        const profile = response?.data?.data?.Socials?.Social[0] || null
+        const profile = response?.data?.data || null
+        // const profile = response?.data?.data?.Socials?.Social[0] || null
         console.log('profile', profile)
         const populatedProfile = {
-          username: profile?.profileName,
+          // username: profile?.profileName,
+          username: profile?.username,
+          // pfp: {
+          //   url: profile?.profileImage,
+          // },
           pfp: {
-            url: profile?.profileImage,
+            url: profile?.pfp?.url,
           },
-          displayName: profile?.profileDisplayName,
+          // displayName: profile?.profileDisplayName,
+          displayName: profile?.displayName,
+          // activeOnFcNetwork: true,
           activeOnFcNetwork: true,
-          profile: { bio: { text: profile?.profileBio } },
+          // profile: { bio: { text: profile?.profileBio } },
+          profile: { bio: { text: profile?.profile?.bio?.text || "" } },
           followingCount: profile?.followingCount,
           followerCount: profile?.followerCount,
-          fid: Number(profile?.userId)
+          fid: Number(profile?.fid)
         }
         setUser(populatedProfile)
       } else {
