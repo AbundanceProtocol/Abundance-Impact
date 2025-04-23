@@ -7,7 +7,7 @@ import Impact from '../../../../models/Impact';
 import Quality from '../../../../models/Quality';
 import Cast from "../../../../models/Cast";
 import EcosystemRules from "../../../../models/EcosystemRules";
-import { init, validateFramesMessage } from "@airstack/frames";
+// import { init, validateFramesMessage } from "@airstack/frames";
 
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 const HubURL = process.env.NEYNAR_HUB
@@ -15,14 +15,15 @@ const client = HubURL ? getSSLHubRpcClient(HubURL) : undefined;
 const apiKey = process.env.NEYNAR_API_KEY
 
 export default async function handler(req, res) {
-  init(process.env.AIRSTACK_API_KEY ?? '')
-  const body = await req.body;
-  const {isValid, message} = await validateFramesMessage(body)
+  // init(process.env.AIRSTACK_API_KEY ?? '')
+  // const body = await req.body;
+  // const {isValid, message} = await validateFramesMessage(body)
 
   if (req.method === 'POST') {
     const points = req.query.pt
     const eco = points?.substring(1)
-    const curatorFid = message?.data?.fid
+    // const curatorFid = message?.data?.fid
+    const curatorFid = req.body.untrustedData?.fid
     const castHash = req.body.untrustedData.castId.hash
     // const authorFid = message?.data?.frameActionBody?.castId?.fid
     console.log('28', points, curatorFid, castHash)

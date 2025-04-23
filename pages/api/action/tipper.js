@@ -7,7 +7,7 @@ import Impact from '../../../models/Impact';
 import Quality from '../../../models/Quality';
 import Cast from "../../../models/Cast";
 import EcosystemRules from "../../../models/EcosystemRules";
-import { init, validateFramesMessage } from "@airstack/frames";
+// import { init, validateFramesMessage } from "@airstack/frames";
 
 const HubURL = process.env.NEYNAR_HUB
 const client = HubURL ? getSSLHubRpcClient(HubURL) : undefined;
@@ -16,15 +16,16 @@ const apiKey = process.env.NEYNAR_API_KEY
 // const secretKey = process.env.SECRET_KEY
 
 export default async function handler(req, res) {
-  init(process.env.AIRSTACK_API_KEY ?? '')
-  const body = await req.body;
-  const {isValid, message} = await validateFramesMessage(body)
+  // init(process.env.AIRSTACK_API_KEY ?? '')
+  // const body = await req.body;
+  // const {isValid, message} = await validateFramesMessage(body)
   
   if (req.method === 'POST') {
     // const impactAmount = 1
     const eco = req.query.points
     const points = '$' + eco
-    const curatorFid = message?.data?.fid
+    // const curatorFid = message?.data?.fid
+    const curatorFid = req.body.untrustedData?.fid
     const castHash = req.body.untrustedData.castId.hash
     // const authorFid = message?.data?.frameActionBody?.castId?.fid
     console.log('28', points, curatorFid, castHash)
