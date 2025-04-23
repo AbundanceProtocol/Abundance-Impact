@@ -9,7 +9,7 @@ import EcosystemRules from  "../../../../models/EcosystemRules";
 import { decryptPassword, getTimeRange, processTips, populateCast } from "../../../../utils/utils";
 import _ from "lodash";
 import qs from "querystring";
-import { init, validateFramesMessage } from "@airstack/frames";
+// import { init, validateFramesMessage } from "@airstack/frames";
 
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 const HubURL = process.env.NEYNAR_HUB
@@ -18,10 +18,10 @@ const secretKey = process.env.SECRET_KEY
 const apiKey = process.env.NEYNAR_API_KEY
 
 export default async function handler(req, res) {
-  init(process.env.AIRSTACK_API_KEY ?? '')
-  const body = await req.body;
-  const {isValid, message} = await validateFramesMessage(body)
-  console.log('isValid:', isValid)
+  // init(process.env.AIRSTACK_API_KEY ?? '')
+  // const body = await req.body;
+  // const {isValid, message} = await validateFramesMessage(body)
+  // console.log('isValid:', isValid)
   const { time, curators, channels, tags, eco, ecosystem, refresh, time1, referrer } = req.query;
   const { untrustedData } = req.body
 
@@ -245,8 +245,10 @@ export default async function handler(req, res) {
     const timePlus1 = new Date(now.getTime() + 1 * 60 * 1000);
     const points = '$' + eco
 
-    const fid = message?.data?.fid
-    const authorFid = message?.data?.frameActionBody?.castId?.fid
+    // const fid = message?.data?.fid
+    const fid = req.body.untrustedData?.fid
+    // const authorFid = message?.data?.frameActionBody?.castId?.fid
+    const authorFid = req.body.untrustedData.castId.fid
 
     const loginImg = `${baseURL}/images/login.jpg`;
     const tipsImg = `${baseURL}/images/frame36.gif`
