@@ -12,7 +12,7 @@ const claimSchema = new mongoose.Schema({
   points: { type: String, default: '$IMPACT', index: true },
   claimed: { type: Boolean, default: false, index: true },
   cast_hash: { type: String, default: null, index: true },
-  season: { type: Number, default: 4 },
+  season: { type: Number, default: 5 },
   createdAt: { type: Date, default: () => new Date(), index: true }
 });
 
