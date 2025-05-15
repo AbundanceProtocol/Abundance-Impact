@@ -7,7 +7,7 @@ import connectToDatabase from "../../../../libs/mongodb";
 // import Quality from '../../../../models/Quality';
 // import Cast from "../../../../models/Cast";
 // import EcosystemRules from "../../../../models/EcosystemRules";
-import { init, validateFramesMessage } from "@airstack/frames";
+// import { init, validateFramesMessage } from "@airstack/frames";
 import { decryptPassword } from "../../../../utils/utils";
 import Tip from "../../../../models/Tip";
 
@@ -20,17 +20,19 @@ const encryptedTipUuid = process.env.ENCRYPTED_TIP_UUID
 const userFid = process.env.USER_FID
 
 export default async function handler(req, res) {
-  init(process.env.AIRSTACK_API_KEY ?? '')
-  const body = await req.body;
-  const {isValid, message} = await validateFramesMessage(body)
+  // init(process.env.AIRSTACK_API_KEY ?? '')
+  // const body = await req.body;
+  // const {isValid, message} = await validateFramesMessage(body)
   // console.log('message', message)
 
   if (req.method === 'POST') {
     // const points = req.query.pt
     // const eco = points?.substring(1)
-    const curatorFid = message?.data?.fid
+    // const curatorFid = message?.data?.fid
+    const curatorFid = req.body.untrustedData?.fid
     const castHash = req.body.untrustedData.castId.hash
-    const authorFid = message?.data?.frameActionBody?.castId?.fid
+    // const authorFid = message?.data?.frameActionBody?.castId?.fid
+    const authorFid = req.body.untrustedData.castId.fid
     console.log('authorFid 01', authorFid, castHash, curatorFid)
 
     if ((Number(curatorFid) !== 9326 && Number(curatorFid) !== Number(userFid)) || (Number(authorFid) == 9326)) {

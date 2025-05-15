@@ -103,7 +103,7 @@ export default function ProfilePage() {
   const [totalClaims, setTotalClaims] = useState(0)
   const [claimsLoading, setClaimsLoading] = useState(true)
   const [fundToggle, setFundToggle] = useState(true)
-  const [seasonToggle, setSeasonToggle] = useState('s3')
+  const [seasonToggle, setSeasonToggle] = useState('s4')
   const [userFunding, setUserFunding] = useState(null)
   const [isSelected, setIsSelected] = useState('none')
   const [userSearch, setUserSearch] = useState({ search: '' })
@@ -180,19 +180,27 @@ export default function ProfilePage() {
         params: { fid }
       })
       if (response?.data) {
-        const profile = response?.data?.data?.Socials?.Social[0] || null
+        const profile = response?.data?.data || null
+        // const profile = response?.data?.data?.Socials?.Social[0] || null
         console.log('profile', profile)
         const populatedProfile = {
-          username: profile?.profileName,
+          // username: profile?.profileName,
+          username: profile?.username,
+          // pfp: {
+          //   url: profile?.profileImage,
+          // },
           pfp: {
-            url: profile?.profileImage,
+            url: profile?.pfp?.url,
           },
-          displayName: profile?.profileDisplayName,
+          // displayName: profile?.profileDisplayName,
+          displayName: profile?.displayName,
+          // activeOnFcNetwork: true,
           activeOnFcNetwork: true,
-          profile: { bio: { text: profile?.profileBio } },
+          // profile: { bio: { text: profile?.profileBio } },
+          profile: { bio: { text: profile?.profile?.bio?.text || "" } },
           followingCount: profile?.followingCount,
           followerCount: profile?.followerCount,
-          fid: Number(profile?.userId)
+          fid: Number(profile?.fid)
         }
         setUser(populatedProfile)
       } else {
@@ -1292,6 +1300,9 @@ export default function ProfilePage() {
     } else if (seasonToggle == 's3') {
       totalIndex = fundData?.totalFunds?.findIndex(data => data._id === 3);
       userIndex = fundData?.userFunds?.findIndex(data => data._id === 3);
+    } else if (seasonToggle == 's4') {
+      totalIndex = fundData?.totalFunds?.findIndex(data => data._id === 4);
+      userIndex = fundData?.userFunds?.findIndex(data => data._id === 4);
     }
 
     if (seasonToggle == 'all') {
@@ -2551,13 +2562,13 @@ export default function ProfilePage() {
                     textWrap: "nowrap",
                   }}
                 >
-                  {creatorLoading ? 'Loading...' : ((creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet) ? 'S2 Airdropped' : ((creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet == null) ? 'Missing wallet' : 'No rewards'}
+                  {creatorLoading ? 'Loading...' : ((creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet) ? 'S3 Airdropped' : ((creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet == null) ? 'Missing wallet' : 'No rewards'}
                 </p>
               </div>
             </div>
             <div className={`flex-col btn-select blu-drk shadow`} style={{minWidth: isMobile ? '135px' : '130px', color: '#cde', height: '120px', width: '22%', cursor: 'default'}}>
               <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
-                <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0', color: '#44aaff'}}>Total Claimed</div>
+                <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0', color: '#44aaff'}}>Total Claimed (S4)</div>
               </div>
               {claimsLoading ? (
                 <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '0 20px'}}>
@@ -2754,6 +2765,7 @@ export default function ProfilePage() {
                 <div className={seasonToggle == 's1' ? 'filter-item-on' : 'filter-item'} onClick={() => {setSeasonToggle('s1')}} style={{fontSize: '12px', fontWeight: '600'}}>S1</div>
                 <div className={seasonToggle == 's2' ? 'filter-item-on' : 'filter-item'} onClick={() => {setSeasonToggle('s2')}} style={{fontSize: '12px', fontWeight: '600'}}>S2</div>
                 <div className={seasonToggle == 's3' ? 'filter-item-on' : 'filter-item'} onClick={() => {setSeasonToggle('s3')}} style={{fontSize: '12px', fontWeight: '600'}}>S3</div>
+                <div className={seasonToggle == 's4' ? 'filter-item-on' : 'filter-item'} onClick={() => {setSeasonToggle('s4')}} style={{fontSize: '12px', fontWeight: '600'}}>S4</div>
               </div>
             </div>
 

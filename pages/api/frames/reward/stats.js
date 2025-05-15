@@ -155,7 +155,7 @@ export default async function handler(req, res) {
         shareUrl = `https://impact.abundance.id/~/ecosystems/${'abundance'}/rewards-v1?${qs.stringify({ fid })}`
 
 
-        shareText = `My /impact Creator Fund Season 2 airdrop (frame by @abundance)\n\nCheck out yours 👇`
+        shareText = `My /impact Creator Fund Season 4 airdrop (frame by @abundance)\n\nCheck out yours 👇`
 
         encodedShareText = encodeURIComponent(shareText)
       
