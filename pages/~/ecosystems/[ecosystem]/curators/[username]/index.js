@@ -25,7 +25,7 @@ export default function ProfilePage() {
   const [ref, inView] = useInView()
   const { ecosystem, username, app, userFid, pass } = router.query
   const [user, setUser] = useState(null)
-  const { LoginPopup, isLogged, setPoints, setIsLogged, setFid, miniApp, setMiniApp } = useContext(AccountContext)
+  const { fid, LoginPopup, LogoutPopup, isLogged, setPoints, setIsLogged, setFid, miniApp, setMiniApp, autotipping, setAutotipping } = useContext(AccountContext)
   const ref1 = useRef(null)
   const [textMax, setTextMax] = useState('430px')
   const [screenWidth, setScreenWidth ] = useState(undefined)
@@ -124,23 +124,30 @@ export default function ProfilePage() {
 
   async function getCuratorData(username) {
     try {
-      const response = await axios.get('/api/getCurator', {
+      const response = await axios.get('/api/getCuratorProfile', {
         params: { username }
       })
       console.log(response)
       if (response?.data) {
-        const profile = response?.data?.user || null
+        const profile = response?.data?.data || null
         const populatedProfile = {
+          // username: profile?.profileName,
           username: profile?.username,
+          // pfp: {
+          //   url: profile?.profileImage,
+          // },
           pfp: {
             url: profile?.pfp?.url,
           },
+          // displayName: profile?.profileDisplayName,
           displayName: profile?.displayName,
+          // activeOnFcNetwork: true,
           activeOnFcNetwork: true,
-          profile: { bio: { text: profile?.bio?.profile } },
+          // profile: { bio: { text: profile?.profileBio } },
+          profile: { bio: { text: profile?.profile?.bio?.text || "" } },
           followingCount: profile?.followingCount,
           followerCount: profile?.followerCount,
-          fid: profile?.fid
+          fid: Number(profile?.fid)
         }
         setUser(populatedProfile)
       
@@ -148,35 +155,6 @@ export default function ProfilePage() {
           params: { fid: populatedProfile?.fid }
         })
 
-        if (updateResponse?.data?.data?.Socials?.Social[0]) {
-          const profile = updateResponse?.data?.data?.Socials?.Social[0] || null
-          console.log('profile', profile)
-          const updateProfile = {
-            username: profile?.profileName,
-            pfp: {
-              url: profile?.profileImage,
-            },
-            displayName: profile?.profileDisplayName,
-            activeOnFcNetwork: true,
-            profile: { bio: { text: profile?.profileBio } },
-            followingCount: profile?.followingCount,
-            followerCount: profile?.followerCount,
-            fid: Number(profile?.userId)
-          }
-          setUser(updateProfile)
-
-          if ((updateProfile?.pfp?.url && updateProfile?.pfp?.url !== populatedProfile?.pfp?.url && updateProfile?.pfp?.url?.length > 0) || (updateProfile?.displayName && updateProfile?.displayName !== populatedProfile?.displayName && updateProfile?.displayName?.length > 0) || (updateProfile?.username && updateProfile?.username !== populatedProfile?.username && updateProfile?.username?.length > 0)) {
-            const updatedUser = await axios.post('/api/updateUserProfile', {       
-              fid: updateProfile?.fid,
-              username: updateProfile?.username,
-              pfp: updateProfile?.pfp?.url,
-              displayName: updateProfile?.displayName
-            })
-            console.log('updatedUser', updatedUser)
-          }
-        } else {
-          setUser(null)
-        }
       } else {
         setUser(null)
       }
