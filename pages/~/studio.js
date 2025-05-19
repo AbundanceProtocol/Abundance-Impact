@@ -103,7 +103,7 @@ export default function ProfilePage() {
   const [totalClaims, setTotalClaims] = useState(0)
   const [claimsLoading, setClaimsLoading] = useState(true)
   const [fundToggle, setFundToggle] = useState(true)
-  const [seasonToggle, setSeasonToggle] = useState('s4')
+  const [seasonToggle, setSeasonToggle] = useState('s5') // update season 5/15
   const [userFunding, setUserFunding] = useState(null)
   const [isSelected, setIsSelected] = useState('none')
   const [userSearch, setUserSearch] = useState({ search: '' })
@@ -1303,7 +1303,10 @@ export default function ProfilePage() {
     } else if (seasonToggle == 's4') {
       totalIndex = fundData?.totalFunds?.findIndex(data => data._id === 4);
       userIndex = fundData?.userFunds?.findIndex(data => data._id === 4);
-    }
+    } else if (seasonToggle == 's5') {
+      totalIndex = fundData?.totalFunds?.findIndex(data => data._id === 5);
+      userIndex = fundData?.userFunds?.findIndex(data => data._id === 5);
+    } // update season 5/15
 
     if (seasonToggle == 'all') {
       for (const fund of fundData.userFunds) {
@@ -2562,13 +2565,13 @@ export default function ProfilePage() {
                     textWrap: "nowrap",
                   }}
                 >
-                  {creatorLoading ? 'Loading...' : ((creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet) ? 'S3 Airdropped' : ((creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet == null) ? 'Missing wallet' : 'No rewards'}
-                </p>
+                  {creatorLoading ? 'Loading...' : ((creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet) ? 'S4 Airdropped' : ((creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet == null) ? 'Missing wallet' : 'No rewards'}
+                </p> {/* update season 5/15 */}
               </div>
             </div>
             <div className={`flex-col btn-select blu-drk shadow`} style={{minWidth: isMobile ? '135px' : '130px', color: '#cde', height: '120px', width: '22%', cursor: 'default'}}>
               <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
-                <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0', color: '#44aaff'}}>Total Claimed (S4)</div>
+                <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0', color: '#44aaff'}}>Total Claimed (S5)</div> {/* update season 5/15 */}
               </div>
               {claimsLoading ? (
                 <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '0 20px'}}>
@@ -2766,6 +2769,7 @@ export default function ProfilePage() {
                 <div className={seasonToggle == 's2' ? 'filter-item-on' : 'filter-item'} onClick={() => {setSeasonToggle('s2')}} style={{fontSize: '12px', fontWeight: '600'}}>S2</div>
                 <div className={seasonToggle == 's3' ? 'filter-item-on' : 'filter-item'} onClick={() => {setSeasonToggle('s3')}} style={{fontSize: '12px', fontWeight: '600'}}>S3</div>
                 <div className={seasonToggle == 's4' ? 'filter-item-on' : 'filter-item'} onClick={() => {setSeasonToggle('s4')}} style={{fontSize: '12px', fontWeight: '600'}}>S4</div>
+                <div className={seasonToggle == 's5' ? 'filter-item-on' : 'filter-item'} onClick={() => {setSeasonToggle('s5')}} style={{fontSize: '12px', fontWeight: '600'}}>S5</div> {/* update season 5/15 */}
               </div>
             </div>
 

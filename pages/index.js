@@ -434,7 +434,7 @@ export default function Home() {
           </div>
 
           <div className='flex-row page-t3' style={{ fontSize: isMobile ? "15px" : "17px" }} >
-            We want everyone on Farcaster (and beyond) to prosper simply by making meaning contributions in their community & the world. /impact is the first step in that journey.
+            We want everyone on Farcaster (and beyond) to prosper simply by making meaningful contributions in their community & the world. /impact is the first step in that journey.
           </div>
 
 
