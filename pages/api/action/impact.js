@@ -105,7 +105,7 @@ export default async function handler(req, res) {
       if (getCastData) {
         // if (getCastData.root_parent_url) {
         //   const isChannel = getCastData.root_parent_url.slice(0,31)
-        //   if (isChannel == 'https://warpcast.com/~/channel/') {
+        //   if (isChannel == 'https://farcaster.xyz/~/channel/') {
         //     channel = getCastData.root_parent_url
         //   }
         // }

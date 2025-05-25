@@ -356,7 +356,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
                     goToUserProfile(event, cast.author)
                   }
                 }}>@{cast.author.username}</a> */}
-                <a href={`https://warpcast.com/${cast.author.username}`} className="fc-lnk" title={cast.author.display_name}>@{cast.author.username}</a>
+                <a href={`https://farcaster.xyz/${cast.author.username}`} className="fc-lnk" title={cast.author.display_name}>@{cast.author.username}</a>
               </span>
               <div className="">·</div>
 
@@ -372,7 +372,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
                 }}
                 ></a> */}
 
-              <a href={`https://warpcast.com/${cast?.author?.username}/${cast?.hash?.substring(0, 10)}`} className="fc-lnk" title="Navigate to cast">
+              <a href={`https://farcaster.xyz/${cast?.author?.username}/${cast?.hash?.substring(0, 10)}`} className="fc-lnk" title="Navigate to cast">
                 <div className="user-font">{timePassed(cast.timestamp)}</div>
               </a>
             </div>

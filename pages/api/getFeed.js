@@ -19,7 +19,7 @@ export default async function handler(req, res) {
         for (let i = 0; i < feed.casts.length; i++) {
           if (feed.casts[i].root_parent_url !== null) {
             const isChannel = feed.casts[i].root_parent_url.slice(0,31)
-            if (isChannel == 'https://warpcast.com/~/channel/') {
+            if (isChannel == 'https://farcaster.xyz/~/channel/') {
               const base = "https://api.neynar.com/";
               const getChannel = feed.casts[i].root_parent_url.slice(31)
               const channelQuery = `${base}v2/farcaster/channel?id=${getChannel}`;

@@ -49,7 +49,7 @@ export default function Tips({eco, ecosystem}) {
   
   const encodedShareText = encodeURIComponent(shareText); 
   let encodedShareUrl = encodeURIComponent(shareUrl); 
-  let shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
+  let shareLink = `https://farcaster.xyz/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
 
   const initFrame = 
     {
@@ -74,7 +74,7 @@ export default function Tips({eco, ecosystem}) {
           index: 3,
           title: "Cast Action",
           action_type: "link",
-          target: `https://warpcast.com/~/add-cast-action?name=%24${eco?.substring(1)}+Console&icon=star&actionType=post&postUrl=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Faction%2Fstatus%3Fpoints=${eco?.substring(1)}&description=Curate+Casts+with+the+Impact+App`
+          target: `https://farcaster.xyz/~/add-cast-action?name=%24${eco?.substring(1)}+Console&icon=star&actionType=post&postUrl=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Faction%2Fstatus%3Fpoints=${eco?.substring(1)}&description=Curate+Casts+with+the+Impact+App`
         },
         {
           index: 4,
@@ -188,7 +188,7 @@ export default function Tips({eco, ecosystem}) {
     //   time, curators, eco, ecosystem, start: true
     // })}`
 
-    // updatedFrameData.buttons[2].target = `https://warpcast.com/~/add-cast-action?name=%24${eco?.substring(1)}+Console&icon=star&actionType=post&postUrl=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Faction%2Fstatus%3Fpoints=${eco?.substring(1)}&description=Curate+Casts+with+the+Impact+App`
+    // updatedFrameData.buttons[2].target = `https://farcaster.xyz/~/add-cast-action?name=%24${eco?.substring(1)}+Console&icon=star&actionType=post&postUrl=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Faction%2Fstatus%3Fpoints=${eco?.substring(1)}&description=Curate+Casts+with+the+Impact+App`
 
 
     // updatedFrameData.image = `${baseURL}/images/frame40.gif`
@@ -338,7 +338,7 @@ export default function Tips({eco, ecosystem}) {
 
         <meta property="fc:frame:button:3" content={`Cast Action`} />
         <meta property="fc:frame:button:3:action" content="link" />
-        <meta property="fc:frame:button:3:target" content={`https://warpcast.com/~/add-cast-action?name=%24${eco?.substring(1)}+Console&icon=star&actionType=post&postUrl=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Faction%2Fstatus%3Fpoints=${eco?.substring(1)}&description=Curate+Casts+with+the+Impact+App`} />
+        <meta property="fc:frame:button:3:target" content={`https://farcaster.xyz/~/add-cast-action?name=%24${eco?.substring(1)}+Console&icon=star&actionType=post&postUrl=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Faction%2Fstatus%3Fpoints=${eco?.substring(1)}&description=Curate+Casts+with+the+Impact+App`} />
 
         <meta property="fc:frame:button:4" content={`What's /impact?`} />
         <meta property="fc:frame:button:4:action" content="link" />

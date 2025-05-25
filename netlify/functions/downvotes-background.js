@@ -74,7 +74,7 @@ exports.handler = async function(event, context) {
       for (const item of qualityPointsSum) {
         let url = ``
         if (item?.author && item?.hash) {
-          url = `https://warpcast.com/${item?.author}/${item?.hash?.substring(0, 10)}`
+          url = `https://farcaster.xyz/${item?.author}/${item?.hash?.substring(0, 10)}`
         }
         item.url = url
       }

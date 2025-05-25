@@ -59,7 +59,7 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem, fi
           index: 2,
           title: "What's /impact?",
           action_type: "link",
-          target: `https://warpcast.com/abundance/0x43ddd672`
+          target: `https://farcaster.xyz/abundance/0x43ddd672`
         },
       ],
       input: {
@@ -308,7 +308,7 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem, fi
 
         <meta property="fc:frame:button:2" content={`What's /impact?`} />
         <meta property="fc:frame:button:2:action" content="link" />
-        <meta property="fc:frame:button:2:target" content={`https://warpcast.com/abundance/0x43ddd672`} />
+        <meta property="fc:frame:button:2:target" content={`https://farcaster.xyz/abundance/0x43ddd672`} />
 
         <meta name="fc:frame:input:text" content="Eg.: 1000 $Degen, 500 $HAM" />
       </Head>

@@ -21,7 +21,7 @@ const UserData = ({ user, textMax, userAllowance, getCurationAllowance, show }) 
         <div style={{width: '100%'}}>
           <div className="flex-row">
             <span className="" datastate="closed" style={{margin: '0 10px 0 0'}}>
-              <a className="" title="" href={`https://warpcast.com/${user?.username}`}>
+              <a className="" title="" href={`https://farcaster.xyz/${user?.username}`}>
                 <img loading="lazy" src={user?.pfp_url} className="" alt={`${user?.display_name} avatar`} style={{width: '48px', height: '48px', maxWidth: '48px', maxHeight: '48px', borderRadius: '24px', border: '1px solid #cdd'}} />
               </a>
             </span>
@@ -29,7 +29,7 @@ const UserData = ({ user, textMax, userAllowance, getCurationAllowance, show }) 
               <div className="flex-row" style={{width: '100%', justifyContent: 'space-between', height: '', alignItems: 'flex-start'}}>
                 <div className="flex-row" style={{alignItems: 'center', gap: '0.25rem', flexWrap: 'wrap'}}>
                   <span className="">
-                    <a className="fc-lnk" title="" href={`https://warpcast.com/${user?.username}`}>
+                    <a className="fc-lnk" title="" href={`https://farcaster.xyz/${user?.username}`}>
                       <div className="flex-row" style={{alignItems: 'center'}}>
                         <span className="name-font" style={{color: '#cdd', fontSize: '18px'}}>{user?.display_name}</span>
                         <div className="" style={{margin: '0 0 0 3px'}}>
@@ -39,10 +39,10 @@ const UserData = ({ user, textMax, userAllowance, getCurationAllowance, show }) 
                     </a>
                   </span>
                   <span className="user-font">
-                    <a className="fc-lnk" title="" href={`https://warpcast.com/${user?.username}`} style={{color: '#cdd'}}>@{user?.username}</a>
+                    <a className="fc-lnk" title="" href={`https://farcaster.xyz/${user?.username}`} style={{color: '#cdd'}}>@{user?.username}</a>
                   </span>
                   <div className="">·</div>
-                  <a className="fc-lnk" title="Navigate to cast" href={`https://warpcast.com/${user?.username}`}>
+                  <a className="fc-lnk" title="Navigate to cast" href={`https://farcaster.xyz/${user?.username}`}>
                     <div className="fid-btn" style={{backgroundColor: '#355', color: '#cdd'}}>fid: {user?.fid}</div>
                   </a>
                 </div>

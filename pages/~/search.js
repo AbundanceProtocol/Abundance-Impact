@@ -188,7 +188,7 @@ export default function Search() {
               <div>
                 <div className="flex-row">
                   <span className="" datastate="closed" style={{margin: '0 10px 0 0'}}>
-                    <a className="" title="" href={`https://warpcast.com/${user.username}`}>
+                    <a className="" title="" href={`https://farcaster.xyz/${user.username}`}>
                       <img loading="lazy" src={user.pfp_url} className="" alt={`${user.display_name} avatar`} style={{width: '48px', height: '48px', maxWidth: '48px', maxHeight: '48px', borderRadius: '24px', border: '1px solid #000'}} />
                     </a>
                   </span>
@@ -206,10 +206,10 @@ export default function Search() {
                           </a>
                         </span>
                         <span className="user-font" datastate="closed">
-                          <a className="fc-lnk" title="" href={`https://warpcast.com/${user.username}`}>@{user.username}</a>
+                          <a className="fc-lnk" title="" href={`https://farcaster.xyz/${user.username}`}>@{user.username}</a>
                         </span>
                         <div className="">·</div>
-                        <a className="fc-lnk" title="Navigate to cast" href={`https://warpcast.com/${user.username}`}>
+                        <a className="fc-lnk" title="Navigate to cast" href={`https://farcaster.xyz/${user.username}`}>
                           <div className="fid-btn">fid: {user.fid}</div>
                         </a>
                       </div>
@@ -391,7 +391,7 @@ export default function Search() {
               <div className="">
                 <div className="flex-row">
                   <span className="" datastate="closed" style={{margin: '0 10px 0 0'}}>
-                    <a className="" title="" href={`https://warpcast.com/~/channel/${channel.id}`}>
+                    <a className="" title="" href={`https://farcaster.xyz/~/channel/${channel.id}`}>
                       <img loading="lazy" src={channel.image_url} className="" alt="" style={{width: '48px', height: '48px', maxWidth: '48px', maxHeight: '48px', borderRadius: '24px', border: '1px solid #000'}} />
                     </a>
                   </span>
@@ -399,14 +399,14 @@ export default function Search() {
                     <div className="flex-row" style={{width: '100%', justifyContent: 'space-between', height: '20px', alignItems: 'flex-start'}}>
                       <div className="flex-row" style={{alignItems: 'center', gap: '0.25rem'}}>
                         <span className="" data-state="closed">
-                          <a className="fc-lnk" title="" href={`https://warpcast.com/~/channel/${channel.id}`}>
+                          <a className="fc-lnk" title="" href={`https://farcaster.xyz/~/channel/${channel.id}`}>
                             <div className="flex-row" style={{alignItems: 'center'}}>
                               <span className="name-font">{channel.name}</span>
                             </div>
                           </a>
                         </span>
                         <span className="user-font" datastate="closed">
-                          <a className="fc-lnk" title="" href={`https://warpcast.com/~/channel/${channel.id}`}>/{channel.id}</a>
+                          <a className="fc-lnk" title="" href={`https://farcaster.xyz/~/channel/${channel.id}`}>/{channel.id}</a>
                         </span>
                       </div>
                     </div>

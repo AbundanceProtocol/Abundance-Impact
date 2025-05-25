@@ -62,7 +62,7 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem, ha
           index: 3,
           title: "What's /impact?",
           action_type: "link",
-          target: `https://warpcast.com/abundance/0x43ddd672`
+          target: `https://farcaster.xyz/abundance/0x43ddd672`
         },
         {
           index: 4,
@@ -317,7 +317,7 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem, ha
         <meta property="fc:frame:button:2:target" content={`${baseURL}/~/curator/${curators || 9326}?${qs.stringify({ points: '$' + eco })}`} />
         <meta property="fc:frame:button:3" content={`What's /impact?`} />
         <meta property="fc:frame:button:3:action" content="link" />
-        <meta property="fc:frame:button:3:target" content={`https://warpcast.com/abundance/0x43ddd672`} />
+        <meta property="fc:frame:button:3:target" content={`https://farcaster.xyz/abundance/0x43ddd672`} />
         <meta property="fc:frame:button:4" content='Refresh' />
         <meta property="fc:frame:button:4:action" content="post" />
 
