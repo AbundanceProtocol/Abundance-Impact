@@ -337,7 +337,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
                     goToUserProfile(event, cast.author)
                   }
                 }}> */}
-                <Link className="fc-lnk" title={cast?.author?.display_name} style={{cursor: 'pointer'}} href={`/~/ecosystems/${handle}/creators/${cast?.author?.username}`}>
+                <Link className="fc-lnk" title={cast?.author?.display_name} style={{cursor: 'pointer'}} href={`/~/ecosystems/${handle}/creators/${cast?.author?.username}/${cast?.hash}`}>
                   <div className="flex-row" style={{alignItems: 'center'}}>
                     <span className="name-font">{cast.author.display_name}</span>
                     <div className="" style={{margin: '0 0 0 3px'}}>
