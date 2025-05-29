@@ -130,6 +130,14 @@ export default async function handler(req, res) {
       query.channel_id = { $in: req.query.channel }
     }
 
+    if (req?.query?.hash && req?.query?.hash !== '') {
+      if (req?.query?.override && (req?.query?.override == '1' || req?.query?.override == 1)) {
+        query = { cast_hash: req?.query?.hash }
+      }
+      query.cast_hash = req?.query?.hash
+    }
+
+
     // if (req.query['channel[]'] && req.query['channel[]'].length > 0) {
 
     //   if (typeof req.query['channel[]'] === 'string') {
