@@ -110,10 +110,14 @@ export default async function handler(req, res) {
           try {
             await connectToDatabase();
           
-            let user = await User.findOne({ fid, ecosystem_points: points }).select('remaining_i_allowance').exec();
+            let user = await User.findOne({ fid, ecosystem_points: points }).select('remaining_i_allowance impact_allowance').exec();
             if (user) {
-              remainingImpact = user.remaining_i_allowance
-              return remainingImpact
+              if (user.impact_allowance > 0) {
+                remainingImpact = user.remaining_i_allowance
+                return remainingImpact
+              } else {
+                return 0
+              }
             } else {
               return null
             }
