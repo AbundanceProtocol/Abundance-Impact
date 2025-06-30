@@ -103,7 +103,7 @@ export default function ProfilePage() {
   const [totalClaims, setTotalClaims] = useState(0)
   const [claimsLoading, setClaimsLoading] = useState(true)
   const [fundToggle, setFundToggle] = useState(true)
-  const [seasonToggle, setSeasonToggle] = useState('s6') // update season 5/15
+  const [seasonToggle, setSeasonToggle] = useState('s7') // update season 5/15
   const [userFunding, setUserFunding] = useState(null)
   const [isSelected, setIsSelected] = useState('none')
   const [userSearch, setUserSearch] = useState({ search: '' })
@@ -1309,6 +1309,9 @@ export default function ProfilePage() {
     } else if (seasonToggle == 's6') {
       totalIndex = fundData?.totalFunds?.findIndex(data => data._id === 6);
       userIndex = fundData?.userFunds?.findIndex(data => data._id === 6);
+    } else if (seasonToggle == 's7') {
+      totalIndex = fundData?.totalFunds?.findIndex(data => data._id === 7);
+      userIndex = fundData?.userFunds?.findIndex(data => data._id === 7);
     } // update season 5/15
 
     if (seasonToggle == 'all') {
@@ -2773,7 +2776,8 @@ export default function ProfilePage() {
                 <div className={seasonToggle == 's3' ? 'filter-item-on' : 'filter-item'} onClick={() => {setSeasonToggle('s3')}} style={{fontSize: '12px', fontWeight: '600'}}>S3</div>
                 <div className={seasonToggle == 's4' ? 'filter-item-on' : 'filter-item'} onClick={() => {setSeasonToggle('s4')}} style={{fontSize: '12px', fontWeight: '600'}}>S4</div>
                 <div className={seasonToggle == 's5' ? 'filter-item-on' : 'filter-item'} onClick={() => {setSeasonToggle('s5')}} style={{fontSize: '12px', fontWeight: '600'}}>S5</div>
-                <div className={seasonToggle == 's6' ? 'filter-item-on' : 'filter-item'} onClick={() => {setSeasonToggle('s6')}} style={{fontSize: '12px', fontWeight: '600'}}>S6</div> {/* update season 5/15 */}
+                <div className={seasonToggle == 's6' ? 'filter-item-on' : 'filter-item'} onClick={() => {setSeasonToggle('s6')}} style={{fontSize: '12px', fontWeight: '600'}}>S6</div>
+                <div className={seasonToggle == 's7' ? 'filter-item-on' : 'filter-item'} onClick={() => {setSeasonToggle('s7')}} style={{fontSize: '12px', fontWeight: '600'}}>S7</div> {/* update season 5/15 */}
               </div>
             </div>
 
