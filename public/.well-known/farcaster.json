@@ -2,7 +2,7 @@
   "frame": {
     "name": "Impact 2.0",
     "version": "1",
-    "iconUrl": "https://impact.abundance.id/images/icon.png",
+    "iconUrl": "https://impact.abundance.id/images/icon-02.png",
     "homeUrl": "https://impact.abundance.id",
     "imageUrl": "https://impact.abundance.id/images/icon.jpg",
     "buttonTitle": "Opem Impact MiniApp",
@@ -23,7 +23,7 @@
     "tagline": "Create impact, get boosted",
     "ogTitle": "Impact 2.0",
     "ogDescription": "Get boosted and rewarded for your impact on Farcaster",
-    "ogImageUrl": "https://impact.abundance.id/images/icon.png",
+    "ogImageUrl": "https://impact.abundance.id/images/icon-02.png",
     "castShareUrl": "https://impact.abundance.id/api/miniapp/cast",
     "screenshotUrls": [
       "https://impact.abundance.id/images/icon.jpg"
