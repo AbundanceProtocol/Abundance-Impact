@@ -30,8 +30,8 @@
     ]
   },
   "accountAssociation": {
-    "header": "",
-    "payload": "",
-    "signature": ""
+    "header": "eyJmaWQiOjkzMjYsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHgzNGU0MzRjRTI5OTY4NEYzOENFNjc1QWFiQTY1OTU4YTNkNkI3RDQ4In0",
+    "payload": "eyJkb21haW4iOiJpbXBhY3QuYWJ1bmRhbmNlLmlkIn0",
+    "signature": "MHgyZjQxYjQ3NjExMzNkODkzNjg4N2U1ZDE1MzFiMjBlMWE2ZWM0ZTkyZGM1Mjg0MWM2MWFkY2MzYzJlN2RlMmNmNWE1ZGNhNDMwMmE0Nzc3Yzc4YmRjMzQ1Njk0MGJlOWNjYmE2NjhkNDJiYzYyNGExNGZlZmVjODQyNTg3OWZhYjFj"
   }
 }
