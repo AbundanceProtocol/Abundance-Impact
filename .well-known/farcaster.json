@@ -1,0 +1,34 @@
+{
+  "frame": {
+    "name": "Impact 2.0",
+    "version": "1",
+    "iconUrl": "https://impact.abundance.id/icon.png",
+    "homeUrl": "https://impact.abundance.id",
+    "imageUrl": "https://impact.abundance.id/icon.jpg",
+    "buttonTitle": "Opem Impact MiniApp",
+    "splashImageUrl": "https://impact.abundance.id/icon.jpg",
+    "splashBackgroundColor": "#1d3244",
+    "webhookUrl": "https://impact.abundance.id/api/webhook",
+    "subtitle": "Create impact, get boosted",
+    "description": "Get boosted and rewarded for your impact on Farcaster",
+    "primaryCategory": "social",
+    "tags": [
+      "impact",
+      "abundance",
+      "boost",
+      "likes",
+      "degen"
+    ],
+    "heroImageUrl": "https://impact.abundance.id/icon.jpg",
+    "tagline": "Create impact, get boosted",
+    "ogTitle": "Impact 2.0",
+    "ogDescription": "Get boosted and rewarded for your impact on Farcaster",
+    "ogImageUrl": "https://impact.abundance.id/icon.jpg",
+    "castShareUrl": "https://impact.abundance.id/api/miniapp/cast"
+  },
+  "accountAssociation": {
+    "header": "",
+    "payload": "",
+    "signature": ""
+  }
+}
