@@ -2,6 +2,7 @@ import '../styles/index.css';
 import React, { useCallback, useState, useEffect, useRef } from 'react'
 import { AccountProvider } from '../context'
 import Layout from '../components/Layout';
+import { sdk } from '@farcaster/miniapp-sdk'
 
 export default function App({ Component, pageProps }) {
   const initialAccount = {points: '$IMPACT', qdau: 0, impact: 0}
@@ -27,6 +28,10 @@ export default function App({ Component, pageProps }) {
     setNavWidth((ref?.current?.offsetWidth - 1312)/2 - 167)
     setBottomNavSize(ref?.current?.offsetWidth)
   }
+
+  useEffect(() => {
+    sdk.actions.ready()
+  }, [])
 
   return (
     <AccountProvider initialAccount={initialAccount} ref1={ref1} >
