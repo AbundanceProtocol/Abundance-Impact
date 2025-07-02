@@ -29,16 +29,24 @@ export default function App({ Component, pageProps }) {
   }
 
   useEffect(() => {
-    import('@farcaster/miniapp-sdk').then(async (mod) => {
-      const { sdk, verifyJwt } = mod;
+    (async () => {
+      const { sdk, verifyJwt } = await import('@farcaster/miniapp-sdk');
   
       sdk.actions.ready();
   
       const urlParams = new URLSearchParams(window.location.search);
-      const fcJwt = urlParams.get('fc_jwt');
+      const urlFcJwt = urlParams.get('fc_jwt');
+      const storedFcJwt = localStorage.getItem('fc_jwt');
+  
+      const fcJwt = urlFcJwt || storedFcJwt;
+  
+      // Save JWT from URL into localStorage
+      if (urlFcJwt) {
+        localStorage.setItem('fc_jwt', urlFcJwt);
+      }
   
       if (!fcJwt) {
-        console.log('No fc_jwt found in URL');
+        console.log('No fc_jwt found — not running inside Warpcast or JWT missing');
         return;
       }
   
@@ -52,7 +60,7 @@ export default function App({ Component, pageProps }) {
       } catch (error) {
         console.error('Failed to verify JWT:', error);
       }
-    });
+    })();
   }, []);
 
   return (
