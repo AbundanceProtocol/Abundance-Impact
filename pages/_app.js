@@ -2,7 +2,6 @@ import '../styles/index.css';
 import React, { useCallback, useState, useEffect, useRef } from 'react'
 import { AccountProvider } from '../context'
 import Layout from '../components/Layout';
-import { sdk } from '@farcaster/miniapp-sdk'
 
 export default function App({ Component, pageProps }) {
   const initialAccount = {points: '$IMPACT', qdau: 0, impact: 0}
@@ -30,8 +29,31 @@ export default function App({ Component, pageProps }) {
   }
 
   useEffect(() => {
-    sdk.actions.ready()
-  }, [])
+    import('@farcaster/miniapp-sdk').then(async (mod) => {
+      const { sdk, verifyJwt } = mod;
+  
+      sdk.actions.ready();
+  
+      const urlParams = new URLSearchParams(window.location.search);
+      const fcJwt = urlParams.get('fc_jwt');
+  
+      if (!fcJwt) {
+        console.log('No fc_jwt found in URL');
+        return;
+      }
+  
+      try {
+        const session = await verifyJwt(fcJwt);
+        if (session?.viewer) {
+          console.log('FID:', session.viewer.fid);
+          console.log('Username:', session.viewer.username);
+          console.log('Wallets:', session.viewer.verifiedAddresses.ethAddresses);
+        }
+      } catch (error) {
+        console.error('Failed to verify JWT:', error);
+      }
+    });
+  }, []);
 
   return (
     <AccountProvider initialAccount={initialAccount} ref1={ref1} >
