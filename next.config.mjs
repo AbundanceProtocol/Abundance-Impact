@@ -1,15 +1,17 @@
 /** @type {import('next').NextConfig} */
 
-const Dotenv = require('dotenv-webpack');
-require('dotenv').config();
+import Dotenv from 'dotenv-webpack';
+import dotenv from 'dotenv';
+dotenv.config();
 
-module.exports = {
+export default {
   reactStrictMode: true,
   env: {
     ENVIRONMENT: process.env.ENVIRONMENT,
   },
   experimental: {
     serverActions: true,
+    esmExternals: "loose",
   },
   compiler: {
     emotion: true,
