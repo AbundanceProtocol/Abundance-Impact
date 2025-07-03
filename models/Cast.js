@@ -20,6 +20,7 @@ const castSchema = new mongoose.Schema({
   cast_tags: [String],
   quality_balance: Number,
   impact_total: { type: Number, default: 0, index: true },
+  version: { type: Number, default: 1, index: true },
   tips_received: [{type: Schema.Types.ObjectId, ref: 'Tip'}],
   quality_absolute: { type: Number, default: 0 },
   impact_points: [{type: Schema.Types.ObjectId, ref: 'Impact'}],

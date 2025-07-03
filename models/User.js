@@ -21,6 +21,8 @@ const userSchema = new mongoose.Schema({
   quality_allowance: Number,
   remaining_q_allowance: Number,
   invite_bonus: { type: Number, default: 0 },
+  boost: { type: Boolean, default: false, index: true },
+  validate: { type: Boolean, default: false, index: true },
   staking_bonus: { type: Number, default: 0 },
   quality_score_change: { type: Number, default: 0 },
   quality_bonus_added: { type: Number, default: 0 },
