@@ -16,7 +16,7 @@ import ExpandImg from '../../../components/Cast/ExpandImg';
 // import { formatNum, getCurrentDateUTC, getTimeRange, isYesterday, checkEmbedType, populateCast, isCast } from '../../../utils/utils';
 import Cast from '../../../components/Cast'
 import useMatchBreakpoints from '../../../hooks/useMatchBreakpoints';
-import sdk from '@farcaster/frame-sdk';
+import sdk from '@farcaster/miniapp-sdk';
 
 export default function ProfilePage() {
   const router = useRouter();
