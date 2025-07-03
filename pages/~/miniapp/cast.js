@@ -123,10 +123,11 @@ export default function ProfilePage() {
 
 
   useEffect(() => {
+    console.log('castHash', castHash, 'castFid', castFid, 'viewerFid', viewerFid);
     (async () => {
       const { sdk } = await import('@farcaster/frame-sdk');
   
-      console.log(sdk.context);
+      console.log('context', sdk.context);
       if (sdk.context.location.type === 'cast_share') {
         const cast = sdk.context.location.cast;
         
