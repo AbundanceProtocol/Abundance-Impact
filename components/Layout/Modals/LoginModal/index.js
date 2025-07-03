@@ -3,7 +3,7 @@ import NeynarSigninButton from '../Signin';
 import { AccountContext } from '../../../../context';
 
 const LoginModal = () => {
-  const { showLogin, setShowLogin, setIsLogged, setFid } = useContext(AccountContext);
+  const { showLogin, isLogged, setShowLogin, setIsLogged, setFid } = useContext(AccountContext);
 
   const handleSignIn = async (loginData) => {
     console.log('isLogged-5')
@@ -18,7 +18,7 @@ const LoginModal = () => {
 
   return (
     <div>
-      {showLogin && (
+      {showLogin && !isLogged && (
         <>
           <div className="overlay" onClick={closeLogin}></div>
           <div id="notificationContainer" style={{borderRadius: '16px', backgroundColor: '#cdd'}}>
