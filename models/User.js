@@ -7,6 +7,8 @@ const userSchema = new mongoose.Schema({
   invited_by: { type: Number, default: null },
   fid: { type: String, index: true },
   uuid: String, //encrypted
+  token: String, //encrypted
+  notified: { type: Boolean, default: false, index: true },
   ecosystem_points: { type: String, index: true },
   ecosystem_name: String,
   pfp: String,
