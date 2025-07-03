@@ -126,7 +126,7 @@ export default function ProfilePage() {
     (async () => {
       const { sdk } = await import('@farcaster/frame-sdk');
   
-      
+      console.log(sdk.context);
       if (sdk.context.location.type === 'cast_share') {
         const cast = sdk.context.location.cast;
         
