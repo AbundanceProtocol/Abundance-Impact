@@ -16,6 +16,7 @@ import ExpandImg from '../../../components/Cast/ExpandImg';
 // import { formatNum, getCurrentDateUTC, getTimeRange, isYesterday, checkEmbedType, populateCast, isCast } from '../../../utils/utils';
 import Cast from '../../../components/Cast'
 import useMatchBreakpoints from '../../../hooks/useMatchBreakpoints';
+import sdk from '@farcaster/frame-sdk';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -124,8 +125,8 @@ export default function ProfilePage() {
 
   useEffect(() => {
     console.log('castHash', castHash, 'castFid', castFid, 'viewerFid', viewerFid);
-    (async () => {
-      const { sdk } = await import('@farcaster/frame-sdk');
+    // (async () => {
+      // const { sdk } = await import('@farcaster/frame-sdk');
   
       console.log('context', sdk.context);
       if (sdk.context.location.type === 'cast_share') {
@@ -144,7 +145,7 @@ export default function ProfilePage() {
       sdk.actions.ready()
 
 
-    })();
+    // })();
   }, []);
 
 
