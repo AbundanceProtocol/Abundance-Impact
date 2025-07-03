@@ -24,7 +24,7 @@ const Layout = ({ children }) => {
       console.log(userProfile?.user?.fid)
 
       const checkUserProfile = async (fid) => {
-        const res = await fetch(`/api/user/validate?fid=${fid}`);
+        const res = await fetch(`/api/user/validateUser?fid=${fid}`);
         const data = await res.json();
         return data.valid;
       };
