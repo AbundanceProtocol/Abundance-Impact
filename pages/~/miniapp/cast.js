@@ -126,7 +126,7 @@ export default function ProfilePage() {
   useEffect(() => {
     console.log('castHash', castHash, 'castFid', castFid, 'viewerFid', viewerFid);
     // (async () => {
-      // const { sdk } = await import('@farcaster/frame-sdk');
+      // const { sdk } = await import('@farcaster/miniapp-sdk');
   
       console.log('context', sdk.context);
       if (sdk.context.location.type === 'cast_share') {

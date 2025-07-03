@@ -16,7 +16,7 @@ const Layout = ({ children }) => {
 
   useEffect(() => {
     (async () => {
-      const { sdk } = await import('@farcaster/frame-sdk');
+      const { sdk } = await import('@farcaster/miniapp-sdk');
   
       
       const userProfile = await sdk.context
