@@ -176,6 +176,39 @@ export default function ProfilePage() {
         context = await context;
       }
       console.log('context', context);
+
+
+      const cast = context.location.cast || null
+      let newCast = {
+        author: {
+          fid: cast?.author.fid || null,
+          pfp_url: cast?.author.pfpUrl || null,
+          username: cast?.author.username || null,
+          display_name: cast?.author.displayName || null,
+          power_badge: false,
+        },
+        hash: cast?.hash || null,
+        cast_media: [],
+        timestamp: new Date(cast?.timestamp).toISOString(),
+        text: cast?.text,
+        impact_points: 0,
+        tip: [],
+        embeds: [],
+        mentioned_profiles: [],
+        replies: {
+          count: 0
+        },
+        reactions: {
+          recasts: [],
+          likes: []
+        },
+        impact_balance: 0,
+        quality_absolute: 0,
+        quality_balance: 0
+      }
+      setUserFeed([newCast])
+
+
     }
     init();
   }, [searchParams]);
@@ -252,7 +285,7 @@ export default function ProfilePage() {
         <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
           <Spinner size={31} color={'#999'} />
         </div>
-        ) : (userFeed.map((cast, index) => (<Cast {...{cast, key: index, index, updateCast, openImagePopup, ecosystem: eco?.ecosystem_points_name, handle: eco?.ecosystem_handle, self: false, app}} />)))}
+        ) : (userFeed.map((cast, index) => (<Cast {...{cast, key: index, index, updateCast, openImagePopup, ecosystem: 'Abundance', handle: 'abundance', self: false, app}} />)))}
         {!delay && !shuffled && (
           <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
             <Spinner size={31} color={'#999'} />
