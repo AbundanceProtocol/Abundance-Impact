@@ -16,7 +16,7 @@ import { ImArrowUp, ImArrowDown  } from "react-icons/im";
 import VideoPlayer from './VideoPlayer';
 import Images from './Images';
 
-export default function Cast({ cast, index, updateCast, openImagePopup, ecosystem, handle, self, app }) {
+export default function Cast({ cast, index, updateCast, openImagePopup, ecosystem, handle, self, app, miniapp }) {
   const store = useStore()
   const router = useRouter();
   const [screenWidth, setScreenWidth] = useState(undefined)
@@ -39,7 +39,9 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
   }
 
   function isCurator(fid, cast) {
-    return cast?.impact_points?.some(point => point.curator_fid == fid);
+    if (!miniapp) {
+      return cast?.impact_points?.some(point => point.curator_fid == fid);
+    }
   }
   
   async function boostQuality(cast, qualityAmount) {
