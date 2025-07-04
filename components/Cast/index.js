@@ -15,6 +15,7 @@ import { IoDiamondOutline as Diamond } from "react-icons/io5";
 import { ImArrowUp, ImArrowDown  } from "react-icons/im";
 import VideoPlayer from './VideoPlayer';
 import Images from './Images';
+import { sdk } from '@farcaster/miniapp-sdk';
 
 export default function Cast({ cast, index, updateCast, openImagePopup, ecosystem, handle, self, app }) {
   const store = useStore()
