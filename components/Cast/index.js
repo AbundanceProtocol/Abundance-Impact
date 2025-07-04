@@ -297,7 +297,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
   }
 
   return (<>{
-    cast && (<div className="inner-container" style={{width: isMiniApp || isMobile ? '340px' : '100%', display: 'flex', flexDirection: 'column', margin: isMiniApp || isMobile ? '10px auto' : ''}}>
+    cast && (<div className="inner-container" style={{width: (isMiniApp || isMobile) ? '340px' : '100%', display: 'flex', flexDirection: 'column', margin: (isMiniApp || isMobile) ? '10px auto' : ''}}>
       <div className='flex-row' style={{width: '100%', justifyContent: 'flex-end', gap: '0.8rem'}}>
         {cast?.tip && (cast?.tip?.map((tip, index) => (<div key={index} className='flex-row' style={{gap: '0.2rem', alignItems: 'flex-end'}}>
           <div style={{fontSize: '13px', fontWeight: '700', color: '#181'}}>{tip?.amount}</div>
@@ -305,17 +305,17 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
         </div>
         )))}
       </div>
-      <div className={isMiniApp || isMobile ? 'flex-col' : 'flex-row'}>
-        <div className={isMiniApp || isMobile ? 'flex-row' : 'flex-col'} style={{alignItems: 'center', userSelect: 'none'}}>
+      <div className={(isMiniApp || isMobile) ? 'flex-col' : 'flex-row'}>
+        <div className={(isMiniApp || isMobile) ? 'flex-row' : 'flex-col'} style={{alignItems: 'center', userSelect: 'none'}}>
           <div className="" style={{margin: '0 10px 0 0', height: '50px'}}>
             <Link href={`/~/ecosystems/${handle}/creators/${cast?.author?.username}`}>
               <img loading="lazy" src={cast?.author?.pfp_url} className="" alt={`${cast.author.display_name} avatar`} style={{width: '48px', height: '48px', maxWidth: '48px', maxHeight: '48px', borderRadius: '24px', border: '1px solid #000'}} />
             </Link>
           </div>
           {(userFid && userFid !== cast.author.fid || true) && (
-          <div className={`${isMiniApp || isMobile ? 'flex-row' : 'flex-col'} ${fail ? 'flash-fail' : ''}`} style={{margin: isMiniApp || isMobile ? '10px 0px 10px auto' : '10px 10px 0 0', border: isMiniApp || isMobile ? '1px solid #000' : '', padding: isMiniApp || isMobile ? '3px 10px 3px 3px' : '', borderRadius: isMiniApp || isMobile ? '10px' : '', backgroundColor: isMiniApp || isMobile ? '#fff' : ''}}>
+          <div className={`${(isMiniApp || isMobile) ? 'flex-row' : 'flex-col'} ${fail ? 'flash-fail' : ''}`} style={{margin: (isMiniApp || isMobile) ? '10px 0px 10px auto' : '10px 10px 0 0', border: (isMiniApp || isMobile) ? '1px solid #000' : '', padding: (isMiniApp || isMobile) ? '3px 10px 3px 3px' : '', borderRadius: (isMiniApp || isMobile) ? '10px' : '', backgroundColor: (isMiniApp || isMobile) ? '#fff' : ''}}>
 
-          {!(isMiniApp || isMobile) && (<div className={`${fail ? 'flash-fail' : ''}`} style={{textAlign: 'center', fontSize: '18px', fontWeight: '700', color: '#555', margin: isMiniApp || isMobile ? '8px 0 0 0' : '-6px 0 0 0'}}>
+          {!(isMiniApp || isMobile) && (<div className={`${fail ? 'flash-fail' : ''}`} style={{textAlign: 'center', fontSize: '18px', fontWeight: '700', color: '#555', margin: (isMiniApp || isMobile) ? '8px 0 0 0' : '-6px 0 0 0'}}>
             <div>{cast.impact_balance || 0}</div>
           </div>)}
 
@@ -335,11 +335,11 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
                   }
                 }
               }
-            } style={{margin: isMiniApp || isMobile ? '0 0 0 0' : `${shrinkMargin(cast.impact_balance)}px 0 ${shrinkMargin(cast.impact_balance)}px 0`}}>
+            } style={{margin: (isMiniApp || isMobile) ? '0 0 0 0' : `${shrinkMargin(cast.impact_balance)}px 0 ${shrinkMargin(cast.impact_balance)}px 0`}}>
               <FaStar size={growPoints(cast.impact_balance)} className='' style={{fontSize: '25px'}} />
           </div>
 
-          {isMiniApp || isMobile && (<div className={`${fail ? 'flash-fail' : ''}`} style={{textAlign: 'center', fontSize: '18px', fontWeight: '700', color: '#555', margin: `${shrinkTextMargin(cast.impact_balance)}px 0 0 0`}}>
+          {(isMiniApp || isMobile) && (<div className={`${fail ? 'flash-fail' : ''}`} style={{textAlign: 'center', fontSize: '18px', fontWeight: '700', color: '#555', margin: `${shrinkTextMargin(cast.impact_balance)}px 0 0 0`}}>
             <div>{cast.impact_balance || 0}</div>
           </div>)}
 
@@ -411,7 +411,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
                 }}
                 ></a> */}
 
-              {!isMiniApp || isMobile ? (<a href={`https://farcaster.xyz/${cast?.author?.username}/${cast?.hash?.substring(0, 10)}`} className="fc-lnk" title="Navigate to cast">
+              {!(isMiniApp || isMobile) ? (<a href={`https://farcaster.xyz/${cast?.author?.username}/${cast?.hash?.substring(0, 10)}`} className="fc-lnk" title="Navigate to cast">
                 <div className="user-font">{timePassed(cast.timestamp)}</div>
                 </a>) : (<a onClick={() => viewCast(cast?.hash)} className="fc-lnk" title="Navigate to cast">
                 <div className="user-font">{timePassed(cast.timestamp)}</div>
