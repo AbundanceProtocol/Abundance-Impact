@@ -17,11 +17,14 @@ import ExpandImg from '../../../components/Cast/ExpandImg';
 import Cast from '../../../components/Cast'
 import useMatchBreakpoints from '../../../hooks/useMatchBreakpoints';
 import sdk from '@farcaster/miniapp-sdk';
+import { useSearchParams } from 'next/navigation';
 
 export default function ProfilePage() {
+  const searchParams = useSearchParams();
+  
   const router = useRouter();
   const [ref, inView] = useInView()
-  const { castHash, castFid, viewerFid } = router.query
+  // const { castHash, castFid, viewerFid } = router.query
   // const [user, setUser] = useState(null)
   const { LoginPopup, isLogged, setPoints, setIsLogged, setFid, miniApp, setMiniApp } = useContext(AccountContext)
   const ref1 = useRef(null)
@@ -124,10 +127,21 @@ export default function ProfilePage() {
 
 
   useEffect(() => {
-    console.log('castHash', castHash, 'castFid', castFid, 'viewerFid', viewerFid);
     // (async () => {
       // const { sdk } = await import('@farcaster/miniapp-sdk');
   
+      const castHash = searchParams.get('castHash');
+      const castFid = searchParams.get('castFid');
+      const viewerFid = searchParams.get('viewerFid');
+      console.log('castHash', castHash, 'castFid', castFid, 'viewerFid', viewerFid);
+
+
+
+
+
+
+
+      
       console.log('context', sdk.context);
       if (sdk.context.location.type === 'cast_share') {
         const cast = sdk.context.location.cast;
@@ -150,7 +164,21 @@ export default function ProfilePage() {
 
 
 
+  useEffect(() => {
+    const castHash = searchParams.get("castHash");
+    const castFid = searchParams.get("castFid");
+    const viewerFid = searchParams.get("viewerFid");
+    console.log('castHash', castHash, 'castFid', castFid, 'viewerFid', viewerFid);
 
+    async function init() {
+      let context = sdk.context;
+      if (typeof context.then === "function") {
+        context = await context;
+      }
+      console.log('context', context);
+    }
+    init();
+  }, [searchParams]);
 
 
   useEffect(() => {
