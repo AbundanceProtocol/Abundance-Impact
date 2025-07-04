@@ -40,7 +40,7 @@ export default function ProfilePage() {
   const [ref, inView] = useInView()
   const { ecosystem, username, app, userFid, pass } = router.query
   const [user, setUser] = useState(null)
-  const { LoginPopup, isLogged, showLogin, setShowLogin, setPoints, setIsLogged, setFid, miniApp, setMiniApp, fid, ecoData } = useContext(AccountContext)
+  const { LoginPopup, isLogged, showLogin, setShowLogin, setPoints, setIsLogged, setFid, miniApp, setMiniApp, fid, ecoData, isMiniApp } = useContext(AccountContext)
   const ref1 = useRef(null)
   const [textMax, setTextMax] = useState('430px')
   const [screenWidth, setScreenWidth ] = useState(undefined)
@@ -1656,6 +1656,8 @@ export default function ProfilePage() {
             backgroundColor: "#11448888",
             borderRadius: "15px",
             border: "1px solid #11447799",
+            width: isMiniApp ? '340px' : '100%',
+            margin: isMiniApp ? '0px auto' : '',
           }}
         >
           <div
@@ -1802,6 +1804,8 @@ export default function ProfilePage() {
             backgroundColor: "#11448888",
             borderRadius: "15px",
             border: "1px solid #11447799",
+            width: isMiniApp ? '340px' : '100%',
+            margin: isMiniApp ? '0px auto' : '',
           }}
         >
           <div
@@ -2049,6 +2053,8 @@ export default function ProfilePage() {
             backgroundColor: "#11448888",
             borderRadius: "15px",
             border: "1px solid #11447799",
+            width: isMiniApp ? '340px' : '100%',
+            margin: isMiniApp ? '0px auto' : '',
           }}
         >
           <div
@@ -2364,6 +2370,8 @@ export default function ProfilePage() {
             backgroundColor: "#11448888",
             borderRadius: "15px",
             border: "1px solid #11447799",
+            width: isMiniApp ? '340px' : '100%',
+            margin: isMiniApp ? '0px auto' : '',
           }}
         >
           <div
@@ -2709,6 +2717,8 @@ export default function ProfilePage() {
             backgroundColor: "#11448888",
             borderRadius: "15px",
             border: "1px solid #11447799",
+            width: isMiniApp ? '340px' : '100%',
+            margin: isMiniApp ? '0px auto' : '',
           }}
         >
           <div
@@ -2929,6 +2939,8 @@ export default function ProfilePage() {
             backgroundColor: "#11448888",
             borderRadius: "15px",
             border: "1px solid #11447799",
+            width: isMiniApp ? '340px' : '100%',
+            margin: isMiniApp ? '0px auto' : '',
           }}
         >
           <div
@@ -3276,6 +3288,8 @@ export default function ProfilePage() {
             backgroundColor: "#11448888",
             borderRadius: "15px",
             border: "1px solid #11447799",
+            width: isMiniApp ? '340px' : '100%',
+            margin: isMiniApp ? '0px auto' : '',
           }}
         >
           <div
@@ -3682,6 +3696,8 @@ export default function ProfilePage() {
             backgroundColor: "#11448888",
             borderRadius: "15px",
             border: "1px solid #11447799",
+            width: isMiniApp ? '340px' : '100%',
+            margin: isMiniApp ? '0px auto' : '',
           }}
         >
           <div
@@ -3857,6 +3873,8 @@ export default function ProfilePage() {
             backgroundColor: "#11448888",
             borderRadius: "15px",
             border: "1px solid #11447799",
+            width: isMiniApp ? '340px' : '100%',
+            margin: isMiniApp ? '0px auto' : '',
           }}
         >
           <div
@@ -4006,6 +4024,8 @@ export default function ProfilePage() {
             backgroundColor: "#11448888",
             borderRadius: "15px",
             border: "1px solid #11447799",
+            width: isMiniApp ? '340px' : '100%',
+            margin: isMiniApp ? '0px auto' : '',
           }}
         >
           <div

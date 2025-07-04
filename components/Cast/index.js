@@ -284,7 +284,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
   }
 
   return (<>{
-    cast && (<div className="inner-container" style={{width: '100%', display: 'flex', flexDirection: 'column'}}>
+    cast && (<div className="inner-container" style={{width: isMiniApp ? '340px' : '100%', display: 'flex', flexDirection: 'column', margin: isMiniApp ? '10px auto' : ''}}>
       <div className='flex-row' style={{width: '100%', justifyContent: 'flex-end', gap: '0.8rem'}}>
         {cast?.tip && (cast?.tip?.map((tip, index) => (<div key={index} className='flex-row' style={{gap: '0.2rem', alignItems: 'flex-end'}}>
           <div style={{fontSize: '13px', fontWeight: '700', color: '#181'}}>{tip?.amount}</div>
@@ -292,16 +292,16 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
         </div>
         )))}
       </div>
-      <div className="flex-row">
-        <div className="flex-col" style={{alignItems: 'center', userSelect: 'none'}}>
+      <div className={isMiniApp ? 'flex-col' : 'flex-row'}>
+        <div className={isMiniApp ? 'flex-row' : 'flex-col'} style={{alignItems: 'center', userSelect: 'none'}}>
           <div className="" style={{margin: '0 10px 0 0', height: '50px'}}>
             <Link href={`/~/ecosystems/${handle}/creators/${cast?.author?.username}`}>
               <img loading="lazy" src={cast?.author?.pfp_url} className="" alt={`${cast.author.display_name} avatar`} style={{width: '48px', height: '48px', maxWidth: '48px', maxHeight: '48px', borderRadius: '24px', border: '1px solid #000'}} />
             </Link>
           </div>
           {(userFid && userFid !== cast.author.fid || true) && (
-          <div className={`'flex-col' ${fail ? 'flash-fail' : ''}`} style={{margin: '10px 10px 0 0'}}>
-            <div className={`${fail ? 'flash-fail' : ''}`} style={{textAlign: 'center', fontSize: '18px', fontWeight: '700', color: '#555', margin: '-6px 0 0 0'}}>
+          <div className={`${isMiniApp ? 'flex-row' : 'flex-col'} ${fail ? 'flash-fail' : ''}`} style={{margin: isMiniApp ? '10px 0px 10px auto' : '10px 10px 0 0', border: isMiniApp ? '1px solid #000' : '', padding: isMiniApp ? '3px 3px 3px 8px' : '', borderRadius: isMiniApp ? '10px' : '', backgroundColor: isMiniApp ? '#fff' : ''}}>
+            <div className={`${fail ? 'flash-fail' : ''}`} style={{textAlign: 'center', fontSize: '18px', fontWeight: '700', color: '#555', margin: isMiniApp ? '8px 0 0 0' : '-6px 0 0 0'}}>
               <div>{cast.impact_balance || 0}</div>
             </div>
             <div className={`impact-arrow ${fail ? 'flash-fail' : ''}`} onClick={
@@ -319,7 +319,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
                   }
                 }
               }
-            } style={{margin: `${shrinkMargin(cast.impact_balance)}px 0 ${shrinkMargin(cast.impact_balance)}px 0`}}>
+            } style={{margin: isMiniApp ? '0 0 0 0' : `${shrinkMargin(cast.impact_balance)}px 0 ${shrinkMargin(cast.impact_balance)}px 0`}}>
               <FaStar size={growPoints(cast.impact_balance)} className='' style={{fontSize: '25px'}} />
             </div>
 
