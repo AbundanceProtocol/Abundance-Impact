@@ -47,6 +47,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
   
   async function viewCast(castHash) {
     try {
+      await sdk.haptics.impactOccurred('light')
       await sdk.actions.viewCast({ 
         hash: castHash,
       });
