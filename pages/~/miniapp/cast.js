@@ -172,6 +172,20 @@ export default function ProfilePage() {
       }
       setUserFeed([newCast])
 
+      const userProfile = await sdk.context
+
+      const checkUserProfile = async (fid) => {
+        const res = await fetch(`/api/user/validateUser?fid=${fid}`);
+        const data = await res.json();
+        return data.valid;
+      };
+
+      const isValidUser = await checkUserProfile(userProfile?.user?.fid);
+
+      if (isValidUser) {
+        setIsLogged(true)
+        setFid(Number(userProfile?.user?.fid))
+      }   
 
     }
     init();
