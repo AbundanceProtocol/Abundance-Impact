@@ -12,13 +12,16 @@ import { AccountContext } from '../../context';
 
 const Layout = ({ children }) => {
   const ref = useRef(null)
-  const { setIsLogged, setFid } = useContext(AccountContext)
+  const { setIsLogged, setFid, setIsMiniApp } = useContext(AccountContext)
 
   useEffect(() => {
     (async () => {
       const { sdk } = await import('@farcaster/miniapp-sdk');
   
-      
+      const isMiniApp = await sdk.isInMiniApp()
+      setIsMiniApp(isMiniApp)
+      console.log('isMiniApp1', isMiniApp)
+
       const userProfile = await sdk.context
 
       console.log(userProfile?.user?.fid)

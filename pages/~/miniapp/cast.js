@@ -26,7 +26,7 @@ export default function ProfilePage() {
   const [ref, inView] = useInView()
   // const { castHash, castFid, viewerFid } = router.query
   // const [user, setUser] = useState(null)
-  const { LoginPopup, isLogged, setPoints, setIsLogged, setFid, miniApp, setMiniApp } = useContext(AccountContext)
+  const { LoginPopup, isLogged, setPoints, setIsLogged, setFid, miniApp, setMiniApp, setIsMiniApp } = useContext(AccountContext)
   const ref1 = useRef(null)
   const [textMax, setTextMax] = useState('430px')
   const [screenWidth, setScreenWidth ] = useState(undefined)
@@ -135,6 +135,11 @@ export default function ProfilePage() {
     console.log('castHash', castHash, 'castFid', castFid, 'viewerFid', viewerFid);
 
     async function init() {
+
+      const isMiniApp = await sdk.isInMiniApp()
+      setIsMiniApp(isMiniApp)
+      console.log('isMiniApp2', isMiniApp)
+
       let context = sdk.context;
       if (typeof context.then === "function") {
         context = await context;
@@ -263,7 +268,7 @@ export default function ProfilePage() {
         <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
           <Spinner size={31} color={'#999'} />
         </div>
-        ) : (userFeed.map((cast, index) => (<Cast {...{cast, key: index, index, updateCast, openImagePopup, ecosystem: 'Abundance', handle: 'abundance', self: false, app: true, miniapp: true}} />)))}
+        ) : (userFeed.map((cast, index) => (<Cast {...{cast, key: index, index, updateCast, openImagePopup, ecosystem: 'Abundance', handle: 'abundance', self: false, app: true}} />)))}
         {!delay && !shuffled && (
           <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
             <Spinner size={31} color={'#999'} />

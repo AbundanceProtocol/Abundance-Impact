@@ -16,11 +16,11 @@ import { ImArrowUp, ImArrowDown  } from "react-icons/im";
 import VideoPlayer from './VideoPlayer';
 import Images from './Images';
 
-export default function Cast({ cast, index, updateCast, openImagePopup, ecosystem, handle, self, app, miniapp }) {
+export default function Cast({ cast, index, updateCast, openImagePopup, ecosystem, handle, self, app }) {
   const store = useStore()
   const router = useRouter();
   const [screenWidth, setScreenWidth] = useState(undefined)
-  const { LoginPopup, fid, userBalances, setUserBalances, isLogged } = useContext(AccountContext)
+  const { LoginPopup, fid, userBalances, setUserBalances, isLogged, isMiniApp } = useContext(AccountContext)
   const [textMax, setTextMax] = useState('522px')
   const [feedMax, setFeedMax ] = useState('620px')
   const likeRefs = useRef([])
@@ -39,10 +39,23 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
   }
 
   function isCurator(fid, cast) {
-    if (!miniapp) {
+    if (!isMiniApp) {
       return cast?.impact_points?.some(point => point.curator_fid == fid);
     }
   }
+  
+  async function viewCast(castHash) {
+    try {
+      await sdk.actions.viewCast({ 
+        hash: castHash,
+      });
+      console.log('Cast viewed successfully');
+    } catch (error) {
+      console.error('Error viewing cast:', error);
+    }
+  }
+
+
   
   async function boostQuality(cast, qualityAmount) {
     const castHash = cast.hash
@@ -374,9 +387,11 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
                 }}
                 ></a> */}
 
-              <a href={`https://farcaster.xyz/${cast?.author?.username}/${cast?.hash?.substring(0, 10)}`} className="fc-lnk" title="Navigate to cast">
+              {!isMiniApp ? (<a href={`https://farcaster.xyz/${cast?.author?.username}/${cast?.hash?.substring(0, 10)}`} className="fc-lnk" title="Navigate to cast">
                 <div className="user-font">{timePassed(cast.timestamp)}</div>
-              </a>
+                </a>) : (<a onClick={() => viewCast(cast?.hash)} className="fc-lnk" title="Navigate to cast">
+                <div className="user-font">{timePassed(cast.timestamp)}</div>
+              </a>)}
             </div>
             {/* <div className="">
               <Kebab />
