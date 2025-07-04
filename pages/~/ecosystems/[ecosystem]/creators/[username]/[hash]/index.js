@@ -19,7 +19,6 @@ import CuratorData from '../../../../../../../components/Page/CuratorData';
 import { formatNum, getCurrentDateUTC, getTimeRange, isYesterday, checkEmbedType, populateCast, isCast } from '../../../../../../../utils/utils';
 import Cast from '../../../../../../../components/Cast'
 import useMatchBreakpoints from '../../../../../../../hooks/useMatchBreakpoints';
-import { sdk } from '@farcaster/miniapp-sdk';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -126,6 +125,8 @@ export default function ProfilePage() {
 
   async function viewCast(castHash) {
     try {
+      const { sdk } = await import('@farcaster/miniapp-sdk');
+
       await sdk.haptics.impactOccurred('light')
       await sdk.actions.viewCast({ 
         hash: castHash,

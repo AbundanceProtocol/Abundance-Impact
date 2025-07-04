@@ -1656,8 +1656,8 @@ export default function ProfilePage() {
             backgroundColor: "#11448888",
             borderRadius: "15px",
             border: "1px solid #11447799",
-            width: isMiniApp ? '340px' : '100%',
-            margin: isMiniApp ? '0px auto' : '',
+            width: isMiniApp || isMobile ? '340px' : '100%',
+            margin: isMiniApp || isMobile ? '0px auto' : '',
           }}
         >
           <div
@@ -1804,8 +1804,8 @@ export default function ProfilePage() {
             backgroundColor: "#11448888",
             borderRadius: "15px",
             border: "1px solid #11447799",
-            width: isMiniApp ? '340px' : '100%',
-            margin: isMiniApp ? '0px auto' : '',
+            width: isMiniApp || isMobile ? '340px' : '100%',
+            margin: isMiniApp || isMobile ? '0px auto' : '',
           }}
         >
           <div
@@ -2053,8 +2053,8 @@ export default function ProfilePage() {
             backgroundColor: "#11448888",
             borderRadius: "15px",
             border: "1px solid #11447799",
-            width: isMiniApp ? '340px' : '100%',
-            margin: isMiniApp ? '0px auto' : '',
+            width: isMiniApp || isMobile ? '340px' : '100%',
+            margin: isMiniApp || isMobile ? '0px auto' : '',
           }}
         >
           <div
@@ -2370,8 +2370,8 @@ export default function ProfilePage() {
             backgroundColor: "#11448888",
             borderRadius: "15px",
             border: "1px solid #11447799",
-            width: isMiniApp ? '340px' : '100%',
-            margin: isMiniApp ? '0px auto' : '',
+            width: isMiniApp || isMobile ? '340px' : '100%',
+            margin: isMiniApp || isMobile ? '0px auto' : '',
           }}
         >
           <div
@@ -2717,8 +2717,8 @@ export default function ProfilePage() {
             backgroundColor: "#11448888",
             borderRadius: "15px",
             border: "1px solid #11447799",
-            width: isMiniApp ? '340px' : '100%',
-            margin: isMiniApp ? '0px auto' : '',
+            width: isMiniApp || isMobile ? '340px' : '100%',
+            margin: isMiniApp || isMobile ? '0px auto' : '',
           }}
         >
           <div
@@ -2939,8 +2939,8 @@ export default function ProfilePage() {
             backgroundColor: "#11448888",
             borderRadius: "15px",
             border: "1px solid #11447799",
-            width: isMiniApp ? '340px' : '100%',
-            margin: isMiniApp ? '0px auto' : '',
+            width: isMiniApp || isMobile ? '340px' : '100%',
+            margin: isMiniApp || isMobile ? '0px auto' : '',
           }}
         >
           <div
@@ -3288,8 +3288,8 @@ export default function ProfilePage() {
             backgroundColor: "#11448888",
             borderRadius: "15px",
             border: "1px solid #11447799",
-            width: isMiniApp ? '340px' : '100%',
-            margin: isMiniApp ? '0px auto' : '',
+            width: isMiniApp || isMobile ? '340px' : '100%',
+            margin: isMiniApp || isMobile ? '0px auto' : '',
           }}
         >
           <div
@@ -3696,8 +3696,8 @@ export default function ProfilePage() {
             backgroundColor: "#11448888",
             borderRadius: "15px",
             border: "1px solid #11447799",
-            width: isMiniApp ? '340px' : '100%',
-            margin: isMiniApp ? '0px auto' : '',
+            width: isMiniApp || isMobile ? '340px' : '100%',
+            margin: isMiniApp || isMobile ? '0px auto' : '',
           }}
         >
           <div
@@ -3873,8 +3873,8 @@ export default function ProfilePage() {
             backgroundColor: "#11448888",
             borderRadius: "15px",
             border: "1px solid #11447799",
-            width: isMiniApp ? '340px' : '100%',
-            margin: isMiniApp ? '0px auto' : '',
+            width: isMiniApp || isMobile ? '340px' : '100%',
+            margin: isMiniApp || isMobile ? '0px auto' : '',
           }}
         >
           <div
@@ -4024,8 +4024,8 @@ export default function ProfilePage() {
             backgroundColor: "#11448888",
             borderRadius: "15px",
             border: "1px solid #11447799",
-            width: isMiniApp ? '340px' : '100%',
-            margin: isMiniApp ? '0px auto' : '',
+            width: isMiniApp || isMobile ? '340px' : '100%',
+            margin: isMiniApp || isMobile ? '0px auto' : '',
           }}
         >
           <div
