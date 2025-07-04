@@ -285,7 +285,7 @@ export default function ProfilePage() {
         <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
           <Spinner size={31} color={'#999'} />
         </div>
-        ) : (userFeed.map((cast, index) => (<Cast {...{cast, key: index, index, updateCast, openImagePopup, ecosystem: 'Abundance', handle: 'abundance', self: false, app}} />)))}
+        ) : (userFeed.map((cast, index) => (<Cast {...{cast, key: index, index, updateCast, openImagePopup, ecosystem: 'Abundance', handle: 'abundance', self: false, app: true}} />)))}
         {!delay && !shuffled && (
           <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
             <Spinner size={31} color={'#999'} />
