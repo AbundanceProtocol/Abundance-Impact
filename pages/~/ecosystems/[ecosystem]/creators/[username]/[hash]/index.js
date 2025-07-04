@@ -19,13 +19,14 @@ import CuratorData from '../../../../../../../components/Page/CuratorData';
 import { formatNum, getCurrentDateUTC, getTimeRange, isYesterday, checkEmbedType, populateCast, isCast } from '../../../../../../../utils/utils';
 import Cast from '../../../../../../../components/Cast'
 import useMatchBreakpoints from '../../../../../../../hooks/useMatchBreakpoints';
+import { sdk } from '@farcaster/miniapp-sdk';
 
 export default function ProfilePage() {
   const router = useRouter();
   const [ref, inView] = useInView()
   const { ecosystem, username, hash, app, userFid, pass } = router.query
   const [user, setUser] = useState(null)
-  const { LoginPopup, isLogged, setPoints, setIsLogged, setFid, miniApp, setMiniApp } = useContext(AccountContext)
+  const { LoginPopup, isLogged, setPoints, setIsLogged, setFid, miniApp, setMiniApp, isMiniApp } = useContext(AccountContext)
   const ref1 = useRef(null)
   const [textMax, setTextMax] = useState('430px')
   const [screenWidth, setScreenWidth ] = useState(undefined)
@@ -121,6 +122,19 @@ export default function ProfilePage() {
   const [timeframe, setTimeframe] = useState('3d')
   const [sortBy, setSortBy] = useState('down')
   const [shuffled, setShuffled] = useState(false)
+
+
+  async function viewCast(castHash) {
+    try {
+      await sdk.haptics.impactOccurred('light')
+      await sdk.actions.viewCast({ 
+        hash: castHash,
+      });
+      console.log('Cast viewed successfully');
+    } catch (error) {
+      console.error('Error viewing cast:', error);
+    }
+  }
 
   async function getCuratorData(username) {
     try {
@@ -703,7 +717,10 @@ export default function ProfilePage() {
           <div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px', padding: '0'}}>{'>'}</div>
           <Link href={`/~/ecosystems/${ecosystem}/creators/${username}`}><div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>@{username}</div></Link>
           <div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px', padding: '0'}}>{'>'}</div>
-          <div className='filter-item-on' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>{hash}</div>
+          <div onClick={() => {
+            if (isMiniApp) {
+              viewCast(hash)
+            }}} className='filter-item-on' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>{hash?.substring(0, 10)}</div>
         </div>
       </div>
 
