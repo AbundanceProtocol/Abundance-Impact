@@ -14,8 +14,20 @@ import UserMenu from './UserMenu';
 
 const Layout = ({ children }) => {
   const ref = useRef(null)
-  const { setIsLogged, setFid, setIsMiniApp, isMiniApp } = useContext(AccountContext)
+  const { setIsLogged, setFid, setIsMiniApp, isMiniApp, setUserBalances } = useContext(AccountContext)
   const { isMobile } = useMatchBreakpoints();
+
+  const getUserBalance = async (fid) => {
+    try {
+      const res = await fetch(`/api/user/getUserBalance?fid=${fid}`);
+      const data = await res.json();
+      console.log('data', data)
+      return data?.balance || 0;
+    } catch (error) {
+      console.error('Error getting user balance:', error);
+      return 0;
+    }
+  };
 
   useEffect(() => {
     (async () => {
@@ -45,6 +57,11 @@ const Layout = ({ children }) => {
 
       sdk.actions.ready()
 
+      if (isValidUser) {
+        const userBalance = await getUserBalance(userProfile?.user?.fid)
+        console.log('userBalance', userBalance)
+        setUserBalances(prev => ({ ...prev, impact: userBalance }))
+      }  
 
     })();
   }, []);
