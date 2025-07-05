@@ -8,8 +8,9 @@ import Cast from '../../../components/Cast'
 import useMatchBreakpoints from '../../../hooks/useMatchBreakpoints';
 import { useSearchParams } from 'next/navigation';
 import axios from 'axios';
+import { populateCast } from '../../../utils/utils';
 
-export default function ProfilePage() {
+export default function SharedCast() {
   const searchParams = useSearchParams();
   
   const router = useRouter();
@@ -107,8 +108,9 @@ export default function ProfilePage() {
         castData = await getCast(cast?.hash)
       }
       if (castData) {
-        newCast = castData
-        setUserFeed([newCast])
+        let populatedCast = await populateCast(castData)
+
+        setUserFeed(populatedCast)
       }
 
       
