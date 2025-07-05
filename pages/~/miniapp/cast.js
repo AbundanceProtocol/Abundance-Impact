@@ -7,6 +7,7 @@ import ExpandImg from '../../../components/Cast/ExpandImg';
 import Cast from '../../../components/Cast'
 import useMatchBreakpoints from '../../../hooks/useMatchBreakpoints';
 import { useSearchParams } from 'next/navigation';
+import axios from 'axios';
 
 export default function ProfilePage() {
   const searchParams = useSearchParams();
