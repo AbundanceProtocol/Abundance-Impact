@@ -108,7 +108,7 @@ export default function SharedCast() {
         castData = await getCast(cast?.hash)
       }
       if (castData) {
-        let populatedCast = await populateCast(castData)
+        let populatedCast = await populateCast([castData])
 
         setUserFeed(populatedCast)
       }
