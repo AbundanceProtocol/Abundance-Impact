@@ -2,20 +2,12 @@ import { useRouter } from 'next/router';
 import { useRef, useContext, useEffect, useState } from 'react';
 import Link from 'next/link'
 import axios from 'axios';
-// import { AiOutlineBars } from "react-icons/ai";
 import { useInView } from 'react-intersection-observer'
-// import { BsClock } from "react-icons/bs";
-import { BiSortDown, BiSortUp } from "react-icons/bi";
-import { IoShuffleOutline as ShuffleIcon } from "react-icons/io5";
-import { PiClockClockwiseBold as ClockForward, PiClockCounterClockwiseBold as ClockBack } from "react-icons/pi";
 import { AccountContext } from '../../../../../../../context';
 import { confirmUser } from '../../../../../../../utils/utils';
 import Spinner from '../../../../../../../components/Common/Spinner';
 import ExpandImg from '../../../../../../../components/Cast/ExpandImg';
 import CuratorData from '../../../../../../../components/Page/CuratorData';
-// import TopPicks from '../../../../../../components/Page/FilterMenu/TopPicks';
-// import Shuffle from '../../../../../../components/Page/FilterMenu/Shuffle';
-// import Time from '../../../../../../components/Page/FilterMenu/Time';
 import { formatNum, getCurrentDateUTC, getTimeRange, isYesterday, checkEmbedType, populateCast, isCast } from '../../../../../../../utils/utils';
 import Cast from '../../../../../../../components/Cast'
 import useMatchBreakpoints from '../../../../../../../hooks/useMatchBreakpoints';

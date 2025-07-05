@@ -1,22 +1,11 @@
 import { useRouter } from 'next/router';
 import { useRef, useContext, useEffect, useState } from 'react';
-// import Link from 'next/link'
-// import axios from 'axios';
-// import { AiOutlineBars } from "react-icons/ai";
 import { useInView } from 'react-intersection-observer'
-// import { BsClock } from "react-icons/bs";
-// import { BiSortDown, BiSortUp } from "react-icons/bi";
-// import { IoShuffleOutline as ShuffleIcon } from "react-icons/io5";
-// import { PiClockClockwiseBold as ClockForward, PiClockCounterClockwiseBold as ClockBack } from "react-icons/pi";
 import { AccountContext } from '../../../context';
-// import { confirmUser } from '../../../utils/utils';
 import Spinner from '../../../components/Common/Spinner';
 import ExpandImg from '../../../components/Cast/ExpandImg';
-// import CuratorData from '../../../components/Page/CuratorData';
-// import { formatNum, getCurrentDateUTC, getTimeRange, isYesterday, checkEmbedType, populateCast, isCast } from '../../../utils/utils';
 import Cast from '../../../components/Cast'
 import useMatchBreakpoints from '../../../hooks/useMatchBreakpoints';
-// import sdk from '@farcaster/miniapp-sdk';
 import { useSearchParams } from 'next/navigation';
 
 export default function ProfilePage() {
@@ -32,95 +21,10 @@ export default function ProfilePage() {
   const [screenWidth, setScreenWidth ] = useState(undefined)
   const [screenHeight, setScreenHeight] = useState(undefined)
   const [feedMax, setFeedMax ] = useState('620px')
-  // const userButtons = ['Curation', 'Casts', 'Casts + Replies']
-  // const [searchSelect, setSearchSelect ] = useState('Curation')
   const { isMobile } = useMatchBreakpoints();
   const [userFeed, setUserFeed] = useState(null)
-  // const [prevSearch, setPrevSearch] = useState({author_username: null, getTime: null, channel: null, username: null, text: null, shuffle: null, ecosystem: null, page: 0, order: -1, timeSort: null})
   const [showPopup, setShowPopup] = useState({open: false, url: null})
-  // const initialEco = {
-  //   channels: [],
-  //   condition_channels: false,
-  //   condition_curators_threshold: 1,
-  //   condition_following_channel: false,
-  //   condition_following_owner: false,
-  //   condition_holding_erc20: false,
-  //   condition_holding_nft: false,
-  //   condition_points_threshold: 1,
-  //   condition_powerbadge: false,
-  //   createdAt: "2024-06-17T03:19:16.065Z",
-  //   downvote_value: 1,
-  //   ecosystem_moderators: [],
-  //   ecosystem_name: 'none',
-  //   ecosystem_handle: 'abundance',
-  //   ecosystem_points_name: '$IMPACT',
-  //   ecosystem_rules: [`Can't do evil`],
-  //   erc20s: [],
-  //   fid: 3,
-  //   nfts: [],
-  //   owner_name: 'none',
-  //   percent_tipped: 10,
-  //   points_per_tip: 1,
-  //   upvote_value: 1,
-  // }
-  // const [eco, setEco] = useState(initialEco)
-  // const [isSelected, setIsSelected] = useState('none')
-  // const [userSearch, setUserSearch] = useState({ search: '' })
-  // const [selectedChannels, setSelectedChannels] = useState([])
-  // const [channels, setChannels] = useState([])
-  // const initialQuery = {author_username: null, shuffle: false, time: '3d', tags: [], channels: [], username: null, order: -1}
-  // const [userQuery, setUserQuery] = useState(initialQuery)
-  // const queryOptions = {
-  //   tags: [
-  //     {
-  //       text: 'All tags',
-  //       value: []
-  //     },
-  //     {
-  //       text: 'Art',
-  //       value: 'art'
-  //     },
-  //     {
-  //       text: 'Dev',
-  //       value: 'dev'
-  //     },        
-  //     {
-  //       text: 'Content',
-  //       value: 'content'
-  //     },
-  //     {
-  //       text: 'Vibes',
-  //       value: 'vibes'
-  //     },
-  //   ],
-  //   time: [
-  //     {
-  //       text: '24 hours',
-  //       value: '24hr'
-  //     },
-  //     {
-  //       text: '3 days',
-  //       value: '3days'
-  //     },
-  //     {
-  //       text: '7 days',
-  //       value: '7days'
-  //     },        
-  //     {
-  //       text: '30 days',
-  //       value: '30days'
-  //     },
-  //     {
-  //       text: 'All',
-  //       value: 'all'
-  //     },
-  //   ]
-  // }
-  // const [page, setPage] = useState(1)
-  // const [sched, setSched] = useState({inView: false, user: false, feed: false})
   const [delay, setDelay] = useState(true)
-  // const [timeframe, setTimeframe] = useState('3d')
-  // const [sortBy, setSortBy] = useState('down')
   const [shuffled, setShuffled] = useState(false)
 
 
@@ -133,6 +37,26 @@ export default function ProfilePage() {
     const castFid = searchParams.get("castFid");
     const viewerFid = searchParams.get("viewerFid");
     console.log('castHash', castHash, 'castFid', castFid, 'viewerFid', viewerFid);
+
+    async function getCast(hash) {
+      try {
+        const response = await axios.get('/api/curation/getUserSearch', {
+          params: { hash, override: 1 }
+        })
+
+        let cast = null
+        if (response?.data?.casts?.length > 0) {
+          cast = response?.data?.casts[0]
+        }
+
+        return cast
+      } catch (error) {
+        console.error('Error submitting data:', error)
+        return null
+      }
+
+    }
+
 
     async function init() {
       const { sdk } = await import('@farcaster/miniapp-sdk');
@@ -177,6 +101,16 @@ export default function ProfilePage() {
       }
       setUserFeed([newCast])
 
+      let castData = null
+      if (cast?.hash) {
+        castData = await getCast(cast?.hash)
+      }
+      if (castData) {
+        newCast = castData
+        setUserFeed([newCast])
+      }
+
+      
       const userProfile = await sdk.context
 
       const checkUserProfile = async (fid) => {
