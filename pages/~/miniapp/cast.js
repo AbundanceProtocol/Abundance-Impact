@@ -16,7 +16,7 @@ import ExpandImg from '../../../components/Cast/ExpandImg';
 // import { formatNum, getCurrentDateUTC, getTimeRange, isYesterday, checkEmbedType, populateCast, isCast } from '../../../utils/utils';
 import Cast from '../../../components/Cast'
 import useMatchBreakpoints from '../../../hooks/useMatchBreakpoints';
-import sdk from '@farcaster/miniapp-sdk';
+// import sdk from '@farcaster/miniapp-sdk';
 import { useSearchParams } from 'next/navigation';
 
 export default function ProfilePage() {
@@ -135,10 +135,10 @@ export default function ProfilePage() {
     console.log('castHash', castHash, 'castFid', castFid, 'viewerFid', viewerFid);
 
     async function init() {
-
+      const { sdk } = await import('@farcaster/miniapp-sdk');
       const isMiniApp = await sdk.isInMiniApp()
       setIsMiniApp(isMiniApp)
-      console.log('isMiniApp2', isMiniApp)
+      console.log('isMiniApp2', isMiniApp, sdk)
 
       let context = sdk.context;
       if (typeof context.then === "function") {
@@ -147,7 +147,7 @@ export default function ProfilePage() {
       console.log('context', context);
 
 
-      const cast = context.location.cast || null
+      const cast = context?.location?.cast || null
       let newCast = {
         author: {
           fid: cast?.author.fid || null,
@@ -158,7 +158,7 @@ export default function ProfilePage() {
         },
         hash: cast?.hash || null,
         cast_media: [],
-        timestamp: new Date(cast?.timestamp).toISOString(),
+        timestamp: new Date(cast?.timestamp || 0).toISOString(),
         text: cast?.text,
         impact_points: 0,
         tip: [],

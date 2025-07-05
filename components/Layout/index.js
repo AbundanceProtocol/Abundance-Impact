@@ -9,10 +9,13 @@ import LoginModal from './Modals/LoginModal';
 import LogoutModal from './Modals/LogoutModal';
 import Head from 'next/head';
 import { AccountContext } from '../../context';
+import useMatchBreakpoints from '../../hooks/useMatchBreakpoints';
+import UserMenu from './UserMenu';
 
 const Layout = ({ children }) => {
   const ref = useRef(null)
-  const { setIsLogged, setFid, setIsMiniApp } = useContext(AccountContext)
+  const { setIsLogged, setFid, setIsMiniApp, isMiniApp } = useContext(AccountContext)
+  const { isMobile } = useMatchBreakpoints();
 
   useEffect(() => {
     (async () => {
@@ -76,6 +79,8 @@ const Layout = ({ children }) => {
       {/* <Mobile /> */}
       <div className='flex-row' style={{justifyContent: 'center', width: 'auto'}}>
         {/* <LeftMenu /> */}
+        {(isMiniApp || isMobile) && <UserMenu />}
+
         <CenterMenu>{children}</CenterMenu>
         {/* <RightMenu /> */}
       </div>
