@@ -1339,8 +1339,8 @@ export default function ProfilePage() {
           <div style={{fontSize: '16px', fontWeight: '700'}}>{fundToggle ? formatNum(totalDegen || 0) || '--' : formatNum(userDegen || 0) || '--'}</div>
           <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$DEGEN</div>
 
-          <div style={{fontSize: '16px', fontWeight: '700', margin: '10px 0 0 0'}}>{fundToggle ? formatNum(totalHam || 0) || '--' : formatNum(userHam || 0) || '--'}</div>
-          <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$HAM</div>
+          {/* <div style={{fontSize: '16px', fontWeight: '700', margin: '10px 0 0 0'}}>{fundToggle ? formatNum(totalHam || 0) || '--' : formatNum(userHam || 0) || '--'}</div>
+          <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$HAM</div> */}
         </div>
       </div>
     );
@@ -1970,7 +1970,7 @@ export default function ProfilePage() {
                   {...{ 
                     noIcon: true,
                     description: `
-                    Auto-Fund automatically distributes your remaining $degen & $ham allowances to impactful builders and creators on Farcaster - and rewards you in the process` }}
+                    Auto-Fund automatically distributes your remaining $degen allowances to impactful builders and creators on Farcaster - and rewards you in the process` }}
                 />
               </ItemWrap>
             </div>
@@ -2552,8 +2552,8 @@ export default function ProfilePage() {
 
                 <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.5rem'}}>
 
-                <div style={{fontSize: '16px', fontWeight: '700', margin: '0'}}>{creatorRewards?.ham > 0 ? Math.floor(creatorRewards?.ham).toLocaleString() || 0 : '--'}</div>
-                <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$HAM</div>
+                {/* <div style={{fontSize: '16px', fontWeight: '700', margin: '0'}}>{creatorRewards?.ham > 0 ? Math.floor(creatorRewards?.ham).toLocaleString() || 0 : '--'}</div>
+                <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$HAM</div> */}
                 </div>
 
 
@@ -2579,18 +2579,18 @@ export default function ProfilePage() {
                     textWrap: "nowrap",
                   }}
                 >
-                  {creatorLoading ? 'Loading...' : ((creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet) ? 'S5 Airdropped' : ((creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet == null) ? 'Missing wallet' : 'No rewards'}
+                  {creatorLoading ? 'Loading...' : ((creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet) ? 'S6 Airdropped' : ((creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet == null) ? 'Missing wallet' : 'No rewards'}
                 </p> {/* update season 5/15 */}
               </div>
             </div>
             <div className={`flex-col btn-select blu-drk shadow`} style={{minWidth: isMobile ? '135px' : '130px', color: '#cde', height: '120px', width: '22%', cursor: 'default'}}>
               <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
-                <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0', color: '#44aaff'}}>Total Claimed (S6)</div> {/* update season 5/15 */}
+                <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0', color: '#44aaff'}}>Claimed (S7)</div> {/* update season 5/15 */}
               </div>
               {claimsLoading ? (
                 <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '0 20px'}}>
                   <Spinner size={31} color={'#468'} />
-                </div>) : (<div className='flex-col' style={{justifyContent: "center", alignItems: 'center', gap: '0.25rem', padding: '8px'}}>
+                </div>) : (<div className='flex-col' style={{justifyContent: "center", alignItems: 'center', gap: '0.25rem', padding: '0px'}}>
                 <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.5rem'}}>
                   <div style={{fontSize: '21px', fontWeight: '700'}}>{totalClaims > 0 ? Math.floor(totalClaims || 0) : '--'}</div>
                   <div style={{fontSize: '14px', fontWeight: '400', color: '#8cf'}}>$DEGEN</div>
@@ -2807,7 +2807,7 @@ export default function ProfilePage() {
             <FundPanel {...{fundName: 'Creator Fund', fundData: impactFunds}} />
             <FundPanel {...{fundName: 'Dev Fund', fundData: impactFunds}} />
             <FundPanel {...{fundName: 'Growth Fund', fundData: impactFunds}} />
-            <FundPanel {...{fundName: 'Special Fund', fundData: impactFunds}} />
+            {/* <FundPanel {...{fundName: 'Special Fund', fundData: impactFunds}} /> */}
 
 
           </div>
@@ -2855,7 +2855,7 @@ export default function ProfilePage() {
               justifyContent: "center",
             }}
           >
-            How it works: Auto-Fund automatically distributes your leftover $degen and $ham allowances before allowances reset to Impact Fund based on your preference.
+            How it works: Auto-Fund automatically distributes your leftover $degen allowances before allowances reset to Impact Fund based on your preference.
           </div>
 
 
@@ -3120,29 +3120,6 @@ export default function ProfilePage() {
                 </div>
                 <div className='flex-row' style={{margin: '5px 0 0 0', color: userFunding?.active_cron && userFunding?.creator_fund == 60 ? '#111' : "#9df", fontSize: '11px'}}>
                   <div>1.33x Score Boost</div>
-                </div>
-              </div>
-              <div className={`flex-col btn-select ${userFunding?.active_cron && userFunding?.special_fund == 100 ? 'cast-act-lt btn-brd-lt' : 'blu-drk btn-brd'}`} style={{minWidth: isMobile ? '185px' : '180px', color: userFunding?.active_cron && userFunding?.special_fund == 100 ? '#000' : '#cde', height: '133px'}} onClick={() => {setFundingSchedule('special')}}>
-                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
-                  <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0'}}>Special Fund</div>
-                </div>
-                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.5rem'}}>
-                  {/* <IoBuild size={15} color={userFunding?.active_cron && userFunding?.special_fund == 100 ? '#147' : '#5af'} />
-                  <div>Dev</div> */}
-                  {/* <div style={{fontSize: '14px', fontWeight: '700'}}>&nbsp;</div> */}
-                </div>
-                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.5rem', height: '90px'}}>
-                  <FaCode size={15} color={userFunding?.active_cron && userFunding?.special_fund == 100 ? '#147' : '#5af'} />
-                  <div></div>
-                  <div className='text-c' style={{fontSize: '14px', fontWeight: '700', maxWidth: '88px'}}>Open Source Devs&nbsp;&nbsp;100%</div>
-                </div>
-                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.5rem'}}>
-                  {/* <IoIosRocket size={15} color={userFunding?.active_cron && userFunding?.special_fund == 100 ? '#147' : '#5af'} />
-                  <div>Growth</div> */}
-                  {/* <div style={{fontSize: '14px', fontWeight: '700'}}>&nbsp;</div> */}
-                </div>
-                <div className='flex-row' style={{margin: '5px 0 0 0', color: userFunding?.active_cron && userFunding?.special_fund == 100 ? '#111' : "#9df", fontSize: '11px'}}>
-                  <div>&nbsp;</div>
                 </div>
               </div>
             </div>
@@ -4128,11 +4105,11 @@ export default function ProfilePage() {
                   <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$DEGEN</div>
                   </div>
 
-                  <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.5rem'}}>
+                  {/* <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.5rem'}}>
 
                   <div style={{fontSize: '16px', fontWeight: '700', margin: '0'}}>{funds?.fundHam > 0 ? formatNum(funds?.fundHam || 0) : '--'}</div>
                   <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$HAM</div>
-                  </div>
+                  </div> */}
                 </div>
               </div>
               <div className={`flex-col btn-select blu-drk shadow`} style={{minWidth: isMobile ? '135px' : '130px', color: '#cde', height: '90px', width: '22%'}}>
@@ -4145,10 +4122,10 @@ export default function ProfilePage() {
                     <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$DEGEN</div>
                   </div>
 
-                  <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.5rem'}}>
+                  {/* <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.5rem'}}>
                     <div style={{fontSize: '16px', fontWeight: '700', margin: '0'}}>{funds?.curatorHam > 0 ? formatNum(funds?.curatorHam || 0) : '--'}</div>
                     <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$HAM</div>
-                  </div>
+                  </div> */}
                 </div>
               </div>
 
@@ -4189,7 +4166,7 @@ export default function ProfilePage() {
 
                 {/* {!isMobile && (<div style={{fontSize: '12px', fontWeight: '500', width: '20%', padding: '6px 13px 6px 13px', textWrap: 'nowrap', color: '#8cf', borderBottom: '1px solid #48b', backgroundColor: '#024e'}}>points</div>)} */}
                 <div style={{fontSize: '12px', fontWeight: '500', width: isMobile ? '25%' : '20%', padding: '6px 13px 6px 13px', textWrap: 'nowrap', color: '#8cf', borderBottom: '1px solid #48b', backgroundColor: '#024e'}}>$DEGEN</div>
-                <div style={{fontSize: '12px', fontWeight: '500', width: isMobile ? '25%' : '20%', padding: '6px 13px 6px 13px', textWrap: 'nowrap', color: '#8cf', borderBottom: '1px solid #48b', backgroundColor: '#024e'}}>$HAM</div>
+                {/* <div style={{fontSize: '12px', fontWeight: '500', width: isMobile ? '25%' : '20%', padding: '6px 13px 6px 13px', textWrap: 'nowrap', color: '#8cf', borderBottom: '1px solid #48b', backgroundColor: '#024e'}}>$HAM</div> */}
               </div>)}
 
   
@@ -4258,7 +4235,7 @@ export default function ProfilePage() {
 
                 {/* {!isMobile && (<div style={{fontSize: '12px', fontWeight: '500', width: '20%', padding: '6px 13px 6px 13px', textWrap: 'nowrap', color: '#8cf', borderBottom: '1px solid #48b', backgroundColor: '#024e'}}>points</div>)} */}
                 <div style={{fontSize: '12px', fontWeight: '500', width: isMobile ? '25%' : '20%', padding: '6px 13px 6px 13px', textWrap: 'nowrap', color: '#8cf', borderBottom: '1px solid #48b', backgroundColor: '#024e'}}>$DEGEN</div>
-                <div style={{fontSize: '12px', fontWeight: '500', width: isMobile ? '25%' : '20%', padding: '6px 13px 6px 13px', textWrap: 'nowrap', color: '#8cf', borderBottom: '1px solid #48b', backgroundColor: '#024e'}}>$HAM</div>
+                {/* <div style={{fontSize: '12px', fontWeight: '500', width: isMobile ? '25%' : '20%', padding: '6px 13px 6px 13px', textWrap: 'nowrap', color: '#8cf', borderBottom: '1px solid #48b', backgroundColor: '#024e'}}>$HAM</div> */}
               </div>)}
 
 

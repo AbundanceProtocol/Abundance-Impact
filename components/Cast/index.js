@@ -64,10 +64,10 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
   async function boostQuality(cast, qualityAmount) {
     const castHash = cast.hash
     const castChannel = cast.root_parent_url
-    
+    console.log('fid, castHash, castChannel, qualityAmount', fid, castHash, castChannel, qualityAmount)
     async function postQuality(fid, castHash, castChannel, qualityAmount) {
       try {
-        const response = await axios.post('/api/curation/postPointQuality', { fid, castHash, castChannel, qualityAmount, points: ecosystem })
+        const response = await axios.post('/api/curation/postPointQuality', { fid, castHash, castChannel, qualityAmount, points: '$IMPACT' })
         return response
       } catch (error) {
         console.error('Error creating post:', error);
