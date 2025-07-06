@@ -14,7 +14,7 @@ import UserMenu from './UserMenu';
 
 const Layout = ({ children }) => {
   const ref = useRef(null)
-  const { setIsLogged, setFid, setIsMiniApp, isMiniApp, setUserBalances } = useContext(AccountContext)
+  const { setIsLogged, setFid, setIsMiniApp, isMiniApp, userBalances, setUserBalances } = useContext(AccountContext)
   const { isMobile } = useMatchBreakpoints();
 
   const getUserBalance = async (fid) => {
@@ -57,7 +57,7 @@ const Layout = ({ children }) => {
 
       sdk.actions.ready()
 
-      if (isValidUser) {
+      if (isValidUser && !(userBalances?.impact > 0) ) {
         const userBalance = await getUserBalance(userProfile?.user?.fid)
         console.log('userBalance', userBalance)
         setUserBalances(prev => ({ ...prev, impact: userBalance }))
