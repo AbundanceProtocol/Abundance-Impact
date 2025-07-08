@@ -38,8 +38,8 @@ export default function SharedCast() {
   async function getWalletAddress(fid) {
     try {
       const response = await axios.get('/api/user/getWallet', { params: { fid } } )
+      console.log('getWallet', response)
       if (response) {
-        console.log(response)
         return response?.data?.wallet || ''
       } else {
         return ''

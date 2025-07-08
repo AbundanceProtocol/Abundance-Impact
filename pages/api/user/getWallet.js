@@ -13,9 +13,8 @@ export default async function handler(req, res) {
             throw new Error('Network response was not ok');
           }
           const data = await response.json();
-
           const wallets = data?.result?.extras?.walletLabels
-
+          
           const warpcastWallet = wallets.find(wallet => wallet.address.startsWith('0x') && wallet.labels.includes('warpcast'));
           if (warpcastWallet) {
             console.log('Warpcast Wallet:', warpcastWallet);
@@ -31,16 +30,6 @@ export default async function handler(req, res) {
       };
 
       const wallet = await fetchData(fid);
-      if (userData) {
-        console.log('User Data:', userData);
-      } else {
-        console.log('Failed to fetch user data');
-      }
-
-
-
-      //// TOTAL CASTS CURATED AND POINTS GIVEN PER DAY
-
 
       res.status(200).json({ message: 'nominations', wallet });
     } catch (error) {
