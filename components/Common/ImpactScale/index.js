@@ -13,7 +13,7 @@ const ImpactScale = ({ initValue, setTipPercent, setInitValue, type, cast, updat
   const [fail, setFail] = useState(false)
   const [success, setSuccess] = useState(false)
 
-  const [value, setValue] = useState(initValue);
+  const [value, setValue] = useState(5);
   const handleChange = (event) => {
     setValue(parseInt(event.target.value));
   };
