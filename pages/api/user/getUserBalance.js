@@ -12,23 +12,23 @@ export default async function handler(req, res) {
       try {
         await connectToDatabase();
 
-        const user = await User.findOne({ fid: fid.toString(), ecosystem_points: '$IMPACT' }).select('remaining_i_allowance').exec();
+        const user = await User.findOne({ fid: fid.toString(), ecosystem_points: '$IMPACT' }).select('remaining_i_allowance remaining_q_allowance').exec();
         if (user) {
           console.log('User data01:', user.remaining_i_allowance);
-          return user?.remaining_i_allowance;
+          return {impact: user?.remaining_i_allowance || 0, qdau: user?.remaining_q_allowance || 0};
         } else {
-          return null;
+          return {impact: 0, qdau: 0};
         }
       } catch (error) {
         console.error('Error:', error);
-        return null;
+        return {impact: 0, qdau: 0};
       }
     }
 
     try {
-      const userBalance = await getUserBalance(fid)
+      const {impact, qdau} = await getUserBalance(fid)
 
-      res.status(200).json({ balance: userBalance });
+      res.status(200).json({ impact, qdau });
     } catch (error) {
       console.error('Error submitting data:', error)
       res.status(500).json({ error: 'Internal Server Error' });

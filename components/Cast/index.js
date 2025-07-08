@@ -68,13 +68,14 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
     async function postQuality(fid, castHash, castChannel, qualityAmount) {
       try {
         const response = await axios.post('/api/curation/postPointQuality', { fid, castHash, castChannel, qualityAmount, points: '$IMPACT' })
+        console.log('response', response)
         return response
       } catch (error) {
         console.error('Error creating post:', error);
         return null
       }
     }
-    // console.log(cast, qualityAmount, userBalances)
+    console.log(userBalances.impact, userBalances.qdau, fid, fid !== '-', qualityAmount, castHash, userBalances.qdau > 0, (cast.impact_balance || cast.impact_balance == 0), !(cast.impact_balance == 0 && qualityAmount < 0))
     if (fid && fid !== '-' && qualityAmount && castHash && userBalances.qdau > 0 && (cast.impact_balance || cast.impact_balance == 0)  &&  !(cast.impact_balance == 0 && qualityAmount < 0)) {
       const qualityResponse = await postQuality(fid, castHash, castChannel, qualityAmount)
       console.log(qualityResponse)
@@ -117,6 +118,8 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
 
 
   async function boostImpact(cast, impactAmount) {
+    console.log('cast', cast)
+
     const castContext = {
       author_fid: cast.author.fid,
       author_pfp: cast.author.pfp_url,

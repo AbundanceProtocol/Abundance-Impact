@@ -9,6 +9,8 @@ import useMatchBreakpoints from '../../../hooks/useMatchBreakpoints';
 import { useSearchParams } from 'next/navigation';
 import axios from 'axios';
 import { populateCast } from '../../../utils/utils';
+import ImpactScale from '../../../components/Common/ImpactScale';
+
 
 export default function SharedCast() {
   const searchParams = useSearchParams();
@@ -17,7 +19,7 @@ export default function SharedCast() {
   const [ref, inView] = useInView()
   // const { castHash, castFid, viewerFid } = router.query
   // const [user, setUser] = useState(null)
-  const { LoginPopup, isLogged, setPoints, setIsLogged, setFid, miniApp, setMiniApp, setIsMiniApp } = useContext(AccountContext)
+  const { LoginPopup, isLogged, setPoints, setIsLogged, setFid, miniApp, setMiniApp, setIsMiniApp, userBalance } = useContext(AccountContext)
   const ref1 = useRef(null)
   const [textMax, setTextMax] = useState('430px')
   const [screenWidth, setScreenWidth ] = useState(undefined)
@@ -28,17 +30,48 @@ export default function SharedCast() {
   const [showPopup, setShowPopup] = useState({open: false, url: null})
   const [delay, setDelay] = useState(true)
   const [shuffled, setShuffled] = useState(false)
+  const [tipPercent, setTipPercent] = useState(5)
+  const [initValue, setInitValue] = useState(5)
 
 
 
-
-
+  async function getWalletAddress(fid) {
+    try {
+      const response = await axios.get('/api/user/getWallet', { params: { fid } } )
+      if (response) {
+        console.log(response)
+        return response?.data?.wallet || ''
+      } else {
+        return ''
+      }
+    } catch (error) {
+      console.error('Error submitting data:', error)
+      return ''
+    }
+  }
 
   useEffect(() => {
     const castHash = searchParams.get("castHash");
     const castFid = searchParams.get("castFid");
     const viewerFid = searchParams.get("viewerFid");
     console.log('castHash', castHash, 'castFid', castFid, 'viewerFid', viewerFid);
+
+    async function setCast(castContext, embeds) {
+      try {
+        const response = await axios.post('/api/user/postCast', { hash: castContext?.cast_hash, castContext, embeds }
+        )
+        console.log('postCast', response)
+        let cast = []
+        if (response?.data?.cast) {
+          cast = response?.data?.cast
+        }
+
+        return cast
+      } catch (error) {
+        console.error('Error submitting data:', error)
+        return []
+      }
+    }
 
     async function getCast(hash) {
       try {
@@ -58,7 +91,6 @@ export default function SharedCast() {
       }
 
     }
-
 
     async function init() {
       const { sdk } = await import('@farcaster/miniapp-sdk');
@@ -111,6 +143,32 @@ export default function SharedCast() {
         let populatedCast = await populateCast([castData])
 
         setUserFeed(populatedCast)
+      } else {
+        let userWallet = ''
+        if (cast?.author?.fid) {
+          userWallet = await getWalletAddress(cast?.author?.fid)
+        }
+
+
+
+        let castContext = {
+          author_fid: cast?.author?.fid || null,
+          author_pfp: cast?.author?.pfpUrl || null,
+          author_username: cast?.author.username || null,
+          author_display_name: cast?.author.displayName || null,
+          cast_hash: cast?.hash || null,
+          cast_text: cast?.text,
+          wallet: userWallet,
+          channel_id: cast?.channelKey || null
+        }
+
+        const savedCast = await setCast(castContext, cast?.embeds)
+        console.log('savedCast', savedCast)
+        if (savedCast) {
+          let populatedCast = await populateCast([savedCast])
+  
+          setUserFeed(populatedCast)
+        }
       }
 
       
@@ -205,7 +263,10 @@ export default function SharedCast() {
         <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
           <Spinner size={31} color={'#999'} />
         </div>
-        ) : (userFeed.map((cast, index) => (<Cast {...{cast, key: index, index, updateCast, openImagePopup, ecosystem: 'Abundance', handle: 'abundance', self: false, app: true}} />)))}
+        ) : (userFeed.map((cast, index) => (<div className='flex-col' key={index}>
+          <Cast {...{cast, key: index, index, updateCast, openImagePopup, ecosystem: 'Abundance', handle: 'abundance', self: false, app: true}} />
+          <ImpactScale {...{setTipPercent, setInitValue, cast, updateCast, index}} />
+        </div>)))}
         {!delay && !shuffled && (
           <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
             <Spinner size={31} color={'#999'} />

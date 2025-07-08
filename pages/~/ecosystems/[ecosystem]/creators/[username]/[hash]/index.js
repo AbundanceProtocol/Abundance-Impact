@@ -11,13 +11,14 @@ import CuratorData from '../../../../../../../components/Page/CuratorData';
 import { formatNum, getCurrentDateUTC, getTimeRange, isYesterday, checkEmbedType, populateCast, isCast } from '../../../../../../../utils/utils';
 import Cast from '../../../../../../../components/Cast'
 import useMatchBreakpoints from '../../../../../../../hooks/useMatchBreakpoints';
+import ImpactScale from '../../../../../../../components/Common/ImpactScale';
 
 export default function ProfilePage() {
   const router = useRouter();
   const [ref, inView] = useInView()
   const { ecosystem, username, hash, app, userFid, pass } = router.query
   const [user, setUser] = useState(null)
-  const { LoginPopup, isLogged, setPoints, setIsLogged, setFid, miniApp, setMiniApp, isMiniApp } = useContext(AccountContext)
+  const { LoginPopup, isLogged, setPoints, setIsLogged, setFid, miniApp, setMiniApp, isMiniApp, userBalances } = useContext(AccountContext)
   const ref1 = useRef(null)
   const [textMax, setTextMax] = useState('430px')
   const [screenWidth, setScreenWidth ] = useState(undefined)
@@ -113,7 +114,8 @@ export default function ProfilePage() {
   const [timeframe, setTimeframe] = useState('3d')
   const [sortBy, setSortBy] = useState('down')
   const [shuffled, setShuffled] = useState(false)
-
+  const [tipPercent, setTipPercent] = useState(5)
+  const [initValue, setInitValue] = useState(5)
 
   async function viewCast(castHash) {
     try {
@@ -766,12 +768,15 @@ export default function ProfilePage() {
         <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
           <Spinner size={31} color={'#999'} />
         </div>
-        ) : (userFeed.map((cast, index) => (<Cast {...{cast, key: index, index, updateCast, openImagePopup, ecosystem: eco?.ecosystem_points_name, handle: eco?.ecosystem_handle, self: false, app}} />)))}
+        ) : (userFeed.map((cast, index) => (<div className='flex-col' key={index}><Cast {...{cast, key: index, index, updateCast, openImagePopup, ecosystem: eco?.ecosystem_points_name, handle: eco?.ecosystem_handle, self: false, app}} />
+        <ImpactScale {...{setTipPercent, setInitValue, cast, updateCast, index}} />
+        </div>)))}
         {!delay && !shuffled && (
           <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
             <Spinner size={31} color={'#999'} />
           </div>
         )}
+
       </div>
       {!delay && (<div ref={ref}>&nbsp;</div>)}
       <ExpandImg  {...{show: showPopup.open, closeImagePopup, embed: {showPopup}, screenWidth, screenHeight }} />

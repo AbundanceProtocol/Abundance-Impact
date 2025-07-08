@@ -22,10 +22,10 @@ const Layout = ({ children }) => {
       const res = await fetch(`/api/user/getUserBalance?fid=${fid}`);
       const data = await res.json();
       console.log('data', data)
-      return data?.balance || 0;
+      return {impact: data?.impact || 0, qdau: data?.qdau || 0};
     } catch (error) {
       console.error('Error getting user balance:', error);
-      return 0;
+      return {impact: 0, qdau: 0};
     }
   };
 
@@ -58,9 +58,9 @@ const Layout = ({ children }) => {
       sdk.actions.ready()
 
       if (isValidUser && !(userBalances?.impact > 0) ) {
-        const userBalance = await getUserBalance(userProfile?.user?.fid)
-        console.log('userBalance', userBalance)
-        setUserBalances(prev => ({ ...prev, impact: userBalance }))
+        const {impact, qdau} = await getUserBalance(userProfile?.user?.fid)
+        console.log('userBalance', impact)
+        setUserBalances(prev => ({ ...prev, impact, qdau }))
       }  
 
     })();
