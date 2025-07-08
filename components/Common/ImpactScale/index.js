@@ -39,6 +39,7 @@ const ImpactScale = ({ initValue, setTipPercent, setInitValue, type, cast, updat
 
 
   async function boostImpact(cast, impactAmount) {
+    console.log('cast, impactAmount', cast, impactAmount, fid, fid !== '-', impactAmount, castContext, userBalances?.impact > 0)
     const castContext = {
       author_fid: cast.author.fid,
       author_pfp: cast.author.pfp_url,
