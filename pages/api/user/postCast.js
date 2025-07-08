@@ -13,10 +13,8 @@ export default async function handler(req, res) {
 
         if (embeds && embeds?.length > 0) {
           for (const embed of embeds) {
-            if (frame?.image) {
-              let frameImage = {url: embed, content_type: 'other'}
-              media.push(frameImage)
-            }
+            let embedData = {url: embed, content_type: 'other'}
+            media.push(embedData)
           }
         }
 
