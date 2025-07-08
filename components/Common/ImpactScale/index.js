@@ -100,7 +100,7 @@ const ImpactScale = ({ initValue, setTipPercent, setInitValue, type, cast, updat
           type="range"
           min="1"
           max={userBalances.impact}
-          value={value}
+          value={value || 5}
           onChange={handleChange}
           style={{ width: '100%' }}
         />
@@ -118,7 +118,7 @@ const ImpactScale = ({ initValue, setTipPercent, setInitValue, type, cast, updat
             () => {
               if (isLogged) {
                 if(userBalances.impact >= value) {
-                  boostImpact(cast, value)
+                  boostImpact(cast, value || 5)
                 } else { 
                   clickFailed()
                 }
