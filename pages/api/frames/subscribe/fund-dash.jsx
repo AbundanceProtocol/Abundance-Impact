@@ -8,11 +8,11 @@ import NodeCache from 'node-cache';
 // import User from "../../../models/User";
 import connectToDatabase from "../../../../libs/mongodb";
 import mongoose from 'mongoose';
-import Impact from '../../../../models/Impact';
+// import Impact from '../../../../models/Impact';
 import User from '../../../../models/User';
-import Claim from '../../../../models/Claim';
-import ScheduleTip from '../../../../models/ScheduleTip';
-import { formatNum } from '../../../../utils/utils'
+// import Claim from '../../../../models/Claim';
+// import ScheduleTip from '../../../../models/ScheduleTip';
+// import { formatNum } from '../../../../utils/utils'
 
 
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
@@ -28,7 +28,7 @@ export default async function handler(req, res) {
     const iVooster = validator == 'true' || false
     // console.log('at2 login', login, needLogin)
 
-    await connectToDatabase();
+    // await connectToDatabase();
 
 
 
