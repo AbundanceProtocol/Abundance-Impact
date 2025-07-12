@@ -136,7 +136,7 @@ export default async function handler(req, res) {
 
         if (userId) {
 
-          console.log('fid', fid)
+          console.log('fid 02', fid, booster, validator)
 
           circlesImg = `${baseURL}/api/frames/subscribe/fund-dash?${qs.stringify({ fid, booster, validator })}`
 
