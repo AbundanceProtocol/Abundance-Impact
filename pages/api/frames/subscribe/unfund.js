@@ -26,7 +26,7 @@ export default async function handler(req, res) {
   // const body = await req.body;
   // const {isValid, message} = await validateFramesMessage(body)
   // console.log('isValid:', isValid)
-  const { fund } = req.query;
+  const { fund, num } = req.query;
   const { untrustedData } = req.body
   // const authorFid = message?.data?.frameActionBody?.castId?.fid
   // console.log('ecosystem', ecosystem)
@@ -52,6 +52,8 @@ export default async function handler(req, res) {
         return { username: null };
       }
     }
+
+    let count = num + 1 || 1
 
     let boost = false
     let validate = false
@@ -138,7 +140,7 @@ export default async function handler(req, res) {
 
           console.log('fid 03', fid, booster, validator)
 
-          circlesImg = `${baseURL}/api/frames/subscribe/fund-dash?${qs.stringify({ fid, booster, validator })}`
+          circlesImg = `${baseURL}/api/frames/subscribe/fund-dash?${qs.stringify({ fid, booster, validator, count })}`
 
           shareUrl = `https://impact.abundance.id/~/ecosystems/abundance/subscribe-v1?${qs.stringify({ referrer: fid })}`
 
@@ -153,22 +155,22 @@ export default async function handler(req, res) {
           let addBoost = `
           <meta name="fc:frame:button:1" content="Boost">
           <meta name="fc:frame:button:1:action" content="post">
-          <meta name="fc:frame:button:1:target" content="${baseURL}/api/frames/subscribe/fund?fund=boost" />`
+          <meta name="fc:frame:button:1:target" content="${baseURL}/api/frames/subscribe/fund?fund=boost&num=${count}" />`
 
           let removeBoost = `
           <meta name="fc:frame:button:1" content="Un-Boost">
           <meta name="fc:frame:button:1:action" content="post">
-          <meta name="fc:frame:button:1:target" content="${baseURL}/api/frames/subscribe/unfund?fund=boost" />`
+          <meta name="fc:frame:button:1:target" content="${baseURL}/api/frames/subscribe/unfund?fund=boost&num=${count}" />`
 
           let addValidator = `
           <meta name="fc:frame:button:2" content="Validate">
           <meta name="fc:frame:button:2:action" content="post">
-          <meta name="fc:frame:button:2:target" content="${baseURL}/api/frames/subscribe/fund?fund=validate" />`
+          <meta name="fc:frame:button:2:target" content="${baseURL}/api/frames/subscribe/fund?fund=validate&num=${count}" />`
 
           let removeValidator = `
           <meta name="fc:frame:button:2" content="Un-Validate">
           <meta name="fc:frame:button:2:action" content="post">
-          <meta name="fc:frame:button:2:target" content="${baseURL}/api/frames/subscribe/unfund?fund=validate" />`
+          <meta name="fc:frame:button:2:target" content="${baseURL}/api/frames/subscribe/unfund?fund=validate&num=${count}" />`
 
 
           let metatags = `
