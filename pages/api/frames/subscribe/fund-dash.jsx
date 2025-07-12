@@ -38,8 +38,6 @@ export default async function handler(req, res) {
 
         const userData = await User.findOne({fid: fid.toString(), ecosystem_points: '$IMPACT'}).select('fid username pfp boost validator')
 
-        // const schedule = await ScheduleTip.findOne({fid: fid}).select('active_cron creator_fund development_fund growth_fund')
-
 
         console.log('userData', userData)
         
@@ -57,65 +55,8 @@ export default async function handler(req, res) {
     console.log('fid 01', fid, booster, validator)
 
     console.log('userData', userData)
-    // let rounded = uniqueCreators
-    // if (uniqueCreators > 100) {
-    //   rounded = Math.floor(uniqueCreators / 100) * 100
-    // } else if (uniqueCreators > 10) {
-    //   rounded = Math.floor(uniqueCreators / 10) * 10
-    // }
 
-
-
-
-    // async function getReward(id) {
-    //   try {
-    //     const objectId = new mongoose.Types.ObjectId(id)
-    //     console.log(id)
-    //     await connectToDatabase();
-    //     let rank = await Claim.findOne({ _id: objectId }).exec();
-
-    //     if (rank) {
-    //       const updateOptions = {
-    //         upsert: false,
-    //         new: true,
-    //         setDefaultsOnInsert: true,
-    //       };
-  
-    //       const update = {
-    //         $set: {
-    //           claimed: true
-    //         },
-    //       };
-    //       console.log('shared', shared)
-    //       const lastFourDays = new Date(Date.now() - 4 * 24 * 60 * 60 * 1000);
-  
-    //       let claimIds = await Claim.distinct("_id", { fid: rank?.fid, createdAt: { $gt: lastFourDays, $lte: rank?.createdAt }, claimed: false });
-  
-    //       for (const claimId of claimIds) {
-    //         const user = await Claim.findOneAndUpdate({ _id: claimId }, update, updateOptions);
-    //         console.log('user', user, claimId)
-    //       }
-    //     }
-
-    //     if (rank) {
-    //       return rank
-    //     } else {
-    //       return null
-    //     }
-    //   } catch (error) {
-    //     console.error("Error while fetching casts:", error);
-    //     return null
-    //   }  
-    // }
-
-    // let reward = null
-
-    // if (id) {
-    //   reward = await getReward(id);
-    // }
-
-
-    // console.log('reward', reward)
+    
 
 
 
@@ -168,52 +109,39 @@ export default async function handler(req, res) {
 
 
 
-        <div style={{display: 'flex', flexDirection: 'row', fontSize: '13px', justifyContent: "center", alignItems: 'center', gap: '0.75rem', margin: '20px 0', flexWrap: 'wrap', width: '100%'}}>
-          <div className={`btn-select ${iBooster ? 'cast-act-lt btn-brd-lt' : 'blu-drk btn-brd'}`} style={{display: 'flex', flexDirection: 'column', minWidth: '150px', color: (iBooster) ? '#000' : '#cde', height: '113px', border: '1px solid #eee', borderRadius: '16px', justifyContent: 'center', backgroundColor: (iBooster) ? '#eeeeeebb' : '#111122bb'}}>
+        <div style={{display: 'flex', flexDirection: 'row', fontSize: '15px', justifyContent: "center", alignItems: 'center', gap: '0.75rem', margin: '20px 0', flexWrap: 'wrap', width: '100%'}}>
+          <div className={`btn-select ${iBooster ? 'cast-act-lt btn-brd-lt' : 'blu-drk btn-brd'}`} style={{display: 'flex', flexDirection: 'column', minWidth: '220px', color: (iBooster) ? '#000' : '#cde', height: '123px', border: '1px solid #eee', borderRadius: '16px', justifyContent: 'center', backgroundColor: (iBooster) ? '#eeeeeebb' : '#111122bb'}}>
             <div style={{display: 'flex', flexDirection: 'row', justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
-              <div style={{fontSize: '17px', fontWeight: '700', margin: '0 0 5px 0'}}>Boost</div>
+              <div style={{fontSize: '19px', fontWeight: '700', margin: '0 0 5px 0'}}>{iBooster ? 'Booster' : 'Boost'}</div>
             </div>
             <div style={{display: 'flex', flexDirection: 'row', justifyContent: "center", alignItems: 'center', gap: '0.5rem'}}>
-              {/* <Impact size={15} color={schedule?.creator_fund == 100 ? '#147' : '#5af'} /> */}
-              <div>Creator</div>
-              <div style={{fontSize: '14px', fontWeight: '700'}}>100%</div>
+              <div>{iBooster ? 'allowing Impact 2.0' : 'allow Impact 2.0'}</div>
             </div>
             <div style={{display: 'flex', flexDirection: 'row', justifyContent: "center", alignItems: 'center', gap: '0.5rem'}}>
-              {/* <IoBuild size={15} color={schedule?.creator_fund == 100 ? '#147' : '#5af'} /> */}
-              <div>Dev</div>
-              <div style={{fontSize: '14px', fontWeight: '700'}}>0%</div>
+              <div>to boost impactful casts</div>
             </div>
-            <div style={{display: 'flex', flexDirection: 'row', justifyContent: "center", alignItems: 'center', gap: '0.5rem'}}>
-              {/* <IoIosRocket size={15} color={schedule?.creator_fund == 100 ? '#147' : '#5af'} /> */}
-              <div>Growth</div>
-              <div style={{fontSize: '14px', fontWeight: '700'}}>0%</div>
+
+            <div style={{fontSize: '13px', fontWeight: '400', display: 'flex', flexDirection: 'row', justifyContent: "center", alignItems: 'center', gap: '0.5rem', margin: '8px 0 0 0'}}>
+              <div>(earn rewards)</div>
             </div>
-            {/* <div style={{display: 'flex', flexDirection: 'row', margin: '5px 0 0 0', color: schedule?.creator_fund == 100 ? '#111' : "#9df", fontSize: '11px'}}>
-              <div>1.0x Score Boost</div>
-            </div> */}
+
           </div>
-          <div className={`btn-select ${iValidator ? 'cast-act-lt btn-brd-lt' : 'blu-drk btn-brd'}`} style={{display: 'flex', flexDirection: 'column', minWidth: '150px', color: (iValidator) ? '#000' : '#cde', height: '113px', border: '1px solid #eee', borderRadius: '16px', justifyContent: 'center', backgroundColor: (iValidator) ? '#eeeeeebb' : '#111122bb'}}>
+          <div className={`btn-select ${iValidator ? 'cast-act-lt btn-brd-lt' : 'blu-drk btn-brd'}`} style={{display: 'flex', flexDirection: 'column', minWidth: '220px', color: (iValidator) ? '#000' : '#cde', height: '123px', border: '1px solid #eee', borderRadius: '16px', justifyContent: 'center', backgroundColor: (iValidator) ? '#eeeeeebb' : '#111122bb'}}>
             <div style={{display: 'flex', flexDirection: 'row', justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
-              <div style={{fontSize: '17px', fontWeight: '700', margin: '0 0 5px 0'}}>Validate</div>
+              <div style={{fontSize: '19px', fontWeight: '700', margin: '0 0 5px 0'}}>{iValidator ? 'Validator' : 'Validate'}</div>
             </div>
-            <div style={{display: 'flex', flexDirection: 'row', justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
-              {/* <Impact size={15} color={schedule?.creator_fund == 80 ? '#147' : '#5af'} /> */}
-              <div>Creator</div>
-              <div style={{fontSize: '14px', fontWeight: '700'}}>80%</div>
+            <div style={{display: 'flex', flexDirection: 'row', justifyContent: "center", alignItems: 'center', gap: '0.5rem'}}>
+              <div>{iValidator ? 'validating the quality' : 'validate the quality'}</div>
             </div>
-            <div style={{display: 'flex', flexDirection: 'row', justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
-              {/* <IoBuild size={15} color={schedule?.creator_fund == 80 ? '#147' : '#5af'} /> */}
-              <div>Dev</div>
-              <div style={{fontSize: '14px', fontWeight: '700'}}>10%</div>
+            <div style={{display: 'flex', flexDirection: 'row', justifyContent: "center", alignItems: 'center', gap: '0.5rem'}}>
+              <div>of impactful casts</div>
             </div>
-            <div style={{display: 'flex', flexDirection: 'row', justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
-              {/* <IoIosRocket size={15} color={schedule?.creator_fund == 80 ? '#147' : '#5af'} /> */}
-              <div>Growth</div>
-              <div style={{fontSize: '14px', fontWeight: '700'}}>10%</div>
+
+            <div style={{fontSize: '13px', fontWeight: '400', display: 'flex', flexDirection: 'row', justifyContent: "center", alignItems: 'center', gap: '0.5rem', margin: '8px 0 0 0'}}>
+              <div>(earn rewards)</div>
             </div>
-            {/* <div style={{display: 'flex', flexDirection: 'row', margin: '5px 0 0 0', color: schedule?.creator_fund == 80 ? '#111' : "#9df", fontSize: '11px'}}>
-              <div>1.25x Score Boost</div>
-            </div> */}
+
+
           </div>
 
 
@@ -223,10 +151,7 @@ export default async function handler(req, res) {
 
 
         <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.0rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '5px 5px 0px 5px'}}>
-          {/* <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '30px', margin: '0px 0 0 0', padding: '0px 0 0 0'}}>Impact Fund</div> */}
-          {/* <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '28px', margin: '0', padding: '0px 0 0 0', fontWeight: '400'}}>Support Farcaster's growth</div> */}
 
-          {/* <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '14px', margin: '0', padding: '0px 0 0 0', fontWeight: '400'}}>reward 2700+ creators & builders for their impact with your $degen allowance</div> */}
         </div>
 
 
@@ -237,55 +162,6 @@ export default async function handler(req, res) {
 
 
 
-
-
-        {/* {pointsStaked && (<div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '0px 5px 0px 5px'}}>
-
-          <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '16px', margin: '0', padding: '0px 0 0 0'}}>is staking {pointsStaked} $impact</div>
-
-        </div>)}
-
-        {uniqueCasts && (<div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '5px 5px 0px 5px'}}>
-
-          <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '19px', margin: '0', padding: '0px 0 0 0'}}>on {uniqueCasts} casts</div>
-
-        </div>)}
-
-        {uniqueCreators && (<div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '5px 5px 0px 5px'}}>
-
-          <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '21px', margin: '0', padding: '0px 0 0 0'}}>from {uniqueCreators} creators</div>
-
-        </div>)} */}
-
-        {/* {userData && (<div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.0rem', border: '0px solid #eeeeeeaa', width: '50%', margin: '15px 5px 10px 5px'}}>
-          <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '18px', margin: '0px 0 0 0', padding: '0px 0 0 0'}}>subscribe to Auto-Fund @{userData.username}'s {rounded}+ creators in the frame</div> */}
-          {/* <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '25px', margin: '0', padding: '5px 0 0 0', fontWeight: '400'}}>rewards you for your impact</div> */}
-        {/* </div>)} */}
-
-        {/* {(Math.floor(reward?.degen_total) > 0) && (<div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '0px 5px 15px 5px'}}>
-
-          {Math.floor(reward?.degen_total) > 0 && (<div style={{display: 'flex', flexDirection: 'column', textAlign: 'center', color: '#dee', margin: '0', padding: '0 5px 0 0', justifyContent: 'center', alignItems: 'center'}}>
-            <div style={{display: 'flex', fontSize: '86px'}}>{Math.floor(reward?.degen_total).toLocaleString() || 0}</div>
-            <div style={{display: 'flex', fontSize: '25px', margin: '-10px 0 0 0'}}>$DEGEN</div>
-          </div>)}
-
-
-        </div>)} */}
-
-
-
-
-
-
-        {/* {(!reward || Math.floor(reward?.degen_total) == 0) && (<div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '60px 5px 60px 5px'}}>
-
-          <div style={{display: 'flex', textAlign: 'center', color: '#cdd', fontSize: '30px', margin: '0', padding: '20px 0 20px 0'}}>{start ? 'check your rewards' : 'no rewards to claim today'}</div>
-          <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '36px', margin: '0', padding: '0px 0 0 0'}}>Impact Alpha</div> 
-          <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '15px', margin: '0', padding: '25px 0 0 0', fontWeight: '400'}}>curate, auto-fund or invite to /impact to win</div>
-
-          <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '25px', margin: '0px 0 0 0', padding: '0px 0 0 0'}}>Impact Daily Rewards</div>
-
-        </div>)} */}
 
 
 
@@ -307,22 +183,6 @@ export default async function handler(req, res) {
     const pngBuffer = await convertSvgToPng(svgBuffer, { format: 'png', width: 600, height: 314 });
 
 
-    // async function updateHash(id) {
-    //   try {
-    //     const objectId = new mongoose.Types.ObjectId(id)
-    //     console.log(id)
-    //     await connectToDatabase();
-    //     let claim = await Claim.findOne({ _id: objectId }).exec();
-    //     if (claim) {
-    //       claim.cast_hash = 'true';
-    //       await claim.save();
-    //     }
-    //     return 
-    //   } catch (error) {
-    //     console.error("Error while fetching claim:", error);
-    //     return
-    //   }  
-    // }
 
     // const updated = await updateHash(id)
 
