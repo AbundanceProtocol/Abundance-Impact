@@ -139,7 +139,7 @@ export default async function handler(req, res) {
 
           console.log('fid 02', fid, booster, validator)
 
-          circlesImg = `${baseURL}/api/frames/subscribe/fund-dash?${qs.stringify({ fid, booster, validator, count })}`
+          circlesImg = `${baseURL}/api/frames/subscribe/fund-dash?${qs.stringify({ fid, booster: booster, validator: validator, count })}`
 
           shareUrl = `https://impact.abundance.id/~/ecosystems/abundance/subscribe-v1?${qs.stringify({ referrer: fid })}`
 
