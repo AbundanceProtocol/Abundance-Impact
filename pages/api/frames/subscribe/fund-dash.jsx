@@ -19,7 +19,7 @@ const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_
 const cache = new NodeCache({ stdTTL: 60 });
 
 export default async function handler(req, res) {
-  const { fid, fund } = req.query
+  const { fid, booster, validator } = req.query
 
   console.log('fid', fid)
   try {
@@ -168,7 +168,7 @@ export default async function handler(req, res) {
 
 
         <div style={{display: 'flex', flexDirection: 'row', fontSize: '13px', justifyContent: "center", alignItems: 'center', gap: '0.75rem', margin: '20px 0', flexWrap: 'wrap', width: '100%'}}>
-          <div className={`btn-select ${userData.boost ? 'cast-act-lt btn-brd-lt' : 'blu-drk btn-brd'}`} style={{display: 'flex', flexDirection: 'column', minWidth: '150px', color: (userData.boost) ? '#000' : '#cde', height: '113px', border: '1px solid #eee', borderRadius: '16px', justifyContent: 'center', backgroundColor: (userData.boost) ? '#eeeeeebb' : '#111122bb'}}>
+          <div className={`btn-select ${booster ? 'cast-act-lt btn-brd-lt' : 'blu-drk btn-brd'}`} style={{display: 'flex', flexDirection: 'column', minWidth: '150px', color: (booster) ? '#000' : '#cde', height: '113px', border: '1px solid #eee', borderRadius: '16px', justifyContent: 'center', backgroundColor: (booster) ? '#eeeeeebb' : '#111122bb'}}>
             <div style={{display: 'flex', flexDirection: 'row', justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
               <div style={{fontSize: '17px', fontWeight: '700', margin: '0 0 5px 0'}}>Boost</div>
             </div>
@@ -191,7 +191,7 @@ export default async function handler(req, res) {
               <div>1.0x Score Boost</div>
             </div> */}
           </div>
-          <div className={`btn-select ${userData.validator ? 'cast-act-lt btn-brd-lt' : 'blu-drk btn-brd'}`} style={{display: 'flex', flexDirection: 'column', minWidth: '150px', color: (userData.validator) ? '#000' : '#cde', height: '113px', border: '1px solid #eee', borderRadius: '16px', justifyContent: 'center', backgroundColor: (userData.validator) ? '#eeeeeebb' : '#111122bb'}}>
+          <div className={`btn-select ${validator ? 'cast-act-lt btn-brd-lt' : 'blu-drk btn-brd'}`} style={{display: 'flex', flexDirection: 'column', minWidth: '150px', color: (validator) ? '#000' : '#cde', height: '113px', border: '1px solid #eee', borderRadius: '16px', justifyContent: 'center', backgroundColor: (validator) ? '#eeeeeebb' : '#111122bb'}}>
             <div style={{display: 'flex', flexDirection: 'row', justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
               <div style={{fontSize: '17px', fontWeight: '700', margin: '0 0 5px 0'}}>Validate</div>
             </div>
