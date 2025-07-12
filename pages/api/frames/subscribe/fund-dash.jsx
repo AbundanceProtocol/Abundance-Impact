@@ -41,13 +41,13 @@ export default async function handler(req, res) {
         // const schedule = await ScheduleTip.findOne({fid: fid}).select('active_cron creator_fund development_fund growth_fund')
 
 
-
+        console.log('userData', userData)
         
         
-        return {userData}
+        return userData
       } catch (error) {
         console.error("Error while fetching casts:", error);
-        return {userData: null}
+        return null
       }
     }
 

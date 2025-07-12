@@ -163,12 +163,12 @@ export default async function handler(req, res) {
           let addValidator = `
           <meta name="fc:frame:button:2" content="Validate">
           <meta name="fc:frame:button:2:action" content="post">
-          <meta name="fc:frame:button:2:target" content="${baseURL}/api/frames/subscribe/fund?fund=boost" />`
+          <meta name="fc:frame:button:2:target" content="${baseURL}/api/frames/subscribe/fund?fund=validate" />`
 
           let removeValidator = `
           <meta name="fc:frame:button:2" content="Un-Validate">
           <meta name="fc:frame:button:2:action" content="post">
-          <meta name="fc:frame:button:2:target" content="${baseURL}/api/frames/subscribe/unfund?fund=boost" />`
+          <meta name="fc:frame:button:2:target" content="${baseURL}/api/frames/subscribe/unfund?fund=validate" />`
 
 
           let metatags = `
