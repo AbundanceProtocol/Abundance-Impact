@@ -67,7 +67,7 @@ export default async function handler(req, res) {
     // const fid = 9326
     let circlesImg = ''
     console.log('fid', fid)
-    const stopFund = `${baseURL}/api/frames/subscribe/stop-fund`
+    // const stopFund = `${baseURL}/api/frames/subscribe/stop-fund`
     // const stopFund = `${baseURL}/api/frames/subscribe/stop-fund?${qs.stringify({ ecosystem: ecosystem || 'abundance' })}`
     const loginUrl = `${baseURL}?${qs.stringify({ referrer: fid, autoFund: 'true' })}`
     
