@@ -21,7 +21,6 @@ const cache = new NodeCache({ stdTTL: 60 });
 export default async function handler(req, res) {
   const { fid, booster, validator } = req.query
 
-  console.log('fid 01', fid, booster, validator)
   try {
     const fontPath = path.join(process.cwd(), 'public', 'Inter-SemiBold.ttf');
     const fontData = fs.readFileSync(fontPath);
@@ -55,6 +54,7 @@ export default async function handler(req, res) {
 
 
     const userData = await getCuratorData(Number(fid))
+    console.log('fid 01', fid, booster, validator)
 
     console.log('userData', userData)
     // let rounded = uniqueCreators
