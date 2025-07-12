@@ -172,8 +172,8 @@ export default async function handler(req, res) {
 
 
           let metatags = `
-          ${booster ? addBoost : removeBoost}
-          ${validator ? addValidator : removeValidator}
+          ${booster ? removeBoost : addBoost}
+          ${validator ? removeValidator : addValidator}
           <meta name="fc:frame:button:3" content="Share">
           <meta name="fc:frame:button:3:action" content="link">
           <meta name="fc:frame:button:3:target" content="${shareLink}" />
