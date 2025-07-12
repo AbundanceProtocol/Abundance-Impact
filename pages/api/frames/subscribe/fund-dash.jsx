@@ -140,7 +140,7 @@ export default async function handler(req, res) {
 
         <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.0rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '5px 5px 0px 5px'}}>
           {/* <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '30px', margin: '0px 0 0 0', padding: '0px 0 0 0'}}>Impact Fund</div> */}
-          <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '28px', margin: '0', padding: '0px 0 10px 0', fontWeight: '400'}}>{count + 'I joined Impact 2.0'}</div>
+          <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '28px', margin: '0', padding: '0px 0 10px 0', fontWeight: '400'}}>{'I joined Impact 2.0'}</div>
           {/* <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '20px', margin: '0', padding: '10px 0 0 0', fontWeight: '400'}}>reward 2700+ creators & builders for their impact with your $degen allowance</div> */}
         </div>
 
