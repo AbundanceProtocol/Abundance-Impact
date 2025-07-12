@@ -25,7 +25,8 @@ export default async function handler(req, res) {
   try {
     const fontPath = path.join(process.cwd(), 'public', 'Inter-SemiBold.ttf');
     const fontData = fs.readFileSync(fontPath);
-    // const login = needLogin == 'true'
+    const iBooster = booster == 'true'
+    const iVooster = validator == 'true'
     // console.log('at2 login', login, needLogin)
 
     await connectToDatabase();
@@ -168,7 +169,7 @@ export default async function handler(req, res) {
 
 
         <div style={{display: 'flex', flexDirection: 'row', fontSize: '13px', justifyContent: "center", alignItems: 'center', gap: '0.75rem', margin: '20px 0', flexWrap: 'wrap', width: '100%'}}>
-          <div className={`btn-select ${booster ? 'cast-act-lt btn-brd-lt' : 'blu-drk btn-brd'}`} style={{display: 'flex', flexDirection: 'column', minWidth: '150px', color: (booster) ? '#000' : '#cde', height: '113px', border: '1px solid #eee', borderRadius: '16px', justifyContent: 'center', backgroundColor: (booster) ? '#eeeeeebb' : '#111122bb'}}>
+          <div className={`btn-select ${iBooster ? 'cast-act-lt btn-brd-lt' : 'blu-drk btn-brd'}`} style={{display: 'flex', flexDirection: 'column', minWidth: '150px', color: (iBooster) ? '#000' : '#cde', height: '113px', border: '1px solid #eee', borderRadius: '16px', justifyContent: 'center', backgroundColor: (iBooster) ? '#eeeeeebb' : '#111122bb'}}>
             <div style={{display: 'flex', flexDirection: 'row', justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
               <div style={{fontSize: '17px', fontWeight: '700', margin: '0 0 5px 0'}}>Boost</div>
             </div>
@@ -191,7 +192,7 @@ export default async function handler(req, res) {
               <div>1.0x Score Boost</div>
             </div> */}
           </div>
-          <div className={`btn-select ${validator ? 'cast-act-lt btn-brd-lt' : 'blu-drk btn-brd'}`} style={{display: 'flex', flexDirection: 'column', minWidth: '150px', color: (validator) ? '#000' : '#cde', height: '113px', border: '1px solid #eee', borderRadius: '16px', justifyContent: 'center', backgroundColor: (validator) ? '#eeeeeebb' : '#111122bb'}}>
+          <div className={`btn-select ${iValidator ? 'cast-act-lt btn-brd-lt' : 'blu-drk btn-brd'}`} style={{display: 'flex', flexDirection: 'column', minWidth: '150px', color: (iValidator) ? '#000' : '#cde', height: '113px', border: '1px solid #eee', borderRadius: '16px', justifyContent: 'center', backgroundColor: (iValidator) ? '#eeeeeebb' : '#111122bb'}}>
             <div style={{display: 'flex', flexDirection: 'row', justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
               <div style={{fontSize: '17px', fontWeight: '700', margin: '0 0 5px 0'}}>Validate</div>
             </div>
