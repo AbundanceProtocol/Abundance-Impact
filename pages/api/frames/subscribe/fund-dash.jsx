@@ -25,8 +25,8 @@ export default async function handler(req, res) {
   try {
     const fontPath = path.join(process.cwd(), 'public', 'Inter-SemiBold.ttf');
     const fontData = fs.readFileSync(fontPath);
-    const iBooster = booster == 'true'
-    const iVooster = validator == 'true'
+    const iBooster = booster == 'true' || false
+    const iVooster = validator == 'true' || false
     // console.log('at2 login', login, needLogin)
 
     await connectToDatabase();
