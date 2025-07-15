@@ -45,7 +45,7 @@ export default function MiniAppAuthButton({ onSuccess, onError, points = '$IMPAC
         } else {
           console.error('Missing fid or uuid for eligibility check');
         }
-        onSuccess && onSuccess(signersData.user || null, [signer], eligibility);
+        onSuccess && onSuccess(signersData.signers[0]?.fid || null, [signer], eligibility);
         setLoading(false);
         return;
       }

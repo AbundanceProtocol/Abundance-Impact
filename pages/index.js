@@ -360,9 +360,9 @@ export default function Home() {
                   </div>
                 ) : (
                   <MiniAppAuthButton
-                    onSuccess={(user, signers) => {
-                      console.log('isLogged-3')
-                      setFid(user?.fid)
+                    onSuccess={(fid, signers) => {
+                      console.log('isLogged-3', fid)
+                      setFid(fid)
                       setIsLogged(true)
                       setShowLogin(false)
                     }}
