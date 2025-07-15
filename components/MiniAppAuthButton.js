@@ -33,6 +33,7 @@ export default function MiniAppAuthButton({ onSuccess, onError, points = '$IMPAC
         const uuid = signer ? signer.signer_uuid : null;
         let eligibility = null;
         if (fid && uuid) {
+          console.log('fid 03', fid)
           try {
             const params = new URLSearchParams({ fid, points, uuid });
             if (referrer) params.append('referrer', referrer);
@@ -92,6 +93,7 @@ export default function MiniAppAuthButton({ onSuccess, onError, points = '$IMPAC
       const uuid = signer ? signer.signer_uuid : null;
       let eligibility = null;
       if (fid && uuid) {
+        console.log('fid 04', fid)
         try {
           const params = new URLSearchParams({ fid, points, uuid });
           if (referrer) params.append('referrer', referrer);
