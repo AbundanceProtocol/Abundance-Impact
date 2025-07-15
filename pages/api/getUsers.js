@@ -23,7 +23,9 @@ export default async function handler(req, res) {
 
       // check if users are following fid
       for (let i = 0; i < users?.result?.users?.length; i++) {
-        users?.result?.users[i].following = 0
+        if (users && users?.result && users?.result?.users && users?.result?.users[i]) {
+          users.result.users[i].following = 0;
+        }
         const options = {"parameters": {"fid": fid, "target": users?.result?.users[i].fid}, "max_age": 100}
 
         function sleep(ms) {
