@@ -30,7 +30,7 @@ import MiniAppAuthButton from '../components/MiniAppAuthButton';
 export default function Home() {
   const ref2 = useRef(null)
   const [ref, inView] = useInView()
-  const { LoginPopup, ecoData, points, setPoints, isLogged, showLogin, setShowLogin, setIsLogged, setFid, getRemainingBalances, isMiniApp, userBalances } = useContext(AccountContext)
+  const { LoginPopup, checkEcoEligibility, ecoData, points, setPoints, isLogged, showLogin, setShowLogin, setIsLogged, setFid, getRemainingBalances, isMiniApp, userBalances } = useContext(AccountContext)
   const [screenWidth, setScreenWidth] = useState(undefined)
   const [screenHeight, setScreenHeight] = useState(undefined)
   const [textMax, setTextMax] = useState('562px')
@@ -360,11 +360,12 @@ export default function Home() {
                   </div>
                 ) : (
                   <MiniAppAuthButton
-                    onSuccess={(fid, signers) => {
+                    onSuccess={(fid, uuid, signers) => {
                       console.log('isLogged-3', fid)
                       setFid(fid)
                       setIsLogged(true)
                       setShowLogin(false)
+                      checkEcoEligibility(fid, '$IMPACT', uuid, referrer)
                     }}
                     onError={err => {
                       // Handle error (optional)

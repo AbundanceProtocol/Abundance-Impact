@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
+import { AccountContext } from '../context';
 
 export default function MiniAppAuthButton({ onSuccess, onError, points = '$IMPACT', referrer = null }) {
   const [loading, setLoading] = useState(false);
+  const { checkEcoEligibility, points, fid, isLogged, LoginPopup } = useContext(AccountContext);
 
   const handleSignIn = async () => {
     setLoading(true);
@@ -31,21 +33,21 @@ export default function MiniAppAuthButton({ onSuccess, onError, points = '$IMPAC
         // Defensive: Only check eligibility if fid and uuid exist
         const fid = (signersData.signers && signersData.signers[0]?.fid) ? signersData.signers[0]?.fid : (signer && signer.fid ? signer.fid : null);
         const uuid = signer ? signer.signer_uuid : null;
-        let eligibility = null;
-        if (fid && uuid) {
-          console.log('fid 03', fid)
-          try {
-            const params = new URLSearchParams({ fid, points, uuid });
-            if (referrer) params.append('referrer', referrer);
-            const eligibilityRes = await fetch(`/api/ecosystem/checkEcoEligibility?${params.toString()}`);
-            eligibility = await eligibilityRes.json();
-          } catch (eligErr) {
-            console.error('Eligibility check failed:', eligErr);
-          }
-        } else {
-          console.error('Missing fid or uuid for eligibility check');
-        }
-        onSuccess && onSuccess(signersData.signers[0]?.fid || null, [signer], eligibility);
+        // let eligibility = null;
+        // if (fid && uuid) {
+        //   console.log('fid 03', fid, uuid.length)
+        //   try {
+        //     const params = new URLSearchParams({ fid, points, uuid });
+        //     if (referrer) params.append('referrer', referrer);
+        //     const eligibilityRes = await fetch(`/api/ecosystem/checkEcoEligibility?${params.toString()}`);
+        //     eligibility = await eligibilityRes.json();
+        //   } catch (eligErr) {
+        //     console.error('Eligibility check failed:', eligErr);
+        //   }
+        // } else {
+        //   console.error('Missing fid or uuid for eligibility check');
+        // }
+        onSuccess && onSuccess(signersData.signers[0]?.fid || null, signersData.signers[0]?.signer_uuid || null, [signer]);
         setLoading(false);
         return;
       }
@@ -89,23 +91,23 @@ export default function MiniAppAuthButton({ onSuccess, onError, points = '$IMPAC
         signers: [signer],
       }));
       // Defensive: Only check eligibility if fid and uuid exist
-      const fid = (signersData.user && signersData.user.fid) ? signersData.user.fid : (signer && signer.fid ? signer.fid : null);
+      const fid = (signersData.signers && signersData.signers[0]?.fid) ? signersData.signers[0]?.fid : (signer && signer.fid ? signer.fid : null);
       const uuid = signer ? signer.signer_uuid : null;
-      let eligibility = null;
-      if (fid && uuid) {
-        console.log('fid 04', fid)
-        try {
-          const params = new URLSearchParams({ fid, points, uuid });
-          if (referrer) params.append('referrer', referrer);
-          const eligibilityRes = await fetch(`/api/ecosystem/checkEcoEligibility?${params.toString()}`);
-          eligibility = await eligibilityRes.json();
-        } catch (eligErr) {
-          console.error('Eligibility check failed:', eligErr);
-        }
-      } else {
-        console.error('Missing fid or uuid for eligibility check');
-      }
-      onSuccess && onSuccess(signersData.user || null, [signer], eligibility);
+      // let eligibility = null;
+      // if (fid && uuid) {
+      //   console.log('fid 04', fid)
+      //   try {
+      //     const params = new URLSearchParams({ fid, points, uuid });
+      //     if (referrer) params.append('referrer', referrer);
+      //     const eligibilityRes = await fetch(`/api/ecosystem/checkEcoEligibility?${params.toString()}`);
+      //     eligibility = await eligibilityRes.json();
+      //   } catch (eligErr) {
+      //     console.error('Eligibility check failed:', eligErr);
+      //   }
+      // } else {
+      //   console.error('Missing fid or uuid for eligibility check');
+      // }
+      onSuccess && onSuccess(signersData.signers[0]?.fid || null, signersData.signers[0]?.signer_uuid || null, [signer]);
     } catch (err) {
       onError && onError(err);
     } finally {
