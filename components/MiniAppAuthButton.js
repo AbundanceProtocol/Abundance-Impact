@@ -1,9 +1,7 @@
-import { useState, useContext } from 'react';
-import { AccountContext } from '../context';
+import { useState } from 'react';
 
 export default function MiniAppAuthButton({ onSuccess, onError, points = '$IMPACT', referrer = null }) {
   const [loading, setLoading] = useState(false);
-  const { checkEcoEligibility, points, fid, isLogged, LoginPopup } = useContext(AccountContext);
 
   const handleSignIn = async () => {
     setLoading(true);
