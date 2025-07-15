@@ -80,7 +80,7 @@ export default async function handler(req, res) {
         } else {
           const channelInfo = await channelData.json();
           if (channelInfo && channelInfo?.result) {
-            let following = channelInfo.result?.following
+            let following = channelInfo?.result?.following
             if (!following) {
               return false
             } else {

@@ -112,8 +112,8 @@ export default async function handler(req, res) {
           const castData = await response.json();
           console.log(castData)
           let casts = []
-          if (castData && castData.result && castData.result.casts.length > 0) {
-            casts = castData.result.casts[0]
+          if (castData && castData?.result && castData?.result?.casts?.length > 0) {
+            casts = castData?.result?.casts[0]
           }
           
           return casts
