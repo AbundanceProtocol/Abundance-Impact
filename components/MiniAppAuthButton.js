@@ -1,0 +1,77 @@
+import { useState } from 'react';
+
+export default function MiniAppAuthButton({ onSuccess, onError }) {
+  const [loading, setLoading] = useState(false);
+
+  const handleSignIn = async () => {
+    setLoading(true);
+    try {
+      // 1. Fetch nonce from backend
+      const nonceRes = await fetch('/api/auth/nonce');
+      const { nonce } = await nonceRes.json();
+
+      // 2. Use Mini App SDK to sign the nonce
+      const { sdk } = await import('@farcaster/miniapp-sdk');
+      const { message, signature } = await sdk.actions.signIn({ nonce });
+
+      // 3. Send message and signature to backend to fetch signers
+      const signersRes = await fetch(`/api/auth/signers?message=${encodeURIComponent(message)}&signature=${signature}`);
+      const signersData = await signersRes.json();
+
+      // 4. If no approved signer, create one and handle approval
+      let signer = signersData.signers?.find(s => s.status === 'approved');
+      if (!signer) {
+        // Create new signer
+        const createRes = await fetch('/api/auth/signer', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message, signature }),
+        });
+        const createData = await createRes.json();
+
+        // Show approval URL (QR code or deep link)
+        if (createData.approvalUrl) {
+          if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+            window.location.href = createData.approvalUrl;
+          } else {
+            alert('Scan this QR code to approve: ' + createData.approvalUrl);
+          }
+        }
+
+        // Poll for approval
+        let approved = false;
+        let pollCount = 0;
+        while (!approved && pollCount < 30) {
+          await new Promise(r => setTimeout(r, 2000));
+          const statusRes = await fetch(`/api/auth/signer?signerUuid=${createData.signerUuid}`);
+          const statusData = await statusRes.json();
+          if (statusData.status === 'approved') {
+            signer = statusData;
+            approved = true;
+          }
+          pollCount++;
+        }
+        if (!approved) throw new Error('Signer approval timed out');
+      }
+
+      // 5. Store user and signer info
+      localStorage.setItem('neynar_authenticated_user', JSON.stringify({
+        isAuthenticated: true,
+        user: signersData.user,
+        signers: [signer],
+      }));
+
+      onSuccess && onSuccess(signersData.user, [signer]);
+    } catch (err) {
+      onError && onError(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <button onClick={handleSignIn} disabled={loading}>
+      {loading ? 'Connecting...' : 'Sign in with Farcaster'}
+    </button>
+  );
+} 
