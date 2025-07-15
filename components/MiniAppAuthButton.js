@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-export default function MiniAppAuthButton({ onSuccess, onError }) {
+export default function MiniAppAuthButton({ onSuccess, onError, points = '$IMPACT', referrer = null }) {
   const [loading, setLoading] = useState(false);
 
   const handleSignIn = async () => {
@@ -17,51 +17,85 @@ export default function MiniAppAuthButton({ onSuccess, onError }) {
       // 3. Send message and signature to backend to fetch signers
       const signersRes = await fetch(`/api/auth/signers?message=${encodeURIComponent(message)}&signature=${signature}`);
       const signersData = await signersRes.json();
+      console.log('signersData:', signersData);
 
-      // 4. If no approved signer, create one and handle approval
+      // 4. If approved signer exists, store and call onSuccess
       let signer = signersData.signers?.find(s => s.status === 'approved');
-      if (!signer) {
-        // Create new signer
-        const createRes = await fetch('/api/auth/signer', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message, signature }),
-        });
-        const createData = await createRes.json();
-
-        // Show approval URL (QR code or deep link)
-        if (createData.approvalUrl) {
-          if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-            window.location.href = createData.approvalUrl;
-          } else {
-            alert('Scan this QR code to approve: ' + createData.approvalUrl);
-          }
+      if (signer) {
+        console.log('Approved signer found:', signer);
+        localStorage.setItem('neynar_authenticated_user', JSON.stringify({
+          isAuthenticated: true,
+          user: signersData.user || null,
+          signers: [signer],
+        }));
+        // Call eligibility API
+        const fid = signersData.user?.fid || signer.fid;
+        const uuid = signer.signer_uuid;
+        let eligibility = null;
+        try {
+          const params = new URLSearchParams({ fid, points, uuid });
+          if (referrer) params.append('referrer', referrer);
+          const eligibilityRes = await fetch(`/api/ecosystem/checkEcoEligibility?${params.toString()}`);
+          eligibility = await eligibilityRes.json();
+        } catch (eligErr) {
+          console.error('Eligibility check failed:', eligErr);
         }
-
-        // Poll for approval
-        let approved = false;
-        let pollCount = 0;
-        while (!approved && pollCount < 30) {
-          await new Promise(r => setTimeout(r, 2000));
-          const statusRes = await fetch(`/api/auth/signer?signerUuid=${createData.signerUuid}`);
-          const statusData = await statusRes.json();
-          if (statusData.status === 'approved') {
-            signer = statusData;
-            approved = true;
-          }
-          pollCount++;
-        }
-        if (!approved) throw new Error('Signer approval timed out');
+        onSuccess && onSuccess(signersData.user || null, [signer], eligibility);
+        setLoading(false);
+        return;
       }
 
-      // 5. Store user and signer info
+      // 5. If no approved signer, create one and handle approval
+      const createRes = await fetch('/api/auth/signer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message, signature }),
+      });
+      const createData = await createRes.json();
+
+      // Show approval URL (QR code or deep link)
+      if (createData.approvalUrl) {
+        if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+          window.location.href = createData.approvalUrl;
+        } else {
+          alert('Scan this QR code to approve: ' + createData.approvalUrl);
+        }
+      }
+
+      // Poll for approval
+      let approved = false;
+      let pollCount = 0;
+      while (!approved && pollCount < 30) {
+        await new Promise(r => setTimeout(r, 2000));
+        const statusRes = await fetch(`/api/auth/signer?signerUuid=${createData.signerUuid}`);
+        const statusData = await statusRes.json();
+        if (statusData.status === 'approved') {
+          signer = statusData;
+          approved = true;
+        }
+        pollCount++;
+      }
+      if (!approved) throw new Error('Signer approval timed out');
+
+      // 6. Store user and signer info
       localStorage.setItem('neynar_authenticated_user', JSON.stringify({
         isAuthenticated: true,
-        user: signersData.user,
+        user: signersData.user || null,
         signers: [signer],
       }));
-
-      onSuccess && onSuccess(signersData.user, [signer]);
+      // Call eligibility API
+      const fid = signersData.user?.fid || signer.fid;
+      const uuid = signer.signer_uuid;
+      let eligibility = null;
+      try {
+        const params = new URLSearchParams({ fid, points, uuid });
+        if (referrer) params.append('referrer', referrer);
+        const eligibilityRes = await fetch(`/api/ecosystem/checkEcoEligibility?${params.toString()}`);
+        eligibility = await eligibilityRes.json();
+      } catch (eligErr) {
+        console.error('Eligibility check failed:', eligErr);
+      }
+      onSuccess && onSuccess(signersData.user || null, [signer], eligibility);
     } catch (err) {
       onError && onError(err);
     } finally {

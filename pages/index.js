@@ -59,12 +59,12 @@ export default function Home() {
     LoginPopup()
   };
 
-  const handleSignIn = async (loginData) => {
-    console.log('isLogged-3')
-    setFid(loginData.fid)
-    setIsLogged(true)
-    setShowLogin(false)
-  };
+  // const handleSignIn = async (loginData) => {
+  //   console.log('isLogged-3')
+  //   setFid(loginData.fid)
+  //   setIsLogged(true)
+  //   setShowLogin(false)
+  // };
 
   useEffect(() => {
     console.log('triggered')
@@ -361,10 +361,10 @@ export default function Home() {
                 ) : (
                   <MiniAppAuthButton
                     onSuccess={(user, signers) => {
-                      // Update your app state/context here if needed
-                      // Example:
-                      // setIsLogged(true);
-                      // setFid(user.fid);
+                      console.log('isLogged-3')
+                      setFid(loginData.fid)
+                      setIsLogged(true)
+                      setShowLogin(false)
                     }}
                     onError={err => {
                       // Handle error (optional)
