@@ -58,13 +58,13 @@ export default async function handler(req, res) {
           }
           if (typeof postResponse.data.query_result !== 'undefined' && counter == 0) 
             following = postResponse.data.query_result.data.rows[0].count
-          users?.result?.users[i].following = following
+            users.result.users[i].following = following
         } catch (error) {
           console.error('Error handling POST requests:', error);
         }
       }
 
-      res.status(200).json({ users: users?.result?.users });
+      res.status(200).json({ users: users.result.users });
     } catch (error) {
       console.error('Error handling GET request:', error);
       res.status(500).json({ error: 'Internal Server Error' });
