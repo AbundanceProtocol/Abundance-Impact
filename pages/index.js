@@ -25,6 +25,7 @@ import { Logo } from './assets';
 import useStore from '../utils/store';
 import ProfilePage from './~/studio';
 import axios from 'axios';
+import MiniAppAuthButton from '../components/MiniAppAuthButton';
 
 export default function Home() {
   const ref2 = useRef(null)
@@ -358,7 +359,19 @@ export default function Home() {
                     Connect Farcaster
                   </div>
                 ) : (
-                  <LoginButton onSignInSuccess={handleSignIn} />
+                  <MiniAppAuthButton
+                    onSuccess={(user, signers) => {
+                      // Update your app state/context here if needed
+                      // Example:
+                      // setIsLogged(true);
+                      // setFid(user.fid);
+                    }}
+                    onError={err => {
+                      // Handle error (optional)
+                      alert('Login failed: ' + err.message);
+                    }}
+                  />
+                  // <LoginButton onSignInSuccess={handleSignIn} />
                 )}
               </div>
               <div
