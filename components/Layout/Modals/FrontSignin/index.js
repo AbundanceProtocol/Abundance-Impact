@@ -1,55 +1,69 @@
-import { useCallback, useEffect } from 'react';
-import useStore from '../../../../utils/store';
+import React, { useState } from 'react';
 
-const NeynarSigninButton = ({ onSignInSuccess }) => {
-  const store = useStore()
-  const handleSignInSuccess = useCallback(
-    async (data) => {
-      try {
-        await onSignInSuccess(data);
-        store.setUserProfile(data)
-        store.setFid(data.fid)
-        store.setIsAuth(data.is_authenticated)
-        store.setSignerUuid(data.signer_uuid)
-      } catch (error) {
-        console.error('Sign-in failed:', error);
-      }
-    },
-    [onSignInSuccess],
-  );
+const STORAGE_KEY = 'neynar_authenticated_user';
 
-  useEffect(() => {
-    // Load Neynar script
-    const script = document.createElement('script');
-    script.src = 'https://neynarxyz.github.io/siwn/raw/1.2.0/index.js';
-    script.async = true;
-    document.body.appendChild(script);
-    window.onSignInSuccess = handleSignInSuccess;
-    return () => {
-      document.body.removeChild(script);
-      delete window.onSignInSuccess;
-    };
-  }, [handleSignInSuccess]); 
+const FarcasterLoginButton = ({ onSignInSuccess }) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  // Step 1: Get nonce
+  const getNonce = async () => {
+    const res = await fetch('/api/auth/nonce');
+    const data = await res.json();
+    return data.nonce;
+  };
+
+  // Step 2: Sign in with Farcaster (pseudo-code, replace with actual SDK/AuthKit)
+  const signInWithFarcaster = async (nonce) => {
+    // TODO: Replace with actual Farcaster Auth Kit logic
+    // Example: const { message, signature } = await farcasterSignIn(nonce);
+    // return { message, signature };
+    alert('Replace this with Farcaster Auth Kit sign-in logic.');
+    return { message: '', signature: '' };
+  };
+
+  // Step 3: Fetch signers
+  const fetchSigners = async (message, signature) => {
+    const res = await fetch(`/api/auth/signers?message=${encodeURIComponent(message)}&signature=${signature}`);
+    const data = await res.json();
+    return data;
+  };
+
+  const handleLogin = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const nonce = await getNonce();
+      const { message, signature } = await signInWithFarcaster(nonce);
+      if (!message || !signature) throw new Error('No signature returned');
+      const data = await fetchSigners(message, signature);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ isAuthenticated: true, user: data.user, signers: data.signers }));
+      if (onSignInSuccess) onSignInSuccess(data);
+    } catch (err) {
+      setError(err.message || 'Login failed');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div
-      className="neynar_signin frnt-nynr-btn"
-      data-client_id={process.env.NEXT_PUBLIC_NEYNAR_CLIENT_ID}
-      data-success-callback="onSignInSuccess"
-      data-theme="dark" 
-      data-variant="farcaster"
-      data-logo_size="24px" 
-      data-height="32px" 
-      data-border_radius="14px" 
-      data-font_size="18px" 
-      data-font_weight="600" 
-      data-color="#fff" 
-      data-padding="2px 4px"
-      data-background_color="transparent" 
-      data-margin="0"
-    >
-    </div>
+    <button className="frnt-nynr-btn" onClick={handleLogin} disabled={loading} style={{
+      color: "white",
+      fontSize: "18px",
+      fontFamily: "Ariel",
+      textAlign: "center",
+      padding: "12px 12px 12px 32px",
+      fontWeight: 600,
+      borderRadius: '14px',
+      background: '#8247e5',
+      border: 'none',
+      cursor: 'pointer',
+      minWidth: '220px',
+    }}>
+      {loading ? 'Connecting...' : 'Connect Farcaster'}
+      {error && <div style={{ color: 'red', fontSize: '14px', marginTop: '8px' }}>{error}</div>}
+    </button>
   );
 };
 
-export default NeynarSigninButton;
+export default FarcasterLoginButton;
