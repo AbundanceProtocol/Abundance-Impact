@@ -29,7 +29,7 @@ export default function MiniAppAuthButton({ onSuccess, onError, points = '$IMPAC
           signers: [signer],
         }));
         // Defensive: Only check eligibility if fid and uuid exist
-        const fid = (signersData.user && signersData.user.fid) ? signersData.user.fid : (signer && signer.fid ? signer.fid : null);
+        const fid = (signersData.signers && signersData.signers[0]?.fid) ? signersData.signers[0]?.fid : (signer && signer.fid ? signer.fid : null);
         const uuid = signer ? signer.signer_uuid : null;
         let eligibility = null;
         if (fid && uuid) {
