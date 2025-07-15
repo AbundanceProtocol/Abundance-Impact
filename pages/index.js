@@ -362,6 +362,10 @@ export default function Home() {
                   <MiniAppAuthButton
                     onSuccess={(fid, uuid, signers) => {
                       console.log('isLogged-3', fid)
+                      store.setFid(fid);
+                      store.setSignerUuid(uuid);
+                      store.setIsAuth(uuid?.length > 0);
+
                       setFid(fid)
                       setIsLogged(true)
                       setShowLogin(false)
