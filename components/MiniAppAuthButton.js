@@ -28,17 +28,21 @@ export default function MiniAppAuthButton({ onSuccess, onError, points = '$IMPAC
           user: signersData.user || null,
           signers: [signer],
         }));
-        // Call eligibility API
-        const fid = signersData.user?.fid || signer.fid;
-        const uuid = signer.signer_uuid;
+        // Defensive: Only check eligibility if fid and uuid exist
+        const fid = (signersData.user && signersData.user.fid) ? signersData.user.fid : (signer && signer.fid ? signer.fid : null);
+        const uuid = signer ? signer.signer_uuid : null;
         let eligibility = null;
-        try {
-          const params = new URLSearchParams({ fid, points, uuid });
-          if (referrer) params.append('referrer', referrer);
-          const eligibilityRes = await fetch(`/api/ecosystem/checkEcoEligibility?${params.toString()}`);
-          eligibility = await eligibilityRes.json();
-        } catch (eligErr) {
-          console.error('Eligibility check failed:', eligErr);
+        if (fid && uuid) {
+          try {
+            const params = new URLSearchParams({ fid, points, uuid });
+            if (referrer) params.append('referrer', referrer);
+            const eligibilityRes = await fetch(`/api/ecosystem/checkEcoEligibility?${params.toString()}`);
+            eligibility = await eligibilityRes.json();
+          } catch (eligErr) {
+            console.error('Eligibility check failed:', eligErr);
+          }
+        } else {
+          console.error('Missing fid or uuid for eligibility check');
         }
         onSuccess && onSuccess(signersData.user || null, [signer], eligibility);
         setLoading(false);
@@ -83,17 +87,21 @@ export default function MiniAppAuthButton({ onSuccess, onError, points = '$IMPAC
         user: signersData.user || null,
         signers: [signer],
       }));
-      // Call eligibility API
-      const fid = signersData.user?.fid || signer.fid;
-      const uuid = signer.signer_uuid;
+      // Defensive: Only check eligibility if fid and uuid exist
+      const fid = (signersData.user && signersData.user.fid) ? signersData.user.fid : (signer && signer.fid ? signer.fid : null);
+      const uuid = signer ? signer.signer_uuid : null;
       let eligibility = null;
-      try {
-        const params = new URLSearchParams({ fid, points, uuid });
-        if (referrer) params.append('referrer', referrer);
-        const eligibilityRes = await fetch(`/api/ecosystem/checkEcoEligibility?${params.toString()}`);
-        eligibility = await eligibilityRes.json();
-      } catch (eligErr) {
-        console.error('Eligibility check failed:', eligErr);
+      if (fid && uuid) {
+        try {
+          const params = new URLSearchParams({ fid, points, uuid });
+          if (referrer) params.append('referrer', referrer);
+          const eligibilityRes = await fetch(`/api/ecosystem/checkEcoEligibility?${params.toString()}`);
+          eligibility = await eligibilityRes.json();
+        } catch (eligErr) {
+          console.error('Eligibility check failed:', eligErr);
+        }
+      } else {
+        console.error('Missing fid or uuid for eligibility check');
       }
       onSuccess && onSuccess(signersData.user || null, [signer], eligibility);
     } catch (err) {
