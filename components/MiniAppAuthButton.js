@@ -92,7 +92,7 @@ export default function MiniAppAuthButton({ onSuccess, onError, points = '$IMPAC
   return (
     <button className='flex-row' style={{padding: '6px', borderRadius: '6px', backgroundColor: '#369', justifyContent: 'center', alignItems: 'center', gap: '0.5rem'}} onClick={handleSignIn} disabled={loading}>
       <SiFarcaster size={23} color={'#fff'} />
-      <div style={{fontSize: '13px', fontWeight: '600', color: '#fff', padding: '0 5px 0 0'}}>{loading ? 'Connecting...' : 'Sign in'}</div> 
+      <div style={{fontSize: '13px', fontWeight: '600', color: '#fff', padding: '0 5px 0 0', whiteSpace: 'nowrap'}}>{loading ? 'Connecting...' : 'Sign in'}</div> 
     </button>
   );
 } 

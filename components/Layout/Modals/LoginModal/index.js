@@ -39,7 +39,7 @@ const LoginModal = () => {
                       setFid(fid)
                       setIsLogged(true)
                       setShowLogin(false)
-                      checkEcoEligibility(fid, '$IMPACT', uuid, referrer)
+                      checkEcoEligibility(fid, '$IMPACT', uuid)
                     }}
                     onError={err => {
                       // Handle error (optional)
