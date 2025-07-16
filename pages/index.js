@@ -90,7 +90,13 @@ export default function Home() {
     })();
   }, []);
 
-
+  useEffect(() => {
+    (async () => {
+      const { sdk } = await import('@farcaster/miniapp-sdk');
+      const isApp = await sdk.isInMiniApp()
+      setIsMiniApp(isApp)
+    })();
+  }, [isLogged]);
 
 
   useEffect(() => {
