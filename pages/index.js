@@ -30,7 +30,7 @@ import MiniAppAuthButton from '../components/MiniAppAuthButton';
 export default function Home() {
   const ref2 = useRef(null)
   const [ref, inView] = useInView()
-  const { LoginPopup, checkEcoEligibility, ecoData, points, setPoints, isLogged, showLogin, setShowLogin, setIsLogged, setFid, getRemainingBalances, isMiniApp, userBalances } = useContext(AccountContext)
+  const { LoginPopup, checkEcoEligibility, ecoData, points, setPoints, isLogged, showLogin, setShowLogin, setIsLogged, setFid, getRemainingBalances, isMiniApp, userBalances, setIsMiniApp } = useContext(AccountContext)
   const [screenWidth, setScreenWidth] = useState(undefined)
   const [screenHeight, setScreenHeight] = useState(undefined)
   const [textMax, setTextMax] = useState('562px')
@@ -59,12 +59,12 @@ export default function Home() {
     LoginPopup()
   };
 
-  // const handleSignIn = async (loginData) => {
-  //   console.log('isLogged-3')
-  //   setFid(loginData.fid)
-  //   setIsLogged(true)
-  //   setShowLogin(false)
-  // };
+  const handleSignIn = async (loginData) => {
+    console.log('isLogged-3')
+    setFid(loginData.fid)
+    setIsLogged(true)
+    setShowLogin(false)
+  };
 
   useEffect(() => {
     console.log('triggered')
@@ -81,6 +81,17 @@ export default function Home() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  useEffect(() => {
+    (async () => {
+      const { sdk } = await import('@farcaster/miniapp-sdk');
+      const isApp = await sdk.isInMiniApp()
+      setIsMiniApp(isApp)
+    })();
+  }, []);
+
+
+
 
   useEffect(() => {
     if (screenWidth) {
@@ -359,7 +370,8 @@ export default function Home() {
                     Connect Farcaster
                   </div>
                 ) : (
-                  <MiniAppAuthButton
+                  isMiniApp ? 
+                  (<MiniAppAuthButton
                     onSuccess={(fid, uuid, signers) => {
                       console.log('isLogged-3', fid)
                       store.setFid(fid);
@@ -375,8 +387,7 @@ export default function Home() {
                       // Handle error (optional)
                       alert('Login failed: ' + err.message);
                     }}
-                  />
-                  // <LoginButton onSignInSuccess={handleSignIn} />
+                  />) : (<LoginButton onSignInSuccess={handleSignIn} />)
                 )}
               </div>
               <div
