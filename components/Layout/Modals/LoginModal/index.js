@@ -1,9 +1,12 @@
 import React, { useContext } from 'react';
 import NeynarSigninButton from '../Signin';
 import { AccountContext } from '../../../../context';
+import MiniAppAuthButton from '../../../MiniAppAuthButton';
+import useStore from '../../../../utils/store';
 
 const LoginModal = () => {
-  const { showLogin, isLogged, setShowLogin, setIsLogged, setFid } = useContext(AccountContext);
+  const { showLogin, isLogged, setShowLogin, setIsLogged, setFid, isMiniApp, checkEcoEligibility } = useContext(AccountContext);
+  const store = useStore()
 
   const handleSignIn = async (loginData) => {
     console.log('isLogged-5')
@@ -25,7 +28,24 @@ const LoginModal = () => {
             <div className='flex-col' id="notificationContent" style={{alignItems: 'center', justifyContent: 'center'}}>
               <div style={{fontSize: '20px', maxWidth: '280px', fontWeight: '500'}}>You&apos;ll need to connect to Farcaster for that</div>
               <div className='flex-row' style={{width: '100%', alignItems: 'center', justifyContent: 'center', marginTop: '16px', gap: '10px'}}>
-                <NeynarSigninButton onSignInSuccess={handleSignIn} />
+                {isMiniApp ? 
+                  (<MiniAppAuthButton
+                    onSuccess={(fid, uuid, signers) => {
+                      console.log('isLogged-3', fid)
+                      store.setFid(fid);
+                      store.setSignerUuid(uuid);
+                      store.setIsAuth(uuid?.length > 0);
+
+                      setFid(fid)
+                      setIsLogged(true)
+                      setShowLogin(false)
+                      checkEcoEligibility(fid, '$IMPACT', uuid, referrer)
+                    }}
+                    onError={err => {
+                      // Handle error (optional)
+                      alert('Login failed: ' + err.message);
+                    }}
+                  />) : (<NeynarSigninButton onSignInSuccess={handleSignIn} />)}
                 <div className='cncl-btn' onClick={closeLogin}>Cancel</div>
               </div>
             </div>
