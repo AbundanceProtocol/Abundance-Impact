@@ -7,6 +7,8 @@ const userSchema = new mongoose.Schema({
   invited_by: { type: Number, default: null },
   fid: { type: String, index: true },
   uuid: String, //encrypted
+  token: String, //encrypted
+  notified: { type: Boolean, default: false, index: true },
   ecosystem_points: { type: String, index: true },
   ecosystem_name: String,
   pfp: String,
@@ -21,6 +23,9 @@ const userSchema = new mongoose.Schema({
   quality_allowance: Number,
   remaining_q_allowance: Number,
   invite_bonus: { type: Number, default: 0 },
+  boost: { type: Boolean, default: false, index: true },
+  validator: { type: Boolean, default: false, index: true },
+  spam_label: { type: Boolean, default: false, index: true },
   staking_bonus: { type: Number, default: 0 },
   quality_score_change: { type: Number, default: 0 },
   quality_bonus_added: { type: Number, default: 0 },

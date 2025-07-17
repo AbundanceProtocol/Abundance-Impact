@@ -49,7 +49,7 @@ export default function Tips({ecosystem, referrer, id}) {
   
   const encodedShareText = encodeURIComponent(shareText); 
   let encodedShareUrl = encodeURIComponent(shareUrl); 
-  let shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
+  let shareLink = `https://farcaster.xyz/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
 
 
 

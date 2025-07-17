@@ -13,12 +13,17 @@
     "@airstack/node": "^0.0.7",
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.9.3",
+    "@farcaster/auth-client": "^0.7.0",
+    "@farcaster/frame-node": "^0.1.2",
     "@farcaster/hub-nodejs": "^0.11.8",
+    "@farcaster/miniapp-sdk": "^0.1.1",
     "@moralisweb3/common-evm-utils": "^2.26.4",
     "@mui/material": "^5.8.7",
     "@netlify/functions": "^2.6.3",
-    "@neynar/nodejs-sdk": "^1.10.0",
+    "@neynar/nodejs-sdk": "^3.25.0",
+    "@neynar/react": "^1.2.5",
     "@openzeppelin/contracts": "^4.5.0",
+    "@pigment-css/react": "^0.0.30",
     "@pinata/sdk": "^2.1.0",
     "@reown/appkit": "^1.2.0",
     "@reown/appkit-adapter-wagmi": "^1.2.0",
@@ -56,6 +61,7 @@
     "react-player": "^2.10.1",
     "satori": "^0.10.14",
     "sharp": "^0.33.5",
+    "siwe": "^3.0.0",
     "svg2img": "^1.0.0-beta.2",
     "uuid": "^11.0.4",
     "viem": "^2.21.37",
@@ -71,5 +77,8 @@
     "typescript": "^5.5.4",
     "urql": "^2.2.2"
   },
-  "packageManager": "yarn@1.22.19"
+  "packageManager": "yarn@1.22.19",
+  "engines": {
+    "node": ">=20.18.0"
+  }
 }

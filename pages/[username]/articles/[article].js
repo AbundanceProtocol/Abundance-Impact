@@ -121,7 +121,7 @@ export default function ArticlePage({articleData, username, articleHash, totalPa
             <div className="">
               <div className="flex-row">
                 <span className="" datastate="closed" style={{margin: '0 10px 0 0'}}>
-                  <a className="" title="" href={authorData ? `https://warpcast.com/${authorData.username}` : ''}>
+                  <a className="" title="" href={authorData ? `https://farcaster.xyz/${authorData.username}` : ''}>
                     <img loading="lazy" src={authorData ? authorData.pfp_url : ''} className="" alt={authorData ? `${authorData.display_name} avatar` : ''} style={{width: '48px', height: '48px', maxWidth: '48px', maxHeight: '48px', borderRadius: '24px', border: '1px solid #000'}} />
                   </a>
                 </span>
@@ -154,7 +154,7 @@ export default function ArticlePage({articleData, username, articleHash, totalPa
                           }}}>@{articleContent.username}</a>
                       </span>
                       <div className="">·</div>
-                      <a className="fc-lnk" title="Navigate to cast" href={authorData && `https://warpcast.com/${authorData.username}/${cast && cast.hash.slice(0,10)}`}>
+                      <a className="fc-lnk" title="Navigate to cast" href={authorData && `https://farcaster.xyz/${authorData.username}/${cast && cast.hash.slice(0,10)}`}>
                         <div className="user-font">{articleContent.date && timePassed(articleContent.date)}</div>
                       </a>
                     </div>

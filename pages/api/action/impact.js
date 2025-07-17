@@ -54,6 +54,33 @@ export default async function handler(req, res) {
       return;
     }
 
+
+    async function checkImpactAllowance(curatorFid) {
+      try {
+        await connectToDatabase();
+        let user = await User.findOne({ fid: curatorFid, ecosystem_points: '$IMPACT' }).exec();
+        if (user && user.impact_allowance > 0) {
+          return true;
+        } else {
+          return false;
+        }
+      } catch (error) {
+        console.error("Error checking opt out:", error);
+        return false;
+      }
+    }
+
+    const curatorImpactAllowance = await checkImpactAllowance(curatorFid)
+
+    if (!curatorImpactAllowance) {
+      res.setHeader('Content-Type', 'text/html');
+      res.status(200).send({
+        message: `User has no impact allowance`
+      });
+      return;
+    }
+
+
     async function getQuality(curatorFid, castHash) {
       try {
         await connectToDatabase();
@@ -85,8 +112,8 @@ export default async function handler(req, res) {
           const castData = await response.json();
           console.log(castData)
           let casts = []
-          if (castData && castData.result && castData.result.casts.length > 0) {
-            casts = castData.result.casts[0]
+          if (castData && castData?.result && castData?.result?.casts?.length > 0) {
+            casts = castData?.result?.casts[0]
           }
           
           return casts
@@ -105,7 +132,7 @@ export default async function handler(req, res) {
       if (getCastData) {
         // if (getCastData.root_parent_url) {
         //   const isChannel = getCastData.root_parent_url.slice(0,31)
-        //   if (isChannel == 'https://warpcast.com/~/channel/') {
+        //   if (isChannel == 'https://farcaster.xyz/~/channel/') {
         //     channel = getCastData.root_parent_url
         //   }
         // }

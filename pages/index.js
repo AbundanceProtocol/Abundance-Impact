@@ -25,11 +25,12 @@ import { Logo } from './assets';
 import useStore from '../utils/store';
 import ProfilePage from './~/studio';
 import axios from 'axios';
+import MiniAppAuthButton from '../components/MiniAppAuthButton';
 
 export default function Home() {
   const ref2 = useRef(null)
   const [ref, inView] = useInView()
-  const { LoginPopup, ecoData, points, setPoints, isLogged, showLogin, setShowLogin, setIsLogged, setFid, getRemainingBalances } = useContext(AccountContext)
+  const { LoginPopup, checkEcoEligibility, ecoData, points, setPoints, isLogged, showLogin, setShowLogin, setIsLogged, setFid, getRemainingBalances, isMiniApp, userBalances, setIsMiniApp } = useContext(AccountContext)
   const [screenWidth, setScreenWidth] = useState(undefined)
   const [screenHeight, setScreenHeight] = useState(undefined)
   const [textMax, setTextMax] = useState('562px')
@@ -82,6 +83,23 @@ export default function Home() {
   }, [])
 
   useEffect(() => {
+    (async () => {
+      const { sdk } = await import('@farcaster/miniapp-sdk');
+      const isApp = await sdk.isInMiniApp()
+      setIsMiniApp(isApp)
+    })();
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      const { sdk } = await import('@farcaster/miniapp-sdk');
+      const isApp = await sdk.isInMiniApp()
+      setIsMiniApp(isApp)
+    })();
+  }, [isLogged]);
+
+
+  useEffect(() => {
     if (screenWidth) {
       if (screenWidth > 680) {
         setTextMax(`562px`)
@@ -108,7 +126,9 @@ export default function Home() {
       let setReferrer = referrer || null
       console.log('setEco', setEco)
       setPoints(setEco)
-      getRemainingBalances(store.fid, setEco, store.signer_uuid, setReferrer)
+      if (userBalances.imppact == 0) {
+        getRemainingBalances(store.fid, setEco, store.signer_uuid, setReferrer)
+      }
       if (autoFund && store.fid && setReferrer) {
         setAutoFundInvite(store.fid, referrer, store.signer_uuid)
       }
@@ -122,7 +142,6 @@ export default function Home() {
       console.error('Error setting invite:', error)
     }
   }
-
 
   return (
     <div name="feed" style={{ width: "auto", maxWidth: "620px" }} ref={ref2}>
@@ -319,8 +338,6 @@ export default function Home() {
 
 
 
-
-
           </div>
 
 
@@ -359,7 +376,24 @@ export default function Home() {
                     Connect Farcaster
                   </div>
                 ) : (
-                  <LoginButton onSignInSuccess={handleSignIn} />
+                  isMiniApp ? 
+                  (<MiniAppAuthButton
+                    onSuccess={(fid, uuid, signers) => {
+                      console.log('isLogged-3', fid)
+                      store.setFid(fid);
+                      store.setSignerUuid(uuid);
+                      store.setIsAuth(uuid?.length > 0);
+
+                      setFid(fid)
+                      setIsLogged(true)
+                      setShowLogin(false)
+                      checkEcoEligibility(fid, '$IMPACT', uuid, referrer)
+                    }}
+                    onError={err => {
+                      // Handle error (optional)
+                      alert('Login failed: ' + err.message);
+                    }}
+                  />) : (<LoginButton onSignInSuccess={handleSignIn} />)
                 )}
               </div>
               <div
@@ -384,8 +418,6 @@ export default function Home() {
 
 
 
-
-
         <div
           id="what is impact"
           style={{
@@ -393,9 +425,6 @@ export default function Home() {
             width: "40%",
           }}
         ></div>
-
-
-
 
 
 
@@ -434,7 +463,7 @@ export default function Home() {
           </div>
 
           <div className='flex-row page-t3' style={{ fontSize: isMobile ? "15px" : "17px" }} >
-            We want everyone on Farcaster (and beyond) to prosper simply by making meaning contributions in their community & the world. /impact is the first step in that journey.
+            We want everyone on Farcaster (and beyond) to prosper simply by making meaningful contributions in their community & the world. /impact is the first step in that journey.
           </div>
 
 
@@ -489,7 +518,6 @@ export default function Home() {
             width: "40%",
           }}
         ></div>
-
 
 
 

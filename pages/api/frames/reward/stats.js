@@ -12,7 +12,7 @@ import CreatorFund from  "../../../../models/CreatorFund";
 // import { decryptPassword, getTimeRange, processTips, populateCast } from "../../../../utils/utils";
 import _ from "lodash";
 import qs from "querystring";
-import { init, validateFramesMessage } from "@airstack/frames";
+// import { init, validateFramesMessage } from "@airstack/frames";
 
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 const HubURL = process.env.NEYNAR_HUB
@@ -21,10 +21,10 @@ const secretKey = process.env.SECRET_KEY
 const apiKey = process.env.NEYNAR_API_KEY
 
 export default async function handler(req, res) {
-  init(process.env.AIRSTACK_API_KEY ?? '')
-  const body = await req.body;
-  const {isValid, message} = await validateFramesMessage(body)
-  console.log('isValid:', isValid)
+  // init(process.env.AIRSTACK_API_KEY ?? '')
+  // const body = await req.body;
+  // const {isValid, message} = await validateFramesMessage(body)
+  // console.log('isValid:', isValid)
   // const { referrer } = req.query;
   const { untrustedData } = req.body
   // const authorFid = message?.data?.frameActionBody?.castId?.fid
@@ -86,7 +86,7 @@ export default async function handler(req, res) {
     const issueImg = `${baseURL}/images/issue.jpg`;
     let circlesImg = ''
     // console.log('fid', ecosystem, referrer, fid)
-    // const impactLink = `https://warpcast.com/abundance/0xea3aef76`
+    // const impactLink = `https://farcaster.xyz/abundance/0xea3aef76`
 
     // const retryPost = `${baseURL}/api/frames/reward/stats`
 
@@ -102,7 +102,7 @@ export default async function handler(req, res) {
 
     let encodedShareText = encodeURIComponent(shareText); 
     let encodedShareUrl = encodeURIComponent(shareUrl); 
-    let shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
+    let shareLink = `https://farcaster.xyz/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
     
     try {
 
@@ -155,12 +155,12 @@ export default async function handler(req, res) {
         shareUrl = `https://impact.abundance.id/~/ecosystems/${'abundance'}/rewards-v1?${qs.stringify({ fid })}`
 
 
-        shareText = `My /impact Creator Fund Season 4 airdrop (frame by @abundance)\n\nCheck out yours 👇`
+        shareText = `My /impact Creator Fund Season 6 airdrop (frame by @abundance)\n\nCheck out yours 👇`
 
         encodedShareText = encodeURIComponent(shareText)
       
         encodedShareUrl = encodeURIComponent(shareUrl); 
-        shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
+        shareLink = `https://farcaster.xyz/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
 
         let metatags = ``
 

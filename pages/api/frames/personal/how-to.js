@@ -28,7 +28,7 @@ export default async function handler(req, res) {
 
         <meta property="fc:frame:button:3" content='Cast Action' />
         <meta property="fc:frame:button:3:action" content="link" />
-        <meta property="fc:frame:button:3:target" content='https://warpcast.com/~/add-cast-action?name=%24IMPACT+Console&icon=star&actionType=post&postUrl=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Faction%2Fstatus%3Fpoints=IMPACT&description=Curate+Casts+with+the+Impact+App' />
+        <meta property="fc:frame:button:3:target" content='https://farcaster.xyz/~/add-cast-action?name=%24IMPACT+Console&icon=star&actionType=post&postUrl=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Faction%2Fstatus%3Fpoints=IMPACT&description=Curate+Casts+with+the+Impact+App' />
 
         <meta name="fc:frame:post_url" content='https://impact.abundance.id' />`
 
@@ -67,7 +67,7 @@ export default async function handler(req, res) {
 
         <meta property="fc:frame:button:3" content='Cast Action' />
         <meta property="fc:frame:button:3:action" content="link" />
-        <meta property="fc:frame:button:3:target" content='https://warpcast.com/~/add-cast-action?name=%24IMPACT+Console&icon=star&actionType=post&postUrl=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Faction%2Fstatus%3Fpoints=IMPACT&description=Curate+Casts+with+the+Impact+App' />
+        <meta property="fc:frame:button:3:target" content='https://farcaster.xyz/~/add-cast-action?name=%24IMPACT+Console&icon=star&actionType=post&postUrl=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Faction%2Fstatus%3Fpoints=IMPACT&description=Curate+Casts+with+the+Impact+App' />
 
         <meta name="fc:frame:post_url" content='https://impact.abundance.id' />`
 

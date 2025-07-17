@@ -121,7 +121,7 @@ export default async function handler(req, res) {
         } else {
           const channelInfo = await channelData.json();
           if (channelInfo && channelInfo?.result) {
-            let following = channelInfo.result?.following
+            let following = channelInfo?.result?.following
             if (!following) {
               return false
             } else {
@@ -260,7 +260,7 @@ export default async function handler(req, res) {
 
     // const exploreLink = `${baseURL}/~/ecosystems/${ecosystem}?${qs.stringify({ time: 'all', curators })}`
 
-    const impactLink = `https://warpcast.com/abundance/0x43ddd672`
+    const impactLink = `https://farcaster.xyz/abundance/0x43ddd672`
 
     const retryPost = `${baseURL}/api/frames/tip/start?${qs.stringify({ time, curators, eco, ecosystem, referrer })}`
 
@@ -282,7 +282,7 @@ export default async function handler(req, res) {
 
     let encodedShareText = encodeURIComponent(shareText); 
     let encodedShareUrl = encodeURIComponent(shareUrl); 
-    let shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
+    let shareLink = `https://farcaster.xyz/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
     
     try {
 
@@ -303,7 +303,7 @@ export default async function handler(req, res) {
         shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share-v4?${qs.stringify({ id: circleFids })}`
     
         encodedShareUrl = encodeURIComponent(shareUrl); 
-        shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
+        shareLink = `https://farcaster.xyz/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
 
         let metatags = `
         <meta name="fc:frame:button:1" content="Share contribution">
@@ -887,7 +887,7 @@ export default async function handler(req, res) {
                   encodedShareText = encodeURIComponent(shareText)
       
                   encodedShareUrl = encodeURIComponent(shareUrl); 
-                  shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
+                  shareLink = `https://farcaster.xyz/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
 
                   metatags = `
                   <meta name="fc:frame:button:1" content="Share contribution">
@@ -938,7 +938,7 @@ export default async function handler(req, res) {
                   encodedShareText = encodeURIComponent(shareText)
       
                   encodedShareUrl = encodeURIComponent(shareUrl); 
-                  shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
+                  shareLink = `https://farcaster.xyz/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
 
                   metatags = `
                   <meta name="fc:frame:button:1" content="Tip more >">

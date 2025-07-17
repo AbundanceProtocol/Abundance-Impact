@@ -1,0 +1,37 @@
+{
+  "frame": {
+    "name": "Impact 2.0",
+    "version": "1",
+    "iconUrl": "https://impact.abundance.id/images/icon-02.png",
+    "homeUrl": "https://impact.abundance.id",
+    "imageUrl": "https://impact.abundance.id/images/icon.jpg",
+    "buttonTitle": "Opem Impact MiniApp",
+    "splashImageUrl": "https://impact.abundance.id/images/icon.png",
+    "splashBackgroundColor": "#011222",
+    "webhookUrl": "https://impact.abundance.id/api/webhook",
+    "subtitle": "Create impact, get boosted",
+    "description": "Get boosted and rewarded for your impact on Farcaster",
+    "primaryCategory": "social",
+    "tags": [
+      "impact",
+      "abundance",
+      "boost",
+      "likes",
+      "degen"
+    ],
+    "heroImageUrl": "https://impact.abundance.id/images/icon.jpg",
+    "tagline": "Create impact, get boosted",
+    "ogTitle": "Impact 2.0",
+    "ogDescription": "Get boosted and rewarded for your impact on Farcaster",
+    "ogImageUrl": "https://impact.abundance.id/images/icon-02.png",
+    "castShareUrl": "https://impact.abundance.id/~/miniapp/cast",
+    "screenshotUrls": [
+      "https://impact.abundance.id/images/icon.jpg"
+    ]
+  },
+  "accountAssociation": {
+    "header": "eyJmaWQiOjkzMjYsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHgzNGU0MzRjRTI5OTY4NEYzOENFNjc1QWFiQTY1OTU4YTNkNkI3RDQ4In0",
+    "payload": "eyJkb21haW4iOiJpbXBhY3QuYWJ1bmRhbmNlLmlkIn0",
+    "signature": "MHgyZjQxYjQ3NjExMzNkODkzNjg4N2U1ZDE1MzFiMjBlMWE2ZWM0ZTkyZGM1Mjg0MWM2MWFkY2MzYzJlN2RlMmNmNWE1ZGNhNDMwMmE0Nzc3Yzc4YmRjMzQ1Njk0MGJlOWNjYmE2NjhkNDJiYzYyNGExNGZlZmVjODQyNTg3OWZhYjFj"
+  }
+}

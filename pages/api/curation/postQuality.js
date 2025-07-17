@@ -15,7 +15,7 @@ export default async function handler(req, res) {
     res.status(500).json({ error: 'Internal Server Error' });
   } else {
     // console.log('1')
-    // console.log(fid, castHash, qualityAmount)
+    console.log('fid, hash, amount', fid, castHash, qualityAmount)
 
     async function getImpact(curatorFid, castHash) {
       try {

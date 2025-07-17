@@ -174,7 +174,7 @@ export default async function handler(req, res) {
       exploreLink = `${baseURL}/~/curator/${curatorId || 9326}?${qs.stringify({ points })}`
     }
 
-    const impactLink = `https://warpcast.com/abundance/0x43ddd672`
+    const impactLink = `https://farcaster.xyz/abundance/0x43ddd672`
 
     const retryPost = `${baseURL}/api/frames/tip/start?${qs.stringify({ time, curators, eco, ecosystem, referrer })}`
 
@@ -196,7 +196,7 @@ export default async function handler(req, res) {
 
     const encodedShareText = encodeURIComponent(shareText); 
     let encodedShareUrl = encodeURIComponent(shareUrl); 
-    let shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
+    let shareLink = `https://farcaster.xyz/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
     
     try {
 
@@ -217,7 +217,7 @@ export default async function handler(req, res) {
         shareUrl = `https://impact.abundance.id/~/ecosystems/${ecosystem}/tip-share-v2?${qs.stringify({ id: circleFids })}`
     
         encodedShareUrl = encodeURIComponent(shareUrl); 
-        shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
+        shareLink = `https://farcaster.xyz/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
 
         let threshold = true
 

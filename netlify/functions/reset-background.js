@@ -147,10 +147,10 @@ async function processUsersBatch(users, ecosystem, lastDay, lastWeek, ecoPoints)
     try {
       let userBonus = 0;
 
-      if (ecosystem.points_per_tip) {
-        const tipValue = await getTipValue(user.fid, ecoPoints, lastDay);
-        userBonus += tipValue * ecosystem.points_per_tip;
-      }
+      // if (ecosystem.points_per_tip) {
+      //   const tipValue = await getTipValue(user.fid, ecoPoints, lastDay);
+      //   userBonus += tipValue * ecosystem.points_per_tip;
+      // }
 
       if (ecosystem.upvote_value && ecosystem.downvote_value) {
         const voteBalance = await getVoteBalance(user.fid, ecoPoints, lastDay, lastWeek, ecosystem);

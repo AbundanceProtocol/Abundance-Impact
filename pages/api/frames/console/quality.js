@@ -112,8 +112,17 @@ export default async function handler(req, res) {
         return;
       } else {
 
-        const userRemainingQuality = user.remaining_q_allowance
+
+        let userRemainingQuality = 0
+        
+        if (user.impact_allowance > 0) {
+          userRemainingQuality = user.remaining_q_allowance
+        } else {
+          userRemainingQuality = 0
+        }
   
+        userRemainingQuality = user.remaining_q_allowance
+
         if (userRemainingQuality && userRemainingQuality !== 0) {
   
           async function updateListings(fid, castHash, qualityAmount, points) {

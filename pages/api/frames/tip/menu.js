@@ -9,7 +9,7 @@ import { decryptPassword, getTimeRange, processTips, populateCast } from "../../
 import _ from "lodash";
 import qs from "querystring";
 import { metaButton } from "../../../../utils/frames";
-import { init, validateFramesMessage } from "@airstack/frames";
+// import { init, validateFramesMessage } from "@airstack/frames";
 
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 const HubURL = process.env.NEYNAR_HUB
@@ -18,10 +18,10 @@ const secretKey = process.env.SECRET_KEY
 const apiKey = process.env.NEYNAR_API_KEY
 
 export default async function handler(req, res) {
-  init(process.env.AIRSTACK_API_KEY ?? '')
-  const body = await req.body;
-  const {isValid, message} = await validateFramesMessage(body)
-  console.log('isValid:', isValid)
+  // init(process.env.AIRSTACK_API_KEY ?? '')
+  // const body = await req.body;
+  // const {isValid, message} = await validateFramesMessage(body)
+  // console.log('isValid:', isValid)
   const { time, curators, channels, tags, eco, ecosystem, refresh, retry, start, referrer } = req.query;
   const { untrustedData } = req.body
 
@@ -54,9 +54,9 @@ export default async function handler(req, res) {
       let shareUrl = `${baseURL}/api/mini-app/curator?${qs.stringify({ fid: curatorId, points, app: 'mini', view: 'prompt' })}`
       // let shareUrl = `${baseURL}/~/curator/${curatorId}?${qs.stringify({ points })}`
       // let encodedMiniAppUrl = encodeURIComponent(shareUrl); 
-      // exploreLink =  `https://warpcast.com/~/composer-action?url=${encodedMiniAppUrl}`
+      // exploreLink =  `https://farcaster.xyz/~/composer-action?url=${encodedMiniAppUrl}`
 
-      exploreLink = `https://warpcast.com/~/composer-action?view=prompt&url=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Fmini-app%2Fcurator%3Ffid%3D${curatorId}%26points%3D%24${eco}%26app%3Dmini`
+      exploreLink = `https://farcaster.xyz/~/composer-action?view=prompt&url=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Fmini-app%2Fcurator%3Ffid%3D${curatorId}%26points%3D%24${eco}%26app%3Dmini`
     }
     
 
@@ -64,7 +64,7 @@ export default async function handler(req, res) {
 
     const postLink = `${baseURL}/~/ecosystems/${ecosystem}/tip-login?${qs.stringify({ time, curators, eco, referrer })}`
 
-    const getCastActionPost = `https://warpcast.com/~/add-cast-action?name=%24${eco}+Console&icon=star&actionType=post&postUrl=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Faction%2Fstatus%3Fpoints=${eco}&description=Curate+Casts+with+the+Impact+App`
+    const getCastActionPost = `https://farcaster.xyz/~/add-cast-action?name=%24${eco}+Console&icon=star&actionType=post&postUrl=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Faction%2Fstatus%3Fpoints=${eco}&description=Curate+Casts+with+the+Impact+App`
 
     let button1 = `<meta name="fc:frame:button:1" content="What's /impact?">
     <meta name="fc:frame:button:1:action" content="post">

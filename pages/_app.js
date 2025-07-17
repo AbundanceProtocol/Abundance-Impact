@@ -28,6 +28,7 @@ export default function App({ Component, pageProps }) {
     setBottomNavSize(ref?.current?.offsetWidth)
   }
 
+
   return (
     <AccountProvider initialAccount={initialAccount} ref1={ref1} >
       <Layout>

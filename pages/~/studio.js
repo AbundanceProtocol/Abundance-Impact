@@ -40,7 +40,7 @@ export default function ProfilePage() {
   const [ref, inView] = useInView()
   const { ecosystem, username, app, userFid, pass } = router.query
   const [user, setUser] = useState(null)
-  const { LoginPopup, isLogged, showLogin, setShowLogin, setPoints, setIsLogged, setFid, miniApp, setMiniApp, fid, ecoData } = useContext(AccountContext)
+  const { LoginPopup, isLogged, showLogin, setShowLogin, setPoints, setIsLogged, setFid, miniApp, setMiniApp, fid, ecoData, isMiniApp } = useContext(AccountContext)
   const ref1 = useRef(null)
   const [textMax, setTextMax] = useState('430px')
   const [screenWidth, setScreenWidth ] = useState(undefined)
@@ -103,7 +103,7 @@ export default function ProfilePage() {
   const [totalClaims, setTotalClaims] = useState(0)
   const [claimsLoading, setClaimsLoading] = useState(true)
   const [fundToggle, setFundToggle] = useState(true)
-  const [seasonToggle, setSeasonToggle] = useState('s4')
+  const [seasonToggle, setSeasonToggle] = useState('s7') // update season 5/15
   const [userFunding, setUserFunding] = useState(null)
   const [isSelected, setIsSelected] = useState('none')
   const [userSearch, setUserSearch] = useState({ search: '' })
@@ -876,7 +876,7 @@ export default function ProfilePage() {
 
     let encodedShareText = encodeURIComponent(shareText)
     let encodedShareUrl = encodeURIComponent(shareUrl); 
-    let shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
+    let shareLink = `https://farcaster.xyz/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
 
     if (!miniApp) {
       window.open(shareLink, '_blank');
@@ -935,7 +935,7 @@ export default function ProfilePage() {
 
     let encodedShareText = encodeURIComponent(shareText)
     let encodedShareUrl = encodeURIComponent(shareUrl); 
-    let shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
+    let shareLink = `https://farcaster.xyz/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
 
     if (!miniApp) {
       window.open(shareLink, '_blank');
@@ -1303,7 +1303,16 @@ export default function ProfilePage() {
     } else if (seasonToggle == 's4') {
       totalIndex = fundData?.totalFunds?.findIndex(data => data._id === 4);
       userIndex = fundData?.userFunds?.findIndex(data => data._id === 4);
-    }
+    } else if (seasonToggle == 's5') {
+      totalIndex = fundData?.totalFunds?.findIndex(data => data._id === 5);
+      userIndex = fundData?.userFunds?.findIndex(data => data._id === 5);
+    } else if (seasonToggle == 's6') {
+      totalIndex = fundData?.totalFunds?.findIndex(data => data._id === 6);
+      userIndex = fundData?.userFunds?.findIndex(data => data._id === 6);
+    } else if (seasonToggle == 's7') {
+      totalIndex = fundData?.totalFunds?.findIndex(data => data._id === 7);
+      userIndex = fundData?.userFunds?.findIndex(data => data._id === 7);
+    } // update season 5/15
 
     if (seasonToggle == 'all') {
       for (const fund of fundData.userFunds) {
@@ -1330,8 +1339,8 @@ export default function ProfilePage() {
           <div style={{fontSize: '16px', fontWeight: '700'}}>{fundToggle ? formatNum(totalDegen || 0) || '--' : formatNum(userDegen || 0) || '--'}</div>
           <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$DEGEN</div>
 
-          <div style={{fontSize: '16px', fontWeight: '700', margin: '10px 0 0 0'}}>{fundToggle ? formatNum(totalHam || 0) || '--' : formatNum(userHam || 0) || '--'}</div>
-          <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$HAM</div>
+          {/* <div style={{fontSize: '16px', fontWeight: '700', margin: '10px 0 0 0'}}>{fundToggle ? formatNum(totalHam || 0) || '--' : formatNum(userHam || 0) || '--'}</div>
+          <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$HAM</div> */}
         </div>
       </div>
     );
@@ -1647,6 +1656,8 @@ export default function ProfilePage() {
             backgroundColor: "#11448888",
             borderRadius: "15px",
             border: "1px solid #11447799",
+            width: isMiniApp || isMobile ? '340px' : '100%',
+            margin: isMiniApp || isMobile ? '0px auto' : '',
           }}
         >
           <div
@@ -1793,6 +1804,8 @@ export default function ProfilePage() {
             backgroundColor: "#11448888",
             borderRadius: "15px",
             border: "1px solid #11447799",
+            width: isMiniApp || isMobile ? '340px' : '100%',
+            margin: isMiniApp || isMobile ? '0px auto' : '',
           }}
         >
           <div
@@ -1957,7 +1970,7 @@ export default function ProfilePage() {
                   {...{ 
                     noIcon: true,
                     description: `
-                    Auto-Fund automatically distributes your remaining $degen & $ham allowances to impactful builders and creators on Farcaster - and rewards you in the process` }}
+                    Auto-Fund automatically distributes your remaining $degen allowances to impactful builders and creators on Farcaster - and rewards you in the process` }}
                 />
               </ItemWrap>
             </div>
@@ -2040,6 +2053,8 @@ export default function ProfilePage() {
             backgroundColor: "#11448888",
             borderRadius: "15px",
             border: "1px solid #11447799",
+            width: isMiniApp || isMobile ? '340px' : '100%',
+            margin: isMiniApp || isMobile ? '0px auto' : '',
           }}
         >
           <div
@@ -2355,6 +2370,8 @@ export default function ProfilePage() {
             backgroundColor: "#11448888",
             borderRadius: "15px",
             border: "1px solid #11447799",
+            width: isMiniApp || isMobile ? '340px' : '100%',
+            margin: isMiniApp || isMobile ? '0px auto' : '',
           }}
         >
           <div
@@ -2535,8 +2552,8 @@ export default function ProfilePage() {
 
                 <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.5rem'}}>
 
-                <div style={{fontSize: '16px', fontWeight: '700', margin: '0'}}>{creatorRewards?.ham > 0 ? Math.floor(creatorRewards?.ham).toLocaleString() || 0 : '--'}</div>
-                <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$HAM</div>
+                {/* <div style={{fontSize: '16px', fontWeight: '700', margin: '0'}}>{creatorRewards?.ham > 0 ? Math.floor(creatorRewards?.ham).toLocaleString() || 0 : '--'}</div>
+                <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$HAM</div> */}
                 </div>
 
 
@@ -2562,18 +2579,18 @@ export default function ProfilePage() {
                     textWrap: "nowrap",
                   }}
                 >
-                  {creatorLoading ? 'Loading...' : ((creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet) ? 'S3 Airdropped' : ((creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet == null) ? 'Missing wallet' : 'No rewards'}
-                </p>
+                  {creatorLoading ? 'Loading...' : ((creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet) ? 'S6 Airdropped' : ((creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet == null) ? 'Missing wallet' : 'No rewards'}
+                </p> {/* update season 5/15 */}
               </div>
             </div>
             <div className={`flex-col btn-select blu-drk shadow`} style={{minWidth: isMobile ? '135px' : '130px', color: '#cde', height: '120px', width: '22%', cursor: 'default'}}>
               <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
-                <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0', color: '#44aaff'}}>Total Claimed (S4)</div>
+                <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0', color: '#44aaff'}}>Claimed (S7)</div> {/* update season 5/15 */}
               </div>
               {claimsLoading ? (
                 <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '0 20px'}}>
                   <Spinner size={31} color={'#468'} />
-                </div>) : (<div className='flex-col' style={{justifyContent: "center", alignItems: 'center', gap: '0.25rem', padding: '8px'}}>
+                </div>) : (<div className='flex-col' style={{justifyContent: "center", alignItems: 'center', gap: '0.25rem', padding: '0px'}}>
                 <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.5rem'}}>
                   <div style={{fontSize: '21px', fontWeight: '700'}}>{totalClaims > 0 ? Math.floor(totalClaims || 0) : '--'}</div>
                   <div style={{fontSize: '14px', fontWeight: '400', color: '#8cf'}}>$DEGEN</div>
@@ -2700,6 +2717,8 @@ export default function ProfilePage() {
             backgroundColor: "#11448888",
             borderRadius: "15px",
             border: "1px solid #11447799",
+            width: isMiniApp || isMobile ? '340px' : '100%',
+            margin: isMiniApp || isMobile ? '0px auto' : '',
           }}
         >
           <div
@@ -2766,6 +2785,9 @@ export default function ProfilePage() {
                 <div className={seasonToggle == 's2' ? 'filter-item-on' : 'filter-item'} onClick={() => {setSeasonToggle('s2')}} style={{fontSize: '12px', fontWeight: '600'}}>S2</div>
                 <div className={seasonToggle == 's3' ? 'filter-item-on' : 'filter-item'} onClick={() => {setSeasonToggle('s3')}} style={{fontSize: '12px', fontWeight: '600'}}>S3</div>
                 <div className={seasonToggle == 's4' ? 'filter-item-on' : 'filter-item'} onClick={() => {setSeasonToggle('s4')}} style={{fontSize: '12px', fontWeight: '600'}}>S4</div>
+                <div className={seasonToggle == 's5' ? 'filter-item-on' : 'filter-item'} onClick={() => {setSeasonToggle('s5')}} style={{fontSize: '12px', fontWeight: '600'}}>S5</div>
+                <div className={seasonToggle == 's6' ? 'filter-item-on' : 'filter-item'} onClick={() => {setSeasonToggle('s6')}} style={{fontSize: '12px', fontWeight: '600'}}>S6</div>
+                <div className={seasonToggle == 's7' ? 'filter-item-on' : 'filter-item'} onClick={() => {setSeasonToggle('s7')}} style={{fontSize: '12px', fontWeight: '600'}}>S7</div> {/* update season 5/15 */}
               </div>
             </div>
 
@@ -2785,7 +2807,7 @@ export default function ProfilePage() {
             <FundPanel {...{fundName: 'Creator Fund', fundData: impactFunds}} />
             <FundPanel {...{fundName: 'Dev Fund', fundData: impactFunds}} />
             <FundPanel {...{fundName: 'Growth Fund', fundData: impactFunds}} />
-            <FundPanel {...{fundName: 'Special Fund', fundData: impactFunds}} />
+            {/* <FundPanel {...{fundName: 'Special Fund', fundData: impactFunds}} /> */}
 
 
           </div>
@@ -2833,7 +2855,7 @@ export default function ProfilePage() {
               justifyContent: "center",
             }}
           >
-            How it works: Auto-Fund automatically distributes your leftover $degen and $ham allowances before allowances reset to Impact Fund based on your preference.
+            How it works: Auto-Fund automatically distributes your leftover $degen allowances before allowances reset to Impact Fund based on your preference.
           </div>
 
 
@@ -2917,6 +2939,8 @@ export default function ProfilePage() {
             backgroundColor: "#11448888",
             borderRadius: "15px",
             border: "1px solid #11447799",
+            width: isMiniApp || isMobile ? '340px' : '100%',
+            margin: isMiniApp || isMobile ? '0px auto' : '',
           }}
         >
           <div
@@ -3098,29 +3122,6 @@ export default function ProfilePage() {
                   <div>1.33x Score Boost</div>
                 </div>
               </div>
-              <div className={`flex-col btn-select ${userFunding?.active_cron && userFunding?.special_fund == 100 ? 'cast-act-lt btn-brd-lt' : 'blu-drk btn-brd'}`} style={{minWidth: isMobile ? '185px' : '180px', color: userFunding?.active_cron && userFunding?.special_fund == 100 ? '#000' : '#cde', height: '133px'}} onClick={() => {setFundingSchedule('special')}}>
-                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
-                  <div style={{fontSize: '15px', fontWeight: '700', margin: '0 0 5px 0'}}>Special Fund</div>
-                </div>
-                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.5rem'}}>
-                  {/* <IoBuild size={15} color={userFunding?.active_cron && userFunding?.special_fund == 100 ? '#147' : '#5af'} />
-                  <div>Dev</div> */}
-                  {/* <div style={{fontSize: '14px', fontWeight: '700'}}>&nbsp;</div> */}
-                </div>
-                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.5rem', height: '90px'}}>
-                  <FaCode size={15} color={userFunding?.active_cron && userFunding?.special_fund == 100 ? '#147' : '#5af'} />
-                  <div></div>
-                  <div className='text-c' style={{fontSize: '14px', fontWeight: '700', maxWidth: '88px'}}>Open Source Devs&nbsp;&nbsp;100%</div>
-                </div>
-                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.5rem'}}>
-                  {/* <IoIosRocket size={15} color={userFunding?.active_cron && userFunding?.special_fund == 100 ? '#147' : '#5af'} />
-                  <div>Growth</div> */}
-                  {/* <div style={{fontSize: '14px', fontWeight: '700'}}>&nbsp;</div> */}
-                </div>
-                <div className='flex-row' style={{margin: '5px 0 0 0', color: userFunding?.active_cron && userFunding?.special_fund == 100 ? '#111' : "#9df", fontSize: '11px'}}>
-                  <div>&nbsp;</div>
-                </div>
-              </div>
             </div>
 
 
@@ -3264,6 +3265,8 @@ export default function ProfilePage() {
             backgroundColor: "#11448888",
             borderRadius: "15px",
             border: "1px solid #11447799",
+            width: isMiniApp || isMobile ? '340px' : '100%',
+            margin: isMiniApp || isMobile ? '0px auto' : '',
           }}
         >
           <div
@@ -3354,7 +3357,7 @@ export default function ProfilePage() {
                   <a
                     className=""
                     title={`$IMPACT Console`}
-                    href={`https://warpcast.com/~/add-cast-action?name=%24IMPACT+Console&icon=star&actionType=post&postUrl=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Faction%2Fstatus%3Fpoints=IMPACT&description=Curate+Casts+with+the+Impact+App`}
+                    href={`https://farcaster.xyz/~/add-cast-action?name=%24IMPACT+Console&icon=star&actionType=post&postUrl=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Faction%2Fstatus%3Fpoints=IMPACT&description=Curate+Casts+with+the+Impact+App`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -3436,7 +3439,7 @@ export default function ProfilePage() {
                   <a
                     className=""
                     title={`+1 $IMPACT`}
-                    href={`https://warpcast.com/~/add-cast-action?name=%2B1+%24IMPACT&icon=star&actionType=post&postUrl=https%3A%2Fimpact.abundance.id%2Fapi%2Faction%2Fimpact1%3Fpoints=IMPACT&description=Curate+Casts+with+the+Impact+App`}
+                    href={`https://farcaster.xyz/~/add-cast-action?name=%2B1+%24IMPACT&icon=star&actionType=post&postUrl=https%3A%2Fimpact.abundance.id%2Fapi%2Faction%2Fimpact1%3Fpoints=IMPACT&description=Curate+Casts+with+the+Impact+App`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -3670,6 +3673,8 @@ export default function ProfilePage() {
             backgroundColor: "#11448888",
             borderRadius: "15px",
             border: "1px solid #11447799",
+            width: isMiniApp || isMobile ? '340px' : '100%',
+            margin: isMiniApp || isMobile ? '0px auto' : '',
           }}
         >
           <div
@@ -3755,7 +3760,7 @@ export default function ProfilePage() {
 
             <div className='flex-row' style={{padding: '10px 5px 20px 5px', flexWrap: 'wrap', minWidth: feedMax, gap: '0.5rem', justifyContent: 'center', maxWidth: textMax}}>
               {invites?.length > 0 ? invites.map((invite, index) => { return (
-                <Link key={index} target="_blank" href={`https://warpcast.com/${invite.username}`}
+                <Link key={index} target="_blank" href={`https://farcaster.xyz/${invite.username}`}
                 //  href={`/~/ecosystems/${eco?.ecosystem_handle || 'abundance'}/curators/${invite?.username}`}
                  >
                   <div className='btn-blu' style={{gap: '1.5rem', minWidth: isMobile ? '290px' : '250px'}}>
@@ -3845,6 +3850,8 @@ export default function ProfilePage() {
             backgroundColor: "#11448888",
             borderRadius: "15px",
             border: "1px solid #11447799",
+            width: isMiniApp || isMobile ? '340px' : '100%',
+            margin: isMiniApp || isMobile ? '0px auto' : '',
           }}
         >
           <div
@@ -3994,6 +4001,8 @@ export default function ProfilePage() {
             backgroundColor: "#11448888",
             borderRadius: "15px",
             border: "1px solid #11447799",
+            width: isMiniApp || isMobile ? '340px' : '100%',
+            margin: isMiniApp || isMobile ? '0px auto' : '',
           }}
         >
           <div
@@ -4096,11 +4105,11 @@ export default function ProfilePage() {
                   <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$DEGEN</div>
                   </div>
 
-                  <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.5rem'}}>
+                  {/* <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.5rem'}}>
 
                   <div style={{fontSize: '16px', fontWeight: '700', margin: '0'}}>{funds?.fundHam > 0 ? formatNum(funds?.fundHam || 0) : '--'}</div>
                   <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$HAM</div>
-                  </div>
+                  </div> */}
                 </div>
               </div>
               <div className={`flex-col btn-select blu-drk shadow`} style={{minWidth: isMobile ? '135px' : '130px', color: '#cde', height: '90px', width: '22%'}}>
@@ -4113,10 +4122,10 @@ export default function ProfilePage() {
                     <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$DEGEN</div>
                   </div>
 
-                  <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.5rem'}}>
+                  {/* <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.5rem'}}>
                     <div style={{fontSize: '16px', fontWeight: '700', margin: '0'}}>{funds?.curatorHam > 0 ? formatNum(funds?.curatorHam || 0) : '--'}</div>
                     <div style={{fontSize: '9px', fontWeight: '400', color: '#8cf'}}>$HAM</div>
-                  </div>
+                  </div> */}
                 </div>
               </div>
 
@@ -4157,7 +4166,7 @@ export default function ProfilePage() {
 
                 {/* {!isMobile && (<div style={{fontSize: '12px', fontWeight: '500', width: '20%', padding: '6px 13px 6px 13px', textWrap: 'nowrap', color: '#8cf', borderBottom: '1px solid #48b', backgroundColor: '#024e'}}>points</div>)} */}
                 <div style={{fontSize: '12px', fontWeight: '500', width: isMobile ? '25%' : '20%', padding: '6px 13px 6px 13px', textWrap: 'nowrap', color: '#8cf', borderBottom: '1px solid #48b', backgroundColor: '#024e'}}>$DEGEN</div>
-                <div style={{fontSize: '12px', fontWeight: '500', width: isMobile ? '25%' : '20%', padding: '6px 13px 6px 13px', textWrap: 'nowrap', color: '#8cf', borderBottom: '1px solid #48b', backgroundColor: '#024e'}}>$HAM</div>
+                {/* <div style={{fontSize: '12px', fontWeight: '500', width: isMobile ? '25%' : '20%', padding: '6px 13px 6px 13px', textWrap: 'nowrap', color: '#8cf', borderBottom: '1px solid #48b', backgroundColor: '#024e'}}>$HAM</div> */}
               </div>)}
 
   
@@ -4226,7 +4235,7 @@ export default function ProfilePage() {
 
                 {/* {!isMobile && (<div style={{fontSize: '12px', fontWeight: '500', width: '20%', padding: '6px 13px 6px 13px', textWrap: 'nowrap', color: '#8cf', borderBottom: '1px solid #48b', backgroundColor: '#024e'}}>points</div>)} */}
                 <div style={{fontSize: '12px', fontWeight: '500', width: isMobile ? '25%' : '20%', padding: '6px 13px 6px 13px', textWrap: 'nowrap', color: '#8cf', borderBottom: '1px solid #48b', backgroundColor: '#024e'}}>$DEGEN</div>
-                <div style={{fontSize: '12px', fontWeight: '500', width: isMobile ? '25%' : '20%', padding: '6px 13px 6px 13px', textWrap: 'nowrap', color: '#8cf', borderBottom: '1px solid #48b', backgroundColor: '#024e'}}>$HAM</div>
+                {/* <div style={{fontSize: '12px', fontWeight: '500', width: isMobile ? '25%' : '20%', padding: '6px 13px 6px 13px', textWrap: 'nowrap', color: '#8cf', borderBottom: '1px solid #48b', backgroundColor: '#024e'}}>$HAM</div> */}
               </div>)}
 
 

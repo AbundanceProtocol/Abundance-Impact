@@ -15,12 +15,14 @@ import { IoDiamondOutline as Diamond } from "react-icons/io5";
 import { ImArrowUp, ImArrowDown  } from "react-icons/im";
 import VideoPlayer from './VideoPlayer';
 import Images from './Images';
+import useMatchBreakpoints from '../../hooks/useMatchBreakpoints';
 
 export default function Cast({ cast, index, updateCast, openImagePopup, ecosystem, handle, self, app }) {
   const store = useStore()
   const router = useRouter();
+  const { isMobile } = useMatchBreakpoints();
   const [screenWidth, setScreenWidth] = useState(undefined)
-  const { LoginPopup, fid, userBalances, setUserBalances, isLogged } = useContext(AccountContext)
+  const { LoginPopup, fid, userBalances, setUserBalances, isLogged, isMiniApp } = useContext(AccountContext)
   const [textMax, setTextMax] = useState('522px')
   const [feedMax, setFeedMax ] = useState('620px')
   const likeRefs = useRef([])
@@ -39,23 +41,41 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
   }
 
   function isCurator(fid, cast) {
-    return cast?.impact_points?.some(point => point.curator_fid == fid);
+    if (!isMiniApp) {
+      return cast?.impact_points?.some(point => point.curator_fid == fid);
+    }
   }
+  
+  async function viewCast(castHash) {
+    try {
+      const { sdk } = await import('@farcaster/miniapp-sdk');
+      await sdk.haptics.impactOccurred('light')
+      await sdk.actions.viewCast({ 
+        hash: castHash,
+      });
+      console.log('Cast viewed successfully');
+    } catch (error) {
+      console.error('Error viewing cast:', error);
+    }
+  }
+
+
   
   async function boostQuality(cast, qualityAmount) {
     const castHash = cast.hash
     const castChannel = cast.root_parent_url
-    
+    console.log('fid, castHash, castChannel, qualityAmount', fid, castHash, castChannel, qualityAmount)
     async function postQuality(fid, castHash, castChannel, qualityAmount) {
       try {
-        const response = await axios.post('/api/curation/postPointQuality', { fid, castHash, castChannel, qualityAmount, points: ecosystem })
+        const response = await axios.post('/api/curation/postPointQuality', { fid, castHash, castChannel, qualityAmount, points: '$IMPACT' })
+        console.log('response', response)
         return response
       } catch (error) {
         console.error('Error creating post:', error);
         return null
       }
     }
-    // console.log(cast, qualityAmount, userBalances)
+    console.log(userBalances.impact, userBalances.qdau, fid, fid !== '-', qualityAmount, castHash, userBalances.qdau > 0, (cast.impact_balance || cast.impact_balance == 0), !(cast.impact_balance == 0 && qualityAmount < 0))
     if (fid && fid !== '-' && qualityAmount && castHash && userBalances.qdau > 0 && (cast.impact_balance || cast.impact_balance == 0)  &&  !(cast.impact_balance == 0 && qualityAmount < 0)) {
       const qualityResponse = await postQuality(fid, castHash, castChannel, qualityAmount)
       console.log(qualityResponse)
@@ -98,6 +118,8 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
 
 
   async function boostImpact(cast, impactAmount) {
+    console.log('cast', cast)
+
     const castContext = {
       author_fid: cast.author.fid,
       author_pfp: cast.author.pfp_url,
@@ -221,6 +243,17 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
     }
   }
 
+  function shrinkTextMargin(points) {
+    if (points && points >= 0 && points <= 4) {
+      return (points) + 1
+    } else if ( points && points > 4) {
+      return 8
+    } else {
+      console.log('points', points)
+      return 2
+    }
+  }
+
   async function postRecast(hash, index, count) {
     const recastedCount = count ? Number(count) : 0
     recastRefs.current[index].style.color = '#191'
@@ -267,7 +300,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
   }
 
   return (<>{
-    cast && (<div className="inner-container" style={{width: '100%', display: 'flex', flexDirection: 'column'}}>
+    cast && (<div className="inner-container" style={{width: (isMiniApp || isMobile) ? '340px' : '100%', display: 'flex', flexDirection: 'column', margin: (isMiniApp || isMobile) ? '10px auto' : ''}}>
       <div className='flex-row' style={{width: '100%', justifyContent: 'flex-end', gap: '0.8rem'}}>
         {cast?.tip && (cast?.tip?.map((tip, index) => (<div key={index} className='flex-row' style={{gap: '0.2rem', alignItems: 'flex-end'}}>
           <div style={{fontSize: '13px', fontWeight: '700', color: '#181'}}>{tip?.amount}</div>
@@ -275,19 +308,22 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
         </div>
         )))}
       </div>
-      <div className="flex-row">
-        <div className="flex-col" style={{alignItems: 'center', userSelect: 'none'}}>
+      <div className={(isMiniApp || isMobile) ? 'flex-col' : 'flex-row'}>
+        <div className={(isMiniApp || isMobile) ? 'flex-row' : 'flex-col'} style={{alignItems: 'center', userSelect: 'none'}}>
           <div className="" style={{margin: '0 10px 0 0', height: '50px'}}>
             <Link href={`/~/ecosystems/${handle}/creators/${cast?.author?.username}`}>
               <img loading="lazy" src={cast?.author?.pfp_url} className="" alt={`${cast.author.display_name} avatar`} style={{width: '48px', height: '48px', maxWidth: '48px', maxHeight: '48px', borderRadius: '24px', border: '1px solid #000'}} />
             </Link>
           </div>
           {(userFid && userFid !== cast.author.fid || true) && (
-          <div className={`'flex-col' ${fail ? 'flash-fail' : ''}`} style={{margin: '10px 10px 0 0'}}>
-            <div className={`${fail ? 'flash-fail' : ''}`} style={{textAlign: 'center', fontSize: '18px', fontWeight: '700', color: '#555', margin: '-6px 0 0 0'}}>
-              <div>{cast.impact_balance || 0}</div>
-            </div>
-            <div className={`impact-arrow ${fail ? 'flash-fail' : ''}`} onClick={
+          <div className={`${(isMiniApp || isMobile) ? 'flex-row' : 'flex-col'} ${fail ? 'flash-fail' : ''}`} style={{margin: (isMiniApp || isMobile) ? '10px 0px 10px auto' : '10px 10px 0 0', border: (isMiniApp || isMobile) ? '1px solid #000' : '', padding: (isMiniApp || isMobile) ? '3px 10px 3px 3px' : '', borderRadius: (isMiniApp || isMobile) ? '10px' : '', backgroundColor: (isMiniApp || isMobile) ? '#fff' : ''}}>
+
+          {!(isMiniApp || isMobile) && (<div className={`${fail ? 'flash-fail' : ''}`} style={{textAlign: 'center', fontSize: '18px', fontWeight: '700', color: '#555', margin: (isMiniApp || isMobile) ? '8px 0 0 0' : '-6px 0 0 0'}}>
+            <div>{cast.impact_balance || 0}</div>
+          </div>)}
+
+
+          <div className={`impact-arrow ${fail ? 'flash-fail' : ''}`} onClick={
              () => {
                 if (!isLogged) {
                   console.log('ca2')
@@ -302,9 +338,15 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
                   }
                 }
               }
-            } style={{margin: `${shrinkMargin(cast.impact_balance)}px 0 ${shrinkMargin(cast.impact_balance)}px 0`}}>
+            } style={{margin: (isMiniApp || isMobile) ? '0 0 0 0' : `${shrinkMargin(cast.impact_balance)}px 0 ${shrinkMargin(cast.impact_balance)}px 0`}}>
               <FaStar size={growPoints(cast.impact_balance)} className='' style={{fontSize: '25px'}} />
-            </div>
+          </div>
+
+          {(isMiniApp || isMobile) && (<div className={`${fail ? 'flash-fail' : ''}`} style={{textAlign: 'center', fontSize: '18px', fontWeight: '700', color: '#555', margin: `${shrinkTextMargin(cast.impact_balance)}px 0 0 0`}}>
+            <div>{cast.impact_balance || 0}</div>
+          </div>)}
+
+
 
             {((self && cast?.impact_balance >= 1) || (fid && cast && isCurator(fid, cast))) && (<div className={`like-btn ${fail ? 'flash-fail' : ''}`} onClick={
              () => {
@@ -317,7 +359,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
                   unstakePoint(cast)
                 }
               }
-            } style={{margin: `${shrinkMargin(cast.impact_balance)}px 0 ${shrinkMargin(cast.impact_balance)}px 0`}}>
+            } style={{margin: (isMiniApp || isMobile) ? '1px -3px -2px 1px' : `${shrinkMargin(cast.impact_balance)}px 0 ${shrinkMargin(cast.impact_balance)}px 0`}}>
               <ArrowDown size={growPoints(cast.impact_balance)} className='' style={{fontSize: '25px'}} />
             </div>)}
           </div>
@@ -337,7 +379,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
                     goToUserProfile(event, cast.author)
                   }
                 }}> */}
-                <Link className="fc-lnk" title={cast?.author?.display_name} style={{cursor: 'pointer'}} href={`/~/ecosystems/${handle}/creators/${cast?.author?.username}`}>
+                <Link className="fc-lnk" title={cast?.author?.display_name} style={{cursor: 'pointer'}} href={`/~/ecosystems/${handle}/creators/${cast?.author?.username}/${cast?.hash}`}>
                   <div className="flex-row" style={{alignItems: 'center'}}>
                     <span className="name-font">{cast.author.display_name}</span>
                     <div className="" style={{margin: '0 0 0 3px'}}>
@@ -356,7 +398,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
                     goToUserProfile(event, cast.author)
                   }
                 }}>@{cast.author.username}</a> */}
-                <a href={`https://warpcast.com/${cast.author.username}`} className="fc-lnk" title={cast.author.display_name}>@{cast.author.username}</a>
+                <a href={`https://farcaster.xyz/${cast.author.username}`} className="fc-lnk" title={cast.author.display_name}>@{cast.author.username}</a>
               </span>
               <div className="">·</div>
 
@@ -372,9 +414,11 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
                 }}
                 ></a> */}
 
-              <a href={`https://warpcast.com/${cast?.author?.username}/${cast?.hash?.substring(0, 10)}`} className="fc-lnk" title="Navigate to cast">
+              {!(isMiniApp || isMobile) ? (<a href={`https://farcaster.xyz/${cast?.author?.username}/${cast?.hash?.substring(0, 10)}`} className="fc-lnk" title="Navigate to cast">
                 <div className="user-font">{timePassed(cast.timestamp)}</div>
-              </a>
+                </a>) : (<a onClick={() => viewCast(cast?.hash)} className="fc-lnk" title="Navigate to cast">
+                <div className="user-font">{timePassed(cast.timestamp)}</div>
+              </a>)}
             </div>
             {/* <div className="">
               <Kebab />

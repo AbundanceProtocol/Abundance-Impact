@@ -300,10 +300,10 @@ export default function ProposalPage() {
         <div className="flex-row" style={{margin: '0px 0px', gap: '0.7rem'}}>
           <div className="flex-row" style={{alignItems: 'center', gap: '0.25rem'}}>
             <span className="user-font" datastate="closed">
-              <a className="fc-lnk" title="" href={`https://warpcast.com/${projectInfo.author.username}`}>by @{projectInfo.author.username}</a>
+              <a className="fc-lnk" title="" href={`https://farcaster.xyz/${projectInfo.author.username}`}>by @{projectInfo.author.username}</a>
             </span>
             <div className="">·</div>
-            <a className="fc-lnk" title="Navigate to cast" href={`https://warpcast.com/${projectInfo.author.username}/${projectInfo.hash.slice(0,10)}`}>
+            <a className="fc-lnk" title="Navigate to cast" href={`https://farcaster.xyz/${projectInfo.author.username}/${projectInfo.hash.slice(0,10)}`}>
               <div className="user-font">{timePassed(projectInfo.timestamp)}</div>
             </a>
           </div>
@@ -329,7 +329,7 @@ export default function ProposalPage() {
               <div className="">
                 <div className="flex-row">
                   <span className="" datastate="closed" style={{margin: '0 10px 0 0'}}>
-                    <a className="" title="" href={`https://warpcast.com/${projectInfo.author.username}`}>
+                    <a className="" title="" href={`https://farcaster.xyz/${projectInfo.author.username}`}>
                       <img loading="lazy" src={projectInfo.project_image} className="" alt={`${projectInfo.author.display_name} avatar`} style={{width: '75px', height: '75px', maxWidth: '75px', maxHeight: '75px', borderRadius: '10px', border: '1px solid #000'}} />
                     </a>
                   </span>

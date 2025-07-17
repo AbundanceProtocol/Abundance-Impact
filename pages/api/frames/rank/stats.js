@@ -11,7 +11,7 @@ import Score from  "../../../../models/Score";
 // import { decryptPassword, getTimeRange, processTips, populateCast } from "../../../../utils/utils";
 import _ from "lodash";
 import qs from "querystring";
-import { init, validateFramesMessage } from "@airstack/frames";
+// import { init, validateFramesMessage } from "@airstack/frames";
 
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 const HubURL = process.env.NEYNAR_HUB
@@ -20,10 +20,10 @@ const secretKey = process.env.SECRET_KEY
 const apiKey = process.env.NEYNAR_API_KEY
 
 export default async function handler(req, res) {
-  init(process.env.AIRSTACK_API_KEY ?? '')
-  const body = await req.body;
-  const {isValid, message} = await validateFramesMessage(body)
-  console.log('isValid:', isValid)
+  // init(process.env.AIRSTACK_API_KEY ?? '')
+  // const body = await req.body;
+  // const {isValid, message} = await validateFramesMessage(body)
+  // console.log('isValid:', isValid)
   const { eco, ecosystem, referrer } = req.query;
   const { untrustedData } = req.body
   // const authorFid = message?.data?.frameActionBody?.castId?.fid
@@ -62,7 +62,7 @@ export default async function handler(req, res) {
         } else {
           const channelInfo = await channelData.json();
           if (channelInfo && channelInfo?.result) {
-            let following = channelInfo.result?.following
+            let following = channelInfo?.result?.following
             if (!following) {
               return false
             } else {
@@ -259,7 +259,7 @@ export default async function handler(req, res) {
     const issueImg = `${baseURL}/images/issue.jpg`;
     let circlesImg = ''
     console.log('fid', eco, ecosystem, referrer, fid)
-    const impactLink = `https://warpcast.com/abundance/0x43ddd672`
+    const impactLink = `https://farcaster.xyz/abundance/0x43ddd672`
 
     const retryPost = `${baseURL}/api/frames/rank/stats?${qs.stringify({ eco, ecosystem, referrer })}`
 
@@ -275,7 +275,7 @@ export default async function handler(req, res) {
 
     let encodedShareText = encodeURIComponent(shareText); 
     let encodedShareUrl = encodeURIComponent(shareUrl); 
-    let shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
+    let shareLink = `https://farcaster.xyz/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
     
     try {
 
@@ -544,7 +544,7 @@ export default async function handler(req, res) {
         encodedShareText = encodeURIComponent(shareText)
       
         encodedShareUrl = encodeURIComponent(shareUrl); 
-        shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
+        shareLink = `https://farcaster.xyz/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
 
 
         let metatags = `

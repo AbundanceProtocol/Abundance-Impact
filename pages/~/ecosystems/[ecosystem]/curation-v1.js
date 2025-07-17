@@ -306,7 +306,7 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem, fi
           <meta property="fc:frame:button:2:action" content="link" />
           <meta
             property="fc:frame:button:2:target"
-            content={`https://warpcast.com/~/composer-action?view=prompt&url=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Fmini-app%2Fcurator%3Ffid%3D${curators}${
+            content={`https://farcaster.xyz/~/composer-action?view=prompt&url=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Fmini-app%2Fcurator%3Ffid%3D${curators}${
               channels ? "%26points%3D" + channels : ""
             }%26points%3D%24${eco}%26app%3Dmini`}
           />

@@ -368,7 +368,7 @@ async function getUserData(fid, time) {
     //// CALCULATE IMPACT SCORE
     mergedDataset.forEach(entry => {
       entry.impact_score = (10 * entry.curator_points + 5 * entry.degen_tip + entry.ham_tip) / 1000 + (entry.promoter_points / 2);
-      entry.contributor_score = (5 * entry.degen_tip + entry.ham_tip) / 1000 || 0
+      entry.contributor_score = (2.5 * entry.degen_tip + entry.ham_tip) / 1000 || 0
     });
 
     mergedDataset.sort((a, b) => b.impact_score - a.impact_score);

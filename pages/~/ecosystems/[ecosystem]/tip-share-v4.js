@@ -137,7 +137,7 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem, fi
 
     updatedFrameData.buttons[1].target = `${baseURL}/api/frames/tip/auto-tip?${qs.stringify({ time, curators, eco, ecosystem, channels, })}`
 
-    updatedFrameData.buttons[2].target = `https://warpcast.com/~/composer-action?view=prompt&url=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Fmini-app%2Fcurator%3Ffid%3D${tipperFid}%26id%3D${id}%26app%3Dmini`
+    updatedFrameData.buttons[2].target = `https://farcaster.xyz/~/composer-action?view=prompt&url=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Fmini-app%2Fcurator%3Ffid%3D${tipperFid}%26id%3D${id}%26app%3Dmini`
 
     updatedFrameData.buttons[3].target = `${baseURL}?${qs.stringify({ referrer: tipperFid })}`
 
@@ -340,7 +340,7 @@ export default function Tips({time, curators, channels, tags, eco, ecosystem, fi
           <meta property="fc:frame:button:3:action" content="link" />
           <meta
             property="fc:frame:button:3:target"
-            content={`https://warpcast.com/~/composer-action?view=prompt&url=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Fmini-app%2Fcurator%3Ffid%3D${tipperFid}%26id%3D${id}%26app%3Dmini`}
+            content={`https://farcaster.xyz/~/composer-action?view=prompt&url=https%3A%2F%2Fimpact.abundance.id%2Fapi%2Fmini-app%2Fcurator%3Ffid%3D${tipperFid}%26id%3D${id}%26app%3Dmini`}
           />
 
           <meta property="fc:frame:button:4" content='Login /impact' />

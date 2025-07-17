@@ -13,7 +13,7 @@ import Claim from  "../../../../models/Claim";
 // import { decryptPassword, getTimeRange, processTips, populateCast } from "../../../../utils/utils";
 import _ from "lodash";
 import qs from "querystring";
-import { init, validateFramesMessage } from "@airstack/frames";
+// import { init, validateFramesMessage } from "@airstack/frames";
 
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 const HubURL = process.env.NEYNAR_HUB
@@ -64,7 +64,7 @@ export default async function handler(req, res) {
         } else {
           const channelInfo = await channelData.json();
           if (channelInfo && channelInfo?.result) {
-            let following = channelInfo.result?.following
+            let following = channelInfo?.result?.following
             if (!following) {
               return false
             } else {
@@ -90,7 +90,7 @@ export default async function handler(req, res) {
     const issueImg = `${baseURL}/images/issue.jpg`;
     let circlesImg = ''
     // console.log('fid', ecosystem, referrer, fid)
-    // const impactLink = `https://warpcast.com/abundance/0xea3aef76`
+    // const impactLink = `https://farcaster.xyz/abundance/0xea3aef76`
 
     // const retryPost = `${baseURL}/api/frames/reward/stats`
 
@@ -106,7 +106,7 @@ export default async function handler(req, res) {
 
     let encodedShareText = encodeURIComponent(shareText); 
     let encodedShareUrl = encodeURIComponent(shareUrl); 
-    let shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
+    let shareLink = `https://farcaster.xyz/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
     
     try {
 
@@ -169,7 +169,7 @@ export default async function handler(req, res) {
         encodedShareText = encodeURIComponent(shareText)
       
         encodedShareUrl = encodeURIComponent(shareUrl); 
-        shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
+        shareLink = `https://farcaster.xyz/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
 
         let metatags = ``
 

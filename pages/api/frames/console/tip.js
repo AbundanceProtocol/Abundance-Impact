@@ -255,7 +255,7 @@ export default async function handler(req, res) {
 
     // const exploreLink = `${baseURL}/~/ecosystems/${ecosystem}?${qs.stringify({ time, curators, eco })}`
 
-    const impactLink = `https://warpcast.com/abundance/0x43ddd672`
+    const impactLink = `https://farcaster.xyz/abundance/0x43ddd672`
 
     const retryPost = `${baseURL}/api/frames/tip/start?${qs.stringify({ time, curators, eco, ecosystem })}`
 
@@ -275,7 +275,7 @@ export default async function handler(req, res) {
 
     let encodedShareText = encodeURIComponent(shareText); 
     let encodedShareUrl = encodeURIComponent(shareUrl); 
-    let shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
+    let shareLink = `https://farcaster.xyz/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
     
     try {
 
@@ -853,7 +853,7 @@ export default async function handler(req, res) {
             encodedShareText = encodeURIComponent(shareText)
           
             encodedShareUrl = encodeURIComponent(shareUrl); 
-            shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
+            shareLink = `https://farcaster.xyz/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
 
             if (remainingTip || remainingTip == 0) {
               console.log('e')

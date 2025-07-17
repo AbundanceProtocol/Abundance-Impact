@@ -60,6 +60,35 @@ export default async function handler(req, res) {
       return;
     }
 
+
+    
+    async function checkImpactAllowance(curatorFid) {
+      try {
+        await connectToDatabase();
+        let user = await User.findOne({ fid: curatorFid, ecosystem_points: '$IMPACT' }).exec();
+        if (user && user.impact_allowance > 0) {
+          return true;
+        } else {
+          return false;
+        }
+      } catch (error) {
+        console.error("Error checking opt out:", error);
+        return false;
+      }
+    }
+
+    const curatorImpactAllowance = await checkImpactAllowance(curatorFid)
+
+    if (!curatorImpactAllowance) {
+      res.setHeader('Content-Type', 'text/html');
+      res.status(200).send({
+        message: `User has no impact allowance`
+      });
+      return;
+    }
+
+
+
     async function getEcosystem(points) {
       try {
         await connectToDatabase();

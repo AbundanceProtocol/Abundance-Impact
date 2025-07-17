@@ -16,6 +16,7 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
   const [showLogout, setShowLogout] = useState(false)
   const [userBalances, setUserBalances] = useState({impact: 0, qdau: 0})
   const [points, setPoints] = useState('$IMPACT')
+  const [isMiniApp, setIsMiniApp] = useState(false)
   const [prevPoints, setPrevPoints] = useState(null)
   const [isLogged, setIsLogged] = useState(false)
   const [fid, setFid] = useState(null)
@@ -171,7 +172,7 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
       if (isLogged && ecoData) {
         setPopulate(populate+1)
         setPoints(ecoData?.ecosystem_points_name)
-        if (router.route !== '/') {
+        if (router.route !== '/' && userBalances.impact == 0) {
           console.log('c10 points', store.fid, points)
           getRemainingBalances(fid || store.fid, ecoData?.ecosystem_points_name, store.signer_uuid)
         }
@@ -376,7 +377,8 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
     prevPoints, setPrevPoints,
     showActions, setShowActions,
     userProfile, setUserProfile,
-    populate, setPopulate
+    populate, setPopulate,
+    isMiniApp, setIsMiniApp
   };
 
   return (

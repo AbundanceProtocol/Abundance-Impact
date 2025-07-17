@@ -1,6 +1,6 @@
 import { getSSLHubRpcClient, Message } from "@farcaster/hub-nodejs";
 import qs from "querystring";
-import { init, validateFramesMessage } from "@airstack/frames";
+// import { init, validateFramesMessage } from "@airstack/frames";
 
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 const HubURL = process.env.NEYNAR_HUB
@@ -8,11 +8,11 @@ const client = HubURL ? getSSLHubRpcClient(HubURL) : undefined;
 
 
 export default async function handler(req, res) {
-  init(process.env.AIRSTACK_API_KEY ?? '')
-  const body = await req.body;
-  const {isValid, message} = await validateFramesMessage(body)
-  console.log('isValid:', isValid)
-  const { untrustedData } = req.body
+  // init(process.env.AIRSTACK_API_KEY ?? '')
+  // const body = await req.body;
+  // const {isValid, message} = await validateFramesMessage(body)
+  // console.log('isValid:', isValid)
+  // const { untrustedData } = req.body
   const { iB, qB, qT, author, iA, qA, ec, login, pt, cu, impact, ql, cI, hash, handle, rS, oO } = req.query;
   
   if (req.method !== 'POST') {
@@ -40,7 +40,7 @@ export default async function handler(req, res) {
     
     const encodedShareText = encodeURIComponent(shareText); 
     let encodedShareUrl = encodeURIComponent(shareUrl); 
-    let shareLink = `https://warpcast.com/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
+    let shareLink = `https://farcaster.xyz/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
 
 
     button1 = `<meta property="fc:frame:button:1" content='Multi-tip' />
