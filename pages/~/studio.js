@@ -3036,6 +3036,48 @@ export default function ProfilePage() {
           >
 
 
+
+
+
+<div
+            className="flex-row"
+            style={{
+              color: "#9df",
+              width: "100%",
+              fontSize: isMobile ? "15px" : "16px",
+              padding: "20px 10px 0px 10px",
+              justifyContent: "center",
+              userSelect: 'none',
+              fontWeight: '600'
+            }}
+          >
+            Coins to tip:
+          </div>
+
+
+            <div className='flex-row' style={{fontSize: '13px', justifyContent: isMobile ? "center" : "space-between", alignItems: 'center', gap: '0.75rem', margin: '20px 0', flexWrap: 'wrap', width: '60%'}}>
+              <div className={`flex-col btn-select ${userFunding?.active_cron && userFunding?.currencies?.includes('$DEGEN') ? 'cast-act-lt btn-brd-lt' : 'blu-drk btn-brd'}`} style={{minWidth: isMobile ? '30%' : '30%', color: userFunding?.active_cron && userFunding?.currencies?.includes('$DEGEN') ? '#000' : '#cde', height: '33px'}} onClick={() => {setFundingSchedule(userFunding?.currencies?.includes('$DEGEN') ? 'degen-off' : 'degen-on')}}>
+                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
+                  <div style={{fontSize: '15px', fontWeight: '700', margin: '5px 0 5px 0'}}>$DEGEN</div>
+                </div>
+              </div>
+              <div className={`flex-col btn-select ${userFunding?.active_cron && userFunding?.currencies?.includes('$TIPN') ? 'cast-act-lt btn-brd-lt' : 'blu-drk btn-brd'}`} style={{minWidth: isMobile ? '30%' : '30%', color: userFunding?.active_cron && userFunding?.currencies?.includes('$TIPN') ? '#000' : '#cde', height: '33px'}} onClick={() => {setFundingSchedule(userFunding?.currencies?.includes('$TIPN') ? 'tipn-off' : 'tipn-on')}}>
+                <div className='flex-row' style={{justifyContent: "center", alignItems: 'center', gap: '0.75rem'}}>
+                  <div style={{fontSize: '15px', fontWeight: '700', margin: '5px 0 5px 0'}}>$TIPN</div>
+                </div>
+              </div>
+            </div>
+
+
+
+
+
+
+
+
+
+
+
           <div
             className="flex-row"
             style={{
@@ -3185,7 +3227,7 @@ export default function ProfilePage() {
                   {/* <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '12px' : '13px'}}>SEARCH</div> */}
 
                   <div className={fundSearch == 'Curators' ? 'filter-item-on' : 'filter-item'} style={{fontSize: '12px'}} onClick={() => {updateSearch('Curators')}}>Curators</div>
-                  <div className={fundSearch == 'Channels' ? 'filter-item-on' : 'filter-item'} style={{fontSize: '12px'}} onClick={() => {updateSearch('Channels')}}>Channels</div>
+                  {/* <div className={fundSearch == 'Channels' ? 'filter-item-on' : 'filter-item'} style={{fontSize: '12px'}} onClick={() => {updateSearch('Channels')}}>Channels</div> */}
 
                   <input type="text" value={searchInput} onChange={(e) => getInput(e.target.value, null)} style={{backgroundColor: '#adf', borderRadius: '8px', padding: isMobile ? '2px 4px' : '2px 4px', fontSize: isMobile ? '12px' : '14px', width: '150px', fontWeight: '600', margin: '0 0 0 4px'}} placeholder={"search " + fundSearch.toLowerCase()} />
 

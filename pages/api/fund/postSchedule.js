@@ -51,6 +51,18 @@ export default async function handler(req, res) {
           } else if (schedule == 'remove-curator') {
             let curator = Number(data)
             updated = await ScheduleTip.findOneAndUpdate({ fid }, { active_cron: true, $pull: { search_curators: curator }, search_channels: [] }, { new: true, select: '-uuid' });
+          } else if (schedule == 'degen-off') {
+            // let curator = Number(data)
+            updated = await ScheduleTip.findOneAndUpdate({ fid }, { active_cron: true, $pull: { currencies: '$DEGEN' } }, { new: true, select: '-uuid' });
+          } else if (schedule == 'degen-on') {
+            // let curator = Number(data)
+            updated = await ScheduleTip.findOneAndUpdate({ fid }, { active_cron: true, $addToSet: { currencies: '$TIPN' } }, { new: true, select: '-uuid' });
+          } else if (schedule == 'tipn-off') {
+            // let curator = Number(data)
+            updated = await ScheduleTip.findOneAndUpdate({ fid }, { active_cron: true, $pull: { currencies: '$TIPN' } }, { new: true, select: '-uuid' });
+          } else if (schedule == 'tipn-on') {
+            // let curator = Number(data)
+            updated = await ScheduleTip.findOneAndUpdate({ fid }, { active_cron: true, $addToSet: { currencies: '$TIPN' } }, { new: true, select: '-uuid' });
           } else {
             updated = null
           }
