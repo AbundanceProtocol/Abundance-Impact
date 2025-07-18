@@ -232,7 +232,7 @@ export default async function handler(req, res) {
               points: points,
               percent_tip: 100,
               ecosystem_name: ecoName,
-              currencies: ['$DEGEN'],
+              currencies: ['$DEGEN', '$TIPN'],
               schedule_time: "45 18 * * *",
               schedule_count: 1,
               schedule_total: 1,
@@ -259,8 +259,10 @@ export default async function handler(req, res) {
 
         if (updatedSchedule) {
           res.status(200).json({ updatedSchedule, curators });
+          return
         } else {
           res.status(404).json({ message: 'No auto-fund created' });
+          return
         }
       }
 
@@ -271,6 +273,7 @@ export default async function handler(req, res) {
     } catch(error) {
       console.error('Error handling POST request:', error);
       res.status(500).json({ error: 'Internal Server Error' });
+      return
     }
   }
 }
