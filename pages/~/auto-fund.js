@@ -1366,7 +1366,7 @@ export default function Autofund() {
       <Head>
         <meta
           name="fc:frame"
-          content='{"version":"next","imageUrl":"https://impact.abundance.id/images/icon-02.png","button":{"title":"Impact 2.0","action":{"type":"launch_frame","name":"Auto-fund $TIPN","url":"https://impact.abundance.id/~/auto-fund","splashImageUrl":"https://impact.abundance.id/images/icon.png","splashBackgroundColor":"#011222"}}}'
+          content='{"version":"next","imageUrl":"https://impact.abundance.id/images/icon-02.png","button":{"title":"Auto-fund $TIPN","action":{"type":"launch_frame","name":"Auto-fund $TIPN","url":"https://impact.abundance.id/~/auto-fund","splashImageUrl":"https://impact.abundance.id/images/icon.png","splashBackgroundColor":"#011222"}}}'
         />
 
         {/* Mini App specific metadata */}
