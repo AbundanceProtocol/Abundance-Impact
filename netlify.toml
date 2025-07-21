@@ -33,7 +33,7 @@
   schedule = "30 4 * * *"
 
 [functions."autofund-tipn-background"]
-  schedule = "35 4 * * 1"
+  schedule = "35 13 * * 2"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"

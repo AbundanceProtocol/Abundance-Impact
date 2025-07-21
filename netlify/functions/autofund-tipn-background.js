@@ -39,7 +39,7 @@ exports.handler = async function(event, context) {
         if (user?.castText) {
           await new Promise(resolve => setTimeout(resolve, 10));
           console.log('user?.castText', user?.castText)
-          // totalCasts += await sendTip(user)
+          totalCasts += await sendTip(user)
         }
       }
 
