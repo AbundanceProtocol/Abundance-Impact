@@ -38,7 +38,8 @@ exports.handler = async function(event, context) {
       for (const user of userData) {
         if (user?.castText) {
           await new Promise(resolve => setTimeout(resolve, 10));
-          totalCasts += await sendTip(user)
+          console.log('user?.castText', user?.castText)
+          // totalCasts += await sendTip(user)
         }
       }
 
