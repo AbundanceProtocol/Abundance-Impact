@@ -32,5 +32,8 @@
 [functions."rewards-background"]
   schedule = "30 4 * * *"
 
+[functions."autofund-tipn-background"]
+  schedule = "35 13 * * 2"
+
 [[plugins]]
   package = "@netlify/plugin-nextjs"

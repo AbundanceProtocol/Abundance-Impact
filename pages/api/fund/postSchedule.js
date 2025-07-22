@@ -51,6 +51,18 @@ export default async function handler(req, res) {
           } else if (schedule == 'remove-curator') {
             let curator = Number(data)
             updated = await ScheduleTip.findOneAndUpdate({ fid }, { active_cron: true, $pull: { search_curators: curator }, search_channels: [] }, { new: true, select: '-uuid' });
+          } else if (schedule == 'degen-off') {
+            // let curator = Number(data)
+            updated = await ScheduleTip.findOneAndUpdate({ fid }, { active_cron: true, $pull: { currencies: '$DEGEN' } }, { new: true, select: '-uuid' });
+          } else if (schedule == 'degen-on') {
+            // let curator = Number(data)
+            updated = await ScheduleTip.findOneAndUpdate({ fid }, { active_cron: true, $addToSet: { currencies: '$TIPN' } }, { new: true, select: '-uuid' });
+          } else if (schedule == 'tipn-off') {
+            // let curator = Number(data)
+            updated = await ScheduleTip.findOneAndUpdate({ fid }, { active_cron: true, $pull: { currencies: '$TIPN' } }, { new: true, select: '-uuid' });
+          } else if (schedule == 'tipn-on') {
+            // let curator = Number(data)
+            updated = await ScheduleTip.findOneAndUpdate({ fid }, { active_cron: true, $addToSet: { currencies: '$TIPN' } }, { new: true, select: '-uuid' });
           } else {
             updated = null
           }
@@ -220,7 +232,7 @@ export default async function handler(req, res) {
               points: points,
               percent_tip: 100,
               ecosystem_name: ecoName,
-              currencies: ['$DEGEN'],
+              currencies: ['$DEGEN', '$TIPN'],
               schedule_time: "45 18 * * *",
               schedule_count: 1,
               schedule_total: 1,
@@ -247,8 +259,10 @@ export default async function handler(req, res) {
 
         if (updatedSchedule) {
           res.status(200).json({ updatedSchedule, curators });
+          return
         } else {
           res.status(404).json({ message: 'No auto-fund created' });
+          return
         }
       }
 
@@ -259,6 +273,7 @@ export default async function handler(req, res) {
     } catch(error) {
       console.error('Error handling POST request:', error);
       res.status(500).json({ error: 'Internal Server Error' });
+      return
     }
   }
 }
