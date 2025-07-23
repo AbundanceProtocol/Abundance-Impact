@@ -49,7 +49,7 @@ export default async function handler(req, res) {
 
       let curators = await getCurators(schedule)
 
-      console.log('schedule', schedule, curators)
+      console.log('schedule-2', schedule, curators)
       res.status(200).json({ schedule, curators });
     } catch (error) {
       console.error('Error submitting data:', error)

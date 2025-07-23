@@ -8,7 +8,7 @@ import Item from '../components/Ecosystem/ItemWrap/Item';
 import Description from '../components/Ecosystem/Description';
 import ItemWrap from '../components/Ecosystem/ItemWrap';
 import useMatchBreakpoints from '../hooks/useMatchBreakpoints';
-import { FaLock, FaUsers, FaUser, FaGlobe, FaPlus, FaRegStar, FaCoins, FaAngleDown, FaShareAlt as Share } from "react-icons/fa";
+import { FaPowerOff, FaLock, FaUsers, FaUser, FaGlobe, FaPlus, FaRegStar, FaCoins, FaAngleDown, FaShareAlt as Share, FaStar } from "react-icons/fa";
 import { HiOutlineAdjustmentsHorizontal as Adjust } from "react-icons/hi2";
 import { GrSchedulePlay as Sched } from "react-icons/gr";
 import { AiFillSafetyCertificate as Aligned } from "react-icons/ai";
@@ -26,11 +26,17 @@ import useStore from '../utils/store';
 import ProfilePage from './~/studio';
 import axios from 'axios';
 import MiniAppAuthButton from '../components/MiniAppAuthButton';
+import { BsKey, BsLock, BsLockFill, BsXCircle, BsPerson, BsPersonFill, BsShieldCheck, BsShieldFillCheck, BsPiggyBank, BsPiggyBankFill, BsStar, BsStarFill, BsQuestionCircle } from "react-icons/bs";
+
+import Spinner from '../components/Common/Spinner';
+import NeynarSigninButton from '../components/Layout/Modals/Signin';
+
+const version = process.env.NEXT_PUBLIC_VERSION
 
 export default function Home() {
   const ref2 = useRef(null)
   const [ref, inView] = useInView()
-  const { LoginPopup, checkEcoEligibility, ecoData, points, setPoints, isLogged, showLogin, setShowLogin, setIsLogged, setFid, getRemainingBalances, isMiniApp, userBalances, setIsMiniApp } = useContext(AccountContext)
+  const { LoginPopup, checkEcoEligibility, ecoData, points, setPoints, isLogged, showLogin, setShowLogin, setIsLogged, fid, setFid, getRemainingBalances, isMiniApp, userBalances, setIsMiniApp, LogoutPopup, userInfo, setUserInfo } = useContext(AccountContext)
   const [screenWidth, setScreenWidth] = useState(undefined)
   const [screenHeight, setScreenHeight] = useState(undefined)
   const [textMax, setTextMax] = useState('562px')
@@ -42,8 +48,27 @@ export default function Home() {
   const [display, setDisplay] = useState({personal: false, ecosystem: false})
   const store = useStore()
 
-  function toggleMenu(target) {
-    setDisplay(prev => ({...prev, [target]: !display[target] }))
+  const [fundLoading , setFundLoading ] = useState(true);
+  const [isOn, setIsOn] = useState({boost: false, validate: false, autoFund: false, fund: 0, currencies: []});
+  const [expand, setExpand] = useState({boost: false, validate: false, autoFund: false});
+  const [loading, setLoading] = useState({boost: false, validate: false, autoFund: false})
+  const [panelOpen, setPanelOpen] = useState((version == '1.0' || userBalances.impact == 0) ? false : true);
+  const [panelTarget, setPanelTarget] = useState((version == '1.0' || userBalances.impact == 0) ? null : 'welcome');
+  const panelRef = useRef(null);
+
+  const openSwipeable = (target) => {
+    setPanelTarget(target);
+    setPanelOpen(true);
+  };
+
+  const closeSwipeable = () => {
+    setPanelOpen(false);
+    setPanelTarget(null);
+  };
+
+
+  function toggleExpand(target) {
+    setExpand(prev => ({...prev, [target]: !expand[target] }))
   }
 
   const createEcosystem = () => {
@@ -90,6 +115,36 @@ export default function Home() {
     })();
   }, []);
 
+
+  async function getUserInfo(fid) {
+    try {
+      const response = await axios.get('/api/getCuratorProfile', {
+        params: { fid }
+      })
+      if (response?.data) {
+        const profile = response?.data?.data || null
+        console.log('profile', profile)
+
+        if (!userInfo.username) {
+          setUserInfo({
+            pfp: profile?.pfp?.url || null,
+            username: profile?.username || null,
+            display: profile?.displayName || null,
+          })
+        }
+      }
+    } catch (error) {
+      console.error('Error submitting data:', error)
+    }
+  }
+
+  useEffect(() => {
+    if (isLogged && version == '2.0' && fid && !userInfo.username) {
+      getUserInfo(fid)
+    }
+  }, [fid]);
+
+
   useEffect(() => {
     (async () => {
       const { sdk } = await import('@farcaster/miniapp-sdk');
@@ -97,6 +152,89 @@ export default function Home() {
       setIsMiniApp(isApp)
     })();
   }, [isLogged]);
+
+
+  useEffect(() => {
+    const panel = panelRef.current;
+    if (!panel) return;
+
+    let startY = 0;
+    let currentY = 0;
+
+    const onTouchStart = (e) => {
+      startY = e.touches[0].clientY;
+    };
+
+    const onTouchMove = (e) => {
+      currentY = e.touches[0].clientY;
+      const diff = currentY - startY;
+      if (diff > 80) {
+        closeSwipeable();
+      }
+    };
+
+    panel.addEventListener('touchstart', onTouchStart);
+    panel.addEventListener('touchmove', onTouchMove);
+
+    return () => {
+      panel.removeEventListener('touchstart', onTouchStart);
+      panel.removeEventListener('touchmove', onTouchMove);
+    };
+  }, [panelOpen]);
+
+
+  async function getUserSettings(fid) {
+    try {
+      setLoading({
+        validate: true,
+        boost: true,
+        autoFund: true
+      })
+      const response = await axios.get('/api/user/getUserSettings', {
+        params: { fid } })
+
+      console.log('response', response)
+
+      if (response?.data) {
+        const userSettings = response?.data || null
+        setIsOn({
+          boost: userSettings.boost || false,
+          validate: userSettings.validate || false, 
+          autoFund: userSettings.autoFund || false, 
+          fund: userSettings.fund || 0, 
+          currencies: userSettings.currencies || []
+        })
+      }
+      setLoading({
+        validate: false,
+        boost: false,
+        autoFund: false
+      })
+    } catch (error) {
+      console.error('Error setting invite:', error)
+      setLoading({
+        validate: false,
+        boost: false,
+        autoFund: false
+      })
+    }
+  }
+
+
+  useEffect(() => {
+    if (isLogged && fid) {
+      getUserSettings(fid)
+    } else if (!isLogged) {
+      setIsOn({
+        boost: false,
+        validate: false, 
+        autoFund: false, 
+        fund: 0, 
+        currencies: []
+      })
+    }
+  }, [isLogged]);
+
 
 
   useEffect(() => {
@@ -143,6 +281,84 @@ export default function Home() {
     }
   }
 
+
+  // const openSwipeable = ({target}) => {
+  //   const [panelOpen, setPanelOpen] = useState(false);
+
+  //   const handleToggle = () => {
+  //     setPanelOpen(!panelOpen);
+  //   };
+
+  //   const handleSwipe = () => {
+  //     setPanelOpen(false);
+  //   };
+
+  //   return (
+  //     <div>
+  //       <div onClick={handleToggle}>
+  //         {target === 'autoFund' && 'Auto-Funding allows advanced features'}
+  //       </div>
+  //       {panelOpen && (
+  //         <div style={{ position: 'fixed', bottom: 0, width: '100%', height: '50%', backgroundColor: 'rgba(0, 0, 0, 0.5)', backdropFilter: 'blur(5px)' }} onClick={handleSwipe}>
+  //           Swipe down to close
+  //         </div>
+  //       )}
+  //     </div>
+  //   );
+  // }
+
+
+  const ToggleSwitch = ({target}) => {
+    const handleToggle = () => {
+      console.log('isOn', isOn)
+      if (isOn) {
+        setFundingSchedule('off')
+      } else {
+        // setIsOn(prev => ({...prev, [target]: !isOn[target] }))
+        setFundingSchedule('on')
+      }
+
+      if (isLogged) {
+        setIsOn(prev => ({...prev, [target]: !isOn[target] }))
+      }
+
+      // setIsOn(!isOn);
+    };
+
+
+    return (
+      <div className="flex-row" style={{justifyContent: 'center', alignItems: 'center', margin: '0 5px 0 0'}}>
+
+        {loading[target] && (<div className='flex-row' style={{height: '20px', alignItems: 'center', width: '20px', justifyContent: 'center', padding: '0px', position: 'relative', right: '10%', top: '0px'}}>
+          <Spinner size={20} color={'#468'} />
+        </div>)}
+
+
+        <div
+          className={`toggleSwitch ${isOn[target] ? "toggleSwitch-on" : ""}`}
+          onClick={handleToggle}
+        >
+          <span className='circle'></span>
+        </div>
+        {/* <div style={{fontSize: '10px', color: isOn ? '#8ad' : '#68a', margin: '0px 0 0 6px'}}>{isOn ? 'On' : 'Off'}</div> */}
+
+      </div>
+    );
+  }
+
+
+  function setFundingSchedule(data) {
+    console.log('data', data)
+  }
+
+
+
+
+
+
+
+
+
   return (
     <div name="feed" style={{ width: "auto", maxWidth: "620px" }} ref={ref2}>
       <Head>
@@ -152,14 +368,18 @@ export default function Home() {
           content={`Building the global superalignment layer`}
         />
       </Head>
-    {!isLogged && (<div id="log in"
+    {(!isLogged || version == '2.0') && (
+      <div id="log in"
       style={{
-        padding: isMobile ? "58px 0 20px 0" : "58px 0 60px 0",
-        width: feedMax,
-      }}
-    ></div>)}
+        padding: isMobile ? (version == '1.0' ? "58px 0 20px 0" : "38px 0 20px 0") : "58px 0 60px 0",
+        width: feedMax, fontSize: '0px'
+      }} >&nnsp;
 
-      {!isLogged && (<div style={{ padding: "0px 4px 140px 4px", width: feedMax }}>
+      </div>
+    )}
+
+      {/* {!isLogged && ( */}
+      <div style={{ padding: (!isLogged || version == '2.0') ? "0px 4px 140px 4px" : '0', width: feedMax }}>
         <div
           className="flex-col"
           style={{
@@ -168,22 +388,22 @@ export default function Home() {
             alignItems: "center",
           }}
         >
-          <Logo
+          {!isLogged && version == '1.0' && (<Logo
             className="rotate"
             height={isMobile ? "95px" : "165px"}
             width={isMobile ? "95px" : "165px"}
             style={{ fill: "#9ce" }}
-          />
-          <Description
+          />)}
+          {!isLogged && version == '1.0' && (<Description
             {...{
               show: true,
               text: "/impact",
               padding: "30px 0 14px 5px",
               size: "title",
             }}
-          />
+          />)}
 
-          <div
+          {!isLogged && version == '1.0' && (<div
             className="flex-row"
             style={{
               color: "#ace",
@@ -195,9 +415,9 @@ export default function Home() {
             }}
           >
             /impact rewards you for your impact
-          </div>
+          </div>)}
 
-          <div
+          {!isLogged && version == '1.0' && (<div
             className="flex-row"
             style={{
               color: "#ace",
@@ -209,10 +429,8 @@ export default function Home() {
             }}
           >
             make an impact - get rewards
-          </div>
-
-
-          <div className='flex-row' style={{justifyContent: 'center', margin: '0 0 10px 0'}}>
+          </div>)}
+          {!isLogged && version == '1.0' && (<div className='flex-row' style={{justifyContent: 'center', margin: '0 0 10px 0'}}>
 
 
           {/* WHAT IS IMPACT BUTTON */}
@@ -338,11 +556,11 @@ export default function Home() {
 
 
 
-          </div>
+          </div>)}
 
 
 
-          <div
+          {!isLogged && version == '1.0' && (<div
             className="flex-row"
             style={{
               color: "#ace",
@@ -354,11 +572,12 @@ export default function Home() {
             }}
           >
             login to get started:
-          </div>
+          </div>)}
 
 
+          {/* {isLogged && version == '1.0' && ( */}
 
-          {!isLogged && (
+          {!isLogged && version == '1.0' && (
             <>
               <div>
                 {showLogin ? (
@@ -418,19 +637,19 @@ export default function Home() {
 
 
 
-        <div
+        {!isLogged && version == '1.0' && (<div
           id="what is impact"
           style={{
             padding: isMobile ? "28px 0 20px 0" : "28px 0 20px 0",
             width: "40%",
           }}
-        ></div>
+        ></div>)}
 
 
 
 
 
-        <div
+        {!isLogged && version == '1.0' && (<div
           style={{
             padding: "8px",
             backgroundColor: "#11448888",
@@ -506,23 +725,23 @@ export default function Home() {
 
           </div>
 
-        </div>
+        </div>)}
 
 
 
 
-        <div
+        {!isLogged && version == '1.0' && (<div
           id="how it works"
           style={{
             padding: isMobile ? "128px 0 20px 0" : "128px 0 20px 0",
             width: "40%",
           }}
-        ></div>
+        ></div>)}
 
 
 
 
-        <div
+        {!isLogged && version == '1.0' && (<div
           style={{
             padding: "8px",
             backgroundColor: "#11448888",
@@ -669,15 +888,650 @@ export default function Home() {
             </ItemWrap>
 
           </div>
+        </div>)}
+
+
+
+
+        <div style={{ padding: "0px 4px 0px 4px", width: feedMax }}>
+
+          {!isLogged && version == '1.0' && (<div
+            id="autoFund"
+            style={{
+              padding: isMobile ? "28px 0 20px 0" : "28px 0 20px 0",
+              width: "40%",
+            }}
+          ></div>)}
+
+
+
+          {/* LOGIN */}
+
+          {version == '2.0' && (<div className='flex-col' style={{backgroundColor: ''}}>
+
+            <div className='shadow flex-col'
+              style={{
+                // padding: "8px",
+                backgroundColor: "#002244",
+                borderRadius: "15px",
+                border: "1px solid #11447799",
+                width: isMiniApp || isMobile ? '340px' : '100%',
+                margin: isMiniApp || isMobile ? '0px auto' : '', 
+                // overflow: 'hidden'
+              }}
+            >
+              <div
+                className="shadow flex-row"
+                style={{
+                  backgroundColor: "#11448888",
+                  width: "100%",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "8px", 
+                  borderRadius: "15px",
+                  margin: '0 0 10px 0'
+
+                }}
+              >
+
+
+                <div
+                  className="flex-row"
+                  style={{
+                    width: "100%",
+                    justifyContent: "flex-start",
+                    alignItems: "center",
+                    padding: "0px 0 0 4px",
+                    margin: '0 0 0px 0'
+                  }} >
+
+                
+                  <BsPersonFill style={{ fill: "#cde" }} size={20}
+                    onClick={() => {
+                    toggleExpand("autoFund");
+                  }} />
+                  <div onClick={() => { toggleExpand("autoFund"); }}>
+
+
+                    <div style={{border: '0px solid #777', padding: '2px', borderRadius: '10px', backgroundColor: '', maxWidth: 'fit-content', cursor: 'pointer', color: '#cde'}}>
+                      <div className="top-layer flex-row">
+                        <div className="flex-row" style={{padding: "4px 0 4px 10px", marginBottom: '0px', flexWrap: 'wrap', justifyContent: 'flex-start', gap: '0.00rem', width: '', alignItems: 'center'}}>
+                          <div style={{fontSize: isMobile ? '18px' : '22px', fontWeight: '600', color: '', padding: '0px 3px'}}>
+                            Login
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+
+                  </div>
+
+
+                  <div
+                    className="flex-row"
+                    style={{
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => {
+                      toggleExpand("autoFund"); }}>
+
+
+                  </div>
+
+
+                </div>
+
+
+                {isLogged ? (<div className='curator-button-red' style={{height: 'max-content', textAlign: 'center', width: '64px', padding: '5px 0 3px 0', alignItems: 'center', justifyContent: 'center'}} onClick={LogoutPopup}>
+                <FaPowerOff size={16} color='#fff' />
+                </div>) : isMiniApp ? 
+                  (<MiniAppAuthButton
+                    onSuccess={(fid, uuid, signers) => {
+                      console.log('isLogged-3', fid)
+                      store.setFid(fid);
+                      store.setSignerUuid(uuid);
+                      store.setIsAuth(uuid?.length > 0);
+
+                      setFid(fid)
+                      setIsLogged(true)
+                      setShowLogin(false)
+                      checkEcoEligibility(fid, '$IMPACT', uuid)
+                    }}
+                    onError={err => {
+                      // Handle error (optional)
+                      alert('Login failed: ' + err.message);
+                    }}
+                  />) : (<div style={{width: '125px', height: '36px', transform: 'scale(0.85)', transformOrigin: 'center'}}><NeynarSigninButton onSignInSuccess={handleSignIn} /></div>)}
+
+              </div>
+
+
+
+
+
+              <div className='flex-col' style={{backgroundColor: "#002244ff", padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: '#ace', fontSize: '12px', gap: '0.75rem', position: 'relative'}}>
+                <div>
+                  You need to login to enable Boosting, Auto-funding or Quests
+                </div>
+
+
+              </div>
+            </div>
+
+
+          </div>
+        
+          )}
+
+
+
+
+          {/* BOOST & NOMINATE */}
+
+          {version == '2.0' && (<div className='flex-col' style={{backgroundColor: ''}}>
+
+            <div className='shadow flex-col'
+              style={{
+                // padding: "8px",
+                backgroundColor: isLogged ? "#002244" : '#333',
+                borderRadius: "15px",
+                border: isLogged ? "1px solid #11447799" : "1px solid #555",
+                width: isMiniApp || isMobile ? '340px' : '100%',
+                margin: isMiniApp || isMobile ? '40px auto 0 auto' : '40px auto 0 auto',
+                // overflow: 'hidden'
+              }} >
+              <div
+                className="shadow flex-row"
+                style={{
+                  backgroundColor: isLogged ? "#11448888" : "#444",
+                  width: "100%",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "8px", 
+                  borderRadius: "15px",
+                  margin: '0 0 10px 0'
+                }} >
+
+
+                <div
+                  className="flex-row"
+                  style={{
+                    width: "100%",
+                    justifyContent: "flex-start",
+                    alignItems: "center",
+                    padding: "0px 0 0 4px",
+                    margin: '0 0 0px 0'
+                  }} >
+
+                
+                  <BsStarFill style={{ fill: "#cde" }} size={20}
+                    onClick={() => {
+                    toggleExpand("autoFund");
+                  }} />
+                  <div onClick={() => { toggleExpand("autoFund"); }}>
+
+
+                    <div style={{border: '0px solid #777', padding: '2px', borderRadius: '10px', backgroundColor: '', maxWidth: 'fit-content', cursor: 'pointer', color: '#cde'}}>
+                      <div className="top-layer flex-row">
+                        <div className="flex-row" style={{padding: "4px 0 4px 10px", marginBottom: '0px', flexWrap: 'wrap', justifyContent: 'flex-start', gap: '0.00rem', width: '', alignItems: 'center'}}>
+                          <div style={{fontSize: isMobile ? '18px' : '22px', fontWeight: '600', color: '', padding: '0px 3px'}}>
+                            Boost & Nominate
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+
+                  </div>
+
+
+                  <div
+                    className="flex-row"
+                    style={{
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => {
+                      toggleExpand("autoFund"); }}>
+                      {/* <Item {...{ text: "How it works" }} /> */}
+
+                  </div>
+
+                </div>
+
+                <ToggleSwitch target={'boost'} />
+
+              </div>
+
+
+
+
+              <div className='flex-col' style={{backgroundColor: isLogged ? "#002244ff" : '#333', padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: isLogged ? '#ace' : '#ddd', fontSize: '12px', gap: '0.75rem', position: 'relative'}}>
+                <div>
+                  Nominate casts to be boosted and rewarded based on their impact on Farcaster - earn rewards
+                </div>
+                <div className='flex-row' style={{position: 'absolute', bottom: '0', right: '0', padding: '5px 5px', gap: '.25rem', alignItems: 'center'}}>
+                  <BsQuestionCircle size={15} onClick={() => {
+                      openSwipeable("boost"); }} />
+                </div>
+
+              </div>
+            </div>
+
+
+            </div>
+
+            )}
+
+
+
+          {/* VALIDATE */}
+
+          {version == '2.0' && (<div className='flex-col' style={{backgroundColor: ''}}>
+
+            <div 
+              className='shadow flex-col'
+              style={{
+                // padding: "8px",
+                backgroundColor: isLogged ? "#002244" : '#333',
+                borderRadius: "15px",
+                border: isLogged ? "1px solid #11447799" : "1px solid #555",
+                width: isMiniApp || isMobile ? '340px' : '100%',
+                margin: isMiniApp || isMobile ? '15px auto 0 auto' : '15px auto 0 auto',
+                // overflow: 'hidden'
+              }} >
+              <div
+                className="shadow flex-row"
+                style={{
+                  backgroundColor: isLogged ? "#11448888" : "#444",
+                  width: "100%",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "8px", 
+                  borderRadius: "15px",
+                  margin: '0 0 10px 0'
+
+                }}
+              >
+
+
+                <div
+                  className="flex-row"
+                  style={{
+                    width: "100%",
+                    justifyContent: "flex-start",
+                    alignItems: "center",
+                    padding: "0px 0 0 4px",
+                    margin: '0 0 0px 0'
+                  }} >
+
+
+
+                
+                  <BsShieldFillCheck style={{ fill: "#cde" }} size={20}
+                    onClick={() => {
+                      toggleExpand("autoFund");
+                    }} />
+                  <div onClick={() => { toggleExpand("autoFund"); }}>
+
+                    <div style={{border: '0px solid #777', padding: '2px', borderRadius: '10px', backgroundColor: '', maxWidth: 'fit-content', cursor: 'pointer', color: '#cde'}}>
+                      <div className="top-layer flex-row">
+                        <div className="flex-row" style={{padding: "4px 0 4px 10px", marginBottom: '0px', flexWrap: 'wrap', justifyContent: 'flex-start', gap: '0.00rem', width: '', alignItems: 'center'}}>
+                          <div style={{fontSize: isMobile ? '18px' : '22px', fontWeight: '600', color: '', padding: '0px 3px'}}>
+                            Validate
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+
+                  <div
+                    className="flex-row"
+                    style={{
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => {
+                      toggleExpand("autoFund"); }}>
+
+
+                  </div>
+
+
+                </div>
+
+                <ToggleSwitch target={'validate'} />
+
+
+
+
+              </div>
+
+              <div className='flex-col' style={{backgroundColor: isLogged ? "#002244ff" : '#333', padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: isLogged ? '#ace' : '#ddd', fontSize: '12px', gap: '0.75rem', position: 'relative'}}>
+                <div>
+                  Ensure the quality of nominations - earn rewards
+                </div>
+                {/* <div>
+                  Validators earn rewards for quality validation
+                </div> */}
+                <div className='flex-row' style={{position: 'absolute', bottom: '0', right: '0', padding: '5px 5px', gap: '.25rem', alignItems: 'center'}}>
+                  <BsQuestionCircle size={15} onClick={() => {
+                      openSwipeable("validate"); }} />
+                </div>
+              </div>
+            </div>
+
+
+            </div>
+
+            )}
+
+
+          {/* AUTO-FUND */}
+
+          {version == '2.0' && (<div className='flex-col' style={{backgroundColor: ''}}>
+
+            <div className='shadow flex-col'
+              style={{
+                // padding: "8px",
+                backgroundColor: isLogged ? "#002244" : '#333',
+                borderRadius: "15px",
+                border: isLogged ? "1px solid #11447799" : "1px solid #555",
+                width: isMiniApp || isMobile ? '340px' : '100%',
+                margin: isMiniApp || isMobile ? '15px auto 0 auto' : '15px auto 0 auto',
+                // overflow: 'hidden'
+              }}
+            >
+              <div
+                className="shadow flex-row"
+                style={{
+                  backgroundColor: isLogged ? "#11448888" : "#444",
+                  width: "100%",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "8px", 
+                  borderRadius: "15px",
+                  margin: '0 0 10px 0'
+
+                }}
+              >
+
+
+                <div
+                  className="flex-row"
+                  style={{
+                    width: "100%",
+                    justifyContent: "flex-start",
+                    alignItems: "center",
+                    padding: "0px 0 0 4px",
+                    margin: '0 0 0px 0'
+                  }} >
+
+
+
+                
+                  <BsPiggyBankFill style={{ fill: "#cde" }} size={20}
+                    onClick={() => {
+                    toggleExpand("autoFund");
+                  }} />
+                  <div onClick={() => { toggleExpand("autoFund"); }}>
+
+
+                    <div style={{border: '0px solid #777', padding: '2px', borderRadius: '10px', backgroundColor: '', maxWidth: 'fit-content', cursor: 'pointer', color: '#cde'}}>
+                      <div className="top-layer flex-row">
+                        <div className="flex-row" style={{padding: "4px 0 4px 10px", marginBottom: '0px', flexWrap: 'wrap', justifyContent: 'flex-start', gap: '0.00rem', width: '', alignItems: 'center'}}>
+                          <div style={{fontSize: isMobile ? '18px' : '22px', fontWeight: '600', color: '', padding: '0px 3px'}}>
+                            Auto-fund
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+
+                  </div>
+
+
+                  <div
+                    className="flex-row"
+                    style={{
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => {
+                      toggleExpand("autoFund"); }}>
+
+
+                  </div>
+
+
+                </div>
+
+
+                <ToggleSwitch target={'autoFund'} />
+
+
+              </div>
+
+
+
+
+
+              <div className='flex-col' style={{backgroundColor: isLogged ? "#002244ff" : '#333', padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: isLogged ? '#ace' : '#ddd', fontSize: '12px', gap: '0.75rem', position: 'relative'}}>
+                <div>
+                  Support creators with your remaining $degen and $tipn allowances - earn rewards
+                </div>
+
+                <div className='flex-row' style={{position: 'absolute', bottom: '0', right: '0', padding: '5px 5px', gap: '.25rem', alignItems: 'center'}}>
+                  <BsQuestionCircle size={15} onClick={() => {
+                      openSwipeable("autoFund"); }} />
+                </div>
+              </div>
+            </div>
+
+
+            </div>
+
+            )}
+
+
+
+        </div>
+
+        {panelOpen && (
+          <div
+            onClick={closeSwipeable}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.4)',
+              backdropFilter: 'blur(4px)',
+              transition: 'opacity 0.3s',
+              zIndex: 999,
+            }} />
+          )}
+
+          {/* Swipeable Panel */}
+          <div
+            ref={panelRef}
+            style={{
+              position: 'fixed',
+              bottom: panelOpen ? 0 : (panelTarget !== 'welcome') ? '-60%' : '-95%',
+              left: '0.5%',
+              width: '99%',
+              height: (panelTarget !== 'welcome') ? '58%' : '90%',
+              backgroundColor: '#55779999',
+              backdropFilter: 'blur(12px)',
+              borderRadius: '15px 15px 0 0',
+              border: '1px solid #468',
+              borderBottom: '0',
+              padding: '13px 20px 20px 20px',
+              margin: '0 0px',
+              zIndex: 1000,
+              transition: 'bottom 0.3s ease-in-out',
+            }}
+          >
+            <div style={{
+              fontSize: '0px',
+              height: '4px',
+              width: '60px',
+              backgroundColor: '#cde',
+              borderRadius: '3px',
+              margin: '0 auto 10px auto'
+            }}>&nbsp;</div>
+
+
+            {version == '2.0' && (<div className='flex-col' style={{backgroundColor: ''}}>
+
+            <div className='shadow flex-col'
+              style={{
+                // padding: "8px",
+                backgroundColor: isLogged ? "#002244" : '#333',
+                borderRadius: "15px",
+                border: isLogged ? "1px solid #11447799" : "1px solid #555",
+                width: isMiniApp || isMobile ? '340px' : '100%',
+                margin: isMiniApp || isMobile ? '15px auto 0 auto' : '15px auto 0 auto',
+                // overflow: 'hidden'
+              }}
+            >
+              <div
+                className="shadow flex-row"
+                style={{
+                  backgroundColor: isLogged ? "#11448888" : "#444",
+                  width: "100%",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "8px", 
+                  borderRadius: "15px",
+                  margin: '0 0 10px 0'
+                }} >
+
+
+                <div
+                  className="flex-row"
+                  style={{
+                    width: "100%",
+                    justifyContent: "flex-start",
+                    alignItems: "center",
+                    padding: "0px 0 0 4px",
+                    margin: '0 0 0px 0'
+                  }} >
+
+                  {(panelTarget == 'autoFund') ? (<BsPiggyBankFill style={{ fill: "#cde" }} size={20} />) : (panelTarget == 'validate') ? (<BsShieldFillCheck style={{ fill: "#cde" }} size={20} />) : (panelTarget == 'boost') ? (<BsStarFill style={{ fill: "#cde" }} size={20} />) : (<div></div>)}
+
+                  {/* <BsPiggyBankFill style={{ fill: "#cde" }} size={20} /> */}
+
+                  <div>
+                    <div style={{border: '0px solid #777', padding: '2px', borderRadius: '10px', backgroundColor: '', maxWidth: 'fit-content', cursor: 'pointer', color: '#cde'}}>
+                      <div className="top-layer flex-row">
+                        <div className="flex-row" style={{padding: "4px 0 4px 10px", marginBottom: '0px', flexWrap: 'wrap', justifyContent: 'flex-start', gap: '0.00rem', width: '', alignItems: 'center'}}>
+                          <div style={{fontSize: isMobile ? '18px' : '22px', fontWeight: '600', color: '', padding: '0px 3px'}}>
+                            {(panelTarget == 'autoFund') ? 'Auto-fund' : (panelTarget == 'validate') ? 'Validate' : (panelTarget == 'boost') ? 'Boost & Nominate' : ''}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+
+                  <div
+                    className="flex-row"
+                    style={{
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      cursor: "pointer",
+                    }} >
+                  </div>
+                </div>
+              </div>
+
+
+
+
+
+              {(panelTarget == 'autoFund') ? (<div className='flex-col' style={{backgroundColor: isLogged ? "#002244ff" : '#333', padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: isLogged ? '#ace' : '#ddd', fontSize: '14px', gap: '1.25rem', position: 'relative', fontWeight: '400'}}>
+                <div>
+                  Auto-funding lets you automatically send your remaining $degen or $tipn allowances to the Impact Fund
+                </div>
+                <div>
+                  @impactfund then distributes the funds to casters in proportion to their impact on Farcaster (per total validated points)
+                </div>
+                <div className='flex-col'>
+                  <div>
+                    Funders can choose what percent of funds goes to the Creator, Dev and Growth Funds (respectively):
+                  </div>
+                  <li>
+                    Standard (100/0/0)
+                  </li>
+                  <li>
+                    Optimized (80/10/10)
+                  </li>
+                  <li>
+                    Accelerated (60/20/20) 
+                  </li>
+                </div>
+              </div>) : (panelTarget == 'validate') ? (
+                <div className='flex-col' style={{backgroundColor: isLogged ? "#002244ff" : '#333', padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: isLogged ? '#ace' : '#ddd', fontSize: '14px', gap: '1.25rem', position: 'relative', fontWeight: '400'}}>
+                <div>
+                  Every nominated cast must be validated before it can be boosted and earn rewards
+                </div>
+                <div>
+                  Impact 2.0 uses Randomized Voter Sampling to validate casts:
+                </div>
+                <div>
+                  Each nominated cast is reviewed by a randomized group of validators proportionate to its (proposed) impact
+                </div>
+                <div>
+                  If the cast is successfully validated the Proposer's Impact Score increases. If not, the Proposer's Impact Score falls, and nomination allowance decreases
+                </div>
+              </div>
+              ) : (panelTarget == 'boost') ? (
+                <div className='flex-col' style={{backgroundColor: isLogged ? "#002244ff" : '#333', padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: isLogged ? '#ace' : '#ddd', fontSize: '14px', gap: '1.25rem', position: 'relative', fontWeight: '400'}}>
+                  <div>
+                    Users start with a weekly allowance of 69 nomination points. They can use these to nominate casts based on how impactful they are to the Farcaster network
+                  </div>
+                  <div>
+                    If validators determine that a cast is fairly valued, it becomes eligible for rewards and is boosted with 'likes' from randomly selected Boosters
+                  </div>
+                  <div>
+                    Proposers and Boosters earn rewards based on their contribution to the network
+                  </div>
+                </div>
+              ) : (<div></div>)}
+            </div>
+
+
+            </div>
+
+            )}
+
+
+
+
+          {/* <div style={{ color: '#fff' }}>
+            {panelTarget === 'autoFund' && 'Auto-Funding allows advanced features'}
+          </div>
+          <div style={{ padding: '20px', color: '#ccc' }}>
+            Swipe down to close
+          </div> */}
+
+
+
         </div>
 
 
-
-      </div>)}
+      </div>
+    
+    {/* )} */}
 
 
       {!isLogged && (<div ref={ref}>&nbsp;</div>)}
-      {isLogged && <ProfilePage />}
+      {version == '2.0' || version == '1.0' && isLogged && <ProfilePage />}
     </div>
   );
 }

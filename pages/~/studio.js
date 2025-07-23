@@ -40,7 +40,7 @@ export default function ProfilePage() {
   const [ref, inView] = useInView()
   const { ecosystem, username, app, userFid, pass } = router.query
   const [user, setUser] = useState(null)
-  const { LoginPopup, isLogged, showLogin, setShowLogin, setPoints, setIsLogged, setFid, miniApp, setMiniApp, fid, ecoData, isMiniApp } = useContext(AccountContext)
+  const { LoginPopup, isLogged, showLogin, setShowLogin, setPoints, setIsLogged, setFid, miniApp, setMiniApp, fid, ecoData, isMiniApp, userInfo, setUserInfo } = useContext(AccountContext)
   const ref1 = useRef(null)
   const [textMax, setTextMax] = useState('430px')
   const [screenWidth, setScreenWidth ] = useState(undefined)
@@ -181,28 +181,27 @@ export default function ProfilePage() {
       })
       if (response?.data) {
         const profile = response?.data?.data || null
-        // const profile = response?.data?.data?.Socials?.Social[0] || null
         console.log('profile', profile)
         const populatedProfile = {
-          // username: profile?.profileName,
           username: profile?.username,
-          // pfp: {
-          //   url: profile?.profileImage,
-          // },
           pfp: {
             url: profile?.pfp?.url,
           },
-          // displayName: profile?.profileDisplayName,
           displayName: profile?.displayName,
-          // activeOnFcNetwork: true,
           activeOnFcNetwork: true,
-          // profile: { bio: { text: profile?.profileBio } },
           profile: { bio: { text: profile?.profile?.bio?.text || "" } },
           followingCount: profile?.followingCount,
           followerCount: profile?.followerCount,
           fid: Number(profile?.fid)
         }
         setUser(populatedProfile)
+        if (!userInfo.username) {
+          setUserInfo({
+            pfp: profile?.pfp?.url || null,
+            username: profile?.username || null,
+            display: profile?.displayName || null,
+          })
+        }
       } else {
         setUser(null)
       }
@@ -1218,7 +1217,7 @@ export default function ProfilePage() {
         }, 2500);
         setIsOn(false)
       }
-      console.log('schedule', schedule)
+      console.log('schedule-4', schedule)
       setFundLoading(false)
       return schedule
     } catch (error) {
