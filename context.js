@@ -67,6 +67,7 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
     modReq: false,
   }
   const [eligibility, setEligibility] = useState(initialEligibility)
+  const [userInfo, setUserInfo] = useState({pfp: null, username: null, display: null})
 
   const getUserProfile = async (fid) => {
     try {
@@ -217,6 +218,7 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
     const updateLogin = () => {
       console.log('c12 store triggered', store.isAuth, miniApp)
       if (store.isAuth) {
+        console.log('c12-6')
         setIsLogged(true);
         setFid(fid || store.fid)
         getUserProfile(fid || store.fid)
@@ -287,6 +289,7 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
         }))
         setEligibility(initialEligibility)
       } else {
+        console.log('c13-7')
         setUserBalances(prev => ({ ...prev, impact: 0, qdau: 0 }))
         checkEcoEligibility(fid, points, uuid, referrer)
       }
@@ -378,7 +381,8 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
     showActions, setShowActions,
     userProfile, setUserProfile,
     populate, setPopulate,
-    isMiniApp, setIsMiniApp
+    isMiniApp, setIsMiniApp,
+    userInfo, setUserInfo
   };
 
   return (

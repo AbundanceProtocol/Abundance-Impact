@@ -7,7 +7,7 @@ const LogoutModal = () => {
   const router = useRouter();
   const store = useStore()
 
-  const { showLogout, setShowLogout, setFid, setIsLogged } = useContext(AccountContext);
+  const { showLogout, setShowLogout, setFid, setIsLogged, setUserInfo } = useContext(AccountContext);
 
   const handleLogOut = () => {
     console.log('isLogged-4')
@@ -28,6 +28,11 @@ const LogoutModal = () => {
     setFid(null)
     setIsLogged(false)
     setShowLogout(false)
+    setUserInfo({
+      pfp: null,
+      username: null,
+      display: null,
+    })
     if (router.route == '/~/studio') {
       router.push(`/`)
     }

@@ -5,6 +5,7 @@ import CenterMenu from './CenterMenu';
 import RightMenu from './RightMenu';
 import ShowActionNav from './ShowActionNav';
 import BottomMenu from './BottomMenu';
+import BottomBar from './BottomBar';
 import LoginModal from './Modals/LoginModal';
 import LogoutModal from './Modals/LogoutModal';
 import Head from 'next/head';
@@ -12,9 +13,11 @@ import { AccountContext } from '../../context';
 import useMatchBreakpoints from '../../hooks/useMatchBreakpoints';
 import UserMenu from './UserMenu';
 
+const version = process.env.NEXT_PUBLIC_VERSION
+
 const Layout = ({ children }) => {
   const ref = useRef(null)
-  const { setIsLogged, setFid, setIsMiniApp, isMiniApp, userBalances, setUserBalances } = useContext(AccountContext)
+  const { setIsLogged, setFid, setIsMiniApp, isMiniApp, userBalances, setUserBalances, setUserInfo } = useContext(AccountContext)
   const { isMobile } = useMatchBreakpoints();
 
   const getUserBalance = async (fid) => {
@@ -53,6 +56,11 @@ const Layout = ({ children }) => {
       if (isValidUser) {
         setIsLogged(true)
         setFid(Number(userProfile?.user?.fid))
+        setUserInfo({
+          pfp: userProfile?.user?.pfp?.url || null,
+          username: userProfile?.user?.username || null,
+          display: userProfile?.user?.displayName || null,
+        })
       }    
 
       sdk.actions.ready()
@@ -102,7 +110,8 @@ const Layout = ({ children }) => {
         {/* <RightMenu /> */}
       </div>
       <ShowActionNav />
-      <BottomMenu />
+      {(version == '1.0' || version == '2.0') && <BottomBar />}
+      {/* {version == '2.0' ? (<BottomBar />) : (<BottomMenu />)} */}
       <LoginModal />
       <LogoutModal />
     </div>
