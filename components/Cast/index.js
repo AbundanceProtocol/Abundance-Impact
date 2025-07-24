@@ -90,6 +90,8 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
           ...prev,
           qdau: qdauBalance
         }))
+        console.log('userBalance', qdauBalance)
+
       } else {
         console.log('fail')
         clickFailed()
@@ -154,6 +156,8 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
           ...prev,
           impact: impactBalance
         }))
+        console.log('userBalance', impactBalance)
+
       } else {
         console.log('fail')
         clickFailed()
