@@ -23,7 +23,7 @@ const Working = ({buttonName, link, menuState, TopIcon }) => {
         <div className={`flex-row`} style={{padding: '0 10px', justifyContent: 'center'}}>
           <div className="flex-col" style={{height: '46px', alignItems: 'center', justifyContent: 'center'}}>
             <div className={`flex-row flex-middle ${menuState} btn-hvr`} style={{padding: '2px 0 2px 0', borderRadius: '16px'}}>
-              <TopIcon style={{margin: '3px 12px 3px 12px', width: (buttonName == 'Cast Actions') ? '30px' : '25px', height: (buttonName == 'Cast Actions') ? '30px' : '25px'}} />
+              <TopIcon style={{margin: '3px 12px 3px 12px', width: (buttonName == 'Cast Actions') ? '25px' : '25px', height: (buttonName == 'Cast Actions') ? '30px' : '25px'}} />
             </div>
           </div>
         </div>

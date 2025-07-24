@@ -19,10 +19,10 @@ import CuratorData from '../../../components/Page/CuratorData';
 import { formatNum, getCurrentDateUTC, getTimeRange, isYesterday, checkEmbedType, populateCast, isCast } from '../../../utils/utils';
 import Cast from '../../../components/Cast'
 import useMatchBreakpoints from '../../../hooks/useMatchBreakpoints';
-// import Connect from '../../../components/Connect';
-// import { useAccount, useReadContract, useContractWrite, usePrepareContractWrite, useWaitForTransactionReceipt } from "wagmi";
-// import contractABI from '../../../contracts/bulksender.json'
-// import Onchain from '../../../components/Onchain';
+import Connect from '../../../components/Connect';
+import { useAccount, useReadContract, useContractWrite, usePrepareContractWrite, useWaitForTransactionReceipt } from "wagmi";
+import contractABI from '../../../contracts/bulksender.json'
+import Onchain from '../../../components/Onchain';
 
 
 export default function Eco() {
@@ -530,8 +530,8 @@ export default function Eco() {
     <div className='flex-col' style={{width: 'auto', position: 'relative'}} ref={ref1}>
       <div className="" style={{padding: '58px 0 0 0'}}>
       </div>
-      {/* <Connect /> */}
-      {/* <Onchain /> */}
+      {/* <Connect />
+      <Onchain /> */}
       {/* <Wallet /> */}
       <div className='flex-row' style={{height: '30px', alignItems: 'center', justifyContent: 'flex-start', padding: '20px 0 30px 0'}}>
         <div className='flex-row' style={{padding: '4px 8px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '20px', alignItems: 'center', gap: '0.25rem'}}>

@@ -194,6 +194,7 @@ export default function ProfilePage() {
           followerCount: profile?.followerCount,
           fid: Number(profile?.fid)
         }
+        console.log('populatedProfile', populatedProfile)
         setUser(populatedProfile)
         if (!userInfo.username) {
           setUserInfo({
@@ -421,6 +422,9 @@ export default function ProfilePage() {
         ...userQuery,
         curators: [fid]
       })
+      // if (!isMiniApp) {
+        
+      // }
     }
 
   }, [fid]);
@@ -3796,6 +3800,104 @@ export default function ProfilePage() {
               justifyContent: "center",
             }}
           >
+
+
+
+
+            {userFunding?.creator_fund >= 0 && (<div
+              className="flex-row"
+              style={{
+                color: "#9df",
+                width: "100%",
+                fontSize: isMobile ? "15px" : "16px",
+                padding: "20px 10px 10px 10px",
+                justifyContent: "center",
+                userSelect: 'none',
+                fontWeight: '600'
+              }}
+            >
+              Who referred you to Impact?
+            </div>)}
+
+            {userFunding?.creator_fund >= 0 && (<div className='flex-row' style={{width: '100%', justifyContent: 'center', flexWrap: "wrap"}}>
+
+              {(userFunding?.search_channels?.length == 0 && userFunding?.search_curators?.length == 0 && userFunding?.creator_fund > 0) ? (<div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '7px 5px'}}>
+                <div className='cast-act-lt' style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', borderRadius: '88px', padding: '3px 10px 3px 3px', width: 'auto', margin: '0 5px 0 0'}}>
+                  <div style={{display: 'flex', textAlign: 'center', fontSize: '16px', margin: '0', cursor: 'pointer', fontWeight: '600'}} onClick={() => {
+                    getInput(searchInput, 'true')}}>&nbsp;Find referrer</div>
+                </div>
+              </div>) : userFunding?.search_channels?.length > 0 ? (<><div style={{fontSize: '15px', color: '#eff', fontWeight: '600', padding: '3px', margin: '7px 5px'}}>Channels:</div>{userFunding?.search_channels?.map((channel, index) => (
+                (<div key={index} style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '7px 5px'}}>
+                  <div className='cast-act-lt' style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', borderRadius: '88px', padding: '3px 10px 3px 3px', width: 'auto', margin: '0 5px 0 0'}}>
+                    {/* {channel?.imageUrl && (<img src={channel?.imageUrl} width={20} height={20} style={{borderRadius: '80px', border: '2px solid #eee', backgroundColor: '#8363ca'}} />)} */}
+                    <div style={{display: 'flex', textAlign: 'center', fontSize: '15px', margin: '0', padding: '0 0 0 5px'}}>{channel ? `/${channel}` : ' channel not found'}</div>
+                    <IoCloseCircle size={18} color={'#a00'} onClick={() => {
+                      setFundingSchedule('remove-channel', channel)}} />
+                  </div>
+                </div>)
+              ))}</>) : curatorList?.length >= 0 ? (<><div style={{fontSize: '15px', color: '#eff', fontWeight: '600', padding: '3px', margin: '7px 5px'}}>Invited by</div>{curatorList?.map((curator, index) => (
+                (<div key={index} style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '7px 5px'}}>
+                  <div className='cast-act-lt' style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', borderRadius: '88px', padding: '3px 10px 3px 3px', width: 'auto', margin: '0 5px 0 0'}}>
+                    {curator?.pfp && (<img src={curator?.pfp} width={20} height={20} style={{borderRadius: '80px', border: '2px solid #eee', backgroundColor: '#8363ca'}} />)}
+                    <div style={{display: 'flex', textAlign: 'center', fontSize: '15px', margin: '0', padding: curator?.pfp ? '0' : '0 0 0 5px'}}>{curator ? `@${curator?.username}` : ' curator not found'}</div>
+                    <IoCloseCircle size={18} color={'#a00'} onClick={() => {
+                      setFundingSchedule('remove-curator', curator?.fid)}} />
+                  </div>
+                </div>)
+              ))}</>) : (<div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '7px 5px'}}>
+                <div className='cast-act-lt' style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', borderRadius: '88px', padding: '3px 10px 3px 3px', width: 'auto', margin: '0 5px 0 0'}}>
+                  <div style={{display: 'flex', textAlign: 'center', fontSize: '16px', margin: '0', cursor: 'pointer', fontWeight: '600'}} onClick={() => {
+                    getInput(searchInput, 'true')}}>&nbsp;No referrer</div>
+                </div>
+              </div>) }
+            </div>)}
+
+
+
+
+            {userFunding?.creator_fund >= 0 && (<div className='flex-col' style={{height: '30px', alignItems: 'center', justifyContent: 'center', padding: '40px 0 30px 0'}}>
+                <div className='flex-row' style={{padding: '4px 8px', backgroundColor: '#002244ee', border: '1px solid #666', borderRadius: '20px', alignItems: 'center', gap: '0.25rem'}}>
+
+                  <FaSearch size={15} color={'#eff'} style={{margin: '0 2px 0 2px'}} />
+                  {/* <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '12px' : '13px'}}>SEARCH</div> */}
+
+                  <div className={fundSearch == 'Curators' ? 'filter-item-on' : 'filter-item'} style={{fontSize: '12px'}} onClick={() => {updateSearch('Curators')}}>Referrer</div>
+
+
+                  <input type="text" value={searchInput} onChange={(e) => getInput(e.target.value, null)} style={{backgroundColor: '#adf', borderRadius: '8px', padding: isMobile ? '2px 4px' : '2px 4px', fontSize: isMobile ? '12px' : '14px', width: '150px', fontWeight: '600', margin: '0 0 0 4px'}} placeholder={"search " + fundSearch.toLowerCase()} />
+
+                </div>
+              </div>)}
+
+
+
+
+            {userFunding?.creator_fund >= 0 && (<div className='flex-row' style={{width: '100%', justifyContent: 'center', flexWrap: "wrap"}}>
+
+
+              {curatorData?.length >= 0 && (curatorData?.map((curator, index) => (
+                (<div key={index} style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '7px 5px'}} onClick={() => {
+                  updateSchedule(curator?.fid, 'Curators')}}>
+                  <div className='cast-act-lt' style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', borderRadius: '88px', padding: '3px 10px 3px 3px', width: 'auto', margin: '0 5px 0 0'}}>
+                    {curator?.pfp && (<img src={curator?.pfp} width={20} height={20} style={{borderRadius: '80px', border: '2px solid #eee', backgroundColor: '#8363ca'}} />)}
+                    <div style={{display: 'flex', textAlign: 'center', fontSize: '15px', margin: '0'}}>{curator?.username ? `@${curator?.username}` : ' curator not found'}</div>
+                  </div>
+                </div>)
+              )))}
+              {curatorsLength > 20 && (<div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '7px 5px'}}>
+                <div className='cast-act-lt' style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', borderRadius: '88px', padding: '3px 10px 3px 3px', width: 'auto', margin: '0 5px 0 0'}}>
+                  <div style={{display: 'flex', textAlign: 'center', fontSize: '15px', margin: '0', cursor: 'pointer'}} onClick={() => {
+                    if (fundSearch == 'Curators') {
+                      getInput(searchInput, 'true')
+                    }}}>&nbsp;+{curatorsLength - 20}</div>
+                </div>
+              </div>)}
+
+            </div>)}
+
+
+
+
 
 
 

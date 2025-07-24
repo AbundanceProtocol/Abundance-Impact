@@ -10,7 +10,14 @@
 /coverage
 temp.js
 pages/temp.js
-/pages/api/testing
+/pages/api/test
+pages/api/testing/getRaffleUpdate.js
+pages/api/testing/getRaffleUpdate-v2.js
+pages/api/testing/getCast.js
+pages/api/testing/getRewardsData2.js
+pages/api/testing/getScoreUpdate.js
+pages/api/testing/getTest25.js
+pages/api/frames/console/more2.js
 
 # next.js
 /.next/
@@ -53,3 +60,9 @@ cache
 
 # scraps
 .scraps.*
+pages/api/frames/console/more2.js
+pages/api/mini-app/curator2.js
+pages/api/testing/getRewardsData2.js
+pages/api/testing/getTest25.js
+pages/api/testing/getMultitippingData.js
+public/images/backgroundframe4.png

@@ -5,6 +5,7 @@ import Circle from '../../../models/Circle';
 import Tip from '../../../models/Tip';
 import Quality from '../../../models/Quality';
 import OptOut from '../../../models/OptOut';
+import { v4 as uuid } from 'uuid'
 
 const dataCode = process.env.DATA_CODE
 const wcApiKey = process.env.WC_API_KEY
@@ -25,14 +26,17 @@ export default async function handler(req, res) {
 
       const result = await Impact.aggregate([
         { $match: { createdAt: { $gte: oneDay } } },
-        { $group: { _id: "$curator_fid", totalImpactPoints: { $sum: "$impact_points" } } },
+        { $group: { 
+            _id: "$curator_fid", 
+            totalImpactPoints: { $sum: "$impact_points" }, 
+            totalImpactDocs: { $sum: 1 } 
+        } },
         { $sort: { totalImpactPoints: -1 } },
         { $limit: 15 }
       ]);
 
       return result
     }
-
 
     async function getUniqueCuratorsQualityCount() {
       await connectToDatabase();
@@ -69,7 +73,7 @@ export default async function handler(req, res) {
 
       const impactUsernames = await Promise.all(getTopNominations.map(async (tip) => {
         const user = await User.findOne({ fid: tip._id.toString() });
-        return {username: user ? user.username : 'Unknown User', points: tip.totalImpactPoints};
+        return {username: user ? user.username : 'Unknown User', points: tip.totalImpactPoints, casts: tip.totalImpactDocs};
       }));
 
       const qualityUsernames = await Promise.all(getTopQDAU.map(async (tip) => {
@@ -78,6 +82,7 @@ export default async function handler(req, res) {
       }));
 
       console.log('qualityUsernames', qualityUsernames)
+      console.log('impactUsernames', impactUsernames)
 
 
       let combinedPoints = impactUsernames.reduce((acc, current) => {
@@ -144,28 +149,22 @@ export default async function handler(req, res) {
 
 
       
-      const tipperUsernames = await Promise.all(getTopTips.map(async (tip) => {
-        const user = await User.findOne({ fid: tip._id.toString() });
-        return {username: user ? user.username : 'Unknown User', tip: tip.totalTips};
-      }));
+      // const tipperUsernames = await Promise.all(getTopTips.map(async (tip) => {
+      //   const user = await User.findOne({ fid: tip._id.toString() });
+      //   return {username: user ? user.username : 'Unknown User', tip: tip.totalTips};
+      // }));
   
 
 
       const uniqueCuratorsCount = await Impact.distinct("curator_fid", { createdAt: { $gte: oneDay } });
-      // console.log(`Number of unique 'curator_fid's that created Impact docs in the past 24 hours: ${uniqueCuratorsCount.length}`);
 
       const newUserCount = await User.countDocuments({ createdAt: { $gte: oneDay } });
-      // console.log(`Number of new User docs created in the last 24 hours: ${newUserCount}`);
 
       const uniqueQualityCuratorsCount = await Quality.distinct("curator_fid", { createdAt: { $gte: oneDay } });
-      // console.log(`Number of unique 'curator_fid's that created Quality docs in the past 24 hours: ${uniqueQualityCuratorsCount.length}`);
-
 
       const newOptOutCount = await OptOut.countDocuments({ createdAt: { $gte: oneDay } });
-      // console.log(`Number of new OptOut docs created in the last 24 hours: ${newOptOutCount}`);
 
       const uniqueTipperCount = await Tip.distinct("tipper_fid", { createdAt: { $gte: oneDay } });
-      // console.log(`Number of unique 'tipper_fid's that created new Tip docs in the past 24 hours: ${uniqueTipperCount.length}`);
 
       const totalDegenAmount = await Tip.aggregate([
         { $match: { createdAt: { $gte: oneDay }, 'tip.currency': { $regex: /degen/i } } },
@@ -173,7 +172,6 @@ export default async function handler(req, res) {
         { $match: { 'tip.currency': { $regex: /degen/i } } },
         { $group: { _id: null, totalAmount: { $sum: '$tip.amount' } } }
       ]);
-      // console.log(`Total 'amount' of '$degen' 'currency' in Tip documents created in the past 24 hours: ${totalDegenAmount[0].totalAmount}`);
 
       const yesterday = new Date(new Date().setDate(new Date().getDate() - 1));
       yesterday.setHours(0, 0, 0, 0);
@@ -194,13 +192,13 @@ export default async function handler(req, res) {
 
       let dcText = ''
       
-      for (const tipper of tipperUsernames) {
-        dcText += '@' + tipper.username + ' - tip: ' + tipper.tip + ' \n'
-      }
-      dcText += '\n'
-      for (const impact of impactUsernames) {
-        dcText += '@' + impact.username + ' - points: ' + impact.points + ' \n'
-      }
+      // for (const tipper of tipperUsernames) {
+      //   dcText += '@' + tipper.username + ' - tip: ' + tipper.tip + ' \n'
+      // }
+      // dcText += '\n'
+      // for (const impact of impactUsernames) {
+      //   dcText += '@' + impact.username + ' - points: ' + impact.points + ' \n'
+      // }
       dcText += '\n'
       for (const quality of qualityUsernames) {
         dcText += '@' + quality.username + ' - quality: ' + quality.points + ' \n'
@@ -217,48 +215,45 @@ export default async function handler(req, res) {
       dcText += 'New opt outs: ' + newOptOutCount + ' \n'
       dcText += 'Users tipping: ' + uniqueTipperCount.length + ' \n'
       dcText += 'Total $degen: ' + totalDegenAmount[0].totalAmount + ' \n'
+
+
       // dcText += 'Circle data: ' + circlesData + '\n'
       console.log('dcText', dcText)
-      async function sendDc() {
-        const response = await fetch(
-          "https://api.warpcast.com/v2/ext-send-direct-cast",
-          {
-            method: "PUT",
-            headers: {
-              Authorization: `Bearer ${wcApiKey}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              recipientFid: 9326,
-              message: dcText,
-              idempotencyKey: Math.random().toString(36).substring(7),
-            }),
-          },
-        );
-        return response
-        // const response2 = await fetch(
-        //   "https://api.warpcast.com/v2/ext-send-direct-cast",
-        //   {
-        //     method: "PUT",
-        //     headers: {
-        //       Authorization: `Bearer ${wcApiKey}`,
-        //       "Content-Type": "application/json",
-        //     },
-        //     body: JSON.stringify({
-        //       recipientFid: 195117,
-        //       message: dcText,
-        //       idempotencyKey: Math.random().toString(36).substring(7),
-        //     }),
-        //   },
-        // );
-      }
-      
-      await sendDc();
 
-      console.log('nominations, tips', tipperUsernames, impactUsernames, uniqueCuratorsCount, newUserCount, uniqueQualityCuratorsCount, newOptOutCount, uniqueTipperCount, totalDegenAmount, qualityUsernames)
+
+
+
+      async function sendDc(text, fid) {
+        try {
+          const requestBody = {
+            "recipientFid": fid,
+            "message": text,
+          };
+          const headers = {
+            Authorization: `Bearer ${wcApiKey}`,
+            "Content-Type": "application/json",
+            "idempotency-key": uuid()
+          };
+          const sentDC = await fetch('https://api.warpcast.com/fc/message', {
+            method: 'PUT',
+            headers: headers,
+            body: JSON.stringify(requestBody),
+          })
+          console.log('sentDC', sentDC)
+          return sentDC
+        } catch (error) {
+          console.error('Error handling request:', error);
+          return null;
+        }
+      }
+
+      const dcData = await sendDc(dcText, 9326);
+      // await sendDc(dcText, Number(userFid));
+
+      console.log('nominations, tips', impactUsernames, uniqueCuratorsCount, newUserCount, uniqueQualityCuratorsCount, newOptOutCount, uniqueTipperCount, totalDegenAmount, qualityUsernames)
       console.log('combinedUsernames', combinedUsernames)
 
-      res.status(200).json({ message: 'nominations, tips', combinedUsernames, circlesData, combinedUsernames, qualityUsernames, userdata: dcText });
+      res.status(200).json({ message: 'nominations, tips', combinedUsernames, circlesData, combinedUsernames, qualityUsernames, userdata: dcText, dcData });
     } catch (error) {
       console.error('Error handling GET request:', error);
       res.status(500).json({ error: 'Internal Server Error' });

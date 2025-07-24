@@ -7,9 +7,9 @@ import { MdCastConnected, MdNotifications, MdFavorite, MdFilterFrames, MdMail, M
 import { RiTeamFill, RiFileSearchFill } from 'react-icons/ri'
 import { TiFlag } from "react-icons/ti";
 import { HiBadgeCheck, HiThumbDown, HiUserGroup, HiViewGridAdd } from 'react-icons/hi'
-import { IoReader, IoNotifications } from 'react-icons/io5'
+import { IoReader, IoNotifications, IoWalletOutline as Wallet } from 'react-icons/io5'
 import { SiSubstack } from 'react-icons/si'
-import { PiSquaresFourLight as Actions } from "react-icons/pi";
+import { PiSquaresFourLight as Actions, PiGlobe } from "react-icons/pi";
 
 const Buttons = () => {
     return <div className="button" />
@@ -22,6 +22,7 @@ const button = {
     'top-menu': ['main'],
     'side-menu': ['Impact', 'Ecosystem', 'Studio'],
     // 'side-menu': ['Impact', 'Search', 'Ecosystem', 'Reviews', 'Notifications', 'Studio', 'Funding', 'Challenge', 'Propose', 'Cast'],
+    // 'bottom-nav': ['Impact', 'Ecosystem', 'Cast Actions'],
     'bottom-nav': ['Impact', 'Ecosystem'],
     // 'bottom-nav': ['Impact', 'Search', 'Ecosystem', 'Reviews', 'Notifications'],
     'nav-menu': {
@@ -83,7 +84,7 @@ const button = {
         description: 'Install Cast Actions for client',
         account: false,
         working: true,
-        icon: Actions
+        icon: Wallet
     },
     'Ecosystem': {
         link: '/~/ecosystems/abundance',
@@ -91,7 +92,7 @@ const button = {
         description: 'Ecosystem',
         account: true,
         working: true,
-        icon: FaGlobe
+        icon: PiGlobe
     },
     'Reviews': {
         link: '/~/reviews',

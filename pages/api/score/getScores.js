@@ -1,5 +1,6 @@
 import connectToDatabase from '../../../libs/mongodb';
 import Score from '../../../models/Score';
+import User from '../../../models/User';
 import Raffle from '../../../models/Raffle';
 // import { decryptPassword } from '../../../utils/utils';
 const secretKey = process.env.SECRET_KEY
@@ -29,17 +30,20 @@ export default async function handler(req, res) {
         let contributorScore = formatScore(score?.contributor_points_all || 0)
         let inviteScore = formatScore(0)
 
-        const totalUsers = await Score.countDocuments();
+        const totalUsers = await Score.countDocuments({});
+        const totalCreators = await Score.countDocuments({ impact_score_all: { $gt: 0 } });
+        const totalCurators = await Score.countDocuments({ curator_points_all: { $gt: 0 } });
+        const totalContributors = await Score.countDocuments({ contributor_points_all: { $gt: 0 } });        // const totalUsers = await Score.countDocuments({});
         const impactCount = await Score.countDocuments({ impact_score_all: { $gt: impactScore } }) + 1;
-        let impactRank = (1 - (impactCount / totalUsers)) * 100;
+        let impactRank = (1 - (impactCount / totalCreators)) * 100;
         impactRank = Math.floor(impactRank * 10) / 10;
 
         const curatorCount = await Score.countDocuments({ curator_points_all: { $gt: curatorScore } }) + 1;
-        let curatorRank = (1 - (curatorCount / totalUsers)) * 100;
+        let curatorRank = (1 - (curatorCount / totalCurators)) * 100;
         curatorRank = Math.floor(curatorRank * 10) / 10;
 
         const creatorCount = await Score.countDocuments({ creator_points_all: { $gt: creatorScore } }) + 1;
-        let creatorRank = (1 - (creatorCount / totalUsers)) * 100;
+        let creatorRank = (1 - (creatorCount / totalContributors)) * 100;
         creatorRank = Math.floor(creatorRank * 10) / 10;
 
         const contributorCount = await Score.countDocuments({ contributor_points_all: { $gt: contributorScore } }) + 1;

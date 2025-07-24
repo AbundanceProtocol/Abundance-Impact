@@ -2,10 +2,58 @@ import { createContext, useState, useEffect } from "react";
 import axios from "axios";
 import useStore from "./utils/store";
 import { useRouter } from 'next/router';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { createAppKit } from '@reown/appkit/react';
+import { cookieToInitialState, WagmiProvider } from 'wagmi';
+import { cookieStorage, createStorage, http } from '@wagmi/core'
+import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
+import { mainnet, arbitrum, base } from '@reown/appkit/networks'
+
+const queryClient = new QueryClient();
+const projectId = process.env.NEXT_PUBLIC_WAGMI_KEY
+
+if (!projectId) {
+  throw new Error('Project ID is not defined')
+}
+
+const networks = [mainnet, arbitrum, base]
+
+const wagmiAdapter = new WagmiAdapter({
+  storage: createStorage({
+    storage: cookieStorage
+  }),
+  ssr: true,
+  projectId,
+  networks,
+})
+
+const config = wagmiAdapter.wagmiConfig
+
+const appKit = createAppKit({
+  adapters: [wagmiAdapter],
+  projectId,
+  networks,
+  defaultNetwork: base,
+  metadata: {
+    name: 'My App',
+    description: 'My app description',
+    url: 'https://myapp.com',
+    icons: ['https://myapp.com/favicon.ico'],
+  },
+  enableEIP6963: true,
+  enableCoinbase: true,
+  features: {
+    analytics: true,
+    email: false,
+    socials: []
+  }
+});
+
+
 
 export const AccountContext = createContext(null)
 
-export const AccountProvider = ({ children, initialAccount, ref1 }) => {
+export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => {
   const store = useStore()
   const [showActions, setShowActions] = useState(false)
   const [showLogin, setShowLogin] = useState(false)
@@ -325,14 +373,17 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
             impact: userData.remaining_i_allowance,
             qdau: userData.remaining_q_allowance
           }))
+          console.log('userBalance', userData.remaining_i_allowance)
 
         } else {
           setUserBalances(prev => ({ ...prev, impact: 0, qdau: 0 }))
+          console.log('userBalance 0')
         }
       } catch (error) {
         console.error('Error, checkEcoEligibility failed:', error)
         setEligibility(initialEligibility)
         setUserBalances(prev => ({ ...prev, impact: 0, qdau: 0 }))
+        console.log('userBalance 1')
       }
     }
   }
@@ -357,6 +408,8 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
     store.setEcosystemData(system)
     setEcoData(system);
   };
+
+  const initialState = cookieToInitialState(wagmiAdapter.wagmiConfig, cookies);
 
   const contextValue = {
     ...initialAccount,
@@ -391,7 +444,11 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
 
   return (
     <AccountContext.Provider value={contextValue}>
-      {children}
+      <WagmiProvider {...{config: wagmiAdapter.wagmiConfig, initialState}}>
+        <QueryClientProvider client={queryClient}>
+          {children}
+        </QueryClientProvider>
+      </WagmiProvider>
     </AccountContext.Provider>
   );
 };
