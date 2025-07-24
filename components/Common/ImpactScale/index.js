@@ -75,6 +75,8 @@ const ImpactScale = ({ initValue, setTipPercent, setInitValue, type, cast, updat
           ...prev,
           impact: impactBalance
         }))
+        console.log('userBalance', impactBalance)
+
         nomSuccess()
       } else {
         console.log('fail')

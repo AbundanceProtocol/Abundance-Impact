@@ -12,6 +12,7 @@ import Head from 'next/head';
 import { AccountContext } from '../../context';
 import useMatchBreakpoints from '../../hooks/useMatchBreakpoints';
 import UserMenu from './UserMenu';
+import SwipeablePanel from '../Common/SwipeablePanel';
 
 const version = process.env.NEXT_PUBLIC_VERSION
 
@@ -114,6 +115,7 @@ const Layout = ({ children }) => {
       {/* {version == '2.0' ? (<BottomBar />) : (<BottomMenu />)} */}
       <LoginModal />
       <LogoutModal />
+      {version == '2.0' && (<SwipeablePanel />)}
     </div>
   );
 };

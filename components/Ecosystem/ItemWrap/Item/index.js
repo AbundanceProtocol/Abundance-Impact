@@ -9,7 +9,7 @@ const Item = ({text, description, icon: Icon, noIcon}) => {
     <div className='flex-row' style={{width: 'auto', padding: '1px 5px', margin: isMobile ? '5px 10px 0px 10px' : '5px 10px 5px 10px', alignItems: 'flex-start', justifyContent: 'flex-start', flexGrow: 1}}>
 
       {Icon && (<div>
-        <Icon style={{width: isMobile ? '20px' : '40px', height: isMobile ? '20px' : '40px', backgroundColor: '', padding: '0', margin: isMobile ? '0 8px 0 0' : '8px 15px 0 0 '}} />
+        <Icon style={{width: isMobile ? '20px' : '40px', height: isMobile ? '20px' : '40px', backgroundColor: '', padding: '0', margin: isMobile ? '6px 10px 0 -2px' : '8px 15px 0 0 '}} />
       </div>)}
       {noIcon && (<div>
         <div style={{width: isMobile ? '20px' : '40px', height: '2px', backgroundColor: '', padding: '0', margin: isMobile ? '0 8px 0 0' : '8px 15px 0 0 '}} /></div>)}
