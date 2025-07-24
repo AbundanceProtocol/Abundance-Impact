@@ -1,4 +1,5 @@
 import React, { useRef, useContext, useEffect } from 'react';
+import Link from 'next/link';
 import { button } from '../../../pages/assets/button';
 import BottomNav from '../BottomMenu/BottomNav';
 import useMatchBreakpoints from '../../../hooks/useMatchBreakpoints';
@@ -54,12 +55,12 @@ const UserMenu = () => {
 
 
 
-        {userInfo?.pfp ? (<img loading="lazy" src={userInfo?.pfp} className="" alt={`${userInfo?.display} avatar`} style={{width: '36px', height: '36px', maxWidth: '36px', maxHeight: '36px', borderRadius: '24px', border: '1px solid #cdd'}} />) : (<Logo
+        {userInfo?.pfp ? (<Link href={'/'}><img loading="lazy" src={userInfo?.pfp} className="" alt={`${userInfo?.display} avatar`} style={{width: '36px', height: '36px', maxWidth: '36px', maxHeight: '36px', borderRadius: '24px', border: '1px solid #cdd'}} /></Link>) : (<Link href={'/'}><Logo
           className="rotate"
           height="36px"
           width="36px"
           style={{ fill: "#9ce" }}
-        />)}
+        /></Link>)}
 
 
         {userInfo?.pfp && (<div className='flex-row' style={{gap: '0.5rem'}}>
@@ -67,11 +68,11 @@ const UserMenu = () => {
 
 
 
-            <div className={`impact-arrow`} style={{margin: '0 0 0 0' }}>
+            <div className={`impact-arrow`} style={{margin: '2px 0 0 0' }}>
               <FaStar size={22} className='' style={{fontSize: '25px', color: '#eee'}} />
             </div>
 
-            <div style={{textAlign: 'center', fontSize: '16px', fontWeight: '600', color: '#eee', margin: `2px 8px 2px 2px`, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+            <div style={{textAlign: 'center', fontSize: '16px', fontWeight: '600', color: '#eee', margin: `2px 8px 0px 2px`, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
               <div>{userBalances?.impact || '0'}</div>
             </div>
 
@@ -80,20 +81,20 @@ const UserMenu = () => {
             </div> */}
           </div>
 
-          {version == '2.0' && (<div className={'flex-row items-center'} style={{border: '1px solid #999', padding: '3px 3px 3px 3px', borderRadius: '10px', backgroundColor: '#002244cc'}}>
+          {version == '2.0' && (<div className={'flex-row items-center'} style={{border: '1px solid #999', padding: '5px 3px 0px 3px', borderRadius: '10px', backgroundColor: '#002244cc'}}>
             <div className={`impact-arrow`} style={{margin: '0 0 0 0' }}>
               <BsCurrencyExchange size={22} className='' style={{fontSize: '25px', color: '#eee'}} />
             </div>
           </div>)}
 
 
-          {version == '2.0' && (<div className={'flex-row items-center'} style={{border: '1px solid #999', padding: '3px 3px 3px 3px', borderRadius: '10px', backgroundColor: '#002244cc'}}>
+          {version == '2.0' && (<div className={'flex-row items-center'} style={{border: '1px solid #999', padding: '5px 3px 0px 3px', borderRadius: '10px', backgroundColor: '#002244cc'}}>
             <div className={`impact-arrow`} style={{margin: '0 0 0 0' }}>
               <BsTrophy size={22} className='' style={{fontSize: '25px', color: '#eee'}} />
             </div>
           </div>)}
 
-          {version == '2.0' && (<div className={'flex-row items-center'} style={{border: '1px solid #999', padding: '3px 3px 3px 3px', borderRadius: '10px', backgroundColor: '#002244cc'}}>
+          {version == '2.0' && (<div className={'flex-row items-center'} style={{border: '1px solid #999', padding: '5px 3px 0px 3px', borderRadius: '10px', backgroundColor: '#002244cc'}}>
             <div className={`impact-arrow`} style={{margin: '0 0 0 0' }}>
               <BsGear size={22} className='' style={{fontSize: '25px', color: '#eee'}} />
             </div>

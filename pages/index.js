@@ -9,15 +9,15 @@ import Description from '../components/Ecosystem/Description';
 import ItemWrap from '../components/Ecosystem/ItemWrap';
 import useMatchBreakpoints from '../hooks/useMatchBreakpoints';
 import { FaPowerOff, FaLock, FaUsers, FaUser, FaGlobe, FaPlus, FaRegStar, FaCoins, FaAngleDown, FaShareAlt as Share, FaStar } from "react-icons/fa";
-import { HiOutlineAdjustmentsHorizontal as Adjust } from "react-icons/hi2";
-import { GrSchedulePlay as Sched } from "react-icons/gr";
-import { AiFillSafetyCertificate as Aligned } from "react-icons/ai";
+// import { HiOutlineAdjustmentsHorizontal as Adjust } from "react-icons/hi2";
+// import { GrSchedulePlay as Sched } from "react-icons/gr";
+// import { AiFillSafetyCertificate as Aligned } from "react-icons/ai";
 import { GiRibbonMedal as Medal } from "react-icons/gi";
-import { MdAdminPanelSettings as Mod } from "react-icons/md";
-import { FaArrowTrendUp as Grow } from "react-icons/fa6";
-import { RiVerifiedBadgeFill as Quality } from "react-icons/ri";
+// import { MdAdminPanelSettings as Mod } from "react-icons/md";
+// import { FaArrowTrendUp as Grow } from "react-icons/fa6";
+// import { RiVerifiedBadgeFill as Quality } from "react-icons/ri";
 import LoginButton from '../components/Layout/Modals/FrontSignin';
-import EcosystemMenu from '../components/Layout/EcosystemNav/EcosystemMenu';
+// import EcosystemMenu from '../components/Layout/EcosystemNav/EcosystemMenu';
 import { IoMdTrophy } from "react-icons/io";
 import { IoInformationCircleOutline as Info, IoLogIn } from "react-icons/io5";
 import { PiSquaresFourLight as Actions, PiBankFill } from "react-icons/pi";
@@ -26,7 +26,7 @@ import useStore from '../utils/store';
 import ProfilePage from './~/studio';
 import axios from 'axios';
 import MiniAppAuthButton from '../components/MiniAppAuthButton';
-import { BsKey, BsLock, BsLockFill, BsXCircle, BsPerson, BsPersonFill, BsShieldCheck, BsShieldFillCheck, BsPiggyBank, BsPiggyBankFill, BsStar, BsStarFill, BsQuestionCircle } from "react-icons/bs";
+import { BsKey, BsLock, BsLockFill, BsXCircle, BsPerson, BsPersonFill, BsShieldCheck, BsShieldFillCheck, BsPiggyBank, BsPiggyBankFill, BsStar, BsStarFill, BsQuestionCircle, BsGift, BsGiftFill } from "react-icons/bs";
 
 import Spinner from '../components/Common/Spinner';
 import NeynarSigninButton from '../components/Layout/Modals/Signin';
@@ -36,7 +36,7 @@ const version = process.env.NEXT_PUBLIC_VERSION
 export default function Home() {
   const ref2 = useRef(null)
   const [ref, inView] = useInView()
-  const { LoginPopup, checkEcoEligibility, ecoData, points, setPoints, isLogged, showLogin, setShowLogin, setIsLogged, fid, setFid, getRemainingBalances, isMiniApp, userBalances, setIsMiniApp, LogoutPopup, userInfo, setUserInfo } = useContext(AccountContext)
+  const { LoginPopup, checkEcoEligibility, ecoData, points, setPoints, isLogged, showLogin, setShowLogin, setIsLogged, fid, setFid, getRemainingBalances, isMiniApp, userBalances, setIsMiniApp, LogoutPopup, userInfo, setUserInfo, setPanelOpen, setPanelTarget } = useContext(AccountContext)
   const [screenWidth, setScreenWidth] = useState(undefined)
   const [screenHeight, setScreenHeight] = useState(undefined)
   const [textMax, setTextMax] = useState('562px')
@@ -52,9 +52,6 @@ export default function Home() {
   const [isOn, setIsOn] = useState({boost: false, validate: false, autoFund: false, fund: 0, currencies: []});
   const [expand, setExpand] = useState({boost: false, validate: false, autoFund: false});
   const [loading, setLoading] = useState({boost: false, validate: false, autoFund: false})
-  const [panelOpen, setPanelOpen] = useState((version == '1.0' || userBalances.impact == 0) ? false : true);
-  const [panelTarget, setPanelTarget] = useState((version == '1.0' || userBalances.impact == 0) ? null : 'welcome');
-  const panelRef = useRef(null);
 
   const openSwipeable = (target) => {
     setPanelTarget(target);
@@ -66,10 +63,6 @@ export default function Home() {
     setPanelTarget(null);
   };
 
-
-  function toggleExpand(target) {
-    setExpand(prev => ({...prev, [target]: !expand[target] }))
-  }
 
   const createEcosystem = () => {
     router.push({
@@ -115,6 +108,35 @@ export default function Home() {
     })();
   }, []);
 
+  useEffect(() => {
+    console.log('version', version, userBalances.impact)
+    if (version == '2.0') {
+      if (userBalances.impact !== 0) {
+        console.log('off-1')
+        setPanelOpen(false)
+        setPanelTarget(null)
+      } else if (userBalances.impact == 0) {
+        console.log('on-1')
+        setPanelOpen(true)
+        setPanelTarget('welcome')
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    console.log('version', version, userBalances.impact)
+    if (version == '2.0') {
+      if (userBalances.impact !== 0) {
+        console.log('off-2')
+        setPanelOpen(false)
+        setPanelTarget(null)
+      } else if (userBalances.impact == 0) {
+        console.log('on-2')
+        setPanelOpen(true)
+        setPanelTarget('welcome')
+      }
+    }
+  }, [userBalances]);
 
   async function getUserInfo(fid) {
     try {
@@ -152,36 +174,6 @@ export default function Home() {
       setIsMiniApp(isApp)
     })();
   }, [isLogged]);
-
-
-  useEffect(() => {
-    const panel = panelRef.current;
-    if (!panel) return;
-
-    let startY = 0;
-    let currentY = 0;
-
-    const onTouchStart = (e) => {
-      startY = e.touches[0].clientY;
-    };
-
-    const onTouchMove = (e) => {
-      currentY = e.touches[0].clientY;
-      const diff = currentY - startY;
-      if (diff > 80) {
-        closeSwipeable();
-      }
-    };
-
-    panel.addEventListener('touchstart', onTouchStart);
-    panel.addEventListener('touchmove', onTouchMove);
-
-    return () => {
-      panel.removeEventListener('touchstart', onTouchStart);
-      panel.removeEventListener('touchmove', onTouchMove);
-    };
-  }, [panelOpen]);
-
 
   async function getUserSettings(fid) {
     try {
@@ -282,47 +274,18 @@ export default function Home() {
   }
 
 
-  // const openSwipeable = ({target}) => {
-  //   const [panelOpen, setPanelOpen] = useState(false);
-
-  //   const handleToggle = () => {
-  //     setPanelOpen(!panelOpen);
-  //   };
-
-  //   const handleSwipe = () => {
-  //     setPanelOpen(false);
-  //   };
-
-  //   return (
-  //     <div>
-  //       <div onClick={handleToggle}>
-  //         {target === 'autoFund' && 'Auto-Funding allows advanced features'}
-  //       </div>
-  //       {panelOpen && (
-  //         <div style={{ position: 'fixed', bottom: 0, width: '100%', height: '50%', backgroundColor: 'rgba(0, 0, 0, 0.5)', backdropFilter: 'blur(5px)' }} onClick={handleSwipe}>
-  //           Swipe down to close
-  //         </div>
-  //       )}
-  //     </div>
-  //   );
-  // }
-
-
   const ToggleSwitch = ({target}) => {
     const handleToggle = () => {
       console.log('isOn', isOn)
       if (isOn) {
         setFundingSchedule('off')
       } else {
-        // setIsOn(prev => ({...prev, [target]: !isOn[target] }))
         setFundingSchedule('on')
       }
 
       if (isLogged) {
         setIsOn(prev => ({...prev, [target]: !isOn[target] }))
       }
-
-      // setIsOn(!isOn);
     };
 
 
@@ -340,8 +303,6 @@ export default function Home() {
         >
           <span className='circle'></span>
         </div>
-        {/* <div style={{fontSize: '10px', color: isOn ? '#8ad' : '#68a', margin: '0px 0 0 6px'}}>{isOn ? 'On' : 'Off'}</div> */}
-
       </div>
     );
   }
@@ -371,7 +332,7 @@ export default function Home() {
     {(!isLogged || version == '2.0') && (
       <div id="log in"
       style={{
-        padding: isMobile ? (version == '1.0' ? "58px 0 20px 0" : "38px 0 20px 0") : "58px 0 60px 0",
+        padding: isMobile ? (version == '1.0' ? "58px 0 20px 0" : "48px 0 20px 0") : "58px 0 60px 0",
         width: feedMax, fontSize: '0px'
       }} >&nnsp;
 
@@ -545,17 +506,8 @@ export default function Home() {
                     </p>
                   </div>
                 </div>
-
-
               </div>
-
             </div>
-
-
-
-
-
-
           </div>)}
 
 
@@ -625,8 +577,7 @@ export default function Home() {
                   justifyContent: "center",
                   textAlign: "center",
                   margin: '0 0 100px 0'
-                }}
-              >
+                }} >
                 /impact needs your permission to create tipping casts on your behalf
               </div>
             </>
@@ -642,11 +593,8 @@ export default function Home() {
           style={{
             padding: isMobile ? "28px 0 20px 0" : "28px 0 20px 0",
             width: "40%",
-          }}
-        ></div>)}
-
-
-
+          }} >
+        </div>)}
 
 
         {!isLogged && version == '1.0' && (<div
@@ -655,8 +603,7 @@ export default function Home() {
             backgroundColor: "#11448888",
             borderRadius: "15px",
             border: "1px solid #11447799",
-          }}
-        >
+          }} >
           <div
             className="flex-row"
             style={{
@@ -664,9 +611,7 @@ export default function Home() {
               justifyContent: "center",
               alignItems: "center",
               padding: "16px 0 0 0",
-            }}
-          >
-            {/* <FaGlobe style={{ fill: "#cde" }} size={24} /> */}
+            }} >
             <Description
               {...{
                 show: true,
@@ -706,9 +651,6 @@ export default function Home() {
           </div>
 
 
-          
-
-
           <div
             className="flex-row"
             style={{
@@ -717,14 +659,8 @@ export default function Home() {
               flexWrap: "wrap",
               alignItems: "center",
               justifyContent: "center",
-            }}
-          >
-
-
-
-
+            }} >
           </div>
-
         </div>)}
 
 
@@ -735,8 +671,8 @@ export default function Home() {
           style={{
             padding: isMobile ? "128px 0 20px 0" : "128px 0 20px 0",
             width: "40%",
-          }}
-        ></div>)}
+          }} >
+          </div>)}
 
 
 
@@ -747,8 +683,7 @@ export default function Home() {
             backgroundColor: "#11448888",
             borderRadius: "15px",
             border: "1px solid #11447799",
-          }}
-        >
+          }} >
           <div
             className="flex-row"
             style={{
@@ -756,9 +691,7 @@ export default function Home() {
               justifyContent: "center",
               alignItems: "center",
               padding: "16px 0 0 0",
-            }}
-          >
-            {/* <FaGlobe style={{ fill: "#cde" }} size={24} /> */}
+            }} >
             <Description
               {...{
                 show: true,
@@ -778,8 +711,7 @@ export default function Home() {
               flexWrap: "wrap",
               alignItems: "center",
               justifyContent: "center",
-            }}
-          >
+            }} >
 
 
             <ItemWrap>
@@ -911,13 +843,11 @@ export default function Home() {
 
             <div className='shadow flex-col'
               style={{
-                // padding: "8px",
                 backgroundColor: "#002244",
                 borderRadius: "15px",
                 border: "1px solid #11447799",
                 width: isMiniApp || isMobile ? '340px' : '100%',
                 margin: isMiniApp || isMobile ? '0px auto' : '', 
-                // overflow: 'hidden'
               }}
             >
               <div
@@ -930,9 +860,7 @@ export default function Home() {
                   padding: "8px", 
                   borderRadius: "15px",
                   margin: '0 0 10px 0'
-
-                }}
-              >
+                }} >
 
 
                 <div
@@ -946,11 +874,8 @@ export default function Home() {
                   }} >
 
                 
-                  <BsPersonFill style={{ fill: "#cde" }} size={20}
-                    onClick={() => {
-                    toggleExpand("autoFund");
-                  }} />
-                  <div onClick={() => { toggleExpand("autoFund"); }}>
+                  <BsPersonFill style={{ fill: "#cde" }} size={20} />
+                  <div>
 
 
                     <div style={{border: '0px solid #777', padding: '2px', borderRadius: '10px', backgroundColor: '', maxWidth: 'fit-content', cursor: 'pointer', color: '#cde'}}>
@@ -962,8 +887,6 @@ export default function Home() {
                         </div>
                       </div>
                     </div>
-
-
                   </div>
 
 
@@ -973,14 +896,9 @@ export default function Home() {
                       justifyContent: "space-between",
                       alignItems: "center",
                       cursor: "pointer",
-                    }}
-                    onClick={() => {
-                      toggleExpand("autoFund"); }}>
-
+                    }} >
 
                   </div>
-
-
                 </div>
 
 
@@ -1015,14 +933,9 @@ export default function Home() {
                 <div>
                   You need to login to enable Boosting, Auto-funding or Quests
                 </div>
-
-
               </div>
             </div>
-
-
           </div>
-        
           )}
 
 
@@ -1034,13 +947,11 @@ export default function Home() {
 
             <div className='shadow flex-col'
               style={{
-                // padding: "8px",
                 backgroundColor: isLogged ? "#002244" : '#333',
                 borderRadius: "15px",
                 border: isLogged ? "1px solid #11447799" : "1px solid #555",
                 width: isMiniApp || isMobile ? '340px' : '100%',
                 margin: isMiniApp || isMobile ? '40px auto 0 auto' : '40px auto 0 auto',
-                // overflow: 'hidden'
               }} >
               <div
                 className="shadow flex-row"
@@ -1066,11 +977,8 @@ export default function Home() {
                   }} >
 
                 
-                  <BsStarFill style={{ fill: "#cde" }} size={20}
-                    onClick={() => {
-                    toggleExpand("autoFund");
-                  }} />
-                  <div onClick={() => { toggleExpand("autoFund"); }}>
+                  <BsStarFill style={{ fill: "#cde" }} size={20} />
+                  <div>
 
 
                     <div style={{border: '0px solid #777', padding: '2px', borderRadius: '10px', backgroundColor: '', maxWidth: 'fit-content', cursor: 'pointer', color: '#cde'}}>
@@ -1093,10 +1001,7 @@ export default function Home() {
                       justifyContent: "space-between",
                       alignItems: "center",
                       cursor: "pointer",
-                    }}
-                    onClick={() => {
-                      toggleExpand("autoFund"); }}>
-                      {/* <Item {...{ text: "How it works" }} /> */}
+                    }} >
 
                   </div>
 
@@ -1117,15 +1022,10 @@ export default function Home() {
                   <BsQuestionCircle size={15} onClick={() => {
                       openSwipeable("boost"); }} />
                 </div>
-
               </div>
             </div>
-
-
-            </div>
-
-            )}
-
+          </div>
+          )}
 
 
           {/* VALIDATE */}
@@ -1135,13 +1035,91 @@ export default function Home() {
             <div 
               className='shadow flex-col'
               style={{
-                // padding: "8px",
                 backgroundColor: isLogged ? "#002244" : '#333',
                 borderRadius: "15px",
                 border: isLogged ? "1px solid #11447799" : "1px solid #555",
                 width: isMiniApp || isMobile ? '340px' : '100%',
                 margin: isMiniApp || isMobile ? '15px auto 0 auto' : '15px auto 0 auto',
-                // overflow: 'hidden'
+              }} >
+              <div
+                className="shadow flex-row"
+                style={{
+                  backgroundColor: isLogged ? "#11448888" : "#444",
+                  width: "100%",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "8px", 
+                  borderRadius: "15px",
+                  margin: '0 0 10px 0'
+                }} >
+
+
+                <div
+                  className="flex-row"
+                  style={{
+                    width: "100%",
+                    justifyContent: "flex-start",
+                    alignItems: "center",
+                    padding: "0px 0 0 4px",
+                    margin: '0 0 0px 0'
+                  }} >
+                
+                  <BsShieldFillCheck style={{ fill: "#cde" }} size={20} />
+                  <div>
+
+                    <div style={{border: '0px solid #777', padding: '2px', borderRadius: '10px', backgroundColor: '', maxWidth: 'fit-content', cursor: 'pointer', color: '#cde'}}>
+                      <div className="top-layer flex-row">
+                        <div className="flex-row" style={{padding: "4px 0 4px 10px", marginBottom: '0px', flexWrap: 'wrap', justifyContent: 'flex-start', gap: '0.00rem', width: '', alignItems: 'center'}}>
+                          <div style={{fontSize: isMobile ? '18px' : '22px', fontWeight: '600', color: '', padding: '0px 3px'}}>
+                            Validate
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+
+                  <div
+                    className="flex-row"
+                    style={{
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      cursor: "pointer",
+                    }} >
+
+                  </div>
+                </div>
+
+                <ToggleSwitch target={'validate'} />
+
+              </div>
+
+              <div className='flex-col' style={{backgroundColor: isLogged ? "#002244ff" : '#333', padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: isLogged ? '#ace' : '#ddd', fontSize: '12px', gap: '0.75rem', position: 'relative'}}>
+                <div>
+                  Ensure the quality of nominations - earn rewards
+                </div>
+                <div className='flex-row' style={{position: 'absolute', bottom: '0', right: '0', padding: '5px 5px', gap: '.25rem', alignItems: 'center'}}>
+                  <BsQuestionCircle size={15} onClick={() => {
+                      openSwipeable("validate"); }} />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          )}
+
+
+          {/* AUTO-FUND */}
+
+          {version == '2.0' && (<div className='flex-col' style={{backgroundColor: ''}}>
+
+            <div className='shadow flex-col'
+              style={{
+                backgroundColor: isLogged ? "#002244" : '#333',
+                borderRadius: "15px",
+                border: isLogged ? "1px solid #11447799" : "1px solid #555",
+                width: isMiniApp || isMobile ? '340px' : '100%',
+                margin: isMiniApp || isMobile ? '15px auto 0 auto' : '15px auto 0 auto',
               }} >
               <div
                 className="shadow flex-row"
@@ -1169,117 +1147,9 @@ export default function Home() {
                   }} >
 
 
-
                 
-                  <BsShieldFillCheck style={{ fill: "#cde" }} size={20}
-                    onClick={() => {
-                      toggleExpand("autoFund");
-                    }} />
-                  <div onClick={() => { toggleExpand("autoFund"); }}>
-
-                    <div style={{border: '0px solid #777', padding: '2px', borderRadius: '10px', backgroundColor: '', maxWidth: 'fit-content', cursor: 'pointer', color: '#cde'}}>
-                      <div className="top-layer flex-row">
-                        <div className="flex-row" style={{padding: "4px 0 4px 10px", marginBottom: '0px', flexWrap: 'wrap', justifyContent: 'flex-start', gap: '0.00rem', width: '', alignItems: 'center'}}>
-                          <div style={{fontSize: isMobile ? '18px' : '22px', fontWeight: '600', color: '', padding: '0px 3px'}}>
-                            Validate
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-
-                  <div
-                    className="flex-row"
-                    style={{
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      cursor: "pointer",
-                    }}
-                    onClick={() => {
-                      toggleExpand("autoFund"); }}>
-
-
-                  </div>
-
-
-                </div>
-
-                <ToggleSwitch target={'validate'} />
-
-
-
-
-              </div>
-
-              <div className='flex-col' style={{backgroundColor: isLogged ? "#002244ff" : '#333', padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: isLogged ? '#ace' : '#ddd', fontSize: '12px', gap: '0.75rem', position: 'relative'}}>
-                <div>
-                  Ensure the quality of nominations - earn rewards
-                </div>
-                {/* <div>
-                  Validators earn rewards for quality validation
-                </div> */}
-                <div className='flex-row' style={{position: 'absolute', bottom: '0', right: '0', padding: '5px 5px', gap: '.25rem', alignItems: 'center'}}>
-                  <BsQuestionCircle size={15} onClick={() => {
-                      openSwipeable("validate"); }} />
-                </div>
-              </div>
-            </div>
-
-
-            </div>
-
-            )}
-
-
-          {/* AUTO-FUND */}
-
-          {version == '2.0' && (<div className='flex-col' style={{backgroundColor: ''}}>
-
-            <div className='shadow flex-col'
-              style={{
-                // padding: "8px",
-                backgroundColor: isLogged ? "#002244" : '#333',
-                borderRadius: "15px",
-                border: isLogged ? "1px solid #11447799" : "1px solid #555",
-                width: isMiniApp || isMobile ? '340px' : '100%',
-                margin: isMiniApp || isMobile ? '15px auto 0 auto' : '15px auto 0 auto',
-                // overflow: 'hidden'
-              }}
-            >
-              <div
-                className="shadow flex-row"
-                style={{
-                  backgroundColor: isLogged ? "#11448888" : "#444",
-                  width: "100%",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  padding: "8px", 
-                  borderRadius: "15px",
-                  margin: '0 0 10px 0'
-
-                }}
-              >
-
-
-                <div
-                  className="flex-row"
-                  style={{
-                    width: "100%",
-                    justifyContent: "flex-start",
-                    alignItems: "center",
-                    padding: "0px 0 0 4px",
-                    margin: '0 0 0px 0'
-                  }} >
-
-
-
-                
-                  <BsPiggyBankFill style={{ fill: "#cde" }} size={20}
-                    onClick={() => {
-                    toggleExpand("autoFund");
-                  }} />
-                  <div onClick={() => { toggleExpand("autoFund"); }}>
+                  <BsPiggyBankFill style={{ fill: "#cde" }} size={20} />
+                  <div>
 
 
                     <div style={{border: '0px solid #777', padding: '2px', borderRadius: '10px', backgroundColor: '', maxWidth: 'fit-content', cursor: 'pointer', color: '#cde'}}>
@@ -1302,9 +1172,7 @@ export default function Home() {
                       justifyContent: "space-between",
                       alignItems: "center",
                       cursor: "pointer",
-                    }}
-                    onClick={() => {
-                      toggleExpand("autoFund"); }}>
+                    }} >
 
 
                   </div>
@@ -1319,9 +1187,6 @@ export default function Home() {
               </div>
 
 
-
-
-
               <div className='flex-col' style={{backgroundColor: isLogged ? "#002244ff" : '#333', padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: isLogged ? '#ace' : '#ddd', fontSize: '12px', gap: '0.75rem', position: 'relative'}}>
                 <div>
                   Support creators with your remaining $degen and $tipn allowances - earn rewards
@@ -1329,207 +1194,14 @@ export default function Home() {
 
                 <div className='flex-row' style={{position: 'absolute', bottom: '0', right: '0', padding: '5px 5px', gap: '.25rem', alignItems: 'center'}}>
                   <BsQuestionCircle size={15} onClick={() => {
-                      openSwipeable("autoFund"); }} />
+                    openSwipeable("autoFund"); }} />
                 </div>
               </div>
             </div>
-
-
-            </div>
-
-            )}
-
-
-
-        </div>
-
-        {panelOpen && (
-          <div
-            onClick={closeSwipeable}
-            style={{
-              position: 'fixed',
-              inset: 0,
-              backgroundColor: 'rgba(0, 0, 0, 0.4)',
-              backdropFilter: 'blur(4px)',
-              transition: 'opacity 0.3s',
-              zIndex: 999,
-            }} />
-          )}
-
-          {/* Swipeable Panel */}
-          <div
-            ref={panelRef}
-            style={{
-              position: 'fixed',
-              bottom: panelOpen ? 0 : (panelTarget !== 'welcome') ? '-60%' : '-95%',
-              left: '0.5%',
-              width: '99%',
-              height: (panelTarget !== 'welcome') ? '58%' : '90%',
-              backgroundColor: '#55779999',
-              backdropFilter: 'blur(12px)',
-              borderRadius: '15px 15px 0 0',
-              border: '1px solid #468',
-              borderBottom: '0',
-              padding: '13px 20px 20px 20px',
-              margin: '0 0px',
-              zIndex: 1000,
-              transition: 'bottom 0.3s ease-in-out',
-            }}
-          >
-            <div style={{
-              fontSize: '0px',
-              height: '4px',
-              width: '60px',
-              backgroundColor: '#cde',
-              borderRadius: '3px',
-              margin: '0 auto 10px auto'
-            }}>&nbsp;</div>
-
-
-            {version == '2.0' && (<div className='flex-col' style={{backgroundColor: ''}}>
-
-            <div className='shadow flex-col'
-              style={{
-                // padding: "8px",
-                backgroundColor: isLogged ? "#002244" : '#333',
-                borderRadius: "15px",
-                border: isLogged ? "1px solid #11447799" : "1px solid #555",
-                width: isMiniApp || isMobile ? '340px' : '100%',
-                margin: isMiniApp || isMobile ? '15px auto 0 auto' : '15px auto 0 auto',
-                // overflow: 'hidden'
-              }}
-            >
-              <div
-                className="shadow flex-row"
-                style={{
-                  backgroundColor: isLogged ? "#11448888" : "#444",
-                  width: "100%",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  padding: "8px", 
-                  borderRadius: "15px",
-                  margin: '0 0 10px 0'
-                }} >
-
-
-                <div
-                  className="flex-row"
-                  style={{
-                    width: "100%",
-                    justifyContent: "flex-start",
-                    alignItems: "center",
-                    padding: "0px 0 0 4px",
-                    margin: '0 0 0px 0'
-                  }} >
-
-                  {(panelTarget == 'autoFund') ? (<BsPiggyBankFill style={{ fill: "#cde" }} size={20} />) : (panelTarget == 'validate') ? (<BsShieldFillCheck style={{ fill: "#cde" }} size={20} />) : (panelTarget == 'boost') ? (<BsStarFill style={{ fill: "#cde" }} size={20} />) : (<div></div>)}
-
-                  {/* <BsPiggyBankFill style={{ fill: "#cde" }} size={20} /> */}
-
-                  <div>
-                    <div style={{border: '0px solid #777', padding: '2px', borderRadius: '10px', backgroundColor: '', maxWidth: 'fit-content', cursor: 'pointer', color: '#cde'}}>
-                      <div className="top-layer flex-row">
-                        <div className="flex-row" style={{padding: "4px 0 4px 10px", marginBottom: '0px', flexWrap: 'wrap', justifyContent: 'flex-start', gap: '0.00rem', width: '', alignItems: 'center'}}>
-                          <div style={{fontSize: isMobile ? '18px' : '22px', fontWeight: '600', color: '', padding: '0px 3px'}}>
-                            {(panelTarget == 'autoFund') ? 'Auto-fund' : (panelTarget == 'validate') ? 'Validate' : (panelTarget == 'boost') ? 'Boost & Nominate' : ''}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-
-                  <div
-                    className="flex-row"
-                    style={{
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      cursor: "pointer",
-                    }} >
-                  </div>
-                </div>
-              </div>
-
-
-
-
-
-              {(panelTarget == 'autoFund') ? (<div className='flex-col' style={{backgroundColor: isLogged ? "#002244ff" : '#333', padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: isLogged ? '#ace' : '#ddd', fontSize: '14px', gap: '1.25rem', position: 'relative', fontWeight: '400'}}>
-                <div>
-                  Auto-funding lets you automatically send your remaining $degen or $tipn allowances to the Impact Fund
-                </div>
-                <div>
-                  @impactfund then distributes the funds to casters in proportion to their impact on Farcaster (per total validated points)
-                </div>
-                <div className='flex-col'>
-                  <div>
-                    Funders can choose what percent of funds goes to the Creator, Dev and Growth Funds (respectively):
-                  </div>
-                  <li>
-                    Standard (100/0/0)
-                  </li>
-                  <li>
-                    Optimized (80/10/10)
-                  </li>
-                  <li>
-                    Accelerated (60/20/20) 
-                  </li>
-                </div>
-              </div>) : (panelTarget == 'validate') ? (
-                <div className='flex-col' style={{backgroundColor: isLogged ? "#002244ff" : '#333', padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: isLogged ? '#ace' : '#ddd', fontSize: '14px', gap: '1.25rem', position: 'relative', fontWeight: '400'}}>
-                <div>
-                  Every nominated cast must be validated before it can be boosted and earn rewards
-                </div>
-                <div>
-                  Impact 2.0 uses Randomized Voter Sampling to validate casts:
-                </div>
-                <div>
-                  Each nominated cast is reviewed by a randomized group of validators proportionate to its (proposed) impact
-                </div>
-                <div>
-                  If the cast is successfully validated the Proposer's Impact Score increases. If not, the Proposer's Impact Score falls, and nomination allowance decreases
-                </div>
-              </div>
-              ) : (panelTarget == 'boost') ? (
-                <div className='flex-col' style={{backgroundColor: isLogged ? "#002244ff" : '#333', padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: isLogged ? '#ace' : '#ddd', fontSize: '14px', gap: '1.25rem', position: 'relative', fontWeight: '400'}}>
-                  <div>
-                    Users start with a weekly allowance of 69 nomination points. They can use these to nominate casts based on how impactful they are to the Farcaster network
-                  </div>
-                  <div>
-                    If validators determine that a cast is fairly valued, it becomes eligible for rewards and is boosted with 'likes' from randomly selected Boosters
-                  </div>
-                  <div>
-                    Proposers and Boosters earn rewards based on their contribution to the network
-                  </div>
-                </div>
-              ) : (<div></div>)}
-            </div>
-
-
-            </div>
-
-            )}
-
-
-
-
-          {/* <div style={{ color: '#fff' }}>
-            {panelTarget === 'autoFund' && 'Auto-Funding allows advanced features'}
           </div>
-          <div style={{ padding: '20px', color: '#ccc' }}>
-            Swipe down to close
-          </div> */}
-
-
-
+          )}
         </div>
-
-
       </div>
-    
-    {/* )} */}
-
-
       {!isLogged && (<div ref={ref}>&nbsp;</div>)}
       {version == '2.0' || version == '1.0' && isLogged && <ProfilePage />}
     </div>

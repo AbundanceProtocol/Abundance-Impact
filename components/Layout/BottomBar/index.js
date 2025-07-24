@@ -13,7 +13,13 @@ const BottomBar = () => {
   const ref1 = useRef(null)
   const { isMobile } = useMatchBreakpoints();
   const router = useRouter()
-  const { isLogged } = useContext(AccountContext)
+  const { isLogged, setPanelTarget, setPanelOpen } = useContext(AccountContext)
+
+  const openSwipeable = (target) => {
+    setPanelTarget(target);
+    setPanelOpen(true);
+  };
+
 
   return (
     isMobile && !(version == '1.0' && !isLogged && router.route == '/') ? (
@@ -62,7 +68,7 @@ const BottomBar = () => {
               </div>
             </Link>
 
-            {version == '2.0' && (<div className='flex-col' style={{justifyContent: 'center', alignItems: 'center', height: '54px', width: '56px', padding: '5px 10px', borderRadius: '10px', border: '1px solid #567', backgroundColor: '#002244aa', backdropFilter: 'blur(12px)'}}>
+            {version == '2.0' && (<div className='flex-col' style={{justifyContent: 'center', alignItems: 'center', height: '54px', width: '56px', padding: '5px 10px', borderRadius: '10px', border: '1px solid #567', backgroundColor: '#002244aa', backdropFilter: 'blur(12px)'}} onClick={() => openSwipeable('welcome')}>
               <div className='flex-col' style={{justifyContent: 'center', alignItems: 'center', height: '40px'}}>
                 <BsQuestionCircle size={20} color={'#99ddff'} />
                 <div style={{fontSize: '12px', fontWeight: '400', padding: '0 0 0 0', color: '#99ddff', margin: '4px 0 0 0'}}>About</div>
