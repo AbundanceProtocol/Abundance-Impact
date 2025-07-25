@@ -68,7 +68,7 @@ const Layout = ({ children }) => {
         })
       }    
 
-      // sdk.actions.ready()
+      sdk.actions.ready()
 
       if (isValidUser && !(userBalances?.impact > 0) ) {
         const {impact, qdau} = await getUserBalance(userProfile?.user?.fid)
