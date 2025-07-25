@@ -1,13 +1,10 @@
 import React, { useRef, useContext, useEffect } from 'react';
 import Link from 'next/link';
-import { button } from '../../../pages/assets/button';
-import BottomNav from '../BottomMenu/BottomNav';
 import useMatchBreakpoints from '../../../hooks/useMatchBreakpoints';
 import { useRouter } from 'next/router';
 import { AccountContext } from '../../../context';
 import { FaStar } from 'react-icons/fa';
 import { Logo } from '../../../pages/assets';
-import { IoMdTrophy } from "react-icons/io";
 import { BsTrophy, BsGear, BsCurrencyExchange, BsChevronDoubleLeft } from "react-icons/bs";
 import axios from 'axios';
 
