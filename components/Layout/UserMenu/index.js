@@ -1,14 +1,11 @@
 import React, { useRef, useContext, useEffect } from 'react';
 import Link from 'next/link';
-import { button } from '../../../pages/assets/button';
-import BottomNav from '../BottomMenu/BottomNav';
 import useMatchBreakpoints from '../../../hooks/useMatchBreakpoints';
 import { useRouter } from 'next/router';
 import { AccountContext } from '../../../context';
 import { FaStar } from 'react-icons/fa';
 import { Logo } from '../../../pages/assets';
-import { IoMdTrophy } from "react-icons/io";
-import { BsTrophy, BsGear, BsCurrencyExchange } from "react-icons/bs";
+import { BsTrophy, BsGear, BsCurrencyExchange, BsChevronDoubleLeft } from "react-icons/bs";
 import axios from 'axios';
 
 const version = process.env.NEXT_PUBLIC_VERSION
@@ -17,14 +14,85 @@ const UserMenu = () => {
   const ref1 = useRef(null)
   const { isMobile } = useMatchBreakpoints();
   const router = useRouter()
-  const { userBalances, userInfo, setUserBalances, fid } = useContext(AccountContext)
+  const { userBalances, userInfo, setUserBalances, fid, isLogged, setIsMiniApp, setUserInfo } = useContext(AccountContext)
 
   useEffect(() => {
     if (fid && userBalances.impact == 0) {
       getUserBalance(fid)
-    }    
+    }
+    
+    if (fid && !userInfo.username) {
+      getUserInfo()
+    }
   }, [fid])
 
+  async function getUserInfo() {
+    try {
+      const { sdk } = await import('@farcaster/miniapp-sdk');
+  
+      const isMiniApp = await sdk.isInMiniApp()
+      console.log('isMiniApp', isMiniApp)
+      setIsMiniApp(isMiniApp)
+
+      const userProfile = await sdk.context
+
+      console.log(userProfile?.user?.fid)
+
+      const checkUserProfile = async (fid) => {
+        console.log('test4', fid)
+
+        try {
+          const res = await fetch(`/api/user/validateUser?fid=${fid}`);
+          const data = await res.json();
+          console.log('test5', data.valid)
+
+          return data.valid;
+        } catch (error) {
+          return null
+        }
+      };
+
+      const isValidUser = await checkUserProfile(fid || userProfile?.user?.fid);
+      console.log(`User is valid: ${isValidUser}`);
+      console.log(isValidUser)
+      if (isValidUser) {
+        // setIsLogged(true)
+        // setFid(Number(userProfile?.user?.fid))
+        if (isMiniApp && !userInfo.username) {
+          setUserInfo({
+            pfp: userProfile?.user?.pfp?.url || null,
+            username: userProfile?.user?.username || null,
+            display: userProfile?.user?.displayName || null,
+          })
+        } else if (!userInfo.username) {
+          getUserProfile(fid)
+        }
+      }  
+
+    } catch (error) {
+      console.error('Error fetching data:', error)
+    }
+  }
+
+  async function getUserProfile(fid) {
+    try {
+      const response = await axios.get('/api/user/getUserInfo', { params: { fid } } )
+      console.log('getuserInfo', response)
+      if (response?.data) {
+        let profile = response?.data
+        setUserInfo({
+          pfp: profile?.pfp || null,
+          username: profile?.username || null,
+          display: profile?.display || null,
+        })
+      } else {
+        return null
+      }
+    } catch (error) {
+      console.error('Error submitting data:', error)
+      return null
+    }
+  }
 
   async function getUserBalance(fid) {
     try {
@@ -64,9 +132,16 @@ const UserMenu = () => {
 
 
         {userInfo?.pfp && (<div className='flex-row' style={{gap: '0.5rem'}}>
+
+
+          {version == '2.0' && router.route !== '/' && (
+            <div className={'flex-row items-center'} style={{border: '1px solid #999', padding: '5px 3px 0px 3px', borderRadius: '10px', backgroundColor: '#002244cc'}} onClick={() => router.back()}>
+              <div className={`impact-arrow`} style={{margin: '0 0 0 0' }}>
+                <BsChevronDoubleLeft size={22} className='' style={{fontSize: '25px', color: '#eee'}} />
+              </div>
+            </div>)}
+
           <div className={'flex-row items-center'} style={{border: '1px solid #999', padding: '3px 3px 3px 3px', borderRadius: '10px', backgroundColor: '#002244cc'}}>
-
-
 
             <div className={`impact-arrow`} style={{margin: '2px 0 0 0' }}>
               <FaStar size={22} className='' style={{fontSize: '25px', color: '#eee'}} />

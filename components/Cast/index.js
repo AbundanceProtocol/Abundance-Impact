@@ -42,7 +42,8 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
 
   function isCurator(fid, cast) {
     if (!isMiniApp) {
-      return cast?.impact_points?.some(point => point.curator_fid == fid);
+      return Array.isArray(cast?.impact_points) &&
+       cast?.impact_points.some(point => point?.curator_fid == fid);
     }
   }
   

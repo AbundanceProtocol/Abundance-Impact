@@ -18,6 +18,7 @@ import { IoShuffleOutline as ShuffleIcon, IoBuild, IoCloseCircle, IoLogIn } from
 import { BiGift } from "react-icons/bi";
 import { FaStar, FaCoins } from "react-icons/fa6";
 import { IoIosRocket, IoMdTrophy, IoMdRefresh as Refresh} from "react-icons/io";
+import { BsPiggyBankFill, BsQuestionCircle } from 'react-icons/bs';
 import { confirmUser, timePassed } from '../../utils/utils';
 import Spinner from '../../components/Common/Spinner';
 import ExpandImg from '../../components/Cast/ExpandImg';
@@ -36,12 +37,14 @@ import qs from "querystring";
 // import ScoreDashboard from '../../components/Common/ScoreDashboard';
 import Modal from '../../components/Layout/Modals/Modal';
 
+const version = process.env.NEXT_PUBLIC_VERSION
+
 export default function Autofund() {
   const router = useRouter();
   const [ref, inView] = useInView()
   const { ecosystem, username, app, userFid, pass } = router.query
   const [user, setUser] = useState(null)
-  const { LoginPopup, isLogged, showLogin, setShowLogin, setPoints, setIsLogged, setFid, miniApp, setMiniApp, fid, ecoData, isMiniApp } = useContext(AccountContext)
+  const { LoginPopup, isLogged, showLogin, setShowLogin, setPoints, setIsLogged, setFid, miniApp, setMiniApp, fid, ecoData, isMiniApp, setIsMiniApp, userBalances, setUserBalances } = useContext(AccountContext)
   const ref1 = useRef(null)
   const [textMax, setTextMax] = useState('430px')
   const [screenWidth, setScreenWidth ] = useState(undefined)
@@ -280,23 +283,7 @@ export default function Autofund() {
       if (response?.data) {
         const userInvites = response?.data?.data || []
         setInvites(userInvites)
-        // const funds = distData?.funds || []
-        // let curatorDegen = 0
-        // let curatorHam = 0
-        // let fundDegen = 0
-        // let fundHam = 0
-        // for (const fund of funds) {
-        //   if (fund?.curators?.length == 0) {
-        //     fundDegen += fund?.degen_total
-        //     fundHam += fund?.ham_total
-        //   } else {
-        //     curatorDegen += fund?.degen_total
-        //     curatorHam += fund?.ham_total
-        //   }
-        // }
-        // setFunds({curatorDegen, curatorHam, fundDegen, fundHam})
-        
-        // setDistribution(distData)
+
       } else {
         setInvites([])
 
@@ -427,6 +414,68 @@ export default function Autofund() {
     }
 
   }, [fid]);
+
+
+
+
+
+  useEffect(() => {
+    if (userBalances.impact == 0) {
+      (async () => {
+        const { sdk } = await import('@farcaster/miniapp-sdk');
+    
+        const isMiniApp = await sdk.isInMiniApp()
+        setIsMiniApp(isMiniApp)
+        console.log('isMiniApp1', isMiniApp)
+  
+        const userProfile = await sdk.context
+  
+        console.log(userProfile?.user?.fid)
+  
+        const checkUserProfile = async (fid) => {
+          try {
+            const res = await fetch(`/api/user/validateUser?fid=${fid}`);
+            const data = await res.json();
+            return data.valid;
+          } catch (error) {
+            return null
+          }
+        };
+  
+        const isValidUser = await checkUserProfile(userProfile?.user?.fid);
+        console.log(`User is valid: ${isValidUser}`);
+        console.log(isValidUser)
+        if (isValidUser) {
+          setIsLogged(true)
+          setFid(Number(userProfile?.user?.fid))
+          setUserInfo({
+            pfp: userProfile?.user?.pfp?.url || null,
+            username: userProfile?.user?.username || null,
+            display: userProfile?.user?.displayName || null,
+          })
+        }    
+  
+        sdk.actions.ready()
+  
+        if (isValidUser && !(userBalances?.impact > 0) ) {
+          const {impact, qdau} = await getUserBalance(userProfile?.user?.fid)
+          console.log('userBalance', impact)
+          setUserBalances(prev => ({ ...prev, impact, qdau }))
+        }  
+  
+      })();
+    }
+  }, []);
+
+
+
+
+
+
+
+
+
+
 
 
   async function getCreatorRewards(fid) {
@@ -1193,45 +1242,49 @@ export default function Autofund() {
   }, [])
 
   async function setFundingSchedule(schedule, data) {
-    setFundLoading(true)
-    try {
-      console.log(fid, schedule)
-      const response = await axios.post('/api/fund/postSchedule', { fid, schedule, data });
-      if (response?.data) {
-        console.log('response', response?.data)
-        setUserFunding(response?.data?.updatedSchedule)
-        setCuratorList(response?.data?.curators)
-        if (response?.data?.updatedSchedule?.active_cron) {
-          setIsOn(true)
+    if (isLogged) {
+      setFundLoading(true)
+      try {
+        console.log(fid, schedule)
+        const response = await axios.post('/api/fund/postSchedule', { fid, schedule, data });
+        if (response?.data) {
+          console.log('response', response?.data)
+          setUserFunding(response?.data?.updatedSchedule)
+          setCuratorList(response?.data?.curators)
+          if (response?.data?.updatedSchedule?.active_cron) {
+            setIsOn(true)
+          } else {
+            setIsOn(false)
+          }
+          setModal({on: true, success: true, text: 'Auto-Fund updated successfully'});
+          setTimeout(() => {
+            setModal({on: false, success: false, text: ''});
+          }, 2500);
         } else {
+          console.log('no auto-fund response')
+          setUserFunding(null)
+          setCuratorList([])
+          setModal({on: true, success: false, text: 'Auto-Fund failed to update'});
+          setTimeout(() => {
+            setModal({on: false, success: false, text: ''});
+          }, 2500);
           setIsOn(false)
         }
-        setModal({on: true, success: true, text: 'Auto-Fund updated successfully'});
-        setTimeout(() => {
-          setModal({on: false, success: false, text: ''});
-        }, 2500);
-      } else {
-        console.log('no auto-fund response')
-        setUserFunding(null)
-        setCuratorList([])
+        console.log('schedule', schedule)
+        setFundLoading(false)
+        return schedule
+      } catch (error) {
+        console.error('Error updating auto-fund:', error);
+        setFundLoading(false)
         setModal({on: true, success: false, text: 'Auto-Fund failed to update'});
         setTimeout(() => {
           setModal({on: false, success: false, text: ''});
         }, 2500);
         setIsOn(false)
+        return null
       }
-      console.log('schedule', schedule)
-      setFundLoading(false)
-      return schedule
-    } catch (error) {
-      console.error('Error updating auto-fund:', error);
-      setFundLoading(false)
-      setModal({on: true, success: false, text: 'Auto-Fund failed to update'});
-      setTimeout(() => {
-        setModal({on: false, success: false, text: ''});
-      }, 2500);
-      setIsOn(false)
-      return null
+    } else {
+      LoginPopup()
     }
   }
 
@@ -1243,27 +1296,35 @@ export default function Autofund() {
 
   const ToggleSwitch = () => {
     const handleToggle = () => {
-      console.log('isOn', isOn)
-      if (isOn) {
-        setFundingSchedule('off')
+      if (isLogged) {
+        console.log('isOn', isOn)
+        if (isOn) {
+          setFundingSchedule('off')
+        } else {
+          setDisplay(prev => ({...prev, ['fund']: true }))
+          setFundingSchedule('on')
+        }
       } else {
-        setDisplay(prev => ({...prev, ['fund']: true }))
-        setFundingSchedule('on')
+        LoginPopup()
       }
-      // setIsOn(!isOn);
     };
   
     return (
-      <div className="flex-col" style={{justifyContent: 'center', alignItems: 'center'}}>
+      <div className="flex-row" style={{justifyContent: 'center', alignItems: 'center', margin: '0 5px 0 0'}}>
+
+        {fundLoading && (<div className='flex-row' style={{height: '20px', alignItems: 'center', width: '20px', justifyContent: 'center', padding: '0px', position: 'relative', right: '10%', top: '0px'}}>
+          <Spinner size={20} color={'#468'} />
+        </div>)}
+
+
         <div
           className={`toggleSwitch ${isOn ? "toggleSwitch-on" : ""}`}
           onClick={handleToggle}
         >
           <span className='circle'></span>
         </div>
-        <div style={{fontSize: '10px', color: isOn ? '#8ad' : '#68a', margin: '10px 0 0 0'}}>{isOn ? 'Auto-Funding On' : 'Auto-Funding Off'}</div>
-
       </div>
+
     );
   }
 
@@ -1384,16 +1445,27 @@ export default function Autofund() {
       </Head>
 
 
-      <div className="" style={{padding: '58px 0 0 0'}}>
+      {/* <div className="" style={{padding: '58px 0 0 0'}}>
+      </div> */}
+
+      {(!isLogged || version == '1.0' || version == '2.0') && (
+      <div id="log in"
+      style={{
+        padding: isMobile ? (version == '1.0' ? "58px 0 20px 0" : "48px 0 20px 0") : "58px 0 60px 0",
+        width: feedMax, fontSize: '0px'
+      }} >&nnsp;
+
       </div>
-
-
-      {user && (<CuratorData {...{ show: (isLogged && user), user, textMax, type: 'curator' }} />)}
-
+    )}
 
 
 
-      {/* MY AUTO FUND */}
+      {/* {user && (<CuratorData {...{ show: (isLogged && user), user, textMax, type: 'curator' }} />)} */}
+
+
+
+
+      {/* AUTO FUND */}
 
 
       <div style={{ padding: "0px 4px 0px 4px", width: feedMax }}>
@@ -1406,103 +1478,83 @@ export default function Autofund() {
 
 
 
-        <div
-          id="autoFund"
-          style={{
-            padding: isMobile ? "28px 0 20px 0" : "28px 0 20px 0",
-            width: "40%",
-          }}
-        ></div>
-
-        <div className='shadow'
-          style={{
-            padding: "8px",
-            backgroundColor: "#11448888",
-            borderRadius: "15px",
-            border: "1px solid #11447799",
-            width: isMiniApp || isMobile ? '340px' : '100%',
-            margin: isMiniApp || isMobile ? '0px auto' : '',
-          }}
-        >
-          <div
-            className="flex-row"
-            style={{
-              width: "100%",
-              justifyContent: "center",
-              alignItems: "center",
-              padding: "16px 0 0 0",
-            }}
-          >
-            <PiBankFill style={{ fill: "#cde" }} size={27}             onClick={() => {
-              toggleMenu("autoFund");
-            }} />
-            <div onClick={() => {
-              toggleMenu("autoFund");
-            }}>
-              <Description
-                {...{
-                  show: true,
-                  text: "My Auto-Fund",
-                  padding: "4px 0 4px 10px",
-                  size: "large",
-                }}
-              />
-            </div>
-
-
-              <div
-                className="flex-row"
-                style={{
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  cursor: "pointer",
-                }}
-                onClick={() => {
-                  toggleMenu("autoFund");
-                }}
-              >
-                {/* <Item {...{ text: "How it works" }} /> */}
 
 
 
-                <FaAngleDown
-                  size={28} color={"#cde"}
-                  style={{
-                    margin: "5px 15px 5px 5px",
-                    transform: display.autoFund
-                      ? "rotate(180deg)"
-                      : "rotate(0deg)",
-                    transition: "transform 0.3s ease",
-                  }}
-                />
+{(version == '1.0' || version == '2.0') && (<div className='flex-col' style={{backgroundColor: ''}}>
+
+<div className='shadow flex-col'
+  style={{
+    backgroundColor: isLogged ? "#002244" : '#333',
+    borderRadius: "15px",
+    border: isLogged ? "1px solid #11447799" : "1px solid #555",
+    width: isMiniApp || isMobile ? '340px' : '100%',
+    margin: isMiniApp || isMobile ? '0px auto 0 auto' : '0px auto 0 auto',
+  }} >
+  <div
+    className="shadow flex-row"
+    style={{
+      backgroundColor: isLogged ? "#11448888" : "#444",
+      width: "100%",
+      justifyContent: "space-between",
+      alignItems: "center",
+      padding: "8px", 
+      borderRadius: "15px",
+      margin: '0 0 10px 0',
+      gap: '1rem'
+
+    }}
+  >
+
+
+    <div
+      className="flex-row"
+      style={{
+        width: "100%",
+        justifyContent: "flex-start",
+        alignItems: "center",
+        padding: "0px 0 0 4px",
+        margin: '0 0 0px 0'
+      }} >
+
+
+    
+      <BsPiggyBankFill style={{ fill: "#cde" }} size={20} />
+      <div>
+
+
+        <div style={{border: '0px solid #777', padding: '2px', borderRadius: '10px', backgroundColor: '', maxWidth: 'fit-content', cursor: 'pointer', color: '#cde'}}>
+          <div className="top-layer flex-row">
+            <div className="flex-row" style={{padding: "4px 0 4px 10px", marginBottom: '0px', flexWrap: 'wrap', justifyContent: 'flex-start', gap: '0.00rem', width: '', alignItems: 'center'}}>
+              <div style={{fontSize: isMobile ? '18px' : '22px', fontWeight: '600', color: '', padding: '0px 3px'}}>
+                Auto-fund
               </div>
-          </div>
-
-
-
-
-          <div
-            className="flex-row"
-            style={{
-              color: "#9df",
-              width: "100%",
-              fontSize: isMobile ? "15px" : "17px",
-              padding: "10px 10px 15px 10px",
-              justifyContent: "center",
-              userSelect: 'none'
-            }}
-          >
-            Join the Impact Fund - boost your Impact Score
-          </div>
-
-          <div className='flex-row' style={{margin: '0 0 10px 0', width: "100%", justifyContent: "center"}}>
-            <div className='flex-row' style={{width: '100px', position: 'relative'}}>
-            <ToggleSwitch />
-            {fundLoading && (<div className='flex-row' style={{height: '20px', alignItems: 'center', width: '20px', justifyContent: 'center', padding: '0px', position: 'absolute', right: '-8%', top: '-3px'}}>
-              <Spinner size={20} color={'#468'} />
-            </div>)}
             </div>
           </div>
+        </div>
+      </div>
+
+
+      <div
+        className="flex-row"
+        style={{
+          justifyContent: "space-between",
+          alignItems: "center",
+          cursor: "pointer",
+        }} >
+
+      </div>
+    </div>
+
+    <ToggleSwitch target={'autoFund'} />
+  </div>
+
+
+
+
+
+
+  <div className='flex-col' style={{backgroundColor: isLogged ? "#002244ff" : '#333', padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: isLogged ? '#ace' : '#ddd', fontSize: '12px', gap: '0.75rem', position: 'relative'}}>
 
 
           {(display.autoFund && <><div
@@ -1520,7 +1572,7 @@ export default function Autofund() {
 
 
 
-<div
+          <div
             className="flex-row"
             style={{
               color: "#9df",
@@ -1553,12 +1605,6 @@ export default function Autofund() {
 
 
 
-
-
-
-
-
-
           <div
             className="flex-row"
             style={{
@@ -1571,7 +1617,7 @@ export default function Autofund() {
               fontWeight: '600'
             }}
           >
-            My overall allocation:
+            Overall allocation:
           </div>
 
 
@@ -1662,10 +1708,10 @@ export default function Autofund() {
                 fontWeight: '600'
               }}
             >
-              My Creator Fund allocation:
+              Creator Fund allocation:
             </div>)}
 
-            {userFunding?.creator_fund > 0 && (<div className='flex-row' style={{width: '100%', justifyContent: 'center', flexWrap: "wrap"}}>
+            {userFunding?.creator_fund > 0 && (<div className='flex-row' style={{width: '100%', justifyContent: 'center', flexWrap: "wrap", color: '#024'}}>
 
               {(userFunding?.search_channels?.length == 0 && userFunding?.search_curators?.length == 0 && userFunding?.creator_fund > 0) ? (<div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '7px 5px'}}>
                 <div className='cast-act-lt' style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', borderRadius: '88px', padding: '3px 10px 3px 3px', width: 'auto', margin: '0 5px 0 0'}}>
@@ -1701,7 +1747,7 @@ export default function Autofund() {
 
 
 
-            {userFunding?.creator_fund > 0 && (<div className='flex-col' style={{height: '30px', alignItems: 'center', justifyContent: 'center', padding: '40px 0 30px 0'}}>
+            {userFunding?.creator_fund > 0 && (<div className='flex-col' style={{height: '30px', alignItems: 'center', justifyContent: 'center', padding: '40px 0 30px 0', color: '#024'}}>
                 <div className='flex-row' style={{padding: '4px 8px', backgroundColor: '#002244ee', border: '1px solid #666', borderRadius: '20px', alignItems: 'center', gap: '0.25rem'}}>
 
                   <FaSearch size={15} color={'#eff'} style={{margin: '0 2px 0 2px'}} />
@@ -1718,7 +1764,7 @@ export default function Autofund() {
 
 
 
-            {userFunding?.creator_fund > 0 && (<div className='flex-row' style={{width: '100%', justifyContent: 'center', flexWrap: "wrap"}}>
+            {userFunding?.creator_fund > 0 && (<div className='flex-row' style={{width: '100%', justifyContent: 'center', flexWrap: "wrap", color: '#024', fontWeight: '600', fontSize: '12px'}}>
 
               {channelData?.length > 0 && (channelData?.map((channel, index) => (
                 (<div key={index} style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '7px 5px'}} onClick={() => {
@@ -1764,7 +1810,42 @@ export default function Autofund() {
             </div>)}
 
           </div></>)}
-        </div>
+
+
+
+
+
+
+    {/* <div>
+      Support creators with your remaining $degen and $tipn allowances - earn rewards
+    </div>
+
+    <div className='flex-row' style={{position: 'absolute', bottom: '0', right: '0', padding: '5px 5px', gap: '.25rem', alignItems: 'center'}}>
+      <BsQuestionCircle size={15} onClick={() => {
+        openSwipeable("autoFund"); }} />
+    </div> */}
+
+
+
+
+
+
+  </div>
+</div>
+</div>
+)}
+
+
+
+
+
+
+
+
+
+
+
+
       </div>
 
 

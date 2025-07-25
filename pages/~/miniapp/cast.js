@@ -19,7 +19,7 @@ export default function SharedCast() {
   const [ref, inView] = useInView()
   // const { castHash, castFid, viewerFid } = router.query
   // const [user, setUser] = useState(null)
-  const { LoginPopup, isLogged, setPoints, setIsLogged, setFid, miniApp, setMiniApp, setIsMiniApp, userBalance } = useContext(AccountContext)
+  const { LoginPopup, isLogged, setPoints, setIsLogged, setFid, miniApp, setMiniApp, setIsMiniApp, userBalance, setUserInfo } = useContext(AccountContext)
   const ref1 = useRef(null)
   const [textMax, setTextMax] = useState('430px')
   const [screenWidth, setScreenWidth ] = useState(undefined)
@@ -175,9 +175,13 @@ export default function SharedCast() {
       const userProfile = await sdk.context
 
       const checkUserProfile = async (fid) => {
-        const res = await fetch(`/api/user/validateUser?fid=${fid}`);
-        const data = await res.json();
-        return data.valid;
+        try {
+          const res = await fetch(`/api/user/validateUser?fid=${fid}`);
+          const data = await res.json();
+          return data.valid;
+        } catch (error) {
+          return null
+        }
       };
 
       const isValidUser = await checkUserProfile(userProfile?.user?.fid);
@@ -185,6 +189,13 @@ export default function SharedCast() {
       if (isValidUser) {
         setIsLogged(true)
         setFid(Number(userProfile?.user?.fid))
+        if (userBalance.impact == 0) {
+          setUserInfo({
+            pfp: userProfile?.user?.pfp?.url || null,
+            username: userProfile?.user?.username || null,
+            display: userProfile?.user?.displayName || null,
+          })
+        }
       }   
 
     }
