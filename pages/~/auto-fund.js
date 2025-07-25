@@ -283,23 +283,7 @@ export default function Autofund() {
       if (response?.data) {
         const userInvites = response?.data?.data || []
         setInvites(userInvites)
-        // const funds = distData?.funds || []
-        // let curatorDegen = 0
-        // let curatorHam = 0
-        // let fundDegen = 0
-        // let fundHam = 0
-        // for (const fund of funds) {
-        //   if (fund?.curators?.length == 0) {
-        //     fundDegen += fund?.degen_total
-        //     fundHam += fund?.ham_total
-        //   } else {
-        //     curatorDegen += fund?.degen_total
-        //     curatorHam += fund?.ham_total
-        //   }
-        // }
-        // setFunds({curatorDegen, curatorHam, fundDegen, fundHam})
-        
-        // setDistribution(distData)
+
       } else {
         setInvites([])
 
