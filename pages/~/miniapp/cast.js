@@ -175,9 +175,13 @@ export default function SharedCast() {
       const userProfile = await sdk.context
 
       const checkUserProfile = async (fid) => {
-        const res = await fetch(`/api/user/validateUser?fid=${fid}`);
-        const data = await res.json();
-        return data.valid;
+        try {
+          const res = await fetch(`/api/user/validateUser?fid=${fid}`);
+          const data = await res.json();
+          return data.valid;
+        } catch (error) {
+          return null
+        }
       };
 
       const isValidUser = await checkUserProfile(userProfile?.user?.fid);

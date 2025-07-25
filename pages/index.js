@@ -184,35 +184,6 @@ export default function Home() {
     }
   }, [userBalances]);
 
-  async function getUserInfo(fid) {
-    try {
-      const response = await axios.get('/api/getCuratorProfile', {
-        params: { fid }
-      })
-      if (response?.data) {
-        const profile = response?.data?.data || null
-        console.log('profile', profile)
-
-        if (!userInfo.username) {
-          setUserInfo({
-            pfp: profile?.pfp?.url || null,
-            username: profile?.username || null,
-            display: profile?.displayName || null,
-          })
-        }
-      }
-    } catch (error) {
-      console.error('Error submitting data:', error)
-    }
-  }
-
-  useEffect(() => {
-    if (isLogged && version == '2.0' && fid && !userInfo.username) {
-      getUserInfo(fid)
-    }
-  }, [fid]);
-
-
   useEffect(() => {
     (async () => {
       const { sdk } = await import('@farcaster/miniapp-sdk');

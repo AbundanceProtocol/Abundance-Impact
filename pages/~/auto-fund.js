@@ -44,7 +44,7 @@ export default function Autofund() {
   const [ref, inView] = useInView()
   const { ecosystem, username, app, userFid, pass } = router.query
   const [user, setUser] = useState(null)
-  const { LoginPopup, isLogged, showLogin, setShowLogin, setPoints, setIsLogged, setFid, miniApp, setMiniApp, fid, ecoData, isMiniApp, setIsMiniApp, userBalances, setUserBalances, setUserInfo } = useContext(AccountContext)
+  const { LoginPopup, isLogged, showLogin, setShowLogin, setPoints, setIsLogged, setFid, miniApp, setMiniApp, fid, ecoData, isMiniApp, setIsMiniApp, userBalances, setUserBalances } = useContext(AccountContext)
   const ref1 = useRef(null)
   const [textMax, setTextMax] = useState('430px')
   const [screenWidth, setScreenWidth ] = useState(undefined)
@@ -1242,45 +1242,49 @@ export default function Autofund() {
   }, [])
 
   async function setFundingSchedule(schedule, data) {
-    setFundLoading(true)
-    try {
-      console.log(fid, schedule)
-      const response = await axios.post('/api/fund/postSchedule', { fid, schedule, data });
-      if (response?.data) {
-        console.log('response', response?.data)
-        setUserFunding(response?.data?.updatedSchedule)
-        setCuratorList(response?.data?.curators)
-        if (response?.data?.updatedSchedule?.active_cron) {
-          setIsOn(true)
+    if (isLogged) {
+      setFundLoading(true)
+      try {
+        console.log(fid, schedule)
+        const response = await axios.post('/api/fund/postSchedule', { fid, schedule, data });
+        if (response?.data) {
+          console.log('response', response?.data)
+          setUserFunding(response?.data?.updatedSchedule)
+          setCuratorList(response?.data?.curators)
+          if (response?.data?.updatedSchedule?.active_cron) {
+            setIsOn(true)
+          } else {
+            setIsOn(false)
+          }
+          setModal({on: true, success: true, text: 'Auto-Fund updated successfully'});
+          setTimeout(() => {
+            setModal({on: false, success: false, text: ''});
+          }, 2500);
         } else {
+          console.log('no auto-fund response')
+          setUserFunding(null)
+          setCuratorList([])
+          setModal({on: true, success: false, text: 'Auto-Fund failed to update'});
+          setTimeout(() => {
+            setModal({on: false, success: false, text: ''});
+          }, 2500);
           setIsOn(false)
         }
-        setModal({on: true, success: true, text: 'Auto-Fund updated successfully'});
-        setTimeout(() => {
-          setModal({on: false, success: false, text: ''});
-        }, 2500);
-      } else {
-        console.log('no auto-fund response')
-        setUserFunding(null)
-        setCuratorList([])
+        console.log('schedule', schedule)
+        setFundLoading(false)
+        return schedule
+      } catch (error) {
+        console.error('Error updating auto-fund:', error);
+        setFundLoading(false)
         setModal({on: true, success: false, text: 'Auto-Fund failed to update'});
         setTimeout(() => {
           setModal({on: false, success: false, text: ''});
         }, 2500);
         setIsOn(false)
+        return null
       }
-      console.log('schedule', schedule)
-      setFundLoading(false)
-      return schedule
-    } catch (error) {
-      console.error('Error updating auto-fund:', error);
-      setFundLoading(false)
-      setModal({on: true, success: false, text: 'Auto-Fund failed to update'});
-      setTimeout(() => {
-        setModal({on: false, success: false, text: ''});
-      }, 2500);
-      setIsOn(false)
-      return null
+    } else {
+      LoginPopup()
     }
   }
 

@@ -46,9 +46,13 @@ const Layout = ({ children }) => {
       console.log(userProfile?.user?.fid)
 
       const checkUserProfile = async (fid) => {
-        const res = await fetch(`/api/user/validateUser?fid=${fid}`);
-        const data = await res.json();
-        return data.valid;
+        try {
+          const res = await fetch(`/api/user/validateUser?fid=${fid}`);
+          const data = await res.json();
+          return data.valid;
+        } catch (error) {
+          return null
+        }
       };
 
       const isValidUser = await checkUserProfile(userProfile?.user?.fid);
@@ -64,7 +68,7 @@ const Layout = ({ children }) => {
         })
       }    
 
-      sdk.actions.ready()
+      // sdk.actions.ready()
 
       if (isValidUser && !(userBalances?.impact > 0) ) {
         const {impact, qdau} = await getUserBalance(userProfile?.user?.fid)
