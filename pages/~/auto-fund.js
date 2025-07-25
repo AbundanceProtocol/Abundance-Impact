@@ -44,7 +44,7 @@ export default function Autofund() {
   const [ref, inView] = useInView()
   const { ecosystem, username, app, userFid, pass } = router.query
   const [user, setUser] = useState(null)
-  const { LoginPopup, isLogged, showLogin, setShowLogin, setPoints, setIsLogged, setFid, miniApp, setMiniApp, fid, ecoData, isMiniApp, setIsMiniApp, userBalances, setUserBalances } = useContext(AccountContext)
+  const { LoginPopup, isLogged, showLogin, setShowLogin, setPoints, setIsLogged, setFid, miniApp, setMiniApp, fid, ecoData, isMiniApp, setIsMiniApp, userBalances, setUserBalances, setUserInfo } = useContext(AccountContext)
   const ref1 = useRef(null)
   const [textMax, setTextMax] = useState('430px')
   const [screenWidth, setScreenWidth ] = useState(undefined)
