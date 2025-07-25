@@ -8,7 +8,7 @@ import { AccountContext } from '../../../context';
 import { FaStar } from 'react-icons/fa';
 import { Logo } from '../../../pages/assets';
 import { IoMdTrophy } from "react-icons/io";
-import { BsTrophy, BsGear, BsCurrencyExchange } from "react-icons/bs";
+import { BsTrophy, BsGear, BsCurrencyExchange, BsChevronDoubleLeft } from "react-icons/bs";
 import axios from 'axios';
 
 const version = process.env.NEXT_PUBLIC_VERSION
@@ -64,9 +64,16 @@ const UserMenu = () => {
 
 
         {userInfo?.pfp && (<div className='flex-row' style={{gap: '0.5rem'}}>
+
+
+          {version == '2.0' && router.route !== '/' && (
+            <div className={'flex-row items-center'} style={{border: '1px solid #999', padding: '5px 3px 0px 3px', borderRadius: '10px', backgroundColor: '#002244cc'}} onClick={() => router.back()}>
+              <div className={`impact-arrow`} style={{margin: '0 0 0 0' }}>
+                <BsChevronDoubleLeft size={22} className='' style={{fontSize: '25px', color: '#eee'}} />
+              </div>
+            </div>)}
+
           <div className={'flex-row items-center'} style={{border: '1px solid #999', padding: '3px 3px 3px 3px', borderRadius: '10px', backgroundColor: '#002244cc'}}>
-
-
 
             <div className={`impact-arrow`} style={{margin: '2px 0 0 0' }}>
               <FaStar size={22} className='' style={{fontSize: '25px', color: '#eee'}} />

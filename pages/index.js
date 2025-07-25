@@ -26,7 +26,7 @@ import useStore from '../utils/store';
 import ProfilePage from './~/studio';
 import axios from 'axios';
 import MiniAppAuthButton from '../components/MiniAppAuthButton';
-import { BsKey, BsLock, BsLockFill, BsXCircle, BsPerson, BsPersonFill, BsShieldCheck, BsShieldFillCheck, BsPiggyBank, BsPiggyBankFill, BsStar, BsStarFill, BsQuestionCircle, BsGift, BsGiftFill } from "react-icons/bs";
+import { BsKey, BsLock, BsLockFill, BsXCircle, BsPerson, BsPersonFill, BsShieldCheck, BsShieldFillCheck, BsPiggyBank, BsPiggyBankFill, BsStar, BsStarFill, BsQuestionCircle, BsGift, BsGiftFill, BsPencilFill  } from "react-icons/bs";
 
 import Spinner from '../components/Common/Spinner';
 import NeynarSigninButton from '../components/Layout/Modals/Signin';
@@ -57,6 +57,52 @@ export default function Home() {
     setPanelTarget(target);
     setPanelOpen(true);
   };
+
+
+
+  // async function setFundingSchedule(schedule, data) {
+  //   setFundLoading(true)
+  //   try {
+  //     console.log(fid, schedule)
+  //     const response = await axios.post('/api/fund/postSchedule', { fid, schedule, data });
+  //     if (response?.data) {
+  //       console.log('response', response?.data)
+  //       setUserFunding(response?.data?.updatedSchedule)
+  //       setCuratorList(response?.data?.curators)
+  //       if (response?.data?.updatedSchedule?.active_cron) {
+  //         setIsOn(true)
+  //       } else {
+  //         setIsOn(false)
+  //       }
+  //       setModal({on: true, success: true, text: 'Auto-Fund updated successfully'});
+  //       setTimeout(() => {
+  //         setModal({on: false, success: false, text: ''});
+  //       }, 2500);
+  //     } else {
+  //       console.log('no auto-fund response')
+  //       setUserFunding(null)
+  //       setCuratorList([])
+  //       setModal({on: true, success: false, text: 'Auto-Fund failed to update'});
+  //       setTimeout(() => {
+  //         setModal({on: false, success: false, text: ''});
+  //       }, 2500);
+  //       setIsOn(false)
+  //     }
+  //     console.log('schedule-4', schedule)
+  //     setFundLoading(false)
+  //     return schedule
+  //   } catch (error) {
+  //     console.error('Error updating auto-fund:', error);
+  //     setFundLoading(false)
+  //     setModal({on: true, success: false, text: 'Auto-Fund failed to update'});
+  //     setTimeout(() => {
+  //       setModal({on: false, success: false, text: ''});
+  //     }, 2500);
+  //     setIsOn(false)
+  //     return null
+  //   }
+  // }
+
 
   const closeSwipeable = () => {
     setPanelOpen(false);
@@ -311,11 +357,6 @@ export default function Home() {
   function setFundingSchedule(data) {
     console.log('data', data)
   }
-
-
-
-
-
 
 
 
@@ -1130,7 +1171,8 @@ export default function Home() {
                   alignItems: "center",
                   padding: "8px", 
                   borderRadius: "15px",
-                  margin: '0 0 10px 0'
+                  margin: '0 0 10px 0',
+                  gap: '1rem'
 
                 }}
               >
@@ -1161,8 +1203,6 @@ export default function Home() {
                         </div>
                       </div>
                     </div>
-
-
                   </div>
 
 
@@ -1174,16 +1214,14 @@ export default function Home() {
                       cursor: "pointer",
                     }} >
 
-
                   </div>
-
-
                 </div>
-
-
+                <Link href={'/~/auto-fund'}>
+                  <div style={{padding: '4px 5px 1px 5px', border: '1px solid #ace', borderRadius: '8px', backgroundColor: '#22446666'}}>
+                    <BsPencilFill color={'#ace'} size={16} />
+                  </div>
+                </Link>
                 <ToggleSwitch target={'autoFund'} />
-
-
               </div>
 
 
