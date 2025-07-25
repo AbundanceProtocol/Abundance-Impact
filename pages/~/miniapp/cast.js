@@ -185,11 +185,13 @@ export default function SharedCast() {
       if (isValidUser) {
         setIsLogged(true)
         setFid(Number(userProfile?.user?.fid))
-        setUserInfo({
-          pfp: userProfile?.user?.pfp?.url || null,
-          username: userProfile?.user?.username || null,
-          display: userProfile?.user?.displayName || null,
-        })
+        if (userBalance.impact == 0) {
+          setUserInfo({
+            pfp: userProfile?.user?.pfp?.url || null,
+            username: userProfile?.user?.username || null,
+            display: userProfile?.user?.displayName || null,
+          })
+        }
       }   
 
     }
