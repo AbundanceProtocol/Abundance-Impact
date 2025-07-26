@@ -44,7 +44,7 @@ export default function Autofund() {
   const [ref, inView] = useInView()
   const { ecosystem, username, app, userFid, pass } = router.query
   const [user, setUser] = useState(null)
-  const { LoginPopup, isLogged, showLogin, setShowLogin, setPoints, setIsLogged, setFid, miniApp, setMiniApp, fid, ecoData, isMiniApp, setIsMiniApp, userBalances, setUserBalances } = useContext(AccountContext)
+  const { LoginPopup, isLogged, showLogin, setShowLogin, setPoints, setIsLogged, setFid, miniApp, setMiniApp, fid, ecoData, isMiniApp, setIsMiniApp, userBalances, setUserBalances, adminTest } = useContext(AccountContext)
   const ref1 = useRef(null)
   const [textMax, setTextMax] = useState('430px')
   const [screenWidth, setScreenWidth ] = useState(undefined)
@@ -1448,10 +1448,10 @@ export default function Autofund() {
       {/* <div className="" style={{padding: '58px 0 0 0'}}>
       </div> */}
 
-      {(!isLogged || version == '1.0' || version == '2.0') && (
+      {(!isLogged || (version == '1.0' && !adminTest) || (version == '2.0' || adminTest)) && (
       <div id="log in"
       style={{
-        padding: isMobile ? (version == '1.0' ? "58px 0 20px 0" : "48px 0 20px 0") : "58px 0 60px 0",
+        padding: isMobile ? ((version == '1.0' && !adminTest) ? "58px 0 20px 0" : "48px 0 20px 0") : "58px 0 60px 0",
         width: feedMax, fontSize: '0px'
       }} >&nnsp;
 
@@ -1481,7 +1481,7 @@ export default function Autofund() {
 
 
 
-{(version == '1.0' || version == '2.0') && (<div className='flex-col' style={{backgroundColor: ''}}>
+{((version == '1.0' && !adminTest) || (version == '2.0' || adminTest)) && (<div className='flex-col' style={{backgroundColor: ''}}>
 
 <div className='shadow flex-col'
   style={{

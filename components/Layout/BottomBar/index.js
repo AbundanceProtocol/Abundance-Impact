@@ -13,7 +13,7 @@ const BottomBar = () => {
   const ref1 = useRef(null)
   const { isMobile } = useMatchBreakpoints();
   const router = useRouter()
-  const { isLogged, setPanelTarget, setPanelOpen } = useContext(AccountContext)
+  const { isLogged, setPanelTarget, setPanelOpen, adminTest } = useContext(AccountContext)
 
   const openSwipeable = (target) => {
     setPanelTarget(target);
@@ -22,7 +22,7 @@ const BottomBar = () => {
 
 
   return (
-    isMobile && !(version == '1.0' && !isLogged && router.route == '/') ? (
+    isMobile && !((version == '1.0' && !adminTest) && !isLogged && router.route == '/') ? (
       <>
         {router.route !== '/~/studio/multi-tip-compose' && (<div ref={ref1} className='flex-row' style={{position: 'fixed', bottom: 0, backgroundColor: '', height: '64px', width: `100%`, borderRadius: '0px', padding: '0 16px', border: '0px solid #678', boxSizing: 'border-box'}}>
 
@@ -41,7 +41,7 @@ const BottomBar = () => {
             </Link>
 
 
-            {version == '2.0' && (<Link href={'/'}>
+            {(version == '2.0' || adminTest) && (<Link href={'/'}>
               <div className='flex-col' style={{justifyContent: 'center', alignItems: 'center', height: '54px', width: '56px', padding: '5px 10px', borderRadius: '10px', border: '1px solid #567', backgroundColor: '#002244aa', backdropFilter: 'blur(12px)'}}>
                 <div className='flex-col' style={{justifyContent: 'center', alignItems: 'center', height: '40px'}}>
                   <BsShieldCheck size={20} color={'#99ddff'} />
@@ -51,7 +51,7 @@ const BottomBar = () => {
             </Link>)}
 
 
-            {version == '2.0' && (<div className='flex-col' style={{justifyContent: 'center', alignItems: 'center', height: '54px', width: '56px', padding: '5px 10px', borderRadius: '10px', border: '1px solid #567', backgroundColor: '#002244aa', backdropFilter: 'blur(12px)'}}>
+            {(version == '2.0' || adminTest) && (<div className='flex-col' style={{justifyContent: 'center', alignItems: 'center', height: '54px', width: '56px', padding: '5px 10px', borderRadius: '10px', border: '1px solid #567', backgroundColor: '#002244aa', backdropFilter: 'blur(12px)'}}>
               <div className='flex-col' style={{justifyContent: 'center', alignItems: 'center', height: '40px'}}>
                 <BsPiggyBank size={20} color={'#99ddff'} />
                 <div style={{fontSize: '12px', fontWeight: '400', padding: '0 0 0 0', color: '#99ddff', margin: '4px 0 0 0'}}>Tip</div>
@@ -68,7 +68,7 @@ const BottomBar = () => {
               </div>
             </Link>
 
-            {version == '2.0' && (<div className='flex-col' style={{justifyContent: 'center', alignItems: 'center', height: '54px', width: '56px', padding: '5px 10px', borderRadius: '10px', border: '1px solid #567', backgroundColor: '#002244aa', backdropFilter: 'blur(12px)'}} onClick={() => openSwipeable('welcome')}>
+            {(version == '2.0' || adminTest) && (<div className='flex-col' style={{justifyContent: 'center', alignItems: 'center', height: '54px', width: '56px', padding: '5px 10px', borderRadius: '10px', border: '1px solid #567', backgroundColor: '#002244aa', backdropFilter: 'blur(12px)'}} onClick={() => openSwipeable('welcome')}>
               <div className='flex-col' style={{justifyContent: 'center', alignItems: 'center', height: '40px'}}>
                 <BsQuestionCircle size={20} color={'#99ddff'} />
                 <div style={{fontSize: '12px', fontWeight: '400', padding: '0 0 0 0', color: '#99ddff', margin: '4px 0 0 0'}}>About</div>

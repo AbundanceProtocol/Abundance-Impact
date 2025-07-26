@@ -40,7 +40,7 @@ export default function ProfilePage() {
   const [ref, inView] = useInView()
   const { ecosystem, username, app, userFid, pass } = router.query
   const [user, setUser] = useState(null)
-  const { LoginPopup, isLogged, showLogin, setShowLogin, setPoints, setIsLogged, setFid, miniApp, setMiniApp, fid, ecoData, isMiniApp, userInfo, setUserInfo } = useContext(AccountContext)
+  const { LoginPopup, isLogged, showLogin, setShowLogin, setPoints, setIsLogged, setFid, miniApp, setMiniApp, fid, ecoData, isMiniApp, userInfo, setUserInfo, adminTest, setAdminTest } = useContext(AccountContext)
   const ref1 = useRef(null)
   const [textMax, setTextMax] = useState('430px')
   const [screenWidth, setScreenWidth ] = useState(undefined)
@@ -4318,6 +4318,120 @@ export default function ProfilePage() {
           </>)}
         </div>
       </div>)}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      {/* ADMIN PANEL */}
+
+      {fid && fid == 9326 && (<div style={{ padding: "0px 4px 0px 4px", width: feedMax }}>
+
+
+        <div
+          id="admin"
+          style={{
+            padding: isMobile ? "28px 0 20px 0" : "28px 0 20px 0",
+            width: "40%",
+          }}
+        ></div>
+
+        <div className='shadow'
+          style={{
+            padding: "8px",
+            backgroundColor: "#11448888",
+            borderRadius: "15px",
+            border: "1px solid #11447799",
+            width: isMiniApp || isMobile ? '340px' : '100%',
+            margin: isMiniApp || isMobile ? '0px auto' : '',
+          }}
+        >
+          <div
+            className="flex-row"
+            style={{
+              width: "100%",
+              justifyContent: "center",
+              alignItems: "center",
+              padding: "16px 0 0 0",
+            }}
+          >
+            <FaCoins style={{ fill: "#cde" }} size={27} onClick={() => {
+                toggleMenu("admin");
+              }}/>
+            <div onClick={() => {
+                toggleMenu("admin");
+              }}>
+            <Description
+              {...{
+                show: true,
+                text: "Admin Panel",
+                padding: "4px 0 4px 10px",
+                size: "large",
+              }}
+            />
+            </div>
+              <div
+                className="flex-row"
+                style={{
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  cursor: "pointer",
+                }}
+                onClick={() => {
+                  toggleMenu("admin");
+                }}
+              >
+                {/* <Item {...{ text: "How it works" }} /> */}
+                <FaAngleDown
+                  size={28} color={"#cde"}
+                  style={{
+                    margin: "5px 15px 5px 5px",
+                    transform: display.multitip
+                      ? "rotate(180deg)"
+                      : "rotate(0deg)",
+                    transition: "transform 0.3s ease",
+                  }}
+                />
+              </div>
+          </div>
+
+          <div
+            className="flex-row"
+            style={{
+              color: "#9df",
+              width: "100%",
+              fontSize: isMobile ? "15px" : "17px",
+              padding: "10px 10px 15px 10px",
+              justifyContent: "center",
+              userSelect: 'none',
+              gap: '1rem'
+            }}
+          >
+            <div style={{padding: '5px', border: '1px solid #777', backgroundColor: adminTest ? '#246' : '#ace', color: adminTest ? '#ace' : '#246', cursor: 'pointer'}} onClick={() => setAdminTest(false)}>Impact 1.0</div>
+            <div style={{padding: '5px', border: '1px solid #777', backgroundColor: adminTest ? '#ace' : '#246', color: adminTest ? '#246' : '#ace', cursor: 'pointer'}} onClick={() => setAdminTest(true)}>Impact 2.0</div>
+            </div>
+
+
+        </div>
+      </div>)}
+
+
+
+
+
+
 
       <div style={{padding: '0 0 80px 0'}}>&nbsp;</div>
 

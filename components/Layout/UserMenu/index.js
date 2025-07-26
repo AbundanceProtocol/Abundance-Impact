@@ -14,13 +14,13 @@ const UserMenu = () => {
   const ref1 = useRef(null)
   const { isMobile } = useMatchBreakpoints();
   const router = useRouter()
-  const { userBalances, userInfo, setUserBalances, fid, isLogged, setIsMiniApp, setUserInfo } = useContext(AccountContext)
+  const { userBalances, userInfo, setUserBalances, fid, isLogged, setIsMiniApp, setUserInfo, adminTest } = useContext(AccountContext)
 
   useEffect(() => {
     if (fid && userBalances.impact == 0) {
       getUserBalance(fid)
     }
-    
+
     if (fid && !userInfo.username) {
       getUserInfo()
     }
@@ -134,7 +134,7 @@ const UserMenu = () => {
         {userInfo?.pfp && (<div className='flex-row' style={{gap: '0.5rem'}}>
 
 
-          {version == '2.0' && router.route !== '/' && (
+          {(version == '2.0' || adminTest) && router.route !== '/' && (
             <div className={'flex-row items-center'} style={{border: '1px solid #999', padding: '5px 3px 0px 3px', borderRadius: '10px', backgroundColor: '#002244cc'}} onClick={() => router.back()}>
               <div className={`impact-arrow`} style={{margin: '0 0 0 0' }}>
                 <BsChevronDoubleLeft size={22} className='' style={{fontSize: '25px', color: '#eee'}} />
@@ -156,20 +156,20 @@ const UserMenu = () => {
             </div> */}
           </div>
 
-          {version == '2.0' && (<div className={'flex-row items-center'} style={{border: '1px solid #999', padding: '5px 3px 0px 3px', borderRadius: '10px', backgroundColor: '#002244cc'}}>
+          {(version == '2.0' || adminTest) && (<div className={'flex-row items-center'} style={{border: '1px solid #999', padding: '5px 3px 0px 3px', borderRadius: '10px', backgroundColor: '#002244cc'}}>
             <div className={`impact-arrow`} style={{margin: '0 0 0 0' }}>
               <BsCurrencyExchange size={22} className='' style={{fontSize: '25px', color: '#eee'}} />
             </div>
           </div>)}
 
 
-          {version == '2.0' && (<div className={'flex-row items-center'} style={{border: '1px solid #999', padding: '5px 3px 0px 3px', borderRadius: '10px', backgroundColor: '#002244cc'}}>
+          {(version == '2.0' || adminTest) && (<div className={'flex-row items-center'} style={{border: '1px solid #999', padding: '5px 3px 0px 3px', borderRadius: '10px', backgroundColor: '#002244cc'}}>
             <div className={`impact-arrow`} style={{margin: '0 0 0 0' }}>
               <BsTrophy size={22} className='' style={{fontSize: '25px', color: '#eee'}} />
             </div>
           </div>)}
 
-          {version == '2.0' && (<div className={'flex-row items-center'} style={{border: '1px solid #999', padding: '5px 3px 0px 3px', borderRadius: '10px', backgroundColor: '#002244cc'}}>
+          {(version == '2.0' || adminTest) && (<div className={'flex-row items-center'} style={{border: '1px solid #999', padding: '5px 3px 0px 3px', borderRadius: '10px', backgroundColor: '#002244cc'}}>
             <div className={`impact-arrow`} style={{margin: '0 0 0 0' }}>
               <BsGear size={22} className='' style={{fontSize: '25px', color: '#eee'}} />
             </div>

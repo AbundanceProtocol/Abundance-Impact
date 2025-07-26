@@ -5,8 +5,14 @@
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
-  external_node_modules = ["mongodb", "mongoose", "sharp"]
+  external_node_modules = ["mongodb", "mongoose", "sharp", "express", "serverless-http", "@farcaster/miniapp-node"]
   included_files = ["utils/**", "libs/**", "models/**", "node_modules/sharp/**/*"]
+
+[[redirects]]
+  from = "/api/webhook"
+  to = "/.netlify/functions/webhook"
+  status = 200
+  force = true
 
 [functions."autofund-background"]
   schedule = "0 23 * * *"

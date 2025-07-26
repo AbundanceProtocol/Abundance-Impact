@@ -18,7 +18,7 @@ const version = process.env.NEXT_PUBLIC_VERSION
 
 const Layout = ({ children }) => {
   const ref = useRef(null)
-  const { setIsLogged, setFid, setIsMiniApp, isMiniApp, userBalances, setUserBalances, setUserInfo } = useContext(AccountContext)
+  const { setIsLogged, setFid, setIsMiniApp, isMiniApp, userBalances, setUserBalances, setUserInfo, adminTest } = useContext(AccountContext)
   const { isMobile } = useMatchBreakpoints();
 
   const getUserBalance = async (fid) => {
@@ -80,6 +80,20 @@ const Layout = ({ children }) => {
   }, []);
 
 
+  useEffect(() => {
+    (async () => {
+      if (adminTest) {
+        const { sdk } = await import('@farcaster/miniapp-sdk');
+    
+        const isMiniApp = await sdk.isInMiniApp()
+        setIsMiniApp(isMiniApp)
+        if (isMiniApp) {
+          sdk.actions.addMiniApp()
+        }
+      }
+    })();
+  }, [adminTest]);
+
 
   return (
     <div ref={ref} className='flex-col' style={{position: 'absolute', display: 'flex', minHeight: '100%', height: '100%', width: '100%', overflowX: 'hidden'}}>
@@ -115,11 +129,11 @@ const Layout = ({ children }) => {
         {/* <RightMenu /> */}
       </div>
       <ShowActionNav />
-      {(version == '1.0' || version == '2.0') && <BottomBar />}
-      {/* {version == '2.0' ? (<BottomBar />) : (<BottomMenu />)} */}
+      {((version == '1.0' && !adminTest) || (version == '2.0' || adminTest)) && <BottomBar />}
+      {/* {(version == '2.0' || adminTest) ? (<BottomBar />) : (<BottomMenu />)} */}
       <LoginModal />
       <LogoutModal />
-      {version == '2.0' && (<SwipeablePanel />)}
+      {(version == '2.0' || adminTest) && (<SwipeablePanel />)}
     </div>
   );
 };

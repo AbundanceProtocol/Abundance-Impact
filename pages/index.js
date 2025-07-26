@@ -36,7 +36,7 @@ const version = process.env.NEXT_PUBLIC_VERSION
 export default function Home() {
   const ref2 = useRef(null)
   const [ref, inView] = useInView()
-  const { LoginPopup, checkEcoEligibility, ecoData, points, setPoints, isLogged, showLogin, setShowLogin, setIsLogged, fid, setFid, getRemainingBalances, isMiniApp, userBalances, setIsMiniApp, LogoutPopup, userInfo, setUserInfo, setPanelOpen, setPanelTarget } = useContext(AccountContext)
+  const { LoginPopup, checkEcoEligibility, ecoData, points, setPoints, isLogged, showLogin, setShowLogin, setIsLogged, fid, setFid, getRemainingBalances, isMiniApp, userBalances, setIsMiniApp, LogoutPopup, userInfo, setUserInfo, setPanelOpen, setPanelTarget, adminTest, setAdminTest } = useContext(AccountContext)
   const [screenWidth, setScreenWidth] = useState(undefined)
   const [screenHeight, setScreenHeight] = useState(undefined)
   const [textMax, setTextMax] = useState('562px')
@@ -156,7 +156,7 @@ export default function Home() {
 
   useEffect(() => {
     console.log('version', version, userBalances.impact)
-    if (version == '2.0') {
+    if ((version == '2.0' || adminTest)) {
       if (userBalances.impact !== 0) {
         console.log('off-1')
         setPanelOpen(false)
@@ -171,7 +171,7 @@ export default function Home() {
 
   useEffect(() => {
     console.log('version', version, userBalances.impact)
-    if (version == '2.0') {
+    if ((version == '2.0' || adminTest)) {
       if (userBalances.impact !== 0) {
         console.log('off-2')
         setPanelOpen(false)
@@ -341,10 +341,10 @@ export default function Home() {
           content={`Building the global superalignment layer`}
         />
       </Head>
-    {(!isLogged || version == '2.0') && (
+    {(!isLogged || (version == '2.0' || adminTest)) && (
       <div id="log in"
       style={{
-        padding: isMobile ? (version == '1.0' ? "58px 0 20px 0" : "48px 0 20px 0") : "58px 0 60px 0",
+        padding: isMobile ? ((version == '1.0' && !adminTest) ? "58px 0 20px 0" : "48px 0 20px 0") : "58px 0 60px 0",
         width: feedMax, fontSize: '0px'
       }} >&nnsp;
 
@@ -352,7 +352,7 @@ export default function Home() {
     )}
 
       {/* {!isLogged && ( */}
-      <div style={{ padding: (!isLogged || version == '2.0') ? "0px 4px 140px 4px" : '0', width: feedMax }}>
+      <div style={{ padding: (!isLogged || (version == '2.0' || adminTest)) ? "0px 4px 140px 4px" : '0', width: feedMax }}>
         <div
           className="flex-col"
           style={{
@@ -361,13 +361,13 @@ export default function Home() {
             alignItems: "center",
           }}
         >
-          {!isLogged && version == '1.0' && (<Logo
+          {!isLogged && (version == '1.0' && !adminTest) && (<Logo
             className="rotate"
             height={isMobile ? "95px" : "165px"}
             width={isMobile ? "95px" : "165px"}
             style={{ fill: "#9ce" }}
           />)}
-          {!isLogged && version == '1.0' && (<Description
+          {!isLogged && (version == '1.0' && !adminTest) && (<Description
             {...{
               show: true,
               text: "/impact",
@@ -376,7 +376,7 @@ export default function Home() {
             }}
           />)}
 
-          {!isLogged && version == '1.0' && (<div
+          {!isLogged && (version == '1.0' && !adminTest) && (<div
             className="flex-row"
             style={{
               color: "#ace",
@@ -390,7 +390,7 @@ export default function Home() {
             /impact rewards you for your impact
           </div>)}
 
-          {!isLogged && version == '1.0' && (<div
+          {!isLogged && (version == '1.0' && !adminTest) && (<div
             className="flex-row"
             style={{
               color: "#ace",
@@ -403,7 +403,7 @@ export default function Home() {
           >
             make an impact - get rewards
           </div>)}
-          {!isLogged && version == '1.0' && (<div className='flex-row' style={{justifyContent: 'center', margin: '0 0 10px 0'}}>
+          {!isLogged && (version == '1.0' && !adminTest) && (<div className='flex-row' style={{justifyContent: 'center', margin: '0 0 10px 0'}}>
 
 
           {/* WHAT IS IMPACT BUTTON */}
@@ -524,7 +524,7 @@ export default function Home() {
 
 
 
-          {!isLogged && version == '1.0' && (<div
+          {!isLogged && (version == '1.0' && !adminTest) && (<div
             className="flex-row"
             style={{
               color: "#ace",
@@ -539,9 +539,9 @@ export default function Home() {
           </div>)}
 
 
-          {/* {isLogged && version == '1.0' && ( */}
+          {/* {isLogged && (version == '1.0' && !adminTest) && ( */}
 
-          {!isLogged && version == '1.0' && (
+          {!isLogged && (version == '1.0' && !adminTest) && (
             <>
               <div>
                 {showLogin ? (
@@ -600,7 +600,7 @@ export default function Home() {
 
 
 
-        {!isLogged && version == '1.0' && (<div
+        {!isLogged && (version == '1.0' && !adminTest) && (<div
           id="what is impact"
           style={{
             padding: isMobile ? "28px 0 20px 0" : "28px 0 20px 0",
@@ -609,7 +609,7 @@ export default function Home() {
         </div>)}
 
 
-        {!isLogged && version == '1.0' && (<div
+        {!isLogged && (version == '1.0' && !adminTest) && (<div
           style={{
             padding: "8px",
             backgroundColor: "#11448888",
@@ -678,7 +678,7 @@ export default function Home() {
 
 
 
-        {!isLogged && version == '1.0' && (<div
+        {!isLogged && (version == '1.0' && !adminTest) && (<div
           id="how it works"
           style={{
             padding: isMobile ? "128px 0 20px 0" : "128px 0 20px 0",
@@ -689,7 +689,7 @@ export default function Home() {
 
 
 
-        {!isLogged && version == '1.0' && (<div
+        {!isLogged && (version == '1.0' && !adminTest) && (<div
           style={{
             padding: "8px",
             backgroundColor: "#11448888",
@@ -839,7 +839,7 @@ export default function Home() {
 
         <div style={{ padding: "0px 4px 0px 4px", width: feedMax }}>
 
-          {!isLogged && version == '1.0' && (<div
+          {!isLogged && (version == '1.0' && !adminTest) && (<div
             id="autoFund"
             style={{
               padding: isMobile ? "28px 0 20px 0" : "28px 0 20px 0",
@@ -851,7 +851,7 @@ export default function Home() {
 
           {/* LOGIN */}
 
-          {version == '2.0' && (<div className='flex-col' style={{backgroundColor: ''}}>
+          {(version == '2.0' || adminTest) && (<div className='flex-col' style={{backgroundColor: ''}}>
 
             <div className='shadow flex-col'
               style={{
@@ -955,7 +955,7 @@ export default function Home() {
 
           {/* BOOST & NOMINATE */}
 
-          {version == '2.0' && (<div className='flex-col' style={{backgroundColor: ''}}>
+          {(version == '2.0' || adminTest) && (<div className='flex-col' style={{backgroundColor: ''}}>
 
             <div className='shadow flex-col'
               style={{
@@ -1042,7 +1042,7 @@ export default function Home() {
 
           {/* VALIDATE */}
 
-          {version == '2.0' && (<div className='flex-col' style={{backgroundColor: ''}}>
+          {(version == '2.0' || adminTest) && (<div className='flex-col' style={{backgroundColor: ''}}>
 
             <div 
               className='shadow flex-col'
@@ -1123,7 +1123,7 @@ export default function Home() {
 
           {/* AUTO-FUND */}
 
-          {version == '2.0' && (<div className='flex-col' style={{backgroundColor: ''}}>
+          {(version == '2.0' || adminTest) && (<div className='flex-col' style={{backgroundColor: ''}}>
 
             <div className='shadow flex-col'
               style={{
@@ -1209,10 +1209,30 @@ export default function Home() {
             </div>
           </div>
           )}
+
+
+
+          {fid && fid == 9326 && (<div
+            className="flex-row"
+            style={{
+              color: "#9df",
+              width: "100%",
+              fontSize: isMobile ? "15px" : "17px",
+              padding: "10px 10px 15px 10px",
+              justifyContent: "center",
+              userSelect: 'none',
+              gap: '1rem'
+            }} >
+            <div style={{padding: '5px', border: '1px solid #777', backgroundColor: adminTest ? '#246' : '#ace', color: adminTest ? '#ace' : '#246', cursor: 'pointer'}} onClick={() => setAdminTest(false)}>Impact 1.0</div>
+            <div style={{padding: '5px', border: '1px solid #777', backgroundColor: adminTest ? '#ace' : '#246', color: adminTest ? '#246' : '#ace', cursor: 'pointer'}} onClick={() => setAdminTest(true)}>Impact 2.0</div>
+          </div>)}
+
+
+
         </div>
       </div>
       {!isLogged && (<div ref={ref}>&nbsp;</div>)}
-      {version == '2.0' || version == '1.0' && isLogged && <ProfilePage />}
+      {(version == '2.0' || adminTest) || (version == '1.0' && !adminTest) && isLogged && <ProfilePage />}
     </div>
   );
 }

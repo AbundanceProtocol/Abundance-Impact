@@ -23,6 +23,7 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
   const [sched, setSched] = useState({ecoData: false, login: false})
   const [panelOpen, setPanelOpen] = useState(false);
   const [panelTarget, setPanelTarget] = useState(null);
+  const [adminTest, setAdminTest] = useState(false)
   const router = useRouter()
   const initEcosystems = [{
     channels: [],
@@ -386,7 +387,8 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
     isMiniApp, setIsMiniApp,
     userInfo, setUserInfo,
     panelOpen, setPanelOpen,
-    panelTarget, setPanelTarget
+    panelTarget, setPanelTarget,
+    adminTest, setAdminTest
   };
 
   return (
