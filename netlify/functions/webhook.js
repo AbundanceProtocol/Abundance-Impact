@@ -1,39 +1,34 @@
-import express from "express";
-import serverless from "serverless-http";
-import {
-  parseWebhookEvent,
-  verifyAppKeyWithNeynar
-} from "@farcaster/miniapp-node";
+import { parseWebhookEvent, verifyAppKeyWithNeynar } from "@farcaster/miniapp-node";
 import axios from "axios";
-import Miniapp from '../../models/Miniapp';
-import connectToDatabase from '../../libs/mongodb';
+import Miniapp from "../../models/Miniapp";
+import connectToDatabase from "../../libs/mongodb";
 
-const app = express();
-app.use(express.json());
-
-app.post("/", async (req, res) => {
+export const handler = async (event) => {
   try {
-    const data = await parseWebhookEvent(req.body, verifyAppKeyWithNeynar);
+    const data = await parseWebhookEvent(JSON.parse(event.body), verifyAppKeyWithNeynar);
 
     if (!data) {
-      return res.status(400).json({ success: false, error: "Invalid data" });
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ success: false, error: "Invalid data" }),
+      };
     }
-    
+
     if (!data.event.notificationDetails?.url) {
-      return res.status(400).json({ success: false, error: "Invalid data" });
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ success: false, error: "Invalid data" }),
+      };
     }
-
-
 
     console.log("✅ Received Farcaster event:", data);
     console.log("✅ Farcaster event payload:", JSON.stringify(data, null, 2));
     console.log("Event type:", data.event.event, "| Fid:", data.fid);
 
-
     await connectToDatabase();
     const doc = new Miniapp({
       event: data.event.event || "",
-      url: data.event.notificationDetails?.url || ""
+      url: data.event.notificationDetails?.url || "",
     });
     await doc.save();
 
@@ -50,19 +45,24 @@ app.post("/", async (req, res) => {
       timeout: 5000,
     });
 
-    return res.status(200).json({ success: true });
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ success: true }),
+    };
   } catch (error) {
     console.error("❌ Error verifying Mini App webhook:", error.name, error.message);
-    const status = error.name === "VerifyJsonFarcasterSignature.InvalidAppKeyError"
-      ? 401
-      : error.name.startsWith("VerifyJsonFarcasterSignature.VerifyAppKey")
+    const status =
+      error.name === "VerifyJsonFarcasterSignature.InvalidAppKeyError"
+        ? 401
+        : error.name.startsWith("VerifyJsonFarcasterSignature.VerifyAppKey")
         ? 500
         : 400;
-    res.status(status).json({ success: false, error: error.message });
+    return {
+      statusCode: status,
+      body: JSON.stringify({ success: false, error: error.message }),
+    };
   }
-});
-
-export const handler = serverless(app);
+};
 
 
 
