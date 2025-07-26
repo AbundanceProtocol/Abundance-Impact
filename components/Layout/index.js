@@ -18,7 +18,7 @@ const version = process.env.NEXT_PUBLIC_VERSION
 
 const Layout = ({ children }) => {
   const ref = useRef(null)
-  const { setIsLogged, setFid, setIsMiniApp, isMiniApp, userBalances, setUserBalances, setUserInfo } = useContext(AccountContext)
+  const { setIsLogged, setFid, setIsMiniApp, isMiniApp, userBalances, setUserBalances, setUserInfo, adminTest } = useContext(AccountContext)
   const { isMobile } = useMatchBreakpoints();
 
   const getUserBalance = async (fid) => {
@@ -70,6 +70,10 @@ const Layout = ({ children }) => {
 
       sdk.actions.ready()
 
+      if (adminTest) {
+        sdk.actions.addMiniApp()
+      }
+
       if (isValidUser && !(userBalances?.impact > 0) ) {
         const {impact, qdau} = await getUserBalance(userProfile?.user?.fid)
         console.log('userBalance', impact)
@@ -115,11 +119,11 @@ const Layout = ({ children }) => {
         {/* <RightMenu /> */}
       </div>
       <ShowActionNav />
-      {(version == '1.0' || version == '2.0') && <BottomBar />}
-      {/* {version == '2.0' ? (<BottomBar />) : (<BottomMenu />)} */}
+      {((version == '1.0' && !adminTest) || (version == '2.0' || adminTest)) && <BottomBar />}
+      {/* {(version == '2.0' || adminTest) ? (<BottomBar />) : (<BottomMenu />)} */}
       <LoginModal />
       <LogoutModal />
-      {version == '2.0' && (<SwipeablePanel />)}
+      {(version == '2.0' || adminTest) && (<SwipeablePanel />)}
     </div>
   );
 };

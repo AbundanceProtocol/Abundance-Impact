@@ -6,11 +6,11 @@ import useMatchBreakpoints from '../../../../hooks/useMatchBreakpoints';
 const version = process.env.NEXT_PUBLIC_VERSION
 
 const BoostInfo = () => {
-  const { isLogged, isMiniApp } = useContext(AccountContext)
+  const { isLogged, isMiniApp, adminTest } = useContext(AccountContext)
   const { isMobile } = useMatchBreakpoints();
 
   return (
-    version == '2.0' && (<div className='flex-col' style={{backgroundColor: ''}}>
+    (version == '2.0' || adminTest) && (<div className='flex-col' style={{backgroundColor: ''}}>
 
     <div className='shadow flex-col'
       style={{
