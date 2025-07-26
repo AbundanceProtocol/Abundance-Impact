@@ -18,8 +18,13 @@ app.post("/", async (req, res) => {
     if (!data) {
       return res.status(400).json({ success: false, error: "Invalid data" });
     }
-
     
+    if (!data.event.notificationDetails?.url) {
+      return res.status(400).json({ success: false, error: "Invalid data" });
+    }
+
+
+
     console.log("✅ Received Farcaster event:", data);
     console.log("✅ Farcaster event payload:", JSON.stringify(data, null, 2));
     console.log("Event type:", data.event.event, "| Fid:", data.fid);
