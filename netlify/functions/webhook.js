@@ -15,11 +15,20 @@ app.post("/", async (req, res) => {
     console.log("✅ Received Farcaster event:", data);
     console.log("✅ Farcaster event payload:", JSON.stringify(data, null, 2));
     console.log("Event type:", data.event.event, "| Fid:", data.fid);
-    console.log('testing')
-    // handle logic based on data.event.event:
-    // e.g. "miniapp_added", "notifications_enabled", etc.
 
-    res.status(200).json({ success: true });
+
+    return axios.post("https://impact.abundance.id/api/mini-app/test", {
+      event: data.event.event,
+      fid: data.fid,
+      payload: data,
+    }, { timeout: 5000 })
+    .then(() => {
+      res.status(200).json({ success: true });
+    })
+    .catch(err => {
+      console.error("Error posting to test endpoint:", err.message);
+      res.status(200).json({ success: true });
+    });
   } catch (error) {
     console.error("❌ Error verifying Mini App webhook:", error.name, error.message);
     const status = error.name === "VerifyJsonFarcasterSignature.InvalidAppKeyError"
