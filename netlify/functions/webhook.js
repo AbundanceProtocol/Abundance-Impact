@@ -1,4 +1,9 @@
-import { parseWebhookEvent, verifyAppKeyWithNeynar } from "@farcaster/miniapp-node";
+import { 
+  parseWebhookEvent, 
+  verifyAppKeyWithNeynar,
+  setUserNotificationDetails,
+  sendFrameNotification
+} from "@farcaster/miniapp-node";
 import axios from "axios";
 import Miniapp from "../../models/Miniapp";
 import connectToDatabase from "../../libs/mongodb";
@@ -7,23 +12,25 @@ export const handler = async (event) => {
   try {
     const data = await parseWebhookEvent(JSON.parse(event.body), verifyAppKeyWithNeynar);
 
-    if (!data) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ success: false, error: "Invalid data" }),
-      };
-    }
-
-    if (!data.event.notificationDetails?.url) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ success: false, error: "Invalid data" }),
-      };
-    }
 
     console.log("✅ Received Farcaster event:", data);
-    console.log("✅ Farcaster event payload:", JSON.stringify(data, null, 2));
     console.log("Event type:", data.event.event, "| Fid:", data.fid);
+
+    if (data.fid == 9326 && data.event.notificationDetails) {
+      const details = data.event.notificationDetails;
+      if (details?.url && details?.token) {
+        await setUserNotificationDetails(data.fid, details);
+
+        await sendFrameNotification({
+          fid: data.fid,
+          title: "Welcome to our Mini App!",
+          body: "Thanks for adding us! Tap to explore.",
+          targetUrl: "https://impact.abundance.id"
+        });
+      }
+    }
+
+
 
     await connectToDatabase();
     const doc = new Miniapp({
@@ -32,18 +39,18 @@ export const handler = async (event) => {
     });
     await doc.save();
 
-    console.log("🗄️ Logged event to MongoDB:", doc);
+    // console.log("🗄️ Logged event to MongoDB:", doc);
 
-    await axios({
-      method: "post",
-      url: "https://impact.abundance.id/api/mini-app/test",
-      data: {
-        fid: data.fid,
-        event: data.event.event,
-        payload: data,
-      },
-      timeout: 5000,
-    });
+    // await axios({
+    //   method: "post",
+    //   url: "https://impact.abundance.id/api/mini-app/test",
+    //   data: {
+    //     fid: data.fid,
+    //     event: data.event.event,
+    //     payload: data,
+    //   },
+    //   timeout: 5000,
+    // });
 
     return {
       statusCode: 200,
@@ -117,20 +124,21 @@ export const handler = async (event) => {
 
 //   switch (event.event) {
 //     case "frame_added":
-//       if (event.notificationDetails) {
-//         await setUserNotificationDetails(fid, event.notificationDetails);
-//         await sendFrameNotification({
-//           fid,
-//           title: "Welcome to Frames v2",
-//           body: "Frame is now added to your client",
-//         });
-//       } else {
-//         await deleteUserNotificationDetails(fid);
-//       }
+      // if (event.notificationDetails) {
+      //   await setUserNotificationDetails(fid, event.notificationDetails);
+      //   await sendFrameNotification({
+      //     fid,
+      //     title: "Welcome to Frames v2",
+      //     body: "Frame is now added to your client",
+      //   });
+      // }
+      // } else {
+        // await deleteUserNotificationDetails(fid);
+      // }
 
-//       break;
-//     case "frame_removed":
-//       await deleteUserNotificationDetails(fid);
+      // break;
+    // case "frame_removed":
+      // await deleteUserNotificationDetails(fid);
 
 //       break;
 //     case "notifications_enabled":
