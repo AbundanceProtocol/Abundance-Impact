@@ -16,20 +16,37 @@ export const handler = async (event) => {
     console.log("✅ Received Farcaster event:", data);
     console.log("Event type:", data.event.event, "| Fid:", data.fid);
 
-    if (data.fid == 9326 && data.event.notificationDetails) {
-      const details = data.event.notificationDetails;
-      if (details?.url && details?.token) {
-        await setUserNotificationDetails(data.fid, details);
+    // if (data.fid == 9326 && data.event.notificationDetails) {
+    //   const details = data.event.notificationDetails;
+    //   if (details?.url && details?.token) {
+    //     await setUserNotificationDetails(data.fid, details);
 
-        await sendFrameNotification({
-          fid: data.fid,
-          title: "Welcome to our Mini App!",
-          body: "Thanks for adding us! Tap to explore.",
-          targetUrl: "https://impact.abundance.id"
-        });
-      }
+    //     await sendFrameNotification({
+    //       fid: data.fid,
+    //       title: "Welcome to our Mini App!",
+    //       body: "Thanks for adding us! Tap to explore.",
+    //       targetUrl: "https://impact.abundance.id"
+    //     });
+    //   }
+    // }
+
+
+    if (data.fid === 9326 && data.event.notificationDetails) {
+      console.log("✉️ Sending notification to FID 9326");
+      await axios({
+        method: "post",
+        url: data.event.notificationDetails.url,
+        data: {
+          notificationId: `fid-9326-${Date.now()}`,
+          title: "Welcome!",
+          body: "Thanks for enabling notifications!",
+          targetUrl: "https://impact.abundance.id",
+          tokens: [data.event.notificationDetails.token],
+        },
+        timeout: 5000,
+      });
+      console.log("✅ Notification sent to FID 9326");
     }
-
 
 
     await connectToDatabase();
