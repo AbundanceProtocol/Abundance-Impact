@@ -5,6 +5,8 @@ import {
   verifyAppKeyWithNeynar
 } from "@farcaster/miniapp-node";
 import axios from "axios";
+import Miniapp from '../../models/Miniapp';
+import connectToDatabase from '../../libs/mongodb';
 
 const app = express();
 app.use(express.json());
@@ -18,16 +20,25 @@ app.post("/", async (req, res) => {
     console.log("Event type:", data.event.event, "| Fid:", data.fid);
 
 
-    await axios({
-      method: "post",
-      url: "https://impact.abundance.id/api/mini-app/test",
-      data: {
-        fid: data.fid,
-        event: data.event.event,
-        payload: data,
-      },
-      timeout: 5000,
+    const db = await connectToDatabase();
+    const doc = new Miniapp({
+      event: data.event.event || "",
+      url: data.event.notificationDetails?.url || ""
     });
+    await doc.save();
+
+    console.log("🗄️ Logged event to MongoDB:", doc);
+
+    // await axios({
+    //   method: "post",
+    //   url: "https://impact.abundance.id/api/mini-app/test",
+    //   data: {
+    //     fid: data.fid,
+    //     event: data.event.event,
+    //     payload: data,
+    //   },
+    //   timeout: 5000,
+    // });
 
     return res.status(200).json({ success: true });
   } catch (error) {
