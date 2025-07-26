@@ -20,7 +20,7 @@ app.post("/", async (req, res) => {
 
     await axios({
       method: "post",
-      url: "https://your-domain.com/api/mini-app/test",
+      url: "https://impact.abundance.id/api/mini-app/test",
       data: {
         fid: data.fid,
         event: data.event.event,
