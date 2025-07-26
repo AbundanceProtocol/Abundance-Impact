@@ -15,6 +15,7 @@ app.post("/", async (req, res) => {
     console.log("✅ Received Farcaster event:", data);
     console.log("✅ Farcaster event payload:", JSON.stringify(data, null, 2));
     console.log("Event type:", data.event.event, "| Fid:", data.fid);
+    console.log('testing')
     // handle logic based on data.event.event:
     // e.g. "miniapp_added", "notifications_enabled", etc.
 
