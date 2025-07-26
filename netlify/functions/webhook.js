@@ -15,12 +15,17 @@ app.post("/", async (req, res) => {
   try {
     const data = await parseWebhookEvent(req.body, verifyAppKeyWithNeynar);
 
+    if (!data) {
+      return res.status(400).json({ success: false, error: "Invalid data" });
+    }
+
+    
     console.log("✅ Received Farcaster event:", data);
     console.log("✅ Farcaster event payload:", JSON.stringify(data, null, 2));
     console.log("Event type:", data.event.event, "| Fid:", data.fid);
 
 
-    const db = await connectToDatabase();
+    await connectToDatabase();
     const doc = new Miniapp({
       event: data.event.event || "",
       url: data.event.notificationDetails?.url || ""
@@ -29,16 +34,16 @@ app.post("/", async (req, res) => {
 
     console.log("🗄️ Logged event to MongoDB:", doc);
 
-    // await axios({
-    //   method: "post",
-    //   url: "https://impact.abundance.id/api/mini-app/test",
-    //   data: {
-    //     fid: data.fid,
-    //     event: data.event.event,
-    //     payload: data,
-    //   },
-    //   timeout: 5000,
-    // });
+    await axios({
+      method: "post",
+      url: "https://impact.abundance.id/api/mini-app/test",
+      data: {
+        fid: data.fid,
+        event: data.event.event,
+        payload: data,
+      },
+      timeout: 5000,
+    });
 
     return res.status(200).json({ success: true });
   } catch (error) {
