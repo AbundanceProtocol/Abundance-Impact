@@ -70,10 +70,6 @@ const Layout = ({ children }) => {
 
       sdk.actions.ready()
 
-      if (adminTest) {
-        sdk.actions.addMiniApp()
-      }
-
       if (isValidUser && !(userBalances?.impact > 0) ) {
         const {impact, qdau} = await getUserBalance(userProfile?.user?.fid)
         console.log('userBalance', impact)
@@ -83,6 +79,20 @@ const Layout = ({ children }) => {
     })();
   }, []);
 
+
+  useEffect(() => {
+    (async () => {
+      if (adminTest) {
+        const { sdk } = await import('@farcaster/miniapp-sdk');
+    
+        const isMiniApp = await sdk.isInMiniApp()
+        setIsMiniApp(isMiniApp)
+        if (isMiniApp) {
+          sdk.actions.addMiniApp()
+        }
+      }
+    })();
+  }, [adminTest]);
 
 
   return (
