@@ -5,8 +5,21 @@
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
-  external_node_modules = ["mongodb", "mongoose", "sharp", "express", "serverless-http", "@farcaster/miniapp-node"]
-  included_files = ["utils/**", "libs/**", "models/**", "node_modules/sharp/**/*"]
+  external_node_modules = [
+    "mongodb", 
+    "mongoose", 
+    "sharp", 
+    "express", 
+    "serverless-http", 
+    "@farcaster/miniapp-node", 
+    "axios"
+  ]
+  included_files = [
+    "utils/**", 
+    "libs/**", 
+    "models/**", 
+    "node_modules/sharp/**/*"
+  ]
 
 [[redirects]]
   from = "/api/webhook"

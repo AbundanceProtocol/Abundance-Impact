@@ -4,6 +4,7 @@ import {
   parseWebhookEvent,
   verifyAppKeyWithNeynar
 } from "@farcaster/miniapp-node";
+import axios from "axios";
 
 const app = express();
 app.use(express.json());
