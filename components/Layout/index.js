@@ -62,7 +62,7 @@ const Layout = ({ children }) => {
         setIsLogged(true)
         setFid(Number(userProfile?.user?.fid))
         setUserInfo({
-          pfp: userProfile?.user?.pfp?.url || null,
+          pfp: userProfile?.user?.pfpUrl || null,
           username: userProfile?.user?.username || null,
           display: userProfile?.user?.displayName || null,
         })

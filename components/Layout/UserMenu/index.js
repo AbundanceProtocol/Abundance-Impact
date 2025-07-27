@@ -62,7 +62,7 @@ const UserMenu = () => {
         console.log('userInfo', userInfo, isMiniApp, userProfile)
         if (isMiniApp && !userInfo.username) {
           setUserInfo({
-            pfp: userProfile?.user?.pfp?.url || null,
+            pfp: userProfile?.user?.pfpUrl || null,
             username: userProfile?.user?.username || null,
             display: userProfile?.user?.displayName || null,
           })
