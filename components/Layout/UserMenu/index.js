@@ -17,6 +17,7 @@ const UserMenu = () => {
   const { userBalances, userInfo, setUserBalances, fid, isLogged, setIsMiniApp, setUserInfo, adminTest } = useContext(AccountContext)
 
   useEffect(() => {
+    console.log('useEffect', fid, userBalances, userInfo)
     if (fid && userBalances.impact == 0) {
       getUserBalance(fid)
     }
