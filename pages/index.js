@@ -1212,7 +1212,7 @@ export default function Home() {
 
 
 
-          {fid && fid == 9326 && version == '2.0' && (<div
+          {fid && fid == 9326 && adminTest && (<div
             className="flex-row"
             style={{
               color: "#9df",
