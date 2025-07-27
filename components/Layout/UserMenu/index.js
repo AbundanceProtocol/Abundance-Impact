@@ -58,6 +58,7 @@ const UserMenu = () => {
       if (isValidUser) {
         // setIsLogged(true)
         // setFid(Number(userProfile?.user?.fid))
+        console.log('userInfo', userInfo, isMiniApp, userProfile)
         if (isMiniApp && !userInfo.username) {
           setUserInfo({
             pfp: userProfile?.user?.pfp?.url || null,
