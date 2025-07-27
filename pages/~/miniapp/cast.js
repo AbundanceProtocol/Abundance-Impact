@@ -191,7 +191,7 @@ export default function SharedCast() {
         setFid(Number(userProfile?.user?.fid))
         if (userBalance.impact == 0) {
           setUserInfo({
-            pfp: userProfile?.user?.pfp?.url || null,
+            pfp: userProfile?.user?.pfpUrl || null,
             username: userProfile?.user?.username || null,
             display: userProfile?.user?.displayName || null,
           })

@@ -17,6 +17,7 @@ const UserMenu = () => {
   const { userBalances, userInfo, setUserBalances, fid, isLogged, setIsMiniApp, setUserInfo, adminTest } = useContext(AccountContext)
 
   useEffect(() => {
+    console.log('useEffect', fid, userBalances, userInfo)
     if (fid && userBalances.impact == 0) {
       getUserBalance(fid)
     }
@@ -58,9 +59,10 @@ const UserMenu = () => {
       if (isValidUser) {
         // setIsLogged(true)
         // setFid(Number(userProfile?.user?.fid))
+        console.log('userInfo', userInfo, isMiniApp, userProfile)
         if (isMiniApp && !userInfo.username) {
           setUserInfo({
-            pfp: userProfile?.user?.pfp?.url || null,
+            pfp: userProfile?.user?.pfpUrl || null,
             username: userProfile?.user?.username || null,
             display: userProfile?.user?.displayName || null,
           })

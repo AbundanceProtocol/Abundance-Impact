@@ -445,11 +445,11 @@ export default function Autofund() {
         const isValidUser = await checkUserProfile(userProfile?.user?.fid);
         console.log(`User is valid: ${isValidUser}`);
         console.log(isValidUser)
-        if (isValidUser) {
+        if (isValidUser && isMiniApp) {
           setIsLogged(true)
           setFid(Number(userProfile?.user?.fid))
           setUserInfo({
-            pfp: userProfile?.user?.pfp?.url || null,
+            pfp: userProfile?.user?.pfpUrl || null,
             username: userProfile?.user?.username || null,
             display: userProfile?.user?.displayName || null,
           })

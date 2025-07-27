@@ -40,7 +40,7 @@ export default function ProfilePage() {
   const [ref, inView] = useInView()
   const { ecosystem, username, app, userFid, pass } = router.query
   const [user, setUser] = useState(null)
-  const { LoginPopup, isLogged, showLogin, setShowLogin, setPoints, setIsLogged, setFid, miniApp, setMiniApp, fid, ecoData, isMiniApp, userInfo, setUserInfo, adminTest, setAdminTest } = useContext(AccountContext)
+  const { LoginPopup, isLogged, showLogin, setShowLogin, setPoints, setIsLogged, setFid, miniApp, setMiniApp, fid, ecoData, isMiniApp, userInfo, setUserInfo, adminTest, setAdminTest, userBalances } = useContext(AccountContext)
   const ref1 = useRef(null)
   const [textMax, setTextMax] = useState('430px')
   const [screenWidth, setScreenWidth ] = useState(undefined)
@@ -4421,6 +4421,8 @@ export default function ProfilePage() {
           >
             <div style={{padding: '5px', border: '1px solid #777', backgroundColor: adminTest ? '#246' : '#ace', color: adminTest ? '#ace' : '#246', cursor: 'pointer'}} onClick={() => setAdminTest(false)}>Impact 1.0</div>
             <div style={{padding: '5px', border: '1px solid #777', backgroundColor: adminTest ? '#ace' : '#246', color: adminTest ? '#246' : '#ace', cursor: 'pointer'}} onClick={() => setAdminTest(true)}>Impact 2.0</div>
+
+            <div style={{padding: '5px', border: '1px solid #777', backgroundColor: adminTest ? '#ace' : '#246', color: adminTest ? '#246' : '#ace', cursor: 'pointer'}}>{'userInfo.pfp: ' + userInfo?.pfp + 'userInfo.display: ' + userInfo?.display + 'userBalances.impact: ' + userBalances?.impact}</div>
             </div>
 
 
