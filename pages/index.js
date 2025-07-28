@@ -26,7 +26,7 @@ import useStore from '../utils/store';
 import ProfilePage from './~/studio';
 import axios from 'axios';
 import MiniAppAuthButton from '../components/MiniAppAuthButton';
-import { BsKey, BsLock, BsLockFill, BsXCircle, BsPerson, BsPersonFill, BsShieldCheck, BsShieldFillCheck, BsPiggyBank, BsPiggyBankFill, BsStar, BsStarFill, BsQuestionCircle, BsGift, BsGiftFill, BsPencilFill  } from "react-icons/bs";
+import { BsKey, BsLock, BsLockFill, BsXCircle, BsPerson, BsPersonFill, BsShieldCheck, BsShieldFillCheck, BsPiggyBank, BsPiggyBankFill, BsStar, BsStarFill, BsQuestionCircle, BsGift, BsGiftFill, BsPencilFill, BsInfoCircle } from "react-icons/bs";
 
 import Spinner from '../components/Common/Spinner';
 import NeynarSigninButton from '../components/Layout/Modals/Signin';
@@ -52,6 +52,16 @@ export default function Home() {
   const [isOn, setIsOn] = useState({boost: false, validate: false, autoFund: false, fund: 0, currencies: []});
   const [expand, setExpand] = useState({boost: false, validate: false, autoFund: false});
   const [loading, setLoading] = useState({boost: false, validate: false, autoFund: false})
+
+  const [showLoginNotice, setShowLoginNotice] = useState(!isLogged);
+
+  useEffect(() => {
+    if (!isLogged) {
+      setShowLoginNotice(true);
+    } else {
+      setTimeout(() => setShowLoginNotice(false), 500);
+    }
+  }, [isLogged]);
 
   const openSwipeable = (target) => {
     setPanelTarget(target);
@@ -857,13 +867,15 @@ export default function Home() {
               style={{
                 backgroundColor: "#002244",
                 borderRadius: "15px",
+                height: '100%',
                 border: "1px solid #11447799",
                 width: isMiniApp || isMobile ? '340px' : '100%',
-                margin: isMiniApp || isMobile ? '0px auto' : '', 
+                margin: isMiniApp || isMobile ? '0px auto' : '',
+                transition: '2.3s ease-in-out height'
               }}
             >
               <div
-                className="shadow flex-row"
+                className={`flex-row ${isLogged ? '' : 'shadow'}`}
                 style={{
                   backgroundColor: "#11448888",
                   width: "100%",
@@ -871,7 +883,7 @@ export default function Home() {
                   alignItems: "center",
                   padding: "8px", 
                   borderRadius: "15px",
-                  margin: '0 0 10px 0'
+                  margin: isLogged ? '0' : '0 0 10px 0'
                 }} >
 
 
@@ -937,15 +949,28 @@ export default function Home() {
 
               </div>
 
-
-
-
-
-              <div className='flex-col' style={{backgroundColor: "#002244ff", padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: '#ace', fontSize: '12px', gap: '0.75rem', position: 'relative'}}>
-                <div>
-                  You need to login to enable Boosting, Auto-funding or Quests
+              {(showLoginNotice || !isLogged) && (
+                <div
+                  className={`login-message-wrapper ${isLogged ? 'fade-out' : 'fade-in'}`}
+                  style={{
+                    overflow: 'hidden',
+                    backgroundColor: "#002244ff",
+                    padding: '0px 18px 12px 18px',
+                    borderRadius: '0 0 15px 15px',
+                    color: '#ace',
+                    fontSize: '12px',
+                    gap: '0.75rem',
+                    position: 'relative',
+                    transition: 'all 0.5s ease',
+                    maxHeight: isLogged ? 0 : '80px',
+                    opacity: isLogged ? 0 : 1,
+                  }}
+                >
+                  <div>
+                    You need to login to enable Boosting, Auto-funding or Quests
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
           )}
@@ -1026,12 +1051,20 @@ export default function Home() {
 
 
 
-              <div className='flex-col' style={{backgroundColor: isLogged ? "#002244ff" : '#333', padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: isLogged ? '#ace' : '#ddd', fontSize: '12px', gap: '0.75rem', position: 'relative'}}>
+              <div className='flex-row' style={{backgroundColor: isLogged ? "#002244ff" : '#333', padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: isLogged ? '#ace' : '#ddd', fontSize: '12px', gap: '0.75rem', position: 'relative'}}>
+
+                <div className='flex-row' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(isLogged && isOn.boost) ? '#0af' : '#aaa'}`, borderRadius: '8px', backgroundColor: '', alignItems: 'center', gap: '0.15rem', height: '30px'}}>
+                  <div style={{fontSize: '13px', fontWeight: '700', color: (isLogged && isOn.boost) ? '#0af' : '#aaa'}}>
+                    +30
+                  </div>
+                  <BsStar color={(isLogged && isOn.boost) ? '#0af' : '#aaa'} size={13} />
+                </div>
+
                 <div>
                   Nominate casts to be boosted and rewarded based on their impact on Farcaster - earn rewards
                 </div>
                 <div className='flex-row' style={{position: 'absolute', bottom: '0', right: '0', padding: '5px 5px', gap: '.25rem', alignItems: 'center'}}>
-                  <BsQuestionCircle size={15} onClick={() => {
+                  <BsInfoCircle size={15} onClick={() => {
                       openSwipeable("boost"); }} />
                 </div>
               </div>
@@ -1106,13 +1139,21 @@ export default function Home() {
 
               </div>
 
-              <div className='flex-col' style={{backgroundColor: isLogged ? "#002244ff" : '#333', padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: isLogged ? '#ace' : '#ddd', fontSize: '12px', gap: '0.75rem', position: 'relative'}}>
+              <div className='flex-row' style={{backgroundColor: isLogged ? "#002244ff" : '#333', padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: isLogged ? '#ace' : '#ddd', fontSize: '12px', gap: '0.75rem', position: 'relative'}}>
+
+                <div className='flex-row' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(isLogged && isOn.validate && isOn.boost) ? '#0af' : (isLogged && isOn.validate) ? '#ace' : '#aaa'}`, borderRadius: '8px', backgroundColor: '', alignItems: 'center', gap: '0.15rem', height: '30px'}}>
+                  <div style={{fontSize: '13px', fontWeight: '700', color: (isLogged && isOn.validate && isOn.boost) ? '#0af' : (isLogged && isOn.validate) ? '#ace' : '#aaa'}}>
+                    +15
+                  </div>
+                  <BsStar color={(isLogged && isOn.validate && isOn.boost) ? '#0af' : (isLogged && isOn.validate) ? '#ace' : '#aaa'} size={13} />
+                </div>
+
                 <div>
                   Ensure the quality of nominations - earn rewards
                 </div>
                 <div className='flex-row' style={{position: 'absolute', bottom: '0', right: '0', padding: '5px 5px', gap: '.25rem', alignItems: 'center'}}>
-                  <BsQuestionCircle size={15} onClick={() => {
-                      openSwipeable("validate"); }} />
+                  <BsInfoCircle size={15} onClick={() => {
+                    openSwipeable("validate"); }} />
                 </div>
               </div>
             </div>
@@ -1147,8 +1188,6 @@ export default function Home() {
 
                 }}
               >
-
-
                 <div
                   className="flex-row"
                   style={{
@@ -1196,13 +1235,21 @@ export default function Home() {
               </div>
 
 
-              <div className='flex-col' style={{backgroundColor: isLogged ? "#002244ff" : '#333', padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: isLogged ? '#ace' : '#ddd', fontSize: '12px', gap: '0.75rem', position: 'relative'}}>
+              <div className='flex-row' style={{backgroundColor: isLogged ? "#002244ff" : '#333', padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: isLogged ? '#ace' : '#ddd', fontSize: '12px', gap: '0.75rem', position: 'relative'}}>
+
+                <div className='flex-row' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(isLogged && isOn.autoFund && isOn.boost) ? '#0af' : (isLogged && isOn.autoFund) ? '#ace' : '#aaa'}`, borderRadius: '8px', backgroundColor: '', alignItems: 'center', gap: '0.15rem', height: '30px'}}>
+                  <div style={{fontSize: '13px', fontWeight: '700', color: (isLogged && isOn.autoFund && isOn.boost) ? '#0af' : (isLogged && isOn.autoFund) ? '#ace' : '#aaa'}}>
+                    +24
+                  </div>
+                  <BsStar color={(isLogged && isOn.autoFund && isOn.boost) ? '#0af' : (isLogged && isOn.autoFund) ? '#ace' : '#aaa'} size={13} />
+                </div>
+
                 <div>
                   Support creators with your remaining $degen and $tipn allowances - earn rewards
                 </div>
 
                 <div className='flex-row' style={{position: 'absolute', bottom: '0', right: '0', padding: '5px 5px', gap: '.25rem', alignItems: 'center'}}>
-                  <BsQuestionCircle size={15} onClick={() => {
+                  <BsInfoCircle size={15} onClick={() => {
                     openSwipeable("autoFund"); }} />
                 </div>
               </div>

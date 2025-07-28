@@ -5,7 +5,7 @@ import BottomNav from './BottomNav';
 import useMatchBreakpoints from '../../../hooks/useMatchBreakpoints';
 import { useRouter } from 'next/router';
 import { AccountContext } from '../../../context';
-import { BsShieldCheck, BsShieldFillCheck, BsPiggyBank, BsPiggyBankFill, BsPerson, BsPersonFill, BsQuestionCircle, BsQuestionCircleFill, BsGear, BsGearFill, BsStar, BsStarFill, BsHouseDoor, BsHouseDoorFill } from "react-icons/bs";
+import { BsShieldCheck, BsShieldFillCheck, BsPiggyBank, BsPiggyBankFill, BsPerson, BsPersonFill, BsInfoCircle, BsQuestionCircleFill, BsGear, BsGearFill, BsStar, BsStarFill, BsHouseDoor, BsHouseDoorFill } from "react-icons/bs";
 
 const version = process.env.NEXT_PUBLIC_VERSION
 
@@ -70,7 +70,7 @@ const BottomBar = () => {
 
             {(version == '2.0' || adminTest) && (<div className='flex-col' style={{justifyContent: 'center', alignItems: 'center', height: '54px', width: '56px', padding: '5px 10px', borderRadius: '10px', border: '1px solid #567', backgroundColor: '#002244aa', backdropFilter: 'blur(12px)'}} onClick={() => openSwipeable('welcome')}>
               <div className='flex-col' style={{justifyContent: 'center', alignItems: 'center', height: '40px'}}>
-                <BsQuestionCircle size={20} color={'#99ddff'} />
+                <BsInfoCircle size={20} color={'#99ddff'} />
                 <div style={{fontSize: '12px', fontWeight: '400', padding: '0 0 0 0', color: '#99ddff', margin: '4px 0 0 0'}}>About</div>
               </div>
             </div>)}
