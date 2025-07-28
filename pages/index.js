@@ -30,6 +30,7 @@ import { BsKey, BsLock, BsLockFill, BsXCircle, BsPerson, BsPersonFill, BsShieldC
 
 import Spinner from '../components/Common/Spinner';
 import NeynarSigninButton from '../components/Layout/Modals/Signin';
+import { formatNum } from '../utils/utils';
 
 const version = process.env.NEXT_PUBLIC_VERSION
 
@@ -49,7 +50,7 @@ export default function Home() {
   const store = useStore()
 
   const [fundLoading , setFundLoading ] = useState(true);
-  const [isOn, setIsOn] = useState({boost: false, validate: false, autoFund: false, fund: 0, currencies: []});
+  const [isOn, setIsOn] = useState({boost: false, validate: false, autoFund: false});
   const [expand, setExpand] = useState({boost: false, validate: false, autoFund: false});
   const [loading, setLoading] = useState({boost: false, validate: false, autoFund: false})
 
@@ -220,14 +221,14 @@ export default function Home() {
           boost: userSettings.boost || false,
           validate: userSettings.validate || false, 
           autoFund: userSettings.autoFund || false, 
-          fund: userSettings.fund || 0, 
-          currencies: userSettings.currencies || []
+          score: userSettings.score || 0
         })
       }
       setLoading({
         validate: false,
         boost: false,
-        autoFund: false
+        autoFund: false,
+        score: 0
       })
     } catch (error) {
       console.error('Error setting invite:', error)
@@ -248,8 +249,6 @@ export default function Home() {
         boost: false,
         validate: false, 
         autoFund: false, 
-        fund: 0, 
-        currencies: []
       })
     }
   }, [isLogged]);
@@ -977,7 +976,7 @@ export default function Home() {
 
 
           {(version == '2.0' || adminTest) && isLogged && (<div className='flex-row' style={{backgroundColor: '', justifyContent: 'center', gap: '1rem', margin: '20px 0 -20px 0'}}>
-            <div className='flex-col' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(isLogged && isOn.boost) ? '#0af' : '#aaa'}`, borderRadius: '8px', backgroundColor: '', alignItems: 'center', gap: '0.0rem', height: '90px', justifyContent: 'center'}}>
+            <div className='flex-col' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(isLogged && isOn.boost) ? '#0af' : '#aaa'}`, borderRadius: '18px', backgroundColor: '', alignItems: 'center', gap: '0.0rem', height: '90px', justifyContent: 'center'}}>
               <div className='flex-row' style={{gap: '0.5rem', alignItems: 'center', padding: '0 10px'}}>
                 <BsStar color={(isLogged && isOn.boost) ? '#0af' : '#aaa'} size={40} />
                 <div style={{fontSize: '43px', fontWeight: '700', color: (isLogged && isOn.boost) ? '#0af' : '#aaa'}}>
@@ -990,11 +989,11 @@ export default function Home() {
               </div>
             </div>
 
-            <div className='flex-col' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(isLogged && isOn.boost) ? '#0af' : '#aaa'}`, borderRadius: '8px', backgroundColor: '', alignItems: 'center', gap: '0.0rem', height: '90px', justifyContent: 'center', width: '135px'}}>
+            <div className='flex-col' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(isLogged && isOn.boost) ? '#0af' : '#aaa'}`, borderRadius: '18px', backgroundColor: '', alignItems: 'center', gap: '0.0rem', height: '90px', justifyContent: 'center', width: '135px'}}>
               <div className='flex-row' style={{gap: '0.5rem', alignItems: 'center', padding: '0 10px'}}>
                 {/* <BsStar color={(isLogged && isOn.boost) ? '#0af' : '#aaa'} size={40} /> */}
                 <div style={{fontSize: '43px', fontWeight: '700', color: (isLogged && isOn.boost) ? '#0af' : '#aaa'}}>
-                  {'69'}
+                  {formatNum(isOn?.score?.toFixed(0) || 0)}
                 </div>
 
               </div>
