@@ -1,5 +1,6 @@
 import connectToDatabase from '../../../libs/mongodb';
 import User from '../../../models/User';
+import Score from '../../../models/Score';
 import ScheduleTip from '../../../models/ScheduleTip';
 
 export default async function handler(req, res) {
@@ -15,14 +16,15 @@ export default async function handler(req, res) {
 
         const user = await User.findOne({ fid: fid.toString(), ecosystem_points: '$IMPACT' }).select('validator boost').exec();
 
-        const schedule = await ScheduleTip.findOne({ fid: Number(fid) }).select('currencies active_cron creator_fund').exec();
+        const schedule = await ScheduleTip.findOne({ fid: Number(fid) }).select('active_cron creator_fund').exec();
+
+        const score = await Score.findOne({ fid: Number(fid), points: '$IMPACT' }).select('impact_score_30d').exec();
+
 
         let validate = false
         let boost = false
         let autoFund = false
-        let fund = 0
-        let currencies = []
-
+        let scoreTotal = 0
 
         if (user) {
           console.log('User data01:', user);
@@ -33,21 +35,24 @@ export default async function handler(req, res) {
         if (schedule) {
           console.log('schedule data01:', schedule);
           autoFund = schedule?.active_cron || false
-          fund = schedule?.creator_fund || false
-          currencies = schedule?.currencies || []
         }
 
-        return {validate, boost, autoFund, fund, currencies}
+        if (score) {
+          console.log('schedule data01:', schedule);
+          scoreTotal = score?.impact_score_30d || 0
+        }
+
+        return {validate, boost, autoFund, score: scoreTotal}
       } catch (error) {
         console.error('Error:', error);
-        return {validate: false, boost: false, autoFund: false, fund: 0, currencies: []}
+        return {validate: false, boost: false, autoFund: false, score: 0}
       }
     }
 
     try {
-      const {validate, boost, autoFund, fund, currencies} = await getUserSettings(fid)
+      const {validate, boost, autoFund, score} = await getUserSettings(fid)
 
-      res.status(200).json({ validate, boost, autoFund, fund, currencies });
+      res.status(200).json({ validate, boost, autoFund, score });
     } catch (error) {
       console.error('Error submitting data:', error)
       res.status(500).json({ error: 'Internal Server Error' });
