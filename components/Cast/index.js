@@ -60,7 +60,29 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
     }
   }
 
+  const looksLikeImageUrl = (url) => {
+    if (!url) return false;
+  
+    // Check for common image file extensions
+    const extensionMatch = url.match(/\.(jpeg|jpg|gif|png|webp|bmp|svg|avif)$/i);
+  
+    // Match CDN-style URL patterns like `/uuid/original`, `/abc123-thumbnail`, etc.
+    const cdnPatternMatch = url.match(/\/[a-f0-9\-]{20,}\/(original|public|thumbnail)?$/i);
+  
+    return !!(extensionMatch || cdnPatternMatch);
+  };
 
+  const looksLikeVideoUrl = (url) => {
+    if (!url) return false;
+  
+    // Check for common video file extensions or stream playlists
+    const videoExtensionMatch = url.match(/\.(mp4|webm|ogg|mkv|m3u8|mov|avi)$/i);
+  
+    // Known streaming CDN patterns (like Farcaster, Livepeer, etc.)
+    const streamPatternMatch = url.includes('stream.farcaster.xyz') || url.includes('livepeer') || url.includes('mux.com');
+  
+    return !!(videoExtensionMatch || streamPatternMatch);
+  }
   
   async function boostQuality(cast, qualityAmount) {
     const castHash = cast.hash
@@ -441,7 +463,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
                 {(media?.content_type?.startsWith('text/html')) && (
                   <Embed url={media?.url} index={index} subindex={subindex} textMax={textMax} />
                 )}
-                {(media?.content_type?.startsWith('image/') || media?.content_type == 'frame') && (
+                {(media?.content_type?.startsWith('image/') || media?.content_type == 'frame') || (media?.content_type === 'other' && looksLikeImageUrl(media?.url)) && (
                   <Images image={media?.url} subindex={subindex} textMax={textMax} handleClick={handleClick} index={index} />
                 )}
                 {(media?.content_type == 'quotecast') && (
@@ -449,7 +471,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
                     <Subcast castHash={media?.url} key={subindex} index={subindex} />
                   </div>
                 )}
-                {(media?.content_type == 'application/x-mpegurl') && (
+                {(media?.content_type == 'application/x-mpegurl') || (media?.content_type === 'other' && looksLikeVideoUrl(media?.url)) && (
                   <div className="" key={`${index}-${subindex}`}>
                     <VideoPlayer width={textMax} src={media.url} />
                   </div>
