@@ -162,6 +162,12 @@ export default function Home() {
       const { sdk } = await import('@farcaster/miniapp-sdk');
       const isApp = await sdk.isInMiniApp()
       setIsMiniApp(isApp)
+
+
+      const userProfile = await sdk.context
+      if (isApp && userProfile?.user?.fid == 9326) {
+        setAdminTest(true)
+      }
     })();
   }, []);
 
@@ -1287,7 +1293,7 @@ export default function Home() {
 
 
 
-          {fid && fid == 9326 && adminTest && (<div
+          {/* {fid && fid == 9326 && adminTest && (<div
             className="flex-row"
             style={{
               color: "#9df",
@@ -1302,7 +1308,8 @@ export default function Home() {
             <div style={{padding: '5px', border: '1px solid #777', backgroundColor: adminTest ? '#ace' : '#246', color: adminTest ? '#246' : '#ace', cursor: 'pointer'}} onClick={() => setAdminTest(true)}>Impact 2.0</div>
 
             <div style={{padding: '5px', border: '1px solid #777', backgroundColor: adminTest ? '#ace' : '#246', color: adminTest ? '#246' : '#ace', cursor: 'pointer'}}>{}</div>
-          </div>)}
+          </div>)} */}
+
         </div>
       </div>
       {!isLogged && (<div ref={ref}>&nbsp;</div>)}
