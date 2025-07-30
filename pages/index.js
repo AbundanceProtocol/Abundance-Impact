@@ -382,15 +382,19 @@ export default function Home() {
       console.log('isMiniApp', isMiniApp, notifStatus.app, notifStatus.notifs)
       if (isMiniApp) {
         if (notifStatus.app && !notifStatus.notifs) {
+          
           const result = await sdk.actions.addMiniApp();
-  
+          console.log('result1', result)
           if (result.added && result.notificationDetails) {
+            console.log('test1')
             setNotifStatus({
               app: true,
               notifs: true
             })
             setIsOn({...isOn, notifs: true})
           } else {
+            console.log('test2')
+
             setNotifStatus({
               app: true,
               notifs: false
@@ -399,7 +403,11 @@ export default function Home() {
           }
   
         } else if (!notifStatus.app) {
+          console.log('test3')
+
           const result = await sdk.actions.addFrame();
+          console.log('result2', result)
+
           if (result.added && result.notificationDetails) {
             setNotifStatus({
               app: true,
@@ -407,6 +415,8 @@ export default function Home() {
             })
             setIsOn({...isOn, notifs: true})
           } else {
+            console.log('test4')
+
             setNotifStatus({
               app: false,
               notifs: false
