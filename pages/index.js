@@ -377,40 +377,44 @@ export default function Home() {
   }
 
   async function notifsOn() {
-    console.log('testing')
     try {
-      if (notifStatus.app && !notifStatus.notifs) {
-        const result = await sdk.actions.addMiniApp();
-
-        if (result.added && result.notificationDetails) {
-          setNotifStatus({
-            app: true,
-            notifs: true
-          })
-          setIsOn({...isOn, notifs: true})
-        } else {
-          setNotifStatus({
-            app: true,
-            notifs: false
-          })
-          setIsOn({...isOn, notifs: false})
+      const { sdk } = await import('@farcaster/miniapp-sdk');
+      if (isMiniApp) {
+        if (notifStatus.app && !notifStatus.notifs) {
+          const result = await sdk.actions.addMiniApp();
+  
+          if (result.added && result.notificationDetails) {
+            setNotifStatus({
+              app: true,
+              notifs: true
+            })
+            setIsOn({...isOn, notifs: true})
+          } else {
+            setNotifStatus({
+              app: true,
+              notifs: false
+            })
+            setIsOn({...isOn, notifs: false})
+          }
+  
+        } else if (!notifStatus.app) {
+          const result = await sdk.actions.addFrame();
+          if (result.added && result.notificationDetails) {
+            setNotifStatus({
+              app: true,
+              notifs: true
+            })
+            setIsOn({...isOn, notifs: true})
+          } else {
+            setNotifStatus({
+              app: false,
+              notifs: false
+            })
+            setIsOn({...isOn, notifs: false})
+          }
         }
-
-      } else if (!notifStatus.app) {
-        const result = await sdk.actions.addFrame();
-        if (result.added && result.notificationDetails) {
-          setNotifStatus({
-            app: true,
-            notifs: true
-          })
-          setIsOn({...isOn, notifs: true})
-        } else {
-          setNotifStatus({
-            app: false,
-            notifs: false
-          })
-          setIsOn({...isOn, notifs: false})
-        }
+      } else {
+        console.log('not miniapp')
       }
 
     } catch(error) {
