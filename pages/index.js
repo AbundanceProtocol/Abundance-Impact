@@ -350,10 +350,10 @@ export default function Home() {
       }
     };
 
-    async function nofitsOn() {
+    async function notifsOn() {
       try {
         if (notifStatus.app && !notifStatus.notifs) {
-          const result = await sdk.actions.addFrame();
+          const result = await sdk.actions.addMiniApp();
 
           if (result.added && result.notificationDetails) {
             setNotifStatus({
@@ -1248,7 +1248,7 @@ export default function Home() {
                     <BsBell color={'#ace'} size={16} />
                   </div>
                 ) : (
-                  <div style={{padding: '4px 5px 1px 5px', border: '1px solid #ace', borderRadius: '8px', backgroundColor: '#22446666'}} onClick={() => {nofitsOn()}}>
+                  <div style={{padding: '4px 5px 1px 5px', border: '1px solid #ace', borderRadius: '8px', backgroundColor: '#22446666'}} onClick={notifsOn}>
                     <BsBellSlash color={'#ace'} size={16} />
                   </div>
                 )}
