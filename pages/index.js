@@ -26,7 +26,7 @@ import useStore from '../utils/store';
 import ProfilePage from './~/studio';
 import axios from 'axios';
 import MiniAppAuthButton from '../components/MiniAppAuthButton';
-import { BsKey, BsLock, BsLockFill, BsXCircle, BsPerson, BsPersonFill, BsShieldCheck, BsShieldFillCheck, BsPiggyBank, BsPiggyBankFill, BsStar, BsStarFill, BsQuestionCircle, BsGift, BsGiftFill, BsPencilFill, BsInfoCircle } from "react-icons/bs";
+import { BsKey, BsLock, BsLockFill, BsXCircle, BsPerson, BsPersonFill, BsShieldCheck, BsShieldFillCheck, BsPiggyBank, BsPiggyBankFill, BsStar, BsStarFill, BsQuestionCircle, BsGift, BsGiftFill, BsPencilFill, BsInfoCircle, BsBellSlash, BsBell } from "react-icons/bs";
 
 import Spinner from '../components/Common/Spinner';
 import NeynarSigninButton from '../components/Layout/Modals/Signin';
@@ -50,11 +50,14 @@ export default function Home() {
   const store = useStore()
 
   const [fundLoading , setFundLoading ] = useState(true);
-  const [isOn, setIsOn] = useState({boost: false, validate: false, autoFund: false});
+  const [isOn, setIsOn] = useState({boost: false, validate: false, autoFund: false, notifs: false});
   const [expand, setExpand] = useState({boost: false, validate: false, autoFund: false});
   const [loading, setLoading] = useState({boost: false, validate: false, autoFund: false})
 
   const [showLoginNotice, setShowLoginNotice] = useState(!isLogged);
+  const [notifStatus, setNotifStatus] = useState({app: false, nofits: false})
+
+
 
   useEffect(() => {
     if (!isLogged) {
@@ -168,6 +171,30 @@ export default function Home() {
       if (isApp && userProfile?.user?.fid == 9326) {
         setAdminTest(true)
       }
+
+      if (isApp) {
+        const client = sdk.context.client;
+        if (client.added) {
+          if (client.notificationDetails) {
+            setNotifStatus({
+              app: true,
+              nofits: true
+            })
+          } else {
+            setNotifStatus({
+              app: true,
+              nofits: false
+            })
+          }
+        } else {
+          setNotifStatus({
+            app: false,
+            nofits: false
+          })        
+        }
+      }
+
+
     })();
   }, []);
 
@@ -227,7 +254,8 @@ export default function Home() {
           boost: userSettings.boost || false,
           validate: userSettings.validate || false, 
           autoFund: userSettings.autoFund || false, 
-          score: userSettings.score || 0
+          score: userSettings.score || 0,
+          notifs: userSettings.notifs || false
         })
       }
       setLoading({
@@ -254,7 +282,9 @@ export default function Home() {
       setIsOn({
         boost: false,
         validate: false, 
-        autoFund: false, 
+        autoFund: false,
+        score: 0,
+        notifs: false
       })
     }
   }, [isLogged]);
@@ -319,6 +349,49 @@ export default function Home() {
         setIsOn(prev => ({...prev, [target]: !isOn[target] }))
       }
     };
+
+    async function nofitsOn() {
+      try {
+        if (notifStatus.app && !notifStatus.notifs) {
+          const result = await sdk.actions.addFrame();
+
+          if (result.added && result.notificationDetails) {
+            setNotifStatus({
+              app: true,
+              notifs: true
+            })
+            setIsOn({...isOn, notifs: true})
+          } else {
+            setNotifStatus({
+              app: true,
+              notifs: false
+            })
+            setIsOn({...isOn, notifs: false})
+          }
+
+        } else if (!notifStatus.app) {
+          const result = await sdk.actions.addFrame();
+          if (result.added && result.notificationDetails) {
+            setNotifStatus({
+              app: true,
+              notifs: true
+            })
+            setIsOn({...isOn, notifs: true})
+          } else {
+            setNotifStatus({
+              app: false,
+              notifs: false
+            })
+            setIsOn({...isOn, notifs: false})
+          }
+        }
+
+      } catch(error) {
+        console.error('Notification setting failed', error)
+        setIsOn({...isOn, notifs: false})
+
+      }
+    }
 
 
     return (
@@ -1129,7 +1202,8 @@ export default function Home() {
                   alignItems: "center",
                   padding: "8px", 
                   borderRadius: "15px",
-                  margin: '0 0 10px 0'
+                  margin: '0 0 10px 0',
+                  gap: '1rem'
                 }} >
 
 
@@ -1140,7 +1214,7 @@ export default function Home() {
                     justifyContent: "flex-start",
                     alignItems: "center",
                     padding: "0px 0 0 4px",
-                    margin: '0 0 0px 0'
+                    margin: '0 0 0px 0',
                   }} >
                 
                   <BsShieldFillCheck style={{ fill: "#cde" }} size={20} />
@@ -1168,6 +1242,16 @@ export default function Home() {
 
                   </div>
                 </div>
+
+                {isOn.notifs ? (
+                  <div style={{padding: '4px 5px 1px 5px', border: '1px solid #ace', borderRadius: '8px', backgroundColor: '#22446666'}}>
+                    <BsBell color={'#ace'} size={16} />
+                  </div>
+                ) : (
+                  <div style={{padding: '4px 5px 1px 5px', border: '1px solid #ace', borderRadius: '8px', backgroundColor: '#22446666'}} onClick={() => {nofitsOn()}}>
+                    <BsBellSlash color={'#ace'} size={16} />
+                  </div>
+                )}
 
                 <ToggleSwitch target={'validate'} />
 
@@ -1219,7 +1303,6 @@ export default function Home() {
                   borderRadius: "15px",
                   margin: '0 0 10px 0',
                   gap: '1rem'
-
                 }}
               >
                 <div
