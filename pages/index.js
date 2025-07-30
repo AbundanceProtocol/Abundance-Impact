@@ -379,6 +379,7 @@ export default function Home() {
   async function notifsOn() {
     try {
       const { sdk } = await import('@farcaster/miniapp-sdk');
+      console.log('isMiniApp', isMiniApp, notifStatus.app, notifStatus.notifs)
       if (isMiniApp) {
         if (notifStatus.app && !notifStatus.notifs) {
           const result = await sdk.actions.addMiniApp();
