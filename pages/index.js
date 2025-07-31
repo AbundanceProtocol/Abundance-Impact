@@ -174,9 +174,9 @@ export default function Home() {
 
       if (isApp) {
         const client = sdk.context.client;
-        console.log('client', client, userProfile)
-        if (client.added) {
-          if (client.notificationDetails) {
+        console.log('client', client, userProfile.client)
+        if (userProfile.client.added) {
+          if (userProfile.client.notificationDetails) {
             setNotifStatus({
               app: true,
               nofits: true
