@@ -55,7 +55,7 @@ export default function Home() {
   const [loading, setLoading] = useState({boost: false, validate: false, autoFund: false})
 
   const [showLoginNotice, setShowLoginNotice] = useState(!isLogged);
-  const [notifStatus, setNotifStatus] = useState({app: false, nofits: false})
+  const [notifStatus, setNotifStatus] = useState({app: false, notifs: false})
 
 
 
@@ -179,18 +179,18 @@ export default function Home() {
           if (userProfile.client.notificationDetails) {
             setNotifStatus({
               app: true,
-              nofits: true
+              notifs: true
             })
           } else {
             setNotifStatus({
               app: true,
-              nofits: false
+              notifs: false
             })
           }
         } else {
           setNotifStatus({
             app: false,
-            nofits: false
+            notifs: false
           })        
         }
       }
