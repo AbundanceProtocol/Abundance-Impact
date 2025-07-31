@@ -26,7 +26,7 @@ import useStore from '../utils/store';
 import ProfilePage from './~/studio';
 import axios from 'axios';
 import MiniAppAuthButton from '../components/MiniAppAuthButton';
-import { BsKey, BsLock, BsLockFill, BsXCircle, BsPerson, BsPersonFill, BsShieldCheck, BsShieldFillCheck, BsPiggyBank, BsPiggyBankFill, BsStar, BsStarFill, BsQuestionCircle, BsGift, BsGiftFill, BsPencilFill, BsInfoCircle } from "react-icons/bs";
+import { BsKey, BsLock, BsLockFill, BsXCircle, BsPerson, BsPersonFill, BsShieldCheck, BsShieldFillCheck, BsPiggyBank, BsPiggyBankFill, BsStar, BsStarFill, BsQuestionCircle, BsGift, BsGiftFill, BsPencilFill, BsInfoCircle, BsBellSlash, BsBell } from "react-icons/bs";
 
 import Spinner from '../components/Common/Spinner';
 import NeynarSigninButton from '../components/Layout/Modals/Signin';
@@ -50,11 +50,14 @@ export default function Home() {
   const store = useStore()
 
   const [fundLoading , setFundLoading ] = useState(true);
-  const [isOn, setIsOn] = useState({boost: false, validate: false, autoFund: false});
+  const [isOn, setIsOn] = useState({boost: false, validate: false, autoFund: false, notifs: false});
   const [expand, setExpand] = useState({boost: false, validate: false, autoFund: false});
   const [loading, setLoading] = useState({boost: false, validate: false, autoFund: false})
 
   const [showLoginNotice, setShowLoginNotice] = useState(!isLogged);
+  const [notifStatus, setNotifStatus] = useState({app: false, notifs: false})
+
+
 
   useEffect(() => {
     if (!isLogged) {
@@ -162,6 +165,37 @@ export default function Home() {
       const { sdk } = await import('@farcaster/miniapp-sdk');
       const isApp = await sdk.isInMiniApp()
       setIsMiniApp(isApp)
+
+
+      const userProfile = await sdk.context
+      if (isApp && userProfile?.user?.fid == 9326) {
+        setAdminTest(true)
+      }
+
+      if (isApp) {
+        const client = sdk.context.client;
+        console.log('client', client, userProfile.client)
+        if (userProfile.client.added) {
+          if (userProfile.client.notificationDetails) {
+            setNotifStatus({
+              app: true,
+              notifs: true
+            })
+          } else {
+            setNotifStatus({
+              app: true,
+              notifs: false
+            })
+          }
+        } else {
+          setNotifStatus({
+            app: false,
+            notifs: false
+          })        
+        }
+      }
+
+
     })();
   }, []);
 
@@ -221,7 +255,8 @@ export default function Home() {
           boost: userSettings.boost || false,
           validate: userSettings.validate || false, 
           autoFund: userSettings.autoFund || false, 
-          score: userSettings.score || 0
+          score: userSettings.score || 0,
+          notifs: userSettings.notifs || false
         })
       }
       setLoading({
@@ -248,7 +283,9 @@ export default function Home() {
       setIsOn({
         boost: false,
         validate: false, 
-        autoFund: false, 
+        autoFund: false,
+        score: 0,
+        notifs: false
       })
     }
   }, [isLogged]);
@@ -315,6 +352,8 @@ export default function Home() {
     };
 
 
+
+
     return (
       <div className="flex-row" style={{justifyContent: 'center', alignItems: 'center', margin: '0 5px 0 0'}}>
 
@@ -338,7 +377,64 @@ export default function Home() {
     console.log('data', data)
   }
 
+  async function notifsOn() {
+    try {
+      const { sdk } = await import('@farcaster/miniapp-sdk');
+      console.log('isMiniApp', isMiniApp, notifStatus.app, notifStatus.notifs)
+      if (isMiniApp) {
+        if (notifStatus.app && !notifStatus.notifs) {
+          
+          const result = await sdk.actions.addMiniApp();
+          console.log('result1', result)
+          if (result.notificationDetails) {
+            console.log('test1')
+            setNotifStatus({
+              app: true,
+              notifs: true
+            })
+            setIsOn({...isOn, notifs: true})
+          } else {
+            console.log('test2')
 
+            setNotifStatus({
+              app: true,
+              notifs: false
+            })
+            setIsOn({...isOn, notifs: false})
+          }
+  
+        } else if (!notifStatus.app) {
+          console.log('test3')
+
+          const result = await sdk.actions.addFrame();
+          console.log('result2', result)
+
+          if (result.notificationDetails) {
+            setNotifStatus({
+              app: true,
+              notifs: true
+            })
+            setIsOn({...isOn, notifs: true})
+          } else {
+            console.log('test4')
+
+            setNotifStatus({
+              app: false,
+              notifs: false
+            })
+            setIsOn({...isOn, notifs: false})
+          }
+        }
+      } else {
+        console.log('not miniapp')
+      }
+
+    } catch(error) {
+      console.error('Notification setting failed', error)
+      setIsOn({...isOn, notifs: false})
+
+    }
+  }
 
 
   return (
@@ -1123,7 +1219,8 @@ export default function Home() {
                   alignItems: "center",
                   padding: "8px", 
                   borderRadius: "15px",
-                  margin: '0 0 10px 0'
+                  margin: '0 0 10px 0',
+                  gap: '1rem'
                 }} >
 
 
@@ -1134,7 +1231,7 @@ export default function Home() {
                     justifyContent: "flex-start",
                     alignItems: "center",
                     padding: "0px 0 0 4px",
-                    margin: '0 0 0px 0'
+                    margin: '0 0 0px 0',
                   }} >
                 
                   <BsShieldFillCheck style={{ fill: "#cde" }} size={20} />
@@ -1163,6 +1260,16 @@ export default function Home() {
                   </div>
                 </div>
 
+                {isOn.notifs ? (
+                  <div style={{padding: '4px 5px 1px 5px', border: '1px solid #ace', borderRadius: '8px', backgroundColor: '#22446666'}}>
+                    <BsBell color={'#ace'} size={16} />
+                  </div>
+                ) : (
+                  <div style={{padding: '4px 5px 1px 5px', border: '1px solid #ace', borderRadius: '8px', backgroundColor: '#22446666'}} onClick={notifsOn}>
+                    <BsBellSlash color={'#ace'} size={16} />
+                  </div>
+                )}
+
                 <ToggleSwitch target={'validate'} />
 
               </div>
@@ -1173,7 +1280,7 @@ export default function Home() {
                   <div style={{fontSize: '13px', fontWeight: '700', color: (isLogged && isOn.validate && isOn.boost) ? '#0af' : (isLogged && isOn.validate) ? '#ace' : '#aaa'}}>
                     +15
                   </div>
-                  <BsStar color={(isLogged && isOn.validate && isOn.boost) ? '#0af' : (isLogged && isOn.validate) ? '#ace' : '#aaa'} size={13} />
+                  <BsStar color={(isLogged && isOn.validate && isOn.boost && isOn.notifs) ? '#0af' : (isLogged && isOn.validate) ? '#ace' : '#aaa'} size={13} />
                 </div>
 
                 <div>
@@ -1213,7 +1320,6 @@ export default function Home() {
                   borderRadius: "15px",
                   margin: '0 0 10px 0',
                   gap: '1rem'
-
                 }}
               >
                 <div
@@ -1287,7 +1393,7 @@ export default function Home() {
 
 
 
-          {fid && fid == 9326 && adminTest && (<div
+          {/* {fid && fid == 9326 && adminTest && (<div
             className="flex-row"
             style={{
               color: "#9df",
@@ -1302,7 +1408,8 @@ export default function Home() {
             <div style={{padding: '5px', border: '1px solid #777', backgroundColor: adminTest ? '#ace' : '#246', color: adminTest ? '#246' : '#ace', cursor: 'pointer'}} onClick={() => setAdminTest(true)}>Impact 2.0</div>
 
             <div style={{padding: '5px', border: '1px solid #777', backgroundColor: adminTest ? '#ace' : '#246', color: adminTest ? '#246' : '#ace', cursor: 'pointer'}}>{}</div>
-          </div>)}
+          </div>)} */}
+
         </div>
       </div>
       {!isLogged && (<div ref={ref}>&nbsp;</div>)}

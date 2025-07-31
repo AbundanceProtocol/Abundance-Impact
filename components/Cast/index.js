@@ -454,7 +454,9 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
           <div className="">
             <div style={{wordWrap: 'break-word', maxWidth: `100%`, width: textMax, whiteSpace: 'pre-line'}}>
               {/* <CastText text={cast.text} embeds={cast.embeds} mentions={cast.mentioned_profiles} /> */}
-              {cast.text}
+              {!(isMiniApp || isMobile) ? (<a href={`https://farcaster.xyz/${cast?.author?.username}/${cast?.hash?.substring(0, 10)}`} title="Navigate to cast">
+              {cast.text}</a>) : (<a onClick={() => viewCast(cast?.hash)} title="Navigate to cast">
+                {cast.text}</a>)}
             </div>
 
             {(cast?.cast_media?.length > 0) && (cast?.cast_media?.map((media, subindex) => (
@@ -480,20 +482,6 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
               )))}
 
 
-
-
-
-
-
-
-            {/* {(cast?.frames?.length > 0) && (cast?.frames?.map((frame, subindex) => (
-              <div key={subindex} className='flex-col' style={{alignItems: 'center', display: hide ? 'flex' : 'flex'}}>
-                {(frame?.image) && (
-                  <Images {...{image: frame?.image, subindex, textMax, handleClick, index}} />
-                )}
-              </div>
-            )))} */}
-
             {cast?.channel && (<div style={{alignSelf: 'flex-start', fontSize: '13px', margin: '10px 0 0 0', padding: '3px 6px', border: '1px solid #666', width: 'fit-content', borderRadius: '3px', backgroundColor: '#eff', fontWeight: '500', color: '#246'}}>/{cast?.channel?.id}</div>)}
           </div>
           {(typeof cast.channelName !== 'undefined') && (
@@ -511,7 +499,6 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
               <div className="">
                 <Message />
               </div>
-              {/* <span className="" style={{padding: '0 0 0 5px'}}>{cast.replies.count}</span> */}
             </div>
             <div className="flex-row" style={{flex: 1}}>
               <div
@@ -532,7 +519,6 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
                 <div className="">
                   <Recast />
                 </div>
-                {/* <span className="" style={{padding: '0 0 0 5px'}}>{cast.reactions.recasts_count}</span> */}
               </div>
             </div>
             <div className="flex-row" style={{flex: 4}}>
@@ -553,7 +539,6 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
                 <div className="">
                   {cast.viewer_context?.liked ? <LikeOn /> : <Like />}
                 </div>
-                {/* <span className="" style={{padding: '0 0 0 5px'}}>{cast.reactions.likes_count}</span> */}
               </div>
             </div>
             <div className="flex-row" style={{flex: 1, padding: '3px', gap: '0.5rem'}}>

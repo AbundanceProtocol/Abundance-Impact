@@ -17,14 +17,15 @@ const BoostInfo = () => {
         backgroundColor: isLogged ? "#002244" : '#333',
         borderRadius: "15px",
         border: isLogged ? "1px solid #11447799" : "1px solid #555",
-        width: isMiniApp || isMobile ? '340px' : '100%',
+        width: '100%',
+        maxWidth: '320px',
         margin: isMiniApp || isMobile ? '15px auto 0 auto' : '15px auto 0 auto',
       }} >
       <div
         className="shadow flex-row"
         style={{
           backgroundColor: isLogged ? "#11448888" : "#444",
-          width: "100%",
+          width: '100%',
           justifyContent: "space-between",
           alignItems: "center",
           padding: "8px", 
@@ -36,7 +37,7 @@ const BoostInfo = () => {
         <div
           className="flex-row"
           style={{
-            width: "100%",
+            width: '100%',
             justifyContent: "flex-start",
             alignItems: "center",
             padding: "0px 0 0 4px",
