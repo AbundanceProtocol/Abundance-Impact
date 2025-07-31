@@ -110,8 +110,8 @@ const WelcomeInfo = () => {
               }}
             />
           </ItemWrap>
-          <div style={{padding: '10px 0', textAlign: 'center'}}>
-            Start using Impact today and join the movement!
+          <div style={{padding: '10px 0', textAlign: 'center', whiteSpace: 'pre-line', width: '80%', margin: '0 auto'}}>
+            Start using Impact today and join the value revolution!
           </div>
         </div>
       </div>
