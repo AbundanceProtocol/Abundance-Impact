@@ -26,7 +26,7 @@ const WelcomeInfo = () => {
           className="shadow flex-row"
           style={{
             backgroundColor: "#11448888",
-            width: "100%",
+            width: isMiniApp || isMobile ? '340px' : '100%',
             justifyContent: "space-between",
             alignItems: "center",
             padding: "8px", 
@@ -38,7 +38,7 @@ const WelcomeInfo = () => {
           <div
             className="flex-row"
             style={{
-              width: "100%",
+              width: isMiniApp || isMobile ? '340px' : '100%',
               justifyContent: "center",
               alignItems: "center",
               padding: "0px 0 0 4px",

@@ -24,7 +24,7 @@ const AutoFundInfo = () => {
           className="shadow flex-row"
           style={{
             backgroundColor: isLogged ? "#11448888" : "#444",
-            width: "100%",
+            width: isMiniApp || isMobile ? '340px' : '100%',
             justifyContent: "space-between",
             alignItems: "center",
             padding: "8px", 
@@ -36,7 +36,7 @@ const AutoFundInfo = () => {
           <div
             className="flex-row"
             style={{
-              width: "100%",
+              width: isMiniApp || isMobile ? '340px' : '100%',
               justifyContent: "flex-start",
               alignItems: "center",
               padding: "0px 0 0 4px",
