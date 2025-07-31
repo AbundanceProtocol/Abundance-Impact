@@ -174,6 +174,7 @@ export default function Home() {
 
       if (isApp) {
         const client = sdk.context.client;
+        console.log('client', client)
         if (client.added) {
           if (client.notificationDetails) {
             setNotifStatus({
