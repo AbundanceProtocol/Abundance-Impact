@@ -385,7 +385,7 @@ export default function Home() {
           
           const result = await sdk.actions.addMiniApp();
           console.log('result1', result)
-          if (result.added && result.notificationDetails) {
+          if (result.notificationDetails) {
             console.log('test1')
             setNotifStatus({
               app: true,
@@ -408,7 +408,7 @@ export default function Home() {
           const result = await sdk.actions.addFrame();
           console.log('result2', result)
 
-          if (result.added && result.notificationDetails) {
+          if (result.notificationDetails) {
             setNotifStatus({
               app: true,
               notifs: true
@@ -1279,7 +1279,7 @@ export default function Home() {
                   <div style={{fontSize: '13px', fontWeight: '700', color: (isLogged && isOn.validate && isOn.boost) ? '#0af' : (isLogged && isOn.validate) ? '#ace' : '#aaa'}}>
                     +15
                   </div>
-                  <BsStar color={(isLogged && isOn.validate && isOn.boost) ? '#0af' : (isLogged && isOn.validate) ? '#ace' : '#aaa'} size={13} />
+                  <BsStar color={(isLogged && isOn.validate && isOn.boost && isOn.notifs) ? '#0af' : (isLogged && isOn.validate) ? '#ace' : '#aaa'} size={13} />
                 </div>
 
                 <div>
