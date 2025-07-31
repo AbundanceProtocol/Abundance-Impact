@@ -12,21 +12,22 @@ const WelcomeInfo = () => {
   const { isMobile } = useMatchBreakpoints();
 
   return (
-    (version == '2.0' || adminTest) && (<div className='flex-col' style={{backgroundColor: ''}}>
+    (version == '2.0' || adminTest) && (<div className='flex-col' style={{backgroundColor: '', position: 'relative'}}>
 
       <div className='shadow flex-col'
         style={{
           backgroundColor: "#002244",
           borderRadius: "15px",
           border: "1px solid #11447799",
-          width: isMiniApp || isMobile ? '340px' : '100%',
+          width: '100%',
+          maxWidth: '320px',
           margin: isMiniApp || isMobile ? '15px auto 0 auto' : '15px auto 0 auto',
         }} >
         <div
           className="shadow flex-row"
           style={{
             backgroundColor: "#11448888",
-            width: isMiniApp || isMobile ? '340px' : '100%',
+            width: '100%',
             justifyContent: "space-between",
             alignItems: "center",
             padding: "8px", 
@@ -38,7 +39,7 @@ const WelcomeInfo = () => {
           <div
             className="flex-row"
             style={{
-              width: isMiniApp || isMobile ? '340px' : '100%',
+              width: '100%',
               justifyContent: "center",
               alignItems: "center",
               padding: "0px 0 0 4px",
