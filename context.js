@@ -24,6 +24,7 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
   const [panelOpen, setPanelOpen] = useState(false);
   const [panelTarget, setPanelTarget] = useState(null);
   const [adminTest, setAdminTest] = useState(false)
+  const [navMenu, setNavMenu] = useState(null)
   const router = useRouter()
   const initEcosystems = [{
     channels: [],
@@ -388,7 +389,8 @@ export const AccountProvider = ({ children, initialAccount, ref1 }) => {
     userInfo, setUserInfo,
     panelOpen, setPanelOpen,
     panelTarget, setPanelTarget,
-    adminTest, setAdminTest
+    adminTest, setAdminTest,
+    navMenu, setNavMenu
   };
 
   return (
