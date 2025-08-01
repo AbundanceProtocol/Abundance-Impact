@@ -128,7 +128,7 @@ async function sendTip(user) {
         special_degen_amount: specialDegen || 0,
         special_ham_amount: specialHam || 0,
         funding_type: 'remaining',
-        season: 7, // update season 5/15
+        season: 8, // update season 5/15
         curator_fid: user?.curator_fids || [],
         channel_id: user?.channels || [],
       });
