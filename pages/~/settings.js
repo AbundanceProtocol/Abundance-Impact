@@ -1,0 +1,859 @@
+import Head from 'next/head';
+import Link from 'next/link';
+import React, { useContext, useState, useRef, useEffect } from 'react'
+import { AccountContext } from '../../context'
+import { useRouter } from 'next/router';
+import { useInView } from 'react-intersection-observer'
+// import Item from '../../components/Ecosystem/ItemWrap/Item';
+// import Description from '../../components/Ecosystem/Description';
+// import ItemWrap from '../../components/Ecosystem/ItemWrap';
+import useMatchBreakpoints from '../../hooks/useMatchBreakpoints';
+import { FaPowerOff, FaLock, FaUsers, FaUser, FaGlobe, FaPlus, FaRegStar, FaCoins, FaAngleDown, FaShareAlt as Share, FaStar } from "react-icons/fa";
+// import { GiRibbonMedal as Medal } from "react-icons/gi";
+// import { IoMdTrophy } from "react-icons/io";
+// import { IoInformationCircleOutline as Info, IoLogIn } from "react-icons/io5";
+// import { PiSquaresFourLight as Actions, PiBankFill } from "react-icons/pi";
+// import { Logo } from './assets';
+import useStore from '../../utils/store';
+import ProfilePage from './studio';
+import axios from 'axios';
+import MiniAppAuthButton from '../../components/MiniAppAuthButton';
+import { BsKey, BsLock, BsLockFill, BsXCircle, BsPerson, BsPersonFill, BsShieldCheck, BsShieldFillCheck, BsPiggyBank, BsPiggyBankFill, BsStar, BsStarFill, BsQuestionCircle, BsGift, BsGiftFill, BsPencilFill, BsInfoCircle, BsBellSlash, BsBell } from "react-icons/bs";
+
+import Spinner from '../../components/Common/Spinner';
+import NeynarSigninButton from '../../components/Layout/Modals/Signin';
+import { formatNum } from '../../utils/utils';
+// import LoginButton from '../../components/Layout/Modals/FrontSignin';
+
+const version = process.env.NEXT_PUBLIC_VERSION
+
+export default function Settings({test}) {
+  const ref2 = useRef(null)
+  const [ref, inView] = useInView()
+  const { LoginPopup, checkEcoEligibility, ecoData, points, setPoints, isLogged, setShowLogin, setIsLogged, fid, setFid, getRemainingBalances, isMiniApp, userBalances, setIsMiniApp, LogoutPopup, userInfo, setUserInfo, setPanelOpen, setPanelTarget, adminTest, setAdminTest } = useContext(AccountContext)
+  const [screenWidth, setScreenWidth] = useState(undefined)
+  const [screenHeight, setScreenHeight] = useState(undefined)
+  const [textMax, setTextMax] = useState('562px')
+  const [feedMax, setFeedMax ] = useState('620px')
+  // const [showPopup, setShowPopup] = useState({open: false, url: null})
+  const router = useRouter()
+  const { eco, referrer, autoFund } = router.query
+  const { isMobile } = useMatchBreakpoints();
+  // const [display, setDisplay] = useState({personal: false, ecosystem: false})
+  const store = useStore()
+
+  const [fundLoading , setFundLoading ] = useState(true);
+  const [isOn, setIsOn] = useState({boost: false, validate: false, autoFund: false, notifs: false});
+  // const [expand, setExpand] = useState({boost: false, validate: false, autoFund: false});
+  const [loading, setLoading] = useState({boost: false, validate: false, autoFund: false})
+
+  const [showLoginNotice, setShowLoginNotice] = useState(!isLogged);
+  const [notifStatus, setNotifStatus] = useState({app: false, notifs: false})
+  
+
+  useEffect(() => {
+    if (!isLogged) {
+      setShowLoginNotice(true);
+    } else {
+      setTimeout(() => setShowLoginNotice(false), 500);
+    }
+  }, [isLogged]);
+
+  const openSwipeable = (target) => {
+    setPanelTarget(target);
+    setPanelOpen(true);
+  };
+
+
+  const handleSignIn = async (loginData) => {
+    console.log('isLogged-3')
+    setFid(loginData.fid)
+    setIsLogged(true)
+    setShowLogin(false)
+  };
+
+  useEffect(() => {
+    console.log('triggered')
+
+    const handleResize = () => {
+      setScreenWidth(window.innerWidth)
+      setScreenHeight(window.innerHeight)
+    }
+    handleResize()
+    window.addEventListener('resize', handleResize);
+    
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    (async () => {
+      const { sdk } = await import('@farcaster/miniapp-sdk');
+      const isApp = await sdk.isInMiniApp()
+      setIsMiniApp(isApp)
+
+
+      const userProfile = await sdk.context
+      if (isApp && userProfile?.user?.fid == 9326) {
+        setAdminTest(true)
+      }
+
+      if (isApp) {
+        const client = sdk.context.client;
+        console.log('client', client, userProfile.client)
+        if (userProfile.client.added) {
+          if (userProfile.client.notificationDetails) {
+            setNotifStatus({
+              app: true,
+              notifs: true
+            })
+          } else {
+            setNotifStatus({
+              app: true,
+              notifs: false
+            })
+          }
+        } else {
+          setNotifStatus({
+            app: false,
+            notifs: false
+          })        
+        }
+      }
+
+
+    })();
+  }, []);
+
+  useEffect(() => {
+    console.log('version', version, userBalances.impact)
+    if ((version == '2.0' || adminTest)) {
+      if (userBalances.impact !== 0) {
+        console.log('off-1')
+        setPanelOpen(false)
+        setPanelTarget(null)
+      } else if (userBalances.impact == 0) {
+        console.log('on-1')
+        setPanelOpen(true)
+        setPanelTarget('welcome')
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    console.log('version', version, userBalances.impact)
+    if ((version == '2.0' || adminTest)) {
+      if (userBalances.impact !== 0) {
+        console.log('off-2')
+        setPanelOpen(false)
+        setPanelTarget(null)
+      } else if (userBalances.impact == 0) {
+        console.log('on-2')
+        setPanelOpen(true)
+        setPanelTarget('welcome')
+      }
+    }
+  }, [userBalances]);
+
+  useEffect(() => {
+    (async () => {
+      const { sdk } = await import('@farcaster/miniapp-sdk');
+      const isApp = await sdk.isInMiniApp()
+      setIsMiniApp(isApp)
+    })();
+  }, [isLogged]);
+
+  async function getUserSettings(fid) {
+    try {
+      setLoading({
+        validate: true,
+        boost: true,
+        autoFund: true
+      })
+      const response = await axios.get('/api/user/getUserSettings', {
+        params: { fid } })
+
+      console.log('response', response)
+
+      if (response?.data) {
+        const userSettings = response?.data || null
+        setIsOn({
+          boost: userSettings.boost || false,
+          validate: userSettings.validate || false, 
+          autoFund: userSettings.autoFund || false, 
+          score: userSettings.score || 0,
+          notifs: userSettings.notifs || false
+        })
+      }
+      setLoading({
+        validate: false,
+        boost: false,
+        autoFund: false,
+        score: 0
+      })
+    } catch (error) {
+      console.error('Error setting invite:', error)
+      setLoading({
+        validate: false,
+        boost: false,
+        autoFund: false
+      })
+    }
+  }
+
+  useEffect(() => {
+    if (isLogged && fid) {
+      getUserSettings(fid)
+    } else if (!isLogged) {
+      setIsOn({
+        boost: false,
+        validate: false, 
+        autoFund: false,
+        score: 0,
+        notifs: false
+      })
+    }
+  }, [isLogged]);
+
+  useEffect(() => {
+    if (screenWidth) {
+      if (screenWidth > 680) {
+        setTextMax(`562px`)
+        setFeedMax('620px')
+      }
+      else if (screenWidth >= 635 && screenWidth <= 680) {
+        setTextMax(`${screenWidth - 120}px`)
+        setFeedMax('580px')
+      }
+      else {
+        setTextMax(`${screenWidth - 10}px`)
+        setFeedMax(`${screenWidth}px`)
+      }
+    }
+    else {
+      setTextMax(`100%`)
+      setFeedMax(`100%`)
+    }
+  }, [screenWidth])
+
+  useEffect(() => {
+    if (isLogged) {
+      let setEco = eco || '$IMPACT'
+      let setReferrer = referrer || null
+      console.log('setEco', setEco)
+      setPoints(setEco)
+      if (userBalances.imppact == 0) {
+        getRemainingBalances(store.fid, setEco, store.signer_uuid, setReferrer)
+      }
+      if (autoFund && store.fid && setReferrer) {
+        setAutoFundInvite(store.fid, referrer, store.signer_uuid)
+      }
+    }
+  }, [eco, isLogged])
+
+  async function setAutoFundInvite(fid, referrer, uuid) {
+    try {
+      const response = await axios.post('/api/curation/postInvite', { fid, referrer, uuid });
+    } catch (error) {
+      console.error('Error setting invite:', error)
+    }
+  }
+
+  const ToggleSwitch = ({target}) => {
+    const handleToggle = () => {
+      console.log('isOn', isOn)
+      if (isOn) {
+        setFundingSchedule('off')
+      } else {
+        setFundingSchedule('on')
+      }
+
+      if (isLogged) {
+        setIsOn(prev => ({...prev, [target]: !isOn[target] }))
+      }
+    };
+
+
+
+
+    return (
+      <div className="flex-row" style={{justifyContent: 'center', alignItems: 'center', margin: '0 5px 0 0'}}>
+
+        {loading[target] && (<div className='flex-row' style={{height: '20px', alignItems: 'center', width: '20px', justifyContent: 'center', padding: '0px', position: 'relative', right: '10%', top: '0px'}}>
+          <Spinner size={20} color={'#468'} />
+        </div>)}
+
+
+        <div
+          className={`toggleSwitch ${isOn[target] ? "toggleSwitch-on" : ""}`}
+          onClick={handleToggle}
+        >
+          <span className='circle'></span>
+        </div>
+      </div>
+    );
+  }
+
+  function setFundingSchedule(data) {
+    console.log('data', data)
+  }
+
+  async function notifsOn() {
+    try {
+      const { sdk } = await import('@farcaster/miniapp-sdk');
+      console.log('isMiniApp', isMiniApp, notifStatus.app, notifStatus.notifs)
+      if (isMiniApp) {
+        if (notifStatus.app && !notifStatus.notifs) {
+          
+          const result = await sdk.actions.addMiniApp();
+          console.log('result1', result)
+          if (result.notificationDetails) {
+            console.log('test1')
+            setNotifStatus({
+              app: true,
+              notifs: true
+            })
+            setIsOn({...isOn, notifs: true})
+          } else {
+            console.log('test2')
+
+            setNotifStatus({
+              app: true,
+              notifs: false
+            })
+            setIsOn({...isOn, notifs: false})
+          }
+  
+        } else if (!notifStatus.app) {
+          console.log('test3')
+
+          const result = await sdk.actions.addFrame();
+          console.log('result2', result)
+
+          if (result.notificationDetails) {
+            setNotifStatus({
+              app: true,
+              notifs: true
+            })
+            setIsOn({...isOn, notifs: true})
+          } else {
+            console.log('test4')
+
+            setNotifStatus({
+              app: false,
+              notifs: false
+            })
+            setIsOn({...isOn, notifs: false})
+          }
+        }
+      } else {
+        console.log('not miniapp')
+      }
+
+    } catch(error) {
+      console.error('Notification setting failed', error)
+      setIsOn({...isOn, notifs: false})
+
+    }
+  }
+  
+
+  return (
+    <div name="feed" style={{ width: "auto", maxWidth: "620px" }} ref={ref2}>
+      <Head>
+        <title>Impact App | Abundance Protocol</title>
+        <meta
+          name="description"
+          content={`Building the global superalignment layer`}
+        />
+      </Head>
+    {(!isLogged || (version == '2.0' || adminTest)) && (
+      <div id="log in"
+      style={{
+        padding: isMobile ? ((version == '1.0' && !adminTest) ? "58px 0 20px 0" : "48px 0 20px 0") : "58px 0 60px 0",
+        width: feedMax, fontSize: '0px'
+      }} >&nnsp;
+
+      </div>
+    )}
+
+      {/* {!isLogged && ( */}
+      {/* <div style={{ padding: (!isLogged || (version == '2.0' || adminTest)) ? "0px 4px 0px 4px" : '0', width: feedMax }}> */}
+
+        {/* <div style={{ padding: "0px 4px 0px 4px", width: feedMax }}> */}
+
+          {!isLogged && (version == '1.0' && !adminTest) && (<div
+            id="autoFund"
+            style={{
+              padding: isMobile ? "28px 0 20px 0" : "28px 0 20px 0",
+              width: "40%",
+            }}
+          ></div>)}
+
+
+
+          {/* LOGIN */}
+
+          {(version == '2.0' || adminTest) && (<div className='flex-col' style={{backgroundColor: ''}}>
+
+            <div className='shadow flex-col'
+              style={{
+                backgroundColor: "#002244",
+                borderRadius: "15px",
+                height: '100%',
+                border: "1px solid #11447799",
+                width: isMiniApp || isMobile ? '340px' : '100%',
+                margin: isMiniApp || isMobile ? '0px auto' : '',
+                transition: '2.3s ease-in-out height'
+              }}
+            >
+              <div
+                className={`flex-row ${isLogged ? '' : 'shadow'}`}
+                style={{
+                  backgroundColor: "#11448888",
+                  width: "100%",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "8px", 
+                  borderRadius: "15px",
+                  margin: isLogged ? '0' : '0 0 10px 0'
+                }} >
+
+
+                <div
+                  className="flex-row"
+                  style={{
+                    width: "100%",
+                    justifyContent: "flex-start",
+                    alignItems: "center",
+                    padding: "0px 0 0 4px",
+                    margin: '0 0 0px 0'
+                  }} >
+
+                
+                  <BsPersonFill style={{ fill: "#cde" }} size={20} />
+                  <div>
+
+
+                    <div style={{border: '0px solid #777', padding: '2px', borderRadius: '10px', backgroundColor: '', maxWidth: 'fit-content', cursor: 'pointer', color: '#cde'}}>
+                      <div className="top-layer flex-row">
+                        <div className="flex-row" style={{padding: "4px 0 4px 10px", marginBottom: '0px', flexWrap: 'wrap', justifyContent: 'flex-start', gap: '0.00rem', width: '', alignItems: 'center'}}>
+                          <div style={{fontSize: isMobile ? '18px' : '22px', fontWeight: '600', color: '', padding: '0px 3px'}}>
+                            Login
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+
+                  <div
+                    className="flex-row"
+                    style={{
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      cursor: "pointer",
+                    }} >
+
+                  </div>
+                </div>
+
+
+                {isLogged ? (<div className='curator-button-red' style={{height: 'max-content', textAlign: 'center', width: '64px', padding: '5px 0 3px 0', alignItems: 'center', justifyContent: 'center'}} onClick={LogoutPopup}>
+                <FaPowerOff size={16} color='#fff' />
+                </div>) : isMiniApp ? 
+                  (<MiniAppAuthButton
+                    onSuccess={(fid, uuid, signers) => {
+                      console.log('isLogged-3', fid)
+                      store.setFid(fid);
+                      store.setSignerUuid(uuid);
+                      store.setIsAuth(uuid?.length > 0);
+
+                      setFid(fid)
+                      setIsLogged(true)
+                      setShowLogin(false)
+                      checkEcoEligibility(fid, '$IMPACT', uuid)
+                    }}
+                    onError={err => {
+                      // Handle error (optional)
+                      alert('Login failed: ' + err.message);
+                    }}
+                  />) : (<div style={{width: '125px', height: '36px', transform: 'scale(0.85)', transformOrigin: 'center'}}><NeynarSigninButton onSignInSuccess={handleSignIn} /></div>)}
+
+              </div>
+
+              {(showLoginNotice || !isLogged) && (
+                <div
+                  className={`login-message-wrapper ${isLogged ? 'fade-out' : 'fade-in'}`}
+                  style={{
+                    overflow: 'hidden',
+                    backgroundColor: "#002244ff",
+                    padding: '0px 18px 12px 18px',
+                    borderRadius: '0 0 15px 15px',
+                    color: '#ace',
+                    fontSize: '12px',
+                    gap: '0.75rem',
+                    position: 'relative',
+                    transition: 'all 0.5s ease',
+                    maxHeight: isLogged ? 0 : '80px',
+                    opacity: isLogged ? 0 : 1,
+                  }}
+                >
+                  <div>
+                    You need to login to enable Boosting, Auto-funding or Quests
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+          )}
+
+
+          {(version == '2.0' || adminTest) && isLogged && (<div className='flex-row' style={{backgroundColor: '', justifyContent: 'center', gap: '1rem', margin: '20px 0 -20px 0'}}>
+            <div className='flex-col' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(isLogged && isOn.boost) ? '#0af' : '#aaa'}`, borderRadius: '18px', backgroundColor: '', alignItems: 'center', gap: '0.0rem', height: '90px', justifyContent: 'center'}}>
+              <div className='flex-row' style={{gap: '0.5rem', alignItems: 'center', padding: '0 10px'}}>
+                <BsStar color={(isLogged && isOn.boost) ? '#0af' : '#aaa'} size={40} />
+                <div style={{fontSize: '43px', fontWeight: '700', color: (isLogged && isOn.boost) ? '#0af' : '#aaa'}}>
+                  {test ? test : '69'}
+                </div>
+
+              </div>
+              <div style={{fontSize: '13px', fontWeight: '700', color: (isLogged && isOn.boost) ? '#0af' : '#aaa'}}>
+                Weekly Points
+              </div>
+            </div>
+
+            <div className='flex-col' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(isLogged && isOn.boost) ? '#0af' : '#aaa'}`, borderRadius: '18px', backgroundColor: '', alignItems: 'center', gap: '0.0rem', height: '90px', justifyContent: 'center', width: '135px'}}>
+              <div className='flex-row' style={{gap: '0.5rem', alignItems: 'center', padding: '0 10px'}}>
+                {/* <BsStar color={(isLogged && isOn.boost) ? '#0af' : '#aaa'} size={40} /> */}
+                <div style={{fontSize: '43px', fontWeight: '700', color: (isLogged && isOn.boost) ? '#0af' : '#aaa'}}>
+                  {formatNum(isOn?.score?.toFixed(0) || 0)}
+                </div>
+
+              </div>
+              <div style={{fontSize: '13px', fontWeight: '700', color: (isLogged && isOn.boost) ? '#0af' : '#aaa'}}>
+                Impact Score
+              </div>
+            </div>
+
+
+          </div>)}
+
+
+          {/* BOOST & NOMINATE */}
+
+          {(version == '2.0' || adminTest) && (<div className='flex-col' style={{backgroundColor: ''}}>
+
+            <div className='shadow flex-col'
+              style={{
+                backgroundColor: isLogged ? "#002244" : '#333',
+                borderRadius: "15px",
+                border: isLogged ? "1px solid #11447799" : "1px solid #555",
+                width: isMiniApp || isMobile ? '340px' : '100%',
+                margin: isMiniApp || isMobile ? '40px auto 0 auto' : '40px auto 0 auto',
+              }} >
+              <div
+                className="shadow flex-row"
+                style={{
+                  backgroundColor: isLogged ? "#11448888" : "#444",
+                  width: "100%",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "8px", 
+                  borderRadius: "15px",
+                  margin: '0 0 10px 0'
+                }} >
+
+
+                <div
+                  className="flex-row"
+                  style={{
+                    width: "100%",
+                    justifyContent: "flex-start",
+                    alignItems: "center",
+                    padding: "0px 0 0 4px",
+                    margin: '0 0 0px 0'
+                  }} >
+
+                
+                  <BsStarFill style={{ fill: "#cde" }} size={20} />
+                  <div>
+
+
+                    <div style={{border: '0px solid #777', padding: '2px', borderRadius: '10px', backgroundColor: '', maxWidth: 'fit-content', cursor: 'pointer', color: '#cde'}}>
+                      <div className="top-layer flex-row">
+                        <div className="flex-row" style={{padding: "4px 0 4px 10px", marginBottom: '0px', flexWrap: 'wrap', justifyContent: 'flex-start', gap: '0.00rem', width: '', alignItems: 'center'}}>
+                          <div style={{fontSize: isMobile ? '18px' : '22px', fontWeight: '600', color: '', padding: '0px 3px'}}>
+                            Boost & Nominate
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+
+                  </div>
+
+
+                  <div
+                    className="flex-row"
+                    style={{
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      cursor: "pointer",
+                    }} >
+
+                  </div>
+
+                </div>
+
+                <ToggleSwitch target={'boost'} />
+
+              </div>
+
+
+
+
+              <div className='flex-row' style={{backgroundColor: isLogged ? "#002244ff" : '#333', padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: isLogged ? '#ace' : '#ddd', fontSize: '12px', gap: '0.75rem', position: 'relative'}}>
+
+                <div className='flex-row' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(isLogged && isOn.boost) ? '#0af' : '#aaa'}`, borderRadius: '8px', backgroundColor: '', alignItems: 'center', gap: '0.15rem', height: '30px'}}>
+                  <div style={{fontSize: '13px', fontWeight: '700', color: (isLogged && isOn.boost) ? '#0af' : '#aaa'}}>
+                    +30
+                  </div>
+                  <BsStar color={(isLogged && isOn.boost) ? '#0af' : '#aaa'} size={13} />
+                </div>
+
+                <div>
+                  Nominate casts to be boosted and rewarded based on their impact on Farcaster - earn rewards
+                </div>
+                <div className='flex-row' style={{position: 'absolute', bottom: '0', right: '0', padding: '5px 5px', gap: '.25rem', alignItems: 'center'}}>
+                  <BsInfoCircle size={15} onClick={() => {
+                      openSwipeable("boost"); }} />
+                </div>
+              </div>
+            </div>
+          </div>
+          )}
+
+
+          {/* VALIDATE */}
+
+          {(version == '2.0' || adminTest) && (<div className='flex-col' style={{backgroundColor: ''}}>
+
+            <div 
+              className='shadow flex-col'
+              style={{
+                backgroundColor: isLogged ? "#002244" : '#333',
+                borderRadius: "15px",
+                border: isLogged ? "1px solid #11447799" : "1px solid #555",
+                width: isMiniApp || isMobile ? '340px' : '100%',
+                margin: isMiniApp || isMobile ? '15px auto 0 auto' : '15px auto 0 auto',
+              }} >
+              <div
+                className="shadow flex-row"
+                style={{
+                  backgroundColor: isLogged ? "#11448888" : "#444",
+                  width: "100%",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "8px", 
+                  borderRadius: "15px",
+                  margin: '0 0 10px 0',
+                  gap: '1rem'
+                }} >
+
+
+                <div
+                  className="flex-row"
+                  style={{
+                    width: "100%",
+                    justifyContent: "flex-start",
+                    alignItems: "center",
+                    padding: "0px 0 0 4px",
+                    margin: '0 0 0px 0',
+                  }} >
+                
+                  <BsShieldFillCheck style={{ fill: "#cde" }} size={20} />
+                  <div>
+
+                    <div style={{border: '0px solid #777', padding: '2px', borderRadius: '10px', backgroundColor: '', maxWidth: 'fit-content', cursor: 'pointer', color: '#cde'}}>
+                      <div className="top-layer flex-row">
+                        <div className="flex-row" style={{padding: "4px 0 4px 10px", marginBottom: '0px', flexWrap: 'wrap', justifyContent: 'flex-start', gap: '0.00rem', width: '', alignItems: 'center'}}>
+                          <div style={{fontSize: isMobile ? '18px' : '22px', fontWeight: '600', color: '', padding: '0px 3px'}}>
+                            Validate
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+
+                  <div
+                    className="flex-row"
+                    style={{
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      cursor: "pointer",
+                    }} >
+
+                  </div>
+                </div>
+
+                {isOn.notifs ? (
+                  <div style={{padding: '4px 5px 1px 5px', border: '1px solid #ace', borderRadius: '8px', backgroundColor: '#22446666'}}>
+                    <BsBell color={'#ace'} size={16} />
+                  </div>
+                ) : (
+                  <div style={{padding: '4px 5px 1px 5px', border: '1px solid #ace', borderRadius: '8px', backgroundColor: '#22446666'}} onClick={notifsOn}>
+                    <BsBellSlash color={'#ace'} size={16} />
+                  </div>
+                )}
+
+                <ToggleSwitch target={'validate'} />
+
+              </div>
+
+              <div className='flex-row' style={{backgroundColor: isLogged ? "#002244ff" : '#333', padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: isLogged ? '#ace' : '#ddd', fontSize: '12px', gap: '0.75rem', position: 'relative'}}>
+
+                <div className='flex-row' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(isLogged && isOn.validate && isOn.boost) ? '#0af' : (isLogged && isOn.validate) ? '#ace' : '#aaa'}`, borderRadius: '8px', backgroundColor: '', alignItems: 'center', gap: '0.15rem', height: '30px'}}>
+                  <div style={{fontSize: '13px', fontWeight: '700', color: (isLogged && isOn.validate && isOn.boost) ? '#0af' : (isLogged && isOn.validate) ? '#ace' : '#aaa'}}>
+                    +15
+                  </div>
+                  <BsStar color={(isLogged && isOn.validate && isOn.boost && isOn.notifs) ? '#0af' : (isLogged && isOn.validate) ? '#ace' : '#aaa'} size={13} />
+                </div>
+
+                <div>
+                  Ensure the quality of nominations - earn rewards
+                </div>
+                <div className='flex-row' style={{position: 'absolute', bottom: '0', right: '0', padding: '5px 5px', gap: '.25rem', alignItems: 'center'}}>
+                  <BsInfoCircle size={15} onClick={() => {
+                    openSwipeable("validate"); }} />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          )}
+
+
+          {/* AUTO-FUND */}
+
+          {(version == '2.0' || adminTest) && (<div className='flex-col' style={{backgroundColor: ''}}>
+
+            <div className='shadow flex-col'
+              style={{
+                backgroundColor: isLogged ? "#002244" : '#333',
+                borderRadius: "15px",
+                border: isLogged ? "1px solid #11447799" : "1px solid #555",
+                width: isMiniApp || isMobile ? '340px' : '100%',
+                margin: isMiniApp || isMobile ? '15px auto 0 auto' : '15px auto 0 auto',
+              }} >
+              <div
+                className="shadow flex-row"
+                style={{
+                  backgroundColor: isLogged ? "#11448888" : "#444",
+                  width: "100%",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "8px", 
+                  borderRadius: "15px",
+                  margin: '0 0 10px 0',
+                  gap: '1rem'
+                }}
+              >
+                <div
+                  className="flex-row"
+                  style={{
+                    width: "100%",
+                    justifyContent: "flex-start",
+                    alignItems: "center",
+                    padding: "0px 0 0 4px",
+                    margin: '0 0 0px 0'
+                  }} >
+
+
+                
+                  <BsPiggyBankFill style={{ fill: "#cde" }} size={20} />
+                  <div>
+
+
+                    <div style={{border: '0px solid #777', padding: '2px', borderRadius: '10px', backgroundColor: '', maxWidth: 'fit-content', cursor: 'pointer', color: '#cde'}}>
+                      <div className="top-layer flex-row">
+                        <div className="flex-row" style={{padding: "4px 0 4px 10px", marginBottom: '0px', flexWrap: 'wrap', justifyContent: 'flex-start', gap: '0.00rem', width: '', alignItems: 'center'}}>
+                          <div style={{fontSize: isMobile ? '18px' : '22px', fontWeight: '600', color: '', padding: '0px 3px'}}>
+                            Auto-fund
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+
+                  <div
+                    className="flex-row"
+                    style={{
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      cursor: "pointer",
+                    }} >
+
+                  </div>
+                </div>
+                <Link href={'/~/auto-fund'}>
+                  <div style={{padding: '4px 5px 1px 5px', border: '1px solid #ace', borderRadius: '8px', backgroundColor: '#22446666'}}>
+                    <BsPencilFill color={'#ace'} size={16} />
+                  </div>
+                </Link>
+                <ToggleSwitch target={'autoFund'} />
+              </div>
+
+
+              <div className='flex-row' style={{backgroundColor: isLogged ? "#002244ff" : '#333', padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: isLogged ? '#ace' : '#ddd', fontSize: '12px', gap: '0.75rem', position: 'relative'}}>
+
+                <div className='flex-row' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(isLogged && isOn.autoFund && isOn.boost) ? '#0af' : (isLogged && isOn.autoFund) ? '#ace' : '#aaa'}`, borderRadius: '8px', backgroundColor: '', alignItems: 'center', gap: '0.15rem', height: '30px'}}>
+                  <div style={{fontSize: '13px', fontWeight: '700', color: (isLogged && isOn.autoFund && isOn.boost) ? '#0af' : (isLogged && isOn.autoFund) ? '#ace' : '#aaa'}}>
+                    +24
+                  </div>
+                  <BsStar color={(isLogged && isOn.autoFund && isOn.boost) ? '#0af' : (isLogged && isOn.autoFund) ? '#ace' : '#aaa'} size={13} />
+                </div>
+
+                <div>
+                  Support creators with your remaining $degen and $tipn allowances - earn rewards
+                </div>
+
+                <div className='flex-row' style={{position: 'absolute', bottom: '0', right: '0', padding: '5px 5px', gap: '.25rem', alignItems: 'center'}}>
+                  <BsInfoCircle size={15} onClick={() => {
+                    openSwipeable("autoFund"); }} />
+                </div>
+              </div>
+            </div>
+          </div>
+          )}
+
+
+          {/* {fid && fid == 9326 && adminTest && (<div
+            className="flex-row"
+            style={{
+              color: "#9df",
+              width: "100%",
+              fontSize: isMobile ? "15px" : "17px",
+              padding: "10px 10px 15px 10px",
+              justifyContent: "center",
+              userSelect: 'none',
+              gap: '1rem'
+            }} >
+            <div style={{padding: '5px', border: '1px solid #777', backgroundColor: adminTest ? '#246' : '#ace', color: adminTest ? '#ace' : '#246', cursor: 'pointer'}} onClick={() => setAdminTest(false)}>Impact 1.0</div>
+            <div style={{padding: '5px', border: '1px solid #777', backgroundColor: adminTest ? '#ace' : '#246', color: adminTest ? '#246' : '#ace', cursor: 'pointer'}} onClick={() => setAdminTest(true)}>Impact 2.0</div>
+
+            <div style={{padding: '5px', border: '1px solid #777', backgroundColor: adminTest ? '#ace' : '#246', color: adminTest ? '#246' : '#ace', cursor: 'pointer'}}>{}</div>
+          </div>)} */}
+
+
+        {/* </div> */}
+      {/* </div> */}
+      {/* {!isLogged && (<div ref={ref}>&nbsp;</div>)} */}
+      {(version == '2.0' || adminTest) || (version == '1.0' && !adminTest) && isLogged && <ProfilePage />}
+    </div>
+  )
+}

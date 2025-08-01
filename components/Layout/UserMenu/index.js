@@ -5,7 +5,7 @@ import { useRouter } from 'next/router';
 import { AccountContext } from '../../../context';
 import { FaStar } from 'react-icons/fa';
 import { Logo } from '../../../pages/assets';
-import { BsTrophy, BsGear, BsCurrencyExchange, BsChevronDoubleLeft } from "react-icons/bs";
+import { BsTrophy, BsGear, BsGearFill, BsCurrencyExchange, BsChevronDoubleLeft } from "react-icons/bs";
 import axios from 'axios';
 
 const version = process.env.NEXT_PUBLIC_VERSION
@@ -14,7 +14,7 @@ const UserMenu = () => {
   const ref1 = useRef(null)
   const { isMobile } = useMatchBreakpoints();
   const router = useRouter()
-  const { userBalances, userInfo, setUserBalances, fid, isLogged, setIsMiniApp, setUserInfo, adminTest } = useContext(AccountContext)
+  const { userBalances, userInfo, setUserBalances, fid, isLogged, setIsMiniApp, setUserInfo, adminTest, navMenu } = useContext(AccountContext)
 
   useEffect(() => {
     console.log('useEffect', fid, userBalances, userInfo)
@@ -171,11 +171,13 @@ const UserMenu = () => {
             </div>
           </div>)}
 
-          {(version == '2.0' || adminTest) && (<div className={'flex-row items-center'} style={{border: '1px solid #999', padding: '5px 3px 0px 3px', borderRadius: '10px', backgroundColor: '#002244cc'}}>
-            <div className={`impact-arrow`} style={{margin: '0 0 0 0' }}>
-              <BsGear size={22} className='' style={{fontSize: '25px', color: '#eee'}} />
-            </div>
-          </div>)}
+          {(version == '2.0' || adminTest) && (            <Link className={'flex-row items-center impact-arrow'} href={'/~/settings'} style={{border: '1px solid #999', padding: '0 6px', borderRadius: '10px', backgroundColor: (navMenu == 'settings' || router.route == '/~/settings') ? '#224466aa' : '#002244cc', margin: '0 0 0 0', justifyContent: 'center', alignItems: 'center'}}>
+            {/* <div> */}
+            {/* <div className={`impact-arrow`} style={{margin: '0 0 0 0' }}> */}
+              {navMenu == 'settings' || router.route == '/~/settings' ? (<BsGearFill size={22} className='' style={{fontSize: '25px', color: '#99ddff'}} />) : (<BsGear size={22} className='' style={{fontSize: '25px', color: '#eee'}} />)}
+            {/* </div> */}
+          {/* </div> */}
+          </Link>)}
 
 
         </div>)}
