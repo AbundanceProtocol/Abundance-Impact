@@ -763,13 +763,13 @@ export default function ProfilePage() {
         {/* </div>
       )} */}
 
-      <div style={{margin: '0 0 70px 0'}}>
+      <div style={{margin: '0 0 270px 0', position: 'relative'}}>
         {(!userFeed || userFeed.length == 0) ? (
         <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
           <Spinner size={31} color={'#999'} />
         </div>
         ) : (userFeed.map((cast, index) => (<div className='flex-col' key={index}><Cast {...{cast, key: index, index, updateCast, openImagePopup, ecosystem: eco?.ecosystem_points_name, handle: eco?.ecosystem_handle, self: false, app}} />
-        <ImpactScale {...{setTipPercent, setInitValue, cast, updateCast, index}} />
+        {/* <ImpactScale {...{setTipPercent, setInitValue, cast, updateCast, index}} style={{position: 'absolute', bottom: '66px'}} /> */}
         </div>)))}
         {!delay && !shuffled && (
           <div className='flex-row' style={{height: '100%', alignItems: 'center', width: '100%', justifyContent: 'center', padding: '20px'}}>
@@ -778,6 +778,24 @@ export default function ProfilePage() {
         )}
 
       </div>
+
+
+      <div className='flex-row' style={{position: 'fixed', bottom: '65px', width: isMobile ? '340px' : 'auto', height: '', margin: '0', justifyContent: 'center', alignItems: 'center'}}>
+        <div style={{width: '100%', position: 'relative'}}>
+
+
+        {userFeed && (userFeed.map((cast, index) => (<div className='flex-col' key={index}>
+        <ImpactScale {...{setTipPercent, setInitValue, cast, updateCast, index}} style={{position: 'absolute', bottom: '66px'}} />
+        </div>)))}
+
+
+
+        </div>
+      </div>
+
+
+
+
       {!delay && (<div ref={ref}>&nbsp;</div>)}
       <ExpandImg  {...{show: showPopup.open, closeImagePopup, embed: {showPopup}, screenWidth, screenHeight }} />
     </div>

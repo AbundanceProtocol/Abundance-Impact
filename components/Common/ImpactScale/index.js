@@ -92,14 +92,14 @@ const ImpactScale = ({ initValue, setTipPercent, setInitValue, type, cast, updat
   return (
     <div 
       className='flex-col' 
-      style={{ width: '100%', gap: '0.2rem', alignItems: 'center', margin: '20px auto 10px auto', border: '1px solid #999', padding: '13px 12px 3px 12px', borderRadius: '10px', backgroundColor: '#002244cc'}}
+      style={{ width: '100%', gap: '0.2rem', alignItems: 'center', margin: '20px auto 10px auto', border: '1px solid #999', padding: '8px 12px 3px 12px', borderRadius: '10px', backgroundColor: '#002244cc', backdropFilter: 'blur(12px)'}}
       onMouseLeave={handleMouseLeave} 
       onTouchEnd={handleMouseLeave}
     >
-      <div style={{textAlign: 'center', fontSize: '16px', fontWeight: '400', color: '#eee', margin: `2px 2px`, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '80%'}}>
+      <div style={{textAlign: 'center', fontSize: '16px', fontWeight: '400', color: '#eee', margin: `0px 2px`, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '80%'}}>
         How impactful is this cast on Farcaster?
       </div>
-      <div className='flex-row' style={{ width: '100%', padding: '5px', gap: '0.0rem'}}>
+      <div className='flex-row' style={{ width: '100%', padding: '1px', gap: '0.0rem'}}>
         <input
           type="range"
           min="1"
@@ -136,15 +136,15 @@ const ImpactScale = ({ initValue, setTipPercent, setInitValue, type, cast, updat
             alignItems: "center",
             justifyContent: "center",
             gap: "0.25rem",
-            margin: '0px 0 10px 0',
+            margin: '0px 0 0px 0',
             cursor: 'pointer'
           }}
         >
           {success ? (<PiCheckFat size={20} />): (<PiMedal size={20} />)}
           <p
             style={{
-              padding: "2px 10px 2px 2px",
-              fontSize: "20px",
+              padding: "0px 10px 0px 2px",
+              fontSize: "18px",
               fontWeight: "700",
               textWrap: "nowrap",
             }}
