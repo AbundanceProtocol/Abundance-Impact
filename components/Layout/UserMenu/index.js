@@ -171,13 +171,10 @@ const UserMenu = () => {
             </div>
           </div>)}
 
-          {(version == '2.0' || adminTest) && (            <Link className={'flex-row items-center impact-arrow'} href={'/~/settings'} style={{border: '1px solid #999', padding: '0 6px', borderRadius: '10px', backgroundColor: (navMenu == 'settings' || router.route == '/~/settings') ? '#224466aa' : '#002244cc', margin: '0 0 0 0', justifyContent: 'center', alignItems: 'center'}}>
-            {/* <div> */}
-            {/* <div className={`impact-arrow`} style={{margin: '0 0 0 0' }}> */}
+          {(version == '2.0' || adminTest) && (
+            <Link className={'flex-row items-center impact-arrow'} href={'/~/settings'} style={{border: '1px solid #999', padding: '0 6px', borderRadius: '10px', backgroundColor: (navMenu == 'settings' || router.route == '/~/settings') ? '#224466aa' : '#002244cc', margin: '0 0 0 0', justifyContent: 'center', alignItems: 'center'}}>
               {navMenu == 'settings' || router.route == '/~/settings' ? (<BsGearFill size={22} className='' style={{fontSize: '25px', color: '#99ddff'}} />) : (<BsGear size={22} className='' style={{fontSize: '25px', color: '#eee'}} />)}
-            {/* </div> */}
-          {/* </div> */}
-          </Link>)}
+            </Link>)}
 
 
         </div>
