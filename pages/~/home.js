@@ -1099,7 +1099,7 @@ export default function Homepage({test}) {
                       alignItems: "center",
                       justifyContent: "center",
                       gap: "0.25rem",
-                      height: '50px',
+                      height: '30px',
                       width: '110px',
                       backgroundColor: '#aaa'
                     }}
@@ -1108,7 +1108,7 @@ export default function Homepage({test}) {
                     <p
                       style={{
                         padding: "0px",
-                        fontSize: isMobile ? '14px' : '18px',
+                        fontSize: isMobile ? '14px' : '14px',
                         fontWeight: "500",
                         textWrap: "wrap",
                         textAlign: 'center'
@@ -1153,7 +1153,7 @@ export default function Homepage({test}) {
                       alignItems: "center",
                       justifyContent: "center",
                       gap: "0.25rem",
-                      height: '50px',
+                      height: '30px',
                       width: '110px',
                       backgroundColor: '#aaa'
                     }}
@@ -1162,7 +1162,7 @@ export default function Homepage({test}) {
                     <p
                       style={{
                         padding: "0px",
-                        fontSize: isMobile ? '14px' : '18px',
+                        fontSize: isMobile ? '14px' : '14px',
                         fontWeight: "500",
                         textWrap: "wrap",
                         textAlign: 'center'
@@ -1207,7 +1207,7 @@ export default function Homepage({test}) {
                       alignItems: "center",
                       justifyContent: "center",
                       gap: "0.25rem",
-                      height: '50px',
+                      height: '30px',
                       width: '110px',
                       backgroundColor: '#aaa'
                     }}
@@ -1216,7 +1216,7 @@ export default function Homepage({test}) {
                     <p
                       style={{
                         padding: "0px",
-                        fontSize: isMobile ? '14px' : '18px',
+                        fontSize: isMobile ? '13px' : '13px',
                         fontWeight: "500",
                         textWrap: "wrap",
                         textAlign: 'center'
