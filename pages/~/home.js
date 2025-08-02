@@ -18,7 +18,7 @@ import useStore from '../../utils/store';
 import ProfilePage from './studio';
 import axios from 'axios';
 import MiniAppAuthButton from '../../components/MiniAppAuthButton';
-import { BsKey, BsLock, BsLockFill, BsXCircle, BsPerson, BsPersonFill, BsShieldCheck, BsShieldFillCheck, BsPiggyBank, BsPiggyBankFill, BsStar, BsStarFill, BsQuestionCircle, BsGift, BsGiftFill, BsPencilFill, BsInfoCircle, BsBellSlash, BsBell } from "react-icons/bs";
+import { BsKey, BsLock, BsLockFill, BsXCircle, BsPerson, BsPersonFill, BsShieldCheck, BsShieldFillCheck, BsPiggyBank, BsPiggyBankFill, BsStar, BsStarFill, BsQuestionCircle, BsGift, BsGiftFill, BsPencilFill, BsInfoCircle, BsBellSlash, BsBell, BsRocketTakeoffFill, BsGearFill, BsCurrencyExchange } from "react-icons/bs";
 
 import Spinner from '../../components/Common/Spinner';
 import NeynarSigninButton from '../../components/Layout/Modals/Signin';
@@ -27,7 +27,7 @@ import { formatNum } from '../../utils/utils';
 
 const version = process.env.NEXT_PUBLIC_VERSION
 
-export default function Settings({test}) {
+export default function Homepage({test}) {
   const ref2 = useRef(null)
   const [ref, inView] = useInView()
   const { LoginPopup, checkEcoEligibility, ecoData, points, setPoints, isLogged, setShowLogin, setIsLogged, fid, setFid, getRemainingBalances, isMiniApp, userBalances, setIsMiniApp, LogoutPopup, userInfo, setUserInfo, setPanelOpen, setPanelTarget, adminTest, setAdminTest } = useContext(AccountContext)
@@ -49,7 +49,7 @@ export default function Settings({test}) {
 
   const [showLoginNotice, setShowLoginNotice] = useState(!isLogged);
   const [notifStatus, setNotifStatus] = useState({app: false, notifs: false})
-  const [needNotif, setNeedNotif] = useState(false)
+  
 
   useEffect(() => {
     if (!isLogged) {
@@ -271,16 +271,7 @@ export default function Settings({test}) {
       }
 
       if (isLogged) {
-        if (target !== 'validate') {
-          setIsOn(prev => ({...prev, [target]: !isOn[target] }))
-        } else if (target == 'validate' && isOn.notifs) {
-          setIsOn(prev => ({...prev, [target]: !isOn[target] }))
-        } else if (target == 'validate' && !isOn.notifs) {
-          setNeedNotif(true)
-          setTimeout(() => {
-            setNeedNotif(false)
-          }, 500)
-        }
+        setIsOn(prev => ({...prev, [target]: !isOn[target] }))
       }
     };
 
@@ -296,8 +287,9 @@ export default function Settings({test}) {
 
 
         <div
-          className={`toggleSwitch ${(isOn[target] && !(target == 'validate' && !isOn.notifs)) ? "toggleSwitch-on" : ""}`}
-          onClick={handleToggle}>
+          className={`toggleSwitch ${isOn[target] ? "toggleSwitch-on" : ""}`}
+          onClick={handleToggle}
+        >
           <span className='circle'></span>
         </div>
       </div>
@@ -404,7 +396,7 @@ export default function Settings({test}) {
 
           {/* LOGIN */}
 
-          {(version == '2.0' || adminTest) && (<div className='flex-col' style={{backgroundColor: ''}}>
+          {/* {(version == '2.0' || adminTest) && (<div className='flex-col' style={{backgroundColor: ''}}>
 
             <div className='shadow flex-col'
               style={{
@@ -485,7 +477,6 @@ export default function Settings({test}) {
                       checkEcoEligibility(fid, '$IMPACT', uuid)
                     }}
                     onError={err => {
-                      // Handle error (optional)
                       alert('Login failed: ' + err.message);
                     }}
                   />) : (<div style={{width: '125px', height: '36px', transform: 'scale(0.85)', transformOrigin: 'center'}}><NeynarSigninButton onSignInSuccess={handleSignIn} /></div>)}
@@ -516,7 +507,7 @@ export default function Settings({test}) {
               )}
             </div>
           </div>
-          )}
+          )} */}
 
 
           {(version == '2.0' || adminTest) && isLogged && (<div className='flex-row' style={{backgroundColor: '', justifyContent: 'center', gap: '1rem', margin: '20px 0 -20px 0'}}>
@@ -535,7 +526,6 @@ export default function Settings({test}) {
 
             <div className='flex-col' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(isLogged && isOn.boost) ? '#0af' : '#aaa'}`, borderRadius: '18px', backgroundColor: '', alignItems: 'center', gap: '0.0rem', height: '90px', justifyContent: 'center', width: '135px'}}>
               <div className='flex-row' style={{gap: '0.5rem', alignItems: 'center', padding: '0 10px'}}>
-                {/* <BsStar color={(isLogged && isOn.boost) ? '#0af' : '#aaa'} size={40} /> */}
                 <div style={{fontSize: '43px', fontWeight: '700', color: (isLogged && isOn.boost) ? '#0af' : '#aaa'}}>
                   {formatNum(isOn?.score?.toFixed(0) || 0)}
                 </div>
@@ -549,10 +539,365 @@ export default function Settings({test}) {
 
           </div>)}
 
+          <div className='flex-row' style={{justifyContent: 'center', alignItems: 'center', padding: '40px 30px 0 30px', flexWrap: 'wrap', gap: '1rem'}}>
+
+            <div
+            className="flex-col"
+            style={{
+              // width: "100%",
+              justifyContent: "center",
+              alignItems: "center",
+              }} >
+
+              <div
+                className="flex-row"
+                style={{
+                  gap: "0.75rem",
+                  margin: "0px",
+                  flexWrap: "wrap",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <div
+                  onClick={() =>
+                    document
+                      .getElementById("multitip")
+                      .scrollIntoView({ behavior: "smooth" })
+                  } >
+                  <div
+                    className="flex-col cast-act-lt"
+                    style={{
+                      borderRadius: "8px",
+                      padding: "8px 8px",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "0.25rem",
+                      height: '100px',
+                      width: '110px'
+                    }}
+                  >
+                    {(!isMobile || isMobile) && <BsStarFill size={20} style={{width: '25px'}} />}
+                    <p
+                      style={{
+                        padding: "0px",
+                        fontSize: isMobile ? '15px' : '15px',
+                        fontWeight: "500",
+                        textWrap: "wrap",
+                        textAlign: 'center'
+                      }} >
+                      Explore
+                    </p>
+                    <p
+                      style={{
+                        padding: "0px",
+                        fontSize: isMobile ? '15px' : '15px',
+                        fontWeight: "500",
+                        textWrap: "wrap",
+                        textAlign: 'center'
+                      }} >
+                      Casts
+                    </p>
+                  </div>
+                </div>
+
+
+              </div>
+
+            </div>
+
+
+
+
+            <div
+            className="flex-col"
+            style={{
+              // width: "100%",
+              justifyContent: "center",
+              alignItems: "center",
+              }} >
+
+              <div
+                className="flex-row"
+                style={{
+                  gap: "0.75rem",
+                  margin: "0px",
+                  flexWrap: "wrap",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <div>
+                  <div
+                    className="flex-col cast-act-lt"
+                    style={{
+                      borderRadius: "8px",
+                      padding: "8px 8px",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "0.25rem",
+                      height: '100px',
+                      width: '110px'
+                    }}
+                  >
+                    {(!isMobile || isMobile) && <BsShieldFillCheck size={20} style={{width: '25px'}} />}
+                    <p
+                      style={{
+                        padding: "0px",
+                        fontSize: isMobile ? '15px' : '18px',
+                        fontWeight: "500",
+                        textWrap: "wrap",
+                        textAlign: 'center'
+                      }}
+                    >
+                      Validate
+                    </p>
+                    <p
+                      style={{
+                        padding: "0px",
+                        fontSize: isMobile ? '15px' : '15px',
+                        fontWeight: "500",
+                        textWrap: "wrap",
+                        textAlign: 'center'
+                      }} >
+                      Proposals
+                    </p>
+                  </div>
+                </div>
+
+
+              </div>
+
+            </div>
+
+
+
+
+            <div
+            className="flex-col"
+            style={{
+              // width: "100%",
+              justifyContent: "center",
+              alignItems: "center",
+              }} >
+
+              <div
+                className="flex-row"
+                style={{
+                  gap: "0.75rem",
+                  margin: "0px",
+                  flexWrap: "wrap",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <div>
+                  <div
+                    className="flex-col cast-act-lt"
+                    style={{
+                      borderRadius: "8px",
+                      padding: "8px 8px",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "0.25rem",
+                      height: '100px',
+                      width: '110px'
+                    }}
+                  >
+                    {(!isMobile || isMobile) && <BsGiftFill size={20} style={{width: '25px'}} />}
+                    <p
+                      style={{
+                        padding: "0px",
+                        fontSize: isMobile ? '15px' : '18px',
+                        fontWeight: "500",
+                        textWrap: "wrap",
+                        textAlign: 'center'
+                      }}
+                    >
+                      Rewards
+                    </p>
+                  </div>
+                </div>
+
+
+              </div>
+
+            </div>
+
+
+
+
+            <div
+            className="flex-col"
+            style={{
+              // width: "100%",
+              justifyContent: "center",
+              alignItems: "center",
+              }} >
+
+              <div
+                className="flex-row"
+                style={{
+                  gap: "0.75rem",
+                  margin: "0px",
+                  flexWrap: "wrap",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <div>
+                  <div
+                    className="flex-col cast-act-lt"
+                    style={{
+                      borderRadius: "8px",
+                      padding: "8px 8px",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "0.25rem",
+                      height: '100px',
+                      width: '110px'
+                    }}
+                  >
+                    {(!isMobile || isMobile) && <BsCurrencyExchange size={20} style={{width: '25px'}} />}
+                    <p
+                      style={{
+                        padding: "0px",
+                        fontSize: isMobile ? '15px' : '18px',
+                        fontWeight: "500",
+                        textWrap: "wrap",
+                        textAlign: 'center'
+                      }}
+                    >
+                      Tip
+                    </p>
+                  </div>
+                </div>
+
+
+              </div>
+
+            </div>
+
+
+
+
+
+            <div
+            className="flex-col"
+            style={{
+              // width: "100%",
+              justifyContent: "center",
+              alignItems: "center",
+              }} >
+
+              <div
+                className="flex-row"
+                style={{
+                  gap: "0.75rem",
+                  margin: "0px",
+                  flexWrap: "wrap",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <div>
+                  <div
+                    className="flex-col cast-act-lt"
+                    style={{
+                      borderRadius: "8px",
+                      padding: "8px 8px",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "0.25rem",
+                      height: '100px',
+                      width: '110px'
+                    }}
+                  >
+                    {(!isMobile || isMobile) && <BsRocketTakeoffFill size={20} style={{width: '25px'}} />}
+                    <p
+                      style={{
+                        padding: "0px",
+                        fontSize: isMobile ? '15px' : '18px',
+                        fontWeight: "500",
+                        textWrap: "nowrap",
+                      }}
+                    >
+                      Quests
+                    </p>
+                  </div>
+                </div>
+
+
+              </div>
+
+            </div>
+
+
+
+
+
+
+
+            <div
+            className="flex-col"
+            style={{
+              // width: "100%",
+              justifyContent: "center",
+              alignItems: "center",
+              }} >
+
+              <div
+                className="flex-row"
+                style={{
+                  gap: "0.75rem",
+                  margin: "0px",
+                  flexWrap: "wrap",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <div>
+                  <div
+                    className="flex-col cast-act-lt"
+                    style={{
+                      borderRadius: "8px",
+                      padding: "8px 8px",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "0.25rem",
+                      height: '100px',
+                      width: '110px'
+                    }}
+                  >
+                    {(!isMobile || isMobile) && <BsGearFill size={20} style={{width: '25px'}} />}
+                    <p
+                      style={{
+                        padding: "0px",
+                        fontSize: isMobile ? '15px' : '18px',
+                        fontWeight: "500",
+                        textWrap: "nowrap",
+                      }}
+                    >
+                      Settings
+                    </p>
+                  </div>
+                </div>
+
+
+              </div>
+
+            </div>
+
+
+
+
+          </div>
+
+
 
           {/* BOOST & NOMINATE */}
 
-          {(version == '2.0' || adminTest) && (<div className='flex-col' style={{backgroundColor: ''}}>
+          {/* {(version == '2.0' || adminTest) && (<div className='flex-col' style={{backgroundColor: ''}}>
 
             <div className='shadow flex-col'
               style={{
@@ -642,12 +987,12 @@ export default function Settings({test}) {
               </div>
             </div>
           </div>
-          )}
+          )} */}
 
 
           {/* VALIDATE */}
 
-          {(version == '2.0' || adminTest) && (<div className='flex-col' style={{backgroundColor: ''}}>
+          {/* {(version == '2.0' || adminTest) && (<div className='flex-col' style={{backgroundColor: ''}}>
 
             <div 
               className='shadow flex-col'
@@ -713,8 +1058,8 @@ export default function Settings({test}) {
                     <BsBell color={'#ace'} size={16} />
                   </div>
                 ) : (
-                  <div style={{padding: '4px 5px 1px 5px', border: needNotif ? '1px solid #f00' :  '1px solid #ace', borderRadius: '8px', backgroundColor: needNotif ? '#fcc' : '#22446666'}} onClick={notifsOn}>
-                    <BsBellSlash color={needNotif ? '#f00' : '#ace'} size={16} />
+                  <div style={{padding: '4px 5px 1px 5px', border: '1px solid #ace', borderRadius: '8px', backgroundColor: '#22446666'}} onClick={notifsOn}>
+                    <BsBellSlash color={'#ace'} size={16} />
                   </div>
                 )}
 
@@ -724,8 +1069,8 @@ export default function Settings({test}) {
 
               <div className='flex-row' style={{backgroundColor: isLogged ? "#002244ff" : '#333', padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: isLogged ? '#ace' : '#ddd', fontSize: '12px', gap: '0.75rem', position: 'relative'}}>
 
-                <div className='flex-row' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(isLogged && isOn.validate && isOn.boost && isOn.notifs) ? '#0af' : (isLogged && isOn.validate) ? '#ace' : '#aaa'}`, borderRadius: '8px', backgroundColor: '', alignItems: 'center', gap: '0.15rem', height: '30px'}}>
-                  <div style={{fontSize: '13px', fontWeight: '700', color: (isLogged && isOn.validate && isOn.boost && isOn.notifs) ? '#0af' : (isLogged && isOn.validate) ? '#ace' : '#aaa'}}>
+                <div className='flex-row' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(isLogged && isOn.validate && isOn.boost) ? '#0af' : (isLogged && isOn.validate) ? '#ace' : '#aaa'}`, borderRadius: '8px', backgroundColor: '', alignItems: 'center', gap: '0.15rem', height: '30px'}}>
+                  <div style={{fontSize: '13px', fontWeight: '700', color: (isLogged && isOn.validate && isOn.boost) ? '#0af' : (isLogged && isOn.validate) ? '#ace' : '#aaa'}}>
                     +15
                   </div>
                   <BsStar color={(isLogged && isOn.validate && isOn.boost && isOn.notifs) ? '#0af' : (isLogged && isOn.validate) ? '#ace' : '#aaa'} size={13} />
@@ -742,12 +1087,12 @@ export default function Settings({test}) {
             </div>
           </div>
 
-          )}
+          )} */}
 
 
           {/* AUTO-FUND */}
 
-          {(version == '2.0' || adminTest) && (<div className='flex-col' style={{backgroundColor: ''}}>
+          {/* {(version == '2.0' || adminTest) && (<div className='flex-col' style={{backgroundColor: ''}}>
 
             <div className='shadow flex-col'
               style={{
@@ -837,30 +1182,8 @@ export default function Settings({test}) {
               </div>
             </div>
           </div>
-          )}
+          )} */}
 
-
-          {/* {fid && fid == 9326 && adminTest && (<div
-            className="flex-row"
-            style={{
-              color: "#9df",
-              width: "100%",
-              fontSize: isMobile ? "15px" : "17px",
-              padding: "10px 10px 15px 10px",
-              justifyContent: "center",
-              userSelect: 'none',
-              gap: '1rem'
-            }} >
-            <div style={{padding: '5px', border: '1px solid #777', backgroundColor: adminTest ? '#246' : '#ace', color: adminTest ? '#ace' : '#246', cursor: 'pointer'}} onClick={() => setAdminTest(false)}>Impact 1.0</div>
-            <div style={{padding: '5px', border: '1px solid #777', backgroundColor: adminTest ? '#ace' : '#246', color: adminTest ? '#246' : '#ace', cursor: 'pointer'}} onClick={() => setAdminTest(true)}>Impact 2.0</div>
-
-            <div style={{padding: '5px', border: '1px solid #777', backgroundColor: adminTest ? '#ace' : '#246', color: adminTest ? '#246' : '#ace', cursor: 'pointer'}}>{}</div>
-          </div>)} */}
-
-
-        {/* </div> */}
-      {/* </div> */}
-      {/* {!isLogged && (<div ref={ref}>&nbsp;</div>)} */}
       {(version == '2.0' || adminTest) || (version == '1.0' && !adminTest) && isLogged && <ProfilePage />}
     </div>
   )

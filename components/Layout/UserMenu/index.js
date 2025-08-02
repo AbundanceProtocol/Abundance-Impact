@@ -133,17 +133,17 @@ const UserMenu = () => {
         /></Link>)}
 
 
-        {userInfo?.pfp && (<div className='flex-row' style={{gap: '0.5rem'}}>
+        <div className='flex-row' style={{gap: '0.5rem'}}>
 
 
-          {(version == '2.0' || adminTest) && router.route !== '/' && (
+          {userInfo?.pfp && (version == '2.0' || adminTest) && router.route !== '/' && (
             <div className={'flex-row items-center'} style={{border: '1px solid #999', padding: '5px 3px 0px 3px', borderRadius: '10px', backgroundColor: '#002244cc'}} onClick={() => router.back()}>
               <div className={`impact-arrow`} style={{margin: '0 0 0 0' }}>
                 <BsChevronDoubleLeft size={22} className='' style={{fontSize: '25px', color: '#eee'}} />
               </div>
             </div>)}
 
-          <div className={'flex-row items-center'} style={{border: '1px solid #999', padding: '3px 3px 3px 3px', borderRadius: '10px', backgroundColor: '#002244cc'}}>
+          {userInfo?.pfp && (version == '2.0' || adminTest) && (<div className={'flex-row items-center'} style={{border: '1px solid #999', padding: '3px 3px 3px 3px', borderRadius: '10px', backgroundColor: '#002244cc'}}>
 
             <div className={`impact-arrow`} style={{margin: '2px 0 0 0' }}>
               <FaStar size={22} className='' style={{fontSize: '25px', color: '#eee'}} />
@@ -156,16 +156,16 @@ const UserMenu = () => {
             {/* <div style={{textAlign: 'center', fontSize: '13px', fontWeight: '400', color: '#eee', margin: `3px 8px 3px 5px`, width: '', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
               <div>$impact</div>
             </div> */}
-          </div>
+          </div>)}
 
-          {(version == '2.0' || adminTest) && (<div className={'flex-row items-center'} style={{border: '1px solid #999', padding: '5px 3px 0px 3px', borderRadius: '10px', backgroundColor: '#002244cc'}}>
+          {userInfo?.pfp && (version == '2.0' || adminTest) && (<div className={'flex-row items-center'} style={{border: '1px solid #999', padding: '5px 3px 0px 3px', borderRadius: '10px', backgroundColor: '#002244cc'}}>
             <div className={`impact-arrow`} style={{margin: '0 0 0 0' }}>
               <BsCurrencyExchange size={22} className='' style={{fontSize: '25px', color: '#eee'}} />
             </div>
           </div>)}
 
 
-          {(version == '2.0' || adminTest) && (<div className={'flex-row items-center'} style={{border: '1px solid #999', padding: '5px 3px 0px 3px', borderRadius: '10px', backgroundColor: '#002244cc'}}>
+          {userInfo?.pfp && (version == '2.0' || adminTest) && (<div className={'flex-row items-center'} style={{border: '1px solid #999', padding: '5px 3px 0px 3px', borderRadius: '10px', backgroundColor: '#002244cc'}}>
             <div className={`impact-arrow`} style={{margin: '0 0 0 0' }}>
               <BsTrophy size={22} className='' style={{fontSize: '25px', color: '#eee'}} />
             </div>
@@ -180,7 +180,7 @@ const UserMenu = () => {
           </Link>)}
 
 
-        </div>)}
+        </div>
 
 
       </div>
