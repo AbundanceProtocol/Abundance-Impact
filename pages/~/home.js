@@ -577,7 +577,7 @@ export default function Homepage({test}) {
                       backgroundColor: '#aaa'
                     }}
                   >
-                    {(!isMobile || isMobile) && <BsGiftFill size={20} style={{width: '25px'}} />}
+                    {(!isMobile || isMobile) && <BsGiftFill size={20} style={{width: '21px'}} />}
                     <p
                       style={{
                         padding: "0px",
@@ -631,7 +631,7 @@ export default function Homepage({test}) {
                       backgroundColor: '#aaa'
                     }}
                   >
-                    {(!isMobile || isMobile) && <BsCurrencyExchange size={20} style={{width: '25px'}} />}
+                    {(!isMobile || isMobile) && <BsCurrencyExchange size={20} style={{width: '21px'}} />}
                     <p
                       style={{
                         padding: "0px",
@@ -692,7 +692,7 @@ export default function Homepage({test}) {
                       width: '110px'
                     }}
                   >
-                    {(!isMobile || isMobile) && <BsStarFill size={20} style={{width: '25px'}} />}
+                    {(!isMobile || isMobile) && <BsStarFill size={20} style={{width: '21px'}} />}
                     <p
                       style={{
                         padding: "0px",
@@ -747,7 +747,7 @@ export default function Homepage({test}) {
                       backgroundColor: '#aaa'
                     }}
                   >
-                    {(!isMobile || isMobile) && <BsShieldFillCheck size={20} style={{width: '25px'}} />}
+                    {(!isMobile || isMobile) && <BsShieldFillCheck size={20} style={{width: '21px'}} />}
                     <p
                       style={{
                         padding: "0px",
@@ -799,7 +799,7 @@ export default function Homepage({test}) {
                       width: '110px'
                     }}
                   >
-                    {(!isMobile || isMobile) && <BsPiggyBankFill size={20} style={{width: '25px'}} />}
+                    {(!isMobile || isMobile) && <BsPiggyBankFill size={20} style={{width: '21px'}} />}
                     <p
                       style={{
                         padding: "0px",
@@ -852,7 +852,7 @@ export default function Homepage({test}) {
                       backgroundColor: '#aaa'
                     }}
                   >
-                    {(!isMobile || isMobile) && <BsGiftFill size={20} style={{width: '25px'}} />}
+                    {(!isMobile || isMobile) && <BsGiftFill size={20} style={{width: '21px'}} />}
                     <p
                       style={{
                         padding: "0px",
@@ -905,7 +905,7 @@ export default function Homepage({test}) {
                       backgroundColor: '#aaa'
                     }}
                   >
-                    {(!isMobile || isMobile) && <BsRocketTakeoffFill size={20} style={{width: '25px'}} />}
+                    {(!isMobile || isMobile) && <BsRocketTakeoffFill size={20} style={{width: '21px'}} />}
                     <p
                       style={{
                         padding: "0px",
@@ -958,7 +958,7 @@ export default function Homepage({test}) {
                       backgroundColor: '#aaa'
                     }}
                   >
-                    {(!isMobile || isMobile) && <BsQuestionCircleFill size={20} style={{width: '25px'}} />}
+                    {(!isMobile || isMobile) && <BsQuestionCircleFill size={20} style={{width: '21px'}} />}
                     <p
                       style={{
                         padding: "0px",
@@ -1020,7 +1020,7 @@ export default function Homepage({test}) {
                       width: '110px'
                     }}
                   >
-                    {(!isMobile || isMobile) && <BsGearFill size={20} style={{width: '25px'}} />}
+                    {(!isMobile || isMobile) && <BsGearFill size={20} style={{width: '21px'}} />}
                     <p
                       style={{
                         padding: "0px",
@@ -1104,7 +1104,7 @@ export default function Homepage({test}) {
                       backgroundColor: '#aaa'
                     }}
                   >
-                    {/* {(!isMobile || isMobile) && <BsGiftFill size={20} style={{width: '25px'}} />} */}
+                    {/* {(!isMobile || isMobile) && <BsGiftFill size={20} style={{width: '21px'}} />} */}
                     <p
                       style={{
                         padding: "0px",
@@ -1158,7 +1158,7 @@ export default function Homepage({test}) {
                       backgroundColor: '#aaa'
                     }}
                   >
-                    {/* {(!isMobile || isMobile) && <BsGiftFill size={20} style={{width: '25px'}} />} */}
+                    {/* {(!isMobile || isMobile) && <BsGiftFill size={20} style={{width: '21px'}} />} */}
                     <p
                       style={{
                         padding: "0px",
@@ -1212,7 +1212,7 @@ export default function Homepage({test}) {
                       backgroundColor: '#aaa'
                     }}
                   >
-                    {/* {(!isMobile || isMobile) && <BsGiftFill size={20} style={{width: '25px'}} />} */}
+                    {/* {(!isMobile || isMobile) && <BsGiftFill size={20} style={{width: '21px'}} />} */}
                     <p
                       style={{
                         padding: "0px",
