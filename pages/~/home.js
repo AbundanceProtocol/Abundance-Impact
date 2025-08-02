@@ -18,7 +18,7 @@ import useStore from '../../utils/store';
 import ProfilePage from './studio';
 import axios from 'axios';
 import MiniAppAuthButton from '../../components/MiniAppAuthButton';
-import { BsKey, BsLock, BsLockFill, BsXCircle, BsPerson, BsPersonFill, BsShieldCheck, BsShieldFillCheck, BsPiggyBank, BsPiggyBankFill, BsStar, BsStarFill, BsQuestionCircle, BsGift, BsGiftFill, BsPencilFill, BsInfoCircle, BsBellSlash, BsBell, BsRocketTakeoffFill, BsGearFill, BsCurrencyExchange } from "react-icons/bs";
+import { BsKey, BsLock, BsLockFill, BsXCircle, BsPerson, BsPersonFill, BsShieldCheck, BsShieldFillCheck, BsPiggyBank, BsPiggyBankFill, BsStar, BsStarFill, BsQuestionCircle, BsGift, BsGiftFill, BsPencilFill, BsInfoCircle, BsBellSlash, BsBell, BsRocketTakeoffFill, BsGearFill, BsCurrencyExchange, BsQuestionCircleFill, BsInfoCircleFill } from "react-icons/bs";
 
 import Spinner from '../../components/Common/Spinner';
 import NeynarSigninButton from '../../components/Layout/Modals/Signin';
@@ -539,73 +539,9 @@ export default function Homepage({test}) {
 
           </div>)}
 
-          <div className='flex-row' style={{justifyContent: 'center', alignItems: 'center', padding: '40px 30px 0 30px', flexWrap: 'wrap', gap: '1rem'}}>
-
-            <div
-            className="flex-col"
-            style={{
-              // width: "100%",
-              justifyContent: "center",
-              alignItems: "center",
-              }} >
-
-              <div
-                className="flex-row"
-                style={{
-                  gap: "0.75rem",
-                  margin: "0px",
-                  flexWrap: "wrap",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <div
-                  onClick={() =>
-                    document
-                      .getElementById("multitip")
-                      .scrollIntoView({ behavior: "smooth" })
-                  } >
-                  <div
-                    className="flex-col cast-act-lt"
-                    style={{
-                      borderRadius: "8px",
-                      padding: "8px 8px",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "0.25rem",
-                      height: '100px',
-                      width: '110px'
-                    }}
-                  >
-                    {(!isMobile || isMobile) && <BsStarFill size={20} style={{width: '25px'}} />}
-                    <p
-                      style={{
-                        padding: "0px",
-                        fontSize: isMobile ? '15px' : '15px',
-                        fontWeight: "500",
-                        textWrap: "wrap",
-                        textAlign: 'center'
-                      }} >
-                      Explore
-                    </p>
-                    <p
-                      style={{
-                        padding: "0px",
-                        fontSize: isMobile ? '15px' : '15px',
-                        fontWeight: "500",
-                        textWrap: "wrap",
-                        textAlign: 'center'
-                      }} >
-                      Casts
-                    </p>
-                  </div>
-                </div>
 
 
-              </div>
-
-            </div>
-
+          <div className='flex-row' style={{justifyContent: 'center', alignItems: 'center', padding: '40px 10px 0 10px', flexWrap: 'wrap', gap: '1rem'}}>
 
 
 
@@ -629,38 +565,29 @@ export default function Homepage({test}) {
               >
                 <div>
                   <div
-                    className="flex-col cast-act-lt"
+                    className="flex-row cast-act-lt"
                     style={{
                       borderRadius: "8px",
                       padding: "8px 8px",
                       alignItems: "center",
                       justifyContent: "center",
                       gap: "0.25rem",
-                      height: '100px',
-                      width: '110px'
+                      height: '50px',
+                      width: '110px',
+                      backgroundColor: '#aaa'
                     }}
                   >
-                    {(!isMobile || isMobile) && <BsShieldFillCheck size={20} style={{width: '25px'}} />}
+                    {(!isMobile || isMobile) && <BsGiftFill size={20} style={{width: '21px'}} />}
                     <p
                       style={{
                         padding: "0px",
-                        fontSize: isMobile ? '15px' : '18px',
+                        fontSize: isMobile ? '14px' : '18px',
                         fontWeight: "500",
                         textWrap: "wrap",
                         textAlign: 'center'
                       }}
                     >
-                      Validate
-                    </p>
-                    <p
-                      style={{
-                        padding: "0px",
-                        fontSize: isMobile ? '15px' : '15px',
-                        fontWeight: "500",
-                        textWrap: "wrap",
-                        textAlign: 'center'
-                      }} >
-                      Proposals
+                      Share Curation
                     </p>
                   </div>
                 </div>
@@ -669,7 +596,6 @@ export default function Homepage({test}) {
               </div>
 
             </div>
-
 
 
 
@@ -693,76 +619,23 @@ export default function Homepage({test}) {
               >
                 <div>
                   <div
-                    className="flex-col cast-act-lt"
+                    className="flex-row cast-act-lt"
                     style={{
                       borderRadius: "8px",
                       padding: "8px 8px",
                       alignItems: "center",
                       justifyContent: "center",
                       gap: "0.25rem",
-                      height: '100px',
-                      width: '110px'
+                      height: '50px',
+                      width: '110px',
+                      backgroundColor: '#aaa'
                     }}
                   >
-                    {(!isMobile || isMobile) && <BsGiftFill size={20} style={{width: '25px'}} />}
+                    {(!isMobile || isMobile) && <BsCurrencyExchange size={20} style={{width: '21px'}} />}
                     <p
                       style={{
                         padding: "0px",
-                        fontSize: isMobile ? '15px' : '18px',
-                        fontWeight: "500",
-                        textWrap: "wrap",
-                        textAlign: 'center'
-                      }}
-                    >
-                      Rewards
-                    </p>
-                  </div>
-                </div>
-
-
-              </div>
-
-            </div>
-
-
-
-
-            <div
-            className="flex-col"
-            style={{
-              // width: "100%",
-              justifyContent: "center",
-              alignItems: "center",
-              }} >
-
-              <div
-                className="flex-row"
-                style={{
-                  gap: "0.75rem",
-                  margin: "0px",
-                  flexWrap: "wrap",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <div>
-                  <div
-                    className="flex-col cast-act-lt"
-                    style={{
-                      borderRadius: "8px",
-                      padding: "8px 8px",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "0.25rem",
-                      height: '100px',
-                      width: '110px'
-                    }}
-                  >
-                    {(!isMobile || isMobile) && <BsCurrencyExchange size={20} style={{width: '25px'}} />}
-                    <p
-                      style={{
-                        padding: "0px",
-                        fontSize: isMobile ? '15px' : '18px',
+                        fontSize: isMobile ? '14px' : '18px',
                         fontWeight: "500",
                         textWrap: "wrap",
                         textAlign: 'center'
@@ -780,6 +653,171 @@ export default function Homepage({test}) {
 
 
 
+          </div>
+
+
+
+
+
+          <div className='flex-row' style={{justifyContent: 'center', alignItems: 'center', padding: '20px 10px 0 10px', flexWrap: 'wrap', gap: '1rem'}}>
+
+            <Link href={'/~/ecosystems/abundance'}
+            className="flex-col"
+            style={{
+              // width: "100%",
+              justifyContent: "center",
+              alignItems: "center",
+              }} >
+
+              <div
+                className="flex-row"
+                style={{
+                  gap: "0.75rem",
+                  margin: "0px",
+                  flexWrap: "wrap",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <div>
+                  <div
+                    className="flex-row cast-act-lt"
+                    style={{
+                      borderRadius: "8px",
+                      padding: "8px 8px",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "0.25rem",
+                      height: '50px',
+                      width: '110px'
+                    }}
+                  >
+                    {(!isMobile || isMobile) && <BsStarFill size={20} style={{width: '21px'}} />}
+                    <p
+                      style={{
+                        padding: "0px",
+                        fontSize: isMobile ? '16px' : '18px',
+                        fontWeight: "500",
+                        textWrap: "wrap",
+                        textAlign: 'center'
+                      }} >
+                      Explore
+                    </p>
+
+                  </div>
+                </div>
+
+
+              </div>
+
+            </Link>
+
+
+
+
+            <div
+            className="flex-col"
+            style={{
+              // width: "100%",
+              justifyContent: "center",
+              alignItems: "center"
+              }} >
+
+              <div
+                className="flex-row"
+                style={{
+                  gap: "0.75rem",
+                  margin: "0px",
+                  flexWrap: "wrap",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <div>
+                  <div
+                    className="flex-row cast-act-lt"
+                    style={{
+                      borderRadius: "8px",
+                      padding: "8px 8px",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "0.25rem",
+                      height: '50px',
+                      width: '110px',
+                      backgroundColor: '#aaa'
+                    }}
+                  >
+                    {(!isMobile || isMobile) && <BsShieldFillCheck size={20} style={{width: '21px'}} />}
+                    <p
+                      style={{
+                        padding: "0px",
+                        fontSize: isMobile ? '16px' : '18px',
+                        fontWeight: "500",
+                        textWrap: "wrap",
+                        textAlign: 'center'
+                      }}
+                    >
+                      Validate
+                    </p>
+                  </div>
+                </div>
+
+
+              </div>
+
+            </div>
+
+
+            <Link href={'/~/auto-fund'}
+            className="flex-col"
+            style={{
+              // width: "100%",
+              justifyContent: "center",
+              alignItems: "center",
+              }} >
+
+              <div
+                className="flex-row"
+                style={{
+                  gap: "0.75rem",
+                  margin: "0px",
+                  flexWrap: "wrap",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <div>
+                  <div
+                    className="flex-row cast-act-lt"
+                    style={{
+                      borderRadius: "8px",
+                      padding: "8px 8px",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "0.25rem",
+                      height: '50px',
+                      width: '110px'
+                    }}
+                  >
+                    {(!isMobile || isMobile) && <BsPiggyBankFill size={20} style={{width: '21px'}} />}
+                    <p
+                      style={{
+                        padding: "0px",
+                        fontSize: isMobile ? '16px' : '18px',
+                        fontWeight: "500",
+                        textWrap: "wrap",
+                        textAlign: 'center'
+                      }}
+                    >
+                      Autofund
+                    </p>
+                  </div>
+                </div>
+
+
+              </div>
+
+            </Link>
 
 
             <div
@@ -802,22 +840,76 @@ export default function Homepage({test}) {
               >
                 <div>
                   <div
-                    className="flex-col cast-act-lt"
+                    className="flex-row cast-act-lt"
                     style={{
                       borderRadius: "8px",
                       padding: "8px 8px",
                       alignItems: "center",
                       justifyContent: "center",
                       gap: "0.25rem",
-                      height: '100px',
-                      width: '110px'
+                      height: '50px',
+                      width: '110px',
+                      backgroundColor: '#aaa'
                     }}
                   >
-                    {(!isMobile || isMobile) && <BsRocketTakeoffFill size={20} style={{width: '25px'}} />}
+                    {(!isMobile || isMobile) && <BsGiftFill size={20} style={{width: '21px'}} />}
                     <p
                       style={{
                         padding: "0px",
-                        fontSize: isMobile ? '15px' : '18px',
+                        fontSize: isMobile ? '16px' : '18px',
+                        fontWeight: "500",
+                        textWrap: "wrap",
+                        textAlign: 'center'
+                      }}
+                    >
+                      Rewards
+                    </p>
+                  </div>
+                </div>
+
+
+              </div>
+
+            </div>
+
+
+            <div
+            className="flex-col"
+            style={{
+              // width: "100%",
+              justifyContent: "center",
+              alignItems: "center",
+              }} >
+
+              <div
+                className="flex-row"
+                style={{
+                  gap: "0.75rem",
+                  margin: "0px",
+                  flexWrap: "wrap",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <div>
+                  <div
+                    className="flex-row cast-act-lt"
+                    style={{
+                      borderRadius: "8px",
+                      padding: "8px 8px",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "0.25rem",
+                      height: '50px',
+                      width: '110px',
+                      backgroundColor: '#aaa'
+                    }}
+                  >
+                    {(!isMobile || isMobile) && <BsRocketTakeoffFill size={20} style={{width: '21px'}} />}
+                    <p
+                      style={{
+                        padding: "0px",
+                        fontSize: isMobile ? '16px' : '18px',
                         fontWeight: "500",
                         textWrap: "nowrap",
                       }}
@@ -834,11 +926,7 @@ export default function Homepage({test}) {
 
 
 
-
-
-
-
-            <div
+            {/* <div
             className="flex-col"
             style={{
               // width: "100%",
@@ -865,15 +953,78 @@ export default function Homepage({test}) {
                       alignItems: "center",
                       justifyContent: "center",
                       gap: "0.25rem",
-                      height: '100px',
-                      width: '110px'
+                      height: '90px',
+                      width: '110px',
+                      backgroundColor: '#aaa'
                     }}
                   >
-                    {(!isMobile || isMobile) && <BsGearFill size={20} style={{width: '25px'}} />}
+                    {(!isMobile || isMobile) && <BsQuestionCircleFill size={20} style={{width: '21px'}} />}
                     <p
                       style={{
                         padding: "0px",
-                        fontSize: isMobile ? '15px' : '18px',
+                        fontSize: isMobile ? '16px' : '18px',
+                        fontWeight: "500",
+                        textWrap: "wrap",
+                        textAlign: 'center'
+                      }} >
+                      How to
+                    </p>
+                    <p
+                      style={{
+                        padding: "0px",
+                        fontSize: isMobile ? '16px' : '18px',
+                        fontWeight: "500",
+                        textWrap: "wrap",
+                        textAlign: 'center'
+                      }} >
+                      Earn
+                    </p>
+                  </div>
+                </div>
+
+
+              </div>
+
+            </div> */}
+
+
+
+            <Link href={'/~/settings'}
+            className="flex-col"
+            style={{
+              // width: "100%",
+              justifyContent: "center",
+              alignItems: "center",
+              }} >
+
+              <div
+                className="flex-row"
+                style={{
+                  gap: "0.75rem",
+                  margin: "0px",
+                  flexWrap: "wrap",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <div>
+                  <div
+                    className="flex-row cast-act-lt"
+                    style={{
+                      borderRadius: "8px",
+                      padding: "8px 8px",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "0.25rem",
+                      height: '50px',
+                      width: '110px'
+                    }}
+                  >
+                    {(!isMobile || isMobile) && <BsGearFill size={20} style={{width: '21px'}} />}
+                    <p
+                      style={{
+                        padding: "0px",
+                        fontSize: isMobile ? '16px' : '18px',
                         fontWeight: "500",
                         textWrap: "nowrap",
                       }}
@@ -886,12 +1037,209 @@ export default function Homepage({test}) {
 
               </div>
 
-            </div>
+            </Link>
 
 
 
 
           </div>
+
+
+
+
+
+
+
+          <div className='flex-row' style={{justifyContent: 'center', alignItems: 'center', padding: '40px 10px 0 10px', flexWrap: 'wrap', gap: '0.5rem'}}>
+
+
+            {(!isMobile || isMobile) && <BsInfoCircleFill size={20} color={'#ace'} style={{width: '25px'}} />}
+            <div style={{
+              padding: "0px",
+              fontSize: isMobile ? '18px' : '18px',
+              fontWeight: "500",
+              textWrap: "wrap",
+              textAlign: 'center',
+              color: '#ace'
+            }} >
+              How it works
+            </div>
+          </div>
+
+
+
+          <div className='flex-row' style={{justifyContent: 'center', alignItems: 'center', padding: '10px 10px 120px 10px', flexWrap: 'wrap', gap: '1rem'}}>
+
+
+
+            <div
+            className="flex-col"
+            style={{
+              // width: "100%",
+              justifyContent: "center",
+              alignItems: "center",
+              }} >
+
+              <div
+                className="flex-row"
+                style={{
+                  gap: "0.75rem",
+                  margin: "0px",
+                  flexWrap: "wrap",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <div>
+                  <div
+                    className="flex-row cast-act-lt"
+                    style={{
+                      borderRadius: "8px",
+                      padding: "8px 8px",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "0.25rem",
+                      height: '30px',
+                      width: '110px',
+                      backgroundColor: '#aaa'
+                    }}
+                  >
+                    {/* {(!isMobile || isMobile) && <BsGiftFill size={20} style={{width: '21px'}} />} */}
+                    <p
+                      style={{
+                        padding: "0px",
+                        fontSize: isMobile ? '14px' : '14px',
+                        fontWeight: "500",
+                        textWrap: "wrap",
+                        textAlign: 'center'
+                      }}
+                    >
+                      How to Earn
+                    </p>
+                  </div>
+                </div>
+
+
+              </div>
+
+            </div>
+
+
+
+            <div
+            className="flex-col"
+            style={{
+              // width: "100%",
+              justifyContent: "center",
+              alignItems: "center",
+              }} >
+
+              <div
+                className="flex-row"
+                style={{
+                  gap: "0.75rem",
+                  margin: "0px",
+                  flexWrap: "wrap",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <div>
+                  <div
+                    className="flex-row cast-act-lt"
+                    style={{
+                      borderRadius: "8px",
+                      padding: "8px 8px",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "0.25rem",
+                      height: '30px',
+                      width: '110px',
+                      backgroundColor: '#aaa'
+                    }}
+                  >
+                    {/* {(!isMobile || isMobile) && <BsGiftFill size={20} style={{width: '21px'}} />} */}
+                    <p
+                      style={{
+                        padding: "0px",
+                        fontSize: isMobile ? '14px' : '14px',
+                        fontWeight: "500",
+                        textWrap: "wrap",
+                        textAlign: 'center'
+                      }}
+                    >
+                      Impact Score
+                    </p>
+                  </div>
+                </div>
+
+
+              </div>
+
+            </div>
+
+
+
+            <div
+            className="flex-col"
+            style={{
+              // width: "100%",
+              justifyContent: "center",
+              alignItems: "center",
+              }} >
+
+              <div
+                className="flex-row"
+                style={{
+                  gap: "0.75rem",
+                  margin: "0px",
+                  flexWrap: "wrap",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <div>
+                  <div
+                    className="flex-row cast-act-lt"
+                    style={{
+                      borderRadius: "8px",
+                      padding: "8px 8px",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "0.25rem",
+                      height: '30px',
+                      width: '110px',
+                      backgroundColor: '#aaa'
+                    }}
+                  >
+                    {/* {(!isMobile || isMobile) && <BsGiftFill size={20} style={{width: '21px'}} />} */}
+                    <p
+                      style={{
+                        padding: "0px",
+                        fontSize: isMobile ? '13px' : '13px',
+                        fontWeight: "500",
+                        textWrap: "wrap",
+                        textAlign: 'center'
+                      }}
+                    >
+                      Weekly Points
+                    </p>
+                  </div>
+                </div>
+
+
+              </div>
+
+            </div>
+
+
+
+          </div>
+
+
+
+
+
 
 
 
