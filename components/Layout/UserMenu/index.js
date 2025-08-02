@@ -5,7 +5,7 @@ import { useRouter } from 'next/router';
 import { AccountContext } from '../../../context';
 import { FaStar } from 'react-icons/fa';
 import { Logo } from '../../../pages/assets';
-import { BsTrophy, BsGear, BsGearFill, BsCurrencyExchange, BsChevronDoubleLeft } from "react-icons/bs";
+import { BsTrophy, BsGear, BsGearFill, BsCurrencyExchange, BsChevronDoubleLeft, BsGift, BsGiftFill } from "react-icons/bs";
 import axios from 'axios';
 
 const version = process.env.NEXT_PUBLIC_VERSION
@@ -165,11 +165,18 @@ const UserMenu = () => {
           </div>)}
 
 
-          {userInfo?.pfp && (version == '2.0' || adminTest) && (<div className={'flex-row items-center'} style={{border: '1px solid #999', padding: '5px 3px 0px 3px', borderRadius: '10px', backgroundColor: '#002244cc'}}>
+          {/* {userInfo?.pfp && (version == '2.0' || adminTest) && (<div className={'flex-row items-center'} style={{border: '1px solid #999', padding: '5px 3px 0px 3px', borderRadius: '10px', backgroundColor: '#002244cc'}}>
             <div className={`impact-arrow`} style={{margin: '0 0 0 0' }}>
               <BsTrophy size={22} className='' style={{fontSize: '25px', color: '#eee'}} />
             </div>
-          </div>)}
+          </div>)} */}
+
+
+          {userInfo?.pfp && (version == '2.0' || adminTest) && (
+            <Link className={'flex-row items-center impact-arrow'} href={'/~/rewards'} style={{border: '1px solid #999', padding: '0 6px', borderRadius: '10px', backgroundColor: (navMenu == 'rewards' || router.route == '/~/rewards') ? '#224466aa' : '#002244cc', margin: '0 0 0 0', justifyContent: 'center', alignItems: 'center'}}>
+              {navMenu == 'rewards' || router.route == '/~/rewards' ? (<BsGiftFill size={22} className='' style={{fontSize: '25px', color: '#99ddff'}} />) : (<BsGift size={22} className='' style={{fontSize: '25px', color: '#eee'}} />)}
+            </Link>)}
+
 
           {(version == '2.0' || adminTest) && (
             <Link className={'flex-row items-center impact-arrow'} href={'/~/settings'} style={{border: '1px solid #999', padding: '0 6px', borderRadius: '10px', backgroundColor: (navMenu == 'settings' || router.route == '/~/settings') ? '#224466aa' : '#002244cc', margin: '0 0 0 0', justifyContent: 'center', alignItems: 'center'}}>
