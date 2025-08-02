@@ -31,7 +31,7 @@ import { BsKey, BsLock, BsLockFill, BsXCircle, BsPerson, BsPersonFill, BsShieldC
 import Spinner from '../components/Common/Spinner';
 import NeynarSigninButton from '../components/Layout/Modals/Signin';
 import { formatNum } from '../utils/utils';
-import Settings from './~/settings';
+import Homepage from './~/home';
 
 
 const version = process.env.NEXT_PUBLIC_VERSION
@@ -74,7 +74,11 @@ export default function Home() {
     setPanelOpen(true);
   };
 
-
+  useEffect(() => {
+    if ((version === '2.0' || adminTest) && !isLogged) {
+      router.replace('/~/settings');
+    }
+  }, [version, adminTest, isLogged]);
 
   // async function setFundingSchedule(schedule, data) {
   //   setFundLoading(true)
@@ -943,8 +947,8 @@ export default function Home() {
         </div>)}
 
 
-        {(version === '2.0' || adminTest) && (
-          isLogged ? <Settings {...{test: 42}} /> : <Settings {...{test: 43}} />
+        {(version === '2.0' || adminTest) && isLogged && (
+          <Homepage {...{test: 42}} />
         )}
 
 
