@@ -5,7 +5,7 @@ import BottomNav from './BottomNav';
 import useMatchBreakpoints from '../../../hooks/useMatchBreakpoints';
 import { useRouter } from 'next/router';
 import { AccountContext } from '../../../context';
-import { BsShieldCheck, BsShieldFillCheck, BsPiggyBank, BsPiggyBankFill, BsPerson, BsPersonFill, BsInfoCircle, BsQuestionCircleFill, BsGear, BsGearFill, BsStar, BsStarFill, BsHouseDoor, BsHouseDoorFill } from "react-icons/bs";
+import { BsShieldCheck, BsShieldFillCheck, BsPiggyBank, BsPiggyBankFill, BsPerson, BsPersonFill, BsInfoCircle, BsInfoCircleFill, BsQuestionCircleFill, BsGear, BsGearFill, BsStar, BsStarFill, BsHouseDoor, BsHouseDoorFill } from "react-icons/bs";
 
 const version = process.env.NEXT_PUBLIC_VERSION
 
