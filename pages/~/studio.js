@@ -863,33 +863,54 @@ export default function ProfilePage() {
     }
   }
 
-
-
-  function claimReward(event, reward) {
-
+  async function claimReward(event, reward) {
     event.preventDefault();
-    let shareUrl = `https://impact.abundance.id/~/ecosystems/abundance/daily-v1?${qs.stringify({
-      id: reward?._id,
-    })}`;
-    let shareText = `I just claimed ${reward?.degen_total} $degen in Impact Rewards for contributing to /impact (frame by @abundance)\n\n/impact gives out daily rewards to those who curate, auto-fund or invite contributors to use Impact Alpha. Check your reward here 👇`
 
-    let encodedShareText = encodeURIComponent(shareText)
-    let encodedShareUrl = encodeURIComponent(shareUrl); 
-    let shareLink = `https://farcaster.xyz/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
+    setDailyLoading(true);
 
-    if (!miniApp) {
-      window.open(shareLink, '_blank');
-    } else if (miniApp) {
-      window.parent.postMessage({
-        type: "createCast",
-        data: {
-          cast: {
-            text: shareText,
-            embeds: [shareUrl]
-          }
-        }
-      }, "*");
+    try {
+      const response = await axios.post("/api/fund/postReward", { id: reward._id });
+
+      console.log("response", response);
+
+      if (response?.data) {
+        // setDailyRewards(response?.data?.claimed);
+        await getDailyRewards(reward.fid);
+        setClaimsLoading(true);
+        await getTotalClaims(reward.fid);
+        setClaimsLoading(false);
+      }
+      setDailyLoading(false);
+    } catch (error) {
+      console.error("Error claiming reward:", error);
+      setDailyLoading(false);
     }
+
+    // let shareUrl = `https://impact.abundance.id/~/ecosystems/abundance/daily-v1?${qs.stringify({
+    //   id: reward?._id
+    // })}`;
+    // let shareText = `I just claimed ${reward?.degen_total} $degen in Impact Rewards for contributing to /impact (frame by @abundance)\n\n/impact gives out daily rewards to those who curate, auto-fund or invite contributors to use Impact Alpha. Check your reward here 👇`;
+
+    // let encodedShareText = encodeURIComponent(shareText);
+    // let encodedShareUrl = encodeURIComponent(shareUrl);
+    // let shareLink = `https://farcaster.xyz/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`;
+
+    // if (!miniApp) {
+    //   window.open(shareLink, "_blank");
+    // } else if (miniApp) {
+    //   window.parent.postMessage(
+    //     {
+    //       type: "createCast",
+    //       data: {
+    //         cast: {
+    //           text: shareText,
+    //           embeds: [shareUrl]
+    //         }
+    //       }
+    //     },
+    //     "*"
+    //   );
+    // }
   }
 
 
