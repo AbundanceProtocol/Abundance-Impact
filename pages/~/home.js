@@ -1,55 +1,113 @@
-import Head from 'next/head';
-import Link from 'next/link';
-import React, { useContext, useState, useRef, useEffect } from 'react'
-import { AccountContext } from '../../context'
-import { useRouter } from 'next/router';
-import { useInView } from 'react-intersection-observer'
+import Head from "next/head";
+import Link from "next/link";
+import React, { useContext, useState, useRef, useEffect } from "react";
+import { AccountContext } from "../../context";
+import { useRouter } from "next/router";
+import { useInView } from "react-intersection-observer";
 // import Item from '../../components/Ecosystem/ItemWrap/Item';
 // import Description from '../../components/Ecosystem/Description';
 // import ItemWrap from '../../components/Ecosystem/ItemWrap';
-import useMatchBreakpoints from '../../hooks/useMatchBreakpoints';
-import { FaPowerOff, FaLock, FaUsers, FaUser, FaGlobe, FaPlus, FaRegStar, FaCoins, FaAngleDown, FaShareAlt as Share, FaStar } from "react-icons/fa";
+import useMatchBreakpoints from "../../hooks/useMatchBreakpoints";
+import {
+  FaPowerOff,
+  FaLock,
+  FaUsers,
+  FaUser,
+  FaGlobe,
+  FaPlus,
+  FaRegStar,
+  FaCoins,
+  FaAngleDown,
+  FaShareAlt as Share,
+  FaStar
+} from "react-icons/fa";
 // import { GiRibbonMedal as Medal } from "react-icons/gi";
 // import { IoMdTrophy } from "react-icons/io";
 // import { IoInformationCircleOutline as Info, IoLogIn } from "react-icons/io5";
 // import { PiSquaresFourLight as Actions, PiBankFill } from "react-icons/pi";
 // import { Logo } from './assets';
-import useStore from '../../utils/store';
-import ProfilePage from './studio';
-import axios from 'axios';
-import MiniAppAuthButton from '../../components/MiniAppAuthButton';
-import { BsKey, BsLock, BsLockFill, BsXCircle, BsPerson, BsPersonFill, BsShieldCheck, BsShieldFillCheck, BsPiggyBank, BsPiggyBankFill, BsStar, BsStarFill, BsQuestionCircle, BsGift, BsGiftFill, BsPencilFill, BsInfoCircle, BsBellSlash, BsBell, BsRocketTakeoffFill, BsGearFill, BsCurrencyExchange, BsQuestionCircleFill, BsInfoCircleFill } from "react-icons/bs";
+import useStore from "../../utils/store";
+import ProfilePage from "./studio";
+import axios from "axios";
+import MiniAppAuthButton from "../../components/MiniAppAuthButton";
+import {
+  BsKey,
+  BsLock,
+  BsLockFill,
+  BsXCircle,
+  BsPerson,
+  BsPersonFill,
+  BsShieldCheck,
+  BsShieldFillCheck,
+  BsPiggyBank,
+  BsPiggyBankFill,
+  BsStar,
+  BsStarFill,
+  BsQuestionCircle,
+  BsGift,
+  BsGiftFill,
+  BsPencilFill,
+  BsInfoCircle,
+  BsBellSlash,
+  BsBell,
+  BsRocketTakeoffFill,
+  BsGearFill,
+  BsCurrencyExchange,
+  BsQuestionCircleFill,
+  BsInfoCircleFill
+} from "react-icons/bs";
 
-import Spinner from '../../components/Common/Spinner';
-import NeynarSigninButton from '../../components/Layout/Modals/Signin';
-import { formatNum } from '../../utils/utils';
+import Spinner from "../../components/Common/Spinner";
+import NeynarSigninButton from "../../components/Layout/Modals/Signin";
+import { formatNum } from "../../utils/utils";
 // import LoginButton from '../../components/Layout/Modals/FrontSignin';
 
-const version = process.env.NEXT_PUBLIC_VERSION
+const version = process.env.NEXT_PUBLIC_VERSION;
 
-export default function Homepage({test}) {
-  const ref2 = useRef(null)
-  const [ref, inView] = useInView()
-  const { LoginPopup, checkEcoEligibility, ecoData, points, setPoints, isLogged, setShowLogin, setIsLogged, fid, setFid, getRemainingBalances, isMiniApp, userBalances, setIsMiniApp, LogoutPopup, userInfo, setUserInfo, setPanelOpen, setPanelTarget, adminTest, setAdminTest } = useContext(AccountContext)
-  const [screenWidth, setScreenWidth] = useState(undefined)
-  const [screenHeight, setScreenHeight] = useState(undefined)
-  const [textMax, setTextMax] = useState('562px')
-  const [feedMax, setFeedMax ] = useState('620px')
+export default function Homepage({ test }) {
+  const ref2 = useRef(null);
+  const [ref, inView] = useInView();
+  const {
+    LoginPopup,
+    checkEcoEligibility,
+    ecoData,
+    points,
+    setPoints,
+    isLogged,
+    setShowLogin,
+    setIsLogged,
+    fid,
+    setFid,
+    getRemainingBalances,
+    isMiniApp,
+    userBalances,
+    setIsMiniApp,
+    LogoutPopup,
+    userInfo,
+    setUserInfo,
+    setPanelOpen,
+    setPanelTarget,
+    adminTest,
+    setAdminTest
+  } = useContext(AccountContext);
+  const [screenWidth, setScreenWidth] = useState(undefined);
+  const [screenHeight, setScreenHeight] = useState(undefined);
+  const [textMax, setTextMax] = useState("562px");
+  const [feedMax, setFeedMax] = useState("620px");
   // const [showPopup, setShowPopup] = useState({open: false, url: null})
-  const router = useRouter()
-  const { eco, referrer, autoFund } = router.query
+  const router = useRouter();
+  const { eco, referrer, autoFund } = router.query;
   const { isMobile } = useMatchBreakpoints();
   // const [display, setDisplay] = useState({personal: false, ecosystem: false})
-  const store = useStore()
+  const store = useStore();
 
-  const [fundLoading , setFundLoading ] = useState(true);
-  const [isOn, setIsOn] = useState({boost: false, validate: false, autoFund: false, notifs: false});
+  const [fundLoading, setFundLoading] = useState(true);
+  const [isOn, setIsOn] = useState({ boost: false, validate: false, autoFund: false, notifs: false });
   // const [expand, setExpand] = useState({boost: false, validate: false, autoFund: false});
-  const [loading, setLoading] = useState({boost: false, validate: false, autoFund: false})
+  const [loading, setLoading] = useState({ boost: false, validate: false, autoFund: false });
 
   const [showLoginNotice, setShowLoginNotice] = useState(!isLogged);
-  const [notifStatus, setNotifStatus] = useState({app: false, notifs: false})
-  
+  const [notifStatus, setNotifStatus] = useState({ app: false, notifs: false });
 
   useEffect(() => {
     if (!isLogged) {
@@ -59,109 +117,105 @@ export default function Homepage({test}) {
     }
   }, [isLogged]);
 
-  const openSwipeable = (target) => {
+  const openSwipeable = target => {
     setPanelTarget(target);
     setPanelOpen(true);
   };
 
-
-  const handleSignIn = async (loginData) => {
-    console.log('isLogged-3')
-    setFid(loginData.fid)
-    setIsLogged(true)
-    setShowLogin(false)
+  const handleSignIn = async loginData => {
+    console.log("isLogged-3");
+    setFid(loginData.fid);
+    setIsLogged(true);
+    setShowLogin(false);
   };
 
   useEffect(() => {
-    console.log('triggered')
+    console.log("triggered");
 
     const handleResize = () => {
-      setScreenWidth(window.innerWidth)
-      setScreenHeight(window.innerHeight)
-    }
-    handleResize()
-    window.addEventListener('resize', handleResize);
-    
+      setScreenWidth(window.innerWidth);
+      setScreenHeight(window.innerHeight);
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+
     return () => {
-      window.removeEventListener('resize', handleResize);
-    }
+      window.removeEventListener("resize", handleResize);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, []);
 
   useEffect(() => {
     (async () => {
-      const { sdk } = await import('@farcaster/miniapp-sdk');
-      const isApp = await sdk.isInMiniApp()
-      setIsMiniApp(isApp)
+      const { sdk } = await import("@farcaster/miniapp-sdk");
+      const isApp = await sdk.isInMiniApp();
+      setIsMiniApp(isApp);
 
-
-      const userProfile = await sdk.context
+      const userProfile = await sdk.context;
       if (isApp && userProfile?.user?.fid == 9326) {
-        setAdminTest(true)
+        setAdminTest(true);
       }
 
       if (isApp) {
         const client = sdk.context.client;
-        console.log('client', client, userProfile.client)
+        console.log("client", client, userProfile.client);
         if (userProfile.client.added) {
           if (userProfile.client.notificationDetails) {
             setNotifStatus({
               app: true,
               notifs: true
-            })
+            });
           } else {
             setNotifStatus({
               app: true,
               notifs: false
-            })
+            });
           }
         } else {
           setNotifStatus({
             app: false,
             notifs: false
-          })        
+          });
         }
       }
-
-
     })();
   }, []);
 
   useEffect(() => {
-    console.log('version', version, userBalances.impact)
-    if ((version == '2.0' || adminTest)) {
+    console.log("version", version, userBalances.impact);
+    if (version == "2.0" || adminTest) {
       if (userBalances.impact !== 0) {
-        console.log('off-1')
-        setPanelOpen(false)
-        setPanelTarget(null)
+        console.log("off-1");
+        setPanelOpen(false);
+        setPanelTarget(null);
       } else if (userBalances.impact == 0) {
-        console.log('on-1')
-        setPanelOpen(true)
-        setPanelTarget('welcome')
+        console.log("on-1");
+        setPanelOpen(true);
+        setPanelTarget("welcome");
       }
     }
   }, []);
 
   useEffect(() => {
-    console.log('version', version, userBalances.impact)
-    if ((version == '2.0' || adminTest)) {
+    console.log("version", version, userBalances.impact);
+    if (version == "2.0" || adminTest) {
       if (userBalances.impact !== 0) {
-        console.log('off-2')
-        setPanelOpen(false)
-        setPanelTarget(null)
+        console.log("off-2");
+        setPanelOpen(false);
+        setPanelTarget(null);
       } else if (userBalances.impact == 0) {
-        console.log('on-2')
-        setPanelOpen(true)
-        setPanelTarget('welcome')
+        console.log("on-2");
+        setPanelOpen(true);
+        setPanelTarget("welcome");
       }
     }
   }, [userBalances]);
 
   useEffect(() => {
     (async () => {
-      const { sdk } = await import('@farcaster/miniapp-sdk');
-      const isApp = await sdk.isInMiniApp()
-      setIsMiniApp(isApp)
+      const { sdk } = await import("@farcaster/miniapp-sdk");
+      const isApp = await sdk.isInMiniApp();
+      setIsMiniApp(isApp);
     })();
   }, [isLogged]);
 
@@ -171,232 +225,231 @@ export default function Homepage({test}) {
         validate: true,
         boost: true,
         autoFund: true
-      })
-      const response = await axios.get('/api/user/getUserSettings', {
-        params: { fid } })
+      });
+      const response = await axios.get("/api/user/getUserSettings", {
+        params: { fid }
+      });
 
-      console.log('response', response)
+      console.log("response", response);
 
       if (response?.data) {
-        const userSettings = response?.data || null
+        const userSettings = response?.data || null;
         setIsOn({
           boost: userSettings.boost || false,
-          validate: userSettings.validate || false, 
-          autoFund: userSettings.autoFund || false, 
+          validate: userSettings.validate || false,
+          autoFund: userSettings.autoFund || false,
           score: userSettings.score || 0,
           notifs: userSettings.notifs || false
-        })
+        });
       }
       setLoading({
         validate: false,
         boost: false,
         autoFund: false,
         score: 0
-      })
+      });
     } catch (error) {
-      console.error('Error setting invite:', error)
+      console.error("Error setting invite:", error);
       setLoading({
         validate: false,
         boost: false,
         autoFund: false
-      })
+      });
     }
   }
 
   useEffect(() => {
     if (isLogged && fid) {
-      getUserSettings(fid)
+      getUserSettings(fid);
     } else if (!isLogged) {
       setIsOn({
         boost: false,
-        validate: false, 
+        validate: false,
         autoFund: false,
         score: 0,
         notifs: false
-      })
+      });
     }
   }, [isLogged]);
 
   useEffect(() => {
     if (screenWidth) {
       if (screenWidth > 680) {
-        setTextMax(`562px`)
-        setFeedMax('620px')
+        setTextMax(`562px`);
+        setFeedMax("620px");
+      } else if (screenWidth >= 635 && screenWidth <= 680) {
+        setTextMax(`${screenWidth - 120}px`);
+        setFeedMax("580px");
+      } else {
+        setTextMax(`${screenWidth - 10}px`);
+        setFeedMax(`${screenWidth}px`);
       }
-      else if (screenWidth >= 635 && screenWidth <= 680) {
-        setTextMax(`${screenWidth - 120}px`)
-        setFeedMax('580px')
-      }
-      else {
-        setTextMax(`${screenWidth - 10}px`)
-        setFeedMax(`${screenWidth}px`)
-      }
+    } else {
+      setTextMax(`100%`);
+      setFeedMax(`100%`);
     }
-    else {
-      setTextMax(`100%`)
-      setFeedMax(`100%`)
-    }
-  }, [screenWidth])
+  }, [screenWidth]);
 
   useEffect(() => {
     if (isLogged) {
-      let setEco = eco || '$IMPACT'
-      let setReferrer = referrer || null
-      console.log('setEco', setEco)
-      setPoints(setEco)
+      let setEco = eco || "$IMPACT";
+      let setReferrer = referrer || null;
+      console.log("setEco", setEco);
+      setPoints(setEco);
       if (userBalances.imppact == 0) {
-        getRemainingBalances(store.fid, setEco, store.signer_uuid, setReferrer)
+        getRemainingBalances(store.fid, setEco, store.signer_uuid, setReferrer);
       }
       if (autoFund && store.fid && setReferrer) {
-        setAutoFundInvite(store.fid, referrer, store.signer_uuid)
+        setAutoFundInvite(store.fid, referrer, store.signer_uuid);
       }
     }
-  }, [eco, isLogged])
+  }, [eco, isLogged]);
 
   async function setAutoFundInvite(fid, referrer, uuid) {
     try {
-      const response = await axios.post('/api/curation/postInvite', { fid, referrer, uuid });
+      const response = await axios.post("/api/curation/postInvite", { fid, referrer, uuid });
     } catch (error) {
-      console.error('Error setting invite:', error)
+      console.error("Error setting invite:", error);
     }
   }
 
-  const ToggleSwitch = ({target}) => {
+  const ToggleSwitch = ({ target }) => {
     const handleToggle = () => {
-      console.log('isOn', isOn)
+      console.log("isOn", isOn);
       if (isOn) {
-        setFundingSchedule('off')
+        setFundingSchedule("off");
       } else {
-        setFundingSchedule('on')
+        setFundingSchedule("on");
       }
 
       if (isLogged) {
-        setIsOn(prev => ({...prev, [target]: !isOn[target] }))
+        setIsOn(prev => ({ ...prev, [target]: !isOn[target] }));
       }
     };
 
-
-
-
     return (
-      <div className="flex-row" style={{justifyContent: 'center', alignItems: 'center', margin: '0 5px 0 0'}}>
+      <div className="flex-row" style={{ justifyContent: "center", alignItems: "center", margin: "0 5px 0 0" }}>
+        {loading[target] && (
+          <div
+            className="flex-row"
+            style={{
+              height: "20px",
+              alignItems: "center",
+              width: "20px",
+              justifyContent: "center",
+              padding: "0px",
+              position: "relative",
+              right: "10%",
+              top: "0px"
+            }}
+          >
+            <Spinner size={20} color={"#468"} />
+          </div>
+        )}
 
-        {loading[target] && (<div className='flex-row' style={{height: '20px', alignItems: 'center', width: '20px', justifyContent: 'center', padding: '0px', position: 'relative', right: '10%', top: '0px'}}>
-          <Spinner size={20} color={'#468'} />
-        </div>)}
-
-
-        <div
-          className={`toggleSwitch ${isOn[target] ? "toggleSwitch-on" : ""}`}
-          onClick={handleToggle}
-        >
-          <span className='circle'></span>
+        <div className={`toggleSwitch ${isOn[target] ? "toggleSwitch-on" : ""}`} onClick={handleToggle}>
+          <span className="circle"></span>
         </div>
       </div>
     );
-  }
+  };
 
   function setFundingSchedule(data) {
-    console.log('data', data)
+    console.log("data", data);
   }
 
   async function notifsOn() {
     try {
-      const { sdk } = await import('@farcaster/miniapp-sdk');
-      console.log('isMiniApp', isMiniApp, notifStatus.app, notifStatus.notifs)
+      const { sdk } = await import("@farcaster/miniapp-sdk");
+      console.log("isMiniApp", isMiniApp, notifStatus.app, notifStatus.notifs);
       if (isMiniApp) {
         if (notifStatus.app && !notifStatus.notifs) {
-          
           const result = await sdk.actions.addMiniApp();
-          console.log('result1', result)
+          console.log("result1", result);
           if (result.notificationDetails) {
-            console.log('test1')
+            console.log("test1");
             setNotifStatus({
               app: true,
               notifs: true
-            })
-            setIsOn({...isOn, notifs: true})
+            });
+            setIsOn({ ...isOn, notifs: true });
           } else {
-            console.log('test2')
+            console.log("test2");
 
             setNotifStatus({
               app: true,
               notifs: false
-            })
-            setIsOn({...isOn, notifs: false})
+            });
+            setIsOn({ ...isOn, notifs: false });
           }
-  
         } else if (!notifStatus.app) {
-          console.log('test3')
+          console.log("test3");
 
           const result = await sdk.actions.addFrame();
-          console.log('result2', result)
+          console.log("result2", result);
 
           if (result.notificationDetails) {
             setNotifStatus({
               app: true,
               notifs: true
-            })
-            setIsOn({...isOn, notifs: true})
+            });
+            setIsOn({ ...isOn, notifs: true });
           } else {
-            console.log('test4')
+            console.log("test4");
 
             setNotifStatus({
               app: false,
               notifs: false
-            })
-            setIsOn({...isOn, notifs: false})
+            });
+            setIsOn({ ...isOn, notifs: false });
           }
         }
       } else {
-        console.log('not miniapp')
+        console.log("not miniapp");
       }
-
-    } catch(error) {
-      console.error('Notification setting failed', error)
-      setIsOn({...isOn, notifs: false})
-
+    } catch (error) {
+      console.error("Notification setting failed", error);
+      setIsOn({ ...isOn, notifs: false });
     }
   }
-  
 
   return (
     <div name="feed" style={{ width: "auto", maxWidth: "620px" }} ref={ref2}>
       <Head>
         <title>Impact App | Abundance Protocol</title>
-        <meta
-          name="description"
-          content={`Building the global superalignment layer`}
-        />
+        <meta name="description" content={`Building the global superalignment layer`} />
       </Head>
-    {(!isLogged || (version == '2.0' || adminTest)) && (
-      <div id="log in"
-      style={{
-        padding: isMobile ? ((version == '1.0' && !adminTest) ? "58px 0 20px 0" : "48px 0 20px 0") : "58px 0 60px 0",
-        width: feedMax, fontSize: '0px'
-      }} >&nnsp;
-
-      </div>
-    )}
+      {(!isLogged || version == "2.0" || adminTest) && (
+        <div
+          id="log in"
+          style={{
+            padding: isMobile ? (version == "1.0" && !adminTest ? "58px 0 20px 0" : "48px 0 20px 0") : "58px 0 60px 0",
+            width: feedMax,
+            fontSize: "0px"
+          }}
+        >
+          &nnsp;
+        </div>
+      )}
 
       {/* {!isLogged && ( */}
       {/* <div style={{ padding: (!isLogged || (version == '2.0' || adminTest)) ? "0px 4px 0px 4px" : '0', width: feedMax }}> */}
 
-        {/* <div style={{ padding: "0px 4px 0px 4px", width: feedMax }}> */}
+      {/* <div style={{ padding: "0px 4px 0px 4px", width: feedMax }}> */}
 
-          {!isLogged && (version == '1.0' && !adminTest) && (<div
-            id="autoFund"
-            style={{
-              padding: isMobile ? "28px 0 20px 0" : "28px 0 20px 0",
-              width: "40%",
-            }}
-          ></div>)}
+      {!isLogged && version == "1.0" && !adminTest && (
+        <div
+          id="autoFund"
+          style={{
+            padding: isMobile ? "28px 0 20px 0" : "28px 0 20px 0",
+            width: "40%"
+          }}
+        ></div>
+      )}
 
+      {/* LOGIN */}
 
-
-          {/* LOGIN */}
-
-          {/* {(version == '2.0' || adminTest) && (<div className='flex-col' style={{backgroundColor: ''}}>
+      {/* {(version == '2.0' || adminTest) && (<div className='flex-col' style={{backgroundColor: ''}}>
 
             <div className='shadow flex-col'
               style={{
@@ -509,424 +562,426 @@ export default function Homepage({test}) {
           </div>
           )} */}
 
-
-          {(version == '2.0' || adminTest) && isLogged && (<div className='flex-row' style={{backgroundColor: '', justifyContent: 'center', gap: '1rem', margin: '20px 0 -20px 0'}}>
-            <div className='flex-col' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(isLogged && isOn.boost) ? '#0af' : '#aaa'}`, borderRadius: '18px', backgroundColor: '', alignItems: 'center', gap: '0.0rem', height: '90px', justifyContent: 'center'}}>
-              <div className='flex-row' style={{gap: '0.5rem', alignItems: 'center', padding: '0 10px'}}>
-                <BsStar color={(isLogged && isOn.boost) ? '#0af' : '#aaa'} size={40} />
-                <div style={{fontSize: '43px', fontWeight: '700', color: (isLogged && isOn.boost) ? '#0af' : '#aaa'}}>
-                  {test ? test : '69'}
-                </div>
-
-              </div>
-              <div style={{fontSize: '13px', fontWeight: '700', color: (isLogged && isOn.boost) ? '#0af' : '#aaa'}}>
-                Weekly Points
-              </div>
-            </div>
-
-            <div className='flex-col' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(isLogged && isOn.boost) ? '#0af' : '#aaa'}`, borderRadius: '18px', backgroundColor: '', alignItems: 'center', gap: '0.0rem', height: '90px', justifyContent: 'center', width: '135px'}}>
-              <div className='flex-row' style={{gap: '0.5rem', alignItems: 'center', padding: '0 10px'}}>
-                <div style={{fontSize: '43px', fontWeight: '700', color: (isLogged && isOn.boost) ? '#0af' : '#aaa'}}>
-                  {formatNum(isOn?.score?.toFixed(0) || 0)}
-                </div>
-
-              </div>
-              <div style={{fontSize: '13px', fontWeight: '700', color: (isLogged && isOn.boost) ? '#0af' : '#aaa'}}>
-                Impact Score
-              </div>
-            </div>
-
-
-          </div>)}
-
-
-
-          <div className='flex-row' style={{justifyContent: 'center', alignItems: 'center', padding: '40px 10px 0 10px', flexWrap: 'wrap', gap: '1rem'}}>
-
-
-
-            <div
+      {(version == "2.0" || adminTest) && isLogged && (
+        <div
+          className="flex-row"
+          style={{ backgroundColor: "", justifyContent: "center", gap: "1rem", margin: "20px 0 -20px 0" }}
+        >
+          <div
             className="flex-col"
             style={{
-              // width: "100%",
-              justifyContent: "center",
+              padding: "1px 5px 1px 5px",
+              border: `1px solid ${isLogged && isOn.boost ? "#0af" : "#aaa"}`,
+              borderRadius: "18px",
+              backgroundColor: "",
               alignItems: "center",
-              }} >
-
-              <div
-                className="flex-row"
-                style={{
-                  gap: "0.75rem",
-                  margin: "0px",
-                  flexWrap: "wrap",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <div>
-                  <div
-                    className="flex-row cast-act-lt"
-                    style={{
-                      borderRadius: "8px",
-                      padding: "8px 8px",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "0.25rem",
-                      height: '50px',
-                      width: '110px',
-                      backgroundColor: '#aaa'
-                    }}
-                  >
-                    {(!isMobile || isMobile) && <BsGiftFill size={20} style={{width: '21px'}} />}
-                    <p
-                      style={{
-                        padding: "0px",
-                        fontSize: isMobile ? '14px' : '18px',
-                        fontWeight: "500",
-                        textWrap: "wrap",
-                        textAlign: 'center'
-                      }}
-                    >
-                      Share Curation
-                    </p>
-                  </div>
-                </div>
-
-
+              gap: "0.0rem",
+              height: "90px",
+              justifyContent: "center"
+            }}
+          >
+            <div className="flex-row" style={{ gap: "0.5rem", alignItems: "center", padding: "0 10px" }}>
+              <BsStar color={isLogged && isOn.boost ? "#0af" : "#aaa"} size={40} />
+              <div style={{ fontSize: "43px", fontWeight: "700", color: isLogged && isOn.boost ? "#0af" : "#aaa" }}>
+                {test ? test : "69"}
               </div>
-
             </div>
-
-
-
-            <div
-            className="flex-col"
-            style={{
-              // width: "100%",
-              justifyContent: "center",
-              alignItems: "center",
-              }} >
-
-              <div
-                className="flex-row"
-                style={{
-                  gap: "0.75rem",
-                  margin: "0px",
-                  flexWrap: "wrap",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <div>
-                  <div
-                    className="flex-row cast-act-lt"
-                    style={{
-                      borderRadius: "8px",
-                      padding: "8px 8px",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "0.25rem",
-                      height: '50px',
-                      width: '110px',
-                      backgroundColor: '#aaa'
-                    }}
-                  >
-                    {(!isMobile || isMobile) && <BsCurrencyExchange size={20} style={{width: '21px'}} />}
-                    <p
-                      style={{
-                        padding: "0px",
-                        fontSize: isMobile ? '14px' : '18px',
-                        fontWeight: "500",
-                        textWrap: "wrap",
-                        textAlign: 'center'
-                      }}
-                    >
-                      Tip
-                    </p>
-                  </div>
-                </div>
-
-
-              </div>
-
+            <div style={{ fontSize: "13px", fontWeight: "700", color: isLogged && isOn.boost ? "#0af" : "#aaa" }}>
+              Weekly Points
             </div>
-
-
-
           </div>
 
-
-
-
-
-          <div className='flex-row' style={{justifyContent: 'center', alignItems: 'center', padding: '20px 10px 0 10px', flexWrap: 'wrap', gap: '1rem'}}>
-
-            <Link href={'/~/ecosystems/abundance'}
+          <div
             className="flex-col"
             style={{
-              // width: "100%",
-              justifyContent: "center",
+              padding: "1px 5px 1px 5px",
+              border: `1px solid ${isLogged && isOn.boost ? "#0af" : "#aaa"}`,
+              borderRadius: "18px",
+              backgroundColor: "",
               alignItems: "center",
-              }} >
-
-              <div
-                className="flex-row"
-                style={{
-                  gap: "0.75rem",
-                  margin: "0px",
-                  flexWrap: "wrap",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <div>
-                  <div
-                    className="flex-row cast-act-lt"
-                    style={{
-                      borderRadius: "8px",
-                      padding: "8px 8px",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "0.25rem",
-                      height: '50px',
-                      width: '110px'
-                    }}
-                  >
-                    {(!isMobile || isMobile) && <BsStarFill size={20} style={{width: '21px'}} />}
-                    <p
-                      style={{
-                        padding: "0px",
-                        fontSize: isMobile ? '16px' : '18px',
-                        fontWeight: "500",
-                        textWrap: "wrap",
-                        textAlign: 'center'
-                      }} >
-                      Explore
-                    </p>
-
-                  </div>
-                </div>
-
-
+              gap: "0.0rem",
+              height: "90px",
+              justifyContent: "center",
+              width: "135px"
+            }}
+          >
+            <div className="flex-row" style={{ gap: "0.5rem", alignItems: "center", padding: "0 10px" }}>
+              <div style={{ fontSize: "43px", fontWeight: "700", color: isLogged && isOn.boost ? "#0af" : "#aaa" }}>
+                {formatNum(isOn?.score?.toFixed(0) || 0)}
               </div>
+            </div>
+            <div style={{ fontSize: "13px", fontWeight: "700", color: isLogged && isOn.boost ? "#0af" : "#aaa" }}>
+              Impact Score
+            </div>
+          </div>
+        </div>
+      )}
 
-            </Link>
-
-
-
-
-            <div
-            className="flex-col"
+      <div
+        className="flex-row"
+        style={{
+          justifyContent: "center",
+          alignItems: "center",
+          padding: "40px 10px 0 10px",
+          flexWrap: "wrap",
+          gap: "1rem"
+        }}
+      >
+        <div
+          className="flex-col"
+          style={{
+            // width: "100%",
+            justifyContent: "center",
+            alignItems: "center"
+          }}
+        >
+          <div
+            className="flex-row"
             style={{
-              // width: "100%",
+              gap: "0.75rem",
+              margin: "0px",
+              flexWrap: "wrap",
               justifyContent: "center",
               alignItems: "center"
-              }} >
-
+            }}
+          >
+            <div>
               <div
-                className="flex-row"
+                className="flex-row cast-act-lt"
                 style={{
-                  gap: "0.75rem",
-                  margin: "0px",
-                  flexWrap: "wrap",
-                  justifyContent: "center",
+                  borderRadius: "8px",
+                  padding: "8px 8px",
                   alignItems: "center",
+                  justifyContent: "center",
+                  gap: "0.25rem",
+                  height: "50px",
+                  width: "110px",
+                  backgroundColor: "#aaa"
                 }}
               >
-                <div>
-                  <div
-                    className="flex-row cast-act-lt"
-                    style={{
-                      borderRadius: "8px",
-                      padding: "8px 8px",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "0.25rem",
-                      height: '50px',
-                      width: '110px',
-                      backgroundColor: '#aaa'
-                    }}
-                  >
-                    {(!isMobile || isMobile) && <BsShieldFillCheck size={20} style={{width: '21px'}} />}
-                    <p
-                      style={{
-                        padding: "0px",
-                        fontSize: isMobile ? '16px' : '18px',
-                        fontWeight: "500",
-                        textWrap: "wrap",
-                        textAlign: 'center'
-                      }}
-                    >
-                      Validate
-                    </p>
-                  </div>
-                </div>
-
-
+                {(!isMobile || isMobile) && <BsGiftFill size={20} style={{ width: "21px" }} />}
+                <p
+                  style={{
+                    padding: "0px",
+                    fontSize: isMobile ? "14px" : "18px",
+                    fontWeight: "500",
+                    textWrap: "wrap",
+                    textAlign: "center"
+                  }}
+                >
+                  Share Curation
+                </p>
               </div>
-
             </div>
+          </div>
+        </div>
 
-
-            <Link href={'/~/auto-fund'}
-            className="flex-col"
+        <div
+          className="flex-col"
+          style={{
+            // width: "100%",
+            justifyContent: "center",
+            alignItems: "center"
+          }}
+        >
+          <div
+            className="flex-row"
             style={{
-              // width: "100%",
+              gap: "0.75rem",
+              margin: "0px",
+              flexWrap: "wrap",
               justifyContent: "center",
-              alignItems: "center",
-              }} >
-
+              alignItems: "center"
+            }}
+          >
+            <div>
               <div
-                className="flex-row"
+                className="flex-row cast-act-lt"
                 style={{
-                  gap: "0.75rem",
-                  margin: "0px",
-                  flexWrap: "wrap",
-                  justifyContent: "center",
+                  borderRadius: "8px",
+                  padding: "8px 8px",
                   alignItems: "center",
+                  justifyContent: "center",
+                  gap: "0.25rem",
+                  height: "50px",
+                  width: "110px",
+                  backgroundColor: "#aaa"
                 }}
               >
-                <div>
-                  <div
-                    className="flex-row cast-act-lt"
-                    style={{
-                      borderRadius: "8px",
-                      padding: "8px 8px",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "0.25rem",
-                      height: '50px',
-                      width: '110px'
-                    }}
-                  >
-                    {(!isMobile || isMobile) && <BsPiggyBankFill size={20} style={{width: '21px'}} />}
-                    <p
-                      style={{
-                        padding: "0px",
-                        fontSize: isMobile ? '16px' : '18px',
-                        fontWeight: "500",
-                        textWrap: "wrap",
-                        textAlign: 'center'
-                      }}
-                    >
-                      Autofund
-                    </p>
-                  </div>
-                </div>
-
-
+                {(!isMobile || isMobile) && <BsCurrencyExchange size={20} style={{ width: "21px" }} />}
+                <p
+                  style={{
+                    padding: "0px",
+                    fontSize: isMobile ? "14px" : "18px",
+                    fontWeight: "500",
+                    textWrap: "wrap",
+                    textAlign: "center"
+                  }}
+                >
+                  Tip
+                </p>
               </div>
-
-            </Link>
-
-
-            <div
-            className="flex-col"
-            style={{
-              // width: "100%",
-              justifyContent: "center",
-              alignItems: "center",
-              }} >
-
-              <div
-                className="flex-row"
-                style={{
-                  gap: "0.75rem",
-                  margin: "0px",
-                  flexWrap: "wrap",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <div>
-                  <div
-                    className="flex-row cast-act-lt"
-                    style={{
-                      borderRadius: "8px",
-                      padding: "8px 8px",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "0.25rem",
-                      height: '50px',
-                      width: '110px',
-                      backgroundColor: '#aaa'
-                    }}
-                  >
-                    {(!isMobile || isMobile) && <BsGiftFill size={20} style={{width: '21px'}} />}
-                    <p
-                      style={{
-                        padding: "0px",
-                        fontSize: isMobile ? '16px' : '18px',
-                        fontWeight: "500",
-                        textWrap: "wrap",
-                        textAlign: 'center'
-                      }}
-                    >
-                      Rewards
-                    </p>
-                  </div>
-                </div>
-
-
-              </div>
-
             </div>
+          </div>
+        </div>
+      </div>
 
-
-            <div
-            className="flex-col"
+      <div
+        className="flex-row"
+        style={{
+          justifyContent: "center",
+          alignItems: "center",
+          padding: "20px 10px 0 10px",
+          flexWrap: "wrap",
+          gap: "1rem"
+        }}
+      >
+        <Link
+          href={"/~/ecosystems/abundance"}
+          className="flex-col"
+          style={{
+            // width: "100%",
+            justifyContent: "center",
+            alignItems: "center"
+          }}
+        >
+          <div
+            className="flex-row"
             style={{
-              // width: "100%",
+              gap: "0.75rem",
+              margin: "0px",
+              flexWrap: "wrap",
               justifyContent: "center",
-              alignItems: "center",
-              }} >
-
+              alignItems: "center"
+            }}
+          >
+            <div>
               <div
-                className="flex-row"
+                className="flex-row cast-act-lt"
                 style={{
-                  gap: "0.75rem",
-                  margin: "0px",
-                  flexWrap: "wrap",
-                  justifyContent: "center",
+                  borderRadius: "8px",
+                  padding: "8px 8px",
                   alignItems: "center",
+                  justifyContent: "center",
+                  gap: "0.25rem",
+                  height: "50px",
+                  width: "110px"
                 }}
               >
-                <div>
-                  <div
-                    className="flex-row cast-act-lt"
-                    style={{
-                      borderRadius: "8px",
-                      padding: "8px 8px",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "0.25rem",
-                      height: '50px',
-                      width: '110px',
-                      backgroundColor: '#aaa'
-                    }}
-                  >
-                    {(!isMobile || isMobile) && <BsRocketTakeoffFill size={20} style={{width: '21px'}} />}
-                    <p
-                      style={{
-                        padding: "0px",
-                        fontSize: isMobile ? '16px' : '18px',
-                        fontWeight: "500",
-                        textWrap: "nowrap",
-                      }}
-                    >
-                      Quests
-                    </p>
-                  </div>
-                </div>
-
-
+                {(!isMobile || isMobile) && <BsStarFill size={20} style={{ width: "21px" }} />}
+                <p
+                  style={{
+                    padding: "0px",
+                    fontSize: isMobile ? "16px" : "18px",
+                    fontWeight: "500",
+                    textWrap: "wrap",
+                    textAlign: "center"
+                  }}
+                >
+                  Explore
+                </p>
               </div>
-
             </div>
+          </div>
+        </Link>
 
+        <div
+          className="flex-col"
+          style={{
+            // width: "100%",
+            justifyContent: "center",
+            alignItems: "center"
+          }}
+        >
+          <div
+            className="flex-row"
+            style={{
+              gap: "0.75rem",
+              margin: "0px",
+              flexWrap: "wrap",
+              justifyContent: "center",
+              alignItems: "center"
+            }}
+          >
+            <div>
+              <div
+                className="flex-row cast-act-lt"
+                style={{
+                  borderRadius: "8px",
+                  padding: "8px 8px",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "0.25rem",
+                  height: "50px",
+                  width: "110px",
+                  backgroundColor: "#aaa"
+                }}
+              >
+                {(!isMobile || isMobile) && <BsShieldFillCheck size={20} style={{ width: "21px" }} />}
+                <p
+                  style={{
+                    padding: "0px",
+                    fontSize: isMobile ? "16px" : "18px",
+                    fontWeight: "500",
+                    textWrap: "wrap",
+                    textAlign: "center"
+                  }}
+                >
+                  Validate
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
 
+        <Link
+          href={"/~/auto-fund"}
+          className="flex-col"
+          style={{
+            // width: "100%",
+            justifyContent: "center",
+            alignItems: "center"
+          }}
+        >
+          <div
+            className="flex-row"
+            style={{
+              gap: "0.75rem",
+              margin: "0px",
+              flexWrap: "wrap",
+              justifyContent: "center",
+              alignItems: "center"
+            }}
+          >
+            <div>
+              <div
+                className="flex-row cast-act-lt"
+                style={{
+                  borderRadius: "8px",
+                  padding: "8px 8px",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "0.25rem",
+                  height: "50px",
+                  width: "110px"
+                }}
+              >
+                {(!isMobile || isMobile) && <BsPiggyBankFill size={20} style={{ width: "21px" }} />}
+                <p
+                  style={{
+                    padding: "0px",
+                    fontSize: isMobile ? "16px" : "18px",
+                    fontWeight: "500",
+                    textWrap: "wrap",
+                    textAlign: "center"
+                  }}
+                >
+                  Fund
+                </p>
+              </div>
+            </div>
+          </div>
+        </Link>
 
-            {/* <div
+        <Link
+          href={"/~/rewards"}
+          className="flex-col"
+          style={{
+            // width: "100%",
+            justifyContent: "center",
+            alignItems: "center"
+          }}
+        >
+          <div
+            className="flex-row"
+            style={{
+              gap: "0.75rem",
+              margin: "0px",
+              flexWrap: "wrap",
+              justifyContent: "center",
+              alignItems: "center"
+            }}
+          >
+            <div>
+              <div
+                className="flex-row cast-act-lt"
+                style={{
+                  borderRadius: "8px",
+                  padding: "8px 8px",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "0.25rem",
+                  height: "50px",
+                  width: "110px"
+                  // backgroundColor: "#aaa"
+                }}
+              >
+                {(!isMobile || isMobile) && <BsGiftFill size={20} style={{ width: "21px" }} />}
+                <p
+                  style={{
+                    padding: "0px",
+                    fontSize: isMobile ? "16px" : "18px",
+                    fontWeight: "500",
+                    textWrap: "wrap",
+                    textAlign: "center"
+                  }}
+                >
+                  Rewards
+                </p>
+              </div>
+            </div>
+          </div>
+        </Link>
+
+        <div
+          className="flex-col"
+          style={{
+            // width: "100%",
+            justifyContent: "center",
+            alignItems: "center"
+          }}
+        >
+          <div
+            className="flex-row"
+            style={{
+              gap: "0.75rem",
+              margin: "0px",
+              flexWrap: "wrap",
+              justifyContent: "center",
+              alignItems: "center"
+            }}
+          >
+            <div>
+              <div
+                className="flex-row cast-act-lt"
+                style={{
+                  borderRadius: "8px",
+                  padding: "8px 8px",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "0.25rem",
+                  height: "50px",
+                  width: "110px",
+                  backgroundColor: "#aaa"
+                }}
+              >
+                {(!isMobile || isMobile) && <BsRocketTakeoffFill size={20} style={{ width: "21px" }} />}
+                <p
+                  style={{
+                    padding: "0px",
+                    fontSize: isMobile ? "16px" : "18px",
+                    fontWeight: "500",
+                    textWrap: "nowrap"
+                  }}
+                >
+                  Quests
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* <div
             className="flex-col"
             style={{
               // width: "100%",
@@ -987,265 +1042,241 @@ export default function Homepage({test}) {
 
             </div> */}
 
-
-
-            <Link href={'/~/settings'}
-            className="flex-col"
+        <Link
+          href={"/~/settings"}
+          className="flex-col"
+          style={{
+            // width: "100%",
+            justifyContent: "center",
+            alignItems: "center"
+          }}
+        >
+          <div
+            className="flex-row"
             style={{
-              // width: "100%",
+              gap: "0.75rem",
+              margin: "0px",
+              flexWrap: "wrap",
               justifyContent: "center",
-              alignItems: "center",
-              }} >
-
+              alignItems: "center"
+            }}
+          >
+            <div>
               <div
-                className="flex-row"
+                className="flex-row cast-act-lt"
                 style={{
-                  gap: "0.75rem",
-                  margin: "0px",
-                  flexWrap: "wrap",
-                  justifyContent: "center",
+                  borderRadius: "8px",
+                  padding: "8px 8px",
                   alignItems: "center",
+                  justifyContent: "center",
+                  gap: "0.25rem",
+                  height: "50px",
+                  width: "110px"
                 }}
               >
-                <div>
-                  <div
-                    className="flex-row cast-act-lt"
-                    style={{
-                      borderRadius: "8px",
-                      padding: "8px 8px",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "0.25rem",
-                      height: '50px',
-                      width: '110px'
-                    }}
-                  >
-                    {(!isMobile || isMobile) && <BsGearFill size={20} style={{width: '21px'}} />}
-                    <p
-                      style={{
-                        padding: "0px",
-                        fontSize: isMobile ? '16px' : '18px',
-                        fontWeight: "500",
-                        textWrap: "nowrap",
-                      }}
-                    >
-                      Settings
-                    </p>
-                  </div>
-                </div>
-
-
+                {(!isMobile || isMobile) && <BsGearFill size={20} style={{ width: "21px" }} />}
+                <p
+                  style={{
+                    padding: "0px",
+                    fontSize: isMobile ? "16px" : "18px",
+                    fontWeight: "500",
+                    textWrap: "nowrap"
+                  }}
+                >
+                  Settings
+                </p>
               </div>
-
-            </Link>
-
-
-
-
-          </div>
-
-
-
-
-
-
-
-          <div className='flex-row' style={{justifyContent: 'center', alignItems: 'center', padding: '40px 10px 0 10px', flexWrap: 'wrap', gap: '0.5rem'}}>
-
-
-            {(!isMobile || isMobile) && <BsInfoCircleFill size={20} color={'#ace'} style={{width: '25px'}} />}
-            <div style={{
-              padding: "0px",
-              fontSize: isMobile ? '18px' : '18px',
-              fontWeight: "500",
-              textWrap: "wrap",
-              textAlign: 'center',
-              color: '#ace'
-            }} >
-              How it works
             </div>
           </div>
+        </Link>
+      </div>
 
+      <div
+        className="flex-row"
+        style={{
+          justifyContent: "center",
+          alignItems: "center",
+          padding: "40px 10px 0 10px",
+          flexWrap: "wrap",
+          gap: "0.5rem"
+        }}
+      >
+        {(!isMobile || isMobile) && <BsInfoCircleFill size={20} color={"#ace"} style={{ width: "25px" }} />}
+        <div
+          style={{
+            padding: "0px",
+            fontSize: isMobile ? "18px" : "18px",
+            fontWeight: "500",
+            textWrap: "wrap",
+            textAlign: "center",
+            color: "#ace"
+          }}
+        >
+          How it works
+        </div>
+      </div>
 
-
-          <div className='flex-row' style={{justifyContent: 'center', alignItems: 'center', padding: '10px 10px 120px 10px', flexWrap: 'wrap', gap: '1rem'}}>
-
-
-
-            <div
-            className="flex-col"
+      <div
+        className="flex-row"
+        style={{
+          justifyContent: "center",
+          alignItems: "center",
+          padding: "10px 10px 120px 10px",
+          flexWrap: "wrap",
+          gap: "1rem"
+        }}
+      >
+        <div
+          className="flex-col"
+          style={{
+            // width: "100%",
+            justifyContent: "center",
+            alignItems: "center"
+          }}
+        >
+          <div
+            className="flex-row"
             style={{
-              // width: "100%",
+              gap: "0.75rem",
+              margin: "0px",
+              flexWrap: "wrap",
               justifyContent: "center",
-              alignItems: "center",
-              }} >
-
+              alignItems: "center"
+            }}
+          >
+            <div>
               <div
-                className="flex-row"
+                className="flex-row cast-act-lt"
                 style={{
-                  gap: "0.75rem",
-                  margin: "0px",
-                  flexWrap: "wrap",
-                  justifyContent: "center",
+                  borderRadius: "8px",
+                  padding: "8px 8px",
                   alignItems: "center",
+                  justifyContent: "center",
+                  gap: "0.25rem",
+                  height: "30px",
+                  width: "110px",
+                  backgroundColor: "#aaa"
                 }}
               >
-                <div>
-                  <div
-                    className="flex-row cast-act-lt"
-                    style={{
-                      borderRadius: "8px",
-                      padding: "8px 8px",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "0.25rem",
-                      height: '30px',
-                      width: '110px',
-                      backgroundColor: '#aaa'
-                    }}
-                  >
-                    {/* {(!isMobile || isMobile) && <BsGiftFill size={20} style={{width: '21px'}} />} */}
-                    <p
-                      style={{
-                        padding: "0px",
-                        fontSize: isMobile ? '14px' : '14px',
-                        fontWeight: "500",
-                        textWrap: "wrap",
-                        textAlign: 'center'
-                      }}
-                    >
-                      How to Earn
-                    </p>
-                  </div>
-                </div>
-
-
+                {/* {(!isMobile || isMobile) && <BsGiftFill size={20} style={{width: '21px'}} />} */}
+                <p
+                  style={{
+                    padding: "0px",
+                    fontSize: isMobile ? "14px" : "14px",
+                    fontWeight: "500",
+                    textWrap: "wrap",
+                    textAlign: "center"
+                  }}
+                >
+                  How to Earn
+                </p>
               </div>
-
             </div>
-
-
-
-            <div
-            className="flex-col"
-            style={{
-              // width: "100%",
-              justifyContent: "center",
-              alignItems: "center",
-              }} >
-
-              <div
-                className="flex-row"
-                style={{
-                  gap: "0.75rem",
-                  margin: "0px",
-                  flexWrap: "wrap",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <div>
-                  <div
-                    className="flex-row cast-act-lt"
-                    style={{
-                      borderRadius: "8px",
-                      padding: "8px 8px",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "0.25rem",
-                      height: '30px',
-                      width: '110px',
-                      backgroundColor: '#aaa'
-                    }}
-                  >
-                    {/* {(!isMobile || isMobile) && <BsGiftFill size={20} style={{width: '21px'}} />} */}
-                    <p
-                      style={{
-                        padding: "0px",
-                        fontSize: isMobile ? '14px' : '14px',
-                        fontWeight: "500",
-                        textWrap: "wrap",
-                        textAlign: 'center'
-                      }}
-                    >
-                      Impact Score
-                    </p>
-                  </div>
-                </div>
-
-
-              </div>
-
-            </div>
-
-
-
-            <div
-            className="flex-col"
-            style={{
-              // width: "100%",
-              justifyContent: "center",
-              alignItems: "center",
-              }} >
-
-              <div
-                className="flex-row"
-                style={{
-                  gap: "0.75rem",
-                  margin: "0px",
-                  flexWrap: "wrap",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <div>
-                  <div
-                    className="flex-row cast-act-lt"
-                    style={{
-                      borderRadius: "8px",
-                      padding: "8px 8px",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "0.25rem",
-                      height: '30px',
-                      width: '110px',
-                      backgroundColor: '#aaa'
-                    }}
-                  >
-                    {/* {(!isMobile || isMobile) && <BsGiftFill size={20} style={{width: '21px'}} />} */}
-                    <p
-                      style={{
-                        padding: "0px",
-                        fontSize: isMobile ? '13px' : '13px',
-                        fontWeight: "500",
-                        textWrap: "wrap",
-                        textAlign: 'center'
-                      }}
-                    >
-                      Weekly Points
-                    </p>
-                  </div>
-                </div>
-
-
-              </div>
-
-            </div>
-
-
-
           </div>
+        </div>
 
+        <div
+          className="flex-col"
+          style={{
+            // width: "100%",
+            justifyContent: "center",
+            alignItems: "center"
+          }}
+        >
+          <div
+            className="flex-row"
+            style={{
+              gap: "0.75rem",
+              margin: "0px",
+              flexWrap: "wrap",
+              justifyContent: "center",
+              alignItems: "center"
+            }}
+          >
+            <div>
+              <div
+                className="flex-row cast-act-lt"
+                style={{
+                  borderRadius: "8px",
+                  padding: "8px 8px",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "0.25rem",
+                  height: "30px",
+                  width: "110px",
+                  backgroundColor: "#aaa"
+                }}
+              >
+                {/* {(!isMobile || isMobile) && <BsGiftFill size={20} style={{width: '21px'}} />} */}
+                <p
+                  style={{
+                    padding: "0px",
+                    fontSize: isMobile ? "14px" : "14px",
+                    fontWeight: "500",
+                    textWrap: "wrap",
+                    textAlign: "center"
+                  }}
+                >
+                  Impact Score
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
 
+        <div
+          className="flex-col"
+          style={{
+            // width: "100%",
+            justifyContent: "center",
+            alignItems: "center"
+          }}
+        >
+          <div
+            className="flex-row"
+            style={{
+              gap: "0.75rem",
+              margin: "0px",
+              flexWrap: "wrap",
+              justifyContent: "center",
+              alignItems: "center"
+            }}
+          >
+            <div>
+              <div
+                className="flex-row cast-act-lt"
+                style={{
+                  borderRadius: "8px",
+                  padding: "8px 8px",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "0.25rem",
+                  height: "30px",
+                  width: "110px",
+                  backgroundColor: "#aaa"
+                }}
+              >
+                {/* {(!isMobile || isMobile) && <BsGiftFill size={20} style={{width: '21px'}} />} */}
+                <p
+                  style={{
+                    padding: "0px",
+                    fontSize: isMobile ? "13px" : "13px",
+                    fontWeight: "500",
+                    textWrap: "wrap",
+                    textAlign: "center"
+                  }}
+                >
+                  Weekly Points
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
+      {/* BOOST & NOMINATE */}
 
-
-
-
-
-          {/* BOOST & NOMINATE */}
-
-          {/* {(version == '2.0' || adminTest) && (<div className='flex-col' style={{backgroundColor: ''}}>
+      {/* {(version == '2.0' || adminTest) && (<div className='flex-col' style={{backgroundColor: ''}}>
 
             <div className='shadow flex-col'
               style={{
@@ -1337,10 +1368,9 @@ export default function Homepage({test}) {
           </div>
           )} */}
 
+      {/* VALIDATE */}
 
-          {/* VALIDATE */}
-
-          {/* {(version == '2.0' || adminTest) && (<div className='flex-col' style={{backgroundColor: ''}}>
+      {/* {(version == '2.0' || adminTest) && (<div className='flex-col' style={{backgroundColor: ''}}>
 
             <div 
               className='shadow flex-col'
@@ -1437,10 +1467,9 @@ export default function Homepage({test}) {
 
           )} */}
 
+      {/* AUTO-FUND */}
 
-          {/* AUTO-FUND */}
-
-          {/* {(version == '2.0' || adminTest) && (<div className='flex-col' style={{backgroundColor: ''}}>
+      {/* {(version == '2.0' || adminTest) && (<div className='flex-col' style={{backgroundColor: ''}}>
 
             <div className='shadow flex-col'
               style={{
@@ -1532,7 +1561,7 @@ export default function Homepage({test}) {
           </div>
           )} */}
 
-      {(version == '2.0' || adminTest) || (version == '1.0' && !adminTest) && isLogged && <ProfilePage />}
+      {version == "2.0" || adminTest || (version == "1.0" && !adminTest && isLogged && <ProfilePage />)}
     </div>
-  )
+  );
 }
