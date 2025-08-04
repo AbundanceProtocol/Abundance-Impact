@@ -346,7 +346,7 @@ export default function Settings({test}) {
             const notifUpdate = await axios.post('/api/user/postNotification', { fid, notif: result.notificationDetails });
 
             if (notifUpdate?.data) {
-              console.log('test1', notifUpdate?.data)
+              console.log('test2', notifUpdate?.data)
               setNotifStatus({
                 app: true,
                 notifs: true
@@ -355,77 +355,21 @@ export default function Settings({test}) {
             }
           }
 
+        } else if (userProfile.client.added && userProfile.client.notificationDetails) {
+
+          console.log('app on')
+
+          const notifUpdate = await axios.post('/api/user/postNotification', { fid, notif: result.notificationDetails });
+          if (notifUpdate?.data) {
+            console.log('test3', notifUpdate?.data)
+            setNotifStatus({
+              app: true,
+              notifs: true
+            })
+            setIsOn({...isOn, notifs: true})
+          }
         }
       
-        console.log('miniapp')
-
-
-        // if (!notifStatus.app && !notifStatus.notifs) {
-          
-        //   const result = await sdk.actions.addMiniApp();
-        //   console.log('result1', result)
-        //   if (result.notificationDetails) {
-
-        //     const notifUpdate = await axios.post('/api/user/postNotification', { fid, notif: result.notificationDetails });
-
-        //     if (notifUpdate?.data) {
-        //       console.log('test1', notifUpdate?.data)
-        //       setNotifStatus({
-        //         app: true,
-        //         notifs: true
-        //       })
-        //       setIsOn({...isOn, notifs: true})
-        //     }
-
-        //   } else {
-        //     console.log('test2')
-
-        //     setNotifStatus({
-        //       app: false,
-        //       notifs: false
-        //     })
-        //     setIsOn({...isOn, notifs: false})
-        //   }
-  
-        // } else if (notifStatus.app && !notifStatus.app) {
-        //   console.log('test3')
-
-        //   const result = await sdk.actions.addFrame();
-        //   // const result = await sdk.actions.addMiniApp();
-        //   console.log('result2', result)
-
-        //   if (result.notificationDetails) {
-
-        //     const notifUpdate = await axios.post('/api/user/postNotification', { fid, notif: result.notificationDetails });
-
-        //     if (notifUpdate?.data) {
-        //       console.log('notifUpdate', notifUpdate)
-
-        //       setNotifStatus({
-        //         app: true,
-        //         notifs: true
-        //       })
-        //       setIsOn({...isOn, notifs: true})
-        //     } else {
-        //       console.log('test4')
-  
-        //       setNotifStatus({
-        //         app: true,
-        //         notifs: false
-        //       })
-        //       setIsOn({...isOn, notifs: false})
-        //     }
-
-        //   } else {
-        //     console.log('test4')
-
-        //     setNotifStatus({
-        //       app: true,
-        //       notifs: false
-        //     })
-        //     setIsOn({...isOn, notifs: false})
-        //   }
-        // }
       } else {
         console.log('not miniapp')
       }
