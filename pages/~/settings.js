@@ -319,7 +319,9 @@ export default function Settings({test}) {
         if (userProfile.client.added && !userProfile.client.notificationDetails) {
           console.log('notifs off')
 
-          const result = await sdk.actions.addFrame();
+          const result = await sdk.actions.addMiniApp()
+
+          // const result = await sdk.actions.addFrame();
           console.log('result2', result)
 
           if (result.notificationDetails) {
