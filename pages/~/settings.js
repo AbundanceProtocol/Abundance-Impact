@@ -337,7 +337,8 @@ export default function Settings({test}) {
         } else if (!notifStatus.app) {
           console.log('test3')
 
-          const result = await sdk.actions.addFrame();
+          // const result = await sdk.actions.addFrame();
+          const result = await sdk.actions.addMiniApp();
           console.log('result2', result)
 
           if (result.notificationDetails) {
