@@ -313,28 +313,34 @@ export default function Settings({test}) {
       const { sdk } = await import('@farcaster/miniapp-sdk');
       console.log('isMiniApp', isMiniApp, notifStatus.app, notifStatus.notifs)
       if (isMiniApp) {
-        if (notifStatus.app && !notifStatus.notifs) {
+        if (!notifStatus.app && !notifStatus.notifs) {
           
           const result = await sdk.actions.addMiniApp();
           console.log('result1', result)
           if (result.notificationDetails) {
-            console.log('test1')
-            setNotifStatus({
-              app: true,
-              notifs: true
-            })
-            setIsOn({...isOn, notifs: true})
+
+            const notifUpdate = await axios.post('/api/user/postNotification', { fid, notif: result.notificationDetails });
+
+            if (notifUpdate?.data) {
+              console.log('test1', notifUpdate?.data)
+              setNotifStatus({
+                app: true,
+                notifs: true
+              })
+              setIsOn({...isOn, notifs: true})
+            }
+
           } else {
             console.log('test2')
 
             setNotifStatus({
-              app: true,
+              app: false,
               notifs: false
             })
             setIsOn({...isOn, notifs: false})
           }
   
-        } else if (!notifStatus.app) {
+        } else if (notifStatus.app && !notifStatus.app) {
           console.log('test3')
 
           const result = await sdk.actions.addFrame();
@@ -367,7 +373,7 @@ export default function Settings({test}) {
             console.log('test4')
 
             setNotifStatus({
-              app: false,
+              app: true,
               notifs: false
             })
             setIsOn({...isOn, notifs: false})
