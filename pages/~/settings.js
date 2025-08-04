@@ -310,52 +310,66 @@ export default function Settings({test}) {
 
   async function notifsOn() {
     try {
-      const { sdk } = await import('@farcaster/miniapp-sdk');
-      console.log('isMiniApp', isMiniApp, notifStatus.app, notifStatus.notifs)
       if (isMiniApp) {
-        if (notifStatus.app && !notifStatus.notifs) {
-          
-          const result = await sdk.actions.addMiniApp();
-          console.log('result1', result)
-          if (result.notificationDetails) {
-            console.log('test1')
-            setNotifStatus({
-              app: true,
-              notifs: true
-            })
-            setIsOn({...isOn, notifs: true})
-          } else {
-            console.log('test2')
+        const { sdk } = await import('@farcaster/miniapp-sdk');
+        const userProfile = await sdk.context
 
-            setNotifStatus({
-              app: true,
-              notifs: false
-            })
-            setIsOn({...isOn, notifs: false})
-          }
-  
-        } else if (!notifStatus.app) {
-          console.log('test3')
+        console.log('isMiniApp', isMiniApp, notifStatus.app, notifStatus.notifs, userProfile.client.added, userProfile.client.notificationDetails)
 
-          const result = await sdk.actions.addFrame();
+        if (userProfile.client.added && !userProfile.client.notificationDetails) {
+          console.log('notifs off')
+
+          const result = await sdk.actions.addMiniApp()
+
+          // const result = await sdk.actions.addFrame();
           console.log('result2', result)
 
           if (result.notificationDetails) {
+            const notifUpdate = await axios.post('/api/user/postNotification', { fid, notif: result.notificationDetails });
+
+            if (notifUpdate?.data) {
+              console.log('test1', notifUpdate?.data)
+              setNotifStatus({
+                app: true,
+                notifs: true
+              })
+              setIsOn({...isOn, notifs: true})
+            }
+          }
+
+        } else if (!userProfile.client.added && !userProfile.client.notificationDetails) {
+          console.log('app off')
+
+          const result = await sdk.actions.addMiniApp()
+          console.log('result1', result)
+          if (result.notificationDetails) {
+            const notifUpdate = await axios.post('/api/user/postNotification', { fid, notif: result.notificationDetails });
+
+            if (notifUpdate?.data) {
+              console.log('test2', notifUpdate?.data)
+              setNotifStatus({
+                app: true,
+                notifs: true
+              })
+              setIsOn({...isOn, notifs: true})
+            }
+          }
+
+        } else if (userProfile.client.added && userProfile.client.notificationDetails) {
+
+          console.log('app on')
+
+          const notifUpdate = await axios.post('/api/user/postNotification', { fid, notif: result.notificationDetails });
+          if (notifUpdate?.data) {
+            console.log('test3', notifUpdate?.data)
             setNotifStatus({
               app: true,
               notifs: true
             })
             setIsOn({...isOn, notifs: true})
-          } else {
-            console.log('test4')
-
-            setNotifStatus({
-              app: false,
-              notifs: false
-            })
-            setIsOn({...isOn, notifs: false})
           }
         }
+      
       } else {
         console.log('not miniapp')
       }

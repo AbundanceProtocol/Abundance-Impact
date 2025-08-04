@@ -368,12 +368,12 @@ export default function Rewards() {
       <Head>
         <meta
           name="fc:frame"
-          content='{"version":"next","imageUrl":"https://impact.abundance.id/images/icon-02.png","button":{"title":"Impact 2.0","action":{"type":"launch_frame","name":"Check Rewards","url":"https://impact.abundance.id/~/rewards","splashImageUrl":"https://impact.abundance.id/images/icon.png","splashBackgroundColor":"#011222"}}}'
+          content='{"version":"next","imageUrl":"https://impact.abundance.id/images/icon-02.png","button":{"title":"Check Rewards","action":{"type":"launch_frame","name":"Impact 2.0","url":"https://impact.abundance.id/~/rewards","splashImageUrl":"https://impact.abundance.id/images/icon.png","splashBackgroundColor":"#011222"}}}'
         />
 
         {/* Mini App specific metadata */}
         <meta name="fc:miniapp" content="true" />
-        <meta name="fc:miniapp:name" content="Check Rewards" />
+        <meta name="fc:miniapp:name" content="Impact 2.0" />
         <meta name="fc:miniapp:description" content="Get boosted and rewarded for your impact on Farcaster" />
         <meta name="fc:miniapp:icon" content="https://impact.abundance.id/images/icon-02.png" />
         <meta name="fc:miniapp:url" content="https://impact.abundance.id/~/rewards" />
