@@ -337,16 +337,32 @@ export default function Settings({test}) {
         } else if (!notifStatus.app) {
           console.log('test3')
 
-          // const result = await sdk.actions.addFrame();
-          const result = await sdk.actions.addMiniApp();
+          const result = await sdk.actions.addFrame();
+          // const result = await sdk.actions.addMiniApp();
           console.log('result2', result)
 
           if (result.notificationDetails) {
-            setNotifStatus({
-              app: true,
-              notifs: true
-            })
-            setIsOn({...isOn, notifs: true})
+
+            const notifUpdate = await axios.post('/api/user/postNotification', { fid, notif: result.notificationDetails });
+
+            if (notifUpdate?.data) {
+              console.log('notifUpdate', notifUpdate)
+
+              setNotifStatus({
+                app: true,
+                notifs: true
+              })
+              setIsOn({...isOn, notifs: true})
+            } else {
+              console.log('test4')
+  
+              setNotifStatus({
+                app: true,
+                notifs: false
+              })
+              setIsOn({...isOn, notifs: false})
+            }
+
           } else {
             console.log('test4')
 
