@@ -261,8 +261,24 @@ export default function Settings({test}) {
     }
   }
 
+  async function updateSettings(setting, data) {
+    try {
+      const response = await axios.post("/api/user/postSettings", { fid, setting, data });
+      console.log('response', response)
+      return response?.data?.updatedSettings
+    } catch (error) {
+      console.error('Failed:', error, error?.response?.data?.message)
+      if (error?.response?.data?.message) {
+        return error?.response?.data?.message
+      } else {
+        return null
+      }
+    }
+  }
+
+
   const ToggleSwitch = ({target}) => {
-    const handleToggle = () => {
+    const handleToggle = async () => {
       console.log('isOn', isOn)
       if (isOn) {
         setFundingSchedule('off')
@@ -272,6 +288,30 @@ export default function Settings({test}) {
 
       if (isLogged) {
         if (target !== 'validate') {
+
+          if (target == 'boost') {
+            if (isOn[target] == false) {
+              setLoading(prev => ({...prev, [target]: true }))
+                try {
+                  const response = await updateSettings("boost-on")
+                  console.log(response)
+                } catch (error) {
+                  console.error('Failed:', error)
+                }
+              setLoading(prev => ({...prev, [target]: false }))
+            } else if (isOn[target] == true) {
+              setLoading(prev => ({...prev, [target]: true }))
+                try {
+                  const response = await updateSettings("boost-off")
+                  console.log(response)
+                } catch (error) {
+                  console.error('Failed:', error)
+                }
+              setLoading(prev => ({...prev, [target]: false }))
+            }
+          }
+
+
           setIsOn(prev => ({...prev, [target]: !isOn[target] }))
         } else if (target == 'validate' && isOn.notifs) {
           setIsOn(prev => ({...prev, [target]: !isOn[target] }))
