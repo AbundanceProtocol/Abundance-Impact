@@ -45,10 +45,27 @@ export default async function handler(req, res) {
         try {
           await connectToDatabase();
           let updated = null
+          let message = null
           if (setting == 'boost-on') {
             updated = await User.findOneAndUpdate({ fid: fid.toString(), ecosystem_points: '$IMPACT' }, { boost: true }, { new: true, select: '-uuid' });
           } else if (setting == 'boost-off') {
             updated = await User.findOneAndUpdate({ fid: fid.toString(), ecosystem_points: '$IMPACT' }, { boost: false }, { new: true, select: '-uuid' });
+          } else if (setting == 'validate-on') {
+            const notifs = await Miniapp.findOne({fid}).select('active token').exec()
+            if (notifs && notifs.active && notifs.token) {
+              updated = await User.findOneAndUpdate({ fid: fid.toString(), ecosystem_points: '$IMPACT' }, { validator: true }, { new: true, select: '-uuid' });
+            } else {
+              message = 'Turn on notifications'
+            }
+          } else if (setting == 'validate-off') {
+            const notifs = await Miniapp.findOne({fid}).select('active token').exec()
+            if (notifs && notifs.active && notifs.token) {
+              updated = await User.findOneAndUpdate({ fid: fid.toString(), ecosystem_points: '$IMPACT' }, { validator: false }, { new: true, select: '-uuid' });
+            } else {
+              message = 'Turn on notifications'
+            }
+
+
           // } else if (setting == 'on') {
           //   updated = await ScheduleTip.findOneAndUpdate({ fid }, { active_cron: true }, { new: true, select: '-uuid' });
           // } else if (setting == 'standard') {
@@ -87,10 +104,10 @@ export default async function handler(req, res) {
             updated = null
           }
           console.log('updated', updated)
-          return updated
+          return {updated, message}
         } catch (error) {
           console.error("Error while fetching data:", error);
-          return null
+          return {updated: null, message: null}
         }  
       }
 
@@ -122,13 +139,13 @@ export default async function handler(req, res) {
 
       if (userSettings) {
 
-        const updatedSettings = await updateSettings(fid, setting)
+        const {updated, message} = await updateSettings(fid, setting)
 
-        if (updatedSettings) {
+        if (updated) {
 
           // let curators = await getCurators(updatedSettings)
 
-          res.status(200).json({ updatedSettings });
+          res.status(200).json({ updatedSettings: updated, message });
           return
         } else {
           res.status(404).json({ message: 'Need to login' });
