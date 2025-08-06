@@ -19,7 +19,7 @@ import ProfilePage from './studio';
 import axios from 'axios';
 import MiniAppAuthButton from '../../components/MiniAppAuthButton';
 import { BsKey, BsLock, BsLockFill, BsXCircle, BsPerson, BsPersonFill, BsShieldCheck, BsShieldFillCheck, BsPiggyBank, BsPiggyBankFill, BsStar, BsStarFill, BsQuestionCircle, BsGift, BsGiftFill, BsPencilFill, BsInfoCircle, BsBellSlash, BsBell } from "react-icons/bs";
-
+import Modal from '../../components/Layout/Modals/Modal';
 import Spinner from '../../components/Common/Spinner';
 import NeynarSigninButton from '../../components/Layout/Modals/Signin';
 import { formatNum } from '../../utils/utils';
@@ -50,6 +50,7 @@ export default function Settings({test}) {
   const [showLoginNotice, setShowLoginNotice] = useState(!isLogged);
   const [notifStatus, setNotifStatus] = useState({app: false, notifs: false})
   const [needNotif, setNeedNotif] = useState(false)
+  const [modal, setModal] = useState({on: false, success: false, text: ''})
 
   useEffect(() => {
     if (!isLogged) {
@@ -261,8 +262,24 @@ export default function Settings({test}) {
     }
   }
 
+  async function updateSettings(setting, data) {
+    try {
+      const response = await axios.post("/api/user/postSettings", { fid, setting, data });
+      console.log('response', response)
+      return response?.data?.updatedSettings
+    } catch (error) {
+      console.error('Failed:', error, error?.response?.data?.message)
+      if (error?.response?.data?.message) {
+        return error?.response?.data?.message
+      } else {
+        return null
+      }
+    }
+  }
+
+
   const ToggleSwitch = ({target}) => {
-    const handleToggle = () => {
+    const handleToggle = async () => {
       console.log('isOn', isOn)
       if (isOn) {
         setFundingSchedule('off')
@@ -272,8 +289,95 @@ export default function Settings({test}) {
 
       if (isLogged) {
         if (target !== 'validate') {
+
+          if (target == 'boost') {
+            if (isOn[target] == false) {
+              setLoading(prev => ({...prev, [target]: true }))
+                try {
+                  const response = await updateSettings("boost-on")
+                  console.log(response)
+                } catch (error) {
+                  console.error('Failed:', error)
+                }
+              setLoading(prev => ({...prev, [target]: false }))
+            } else if (isOn[target] == true) {
+              setLoading(prev => ({...prev, [target]: true }))
+                try {
+                  const response = await updateSettings("boost-off")
+                  console.log(response)
+                } catch (error) {
+                  console.error('Failed:', error)
+                }
+              setLoading(prev => ({...prev, [target]: false }))
+            }
+          } else if (target == 'autoFund') {
+            if (isOn[target] == false) {
+              setLoading(prev => ({...prev, [target]: true }))
+                try {
+                  const response = await updateSettings("autoFund-on")
+                  console.log(response)
+                } catch (error) {
+                  console.error('Failed:', error)
+                }
+              setLoading(prev => ({...prev, [target]: false }))
+            } else if (isOn[target] == true) {
+              setLoading(prev => ({...prev, [target]: true }))
+                try {
+                  const response = await updateSettings("autoFund-off")
+                  console.log(response)
+                } catch (error) {
+                  console.error('Failed:', error)
+                }
+              setLoading(prev => ({...prev, [target]: false }))
+            }
+          }
           setIsOn(prev => ({...prev, [target]: !isOn[target] }))
         } else if (target == 'validate' && isOn.notifs) {
+          if (isOn[target] == false) {
+            setLoading(prev => ({...prev, [target]: true }))
+              try {
+                const response = await updateSettings("validate-on")
+                console.log(response)
+                if (response?.data?.message && response?.data?.message == 'Turn on notifications') {
+                  setModal({on: true, success: false, text: 'Turn on notifications'});
+                  setTimeout(() => {
+                    setModal({on: false, success: false, text: ''});
+                  }, 2500);
+                  setNotifStatus({
+                    app: false,
+                    notifs: false
+                  })
+                  setIsOn({...isOn, notifs: false})
+                }
+              } catch (error) {
+                console.error('Failed:', error)
+              }
+            setLoading(prev => ({...prev, [target]: false }))
+          } else if (isOn[target] == true) {
+            setLoading(prev => ({...prev, [target]: true }))
+              try {
+                const response = await updateSettings("validate-off")
+                console.log(response)
+                if (response?.data?.message && response?.data?.message == 'Turn on notifications') {
+                  setModal({on: true, success: false, text: 'Turn on notifications'});
+                  setTimeout(() => {
+                    setModal({on: false, success: false, text: ''});
+                  }, 2500);
+                  setNotifStatus({
+                    app: false,
+                    notifs: false
+                  })
+                  setIsOn({...isOn, notifs: false})
+                }
+              } catch (error) {
+                console.error('Failed:', error)
+              }
+            setLoading(prev => ({...prev, [target]: false }))
+          }
+
+
+
+
           setIsOn(prev => ({...prev, [target]: !isOn[target] }))
         } else if (target == 'validate' && !isOn.notifs) {
           setNeedNotif(true)
@@ -876,6 +980,7 @@ export default function Settings({test}) {
       {/* </div> */}
       {/* {!isLogged && (<div ref={ref}>&nbsp;</div>)} */}
       {(version == '2.0' || adminTest) || (version == '1.0' && !adminTest) && isLogged && <ProfilePage />}
+      <Modal modal={modal} />
     </div>
   )
 }
