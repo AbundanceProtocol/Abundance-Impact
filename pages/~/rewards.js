@@ -751,7 +751,7 @@ export default function Rewards() {
                       style={{ justifyContent: "center", alignItems: "center", gap: "0.75rem" }}
                     >
                       <div style={{ fontSize: "15px", fontWeight: "700", margin: "0 0 5px 0", color: "#44aaff" }}>
-                        Claimed (S7)
+                        Claimed (S8)
                       </div>{" "}
                       {/* update season 5/15 */}
                     </div>
