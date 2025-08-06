@@ -310,6 +310,26 @@ export default function Settings({test}) {
                 }
               setLoading(prev => ({...prev, [target]: false }))
             }
+          } else if (target == 'autoFund') {
+            if (isOn[target] == false) {
+              setLoading(prev => ({...prev, [target]: true }))
+                try {
+                  const response = await updateSettings("autoFund-on")
+                  console.log(response)
+                } catch (error) {
+                  console.error('Failed:', error)
+                }
+              setLoading(prev => ({...prev, [target]: false }))
+            } else if (isOn[target] == true) {
+              setLoading(prev => ({...prev, [target]: true }))
+                try {
+                  const response = await updateSettings("autoFund-off")
+                  console.log(response)
+                } catch (error) {
+                  console.error('Failed:', error)
+                }
+              setLoading(prev => ({...prev, [target]: false }))
+            }
           }
           setIsOn(prev => ({...prev, [target]: !isOn[target] }))
         } else if (target == 'validate' && isOn.notifs) {
