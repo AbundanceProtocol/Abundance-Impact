@@ -17,7 +17,10 @@ const castSchema = new mongoose.Schema({
   }],
   cast_channel: { type: String, index: true },
   channel_id: { type: String },
-  cast_tags: [String],
+  cast_tags: [{
+    tag: { type: String, required: true },
+    fid: { type: Number, required: true },
+  }],
   quality_balance: Number,
   impact_total: { type: Number, default: 0, index: true },
   version: { type: Number, default: 1, index: true },
