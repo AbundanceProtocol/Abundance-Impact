@@ -19,23 +19,22 @@ const cache = new NodeCache({ stdTTL: 60 });
 
 
 export default async function handler(req, res) {
-  const { id, fid } = req.query
+  const { fid } = req.query
 
-  console.log('id', id)
   try {
     const fontPath = path.join(process.cwd(), 'public', 'Inter-SemiBold.ttf');
     const fontData = fs.readFileSync(fontPath);
 
-    async function getCircle(id) {
+    async function getCircle(fid) {
       try {
-        console.log(id)
+        // console.log(id)
         await connectToDatabase();
         let circle = null
         if (fid) {
-          circle = await Circle.findOne({ fid }).sort({ _id: -1 }).exec();
-        } else if (id) {
-          const objectId = new mongoose.Types.ObjectId(id)
-          circle = await Circle.findOne({ _id: objectId }).exec();
+          circle = await Circle.findOne({ fid }).sort({ createdAt: -1 }).exec();
+        // } else if (id) {
+        //   const objectId = new mongoose.Types.ObjectId(id)
+        //   circle = await Circle.findOne({ _id: objectId }).exec();
         }
         if (circle && !circle?.image) {
           return {circles: circle.circles, text: circle.text, showcase: circle.showcase, userPfp: circle.user_pfp || null, curator: circle.curator || [], timeframe: circle.time || '', channels: circle.channels || [], image: null}
@@ -50,17 +49,17 @@ export default async function handler(req, res) {
       }  
     }
 
-    async function updateImage(id, fid, image) {
+    async function updateImage(fid, image) {
       try {
-        console.log(id)
+        // console.log(id)
         await connectToDatabase();
         let circle = null
         
         if (fid) {
-          circle = await Circle.findOne({ fid }).sort({ _id: -1 }).exec();
-        } else if (id) {
-          const objectId = new mongoose.Types.ObjectId(id)
-          circle = await Circle.findOne({ _id: objectId }).exec();
+          circle = await Circle.findOne({ fid }).sort({ createdAt: -1 }).exec();
+        // } else if (id) {
+        //   const objectId = new mongoose.Types.ObjectId(id)
+        //   circle = await Circle.findOne({ _id: objectId }).exec();
         }
 
         if (circle) {
@@ -131,7 +130,7 @@ export default async function handler(req, res) {
 
 
 
-    let {circles, text, showcase, userPfp, curator, timeframe, channels, image} = await getCircle(id, fid);
+    let {circles, text, showcase, userPfp, curator, timeframe, channels, image} = await getCircle(fid);
 
     let threshold = true
 
@@ -307,7 +306,7 @@ export default async function handler(req, res) {
         .png({ quality: 50, compressionLevel: 9 })
         .toBuffer();
   
-      const updated = await updateImage(id, fid, compressedBuffer)
+      const updated = await updateImage(fid, compressedBuffer)
 
       // Set the content type to PNG and send the response
       res.setHeader('Content-Type', 'image/png');
