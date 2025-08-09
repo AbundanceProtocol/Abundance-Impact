@@ -18,7 +18,7 @@ const cache = new NodeCache({ stdTTL: 60 });
 
 
 export default async function handler(req, res) {
-  const { id } = req.query
+  const { id, fid } = req.query
 
   console.log('id', id)
   try {
@@ -27,10 +27,15 @@ export default async function handler(req, res) {
 
     async function getCircle(id) {
       try {
-        const objectId = new mongoose.Types.ObjectId(id)
         console.log(id)
         await connectToDatabase();
-        let circle = await Circle.findOne({ _id: objectId }).exec();
+        let circle = null
+        if (fid) {
+          circle = await Circle.findOne({ fid }).sort({ _id: -1 }).exec();
+        } else if (id) {
+          const objectId = new mongoose.Types.ObjectId(id)
+          circle = await Circle.findOne({ _id: objectId }).exec();
+        }
         if (circle && !circle?.image) {
           return {circles: circle.circles, text: circle.text, username: circle.username, showcase: circle.showcase, userPfp: circle.user_pfp || null, curator: circle.curator || [], timeframe: circle.time || '', channels: circle.channels || [], image: null}
         } else if (circle && circle?.image) {
@@ -44,12 +49,19 @@ export default async function handler(req, res) {
       }  
     }
 
-    async function updateImage(id, image) {
+    async function updateImage(id, fid, image) {
       try {
-        const objectId = new mongoose.Types.ObjectId(id)
         console.log(id)
         await connectToDatabase();
-        let circle = await Circle.findOne({ _id: objectId }).exec();
+        let circle = null
+        
+        if (fid) {
+          circle = await Circle.findOne({ fid }).sort({ _id: -1 }).exec();
+        } else if (id) {
+          const objectId = new mongoose.Types.ObjectId(id)
+          circle = await Circle.findOne({ _id: objectId }).exec();
+        }
+
         if (circle) {
           circle.image = image;
           await circle.save();
@@ -84,7 +96,7 @@ export default async function handler(req, res) {
     }
 
 
-    let {circles, text, username, showcase, userPfp, curator, timeframe, channels, image} = await getCircle(id);
+    let {circles, text, username, showcase, userPfp, curator, timeframe, channels, image} = await getCircle(id, fid);
 
     let threshold = true
 
@@ -306,8 +318,8 @@ export default async function handler(req, res) {
            
             {showcase?.length == 0 ? (
               <div style={{height: '130px', color: '#fff', fontSize: '17px'}}>No casts</div>
-            ) : showcase?.length >= 1 && showcase?.length <= 9 ? (
-              showcase.slice(0, 4).map((show, index) => (
+            ) : showcase?.length >= 1 ? (
+              showcase.map((show, index) => (
                 <div key={index} style={{display: 'flex', justifyContent: 'center', alignItems: 'center', minWidth: '65px', maxWidth: '170px', position: 'relative'}}>
                   <img src={show.cast} height={125} style={{display: 'flex', justifyContent: 'center', alignItems: 'center', borderRadius: '10px', border: '2px solid #eee', backgroundColor: '#8363ca', minWidth: '65px', maxWidth: '170px'}} />
                   {show?.impact && (
@@ -352,7 +364,7 @@ export default async function handler(req, res) {
         .png({ quality: 50, compressionLevel: 9 })
         .toBuffer();
   
-      const updated = await updateImage(id, compressedBuffer)
+      const updated = await updateImage(id, fid, compressedBuffer)
 
       // Set the content type to PNG and send the response
       res.setHeader('Content-Type', 'image/png');
