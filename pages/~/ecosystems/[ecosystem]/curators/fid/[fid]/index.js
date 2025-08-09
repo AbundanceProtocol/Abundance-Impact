@@ -783,7 +783,7 @@ export async function getServerSideProps(context) {
   const { query, params } = context;
   const { id } = query;
   // const { fid } = params;
-  
+  console.log('id1: ', id)
   // async function getCircle(id) {
   //   if (id) {
   //     try {
