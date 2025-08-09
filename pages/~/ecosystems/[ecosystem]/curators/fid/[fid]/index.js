@@ -24,10 +24,10 @@ import qs from "querystring";
 
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 
-export default function CuratorFid({}) {
+export default function CuratorFid({id}) {
   const router = useRouter();
   const [ref, inView] = useInView()
-  const { ecosystem, username, app, userFid, pass, fid, id } = router.query
+  const { ecosystem, username, app, userFid, pass, fid } = router.query
   const [user, setUser] = useState(null)
   const { LoginPopup, LogoutPopup, isLogged, setPoints, setIsLogged, setFid, miniApp, setMiniApp, autotipping, setAutotipping } = useContext(AccountContext)
   const ref1 = useRef(null)
@@ -71,7 +71,7 @@ export default function CuratorFid({}) {
   const [userSearch, setUserSearch] = useState({ search: '' })
   const [selectedChannels, setSelectedChannels] = useState([])
   const [channels, setChannels] = useState([])
-  const initialQuery = {shuffle: false, time: '3d', tags: [], channels: [], username: null, curators: [], order: -1}
+  const initialQuery = {shuffle: false, time: '7d', tags: [], channels: [], username: null, curators: [], order: -1}
   const [userQuery, setUserQuery] = useState(initialQuery)
   const queryOptions = {
     tags: [
@@ -682,7 +682,7 @@ export default function CuratorFid({}) {
           name="fc:frame"
           content={`{"version":"next","imageUrl":"${baseURL}/api/frames/tip/circle-v3?${qs.stringify({
             id,
-          })}","button":{"title":"Impact Curation","action":{"type":"launch_frame","name":"Impact 2.0","url":"https://impact.abundance.id/~/ecosystems/abundance/curators/fid/${9326}?${qs.stringify({
+          })}","button":{"title":"Impact Curation","action":{"type":"launch_frame","name":"Impact 2.0","url":"https://impact.abundance.id/~/ecosystems/abundance/curators/fid/${fid}?${qs.stringify({
             id,
           })}","splashImageUrl":"https://impact.abundance.id/images/icon.png","splashBackgroundColor":"#011222"}}}`}
         />
@@ -694,9 +694,7 @@ export default function CuratorFid({}) {
         <meta name="fc:miniapp:icon" content={`{"version":"next","imageUrl":"${baseURL}/api/frames/tip/circle-v3?${qs.stringify({
             id,
           })}`} />
-        <meta name="fc:miniapp:url" content={`https://impact.abundance.id/~/ecosystems/abundance/curators/fid/${9326}?${qs.stringify({
-            id,
-          })}`} />
+        <meta name="fc:miniapp:url" content={`https://impact.abundance.id/~/ecosystems/abundance/curators/fid/${fid}`} />
       </Head>
       <div className="" style={{padding: '58px 0 0 0'}}>
       </div>
@@ -781,10 +779,10 @@ export default function CuratorFid({}) {
 
 
 
-// export async function getServerSideProps(context) {
-//   const { query, params } = context;
-//   const { id } = query;
-//   const { fid } = params;
+export async function getServerSideProps(context) {
+  const { query, params } = context;
+  const { id } = query;
+  // const { fid } = params;
   
   // async function getCircle(id) {
   //   if (id) {
@@ -813,10 +811,10 @@ export default function CuratorFid({}) {
   
   // const { time, curators, channels, eco, username, tipperFid } = await getCircle(id)
   
-  // let setId = ''
-  // if (id) {
-  //   setId = id
-  // }
+  let setId = ''
+  if (id) {
+    setId = id
+  }
   // let setUsername = ''
   // if (username) {
   //   setUsername = username
@@ -842,16 +840,16 @@ export default function CuratorFid({}) {
   //   setTipperFid = tipperFid
   // }
 
-  // return {
-  //   props: {
+  return {
+    props: {
       // time: setTime,
       // curators: setCurators,
       // channels: setChannels,
       // eco: setEco,
       // ecosystem: ecosystem,
       // username: setUsername,
-      // id: setId,
+      id: setId,
       // tipperFid: setTipperFid
-//     },
-//   };
-// }
+    },
+  };
+}
