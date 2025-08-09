@@ -295,7 +295,7 @@ export default async function handler(req, res) {
   
   
   
-          <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '390px'}}>
+          <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px'}}>
   
   
   
@@ -304,22 +304,22 @@ export default async function handler(req, res) {
            
             {showcase?.length == 0 ? (
               <div style={{height: '130px', color: '#fff', fontSize: '17px'}}>No casts</div>
-            ) : showcase?.length == 1 ? (<div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', minWidth: '180px', maxWidth: '560px', position: 'relative'}}>
-              <img src={showcase[0].cast} height={390} style={{display: 'flex', justifyContent: 'center', alignItems: 'center', borderRadius: '10px', border: '2px solid #eee', backgroundColor: '#8363ca', minWidth: '180px', maxWidth: '560px'}} />
+            ) : showcase?.length == 1 ? (<div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', minWidth: '65px', maxWidth: '170px', position: 'relative'}}>
+              <img src={showcase[0].cast} height={125} style={{display: 'flex', justifyContent: 'center', alignItems: 'center', borderRadius: '10px', border: '2px solid #eee', backgroundColor: '#8363ca', minWidth: '65px', maxWidth: '170px'}} />
               {showcase[0]?.impact && (<div style={{position: 'absolute', bottom: 0, right: 0, transform: 'translate(-0%, -0%)', backgroundColor: '#86c', color: '#fff', fontSize: '15px', padding: '2px 4px', borderRadius: '3px' }}>
                 {showcase[0].impact.toString()}
               </div>)}
             </div>
             ) : showcase?.length == 2 ? (
-              showcase.map((show, index) => (<div key={index} style={{display: 'flex', justifyContent: 'center', alignItems: 'center', minWidth: '110px', maxWidth: '265px', position: 'relative'}}>
-                <img src={show.cast} height={210} style={{display: 'flex', justifyContent: 'center', alignItems: 'center', borderRadius: '10px', border: '2px solid #eee', backgroundColor: '#8363ca', minWidth: '110px', maxWidth: '265px'}} />
+              showcase.map((show, index) => (<div key={index} style={{display: 'flex', justifyContent: 'center', alignItems: 'center', minWidth: '65px', maxWidth: '170px', position: 'relative'}}>
+                <img src={show.cast} height={125} style={{display: 'flex', justifyContent: 'center', alignItems: 'center', borderRadius: '10px', border: '2px solid #eee', backgroundColor: '#8363ca', minWidth: '65px', maxWidth: '170px'}} />
                 {show?.impact && (<div style={{position: 'absolute', bottom: 0, right: 0, transform: 'translate(-0%, -0%)', backgroundColor: '#86c', color: '#fff', fontSize: '15px', padding: '2px 4px', borderRadius: '3px' }}>
                   {show.impact.toString()}
                 </div>)}
               </div>))
             ) : showcase?.length == 3 || showcase?.length == 4 ? (
-              showcase.map((show, index) => (<div key={index} style={{display: 'flex', justifyContent: 'center', alignItems: 'center', minWidth: '110px', maxWidth: '265px', position: 'relative'}}>
-                <img src={show.cast} height={190} style={{display: 'flex', justifyContent: 'center', alignItems: 'center', borderRadius: '10px', border: '2px solid #eee', backgroundColor: '#8363ca', minWidth: '110px', maxWidth: '265px'}} />
+              showcase.map((show, index) => (<div key={index} style={{display: 'flex', justifyContent: 'center', alignItems: 'center', minWidth: '65px', maxWidth: '170px', position: 'relative'}}>
+                <img src={show.cast} height={125} style={{display: 'flex', justifyContent: 'center', alignItems: 'center', borderRadius: '10px', border: '2px solid #eee', backgroundColor: '#8363ca', minWidth: '65px', maxWidth: '170px'}} />
                 {show?.impact && (<div style={{position: 'absolute', bottom: 0, right: 0, transform: 'translate(-0%, -0%)', backgroundColor: '#86c', color: '#fff', fontSize: '15px', padding: '2px 4px', borderRadius: '3px' }}>
                   {show.impact.toString()}
                 </div>)}
