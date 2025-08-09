@@ -682,18 +682,14 @@ export default function CuratorFid({id, fid}) {
           name="fc:frame"
           content={`{"version":"next","imageUrl":"${baseURL}/api/frames/tip/circle-v5?${qs.stringify({
             id, fid
-          })}","button":{"title":"Impact Curation","action":{"type":"launch_frame","name":"Impact 2.0","url":"https://impact.abundance.id/~/ecosystems/abundance/curators/fid/${fid}?${qs.stringify({
-            id,
-          })}","splashImageUrl":"https://impact.abundance.id/images/icon.png","splashBackgroundColor":"#011222"}}}`}
+          })}","button":{"title":"Impact Curation","action":{"type":"launch_frame","name":"Impact 2.0","url":"https://impact.abundance.id/~/ecosystems/abundance/curators/fid/${fid}","splashImageUrl":"https://impact.abundance.id/images/icon.png","splashBackgroundColor":"#011222"}}}`}
         />
 
         {/* Mini App specific metadata */}
         <meta name="fc:miniapp" content="true" />
         <meta name="fc:miniapp:name" content="Impact 2.0" />
         <meta name="fc:miniapp:description" content="Get boosted and rewarded for your impact on Farcaster" />
-        <meta name="fc:miniapp:icon" content={`{"version":"next","imageUrl":"${baseURL}/api/frames/tip/circle-v5?${qs.stringify({
-            id, fid
-          })}`} />
+        <meta name="fc:miniapp:icon" content={`{"version":"next","imageUrl":"${baseURL}/api/frames/tip/circle-v5?${qs.stringify({ fid })}`} />
         <meta name="fc:miniapp:url" content={`https://impact.abundance.id/~/ecosystems/abundance/curators/fid/${fid}`} />
       </Head>
       <div className="" style={{padding: '58px 0 0 0'}}>
