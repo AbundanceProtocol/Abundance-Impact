@@ -71,7 +71,7 @@ export default function CuratorFid({id, fid}) {
   const [userSearch, setUserSearch] = useState({ search: '' })
   const [selectedChannels, setSelectedChannels] = useState([])
   const [channels, setChannels] = useState([])
-  const initialQuery = {shuffle: false, time: '7d', tags: [], channels: [], username: null, curators: [], order: -1}
+  const initialQuery = {shuffle: false, time: '30d', tags: [], channels: [], username: null, curators: [], order: -1}
   const [userQuery, setUserQuery] = useState(initialQuery)
   const queryOptions = {
     tags: [
@@ -716,12 +716,12 @@ export default function CuratorFid({id, fid}) {
 
 
 
+
+
+
       {searchSelect == 'Curation' && (
 
       <div className={isMobile ? 'flex-col' : 'flex-row'} style={{justifyContent: 'center', marginTop: '15px', marginBottom: '30px', gap: isMobile ? '0.25rem' : '1rem'}}>
-
-
-
 
 
         <div className='flex-row' style={{height: '30px', alignItems: 'center', justifyContent: 'center', padding: '20px 0'}}>

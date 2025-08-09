@@ -8,6 +8,7 @@ import NodeCache from 'node-cache';
 import Tip from "../../../../models/Tip";
 import Cast from "../../../../models/Cast";
 import Circle from "../../../../models/Circle";
+import User from "../../../../models/User";
 import connectToDatabase from "../../../../libs/mongodb";
 import { numToText } from "../../../../utils/utils";
 import mongoose from 'mongoose';
@@ -37,15 +38,15 @@ export default async function handler(req, res) {
           circle = await Circle.findOne({ _id: objectId }).exec();
         }
         if (circle && !circle?.image) {
-          return {circles: circle.circles, text: circle.text, username: circle.username, showcase: circle.showcase, userPfp: circle.user_pfp || null, curator: circle.curator || [], timeframe: circle.time || '', channels: circle.channels || [], image: null}
+          return {circles: circle.circles, text: circle.text, showcase: circle.showcase, userPfp: circle.user_pfp || null, curator: circle.curator || [], timeframe: circle.time || '', channels: circle.channels || [], image: null}
         } else if (circle && circle?.image) {
-          return {circles: circle.circles, text: circle.text, username: circle.username, showcase: circle.showcase, userPfp: circle.user_pfp || null, curator: circle.curator || [], timeframe: circle.time || '', image: circle.image, channels: circle.channels || []}
+          return {circles: circle.circles, text: circle.text, showcase: circle.showcase, userPfp: circle.user_pfp || null, curator: circle.curator || [], timeframe: circle.time || '', image: circle.image, channels: circle.channels || []}
         } else {
-          return {circles: [], text: '', username: '', showcase: [], userPfp: null, curator: [], timeframe: '', image: null}
+          return {circles: [], text: '', showcase: [], userPfp: null, curator: [], timeframe: '', image: null}
         }
       } catch (error) {
         console.error("Error while fetching casts:", error);
-        return {circles: [], text: '', username: '', showcase: [], userPfp: null, curator: [], timeframe: '', channels: [], image: null}
+        return {circles: [], text: '', showcase: [], userPfp: null, curator: [], timeframe: '', channels: [], image: null}
       }  
     }
 
@@ -95,8 +96,37 @@ export default async function handler(req, res) {
       }
     }
 
+    async function getUser(fid) {
+      try {
+        const base = "https://client.warpcast.com/";
+        const url = `${base}v2/user-by-fid?fid=${Number(fid)}`;
+        const response = await fetch(url, {
+          headers: {
+            accept: "application/json",
+          },
+        });
+  
+        if (response) {
+          const user = await response.json()
+          if (user) {
+            const userProfile = user?.result?.user
+            console.log('userProfile', userProfile)
+            return {username: userProfile?.username, pfp: userProfile?.pfp?.url}
+          }
+        }
+        return {username: null, pfp: null}
+      } catch (error) {
+        console.error('Error handling GET request:', error);
+        return {username: null, pfp: null}
+      }        
+    }
+    const {username, pfp} = await getUser(fid)
 
-    let {circles, text, username, showcase, userPfp, curator, timeframe, channels, image} = await getCircle(id, fid);
+
+
+
+
+    let {circles, text, showcase, userPfp, curator, timeframe, channels, image} = await getCircle(id, fid);
 
     let threshold = true
 
@@ -108,20 +138,20 @@ export default async function handler(req, res) {
       }
     }
 
-    if (image) {
-      try {
-        const buffer = image.buffer
-        res.setHeader('Content-Type', 'image/png');
-        res.setHeader('Cache-Control', 'max-age=10');
-        // res.send(pngBuffer);
-        res.send(buffer);
-        return
-      } catch (err) {
-        console.error('Error deserializing BSON:', err);
-        res.status(500).send('Error generating image');
-        return
-      }
-    } else {
+    // if (image) {
+    //   try {
+    //     const buffer = image.buffer
+    //     res.setHeader('Content-Type', 'image/png');
+    //     res.setHeader('Cache-Control', 'max-age=10');
+    //     // res.send(pngBuffer);
+    //     res.send(buffer);
+    //     return
+    //   } catch (err) {
+    //     console.error('Error deserializing BSON:', err);
+    //     res.status(500).send('Error generating image');
+    //     return
+    //   }
+    // } else {
       if (showcase?.length > 0 && showcase[0]?.impact) {
         showcase.sort((a, b) => b.impact - a.impact);
 
@@ -163,8 +193,8 @@ export default async function handler(req, res) {
   
       const [firstHalf, secondHalf] = splitCircles(circles);
   
-      if (showcase?.length > 4) {
-        showcase = showcase.slice(0, 4)
+      if (showcase?.length > 5) {
+        showcase = showcase.slice(0, 5)
       }
 
       const backgroundImg = `${baseURL}/images/backgroundframe3.png`
@@ -189,127 +219,35 @@ export default async function handler(req, res) {
 
 
 
-
-
-
-
-
-
-
-
-  {!threshold && <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '5px 5px 15px 5px'}}>
   
-  <div style={{display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '1px solid #eeeeeeaa', borderRadius: '88px', padding: '3px 10px 3px 3px', background: '#eeeeeeaa', width: 'auto', margin: '0 5px 0 0'}}>
-    {curator.length > 0 && curator[0]?.pfp && curator[0]?.pfp !== null && (<img src={curator[0]?.pfp} width={40} height={40} style={{borderRadius: '80px', border: '2px solid #eee', backgroundColor: '#8363ca'}} />)}
-    <div style={{display: 'flex', textAlign: 'center', color: '#220a4d', fontSize: '22px', margin: '0'}}>{curator?.length > 0 && curator[0]?.username !== null ? `@${curator[0]?.username}` : ' Ecosystem'}</div>
-  </div>
-
-  <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '22px', margin: '0', padding: '0'}}>impact picks</div>
-
-
-</div>}
-
-
-
-
-
-
-
-{!threshold && (<div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.0rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '0px 5px 0px 5px'}}>
-
-  <div style={{display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', borderRadius: '16px', padding: '3px 5px', margin: '0', width: 'auto'}}>
-    <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '18px', margin: '0'}}>{`picked over`}{time !== 'all time' && ' the last'}</div>
-  </div>
-
-  <div style={{display: 'flex', flexDirection: 'row', color: '#220a4d', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '1px solid #eeeeeeaa', borderRadius: '16px', padding: '3px 10px', background: '#eeeeeeaa', width: 'auto', margin: '0', fontSize: '18px'}}>{time}</div>
-
-  <div style={{display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', borderRadius: '16px', padding: '3px 5px', margin: '0', width: 'auto'}}>
-    <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '18px', margin: '0'}}>{`in`}</div>
-  </div>
-
-  <div style={{display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '1px solid #eeeeeeaa', borderRadius: '16px', padding: '3px 10px', background: '#eeeeeeaa', width: 'auto', margin: '0', fontSize: '18px'}}>
-    <div style={{display: 'flex', textAlign: 'center', color: '#220a4d', fontSize: '18px', margin: '0'}}>{`${channels?.length > 0 && channels[0] !== ' ' && channels[0] !== null ? '/' + channels[0] : 'all channels'}`}</div>
-  </div>
-
-</div>)}
-
-
-{!threshold && (<div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.0rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '3px 5px 10px 2px'}}>
-
-  <div style={{display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', borderRadius: '16px', padding: '3px 5px', margin: '0', width: 'auto'}}>
-    <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '18px', margin: '0'}}>{`picks feature:`}</div>
-  </div>
-
-</div>)}
-
-
-
+          {threshold && (<div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '3px 5px 10px 2px', height: '240px'}}>
   
-  
-          {threshold && (<div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '5px 5px 15px 5px'}}>
-  
-            <div style={{display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '1px solid #eeeeeeaa', borderRadius: '88px', padding: '3px 10px 3px 3px', background: '#eeeeeeaa', width: 'auto', margin: '0 5px 0 0'}}>
-              {userPfp && (<img src={userPfp} width={40} height={40} style={{borderRadius: '80px', border: '2px solid #eee', backgroundColor: '#8363ca'}} />)}
+
+            <div style={{display: 'flex', textAlign: 'center', color: '#ddeeffee', fontSize: '52px', margin: '0', width: '300px'}}>Impact Curator</div>
+
+
+            <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '3px 5px 10px 2px', height: '240px'}}>
+            {pfp && (<img src={pfp} width={100} height={100} style={{borderRadius: '80px', border: '2px solid #eee', backgroundColor: '#8363ca'}} />)}
+
+            {username && (<div style={{display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '1px solid #eeeeeeaa', borderRadius: '16px', padding: '3px 10px', background: '#eeeeeeaa', width: 'auto', margin: '0'}}>
+
               <div style={{display: 'flex', textAlign: 'center', color: '#220a4d', fontSize: '22px', margin: '0'}}>{`@${username}`}</div>
-            </div>
-  
-            <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '22px', margin: '0', padding: '0'}}>multi-tipped</div>
-  
-  
-          </div>)}
-  
-  
-  
-  
-  
-  
-  
-          {threshold && (<div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.0rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '0px 5px 0px 5px'}}>
-  
-            <div style={{display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '1px solid #eeeeeeaa', borderRadius: '16px', padding: '3px 10px', margin: '0', background: '#eeeeeeaa', width: 'auto'}}>
-              <div style={{display: 'flex', textAlign: 'center', color: '#220a4d', fontSize: '18px', margin: '0'}}>{text}</div>
-            </div>
-  
-            <div style={{display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', borderRadius: '16px', padding: '3px 5px', margin: '0', width: 'auto'}}>
-              <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '18px', margin: '0'}}>{`to ${numToText(showcase?.length)} creator`}{showcase?.length > 1 && `s`}</div>
-            </div>
-          </div>)}
-   
-  
-          {threshold && (<div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.0rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '3px 5px 10px 2px'}}>
-  
-            <div style={{display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', borderRadius: '16px', padding: '3px 5px', margin: '0', width: 'auto'}}>
-              <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '18px', margin: '0'}}>{`curated over`}{time !== 'all time' && ' the last'}</div>
-            </div>
-  
-            <div style={{display: 'flex', flexDirection: 'row', color: '#220a4d', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '1px solid #eeeeeeaa', borderRadius: '16px', padding: '3px 10px', background: '#eeeeeeaa', width: 'auto', margin: '0'}}>{time}</div>
-  
-            <div style={{display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '0px solid #eeeeeeaa', borderRadius: '16px', padding: '3px 5px', margin: '0', width: 'auto'}}>
-              <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '18px', margin: '0'}}>{`by`}</div>
-            </div>
-  
-            <div style={{display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '1px solid #eeeeeeaa', borderRadius: '16px', padding: '3px 10px', background: '#eeeeeeaa', width: 'auto', margin: '0'}}>
-              {curator.length > 0 && (<img src={curator[0]?.pfp} width={20} height={20} style={{borderRadius: '80px', border: '2px solid #eee', backgroundColor: '#8363ca'}} />)}
-              <div style={{display: 'flex', textAlign: 'center', color: '#220a4d', fontSize: '18px', margin: '0'}}>{`@${curator[0]?.username}`}</div>
-            </div>
+            </div>)}
+
+          </div>
+
+
   
           </div>)}
   
   
 
 
-
-
-
-
-
-
-
   
   
   
   
-          <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px'}}>
+          <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '120px'}}>
   
   
   
@@ -317,11 +255,11 @@ export default async function handler(req, res) {
           <div style={{gap: '0.5rem', display: 'flex', flexWrap: 'wrap', justifyContent: 'center', flexDirection: 'row'}}>
            
             {showcase?.length == 0 ? (
-              <div style={{height: '130px', color: '#fff', fontSize: '17px'}}>No casts</div>
+              <div style={{height: '130px', color: '#fff', fontSize: '17px'}}>&nbsp;</div>
             ) : showcase?.length >= 1 ? (
               showcase.map((show, index) => (
-                <div key={index} style={{display: 'flex', justifyContent: 'center', alignItems: 'center', minWidth: '65px', maxWidth: '170px', position: 'relative'}}>
-                  <img src={show.cast} height={125} style={{display: 'flex', justifyContent: 'center', alignItems: 'center', borderRadius: '10px', border: '2px solid #eee', backgroundColor: '#8363ca', minWidth: '65px', maxWidth: '170px'}} />
+                <div key={index} style={{display: 'flex', justifyContent: 'center', alignItems: 'center', minWidth: '65px', maxWidth: '140px', position: 'relative'}}>
+                  <img src={show.cast} height={100} style={{display: 'flex', justifyContent: 'center', alignItems: 'center', borderRadius: '10px', border: '2px solid #eee', backgroundColor: '#8363ca', minWidth: '65px', maxWidth: '170px'}} />
                   {show?.impact && (
                     <div style={{position: 'absolute', bottom: 0, right: 0, transform: 'translate(-0%, -0%)', backgroundColor: '#86c', color: '#fff', fontSize: '15px', padding: '2px 4px', borderRadius: '3px' }}>
                       {show.impact.toString()}
@@ -330,7 +268,7 @@ export default async function handler(req, res) {
                 </div>
               ))
             ) : (
-              <div key={index} className='frame-btn' style={{color: '#fff', fontSize: '17px'}}>No casts</div>
+              <div key={index} className='frame-btn' style={{color: '#fff', fontSize: '17px'}}>&nbsp;</div>
             )
               
             }
@@ -341,7 +279,7 @@ export default async function handler(req, res) {
   
   
   
-          <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '18px', margin: showcase?.length > 0 ? '30px 10px 0px 10px' : '25px 10px 0px 10px', width: 'auto', justifyContent: 'center', alignItems: 'center'}}>/impact by @abundance&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;explore curation in mini-app</div>
+          {/* <div style={{display: 'flex', textAlign: 'center', color: '#eff', fontSize: '18px', margin: showcase?.length > 0 ? '30px 10px 0px 10px' : '25px 10px 0px 10px', width: 'auto', justifyContent: 'center', alignItems: 'center'}}>/impact by @abundance&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;explore curation in mini-app</div> */}
   
         </div>
         ,
@@ -371,7 +309,7 @@ export default async function handler(req, res) {
       res.setHeader('Cache-Control', 'max-age=10');
       // res.send(pngBuffer);
       res.send(compressedBuffer);
-    }
+    // }
   } catch (error) {
     console.error(error);
     res.status(500).send('Error generating image');
