@@ -86,7 +86,6 @@ export default async function handler(req, res) {
 
     let {circles, text, username, showcase, userPfp, curator, timeframe, channels, image} = await getCircle(id);
 
-
     let threshold = true
 
     if (text) {
@@ -135,8 +134,8 @@ export default async function handler(req, res) {
         time = '30 days'
       }
   
-      if (circles?.length > 9) {
-        circles = circles.slice(0, 9)
+      if (circles?.length > 4) {
+        circles = circles.slice(0, 4)
       }
   
       const splitCircles = (arr) => {
@@ -152,7 +151,10 @@ export default async function handler(req, res) {
   
       const [firstHalf, secondHalf] = splitCircles(circles);
   
-  
+      if (showcase?.length > 4) {
+        showcase = showcase.slice(0, 4)
+      }
+
       const backgroundImg = `${baseURL}/images/backgroundframe3.png`
   
       const svg = await satori(
