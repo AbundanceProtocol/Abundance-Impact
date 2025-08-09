@@ -98,22 +98,27 @@ export default async function handler(req, res) {
 
     async function getUser(fid) {
       try {
-        const base = "https://client.warpcast.com/";
-        const url = `${base}v2/user-by-fid?fid=${Number(fid)}`;
-        const response = await fetch(url, {
-          headers: {
-            accept: "application/json",
-          },
-        });
-  
-        if (response) {
-          const user = await response.json()
-          if (user) {
-            const userProfile = user?.result?.user
-            console.log('userProfile', userProfile)
-            return {username: userProfile?.username, pfp: userProfile?.pfp?.url}
-          }
+        await connectToDatabase();
+        const user = await User.findOne({fid: fid.toString(), ecosystem_points: '$IMPACT'})
+        if (user) {
+          return {username: user?.username || '', pfp: user?.pfp}
         }
+        // const base = "https://client.warpcast.com/";
+        // const url = `${base}v2/user-by-fid?fid=${Number(fid)}`;
+        // const response = await fetch(url, {
+        //   headers: {
+        //     accept: "application/json",
+        //   },
+        // });
+  
+        // if (response) {
+        //   const user = await response.json()
+        //   if (user) {
+        //     const userProfile = user?.result?.user
+        //     console.log('userProfile', userProfile)
+        //     return {username: userProfile?.username, pfp: userProfile?.pfp?.url}
+        //   }
+        // }
         return {username: null, pfp: null}
       } catch (error) {
         console.error('Error handling GET request:', error);
