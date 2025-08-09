@@ -24,10 +24,10 @@ import qs from "querystring";
 
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 
-export default function CuratorFid({id}) {
+export default function CuratorFid({id, fid}) {
   const router = useRouter();
   const [ref, inView] = useInView()
-  const { ecosystem, username, app, userFid, pass, fid } = router.query
+  const { ecosystem, username, app, userFid, pass } = router.query
   const [user, setUser] = useState(null)
   const { LoginPopup, LogoutPopup, isLogged, setPoints, setIsLogged, setFid, miniApp, setMiniApp, autotipping, setAutotipping } = useContext(AccountContext)
   const ref1 = useRef(null)
@@ -782,7 +782,7 @@ export default function CuratorFid({id}) {
 export async function getServerSideProps(context) {
   const { query, params } = context;
   const { id } = query;
-  // const { fid } = params;
+  const { fid } = params;
   console.log('id1: ', id)
   // async function getCircle(id) {
   //   if (id) {
@@ -849,6 +849,7 @@ export async function getServerSideProps(context) {
       // ecosystem: ecosystem,
       // username: setUsername,
       id: setId,
+      fid
       // tipperFid: setTipperFid
     },
   };
