@@ -39,7 +39,7 @@ export default async function handler(req, res) {
         if (circle && !circle?.image) {
           return {circles: circle.circles, text: circle.text, showcase: circle.showcase, userPfp: circle.user_pfp || null, curator: circle.curator || [], timeframe: circle.time || '', channels: circle.channels || [], image: null}
         } else if (circle && circle?.image) {
-          return {circles: circle.circles, text: circle.text, showcase: circle.showcase, userPfp: circle.user_pfp || null, curator: circle.curator || [], timeframe: circle.time || '', image: circle.image, channels: circle.channels || []}
+          return {circles: circle.circles, text: circle.text, showcase: circle.showcase, userPfp: circle.user_pfp || null, curator: circle.curator || [], timeframe: circle.time || '', image: null, channels: circle.channels || []}
         } else {
           return {circles: [], text: '', showcase: [], userPfp: null, curator: [], timeframe: '', image: null}
         }
@@ -144,20 +144,20 @@ export default async function handler(req, res) {
       }
     }
 
-    if (image) {
-      try {
-        const buffer = image.buffer
-        res.setHeader('Content-Type', 'image/png');
-        res.setHeader('Cache-Control', 'max-age=10');
-        // res.send(pngBuffer);
-        res.send(buffer);
-        return
-      } catch (err) {
-        console.error('Error deserializing BSON:', err);
-        res.status(500).send('Error generating image');
-        return
-      }
-    } else {
+    // if (image) {
+    //   try {
+    //     const buffer = image.buffer
+    //     res.setHeader('Content-Type', 'image/png');
+    //     res.setHeader('Cache-Control', 'max-age=10');
+    //     // res.send(pngBuffer);
+    //     res.send(buffer);
+    //     return
+    //   } catch (err) {
+    //     console.error('Error deserializing BSON:', err);
+    //     res.status(500).send('Error generating image');
+    //     return
+    //   }
+    // } else {
       if (showcase?.length > 0 && showcase[0]?.impact) {
         showcase.sort((a, b) => b.impact - a.impact);
 
@@ -304,14 +304,14 @@ export default async function handler(req, res) {
         .png({ quality: 50, compressionLevel: 9 })
         .toBuffer();
   
-      const updated = await updateImage(fid, compressedBuffer)
+      // const updated = await updateImage(fid, compressedBuffer)
 
       // Set the content type to PNG and send the response
       res.setHeader('Content-Type', 'image/png');
       res.setHeader('Cache-Control', 'max-age=10');
       // res.send(pngBuffer);
       res.send(compressedBuffer);
-    }
+    // }
   } catch (error) {
     console.error(error);
     res.status(500).send('Error generating image');
