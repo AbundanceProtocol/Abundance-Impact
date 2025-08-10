@@ -682,7 +682,7 @@ export default function CuratorFid({fid}) {
           name="fc:frame"
           content={`{"version":"next","imageUrl":"${baseURL}/api/frames/tip/circle-v5?${qs.stringify({
             fid
-          })}","button":{"title":"Impact Curation","action":{"type":"launch_frame","name":"Impact 2.0","url":"https://impact.abundance.id/~/ecosystems/abundance/curators/fid/${fid}","splashImageUrl":"https://impact.abundance.id/images/icon.png","splashBackgroundColor":"#011222"}}}`}
+          })}","button":{"title":"Impact Curation","action":{"type":"launch_frame","name":"Impact 2.0","url":"https://impact.abundance.id/~/curator/${fid}","splashImageUrl":"https://impact.abundance.id/images/icon.png","splashBackgroundColor":"#011222"}}}`}
         />
 
         {/* Mini App specific metadata */}
@@ -690,12 +690,12 @@ export default function CuratorFid({fid}) {
         <meta name="fc:miniapp:name" content="Impact 2.0" />
         <meta name="fc:miniapp:description" content="Get boosted and rewarded for your impact on Farcaster" />
         <meta name="fc:miniapp:icon" content={`{"version":"next","imageUrl":"${baseURL}/api/frames/tip/circle-v5?${qs.stringify({ fid })}`} />
-        <meta name="fc:miniapp:url" content={`https://impact.abundance.id/~/ecosystems/abundance/curators/fid/${fid}`} />
+        <meta name="fc:miniapp:url" content={`https://impact.abundance.id/~/curator/${fid}`} />
       </Head>
       <div className="" style={{padding: '58px 0 0 0'}}>
       </div>
 
-      <div className='flex-row' style={{height: '30px', alignItems: 'center', justifyContent: 'flex-start', padding: '20px 0 30px 0'}}>
+      {/* <div className='flex-row' style={{height: '30px', alignItems: 'center', justifyContent: 'flex-start', padding: '20px 0 30px 0'}}>
         <div className='flex-row' style={{padding: '4px 8px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '20px', alignItems: 'center', gap: '0.25rem'}}>
 
 
@@ -706,7 +706,7 @@ export default function CuratorFid({fid}) {
           <div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px', padding: '0'}}>{'>'}</div>
           <div className='filter-item-on' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>@{username}</div>
         </div>
-      </div>
+      </div> */}
 
       {user && (<CuratorData {...{ show: (isLogged && user), user, textMax, type: 'curator' }} />)}
 
