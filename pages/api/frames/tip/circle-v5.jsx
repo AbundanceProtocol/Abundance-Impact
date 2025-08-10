@@ -132,6 +132,8 @@ export default async function handler(req, res) {
 
     let {circles, text, showcase, userPfp, curator, timeframe, channels, image} = await getCircle(fid);
 
+    console.log('data', circles, text, showcase, userPfp, curator, timeframe, channels, image, username, pfp)
+
     let threshold = true
 
     if (text) {
