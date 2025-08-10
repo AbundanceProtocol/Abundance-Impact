@@ -130,17 +130,17 @@ export default async function handler(req, res) {
 
 
 
-    // let {circles, text, showcase, userPfp, curator, timeframe, channels, image} = await getCircle(fid);
+    let {circles, text, showcase, userPfp, curator, timeframe, channels, image} = await getCircle(fid);
 
     let threshold = true
 
-    // if (text) {
-    //   const numbers = text.match(/\d+/g).map(Number);
-    //   const numTest = numbers.some(number => number >= 100);
-    //   if (!numTest) {
-    //     threshold = false
-    //   }
-    // }
+    if (text) {
+      const numbers = text.match(/\d+/g).map(Number);
+      const numTest = numbers.some(number => number >= 100);
+      if (!numTest) {
+        threshold = false
+      }
+    }
 
     // if (image) {
     //   try {
@@ -156,34 +156,33 @@ export default async function handler(req, res) {
     //     return
     //   }
     // } else {
+      if (showcase?.length > 0 && showcase[0]?.impact) {
+        showcase.sort((a, b) => b.impact - a.impact);
 
-      // if (showcase?.length > 0 && showcase[0]?.impact) {
-      //   showcase.sort((a, b) => b.impact - a.impact);
-
-      //   for (let show of showcase) {
-      //     if (show?.cast?.startsWith('https://client.warpcast.com/v2/cast-image?castHash=')) {
-      //       const isUnavailable = await getImageFileSize(show?.cast)
-      //       if (isUnavailable) {
-      //         show.cast = show?.pfp
-      //       }
-      //     }
-      //   }
-      // }
+        for (let show of showcase) {
+          if (show?.cast?.startsWith('https://client.warpcast.com/v2/cast-image?castHash=')) {
+            const isUnavailable = await getImageFileSize(show?.cast)
+            if (isUnavailable) {
+              show.cast = show?.pfp
+            }
+          }
+        }
+      }
   
-      // let time = 'all time'
-      // if (timeframe == '24h') {
-      //   time = '24 hr'
-      // } else if (timeframe == '3d') {
-      //   time = '3 days'
-      // } else if (timeframe == '7d') {
-      //   time = '7 days'
-      // } else if (timeframe == '30d') {
-      //   time = '30 days'
-      // }
+      let time = 'all time'
+      if (timeframe == '24h') {
+        time = '24 hr'
+      } else if (timeframe == '3d') {
+        time = '3 days'
+      } else if (timeframe == '7d') {
+        time = '7 days'
+      } else if (timeframe == '30d') {
+        time = '30 days'
+      }
   
-      // if (circles?.length > 4) {
-      //   circles = circles.slice(0, 4)
-      // }
+      if (circles?.length > 4) {
+        circles = circles.slice(0, 4)
+      }
   
       // const splitCircles = (arr) => {
       //   // Calculate the midpoint
@@ -198,9 +197,9 @@ export default async function handler(req, res) {
   
       // const [firstHalf, secondHalf] = splitCircles(circles);
   
-      // if (showcase?.length > 5) {
-      //   showcase = showcase.slice(0, 5)
-      // }
+      if (showcase?.length > 5) {
+        showcase = showcase.slice(0, 5)
+      }
 
       const backgroundImg = `${baseURL}/images/backgroundframe3.png`
   
@@ -259,7 +258,7 @@ export default async function handler(req, res) {
   
           <div style={{gap: '0.5rem', display: 'flex', flexWrap: 'wrap', justifyContent: 'center', flexDirection: 'row'}}>
            
-            {/* {showcase?.length == 0 ? (
+            {showcase?.length == 0 ? (
               <div style={{height: '130px', color: '#fff', fontSize: '17px'}}>&nbsp;</div>
             ) : showcase?.length >= 1 ? (
               showcase.map((show, index) => (
@@ -276,7 +275,7 @@ export default async function handler(req, res) {
               <div key={index} className='frame-btn' style={{color: '#fff', fontSize: '17px'}}>&nbsp;</div>
             )
               
-            } */}
+            }
           </div>
           </div>
   
