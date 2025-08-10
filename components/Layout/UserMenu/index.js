@@ -198,7 +198,7 @@ const UserMenu = () => {
             </div>
           )}
 
-          {userInfo?.pfp && (version == "2.0" || adminTest) && (
+          {userInfo?.pfp && (version == "1.0" || version == "2.0" || adminTest) && (
             <div
               className={"flex-row items-center"}
               style={{

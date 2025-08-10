@@ -2,6 +2,7 @@ import { useRouter } from 'next/router';
 import { useRef, useContext, useEffect, useState } from 'react';
 import Link from 'next/link'
 import axios from 'axios';
+import Head from "next/head";
 // import { AiOutlineBars } from "react-icons/ai";
 import { useInView } from 'react-intersection-observer'
 // import { BsClock } from "react-icons/bs";
@@ -19,11 +20,14 @@ import CuratorData from '../../../../../../../components/Page/CuratorData';
 import { formatNum, getCurrentDateUTC, getTimeRange, isYesterday, checkEmbedType, populateCast, isCast } from '../../../../../../../utils/utils';
 import Cast from '../../../../../../../components/Cast'
 import useMatchBreakpoints from '../../../../../../../hooks/useMatchBreakpoints';
+import qs from "querystring";
 
-export default function ProfilePage() {
+const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
+
+export default function CuratorFid({id, fid}) {
   const router = useRouter();
   const [ref, inView] = useInView()
-  const { ecosystem, username, app, userFid, pass, fid } = router.query
+  const { ecosystem, username, app, userFid, pass } = router.query
   const [user, setUser] = useState(null)
   const { LoginPopup, LogoutPopup, isLogged, setPoints, setIsLogged, setFid, miniApp, setMiniApp, autotipping, setAutotipping } = useContext(AccountContext)
   const ref1 = useRef(null)
@@ -67,7 +71,7 @@ export default function ProfilePage() {
   const [userSearch, setUserSearch] = useState({ search: '' })
   const [selectedChannels, setSelectedChannels] = useState([])
   const [channels, setChannels] = useState([])
-  const initialQuery = {shuffle: false, time: '3d', tags: [], channels: [], username: null, curators: [], order: -1}
+  const initialQuery = {shuffle: false, time: '30d', tags: [], channels: [], username: null, curators: [], order: -1}
   const [userQuery, setUserQuery] = useState(initialQuery)
   const queryOptions = {
     tags: [
@@ -673,6 +677,21 @@ export default function ProfilePage() {
 
   return (
     <div className='flex-col' style={{width: 'auto', position: 'relative'}} ref={ref1}>
+            <Head>
+        <meta
+          name="fc:frame"
+          content={`{"version":"next","imageUrl":"${baseURL}/api/frames/tip/circle-v5?${qs.stringify({
+            fid
+          })}","button":{"title":"Impact Curation","action":{"type":"launch_frame","name":"Impact 2.0","url":"https://impact.abundance.id/~/ecosystems/abundance/curators/fid/${fid}","splashImageUrl":"https://impact.abundance.id/images/icon.png","splashBackgroundColor":"#011222"}}}`}
+        />
+
+        {/* Mini App specific metadata */}
+        <meta name="fc:miniapp" content="true" />
+        <meta name="fc:miniapp:name" content="Impact 2.0" />
+        <meta name="fc:miniapp:description" content="Get boosted and rewarded for your impact on Farcaster" />
+        <meta name="fc:miniapp:icon" content={`{"version":"next","imageUrl":"${baseURL}/api/frames/tip/circle-v5?${qs.stringify({ fid })}`} />
+        <meta name="fc:miniapp:url" content={`https://impact.abundance.id/~/ecosystems/abundance/curators/fid/${fid}`} />
+      </Head>
       <div className="" style={{padding: '58px 0 0 0'}}>
       </div>
 
@@ -693,12 +712,12 @@ export default function ProfilePage() {
 
 
 
+
+
+
       {searchSelect == 'Curation' && (
 
       <div className={isMobile ? 'flex-col' : 'flex-row'} style={{justifyContent: 'center', marginTop: '15px', marginBottom: '30px', gap: isMobile ? '0.25rem' : '1rem'}}>
-
-
-
 
 
         <div className='flex-row' style={{height: '30px', alignItems: 'center', justifyContent: 'center', padding: '20px 0'}}>
@@ -749,4 +768,85 @@ export default function ProfilePage() {
       <ExpandImg  {...{show: showPopup.open, closeImagePopup, embed: {showPopup}, screenWidth, screenHeight }} />
     </div>
   );
+}
+
+
+
+
+
+
+export async function getServerSideProps(context) {
+  const { query, params } = context;
+  const { id } = query;
+  const { fid } = params;
+  console.log('id1: ', id)
+  // async function getCircle(id) {
+  //   if (id) {
+  //     try {
+  //       const objectId = new mongoose.Types.ObjectId(id)
+  //       console.log(id)
+  //       await connectToDatabase();
+  //       let circle = await Circle.findOne({ _id: objectId }).exec();
+  //       if (circle) {
+  //         let eco = ''
+  //         if (circle.points) {
+  //           eco = circle?.points?.substring(1)
+  //         }
+  //         return { time: circle?.time, curators: circle?.curators, channels: circle?.channels, eco, username: circle?.username, tipperFid: circle?.fid }
+  //       } else {
+  //         return { time: 'all', curators: [], channels: [], eco: null, username: '', tipperFid: 9326 }
+  //       }
+  //     } catch (error) {
+  //       console.error("Error while fetching casts:", error);
+  //       return { time: 'all', curators: [], channels: [], eco: null, username: '', tipperFid: 9326 }
+  //     }  
+  //   } else {
+  //     return { time: 'all', curators: [], channels: [], eco: null, username: '', tipperFid: 9326 }
+  //   }
+  // }
+  
+  // const { time, curators, channels, eco, username, tipperFid } = await getCircle(id)
+  
+  let setId = ''
+  if (id) {
+    setId = id
+  }
+  // let setUsername = ''
+  // if (username) {
+  //   setUsername = username
+  // }
+  // let setEco = null
+  // if (eco) {
+  //   setEco = eco
+  // }
+  // let setTime = 'all'
+  // if (time) {
+  //   setTime = time
+  // }
+  // let setCurators = []
+  // if (curators) {
+  //   setCurators = Array.isArray(curators) ? parseInt(curators) : [parseInt(curators)]
+  // }  
+  // let setChannels = []
+  // if (channels) {
+  //   setChannels = Array.isArray(channels) ? channels : [channels]
+  // }
+  // let setTipperFid = 9326
+  // if (tipperFid) {
+  //   setTipperFid = tipperFid
+  // }
+
+  return {
+    props: {
+      // time: setTime,
+      // curators: setCurators,
+      // channels: setChannels,
+      // eco: setEco,
+      // ecosystem: ecosystem,
+      // username: setUsername,
+      id: setId,
+      fid
+      // tipperFid: setTipperFid
+    },
+  };
 }
