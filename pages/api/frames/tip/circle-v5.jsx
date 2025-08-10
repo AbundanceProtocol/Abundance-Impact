@@ -253,16 +253,14 @@ export default async function handler(req, res) {
   
   
   
-          <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '120px'}}>
+          {showcase?.length >= 1 && (<div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '120px'}}>
   
   
   
   
           <div style={{gap: '0.5rem', display: 'flex', flexWrap: 'wrap', justifyContent: 'center', flexDirection: 'row'}}>
            
-            {showcase?.length == 0 ? (
-              <div style={{height: '130px', color: '#fff', fontSize: '17px'}}>&nbsp;</div>
-            ) : showcase?.length >= 1 ? (
+            {showcase?.length >= 1 && (
               showcase.map((show, index) => (
                 <div key={index} style={{display: 'flex', justifyContent: 'center', alignItems: 'center', minWidth: '65px', maxWidth: '140px', position: 'relative'}}>
                   <img src={show.cast} width={100} height={100} style={{display: 'flex', justifyContent: 'center', alignItems: 'center', borderRadius: '10px', border: '2px solid #eee', backgroundColor: '#8363ca', minWidth: '65px', maxWidth: '170px'}} />
@@ -273,13 +271,11 @@ export default async function handler(req, res) {
                   )}
                 </div>
               ))
-            ) : (
-              <div key={index} className='frame-btn' style={{color: '#fff', fontSize: '17px'}}>&nbsp;</div>
             )
               
             }
           </div>
-          </div>
+          </div>)}
   
   
   
