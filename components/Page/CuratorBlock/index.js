@@ -103,11 +103,13 @@ const CuratorBlock = ({ user, textMax, show, type, feedMax }) => {
     }
   }
 
-  const setCurator = () => {
+  const setCurator = async () => {
     // router.push({
     //   pathname: `/~/ecosystems/abundance/curators/${user?.username}/multi-tip`,
     //   query: { userFid: user?.fid, name: user?.username }
     // });
+    const { sdk } = await import("@farcaster/miniapp-sdk");
+    const isApp = await sdk.isInMiniApp();
 
     let shareUrl = `https://impact.abundance.id/~/curator/${user?.fid}`
 
@@ -124,18 +126,24 @@ const CuratorBlock = ({ user, textMax, show, type, feedMax }) => {
     let encodedShareUrl = encodeURIComponent(shareUrl); 
     let shareLink = `https://farcaster.xyz/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
 
-    if (!isMiniApp) {
+    if (!isApp) {
       window.open(shareLink, '_blank');
-    } else if (isMiniApp) {
-      window.parent.postMessage({
-        type: "createCast",
-        data: {
-          cast: {
-            text: shareText,
-            embeds: [shareUrl]
-          }
-        }
-      }, "*");
+    } else if (isApp) {
+      await sdk.actions.composeCast({
+        text: shareText,
+        embeds: [shareUrl],
+        close: false
+      })
+
+      // window.parent.postMessage({
+      //   type: "createCast",
+      //   data: {
+      //     cast: {
+      //       text: shareText,
+      //       embeds: [shareUrl]
+      //     }
+      //   }
+      // }, "*");
     }
 
 

@@ -455,8 +455,8 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
             <div style={{wordWrap: 'break-word', maxWidth: `100%`, width: textMax, whiteSpace: 'pre-line'}}>
               {/* <CastText text={cast.text} embeds={cast.embeds} mentions={cast.mentioned_profiles} /> */}
               {!(isMiniApp || isMobile) ? (<a href={`https://farcaster.xyz/${cast?.author?.username}/${cast?.hash?.substring(0, 10)}`} title="Navigate to cast">
-              {cast.text}</a>) : (<a onClick={() => viewCast(cast?.hash)} title="Navigate to cast">
-                {cast.text}</a>)}
+              {cast?.text?.length > 320 ? cast.text.slice(0, 320) + '... (read more)' : cast.text}</a>) : (<a onClick={() => viewCast(cast?.hash)} title="Navigate to cast">
+                {cast?.text?.length > 320 ? cast.text.slice(0, 320) + '... (read more)' : cast.text}</a>)}
             </div>
 
             {(cast?.cast_media?.length > 0) && (cast?.cast_media?.map((media, subindex) => (
