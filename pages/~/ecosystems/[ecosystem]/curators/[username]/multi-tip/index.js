@@ -339,39 +339,40 @@ export default function MultiTip() {
 
     // let shareUrl = `https://impact.abundance.id/~/ecosystems/${frameEcosystem?.url}/tip-v5?time=${frameTime?.url}&shuffle=true${frameCurators?.url ? '&curators=' + frameCurators?.url[0] : ''}&eco=${frameEcosystem?.eco}${ (selectedChannel !== ' ') ? '&channels=' + selectedChannel : ''}`
 
-    let shareUrl = `https://impact.abundance.id/~/ecosystems/${frameEcosystem?.url}/curation-v1?id=${getCircleId}`
+    let shareUrl = `https://impact.abundance.id/~/curator/${frameCurators?.url ? frameCurators?.url[0] : fid}`
 
-    let tippedCreators = "";
-    if (showcase?.length > 0) {
-      tippedCreators = showcase.reduce((str, creator, index, arr) => {
-        if (!str.includes(creator.username)) {
-          if (str === "") {
-            return "@" + creator.username;
-          }
-          if (index === arr.length - 1 && index !== 0) {
-            return str + " & @" + creator.username + " ";
-          }
-          return str + ", @" + creator.username;
-        }
-        return str;
-      }, "");
-    }
+    // let tippedCreators = "";
+    // if (showcase?.length > 0) {
+    //   tippedCreators = showcase.reduce((str, creator, index, arr) => {
+    //     if (!str.includes(creator.username)) {
+    //       if (str === "") {
+    //         return "@" + creator.username;
+    //       }
+    //       if (index === arr.length - 1 && index !== 0) {
+    //         return str + " & @" + creator.username + " ";
+    //       }
+    //       return str + ", @" + creator.username;
+    //     }
+    //     return str;
+    //   }, "");
+    // }
 
     // console.log('shareUrl', shareUrl)
-    let shareText = ''
+    let shareText = `I'm signal-boosting impactful creators & builders thru /impact\n\nCheck my curation:`
 
-    if (frameCurators?.url && frameCurators?.url[0] == fid) {
-      shareText = `I'm supporting great builders & creators on /impact by @abundance.\n\nMy latest picks feature ${tippedCreators}\n\nExplore my curation and support the nominees here:`;
-    } else if (frameCurators?.url?.length > 0) {
+    // if (frameCurators?.url && frameCurators?.url[0] == fid) {
+    //   shareText = `I'm supporting great builders & creators on /impact by @abundance.\n\nMy latest picks feature ${tippedCreators}\n\nExplore my curation and support the nominees here:`;
+    // } else if (frameCurators?.url?.length > 0) {
 
-      if (frameCurators?.url[0] !== fid) {
-        shareText = `Loving @${frameCurators?.condition}'s curation of builders & creators on /impact by @abundance.\n\n@${frameCurators?.condition}'s latest picks feature ${tippedCreators}\n\nExplore @${frameCurators?.condition}'s curation and support the nominees here:`;
-      } else {
-        shareText = `I'm supporting great builders & creators on /impact by @abundance.\n\nLatest picks feature ${tippedCreators}\n\nExplore the ecosystem and support builders & creators here:`;
-      }
-    } else {
-      shareText = `I'm supporting great builders & creators on /impact by @abundance.\n\nLatest picks feature ${tippedCreators}\n\nExplore the ecosystem and support builders & creators here:`;
+    if (frameCurators?.url && Number(frameCurators?.url[0]) !== Number(fid)) {
+      shareText = `Loving @${frameCurators?.condition}'s curation of impactful builders & creators on /impact\n\nCheck @${frameCurators?.condition}'s latest picks:`
     }
+    //   } else {
+    //     shareText = `I'm supporting great builders & creators on /impact by @abundance.\n\nLatest picks feature ${tippedCreators}\n\nExplore the ecosystem and support builders & creators here:`;
+    //   }
+    // } else {
+    //   shareText = `I'm supporting great builders & creators on /impact by @abundance.\n\nLatest picks feature ${tippedCreators}\n\nExplore the ecosystem and support builders & creators here:`;
+    // }
 
     let encodedShareText = encodeURIComponent(shareText)
     let encodedShareUrl = encodeURIComponent(shareUrl); 
