@@ -359,7 +359,7 @@ export default function MultiTip() {
     //   shareText = `I'm supporting great builders & creators on /impact by @abundance.\n\nMy latest picks feature ${tippedCreators}\n\nExplore my curation and support the nominees here:`;
     // } else if (frameCurators?.url?.length > 0) {
 
-    if (frameCurators?.url && frameCurators?.url[0] !== fid) {
+    if (frameCurators?.url && Number(frameCurators?.url[0]) !== Number(fid)) {
       shareText = `Loving @${frameCurators?.condition}'s curation of impactful builders & creators on /impact\n\nCheck @${frameCurators?.condition}'s latest picks:`
     }
   //    else {

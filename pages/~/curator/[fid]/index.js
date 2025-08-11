@@ -14,13 +14,14 @@ import { confirmUser } from '../../../../utils/utils';
 import Spinner from '../../../../components/Common/Spinner';
 import ExpandImg from '../../../../components/Cast/ExpandImg';
 import CuratorData from '../../../../components/Page/CuratorData';
-// import TopPicks from '../../../../components/Page/FilterMenu/TopPicks';
-// import Shuffle from '../../../../components/Page/FilterMenu/Shuffle';
-// import Time from '../../../../components/Page/FilterMenu/Time';
+import CuratorBlock from '../../../../components/Page/CuratorBlock';
+import { BsGiftFill, BsFillPersonFill } from "react-icons/bs";
 import { formatNum, getCurrentDateUTC, getTimeRange, isYesterday, checkEmbedType, populateCast, isCast } from '../../../../utils/utils';
 import Cast from '../../../../components/Cast'
 import useMatchBreakpoints from '../../../../hooks/useMatchBreakpoints';
 import qs from "querystring";
+
+const version = process.env.NEXT_PUBLIC_VERSION;
 
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 
@@ -29,7 +30,7 @@ export default function CuratorFid({fid}) {
   const [ref, inView] = useInView()
   const { username, app, userFid, pass } = router.query
   const [user, setUser] = useState(null)
-  const { LoginPopup, LogoutPopup, isLogged, setPoints, setIsLogged, setFid, miniApp, setMiniApp, autotipping, setAutotipping } = useContext(AccountContext)
+  const { LoginPopup, LogoutPopup, isLogged, setPoints, setIsLogged, setFid, miniApp, setMiniApp, autotipping, setAutotipping, adminTest, isMiniApp } = useContext(AccountContext)
   const ref1 = useRef(null)
   const [textMax, setTextMax] = useState('430px')
   const [screenWidth, setScreenWidth ] = useState(undefined)
@@ -146,6 +147,7 @@ export default function CuratorFid({fid}) {
           followerCount: profile?.followerCount,
           fid: Number(profile?.fid)
         }
+        console.log('populatedProfile', populatedProfile)
         setUser(populatedProfile)
       
         // const updateResponse = await axios.get('/api/getCuratorProfile', {
@@ -677,7 +679,7 @@ export default function CuratorFid({fid}) {
 
   return (
     <div className='flex-col' style={{width: 'auto', position: 'relative'}} ref={ref1}>
-            <Head>
+      <Head>
         <meta
           name="fc:frame"
           content={`{"version":"next","imageUrl":"${baseURL}/api/frames/tip/circle-v5?${qs.stringify({
@@ -692,8 +694,161 @@ export default function CuratorFid({fid}) {
         <meta name="fc:miniapp:icon" content={`{"version":"next","imageUrl":"${baseURL}/api/frames/tip/circle-v5?${qs.stringify({ fid })}`} />
         <meta name="fc:miniapp:url" content={`https://impact.abundance.id/~/curator/${fid}`} />
       </Head>
-      <div className="" style={{padding: '58px 0 0 0'}}>
-      </div>
+      {/* <div className="" style={{padding: '58px 0 0 0'}}>
+      </div> */}
+
+      {(!isLogged || (version == "1.0" && !adminTest) || version == "2.0" || adminTest) && (
+        <div
+          id="log in"
+          style={{
+            padding: isMobile ? (version == "1.0" && !adminTest ? "58px 0 20px 0" : "48px 0 20px 0") : "58px 0 60px 0",
+            width: feedMax,
+            fontSize: "0px"
+          }}
+        >
+          &nnsp;
+        </div>
+      )}
+
+
+
+
+
+
+
+
+
+
+
+      {/* <div style={{ padding: "0px 4px 0px 4px", width: feedMax }}>
+        {((version == "1.0" && !adminTest) || version == "2.0" || adminTest) && (
+          <div className="flex-col" style={{ backgroundColor: "" }}>
+            <div
+              className="shadow flex-col"
+              style={{
+                backgroundColor: isLogged ? "#002244" : "#333",
+                borderRadius: "15px",
+                border: isLogged ? "1px solid #11447799" : "1px solid #555",
+                width: isMiniApp || isMobile ? "340px" : "100%",
+                margin: isMiniApp || isMobile ? "0px auto 0 auto" : "0px auto 0 auto"
+              }}
+            >
+              <div
+                className="shadow flex-row"
+                style={{
+                  backgroundColor: isLogged ? "#11448888" : "#444",
+                  width: "100%",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "8px",
+                  borderRadius: "15px",
+                  margin: "0 0 10px 0",
+                  gap: "1rem"
+                }}
+              >
+                <div
+                  className="flex-row"
+                  style={{
+                    width: "100%",
+                    justifyContent: "flex-start",
+                    alignItems: "center",
+                    padding: "0px 0 0 4px",
+                    margin: "0 0 0px 0"
+                  }}
+                >
+                  {user ? (<BsFillPersonFill style={{ fill: "#cde" }} size={20} />): (<BsFillPersonFill style={{ fill: "#cde" }} size={20} />)}
+                  <div>
+                    <div
+                      style={{
+                        border: "0px solid #777",
+                        padding: "2px",
+                        borderRadius: "10px",
+                        backgroundColor: "",
+                        maxWidth: "fit-content",
+                        cursor: "pointer",
+                        color: "#cde"
+                      }}
+                    >
+                      <div className="top-layer flex-row">
+                        <div
+                          className="flex-row"
+                          style={{
+                            padding: "4px 0 4px 10px",
+                            marginBottom: "0px",
+                            flexWrap: "wrap",
+                            justifyContent: "flex-start",
+                            gap: "0.00rem",
+                            width: "",
+                            alignItems: "center"
+                          }}
+                        >
+                          <div
+                            style={{
+                              fontSize: isMobile ? "18px" : "22px",
+                              fontWeight: "600",
+                              color: "",
+                              padding: "0px 3px"
+                            }}
+                          >
+                            {user?.username ? `${'@' + user.username}` : 'Curator'}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div
+                    className="flex-row"
+                    style={{
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      cursor: "pointer"
+                    }}
+                  ></div>
+                </div>
+
+              </div>
+
+              <div
+                className="flex-col"
+                style={{
+                  backgroundColor: isLogged ? "#002244ff" : "#333",
+                  padding: "0px 18px 12px 18px",
+                  borderRadius: "0 0 15px 15px",
+                  color: isLogged ? "#ace" : "#ddd",
+                  fontSize: "12px",
+                  gap: "0.75rem",
+                  position: "relative"
+                }}
+              >
+                <div
+                  className="flex-row"
+                  style={{
+                    color: "#9df",
+                    width: "100%",
+                    fontSize: isMobile ? "15px" : "17px",
+                    padding: "10px 10px 15px 10px",
+                    justifyContent: "center",
+                    userSelect: "none"
+                  }}
+                >
+                  Check your Impact Rewards
+                </div>
+
+
+
+              </div>
+            </div>
+          </div>
+        )}
+      </div> */}
+
+
+
+
+
+
+
 
       {/* <div className='flex-row' style={{height: '30px', alignItems: 'center', justifyContent: 'flex-start', padding: '20px 0 30px 0'}}>
         <div className='flex-row' style={{padding: '4px 8px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '20px', alignItems: 'center', gap: '0.25rem'}}>
@@ -708,9 +863,10 @@ export default function CuratorFid({fid}) {
         </div>
       </div> */}
 
-      {user && (<CuratorData {...{ show: (isLogged && user), user, textMax, type: 'curator' }} />)}
+      {/* {user && (<CuratorData {...{ show: (isLogged && user), user, textMax, type: 'curator' }} />)} */}
 
 
+      {user && (<CuratorBlock {...{ show: (isLogged && user), user, textMax, feedMax, type: 'curator' }} />)}
 
 
 
