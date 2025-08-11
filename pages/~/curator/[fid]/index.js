@@ -122,7 +122,7 @@ export default function CuratorFid({fid}) {
   // const [page, setPage] = useState(1)
   const [sched, setSched] = useState({inView: false, user: false, feed: false})
   const [delay, setDelay] = useState(true)
-  const [timeframe, setTimeframe] = useState('3d')
+  const [timeframe, setTimeframe] = useState('30d')
   const [sortBy, setSortBy] = useState('down')
   const [shuffled, setShuffled] = useState(false)
 
