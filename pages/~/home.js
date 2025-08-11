@@ -54,7 +54,8 @@ import {
   BsGearFill,
   BsCurrencyExchange,
   BsQuestionCircleFill,
-  BsInfoCircleFill
+  BsInfoCircleFill,
+  BsShareFill
 } from "react-icons/bs";
 
 import Spinner from "../../components/Common/Spinner";
@@ -358,6 +359,35 @@ export default function Homepage({ test }) {
     console.log("data", data);
   }
 
+
+  const shareCuration = async () => {
+    if (fid) {
+      const { sdk } = await import("@farcaster/miniapp-sdk");
+      const isApp = await sdk.isInMiniApp();
+  
+      let shareUrl = `https://impact.abundance.id/~/curator/${fid}`
+  
+      let shareText = `I'm signal-boosting impactful creators & builders thru /impact\n\nCheck my curation:`
+  
+      let encodedShareText = encodeURIComponent(shareText)
+      let encodedShareUrl = encodeURIComponent(shareUrl); 
+      let shareLink = `https://farcaster.xyz/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
+  
+      if (!isApp) {
+        window.open(shareLink, '_blank');
+      } else if (isApp) {
+        await sdk.actions.composeCast({
+          text: shareText,
+          embeds: [shareUrl],
+          close: false
+        })
+      }
+    }
+  }
+
+
+
+
   async function notifsOn() {
     try {
       const { sdk } = await import("@farcaster/miniapp-sdk");
@@ -618,6 +648,7 @@ export default function Homepage({ test }) {
       )}
 
       <div
+        onClick={shareCuration}
         className="flex-row"
         style={{
           justifyContent: "center",
@@ -656,10 +687,10 @@ export default function Homepage({ test }) {
                   gap: "0.25rem",
                   height: "50px",
                   width: "110px",
-                  backgroundColor: "#aaa"
+                  // backgroundColor: "#aaa"
                 }}
               >
-                {(!isMobile || isMobile) && <BsGiftFill size={20} style={{ width: "21px" }} />}
+                {(!isMobile || isMobile) && <BsShareFill size={20} style={{ width: "21px" }} />}
                 <p
                   style={{
                     padding: "0px",
