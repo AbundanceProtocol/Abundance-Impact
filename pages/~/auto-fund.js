@@ -121,7 +121,7 @@ export default function Autofund() {
   const [curatorList, setCuratorList] = useState([]);
   const [funds, setFunds] = useState({ curatorDegen: 0, curatorHam: 0, fundDegen: 0, fundHam: 0 });
   const [distribution, setDistribution] = useState(null);
-
+  const [modal, setModal] = useState({on: false, success: false, text: ''})
   const [showPopup, setShowPopup] = useState({ open: false, url: null });
   const initialEco = {
     channels: [],
@@ -1900,6 +1900,7 @@ export default function Autofund() {
       <div style={{ padding: "0 0 80px 0" }}>&nbsp;</div>
 
       <ExpandImg {...{ show: showPopup.open, closeImagePopup, embed: { showPopup }, screenWidth, screenHeight }} />
+      <Modal modal={modal} />
     </div>
   );
 }
