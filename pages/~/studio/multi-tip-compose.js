@@ -355,14 +355,14 @@ export default function MultiTip() {
     //   }, "");
     // }
 
-    let shareText = `I'm signal-boosting impactful creators & builders thru /impact\n\nCheck my curation & help build a better platform!`
+    let shareText = `I'm signal-boosting impactful creators & builders thru /impact\n\nCheck my curation:`
 
     // if (frameCurators?.url && frameCurators?.url[0] == frameFid) {
     //   shareText = `I'm supporting great builders & creators on /impact by @abundance.\n\nMy latest picks feature ${tippedCreators}\n\nExplore my curation and support the nominees here:`
     // } else if (frameCurators?.url?.length > 0) {
 
     if (frameCurators?.url && frameCurators?.url[0] !== frameFid) {
-      shareText = `Loving @${frameCurators?.condition}'s curation of impactful builders & creators on /impact\n\nCheck @${frameCurators?.condition}'s latest picks & help build a better platform!`
+      shareText = `Loving @${frameCurators?.condition}'s curation of impactful builders & creators on /impact\n\nCheck @${frameCurators?.condition}'s latest picks:`
     }
     //   } else {
     //     shareText = `I'm supporting great builders & creators on /impact by @abundance.\n\nLatest picks feature ${tippedCreators}\n\nExplore the ecosystem and support builders & creators here:`;
