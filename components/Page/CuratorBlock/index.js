@@ -251,7 +251,7 @@ const CuratorBlock = ({ user, textMax, show, type, feedMax }) => {
                 className="flex-col"
                 style={{
                   backgroundColor: isLogged ? "#002244ff" : "#333",
-                  padding: "0px 18px 12px 18px",
+                  padding: "0px 18px 18px 18px",
                   borderRadius: "0 0 15px 15px",
                   color: isLogged ? "#ace" : "#ddd",
                   fontSize: "12px",
@@ -260,26 +260,102 @@ const CuratorBlock = ({ user, textMax, show, type, feedMax }) => {
                 }}
               >
                 <div
-                  className="flex-row"
+                  className="flex-col"
                   style={{
                     color: "#9df",
                     width: "100%",
                     fontSize: isMobile ? "15px" : "17px",
-                    padding: "10px 10px 15px 10px",
+                    padding: "0",
                     justifyContent: "center",
+                    alignItems: "center",
                     userSelect: "none"
                   }}
                 >
 
 
-                  <div className="flex-row" style={{gap: '1rem'}}>
+                  <div className="flex-col" style={{gap: '1rem', margin: '0 0 10px 0'}}>
+
+
+
+
+
+
+
+                  <div className="flex-col" style={{width: '100%', gap: '1rem', alignItems: 'flex-start'}}>
+                    <div className="flex-row" style={{width: '100%', justifyContent: 'space-between', height: '', alignItems: 'flex-start'}}>
+                      <div className="flex-row" style={{alignItems: 'center', gap: '0.25rem', flexWrap: 'wrap'}}>
+                        <span className="">
+                          <a className="fc-lnk" title="" href={`https://farcaster.xyz/${user?.username}`}>
+                            <div className="flex-row" style={{alignItems: 'center'}}>
+                              <span className="name-font" style={{color: '#cdd', fontSize: '18px'}}>{user?.displayName}</span>
+                              {/* <div className="" style={{margin: '0 0 0 3px'}}>
+                                {(user?.activeOnFcNetwork) && (<ActiveUser />)}
+                              </div> */}
+                            </div>
+                          </a>
+                        </span>
+                        {/* <span className="user-font">
+                          <a className="fc-lnk" title="" href={`https://farcaster.xyz/${user?.username}`} style={{color: '#cdd'}}>@{user?.username}</a>
+                        </span> */}
+                        <div className="">·</div>
+                        <a className="fc-lnk" title="Navigate to cast" href={`https://farcaster.xyz/${user?.username}`}>
+                          <div className="fid-btn" style={{backgroundColor: '#003366', color: '#cdd'}}>fid: {user?.fid}</div>
+                        </a>
+                      </div>
+                    </div>
+                    <div className="">
+                      <div style={{wordWrap: 'break-word', maxWidth: textMax, color: '#cdd'}}>{user?.profile?.bio?.text}</div>
+                    </div>
+                  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <div className="flex-row" style={{width: '100%', justifyContent: 'space-evenly', gap: '1rem'}}>
+                      <div className="" style={{flex: 1}}>
+                        <div className="flex-row" style={{padding: '0 0 0 5px', fontSize: '12px', color: '#cdd', gap: '0.25rem', alignItems: 'center', cursor: 'default'}}>
+                          <div style={{fontWeight: '700', fontSize: '13px'}} title={user?.followingCount}>{formatNum(user?.followingCount)}</div>
+                          <div style={{fontWeight: '400'}}>following</div>
+                        </div>
+                      </div>
+
+                      <div className="flex-row" style={{flex: 2}}>
+                        <div className="flex-row" style={{padding: '0 0 0 5px', fontSize: '12px', color: '#cdd', gap: '0.25rem', alignItems: 'center', cursor: 'default'}}>
+                          <div style={{fontWeight: '700', fontSize: '13px'}} title={user?.followerCount}>{formatNum(user?.followerCount)}</div>
+                          <div style={{fontWeight: '400'}}>followed</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+
+                  <div className="flex-row" style={{gap: '1rem', margin: '10px 0 0 0'}}>
 
                     <div
                       onClick={(event) => {
-                        if (autotipping.includes(user?.fid)) {
-                          removeAutotip(event, user?.fid)
+                        if (isLogged) {
+                          if (autotipping.includes(user?.fid)) {
+                            removeAutotip(event, user?.fid)
+                          } else {
+                            addAutotip(event, user?.fid)
+                          }
                         } else {
-                          addAutotip(event, user?.fid)
+                          LoginPopup()
                         }
                       }}
                       // href={"/~/rewards"}
