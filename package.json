@@ -17,6 +17,7 @@
     "@farcaster/frame-node": "^0.1.2",
     "@farcaster/hub-nodejs": "^0.11.8",
     "@farcaster/miniapp-sdk": "^0.1.1",
+    "@farcaster/miniapp-wagmi-connector": "^1.0.0",
     "@moralisweb3/common-evm-utils": "^2.26.4",
     "@mui/material": "^5.8.7",
     "@netlify/functions": "^2.6.3",
@@ -62,7 +63,7 @@
     "react-player": "^2.10.1",
     "satori": "^0.10.14",
     "serverless-http": "^3.2.0",
-    "sharp": "^0.33.5",
+    "sharp": "^0.34.3",
     "siwe": "^3.0.0",
     "svg2img": "^1.0.0-beta.2",
     "uuid": "^11.0.4",
@@ -72,8 +73,8 @@
     "zustand": "^4.0.0-rc.1"
   },
   "devDependencies": {
-    "@graphprotocol/graph-cli": "^0.32.0",
     "@netlify/plugin-nextjs": "4.41.1",
+    "@types/react": "19.1.10",
     "eslint": "8.11.0",
     "eslint-config-next": "12.1.0",
     "typescript": "^5.5.4",

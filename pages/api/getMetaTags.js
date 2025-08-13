@@ -1,4 +1,4 @@
-import cheerio from 'cheerio';
+import * as cheerio from 'cheerio';
 
 export default async function handler(req, res) {
   const { url } = req.query;

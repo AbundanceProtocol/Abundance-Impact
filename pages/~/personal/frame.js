@@ -8,7 +8,7 @@ import { timePassed } from '../../../utils/utils';
 import { IoDiamondOutline as Diamond } from "react-icons/io5";
 import { ImArrowUp, ImArrowDown  } from "react-icons/im";
 import { AccountContext } from '../../../context';
-import cheerio from 'cheerio'
+import * as cheerio from 'cheerio'
 import FrameButton from '../../../components/Cast/Frame/Button';
 import qs from "querystring";
 

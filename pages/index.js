@@ -168,40 +168,61 @@ export default function Home() {
 
   useEffect(() => {
     (async () => {
-      const { sdk } = await import('@farcaster/miniapp-sdk');
-      const isApp = await sdk.isInMiniApp()
-      setIsMiniApp(isApp)
+      try {
+        console.log('Attempting to detect Mini App environment...');
+        const { sdk } = await import('@farcaster/miniapp-sdk');
+        console.log('SDK imported successfully in main page');
+        
+        const isApp = await sdk.isInMiniApp();
+        console.log('isInMiniApp result:', isApp);
+        setIsMiniApp(isApp);
 
+        if (isApp) {
+          console.log('Confirmed we are in a Mini App environment');
+          try {
+            const userProfile = await sdk.context;
+            console.log('User profile retrieved:', !!userProfile);
+            
+            if (userProfile?.user?.fid == 9326) {
+              setAdminTest(true);
+            }
 
-      const userProfile = await sdk.context
-      if (isApp && userProfile?.user?.fid == 9326) {
-        setAdminTest(true)
-      }
-
-      if (isApp) {
-        const client = sdk.context.client;
-        console.log('client', client, userProfile.client)
-        if (userProfile.client.added) {
-          if (userProfile.client.notificationDetails) {
-            setNotifStatus({
-              app: true,
-              notifs: true
-            })
-          } else {
-            setNotifStatus({
-              app: true,
-              notifs: false
-            })
+            const client = sdk.context.client;
+            console.log('client', client, userProfile.client);
+            
+            if (userProfile.client.added) {
+              if (userProfile.client.notificationDetails) {
+                setNotifStatus({
+                  app: true,
+                  notifs: true
+                });
+              } else {
+                setNotifStatus({
+                  app: true,
+                  notifs: false
+                });
+              }
+            } else {
+              setNotifStatus({
+                app: false,
+                notifs: false
+              });
+            }
+          } catch (contextError) {
+            console.error('Failed to get user context:', contextError);
           }
         } else {
-          setNotifStatus({
-            app: false,
-            notifs: false
-          })        
+          console.log('Not in a Mini App environment');
         }
+      } catch (error) {
+        console.error('Failed to detect Mini App environment:', error);
+        console.error('Error details:', {
+          message: error.message,
+          stack: error.stack,
+          name: error.name
+        });
+        setIsMiniApp(false);
       }
-
-
     })();
   }, []);
 
@@ -237,9 +258,16 @@ export default function Home() {
 
   useEffect(() => {
     (async () => {
-      const { sdk } = await import('@farcaster/miniapp-sdk');
-      const isApp = await sdk.isInMiniApp()
-      setIsMiniApp(isApp)
+      try {
+        console.log('Re-checking Mini App environment after login...');
+        const { sdk } = await import('@farcaster/miniapp-sdk');
+        const isApp = await sdk.isInMiniApp();
+        console.log('Re-check isInMiniApp result:', isApp);
+        setIsMiniApp(isApp);
+      } catch (error) {
+        console.error('Failed to re-check Mini App environment:', error);
+        setIsMiniApp(false);
+      }
     })();
   }, [isLogged]);
 
