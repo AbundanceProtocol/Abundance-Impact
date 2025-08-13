@@ -167,7 +167,8 @@ function WalletDemo() {
           setSdkTest({
             user: context?.user?.username || 'Unknown',
             fid: context?.user?.fid || 'Unknown',
-            ethAddress: context?.user?.verifiedAddresses?.ethAddresses?.[0] || 'None'
+            ethAddress: context?.user?.custodyAddress || 'None',
+            displayName: context?.user?.displayName || 'Unknown'
           });
         }
       } catch (error) {
@@ -208,8 +209,9 @@ function WalletDemo() {
         
         {sdkTest && !sdkTest.error && (
           <div style={{ marginTop: '10px', fontSize: '13px', color: '#aaa' }}>
-            <div>User: {sdkTest.user} (FID: {sdkTest.fid})</div>
-            <div>ETH Address: {sdkTest.ethAddress}</div>
+            <div>User: {sdkTest.user} ({sdkTest.displayName})</div>
+            <div>FID: {sdkTest.fid}</div>
+            <div>Custody Address: {sdkTest.ethAddress}</div>
           </div>
         )}
         

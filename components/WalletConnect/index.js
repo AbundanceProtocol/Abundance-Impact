@@ -47,8 +47,8 @@ export default function WalletConnect() {
         // Get the user context which includes wallet information
         const context = await sdk.context;
         
-        if (context?.user?.verifiedAddresses?.ethAddresses?.[0]) {
-          const address = context.user.verifiedAddresses.ethAddresses[0];
+        if (context?.user?.custodyAddress) {
+          const address = context.user.custodyAddress;
           
           // Get the Ethereum provider using the correct SDK method
           const provider = await sdk.wallet.getEthereumProvider();
@@ -82,7 +82,7 @@ export default function WalletConnect() {
             setWalletError('Could not get Ethereum provider from Farcaster');
           }
         } else {
-          setWalletError('No verified Ethereum address found');
+          setWalletError('No custody address found in user context');
         }
       } else {
         setWalletError('Not in a Farcaster Mini App environment');
