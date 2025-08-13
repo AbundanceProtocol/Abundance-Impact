@@ -1,0 +1,184 @@
+import { useContext, useCallback } from 'react';
+import { AccountContext } from '../context';
+
+export const useWallet = () => {
+  const {
+    walletConnected,
+    walletAddress,
+    walletChainId,
+    walletProvider,
+    walletError,
+    walletLoading,
+    setWalletConnected,
+    setWalletAddress,
+    setWalletChainId,
+    setWalletProvider,
+    setWalletError,
+    setWalletLoading
+  } = useContext(AccountContext);
+
+  const connectWallet = useCallback(async (provider) => {
+    setWalletLoading(true);
+    setWalletError(null);
+
+    try {
+      let address, chainId;
+
+      if (provider === 'metamask') {
+        if (typeof window !== 'undefined' && window.ethereum) {
+          const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+          address = accounts[0];
+          chainId = await window.ethereum.request({ method: 'eth_chainId' });
+        } else {
+          throw new Error('MetaMask not installed');
+        }
+      } else if (provider === 'walletconnect') {
+        // WalletConnect implementation
+        const { WalletConnectConnector } = await import('@web3-react/walletconnect-connector');
+        const connector = new WalletConnectConnector({
+          rpc: {
+            1: process.env.NEXT_PUBLIC_ETHEREUM_RPC_URL || 'https://mainnet.infura.io/v3/your-project-id',
+            8453: process.env.NEXT_PUBLIC_BASE_RPC_URL || 'https://mainnet.base.org'
+          },
+          qrcode: true,
+        });
+        
+        const account = await connector.activate();
+        address = account.account;
+        chainId = account.chainId;
+      } else if (provider === 'coinbase') {
+        if (typeof window !== 'undefined' && window.ethereum && window.ethereum.isCoinbaseWallet) {
+          const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+          address = accounts[0];
+          chainId = await window.ethereum.request({ method: 'eth_chainId' });
+        } else {
+          throw new Error('Coinbase Wallet not available');
+        }
+      }
+
+      if (address && chainId) {
+        setWalletAddress(address);
+        setWalletChainId(chainId);
+        setWalletProvider(provider);
+        setWalletConnected(true);
+        setWalletError(null);
+      }
+    } catch (error) {
+      console.error('Wallet connection error:', error);
+      setWalletError(error.message);
+    } finally {
+      setWalletLoading(false);
+    }
+  }, [setWalletLoading, setWalletError, setWalletAddress, setWalletChainId, setWalletProvider, setWalletConnected]);
+
+  const disconnectWallet = useCallback(() => {
+    setWalletConnected(false);
+    setWalletAddress(null);
+    setWalletChainId(null);
+    setWalletProvider(null);
+    setWalletError(null);
+  }, [setWalletConnected, setWalletAddress, setWalletChainId, setWalletProvider, setWalletError]);
+
+  const switchNetwork = useCallback(async (targetChainId) => {
+    try {
+      if (walletProvider === 'metamask' && window.ethereum) {
+        await window.ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: targetChainId }],
+        });
+      }
+    } catch (error) {
+      console.error('Error switching network:', error);
+      throw error;
+    }
+  }, [walletProvider]);
+
+  const sendTransaction = useCallback(async (to, value, data = '0x') => {
+    if (!walletConnected || !walletAddress) {
+      throw new Error('Wallet not connected');
+    }
+
+    try {
+      const transactionParameters = {
+        to,
+        from: walletAddress,
+        value: '0x' + Number(value).toString(16),
+        data,
+      };
+
+      const txHash = await window.ethereum.request({
+        method: 'eth_sendTransaction',
+        params: [transactionParameters],
+      });
+
+      return txHash;
+    } catch (error) {
+      console.error('Transaction error:', error);
+      throw error;
+    }
+  }, [walletConnected, walletAddress]);
+
+  const signMessage = useCallback(async (message) => {
+    if (!walletConnected || !walletAddress) {
+      throw new Error('Wallet not connected');
+    }
+
+    try {
+      const signature = await window.ethereum.request({
+        method: 'personal_sign',
+        params: [message, walletAddress],
+      });
+
+      return signature;
+    } catch (error) {
+      console.error('Message signing error:', error);
+      throw error;
+    }
+  }, [walletConnected, walletAddress]);
+
+  const getBalance = useCallback(async () => {
+    if (!walletConnected || !walletAddress) {
+      throw new Error('Wallet not connected');
+    }
+
+    try {
+      const balance = await window.ethereum.request({
+        method: 'eth_getBalance',
+        params: [walletAddress, 'latest'],
+      });
+
+      return balance;
+    } catch (error) {
+      console.error('Balance fetch error:', error);
+      throw error;
+    }
+  }, [walletConnected, walletAddress]);
+
+  const isFarcasterMiniApp = typeof window !== 'undefined' && 
+    (window.location.hostname.includes('warpcast.com') || 
+     window.location.hostname.includes('farcaster.xyz') ||
+     window.navigator.userAgent.includes('Farcaster'));
+
+  return {
+    // State
+    walletConnected,
+    walletAddress,
+    walletChainId,
+    walletProvider,
+    walletError,
+    walletLoading,
+    isFarcasterMiniApp,
+    
+    // Methods
+    connectWallet,
+    disconnectWallet,
+    switchNetwork,
+    sendTransaction,
+    signMessage,
+    getBalance,
+    
+    // Setters
+    setWalletError,
+    setWalletLoading
+  };
+}; 
