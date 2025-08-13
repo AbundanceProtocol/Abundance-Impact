@@ -8,6 +8,7 @@ import { cookieToInitialState, WagmiProvider } from 'wagmi';
 import { cookieStorage, createStorage } from '@wagmi/core'
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
 import { mainnet, arbitrum, base } from '@reown/appkit/networks'
+import { config as wagmiConfig } from './config/wagmi'
 
 const queryClient = new QueryClient();
 const projectId = process.env.NEXT_PUBLIC_WAGMI_KEY || 'default-project-id'
@@ -406,7 +407,7 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
     setEcoData(system);
   };
 
-  const initialState = cookieToInitialState(wagmiAdapter.wagmiConfig, cookies);
+  const initialState = cookieToInitialState(wagmiConfig, cookies);
 
   const contextValue = {
     ...initialAccount,
@@ -449,17 +450,11 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
 
   return (
     <AccountContext.Provider value={contextValue}>
-      {wagmiAdapter ? (
-        <WagmiProvider {...{config: wagmiAdapter.wagmiConfig, initialState}}>
-          <QueryClientProvider client={queryClient}>
-            {children}
-          </QueryClientProvider>
-        </WagmiProvider>
-      ) : (
+      <WagmiProvider config={wagmiConfig} initialState={initialState}>
         <QueryClientProvider client={queryClient}>
           {children}
         </QueryClientProvider>
-      )}
+      </WagmiProvider>
     </AccountContext.Provider>
   );
 };
