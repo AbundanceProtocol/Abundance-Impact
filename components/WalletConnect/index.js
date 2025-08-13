@@ -45,17 +45,17 @@ export default function WalletConnect() {
   }, []);
 
 
-  useEffect(() => {
-    (async () => {
-      const { sdk } = await import('@farcaster/miniapp-sdk');
+  // useEffect(() => {
+  //   (async () => {
+  //     const { sdk } = await import('@farcaster/miniapp-sdk');
 
-      const isApp = await sdk.isInMiniApp()
+  //     const isApp = await sdk.isInMiniApp()
 
-      if (isApp && !walletConnected && !walletLoading) {
-        autoConnectWallet();
-      }
-    })();
-  }, [walletConnected, walletLoading]);
+  //     if (isApp && !walletConnected && !walletLoading) {
+  //       autoConnectWallet();
+  //     }
+  //   })();
+  // }, [walletConnected, walletLoading]);
 
 
   const autoConnectWallet = async () => {
