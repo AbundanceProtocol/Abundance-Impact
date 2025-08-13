@@ -18,6 +18,128 @@ import WalletActions from "../../components/WalletActions";
 
 const version = process.env.NEXT_PUBLIC_VERSION;
 
+// Simple Wallet Demo Component
+function WalletDemo() {
+  const {
+    walletConnected,
+    walletAddress,
+    walletChainId,
+    walletProvider
+  } = useContext(AccountContext);
+  
+  const [sdkTest, setSdkTest] = useState(null);
+  const [isInMiniApp, setIsInMiniApp] = useState(false);
+
+  // Test Farcaster SDK integration
+  useEffect(() => {
+    const testSDK = async () => {
+      try {
+        const { sdk } = await import('@farcaster/miniapp-sdk');
+        const inMiniApp = await sdk.isInMiniApp();
+        setIsInMiniApp(inMiniApp);
+        
+        if (inMiniApp) {
+          const context = await sdk.context;
+          setSdkTest({
+            user: context?.user?.username || 'Unknown',
+            fid: context?.user?.fid || 'Unknown',
+            ethAddress: context?.user?.verifiedAddresses?.ethAddresses?.[0] || 'None'
+          });
+        }
+      } catch (error) {
+        console.error('SDK test failed:', error);
+        setSdkTest({ error: error.message });
+      }
+    };
+
+    testSDK();
+  }, []);
+
+  const getNetworkName = (chainId) => {
+    switch (chainId) {
+      case '0x1': return 'Ethereum';
+      case '0xa': return 'Optimism';
+      case '0xa4b1': return 'Arbitrum';
+      case '0x2105': return 'Base';
+      default: return `Chain ${chainId}`;
+    }
+  };
+
+  return (
+    <div style={{ 
+      padding: '20px', 
+      border: '1px solid #333', 
+      borderRadius: '8px', 
+      margin: '10px 0',
+      backgroundColor: '#111'
+    }}>
+      <h3 style={{ color: '#fff', marginBottom: '15px' }}>🔗 Farcaster Wallet Integration Test</h3>
+      
+      {/* SDK Status */}
+      <div style={{ marginBottom: '15px' }}>
+        <div style={{ color: '#888', fontSize: '14px' }}>Farcaster Mini App Status:</div>
+        <div style={{ color: isInMiniApp ? '#4CAF50' : '#f44336', fontWeight: 'bold' }}>
+          {isInMiniApp ? '✅ Inside Farcaster Mini App' : '❌ Not in Farcaster Mini App'}
+        </div>
+        
+        {sdkTest && !sdkTest.error && (
+          <div style={{ marginTop: '10px', fontSize: '13px', color: '#aaa' }}>
+            <div>User: {sdkTest.user} (FID: {sdkTest.fid})</div>
+            <div>ETH Address: {sdkTest.ethAddress}</div>
+          </div>
+        )}
+        
+        {sdkTest?.error && (
+          <div style={{ marginTop: '10px', fontSize: '13px', color: '#f44336' }}>
+            Error: {sdkTest.error}
+          </div>
+        )}
+      </div>
+
+      {/* Wallet Status */}
+      <div style={{ marginBottom: '15px' }}>
+        <div style={{ color: '#888', fontSize: '14px' }}>Wallet Connection Status:</div>
+        <div style={{ color: walletConnected ? '#4CAF50' : '#f44336', fontWeight: 'bold' }}>
+          {walletConnected ? '✅ Wallet Connected' : '❌ Wallet Not Connected'}
+        </div>
+        
+        {walletConnected && (
+          <div style={{ marginTop: '10px', fontSize: '13px', color: '#aaa' }}>
+            <div>Provider: {walletProvider}</div>
+            <div>Address: {walletAddress?.slice(0, 6)}...{walletAddress?.slice(-4)}</div>
+            <div>Network: {getNetworkName(walletChainId)}</div>
+          </div>
+        )}
+      </div>
+
+      {/* Integration Status */}
+      <div style={{ 
+        padding: '10px', 
+        borderRadius: '4px', 
+        backgroundColor: isInMiniApp && walletConnected ? '#1a4d1a' : '#4d1a1a',
+        border: `1px solid ${isInMiniApp && walletConnected ? '#4CAF50' : '#f44336'}`
+      }}>
+        <div style={{ 
+          color: isInMiniApp && walletConnected ? '#4CAF50' : '#f44336',
+          fontWeight: 'bold',
+          fontSize: '14px'
+        }}>
+          {isInMiniApp && walletConnected 
+            ? '🎉 Full Integration Working!' 
+            : '⚠️ Integration Incomplete'
+          }
+        </div>
+        <div style={{ fontSize: '12px', color: '#ccc', marginTop: '5px' }}>
+          {isInMiniApp && walletConnected 
+            ? 'SDK detected miniapp environment and wallet is connected via sdk.wallet.getEthereumProvider()'
+            : 'Either not in miniapp or wallet connection failed'
+          }
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Tip() {
   const router = useRouter();
   const { ecosystem, username, app, userFid, pass } = router.query;
@@ -998,6 +1120,10 @@ export default function Tip() {
                 }}
               >
                 In Farcaster Mini Apps, wallet connection is handled automatically
+              </div>
+
+              <div style={{ padding: "0 20px 20px 20px" }}>
+                <WalletDemo />
               </div>
 
               <div style={{ padding: "0 20px 20px 20px" }}>
