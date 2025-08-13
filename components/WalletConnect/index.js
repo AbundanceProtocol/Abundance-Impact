@@ -22,6 +22,7 @@ export default function WalletConnect() {
   } = useContext(AccountContext);
 
   const [copied, setCopied] = useState(false);
+  const [ethProvider, setEthProvider] = useState(null);
 
   // Check if we're in a Farcaster Mini App environment
   const isFarcasterMiniApp = typeof window !== 'undefined' && 
@@ -54,16 +55,37 @@ export default function WalletConnect() {
         if (context?.user?.verifiedAddresses?.ethAddresses?.[0]) {
           const address = context.user.verifiedAddresses.ethAddresses[0];
           
-          // Set wallet connection state
-          setWalletAddress(address);
-          setWalletProvider('farcaster');
-          setWalletConnected(true);
+          // Get the Ethereum provider using the correct SDK method
+          const provider = await sdk.wallet.getEthereumProvider();
           
-          // Try to get the current network/chain ID
-          // For now, default to Base (0x2105) as it's commonly used
-          setWalletChainId('0x2105');
-          
-          console.log('Auto-connected to wallet:', address);
+          if (provider) {
+            // Store the provider for later use
+            setEthProvider(provider);
+            
+            // Set wallet connection state
+            setWalletAddress(address);
+            setWalletProvider('farcaster');
+            setWalletConnected(true);
+            
+            // Get the actual chain ID from the provider
+            try {
+              const chainId = await provider.request({ method: 'eth_chainId' });
+              setWalletChainId(chainId);
+            } catch (chainError) {
+              console.warn('Could not get chain ID, defaulting to Base:', chainError);
+              setWalletChainId('0x2105'); // Default to Base
+            }
+            
+            // Store provider in window for useWallet hook compatibility
+            if (typeof window !== 'undefined') {
+              window.farcasterEthProvider = provider;
+            }
+            
+            console.log('Auto-connected to wallet:', address);
+            console.log('Provider available:', !!provider);
+          } else {
+            setWalletError('Could not get Ethereum provider from Farcaster');
+          }
         } else {
           setWalletError('No verified Ethereum address found');
         }

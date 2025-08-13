@@ -17,6 +17,16 @@ export const useWallet = () => {
     setWalletLoading
   } = useContext(AccountContext);
 
+  // Get the appropriate provider based on wallet type
+  const getProvider = useCallback(() => {
+    if (walletProvider === 'farcaster' && typeof window !== 'undefined' && window.farcasterEthProvider) {
+      return window.farcasterEthProvider;
+    } else if (typeof window !== 'undefined' && window.ethereum) {
+      return window.ethereum;
+    }
+    return null;
+  }, [walletProvider]);
+
   const connectWallet = useCallback(async (provider) => {
     setWalletLoading(true);
     setWalletError(null);
@@ -77,21 +87,29 @@ export const useWallet = () => {
     setWalletChainId(null);
     setWalletProvider(null);
     setWalletError(null);
+    
+    // Clear Farcaster provider from window
+    if (typeof window !== 'undefined' && window.farcasterEthProvider) {
+      delete window.farcasterEthProvider;
+    }
   }, [setWalletConnected, setWalletAddress, setWalletChainId, setWalletProvider, setWalletError]);
 
   const switchNetwork = useCallback(async (targetChainId) => {
     try {
-      if (walletProvider === 'metamask' && window.ethereum) {
-        await window.ethereum.request({
+      const provider = getProvider();
+      if (provider) {
+        await provider.request({
           method: 'wallet_switchEthereumChain',
           params: [{ chainId: targetChainId }],
         });
+      } else {
+        throw new Error('No provider available');
       }
     } catch (error) {
       console.error('Error switching network:', error);
       throw error;
     }
-  }, [walletProvider]);
+  }, [getProvider]);
 
   const sendTransaction = useCallback(async (to, value, data = '0x') => {
     if (!walletConnected || !walletAddress) {
@@ -99,6 +117,11 @@ export const useWallet = () => {
     }
 
     try {
+      const provider = getProvider();
+      if (!provider) {
+        throw new Error('No provider available');
+      }
+
       const transactionParameters = {
         to,
         from: walletAddress,
@@ -106,7 +129,7 @@ export const useWallet = () => {
         data,
       };
 
-      const txHash = await window.ethereum.request({
+      const txHash = await provider.request({
         method: 'eth_sendTransaction',
         params: [transactionParameters],
       });
@@ -116,7 +139,7 @@ export const useWallet = () => {
       console.error('Transaction error:', error);
       throw error;
     }
-  }, [walletConnected, walletAddress]);
+  }, [walletConnected, walletAddress, getProvider]);
 
   const signMessage = useCallback(async (message) => {
     if (!walletConnected || !walletAddress) {
@@ -124,7 +147,12 @@ export const useWallet = () => {
     }
 
     try {
-      const signature = await window.ethereum.request({
+      const provider = getProvider();
+      if (!provider) {
+        throw new Error('No provider available');
+      }
+
+      const signature = await provider.request({
         method: 'personal_sign',
         params: [message, walletAddress],
       });
@@ -134,7 +162,7 @@ export const useWallet = () => {
       console.error('Message signing error:', error);
       throw error;
     }
-  }, [walletConnected, walletAddress]);
+  }, [walletConnected, walletAddress, getProvider]);
 
   const getBalance = useCallback(async () => {
     if (!walletConnected || !walletAddress) {
@@ -142,7 +170,12 @@ export const useWallet = () => {
     }
 
     try {
-      const balance = await window.ethereum.request({
+      const provider = getProvider();
+      if (!provider) {
+        throw new Error('No provider available');
+      }
+
+      const balance = await provider.request({
         method: 'eth_getBalance',
         params: [walletAddress, 'latest'],
       });
@@ -152,7 +185,7 @@ export const useWallet = () => {
       console.error('Balance fetch error:', error);
       throw error;
     }
-  }, [walletConnected, walletAddress]);
+  }, [walletConnected, walletAddress, getProvider]);
 
   const isFarcasterMiniApp = typeof window !== 'undefined' && 
     (window.location.hostname.includes('warpcast.com') || 
@@ -176,6 +209,7 @@ export const useWallet = () => {
     sendTransaction,
     signMessage,
     getBalance,
+    getProvider,
     
     // Setters
     setWalletError,

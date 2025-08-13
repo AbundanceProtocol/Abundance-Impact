@@ -1,7 +1,9 @@
 'use client'
 
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
+import { useContext } from 'react';
 import { AccountContext } from '../../context';
+import { useWallet } from '../../hooks/useWallet';
 import { FaExchangeAlt, FaPaperPlane, FaEye, FaHistory, FaCog } from 'react-icons/fa';
 import { BsArrowLeftRight } from 'react-icons/bs';
 
@@ -13,61 +15,68 @@ export default function WalletActions() {
     walletProvider
   } = useContext(AccountContext);
 
+  const { getProvider, switchNetwork, sendTransaction, signMessage, getBalance } = useWallet();
+  
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState('');
   const [showActions, setShowActions] = useState(false);
-  const [transactionAmount, setTransactionAmount] = useState('');
-  const [recipientAddress, setRecipientAddress] = useState('');
-  const [transactionLoading, setTransactionLoading] = useState(false);
-  const [transactionError, setTransactionError] = useState(null);
-  const [transactionSuccess, setTransactionSuccess] = useState(false);
 
   if (!walletConnected) {
     return null;
   }
 
-  const switchNetwork = async (targetChainId) => {
+  const handleSwitchNetwork = async (targetChainId) => {
     try {
-      if (walletProvider === 'metamask' && window.ethereum) {
-        await window.ethereum.request({
-          method: 'wallet_switchEthereumChain',
-          params: [{ chainId: targetChainId }],
-        });
-      }
+      setLoading(true);
+      setResult('');
+      await switchNetwork(targetChainId);
+      setResult(`Switched to network ${getNetworkName(targetChainId)}`);
     } catch (error) {
-      console.error('Error switching network:', error);
+      setResult(`Error: ${error.message}`);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const sendTransaction = async () => {
-    if (!transactionAmount || !recipientAddress) {
-      setTransactionError('Please fill in all fields');
-      return;
-    }
-
-    setTransactionLoading(true);
-    setTransactionError(null);
-
+  const handleTestTransaction = async () => {
     try {
-      const transactionParameters = {
-        to: recipientAddress,
-        from: walletAddress,
-        value: '0x' + Number(transactionAmount).toString(16),
-      };
-
-      const txHash = await window.ethereum.request({
-        method: 'eth_sendTransaction',
-        params: [transactionParameters],
-      });
-
-      setTransactionSuccess(true);
-      setTransactionAmount('');
-      setRecipientAddress('');
-      
-      setTimeout(() => setTransactionSuccess(false), 5000);
+      setLoading(true);
+      setResult('');
+      // Test transaction to self with 0 value
+      const txHash = await sendTransaction(walletAddress, 0);
+      setResult(`Transaction sent: ${txHash.slice(0, 20)}...`);
     } catch (error) {
-      console.error('Transaction error:', error);
-      setTransactionError(error.message);
+      setResult(`Error: ${error.message}`);
     } finally {
-      setTransactionLoading(false);
+      setLoading(false);
+    }
+  };
+
+  const handleSignMessage = async () => {
+    try {
+      setLoading(true);
+      setResult('');
+      const message = 'Hello from Farcaster Mini App!';
+      const signature = await signMessage(message);
+      setResult(`Message signed: ${signature.slice(0, 20)}...`);
+    } catch (error) {
+      setResult(`Error: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGetBalance = async () => {
+    try {
+      setLoading(true);
+      setResult('');
+      const balance = await getBalance();
+      const ethBalance = parseInt(balance, 16) / 1e18;
+      setResult(`Balance: ${ethBalance.toFixed(6)} ETH`);
+    } catch (error) {
+      setResult(`Error: ${error.message}`);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -107,6 +116,9 @@ export default function WalletActions() {
         <div className="network-indicator" style={{ backgroundColor: getNetworkColor(walletChainId) }}>
           {getNetworkName(walletChainId)}
         </div>
+        <div className="wallet-address-short">
+          {walletAddress?.slice(0, 6)}...{walletAddress?.slice(-4)}
+        </div>
         <button 
           onClick={() => setShowActions(!showActions)}
           className="toggle-actions-btn"
@@ -122,90 +134,100 @@ export default function WalletActions() {
             <h4>Switch Network</h4>
             <div className="network-options">
               <button 
-                onClick={() => switchNetwork('0x1')}
+                onClick={() => handleSwitchNetwork('0x1')}
                 className={`network-btn ${walletChainId === '0x1' ? 'active' : ''}`}
+                disabled={loading || walletChainId === '0x1'}
               >
                 Ethereum
               </button>
               <button 
-                onClick={() => switchNetwork('0xa')}
+                onClick={() => handleSwitchNetwork('0xa')}
                 className={`network-btn ${walletChainId === '0xa' ? 'active' : ''}`}
+                disabled={loading || walletChainId === '0xa'}
               >
                 Optimism
               </button>
               <button 
-                onClick={() => switchNetwork('0xa4b1')}
+                onClick={() => handleSwitchNetwork('0xa4b1')}
                 className={`network-btn ${walletChainId === '0xa4b1' ? 'active' : ''}`}
+                disabled={loading || walletChainId === '0xa4b1'}
               >
                 Arbitrum
               </button>
               <button 
-                onClick={() => switchNetwork('0x2105')}
+                onClick={() => handleSwitchNetwork('0x2105')}
                 className={`network-btn ${walletChainId === '0x2105' ? 'active' : ''}`}
+                disabled={loading || walletChainId === '0x2105'}
               >
                 Base
               </button>
             </div>
           </div>
 
-          {/* Send Transaction */}
+          {/* Wallet Actions */}
           <div className="action-section">
-            <h4>Send Transaction</h4>
-            <div className="transaction-form">
-              <input
-                type="text"
-                placeholder="Recipient Address (0x...)"
-                value={recipientAddress}
-                onChange={(e) => setRecipientAddress(e.target.value)}
-                className="transaction-input"
-              />
-              <input
-                type="number"
-                placeholder="Amount (ETH)"
-                value={transactionAmount}
-                onChange={(e) => setTransactionAmount(e.target.value)}
-                className="transaction-input"
-                step="0.001"
-                min="0"
-              />
+            <h4>Wallet Actions</h4>
+            <div className="wallet-action-buttons">
               <button 
-                onClick={sendTransaction}
-                disabled={transactionLoading || !transactionAmount || !recipientAddress}
-                className="send-btn"
+                onClick={handleGetBalance}
+                className="action-btn"
+                disabled={loading}
               >
-                {transactionLoading ? 'Sending...' : <><FaPaperPlane size={14} /> Send</>}
+                <FaEye size={14} />
+                Get Balance
+              </button>
+              <button 
+                onClick={handleSignMessage}
+                className="action-btn"
+                disabled={loading}
+              >
+                <FaCog size={14} />
+                Sign Message
+              </button>
+              <button 
+                onClick={handleTestTransaction}
+                className="action-btn"
+                disabled={loading}
+              >
+                <FaPaperPlane size={14} />
+                Test Transaction
               </button>
             </div>
-            
-            {transactionError && (
-              <div className="transaction-error">
-                {transactionError}
-              </div>
-            )}
-            
-            {transactionSuccess && (
-              <div className="transaction-success">
-                Transaction sent successfully!
-              </div>
-            )}
           </div>
 
-          {/* Quick Actions */}
+          {/* Status Display */}
+          {loading && (
+            <div className="status-section">
+              <div className="loading-message">
+                Processing...
+              </div>
+            </div>
+          )}
+          
+          {result && !loading && (
+            <div className="status-section">
+              <div className="result-message">
+                {result}
+              </div>
+            </div>
+          )}
+
+          {/* Provider Info */}
           <div className="action-section">
-            <h4>Quick Actions</h4>
-            <div className="quick-actions">
-              <button className="quick-action-btn">
-                <FaEye size={16} />
-                View on Explorer
-              </button>
-              <button className="quick-action-btn">
-                <FaHistory size={16} />
-                Transaction History
-              </button>
-              <button className="quick-action-btn">
-                <BsArrowLeftRight size={16} />
-                Bridge Assets
-              </button>
+            <h4>Provider Info</h4>
+            <div className="provider-info">
+              <div className="info-item">
+                <span>Provider:</span>
+                <span>{walletProvider}</span>
+              </div>
+              <div className="info-item">
+                <span>Network:</span>
+                <span>{getNetworkName(walletChainId)}</span>
+              </div>
+              <div className="info-item">
+                <span>Address:</span>
+                <span>{walletAddress?.slice(0, 10)}...{walletAddress?.slice(-6)}</span>
+              </div>
             </div>
           </div>
         </div>
