@@ -8,7 +8,6 @@
   external_node_modules = [
     "mongodb", 
     "mongoose", 
-    "sharp", 
     "express", 
     "serverless-http", 
     "@farcaster/miniapp-node", 
