@@ -10,23 +10,30 @@ import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
 import { mainnet, arbitrum, base } from '@reown/appkit/networks'
 
 const queryClient = new QueryClient();
-const projectId = process.env.NEXT_PUBLIC_WAGMI_KEY
+const projectId = process.env.NEXT_PUBLIC_WAGMI_KEY || 'default-project-id'
 
-// Only throw error in development
-if (!process.env.NEXT_PUBLIC_WAGMI_KEY && process.env.NODE_ENV === 'development') {
+// Only warn in development
+if (!process.env.NEXT_PUBLIC_WAGMI_KEY) {
   console.warn('NEXT_PUBLIC_WAGMI_KEY is not defined. Using default project ID.');
 }
 
 const networks = [mainnet, arbitrum, base]
 
-const wagmiAdapter = new WagmiAdapter({
-  storage: createStorage({
-    storage: cookieStorage
-  }),
-  ssr: true,
-  projectId,
-  networks,
-})
+let wagmiAdapter;
+try {
+  wagmiAdapter = new WagmiAdapter({
+    storage: createStorage({
+      storage: cookieStorage
+    }),
+    ssr: true,
+    projectId,
+    networks,
+  })
+} catch (error) {
+  console.warn('Failed to initialize WagmiAdapter:', error.message);
+  // Create a minimal fallback adapter
+  wagmiAdapter = null;
+}
 
 
 
@@ -442,11 +449,17 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
 
   return (
     <AccountContext.Provider value={contextValue}>
-      <WagmiProvider {...{config: wagmiAdapter.wagmiConfig, initialState}}>
+      {wagmiAdapter ? (
+        <WagmiProvider {...{config: wagmiAdapter.wagmiConfig, initialState}}>
+          <QueryClientProvider client={queryClient}>
+            {children}
+          </QueryClientProvider>
+        </WagmiProvider>
+      ) : (
         <QueryClientProvider client={queryClient}>
           {children}
         </QueryClientProvider>
-      </WagmiProvider>
+      )}
     </AccountContext.Provider>
   );
 };

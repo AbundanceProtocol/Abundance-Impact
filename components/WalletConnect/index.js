@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useContext } from 'react';
 import { AccountContext } from '../../context';
-import { FaWallet, FaCopy, FaExternalLinkAlt, FaMeta } from 'react-icons/fa';
+import { FaWallet, FaCopy, FaExternalLinkAlt } from 'react-icons/fa';
 import { SiWalletconnect } from 'react-icons/si';
 
 export default function WalletConnect() {
@@ -130,7 +130,7 @@ export default function WalletConnect() {
   const getProviderIcon = (provider) => {
     switch (provider) {
       case 'metamask':
-        return <FaMeta size={20} />;
+        return <FaWallet size={20} />;
       case 'walletconnect':
         return <SiWalletconnect size={20} />;
       case 'coinbase':

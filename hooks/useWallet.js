@@ -43,19 +43,8 @@ export const useWallet = () => {
           throw new Error('MetaMask not installed');
         }
       } else if (provider === 'walletconnect') {
-        // WalletConnect implementation
-        const { WalletConnectConnector } = await import('@web3-react/walletconnect-connector');
-        const connector = new WalletConnectConnector({
-          rpc: {
-            1: process.env.NEXT_PUBLIC_ETHEREUM_RPC_URL || 'https://mainnet.infura.io/v3/your-project-id',
-            8453: process.env.NEXT_PUBLIC_BASE_RPC_URL || 'https://mainnet.base.org'
-          },
-          qrcode: true,
-        });
-        
-        const account = await connector.activate();
-        address = account.account;
-        chainId = account.chainId;
+        // Simplified WalletConnect - can be enhanced later with proper WC implementation
+        throw new Error('WalletConnect not configured. Please use MetaMask or Coinbase Wallet for now.');
       } else if (provider === 'coinbase') {
         if (typeof window !== 'undefined' && window.ethereum && window.ethereum.isCoinbaseWallet) {
           const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
