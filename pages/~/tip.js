@@ -149,11 +149,11 @@ function WalletDemo() {
     walletConnected,
     walletAddress,
     walletChainId,
-    walletProvider
+    walletProvider,
+    isMiniApp
   } = useContext(AccountContext);
   
   const [sdkTest, setSdkTest] = useState(null);
-  const [isInMiniApp, setIsInMiniApp] = useState(false);
 
   // Test Farcaster SDK integration
   useEffect(() => {
@@ -161,7 +161,6 @@ function WalletDemo() {
       try {
         const { sdk } = await import('@farcaster/miniapp-sdk');
         const inMiniApp = await sdk.isInMiniApp();
-        setIsInMiniApp(inMiniApp);
         
         if (inMiniApp) {
           const context = await sdk.context;
@@ -203,8 +202,8 @@ function WalletDemo() {
       {/* SDK Status */}
       <div style={{ marginBottom: '15px' }}>
         <div style={{ color: '#888', fontSize: '14px' }}>Farcaster Mini App Status:</div>
-        <div style={{ color: isInMiniApp ? '#4CAF50' : '#f44336', fontWeight: 'bold' }}>
-          {isInMiniApp ? '✅ Inside Farcaster Mini App' : '❌ Not in Farcaster Mini App'}
+        <div style={{ color: isMiniApp ? '#4CAF50' : '#f44336', fontWeight: 'bold' }}>
+          {isMiniApp ? '✅ Inside Farcaster Mini App' : '❌ Not in Farcaster Mini App'}
         </div>
         
         {sdkTest && !sdkTest.error && (
@@ -241,22 +240,22 @@ function WalletDemo() {
       <div style={{ 
         padding: '10px', 
         borderRadius: '4px', 
-        backgroundColor: isInMiniApp && walletConnected ? '#1a4d1a' : '#4d1a1a',
-        border: `1px solid ${isInMiniApp && walletConnected ? '#4CAF50' : '#f44336'}`
+        backgroundColor: isMiniApp && walletConnected ? '#1a4d1a' : '#4d1a1a',
+        border: `1px solid ${isMiniApp && walletConnected ? '#4CAF50' : '#f44336'}`
       }}>
         <div style={{ 
-          color: isInMiniApp && walletConnected ? '#4CAF50' : '#f44336',
+          color: isMiniApp && walletConnected ? '#4CAF50' : '#f44336',
           fontWeight: 'bold',
           fontSize: '14px'
         }}>
-          {isInMiniApp && walletConnected 
+          {isMiniApp && walletConnected 
             ? '🎉 Full Integration Working!' 
             : '⚠️ Integration Incomplete'
           }
         </div>
         <div style={{ fontSize: '12px', color: '#ccc', marginTop: '5px' }}>
-          {isInMiniApp && walletConnected 
-            ? 'SDK detected miniapp environment and wallet is connected via sdk.wallet.getEthereumProvider()'
+          {isMiniApp && walletConnected 
+            ? 'Context isMiniApp=true and wallet connected via sdk.wallet.getEthereumProvider()'
             : 'Either not in miniapp or wallet connection failed'
           }
         </div>

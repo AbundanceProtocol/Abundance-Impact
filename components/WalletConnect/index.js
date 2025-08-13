@@ -18,24 +18,19 @@ export default function WalletConnect() {
     setWalletChainId,
     setWalletProvider,
     setWalletError,
-    setWalletLoading
+    setWalletLoading,
+    isMiniApp
   } = useContext(AccountContext);
 
   const [copied, setCopied] = useState(false);
   const [ethProvider, setEthProvider] = useState(null);
 
-  // Check if we're in a Farcaster Mini App environment
-  const isFarcasterMiniApp = typeof window !== 'undefined' && 
-    (window.location.hostname.includes('warpcast.com') || 
-     window.location.hostname.includes('farcaster.xyz') ||
-     window.navigator.userAgent.includes('Farcaster'));
-
   // Auto-connect wallet when in Farcaster Mini App
   useEffect(() => {
-    if (isFarcasterMiniApp && !walletConnected && !walletLoading) {
+    if (isMiniApp && !walletConnected && !walletLoading) {
       autoConnectWallet();
     }
-  }, [isFarcasterMiniApp, walletConnected, walletLoading]);
+  }, [isMiniApp, walletConnected, walletLoading]);
 
   const autoConnectWallet = async () => {
     try {
