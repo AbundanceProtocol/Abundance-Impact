@@ -12,7 +12,13 @@ export default function WalletConnect() {
     walletChainId,
     walletProvider,
     walletError,
-    walletLoading
+    walletLoading,
+    setWalletConnected,
+    setWalletAddress,
+    setWalletChainId,
+    setWalletProvider,
+    setWalletError,
+    setWalletLoading
   } = useContext(AccountContext);
 
   const [copied, setCopied] = useState(false);
@@ -22,6 +28,55 @@ export default function WalletConnect() {
     (window.location.hostname.includes('warpcast.com') || 
      window.location.hostname.includes('farcaster.xyz') ||
      window.navigator.userAgent.includes('Farcaster'));
+
+  // Auto-connect wallet when in Farcaster Mini App
+  useEffect(() => {
+    if (isFarcasterMiniApp && !walletConnected && !walletLoading) {
+      autoConnectWallet();
+    }
+  }, [isFarcasterMiniApp, walletConnected, walletLoading]);
+
+  const autoConnectWallet = async () => {
+    try {
+      setWalletLoading(true);
+      setWalletError(null);
+
+      // Import the Farcaster Mini App SDK
+      const { sdk } = await import('@farcaster/miniapp-sdk');
+      
+      // Check if we're in a Mini App
+      const isInMiniApp = await sdk.isInMiniApp();
+      
+      if (isInMiniApp) {
+        // Get the user context which includes wallet information
+        const context = await sdk.context;
+        
+        if (context?.user?.verifiedAddresses?.ethAddresses?.[0]) {
+          const address = context.user.verifiedAddresses.ethAddresses[0];
+          
+          // Set wallet connection state
+          setWalletAddress(address);
+          setWalletProvider('farcaster');
+          setWalletConnected(true);
+          
+          // Try to get the current network/chain ID
+          // For now, default to Base (0x2105) as it's commonly used
+          setWalletChainId('0x2105');
+          
+          console.log('Auto-connected to wallet:', address);
+        } else {
+          setWalletError('No verified Ethereum address found');
+        }
+      } else {
+        setWalletError('Not in a Farcaster Mini App environment');
+      }
+    } catch (error) {
+      console.error('Auto-connect failed:', error);
+      setWalletError(error.message || 'Failed to auto-connect wallet');
+    } finally {
+      setWalletLoading(false);
+    }
+  };
 
   const copyAddress = async () => {
     if (walletAddress) {
@@ -58,6 +113,8 @@ export default function WalletConnect() {
         return <SiWalletconnect size={20} />;
       case 'coinbase':
         return <FaWallet size={20} />;
+      case 'farcaster':
+        return <FaWallet size={20} />;
       default:
         return <FaWallet size={20} />;
     }
@@ -71,10 +128,63 @@ export default function WalletConnect() {
         return 'WalletConnect';
       case 'coinbase':
         return 'Coinbase Wallet';
+      case 'farcaster':
+        return 'Farcaster Wallet';
       default:
         return 'Wallet';
     }
   };
+
+  // Show loading state while auto-connecting
+  if (walletLoading) {
+    return (
+      <div className="wallet-connect">
+        <div className="farcaster-wallet-info">
+          <div className="wallet-status">
+            <FaWallet size={24} />
+            <span>Connecting Wallet...</span>
+          </div>
+          <div className="wallet-note">
+            <small>Automatically connecting to your Farcaster wallet...</small>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state if connection failed
+  if (walletError) {
+    return (
+      <div className="wallet-connect">
+        <div className="farcaster-wallet-info">
+          <div className="wallet-status">
+            <FaWallet size={24} />
+            <span>Connection Failed</span>
+          </div>
+          <div className="mini-app-status">
+            <div className="status-item">
+              <span className="status-label">Error:</span>
+              <span className="status-value error">{walletError}</span>
+            </div>
+          </div>
+          <button 
+            onClick={autoConnectWallet}
+            style={{
+              padding: '8px 16px',
+              backgroundColor: '#114488',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              marginTop: '10px'
+            }}
+          >
+            Retry Connection
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   // If wallet is connected, show wallet info
   if (walletConnected && walletAddress) {
@@ -99,31 +209,15 @@ export default function WalletConnect() {
     );
   }
 
-  // If no wallet connected, show Farcaster Mini App info
-  return (
-    <div className="wallet-connect">
-      <div className="farcaster-wallet-info">
-        <div className="wallet-status">
-          <FaWallet size={24} />
-          <span>Wallet Status</span>
-        </div>
-        
-        {isFarcasterMiniApp ? (
-          <div className="mini-app-status">
-            <div className="status-item">
-              <span className="status-label">Environment:</span>
-              <span className="status-value success">Farcaster Mini App</span>
-            </div>
-            <div className="status-item">
-              <span className="status-label">Wallet Access:</span>
-              <span className="status-value info">Available through Farcaster</span>
-            </div>
-            <div className="status-item">
-              <span className="status-label">Connection:</span>
-              <span className="status-value warning">Not yet connected</span>
-            </div>
+  // If no wallet connected and not in Mini App, show manual connection info
+  if (!isFarcasterMiniApp) {
+    return (
+      <div className="wallet-connect">
+        <div className="farcaster-wallet-info">
+          <div className="wallet-status">
+            <FaWallet size={24} />
+            <span>Wallet Status</span>
           </div>
-        ) : (
           <div className="regular-browser-status">
             <div className="status-item">
               <span className="status-label">Environment:</span>
@@ -134,15 +228,38 @@ export default function WalletConnect() {
               <span className="status-value warning">Requires wallet extension</span>
             </div>
           </div>
-        )}
+          <div className="wallet-note">
+            <small>Connect your wallet extension to interact with blockchain features.</small>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
+  // Fallback: show connection status
+  return (
+    <div className="wallet-connect">
+      <div className="farcaster-wallet-info">
+        <div className="wallet-status">
+          <FaWallet size={24} />
+          <span>Wallet Status</span>
+        </div>
+        <div className="mini-app-status">
+          <div className="status-item">
+            <span className="status-label">Environment:</span>
+            <span className="status-value success">Farcaster Mini App</span>
+          </div>
+          <div className="status-item">
+            <span className="status-label">Wallet Access:</span>
+            <span className="status-value info">Available through Farcaster</span>
+          </div>
+          <div className="status-item">
+            <span className="status-label">Connection:</span>
+            <span className="status-value warning">Attempting to connect...</span>
+          </div>
+        </div>
         <div className="wallet-note">
-          <small>
-            {isFarcasterMiniApp 
-              ? "Your wallet will be automatically connected when you perform blockchain actions in this Farcaster Mini App."
-              : "Connect your wallet extension to interact with blockchain features."
-            }
-          </small>
+          <small>Your wallet will be automatically connected when you perform blockchain actions in this Farcaster Mini App.</small>
         </div>
       </div>
     </div>
