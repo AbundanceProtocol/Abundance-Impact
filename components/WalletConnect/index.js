@@ -18,24 +18,45 @@ export default function WalletConnect() {
     setWalletChainId,
     setWalletProvider,
     setWalletError,
-    setWalletLoading
+    setWalletLoading,
+    isMiniApp
   } = useContext(AccountContext);
 
   const [copied, setCopied] = useState(false);
   const [ethProvider, setEthProvider] = useState(null);
 
   // Check if we're in a Farcaster Mini App environment
-  const isFarcasterMiniApp = typeof window !== 'undefined' && 
-    (window.location.hostname.includes('warpcast.com') || 
-     window.location.hostname.includes('farcaster.xyz') ||
-     window.navigator.userAgent.includes('Farcaster'));
+  // const isFarcasterMiniApp = typeof window !== 'undefined' && 
+  //   (window.location.hostname.includes('warpcast.com') || 
+  //    window.location.hostname.includes('farcaster.xyz') ||
+  //    window.navigator.userAgent.includes('Farcaster'));
 
   // Auto-connect wallet when in Farcaster Mini App
   useEffect(() => {
-    if (isFarcasterMiniApp && !walletConnected && !walletLoading) {
-      autoConnectWallet();
-    }
-  }, [isFarcasterMiniApp, walletConnected, walletLoading]);
+    (async () => {
+      const { sdk } = await import('@farcaster/miniapp-sdk');
+  
+      const isApp = await sdk.isInMiniApp()
+
+      if (isApp && !walletConnected && !walletLoading) {
+        autoConnectWallet();
+      }
+    })();
+  }, []);
+
+
+  useEffect(() => {
+    (async () => {
+      const { sdk } = await import('@farcaster/miniapp-sdk');
+
+      const isApp = await sdk.isInMiniApp()
+
+      if (isApp && !walletConnected && !walletLoading) {
+        autoConnectWallet();
+      }
+    })();
+  }, [walletConnected, walletLoading]);
+
 
   const autoConnectWallet = async () => {
     try {
@@ -58,6 +79,8 @@ export default function WalletConnect() {
           // Get the Ethereum provider using the correct SDK method
           const provider = await sdk.wallet.getEthereumProvider();
           
+          console.log("provider", provider);
+
           if (provider) {
             // Store the provider for later use
             setEthProvider(provider);
