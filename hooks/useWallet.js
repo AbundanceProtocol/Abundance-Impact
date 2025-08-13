@@ -176,11 +176,6 @@ export const useWallet = () => {
     }
   }, [walletConnected, walletAddress, getProvider]);
 
-  const isFarcasterMiniApp = typeof window !== 'undefined' && 
-    (window.location.hostname.includes('warpcast.com') || 
-     window.location.hostname.includes('farcaster.xyz') ||
-     window.navigator.userAgent.includes('Farcaster'));
-
   return {
     // State
     walletConnected,
@@ -189,7 +184,6 @@ export const useWallet = () => {
     walletProvider,
     walletError,
     walletLoading,
-    isFarcasterMiniApp,
     
     // Methods
     connectWallet,
