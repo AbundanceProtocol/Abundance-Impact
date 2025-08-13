@@ -255,7 +255,7 @@ export default function WalletConnect() {
   }
 
   // If no wallet connected and not in Mini App, show manual connection info
-  if (!isFarcasterMiniApp) {
+  if (!isMiniApp) {
     return (
       <div className="wallet-connect">
         <div className="farcaster-wallet-info">
