@@ -90,6 +90,8 @@ export default function WalletActions() {
         return 'Arbitrum';
       case '0x2105':
         return 'Base';
+      case '0xa4ec':
+        return 'Celo';
       default:
         return `Chain ${chainId}`;
     }
@@ -105,6 +107,8 @@ export default function WalletActions() {
         return '#28a0f0';
       case '0x2105':
         return '#0052ff';
+      case '0xa4ec':
+        return '#35d07f'; // Celo green color
       default:
         return '#666';
     }
@@ -160,6 +164,13 @@ export default function WalletActions() {
                 disabled={loading || walletChainId === '0x2105'}
               >
                 Base
+              </button>
+              <button 
+                onClick={() => handleSwitchNetwork('0xa4ec')}
+                className={`network-btn ${walletChainId === '0xa4ec' ? 'active' : ''}`}
+                disabled={loading || walletChainId === '0xa4ec'}
+              >
+                Celo
               </button>
             </div>
           </div>

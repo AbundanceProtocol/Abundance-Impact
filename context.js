@@ -68,6 +68,11 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
   const [walletProvider, setWalletProvider] = useState(null)
   const [walletError, setWalletError] = useState(null)
   const [walletLoading, setWalletLoading] = useState(false)
+  const [topCoins, setTopCoins] = useState([])
+  const [topCoinsLoading, setTopCoinsLoading] = useState(false)
+  const [lastTopCoinsFetch, setLastTopCoinsFetch] = useState(0)
+  const [topCoinsCache, setTopCoinsCache] = useState({})
+  const [lastRpcCall, setLastRpcCall] = useState(0) // Track last RPC call time
   
   const router = useRouter()
   const initEcosystems = [{
@@ -407,6 +412,366 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
     setEcoData(system);
   };
 
+  // Get user's top coins by $ value from Base chain
+  const getTopCoins = async (address, forceRefresh = false) => {
+    if (!address) return;
+    
+    // Check cache first (5 minute cache)
+    const cacheKey = address.toLowerCase();
+    const now = Date.now();
+    const cacheAge = now - (lastTopCoinsFetch || 0);
+    const cacheValid = cacheAge < 5 * 60 * 1000; // 5 minutes
+    
+    if (!forceRefresh && cacheValid && topCoinsCache[cacheKey] && topCoinsCache[cacheKey].length > 0) {
+      console.log('📦 Using cached top coins data (age:', Math.round(cacheAge / 1000), 'seconds)');
+      setTopCoins(topCoinsCache[cacheKey]);
+      return;
+    }
+    
+    // Prevent multiple simultaneous calls
+    if (topCoinsLoading) {
+      console.log('⏳ Already loading top coins, skipping...');
+      return;
+    }
+    
+    // RPC rate limiting - prevent calls within 10 seconds of each other
+    const timeSinceLastRpc = now - (lastRpcCall || 0);
+    if (timeSinceLastRpc < 10000) { // 10 seconds
+      console.log('⏳ RPC rate limit active, please wait...', Math.ceil((10000 - timeSinceLastRpc) / 1000), 'seconds remaining');
+      return;
+    }
+    
+    try {
+      setTopCoinsLoading(true);
+      setLastRpcCall(now); // Mark this as the last RPC call
+      console.log('Fetching top coins for address:', address);
+      
+      // Base chain RPC URL
+      const baseRpcUrl = process.env.NEXT_PUBLIC_BASE_RPC_URL || 'https://mainnet.base.org';
+      
+      // Common token addresses on Base
+      const commonTokens = [
+        { symbol: 'USDC', address: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', decimals: 6 },
+        { symbol: 'DEGEN', address: '0x4ed4E862860beD51a9570b96d89aF5E1B0Efefed', decimals: 18 },
+        { symbol: 'BETR', address: '0x1F32b1c2345538c0c6f582fCB0223cA264d87105', decimals: 18 },
+        { symbol: 'NOICE', address: '0x9cb41fd9dc6891bae8187029461bfaadf6cc0c69', decimals: 18 },
+        { symbol: 'TIPN', address: '0x5ba8d32579a4497c12d327289a103c3ad5b64eb1', decimals: 18 }
+      ];
+
+      // Get token prices from CoinGecko API (free tier) first
+      let tokenPrices = {};
+      try {
+        // Add delay to respect rate limits
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        const priceResponse = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum,usd-coin,degen,betr,noice,tipn&vs_currencies=usd');
+        if (priceResponse.ok) {
+          const priceData = await priceResponse.json();
+          tokenPrices = {
+            'WETH': priceData.ethereum?.usd || 3000,
+            'USDC': priceData['usd-coin']?.usd || 1,
+            'DEGEN': priceData.degen?.usd || 0.01,
+            'BETR': priceData.betr?.usd || 0.01,
+            'NOICE': priceData.noice?.usd || 0.01,
+            'TIPN': priceData.tipn?.usd || 0.01
+          };
+        } else if (priceResponse.status === 429) {
+          console.warn('CoinGecko rate limit hit, using fallback prices');
+          throw new Error('Rate limit exceeded');
+        }
+      } catch (error) {
+        console.warn('Failed to fetch token prices, using fallback prices:', error);
+        // Fallback prices
+        tokenPrices = {
+          'WETH': 3000, 'USDC': 1, 'DEGEN': 0.01, 'BETR': 0.01, 'NOICE': 0.01, 'TIPN': 0.01
+        };
+      }
+
+      const tokenBalances = [];
+      
+      // Get native ETH balance first
+      try {
+        const ethBalanceResponse = await fetch(baseRpcUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            method: 'eth_getBalance',
+            params: [address, 'latest'],
+            id: 1
+          })
+        });
+        
+        const ethBalanceData = await ethBalanceResponse.json();
+        if (ethBalanceData.result && ethBalanceData.result !== '0x') {
+          const ethBalance = parseInt(ethBalanceData.result, 16) / Math.pow(10, 18);
+          if (ethBalance > 0) { // Only show if > 0 ETH
+            const ethPrice = tokenPrices['WETH'] || 3000;
+            const ethValue = ethBalance * ethPrice;
+            
+            tokenBalances.push({
+              symbol: 'ETH',
+              address: '0x0000000000000000000000000000000000000000',
+              balance: ethBalance.toFixed(4),
+              price: ethPrice,
+              value: ethValue.toFixed(2),
+              isNative: true
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching ETH balance:', error);
+      }
+      
+      // Get token balances with rate limiting
+      for (const token of commonTokens) {
+        try {
+          // Add longer delay between requests to prevent overwhelming the RPC
+          await new Promise(resolve => setTimeout(resolve, 200)); // Increased from 50ms to 200ms
+          
+          const balanceResponse = await fetch(baseRpcUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              jsonrpc: '2.0',
+              method: 'eth_call',
+              params: [{
+                to: token.address,
+                data: `0x70a08231${address.slice(2).padStart(64, '0')}` // balanceOf(address)
+              }, 'latest'],
+              id: 1
+            })
+          });
+          
+          if (!balanceResponse.ok) {
+            if (balanceResponse.status === 429) {
+              console.warn(`Rate limit hit for ${token.symbol}, skipping remaining tokens`);
+              break; // Stop processing more tokens if we hit rate limit
+            }
+            console.warn(`Failed to fetch ${token.symbol} balance: HTTP ${balanceResponse.status}`);
+            continue;
+          }
+          
+          const balanceData = await balanceResponse.json();
+          
+          if (balanceData.error) {
+            console.warn(`RPC error fetching ${token.symbol} balance:`, balanceData.error);
+            continue;
+          }
+          
+          if (balanceData.result && balanceData.result !== '0x') {
+            const balance = parseInt(balanceData.result, 16) / Math.pow(10, token.decimals);
+            
+            // Only include tokens with balance > 0
+            if (balance > 0) {
+              const price = tokenPrices[token.symbol] || 1;
+              const value = balance * price;
+              
+              tokenBalances.push({
+                symbol: token.symbol,
+                address: token.address,
+                balance: balance.toFixed(4),
+                price: price,
+                value: value.toFixed(2)
+              });
+            }
+          }
+        } catch (error) {
+          console.error(`Error fetching ${token.symbol} balance:`, error);
+          // Continue with other tokens instead of failing completely
+        }
+      }
+      
+      // Sort by $ value (highest first)
+      const sortedTokens = tokenBalances.sort((a, b) => parseFloat(b.value) - parseFloat(a.value));
+      
+      console.log('Top coins by value:', sortedTokens);
+      
+      // Update state and cache
+      setTopCoins(sortedTokens);
+      setTopCoinsCache(prev => ({ ...prev, [cacheKey]: sortedTokens }));
+      setLastTopCoinsFetch(now);
+      
+    } catch (error) {
+      console.error('Error fetching top coins:', error);
+      // Don't clear existing data on error to prevent flashing
+      if (topCoins.length === 0) {
+        setTopCoins([]);
+      }
+    } finally {
+      setTopCoinsLoading(false);
+    }
+  };
+
+  // Get user's top coins by $ value from Celo chain
+  const getTopCoinsCelo = async (address, forceRefresh = false) => {
+    if (!address) return;
+    
+    // Check cache first (5 minute cache)
+    const cacheKey = `celo_${address.toLowerCase()}`;
+    const now = Date.now();
+    const cacheAge = now - (lastTopCoinsFetch || 0);
+    const cacheValid = cacheAge < 5 * 60 * 1000; // 5 minutes
+    
+    if (!forceRefresh && cacheValid && topCoinsCache[cacheKey] && topCoinsCache[cacheKey].length > 0) {
+      console.log('📦 Using cached Celo top coins data (age:', Math.round(cacheAge / 1000), 'seconds)');
+      setTopCoins(topCoinsCache[cacheKey]);
+      return;
+    }
+    
+    // Prevent multiple simultaneous calls
+    if (topCoinsLoading) {
+      console.log('⏳ Already loading top coins, skipping...');
+      return;
+    }
+    
+    // RPC rate limiting - prevent calls within 10 seconds of each other
+    const timeSinceLastRpc = now - (lastRpcCall || 0);
+    if (timeSinceLastRpc < 10000) { // 10 seconds
+      console.log('⏳ RPC rate limit active, please wait...', Math.ceil((10000 - timeSinceLastRpc) / 1000), 'seconds remaining');
+      return;
+    }
+    
+    try {
+      setTopCoinsLoading(true);
+      setLastRpcCall(now); // Mark this as the last RPC call
+      console.log('Fetching Celo top coins for address:', address);
+      
+      // Celo chain RPC URL
+      const celoRpcUrl = process.env.NEXT_PUBLIC_CELO_RPC_URL || 'https://forno.celo.org';
+      
+      // Common token addresses on Celo
+      const celoTokens = [
+        { symbol: 'CELO', address: '0x471EcE3750Da237f93B8E339c536989b8978a438', decimals: 18 },
+        { symbol: 'USDC', address: '0x765DE816845861e75A25fCA122bb6898B8B1282a', decimals: 6 },
+        { symbol: 'WETH', address: '0x122013fd7dF1C6F636a5bb8f03108E876548b455', decimals: 18 }
+      ];
+
+      // Get token prices from CoinGecko API (free tier) first
+      let tokenPrices = {};
+      try {
+        // Add delay to respect rate limits
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        const priceResponse = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=celo,usd-coin,ethereum&vs_currencies=usd');
+        if (priceResponse.ok) {
+          const priceData = await priceResponse.json();
+          tokenPrices = {
+            'CELO': priceData.celo?.usd || 0.5,
+            'USDC': priceData['usd-coin']?.usd || 1,
+            'WETH': priceData.ethereum?.usd || 3000
+          };
+        } else if (priceResponse.status === 429) {
+          console.warn('CoinGecko rate limit hit, using fallback prices');
+          throw new Error('Rate limit exceeded');
+        }
+      } catch (error) {
+        console.warn('Failed to fetch token prices, using fallback prices:', error);
+        // Fallback prices
+        tokenPrices = {
+          'CELO': 0.5, 'USDC': 1, 'WETH': 3000
+        };
+      }
+
+      const tokenBalances = [];
+      
+      // Get native CELO balance
+      try {
+        const celoBalanceResponse = await fetch(celoRpcUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            method: 'eth_getBalance',
+            params: [address, 'latest'],
+            id: 1
+          })
+        });
+        
+        const celoBalanceData = await celoBalanceResponse.json();
+        if (celoBalanceData.result && celoBalanceData.result !== '0x') {
+          const celoBalance = parseInt(celoBalanceData.result, 16) / Math.pow(10, 18);
+          if (celoBalance > 0) { // Only show if > 0 CELO
+            const celoPrice = tokenPrices['CELO'] || 0.5;
+            const celoValue = celoBalance * celoPrice;
+            
+            tokenBalances.push({
+              symbol: 'CELO',
+              address: '0x0000000000000000000000000000000000000000',
+              balance: celoBalance.toFixed(4),
+              price: celoPrice,
+              value: celoValue.toFixed(2),
+              isNative: true
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching CELO balance:', error);
+      }
+      
+      // Get Celo token balances
+      for (const token of celoTokens) {
+        try {
+          await new Promise(resolve => setTimeout(resolve, 50));
+          
+          const balanceResponse = await fetch(celoRpcUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              jsonrpc: '2.0',
+              method: 'eth_call',
+              params: [{
+                to: token.address,
+                data: `0x70a08231${address.slice(2).padStart(64, '0')}`
+              }, 'latest'],
+              id: 1
+            })
+          });
+          
+          if (!balanceResponse.ok) continue;
+          
+          const balanceData = await balanceResponse.json();
+          if (balanceData.error) continue;
+          
+          if (balanceData.result && balanceData.result !== '0x') {
+            const balance = parseInt(balanceData.result, 16) / Math.pow(10, token.decimals);
+            
+            // Only include tokens with balance > 0
+            if (balance > 0) {
+              const price = tokenPrices[token.symbol] || 1;
+              const value = balance * price;
+              
+              tokenBalances.push({
+                symbol: token.symbol,
+                address: token.address,
+                balance: balance.toFixed(4),
+                price: price,
+                value: value.toFixed(2)
+              });
+            }
+          }
+        } catch (error) {
+          console.error(`Error fetching Celo ${token.symbol} balance:`, error);
+        }
+      }
+      
+      const sortedTokens = tokenBalances.sort((a, b) => parseFloat(b.value) - parseFloat(a.value));
+      console.log('Celo top coins by value:', sortedTokens);
+      
+      setTopCoins(sortedTokens);
+      setTopCoinsCache(prev => ({ ...prev, [cacheKey]: sortedTokens }));
+      setLastTopCoinsFetch(now);
+      
+    } catch (error) {
+      console.error('Error fetching Celo top coins:', error);
+      if (topCoins.length === 0) {
+        setTopCoins([]);
+      }
+    } finally {
+      setTopCoinsLoading(false);
+    }
+  };
+
   const initialState = cookieToInitialState(wagmiConfig, cookies);
 
   const contextValue = {
@@ -419,6 +784,8 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
     changeEco,
     getEcosystems,
     getRemainingBalances,
+    getTopCoins,
+    getTopCoinsCelo,
     miniApp, setMiniApp,
     fid, setFid,
     points, setPoints,
@@ -445,7 +812,12 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
     walletChainId, setWalletChainId,
     walletProvider, setWalletProvider,
     walletError, setWalletError,
-    walletLoading, setWalletLoading
+    walletLoading, setWalletLoading,
+    topCoins, setTopCoins,
+    topCoinsLoading, setTopCoinsLoading,
+    lastTopCoinsFetch, setLastTopCoinsFetch,
+    topCoinsCache, setTopCoinsCache,
+    lastRpcCall, setLastRpcCall
   };
 
   return (

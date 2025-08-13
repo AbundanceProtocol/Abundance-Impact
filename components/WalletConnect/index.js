@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useCallback, useContext } from 'react';
 import { AccountContext } from '../../context';
 import { FaWallet, FaCopy, FaExternalLinkAlt } from 'react-icons/fa';
 import { SiWalletconnect } from 'react-icons/si';
@@ -9,24 +9,58 @@ import { farcasterMiniApp as miniAppConnector } from '@farcaster/miniapp-wagmi-c
 
 export default function WalletConnect() {
   const {
-    walletConnected,
-    walletAddress,
-    walletChainId,
-    walletProvider,
-    walletError,
-    walletLoading,
-    setWalletConnected,
-    setWalletAddress,
-    setWalletChainId,
-    setWalletProvider,
-    setWalletError,
-    setWalletLoading,
+    walletConnected, setWalletConnected,
+    walletAddress, setWalletAddress,
+    walletChainId, setWalletChainId,
+    walletProvider, setWalletProvider,
+    walletError, setWalletError,
+    walletLoading, setWalletLoading,
+    topCoins, setTopCoins,
+    topCoinsLoading, setTopCoinsLoading,
+    lastTopCoinsFetch, setLastTopCoinsFetch,
+    topCoinsCache, setTopCoinsCache,
+    getTopCoins,
+    getTopCoinsCelo,
+    lastRpcCall, setLastRpcCall,
     isMiniApp
   } = useContext(AccountContext);
 
   const [copied, setCopied] = useState(false);
   const [ethProvider, setEthProvider] = useState(null);
   const [hasAttemptedAutoConnect, setHasAttemptedAutoConnect] = useState(false);
+  const [lastRefreshTime, setLastRefreshTime] = useState(0);
+
+  // Debounced refresh function
+  const debouncedRefresh = (address, forceRefresh = false) => {
+    const now = Date.now();
+    const timeSinceLastRefresh = now - lastRefreshTime;
+    
+    if (timeSinceLastRefresh < 2000) { // 2 second cooldown
+      console.log('⏳ Refresh cooldown active, please wait...');
+      return;
+    }
+    
+    if (topCoinsLoading) {
+      console.log('⏳ Already loading, please wait...');
+      return;
+    }
+    
+    console.log('🔄 Refreshing top coins...', forceRefresh ? '(forced)' : '');
+    setLastRefreshTime(now);
+    setLastRpcCall(now); // Reset RPC call time
+    
+    // Determine which function to call based on current chain
+    const isBaseChain = walletChainId === '0x2105' || walletChainId === '8453' || walletChainId === 8453;
+    const isCeloChain = walletChainId === '0xa4ec' || walletChainId === '42220' || walletChainId === 42220;
+    
+    if (isBaseChain) {
+      getTopCoins(address, forceRefresh);
+    } else if (isCeloChain) {
+      getTopCoinsCelo(address, forceRefresh);
+    } else {
+      console.warn('Unknown chain, cannot refresh top coins');
+    }
+  };
 
   // Wagmi hooks for wallet management
   const { isConnected, address, chainId } = useAccount();
@@ -47,8 +81,65 @@ export default function WalletConnect() {
       setWalletAddress(null);
       setWalletChainId(null);
       setWalletProvider(null);
+      // Clear top coins data when disconnecting to prevent stale data
+      if (topCoins.length > 0) {
+        console.log('🧹 Clearing top coins data on disconnect');
+        setTopCoins([]);
+      }
     }
-  }, [isConnected, address, chainId]);
+  }, [isConnected, address, chainId, topCoins.length]);
+
+  // Fetch top coins when connected to Base or Celo
+  useEffect(() => {
+    console.log('🔍 Top coins useEffect triggered:', {
+      walletConnected,
+      walletAddress,
+      walletChainId,
+      chainId,
+      isConnected,
+      address
+    });
+    
+    // Check for supported chains: Base (0x2105/8453) or Celo (0xa4ec/42220)
+    const isBaseChain = walletChainId === '0x2105' || walletChainId === '8453' || walletChainId === 8453;
+    const isCeloChain = walletChainId === '0xa4ec' || walletChainId === '42220' || walletChainId === 42220;
+    
+    if (walletConnected && walletAddress && (isBaseChain || isCeloChain) && !topCoinsLoading) {
+      console.log('✅ Wallet connected to supported chain, checking if we need to fetch top coins...');
+      
+      // Only fetch if we don't have data or if it's been more than 5 minutes
+      const shouldFetch = topCoins.length === 0;
+      
+      if (shouldFetch) {
+        console.log('🔄 No cached data, fetching top coins...');
+        // Add a small delay to prevent rapid successive calls
+        const timeoutId = setTimeout(() => {
+          if (isBaseChain) {
+            console.log('🌐 Fetching from Base chain...');
+            getTopCoins(walletAddress);
+          } else if (isCeloChain) {
+            console.log('🌐 Fetching from Celo chain...');
+            getTopCoinsCelo(walletAddress);
+          }
+        }, 500);
+        
+        return () => clearTimeout(timeoutId);
+      } else {
+        console.log('📦 Using existing top coins data, no need to fetch');
+      }
+    } else {
+      console.log('❌ Not fetching top coins because:', {
+        walletConnected,
+        walletAddress: !!walletAddress,
+        walletChainId,
+        isBaseChain,
+        isCeloChain,
+        topCoinsLoading,
+        hasExistingData: topCoins.length > 0,
+        expectedChainIds: ['0x2105', '8453', 8453, '0xa4ec', '42220', 42220]
+      });
+    }
+  }, [walletConnected, walletAddress, walletChainId, topCoinsLoading, topCoins.length]); // Removed getTopCoins and getTopCoinsCelo from dependencies
 
   // Auto-connect wallet when in Farcaster Mini App
   useEffect(() => {
@@ -333,6 +424,8 @@ export default function WalletConnect() {
         return 'Arbitrum';
       case '0x2105':
         return 'Base';
+      case '0xa4ec':
+        return 'Celo';
       default:
         return `Chain ${chainId}`;
     }
@@ -589,6 +682,277 @@ export default function WalletConnect() {
           <div className="wallet-network">
             {getNetworkName(walletChainId)}
           </div>
+          
+          {/* Debug info for chain ID */}
+          <div style={{ 
+            fontSize: '11px', 
+            color: '#666', 
+            backgroundColor: '#f8f9fa', 
+            padding: '4px 8px', 
+            borderRadius: '4px',
+            margin: '5px 0',
+            fontFamily: 'monospace'
+          }}>
+            Chain ID: {walletChainId} | Expected: 0x2105/8453 (Base) or 0xa4ec/42220 (Celo) | 
+            Is Base: {(walletChainId === '0x2105' || walletChainId === '8453' || walletChainId === 8453) ? '✅' : '❌'} | 
+            Is Celo: {(walletChainId === '0xa4ec' || walletChainId === '42220' || walletChainId === 42220) ? '✅' : '❌'}
+          </div>
+          
+          {/* Manual test button */}
+          <button 
+            onClick={() => {
+              console.log('🧪 Manual test button clicked');
+              console.log('Current state:', { walletConnected, walletAddress, walletChainId, topCoins, topCoinsLoading });
+              if (walletAddress) {
+                console.log('Calling getTopCoins manually with force refresh...');
+                debouncedRefresh(walletAddress, true);
+              }
+            }}
+            disabled={topCoinsLoading || (Date.now() - lastRefreshTime) < 2000}
+            style={{
+              padding: '4px 8px',
+              backgroundColor: topCoinsLoading || (Date.now() - lastRefreshTime) < 2000 ? '#6c757d' : '#ffc107',
+              color: 'black',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: topCoinsLoading || (Date.now() - lastRefreshTime) < 2000 ? 'not-allowed' : 'pointer',
+              fontSize: '11px',
+              margin: '5px 0'
+            }}
+          >
+            🧪 Test Get Top Coins
+            {topCoinsLoading && ' (Loading...)'}
+            {(Date.now() - lastRefreshTime) < 2000 && !topCoinsLoading && ' (Wait...)'}
+          </button>
+          
+          {/* Show top coins when connected to Base or Celo */}
+          {(() => {
+            // Check for supported chains: Base (0x2105/8453) or Celo (0xa4ec/42220)
+            const isBaseChain = walletChainId === '0x2105' || walletChainId === '8453' || walletChainId === 8453;
+            const isCeloChain = walletChainId === '0xa4ec' || walletChainId === '42220' || walletChainId === 42220;
+            
+            console.log('🔍 Rendering top coins section:', {
+              walletChainId,
+              isBaseChain,
+              isCeloChain,
+              expectedChainIds: ['0x2105', '8453', 8453, '0xa4ec', '42220', 42220],
+              topCoinsLength: topCoins.length,
+              topCoinsLoading
+            });
+            
+            return (isBaseChain || isCeloChain) && (
+              <div className="top-coins-section">
+                <h4 style={{ margin: '10px 0 5px 0', fontSize: '14px', color: '#333' }}>
+                  Top Coins by $ Value {isBaseChain ? '(Base)' : '(Celo)'}
+                </h4>
+                
+                {/* RPC Rate Limit Status */}
+                {(() => {
+                  const now = Date.now();
+                  const timeSinceLastRpc = now - (lastRpcCall || 0);
+                  const isRateLimited = timeSinceLastRpc < 10000;
+                  
+                  if (isRateLimited) {
+                    return (
+                      <div style={{
+                        fontSize: '11px',
+                        color: '#ff6b35',
+                        backgroundColor: '#fff3cd',
+                        padding: '4px 8px',
+                        borderRadius: '4px',
+                        margin: '5px 0',
+                        border: '1px solid #ffeaa7'
+                      }}>
+                        ⏳ RPC Rate Limit: {Math.ceil((10000 - timeSinceLastRpc) / 1000)}s remaining
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
+                
+                {topCoinsLoading ? (
+                  <div style={{ fontSize: '12px', color: '#666', fontStyle: 'italic' }}>
+                    Loading top coins...
+                  </div>
+                ) : topCoins.length > 0 ? (
+                  <>
+                    {/* Total Portfolio Value */}
+                    <div style={{
+                      padding: '8px 12px',
+                      backgroundColor: '#e8f5e8',
+                      borderRadius: '6px',
+                      marginBottom: '10px',
+                      textAlign: 'center'
+                    }}>
+                      <span style={{ fontSize: '12px', color: '#666' }}>Total Portfolio: </span>
+                      <span style={{ fontSize: '14px', fontWeight: 'bold', color: '#28a745' }}>
+                        ${topCoins.reduce((sum, coin) => sum + parseFloat(coin.value), 0).toFixed(2)}
+                      </span>
+                    </div>
+                    
+                    <div className="top-coins-list">
+                      {topCoins.slice(0, 5).map((coin, index) => (
+                        <div key={coin.address} className="coin-item" style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          padding: '4px 8px',
+                          margin: '2px 0',
+                          backgroundColor: index % 2 === 0 ? '#f8f9fa' : '#ffffff',
+                          borderRadius: '4px',
+                          fontSize: '12px'
+                        }}>
+                          <span style={{ fontWeight: 'bold', color: '#333' }}>
+                            {coin.symbol}
+                          </span>
+                          <span style={{ color: '#666' }}>
+                            {coin.balance}
+                          </span>
+                          <span style={{ color: '#28a745', fontWeight: 'bold' }}>
+                            ${coin.value}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    <div style={{ 
+                      fontSize: '10px', 
+                      color: '#999', 
+                      textAlign: 'center', 
+                      marginTop: '8px',
+                      fontStyle: 'italic'
+                    }}>
+                      Last updated: {new Date().toLocaleTimeString()}
+                      {lastRefreshTime > 0 && (
+                        <span style={{ display: 'block', marginTop: '2px' }}>
+                          Last refresh: {new Date(lastRefreshTime).toLocaleTimeString()}
+                        </span>
+                      )}
+                      <span style={{ display: 'block', marginTop: '2px', color: '#17a2b8' }}>
+                        {(() => {
+                          const now = Date.now();
+                          const cacheAge = now - (lastRefreshTime || 0);
+                          const cacheAgeMinutes = Math.round(cacheAge / (1000 * 60));
+                          if (cacheAge < 5 * 60 * 1000) {
+                            return `📦 Cached data (${cacheAgeMinutes} min old)`;
+                          } else {
+                            return '🔄 Fresh data';
+                          }
+                        })()}
+                      </span>
+                    </div>
+                  </>
+                ) : (
+                  <div style={{ fontSize: '12px', color: '#666', fontStyle: 'italic' }}>
+                    No tokens found
+                  </div>
+                )}
+                <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                  <button 
+                    onClick={() => debouncedRefresh(walletAddress, true)}
+                    disabled={topCoinsLoading || (Date.now() - lastRefreshTime) < 2000}
+                    style={{
+                      padding: '4px 8px',
+                      backgroundColor: topCoinsLoading || (Date.now() - lastRefreshTime) < 2000 ? '#6c757d' : '#17a2b8',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: topCoinsLoading || (Date.now() - lastRefreshTime) < 2000 ? 'not-allowed' : 'pointer',
+                      fontSize: '11px'
+                    }}
+                  >
+                    {topCoinsLoading ? 'Loading...' : 
+                     (Date.now() - lastRefreshTime) < 2000 ? 'Wait...' : 'Refresh'}
+                  </button>
+                  <button 
+                    onClick={() => {
+                      const isBaseChain = walletChainId === '0x2105' || walletChainId === '8453' || walletChainId === 8453;
+                      const isCeloChain = walletChainId === '0xa4ec' || walletChainId === '42220' || walletChainId === 42220;
+                      
+                      if (isBaseChain) {
+                        window.open(`https://basescan.org/address/${walletAddress}`, '_blank');
+                      } else if (isCeloChain) {
+                        window.open(`https://explorer.celo.org/address/${walletAddress}`, '_blank');
+                      }
+                    }}
+                    style={{
+                      padding: '4px 8px',
+                      backgroundColor: '#6c757d',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '11px'
+                    }}
+                  >
+                    View on {(() => {
+                      const isBaseChain = walletChainId === '0x2105' || walletChainId === '8453' || walletChainId === 8453;
+                      const isCeloChain = walletChainId === '0xa4ec' || walletChainId === '42220' || walletChainId === 42220;
+                      
+                      if (isBaseChain) return 'BaseScan';
+                      if (isCeloChain) return 'Celo Explorer';
+                      return 'Explorer';
+                    })()}
+                  </button>
+                </div>
+              </div>
+            );
+          })()}
+          
+          {/* Debug fallback - show top coins section even when not on supported chains */}
+          {(() => {
+            const isBaseChain = walletChainId === '0x2105' || walletChainId === '8453' || walletChainId === 8453;
+            const isCeloChain = walletChainId === '0xa4ec' || walletChainId === '42220' || walletChainId === 42220;
+            
+            if (!isBaseChain && !isCeloChain && walletConnected && walletAddress) {
+              return (
+                <div style={{ 
+                  padding: '10px', 
+                  backgroundColor: '#fff3cd', 
+                  border: '1px solid #ffeaa7',
+                  borderRadius: '6px',
+                  margin: '10px 0',
+                  fontSize: '12px'
+                }}>
+                  <div style={{ fontWeight: 'bold', marginBottom: '5px' }}>🔍 Debug: Top Coins Section Hidden</div>
+                  <div>Chain ID: <code>{walletChainId}</code></div>
+                  <div>Expected: <code>0x2105</code> or <code>8453</code> (Base) | <code>0xa4ec</code> or <code>42220</code> (Celo)</div>
+                  <div>Is Base: {isBaseChain ? '✅' : '❌'}</div>
+                  <div>Is Celo: {isCeloChain ? '✅' : '❌'}</div>
+                  <div>Top Coins Data: {topCoins.length > 0 ? `${topCoins.length} coins` : 'No coins'}</div>
+                  <div>Loading: {topCoinsLoading ? 'Yes' : 'No'}</div>
+                  <button 
+                    onClick={() => {
+                      console.log('🧪 Debug: Calling getTopCoins from fallback...');
+                      // Try to call the appropriate function based on chain
+                      if (isBaseChain) {
+                        getTopCoins(walletAddress, true);
+                      } else if (isCeloChain) {
+                        getTopCoinsCelo(walletAddress, true);
+                      } else {
+                        // Try Base as fallback
+                        getTopCoins(walletAddress, true);
+                      }
+                    }}
+                    style={{
+                      padding: '4px 8px',
+                      backgroundColor: '#17a2b8',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '11px',
+                      marginTop: '5px'
+                    }}
+                  >
+                    Force Fetch Top Coins
+                  </button>
+                </div>
+              );
+            }
+            return null;
+          })()}
+          
           <div className="wallet-actions">
             <button 
               onClick={() => disconnect()}
