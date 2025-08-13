@@ -2,9 +2,8 @@
 
 import React, { useState, useEffect, useContext } from 'react';
 import { AccountContext } from '../../context';
-import { FaWallet, FaCopy, FaExternalLinkAlt } from 'react-icons/fa';
+import { FaWallet, FaCopy, FaExternalLinkAlt, FaMeta } from 'react-icons/fa';
 import { SiWalletconnect } from 'react-icons/si';
-import { FaMeta, FaWallet } from 'react-icons/fa';
 
 export default function WalletConnect() {
   const {
