@@ -3,8 +3,8 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AccountContext } from '../../context';
 import { FaWallet, FaCopy, FaExternalLinkAlt } from 'react-icons/fa';
-import { SiMetamask, SiWalletconnect } from 'react-icons/si';
-import { BsCoinbase } from 'react-icons/bs';
+import { SiWalletconnect } from 'react-icons/si';
+import { FaMeta, FaWallet } from 'react-icons/fa';
 
 export default function WalletConnect() {
   const {
@@ -54,11 +54,11 @@ export default function WalletConnect() {
   const getProviderIcon = (provider) => {
     switch (provider) {
       case 'metamask':
-        return <SiMetamask size={20} />;
+        return <FaMeta size={20} />;
       case 'walletconnect':
         return <SiWalletconnect size={20} />;
       case 'coinbase':
-        return <BsCoinbase size={20} />;
+        return <FaWallet size={20} />;
       default:
         return <FaWallet size={20} />;
     }

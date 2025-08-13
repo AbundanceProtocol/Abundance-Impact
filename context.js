@@ -12,8 +12,9 @@ import { mainnet, arbitrum, base } from '@reown/appkit/networks'
 const queryClient = new QueryClient();
 const projectId = process.env.NEXT_PUBLIC_WAGMI_KEY
 
-if (!projectId) {
-  throw new Error('Project ID is not defined')
+// Only throw error in development
+if (!process.env.NEXT_PUBLIC_WAGMI_KEY && process.env.NODE_ENV === 'development') {
+  console.warn('NEXT_PUBLIC_WAGMI_KEY is not defined. Using default project ID.');
 }
 
 const networks = [mainnet, arbitrum, base]
