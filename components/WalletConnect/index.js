@@ -213,13 +213,8 @@ export default function WalletConnect() {
           <div className="all-tokens-section">
 
             
-            {topCoinsLoading ? (
-              <div style={{ fontSize: '12px', color: '#666', fontStyle: 'italic' }}>
-                Loading tokens...
-              </div>
-            ) : topCoins.length > 0 ? (
-              <div>
-                {/* Token Selection Dropdown */}
+            <div>
+              {/* Token Selection Dropdown */}
                 <div style={{ marginBottom: '10px' }}>
                   {/* Custom Dropdown */}
                   <div style={{ position: 'relative' }} className="custom-dropdown">
@@ -305,15 +300,15 @@ export default function WalletConnect() {
                                     />
                                   </div>
                                 </div>
-                                <div>
+                                <div style={{ textAlign: 'left' }}>
                                   <div style={{ fontSize: '13px', fontWeight: 'bold' }}>USDC</div>
-                                  <div style={{ fontSize: '11px', color: '#666' }}>--</div>
+                                  <div style={{ fontSize: '11px', color: '#666' }}>Base</div>
                                 </div>
                               </div>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <span style={{ color: '#999' }}>--</span>
-                                <Spinner size="16px" />
                               </div>
+                              <Spinner size={28} color={'#999'} />
                             </>
                           );
                         }
@@ -461,13 +456,13 @@ export default function WalletConnect() {
                           <div style={{
                             padding: '20px',
                             textAlign: 'center',
-                            color: '#666',
+                            color: '#333',
                             display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center',
                             gap: '10px'
                           }}>
-                            <Spinner size="24px" />
+                            <Spinner size={28} color={'#999'} />
                             <span>Loading tokens...</span>
                           </div>
                         ) : topCoins.length === 0 ? (
@@ -625,11 +620,6 @@ export default function WalletConnect() {
                 
 
               </div>
-            ) : (
-              <div style={{ fontSize: '12px', color: '#666', fontStyle: 'italic' }}>
-                No tokens found. Connect to a supported network to view balances.
-              </div>
-            )}
           </div>
         )}
       </div>
