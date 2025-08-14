@@ -1359,7 +1359,7 @@ export default function Tip() {
               }}>
 
                              {/* Filter Components */}
-               <div className={'flex-row'} style={{justifyContent: 'center', marginTop: '15px', marginBottom: '30px', gap: isMobile ? '0.35rem' : '0.35rem', flexWrap: 'wrap'}}>
+               <div className={'flex-row'} style={{justifyContent: 'center', marginTop: '15px', marginBottom: '0px', gap: isMobile ? '0.35rem' : '0.35rem', flexWrap: 'wrap'}}>
                  
                  {/* SORT Filter */}
                  <div className='flex-row' style={{height: '42px', alignItems: 'center', justifyContent: 'center', padding: '28px 0'}}>
@@ -1428,20 +1428,14 @@ export default function Tip() {
                              </div>
 
                                {/* Search Results Display */}
-                <div style={{ padding: "20px 0 0 0" }}>
+                <div style={{ padding: "0px 0 0 0" }}>
                   {searchLoading ? (
-                    <div className="flex-row" style={{justifyContent: 'center', padding: '20px'}}>
+                    <div className="flex-row" style={{justifyContent: 'center', padding: '0px'}}>
                       <Spinner size={31} color={'#999'} />
                     </div>
                   ) : creatorResults.length > 0 ? (
                     <div className="flex-col" style={{gap: '10px'}}>
-                      <div style={{textAlign: 'center', color: '#ace', fontSize: '14px', fontWeight: '600'}}>
-                        Found {creatorResults.length} creators
-                      </div>
                       {/* TODO: Display creator results here */}
-                      <div style={{color: '#999', fontSize: '12px', textAlign: 'center'}}>
-                        Creator results will be displayed here
-                      </div>
                     </div>
                   ) : (
                     <div style={{textAlign: 'center', color: '#999', fontSize: '12px'}}>
@@ -1452,7 +1446,7 @@ export default function Tip() {
 
                 {/* Curators Search Results */}
                 {curatorData?.length > 0 && (
-                  <div style={{ padding: "20px 0 0 0" }}>
+                  <div style={{ padding: "0px 0 0 0" }}>
                     <div style={{textAlign: 'center', color: '#ace', fontSize: '14px', fontWeight: '600', marginBottom: '15px'}}>
                       Found {curatorsLength} curators
                     </div>
@@ -1468,7 +1462,7 @@ export default function Tip() {
                             gap: "0.25rem",
                             border: "1px solid #666",
                             borderRadius: "20px",
-                            padding: "8px 12px",
+                            padding: "4px 12px 4px 6px",
                             backgroundColor: "#33445522",
                             cursor: "pointer",
                             transition: "all 0.2s ease"
@@ -1490,7 +1484,7 @@ export default function Tip() {
                               height={24}
                               style={{
                                 borderRadius: "80px",
-                                border: "2px solid #eee",
+                                border: "1px solid #eee",
                                 backgroundColor: "#8363ca"
                               }}
                             />
@@ -1511,83 +1505,107 @@ export default function Tip() {
                   </div>
                 )}
 
-                {/* Selected Curators Display */}
-                {curatorList?.length > 0 && (
-                  <div style={{ padding: "20px 0 0 0" }}>
-                    <div style={{textAlign: 'center', color: '#ace', fontSize: '14px', fontWeight: '600', marginBottom: '15px'}}>
-                      Selected Curators:
-                    </div>
-                    <div className="flex-row" style={{justifyContent: 'center', flexWrap: 'wrap', gap: '10px'}}>
-                      {curatorList?.map((curator, index) => (
-                        <div
-                          key={index}
-                          style={{
-                            display: "flex",
-                            flexDirection: "row",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            gap: "0.25rem",
-                            border: "1px solid #666",
-                            borderRadius: "20px",
-                            padding: "8px 12px",
-                            backgroundColor: "#44556644",
-                            position: "relative"
-                          }}
-                        >
-                          {curator?.pfp && (
-                            <img
-                              src={curator?.pfp}
-                              width={24}
-                              height={24}
-                              style={{
-                                borderRadius: "80px",
-                                border: "2px solid #eee",
-                                backgroundColor: "#8363ca"
-                              }}
-                            />
-                          )}
-                          <div style={{ 
-                            display: "flex", 
-                            textAlign: "center", 
-                            fontSize: "14px", 
-                            margin: "0",
-                            color: "#ace",
-                            fontWeight: "500"
-                          }}>
-                            {curator ? `@${curator?.username}` : " curator not found"}
-                          </div>
-                          <div
-                            style={{
-                              position: "absolute",
-                              top: "-8px",
-                              right: "-8px",
-                              cursor: "pointer",
-                              backgroundColor: "#a00",
-                              borderRadius: "50%",
-                              width: "20px",
-                              height: "20px",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              fontSize: "12px",
-                              color: "white",
-                              fontWeight: "bold"
-                            }}
-                            onClick={() => {
-                              setCuratorList([]);
-                              setUserQuery({
-                                ...userQuery,
-                                curators: null
-                              });
-                            }}
-                          >
-                            ×
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                                 {/* Selected Curators Display */}
+                 {curatorList?.length > 0 && (
+                   <div style={{ padding: "20px 0 0 0" }}>
+                     <div style={{textAlign: 'center', color: '#ace', fontSize: '14px', fontWeight: '600', marginBottom: '15px'}}>
+                       Selected Curators:
+                     </div>
+                     <div className="flex-row" style={{justifyContent: 'center', flexWrap: 'wrap', gap: '10px'}}>
+                       {curatorList?.map((curator, index) => (
+                         <div
+                           key={index}
+                           style={{
+                             display: "flex",
+                             flexDirection: "row",
+                             alignItems: "center",
+                             justifyContent: "center",
+                             gap: "0.25rem",
+                             border: "1px solid #666",
+                             borderRadius: "20px",
+                             padding: "4px 12px 4px 6px",
+                             backgroundColor: "#44556644",
+                             position: "relative"
+                           }}
+                         >
+                           {curator?.pfp && (
+                             <img
+                               src={curator?.pfp}
+                               width={24}
+                               height={24}
+                               style={{
+                                 borderRadius: "80px",
+                                 border: "1px solid #eee",
+                                 backgroundColor: "#8363ca"
+                               }}
+                             />
+                           )}
+                           <div style={{ 
+                             display: "flex", 
+                             textAlign: "center", 
+                             fontSize: "14px", 
+                             margin: "0",
+                             color: "#ace",
+                             fontWeight: "500"
+                           }}>
+                             {curator ? `@${curator?.username}` : " curator not found"}
+                           </div>
+                           <div
+                             style={{
+                               position: "absolute",
+                               top: "-8px",
+                               right: "-8px",
+                               cursor: "pointer",
+                               backgroundColor: "#a00",
+                               borderRadius: "50%",
+                               width: "20px",
+                               height: "20px",
+                               display: "flex",
+                               alignItems: "center",
+                               justifyContent: "center",
+                               fontSize: "12px",
+                               color: "white",
+                               fontWeight: "bold"
+                             }}
+                             onClick={() => {
+                               // Remove specific curator from the list
+                               const updatedCuratorList = curatorList.filter(c => c.fid !== curator.fid);
+                               setCuratorList(updatedCuratorList);
+                               
+                               // Update userQuery with remaining curator FIDs
+                               if (updatedCuratorList.length > 0) {
+                                 const curatorFids = updatedCuratorList.map(c => c.fid);
+                                 setUserQuery({
+                                   ...userQuery,
+                                   curators: curatorFids
+                                 });
+                               } else {
+                                 setUserQuery({
+                                   ...userQuery,
+                                   curators: null
+                                 });
+                               }
+                             }}
+                           >
+                             ×
+                           </div>
+                         </div>
+                       ))}
+                     </div>
+                   </div>
+                 )}
+
+                 {/* Found Creators Count - At Bottom */}
+                 {creatorResults.length > 0 && (
+                   <div style={{ padding: "20px 0 0 0", textAlign: 'center' }}>
+                     <div style={{color: '#ace', fontSize: '14px', fontWeight: '600'}}>
+                       Found {creatorResults.length} creators
+                     </div>
+                     <div style={{color: '#999', fontSize: '12px', textAlign: 'center', marginTop: '10px'}}>
+                       Creator results will be displayed here
+                     </div>
+                   </div>
+                 )}
 
                {/* <div style={{ padding: "0 20px 5px 20px" }}>
                  <WalletConnect />
