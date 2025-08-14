@@ -1,11 +1,9 @@
 'use client'
 
-import React, { useState, useEffect, useCallback, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { AccountContext } from '../../context';
-import { FaWallet, FaCopy, FaExternalLinkAlt } from 'react-icons/fa';
-import { SiWalletconnect } from 'react-icons/si';
-import { useAccount, useConnect, useDisconnect } from 'wagmi';
-import { farcasterMiniApp as miniAppConnector } from '@farcaster/miniapp-wagmi-connector';
+import { useAccount, useDisconnect } from 'wagmi';
+import Spinner from '../Common/Spinner';
 
 export default function WalletConnect() {
   const {
@@ -19,52 +17,149 @@ export default function WalletConnect() {
     topCoinsLoading, setTopCoinsLoading,
     lastTopCoinsFetch, setLastTopCoinsFetch,
     topCoinsCache, setTopCoinsCache,
-    getTopCoins,
-    getTopCoinsCelo,
+    getAllTokens,
     lastRpcCall, setLastRpcCall,
     isMiniApp
   } = useContext(AccountContext);
 
-  const [copied, setCopied] = useState(false);
-  const [ethProvider, setEthProvider] = useState(null);
-  const [hasAttemptedAutoConnect, setHasAttemptedAutoConnect] = useState(false);
+  const [selectedToken, setSelectedToken] = useState('default');
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [lastRefreshTime, setLastRefreshTime] = useState(0);
+  const [tipAmount, setTipAmount] = useState(0);
+
+  // Helper function for dynamic decimal formatting
+  const formatAmount = (amount, symbol) => {
+    const numAmount = parseFloat(amount);
+    
+    if (symbol === 'ETH') {
+      return numAmount.toFixed(4);
+    } else if (numAmount >= 10) {
+      return numAmount.toFixed(2);
+    } else if (numAmount < 10) {
+      return numAmount.toFixed(3);
+    }
+    return numAmount.toFixed(2);
+  };
+
+  // Helper functions for token display
+  const getTokenImage = (symbol) => {
+    const tokenImages = {
+      'ETH': '/images/tokens/ethereum.png',
+      'WETH': '/images/tokens/ethereum.png',
+      'USDC': '/images/tokens/usdc.png',
+      'CELO': '/images/tokens/celo.jpg',
+      'DEGEN': '/images/tokens/degen.png',
+      'BETR': '/images/tokens/ethereum.png', // Fallback to ethereum for now
+      'NOICE': '/images/tokens/noice.jpg',
+      'TIPN': '/images/tokens/tipn.png',
+      'OP': '/images/tokens/optimism.png', // Use optimism image for OP token
+      'ARB': '/images/tokens/ethereum.png' // Fallback to ethereum for now
+    };
+    return tokenImages[symbol] || '/images/tokens/ethereum.png'; // Default fallback
+  };
+
+  const getNetworkImage = (chainId) => {
+    const networkImages = {
+      '0x1': '/images/tokens/ethereum.png',      // Ethereum
+      '0xa': '/images/tokens/optimism.png',      // Optimism
+      '0xa4b1': '/images/tokens/ethereum.png',  // Arbitrum (fallback to ethereum for now)
+      '0x2105': '/images/tokens/base.png',      // Base
+      '0xa4ec': '/images/tokens/celo.jpg'       // Celo
+    };
+    return networkImages[chainId] || '/images/tokens/ethereum.png'; // Default fallback
+  };
+
+  const getTokenColor = (symbol) => {
+    const colors = {
+      'ETH': '#627eea',
+      'WETH': '#627eea',
+      'USDC': '#2775ca',
+      'CELO': '#35d07f',
+      'DEGEN': '#ff6b35',
+      'BETR': '#e91e63',
+      'NOICE': '#9c27b0',
+      'TIPN': '#ff9800',
+      'OP': '#ff0420',
+      'ARB': '#28a0f0'
+    };
+    return colors[symbol] || '#6c757d';
+  };
+
+  const getNetworkColor = (chainId) => {
+    const colors = {
+      '0x1': '#627eea',      // Ethereum
+      '0xa': '#ff0420',      // Optimism
+      '0xa4b1': '#28a0f0',  // Arbitrum
+      '0x2105': '#0052ff',   // Base
+      '0xa4ec': '#35d07f'   // Celo
+    };
+    return colors[chainId] || '#666';
+  };
+
+  const getNetworkExplorer = (chainId) => {
+    const explorers = {
+      '0x1': 'Etherscan',
+      '0xa': 'Optimistic Etherscan',
+      '0xa4b1': 'Arbiscan',
+      '0x2105': 'BaseScan',
+      '0xa4ec': 'Celo Explorer'
+    };
+    return explorers[chainId] || 'Explorer';
+  };
+
+  // Helper function to find token by symbol and network
+  const findToken = (symbol, networkKey) => {
+    return topCoins.find(t => t.symbol === symbol && t.networkKey === networkKey);
+  };
+
+  // Helper function to get selected token
+  const getSelectedToken = () => {
+    if (selectedToken === 'default') {
+      // Find USDC on Base as default
+      let token = findToken('USDC', 'base');
+      if (!token) {
+        // If no USDC on Base, use first available token
+        token = topCoins.find(t => parseFloat(t.balance) > 0);
+      }
+      return token;
+    } else {
+      // selectedToken should be the actual token object
+      // Verify it's a valid token object with required properties
+      if (selectedToken && typeof selectedToken === 'object' && selectedToken.symbol && selectedToken.balance !== undefined) {
+        return selectedToken;
+      } else {
+        // Fallback to default if selectedToken is invalid
+        console.warn('Invalid selectedToken:', selectedToken);
+        let token = findToken('USDC', 'base');
+        if (!token) {
+          token = topCoins.find(t => parseFloat(t.balance) > 0);
+        }
+        return token;
+      }
+    }
+  };
+
+
 
   // Debounced refresh function
   const debouncedRefresh = (address, forceRefresh = false) => {
     const now = Date.now();
     const timeSinceLastRefresh = now - lastRefreshTime;
-    
-    if (timeSinceLastRefresh < 2000) { // 2 second cooldown
-      console.log('⏳ Refresh cooldown active, please wait...');
+
+    if (timeSinceLastRefresh < 2000) {
       return;
     }
-    
+
     if (topCoinsLoading) {
-      console.log('⏳ Already loading, please wait...');
       return;
     }
-    
-    console.log('🔄 Refreshing top coins...', forceRefresh ? '(forced)' : '');
+
     setLastRefreshTime(now);
-    setLastRpcCall(now); // Reset RPC call time
-    
-    // Determine which function to call based on current chain
-    const isBaseChain = walletChainId === '0x2105' || walletChainId === '8453' || walletChainId === 8453;
-    const isCeloChain = walletChainId === '0xa4ec' || walletChainId === '42220' || walletChainId === 42220;
-    
-    if (isBaseChain) {
-      getTopCoins(address, forceRefresh);
-    } else if (isCeloChain) {
-      getTopCoinsCelo(address, forceRefresh);
-    } else {
-      console.warn('Unknown chain, cannot refresh top coins');
-    }
+    getAllTokens(address, forceRefresh);
   };
 
   // Wagmi hooks for wallet management
   const { isConnected, address, chainId } = useAccount();
-  const { connect, connectors, isPending } = useConnect();
   const { disconnect } = useDisconnect();
 
   // Sync Wagmi state with local state
@@ -81,1021 +176,535 @@ export default function WalletConnect() {
       setWalletAddress(null);
       setWalletChainId(null);
       setWalletProvider(null);
-      // Clear top coins data when disconnecting to prevent stale data
       if (topCoins.length > 0) {
-        console.log('🧹 Clearing top coins data on disconnect');
         setTopCoins([]);
       }
     }
   }, [isConnected, address, chainId, topCoins.length]);
 
-  // Fetch top coins when connected to Base or Celo
+  // Click outside handler to close dropdown
   useEffect(() => {
-    console.log('🔍 Top coins useEffect triggered:', {
-      walletConnected,
-      walletAddress,
-      walletChainId,
-      chainId,
-      isConnected,
-      address
-    });
-    
-    // Check for supported chains: Base (0x2105/8453) or Celo (0xa4ec/42220)
-    const isBaseChain = walletChainId === '0x2105' || walletChainId === '8453' || walletChainId === 8453;
-    const isCeloChain = walletChainId === '0xa4ec' || walletChainId === '42220' || walletChainId === 42220;
-    
-    if (walletConnected && walletAddress && (isBaseChain || isCeloChain) && !topCoinsLoading) {
-      console.log('✅ Wallet connected to supported chain, checking if we need to fetch top coins...');
-      
-      // Only fetch if we don't have data or if it's been more than 5 minutes
+    const handleClickOutside = (event) => {
+      if (dropdownOpen && !event.target.closest('.custom-dropdown')) {
+        setDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [dropdownOpen]);
+
+  // Fetch all tokens when wallet is connected
+  useEffect(() => {
+    if (walletConnected && walletAddress && !topCoinsLoading) {
       const shouldFetch = topCoins.length === 0;
-      
+
       if (shouldFetch) {
-        console.log('🔄 No cached data, fetching top coins...');
-        // Add a small delay to prevent rapid successive calls
         const timeoutId = setTimeout(() => {
-          if (isBaseChain) {
-            console.log('🌐 Fetching from Base chain...');
-            getTopCoins(walletAddress);
-          } else if (isCeloChain) {
-            console.log('🌐 Fetching from Celo chain...');
-            getTopCoinsCelo(walletAddress);
-          }
+          getAllTokens(walletAddress);
         }, 500);
-        
+
         return () => clearTimeout(timeoutId);
-      } else {
-        console.log('📦 Using existing top coins data, no need to fetch');
-      }
-    } else {
-      console.log('❌ Not fetching top coins because:', {
-        walletConnected,
-        walletAddress: !!walletAddress,
-        walletChainId,
-        isBaseChain,
-        isCeloChain,
-        topCoinsLoading,
-        hasExistingData: topCoins.length > 0,
-        expectedChainIds: ['0x2105', '8453', 8453, '0xa4ec', '42220', 42220]
-      });
-    }
-  }, [walletConnected, walletAddress, walletChainId, topCoinsLoading, topCoins.length]); // Removed getTopCoins and getTopCoinsCelo from dependencies
-
-  // Auto-connect wallet when in Farcaster Mini App
-  useEffect(() => {
-    // Only auto-connect if:
-    // 1. We're in a Mini App
-    // 2. Wallet is not already connected
-    // 3. Not currently loading
-    // 4. No previous error (to prevent infinite retries)
-    // 5. Haven't already attempted auto-connection
-    if (isMiniApp && !walletConnected && !walletLoading && !walletError && !hasAttemptedAutoConnect) {
-      console.log('Auto-connect triggered - isMiniApp:', isMiniApp, 'walletConnected:', walletConnected, 'walletLoading:', walletLoading, 'walletError:', walletError, 'hasAttemptedAutoConnect:', hasAttemptedAutoConnect);
-      setHasAttemptedAutoConnect(true);
-      autoConnectWallet();
-    } else if (!isMiniApp) {
-      // If not in Mini App, reset the flag so it can try again if environment changes
-      setHasAttemptedAutoConnect(false);
-    }
-  }, [isMiniApp]); // Only depend on isMiniApp, not the other wallet states
-
-  // Debug logging - only log when values actually change
-  useEffect(() => {
-    console.log('WalletConnect component mounted/updated:', {
-      isMiniApp,
-      walletConnected,
-      walletAddress,
-      walletChainId,
-      walletProvider,
-      walletError,
-      walletLoading,
-      isConnected,
-      address,
-      chainId,
-      connectors: connectors?.map(c => ({ id: c.id, name: c.name, ready: c.ready }))
-    });
-  }, [isMiniApp, walletConnected, walletAddress, walletChainId, walletProvider, walletError, walletLoading, isConnected, address, chainId, connectors]);
-
-  // Test connector import
-  useEffect(() => {
-    const testConnectorImport = async () => {
-      try {
-        console.log('Testing Farcaster connector import...');
-        const { farcasterMiniApp } = await import('@farcaster/miniapp-wagmi-connector');
-        console.log('✅ Farcaster connector import successful:', farcasterMiniApp);
-        
-        // Test creating a connector instance
-        const testConnector = farcasterMiniApp();
-        console.log('✅ Farcaster connector instance created:', testConnector);
-      } catch (error) {
-        console.error('❌ Farcaster connector import failed:', error);
-      }
-    };
-    
-    testConnectorImport();
-  }, []);
-
-  // Monitor connector changes
-  useEffect(() => {
-    console.log('Connectors changed:', connectors?.map(c => ({ id: c.id, name: c.name, ready: c.ready })));
-    
-    if (connectors && connectors.length > 0) {
-      const farcasterConnector = connectors.find(connector => 
-        connector.id === 'farcasterMiniApp' || 
-        connector.name === 'Farcaster Mini App'
-      );
-      
-      if (farcasterConnector) {
-        console.log('✅ Farcaster connector found:', farcasterConnector);
-      } else {
-        console.log('❌ Farcaster connector not found. Available connectors:', connectors);
-      }
-    } else {
-      console.log('❌ No connectors available');
-    }
-  }, [connectors]);
-
-  // Environment detection
-  const detectEnvironment = () => {
-    const env = {
-      isCloudflare: false,
-      isNetlify: false,
-      isVercel: false,
-      isLocal: false,
-      userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'unknown',
-      url: typeof window !== 'undefined' ? window.location.href : 'unknown',
-      hasWindow: typeof window !== 'undefined',
-      hasDocument: typeof document !== 'undefined'
-    };
-
-    if (typeof window !== 'undefined') {
-      env.isCloudflare = window.location.hostname.includes('cloudflare') || 
-                         window.location.hostname.includes('workers.dev') ||
-                         window.location.hostname.includes('pages.dev');
-      env.isNetlify = window.location.hostname.includes('netlify');
-      env.isVercel = window.location.hostname.includes('vercel');
-      env.isLocal = window.location.hostname.includes('localhost') || 
-                    window.location.hostname.includes('127.0.0.1');
-    }
-
-    console.log('Environment detection:', env);
-    return env;
-  };
-
-  // Reset function to clear all states and start fresh
-  const handleReset = () => {
-    setWalletError(null);
-    setWalletLoading(false);
-    setHasAttemptedAutoConnect(false);
-    setWalletConnected(false);
-    setWalletAddress(null);
-    setWalletChainId(null);
-    setWalletProvider(null);
-    setEthProvider(null);
-  };
-
-  // Manual retry function that clears error state
-  const handleManualRetry = () => {
-    setWalletError(null); // Clear the error state
-    setWalletLoading(false); // Ensure loading is false
-    setHasAttemptedAutoConnect(false); // Reset the auto-connect flag
-    // Small delay to ensure state updates before retrying
-    setTimeout(() => {
-      autoConnectWallet();
-    }, 100);
-  };
-
-  // Manual connect function using Wagmi
-  const handleManualConnect = async () => {
-    try {
-      setWalletLoading(true);
-      setWalletError(null);
-
-      // Find the Farcaster Mini App connector
-      const farcasterConnector = connectors.find(connector => 
-        connector.id === 'farcasterMiniApp' || 
-        connector.name === 'Farcaster Mini App'
-      );
-
-      if (!farcasterConnector) {
-        throw new Error('Farcaster Mini App connector not found');
-      }
-
-      await connect({ connector: farcasterConnector });
-      console.log('Manual connect successful');
-      
-    } catch (error) {
-      console.error('Manual connect failed:', error);
-      setWalletError(`Manual connect failed: ${error.message}`);
-    } finally {
-      setWalletLoading(false);
-    }
-  };
-
-  // Add a fallback connection method
-  const tryFallbackConnection = async () => {
-    try {
-      console.log('Trying fallback connection method...');
-      
-      // Check if we're in a Farcaster environment by looking for specific window properties
-      if (typeof window !== 'undefined') {
-        // Check for Farcaster-specific properties
-        const hasFarcasterProps = window.location.href.includes('farcaster') || 
-                                  window.location.href.includes('warpcast') ||
-                                  window.navigator.userAgent.includes('Farcaster') ||
-                                  window.navigator.userAgent.includes('Warpcast');
-        
-        console.log('Fallback check - hasFarcasterProps:', hasFarcasterProps);
-        console.log('User agent:', window.navigator.userAgent);
-        console.log('URL:', window.location.href);
-        
-        if (hasFarcasterProps) {
-          // Try to detect if we have any wallet-like objects
-          const hasWalletObjects = window.ethereum || 
-                                  window.farcasterEthProvider || 
-                                  window.farcaster ||
-                                  window.warpcast;
-          
-          console.log('Fallback check - hasWalletObjects:', hasWalletObjects);
-          
-          if (hasWalletObjects) {
-            setWalletError('Detected Farcaster environment but wallet connection failed. Please ensure you are using the latest Farcaster client version.');
-          } else {
-            setWalletError('Detected Farcaster environment but no wallet provider found. Please update your Farcaster client.');
-          }
-        } else {
-          setWalletError('Not in a Farcaster environment. Please open this app in the Farcaster client.');
-        }
-      }
-    } catch (error) {
-      console.error('Fallback connection failed:', error);
-      setWalletError(`Fallback connection failed: ${error.message}`);
-    }
-  };
-
-  const autoConnectWallet = async () => {
-    try {
-      setWalletLoading(true);
-      setWalletError(null);
-
-      console.log('Starting auto-connect process using Wagmi connector...');
-      console.log('isMiniApp:', isMiniApp);
-      console.log('Available connectors:', connectors);
-      console.log('Connector details:', connectors?.map(c => ({
-        id: c.id,
-        name: c.name,
-        ready: c.ready,
-        type: c.type
-      })));
-
-      // Check if we're in a Mini App environment
-      if (!isMiniApp) {
-        throw new Error('Not in a Farcaster Mini App environment. Please open this app in the Farcaster client.');
-      }
-
-      // Find the Farcaster Mini App connector
-      const farcasterConnector = connectors.find(connector => 
-        connector.id === 'farcasterMiniApp' || 
-        connector.name === 'Farcaster Mini App' ||
-        connector.id === 'farcaster' ||
-        connector.name === 'farcaster'
-      );
-
-      if (!farcasterConnector) {
-        console.error('Available connectors:', connectors);
-        console.error('Looking for connector with id: farcasterMiniApp, farcaster or name: Farcaster Mini App, farcaster');
-        throw new Error('Farcaster Mini App connector not found. Please ensure the connector is properly configured.');
-      }
-
-      console.log('Found Farcaster connector:', farcasterConnector);
-
-      // Use Wagmi's connect function with the Farcaster connector
-      try {
-        await connect({ connector: farcasterConnector });
-        console.log('Wagmi connect initiated successfully');
-        
-        // The wallet state will be updated via the useEffect that syncs with Wagmi
-        // No need to manually set states here
-        
-      } catch (connectError) {
-        console.error('Wagmi connect failed:', connectError);
-        throw new Error(`Failed to connect via Wagmi: ${connectError.message}`);
-      }
-
-    } catch (error) {
-      console.error('Auto-connect failed:', error);
-      
-      // Provide more specific error messages
-      let errorMessage = error.message || 'Failed to auto-connect wallet';
-      
-      if (error.message.includes('Not in a Farcaster Mini App')) {
-        errorMessage = 'This app must be opened within the Farcaster client to access wallet features.';
-      } else if (error.message.includes('Farcaster Mini App connector not found')) {
-        errorMessage = 'Wallet connector not properly configured. Please refresh the page and try again.';
-      } else if (error.message.includes('Failed to connect via Wagmi')) {
-        errorMessage = 'Failed to connect to wallet. Please ensure you are using the latest Farcaster client.';
-      }
-      
-      setWalletError(errorMessage);
-    } finally {
-      setWalletLoading(false);
-    }
-  };
-
-  const copyAddress = async () => {
-    if (walletAddress) {
-      try {
-        await navigator.clipboard.writeText(walletAddress);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      } catch (error) {
-        console.error('Failed to copy address:', error);
       }
     }
-  };
-
-  const getNetworkName = (chainId) => {
-    switch (chainId) {
-      case '0x1':
-        return 'Ethereum';
-      case '0xa':
-        return 'Optimism';
-      case '0xa4b1':
-        return 'Arbitrum';
-      case '0x2105':
-        return 'Base';
-      case '0xa4ec':
-        return 'Celo';
-      default:
-        return `Chain ${chainId}`;
-    }
-  };
-
-  const getProviderIcon = (provider) => {
-    switch (provider) {
-      case 'metamask':
-        return <FaWallet size={20} />;
-      case 'walletconnect':
-        return <SiWalletconnect size={20} />;
-      case 'coinbase':
-        return <FaWallet size={20} />;
-      case 'farcaster':
-        return <FaWallet size={20} />;
-      default:
-        return <FaWallet size={20} />;
-    }
-  };
-
-  const getProviderName = (provider) => {
-    switch (provider) {
-      case 'metamask':
-        return 'MetaMask';
-      case 'walletconnect':
-        return 'WalletConnect';
-      case 'coinbase':
-        return 'Coinbase Wallet';
-      case 'farcaster':
-        return 'Farcaster Wallet';
-      default:
-        return 'Wallet';
-    }
-  };
-
-  // Add a manual connection test
-  const testConnectionStep = async (step) => {
-    try {
-      console.log(`Testing connection step: ${step}`);
-      
-      switch (step) {
-        case 'wagmi-config':
-          // Test if Wagmi is properly configured
-          if (connectors && connectors.length > 0) {
-            console.log('✅ Wagmi connectors available:', connectors.length);
-            return { success: true, message: `${connectors.length} connectors available` };
-          } else {
-            throw new Error('No Wagmi connectors found');
-          }
-          
-        case 'farcaster-connector':
-          // Test if Farcaster connector is available
-          const farcasterConnector = connectors.find(connector => 
-            connector.id === 'farcasterMiniApp' || 
-            connector.name === 'Farcaster Mini App'
-          );
-          if (farcasterConnector) {
-            console.log('✅ Farcaster connector found:', farcasterConnector.name);
-            return { success: true, message: 'Farcaster connector available' };
-          } else {
-            throw new Error('Farcaster connector not found');
-          }
-          
-        case 'miniapp-environment':
-          // Test if we're in a Mini App environment
-          if (isMiniApp) {
-            console.log('✅ Mini App environment detected');
-            return { success: true, message: 'Mini App environment confirmed' };
-          } else {
-            throw new Error('Not in Mini App environment');
-          }
-          
-        case 'wagmi-state':
-          // Test if Wagmi state is working
-          if (typeof isConnected !== 'undefined') {
-            console.log('✅ Wagmi state accessible, isConnected:', isConnected);
-            return { success: true, message: `Wagmi state: isConnected=${isConnected}` };
-          } else {
-            throw new Error('Wagmi state not accessible');
-          }
-          
-        default:
-          return { success: false, message: 'Unknown test step' };
-      }
-    } catch (error) {
-      console.error(`❌ Test step ${step} failed:`, error);
-      return { success: false, message: error.message };
-    }
-  };
-
-  const runConnectionTests = async () => {
-    console.log('Running connection tests...');
-    const tests = ['wagmi-config', 'farcaster-connector', 'miniapp-environment', 'wagmi-state'];
-    const results = [];
-    
-    for (const test of tests) {
-      const result = await testConnectionStep(test);
-      results.push({ step: test, ...result });
-    }
-    
-    console.log('Connection test results:', results);
-    
-    // Find the first failing test
-    const firstFailure = results.find(r => !r.success);
-    if (firstFailure) {
-      setWalletError(`Connection test failed at step '${firstFailure.step}': ${firstFailure.message}`);
-    } else {
-      setWalletError('All connection tests passed but wallet still not connected. This may be a timing issue or the user may need to manually approve the connection.');
-    }
-  };
+  }, [walletConnected, walletAddress, walletChainId, getAllTokens, topCoinsLoading, topCoins.length]);
 
   // Show loading state while auto-connecting
-  if (walletLoading || isPending) {
-    return (
-      <div className="wallet-connect">
-        <div className="farcaster-wallet-info">
-          <div className="wallet-status">
-            <FaWallet size={24} />
-            <span>Connecting Wallet...</span>
-          </div>
-          <div className="wallet-note">
-            <small>Connecting to your Farcaster wallet...</small>
-          </div>
-          <div className="debug-info" style={{ marginTop: '10px', fontSize: '12px', color: '#666' }}>
-            <div>isMiniApp: {String(isMiniApp)}</div>
-            <div>walletConnected: {String(walletConnected)}</div>
-            <div>walletLoading: {String(walletLoading)}</div>
-            <div>isPending: {String(isPending)}</div>
-            <div>walletError: {walletError || 'null'}</div>
-          </div>
-        </div>
-      </div>
-    );
+  if (walletLoading) {
+    return null; // Don't show anything while loading
   }
 
   // Show error state if connection failed
   if (walletError) {
-    return (
-      <div className="wallet-connect">
-        <div className="farcaster-wallet-info">
-          <div className="wallet-status">
-            <FaWallet size={24} />
-            <span>Connection Failed</span>
-          </div>
-          <div className="mini-app-status">
-            <div className="status-item">
-              <span className="status-label">Error:</span>
-              <span className="status-value error">{walletError}</span>
-            </div>
-            <div className="status-item">
-              <span className="status-label">Environment:</span>
-              <span className="status-value info">
-                {isMiniApp ? 'Farcaster Mini App' : 'Regular Browser'}
-              </span>
-            </div>
-            <div className="status-item">
-              <span className="status-label">Debug Info:</span>
-              <span className="status-value info">
-                {typeof window !== 'undefined' ? 
-                  `User Agent: ${window.navigator.userAgent.substring(0, 50)}...` : 
-                  'Window not available'
-                }
-              </span>
-            </div>
-          </div>
-          <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-            <button 
-              onClick={handleManualRetry}
-              style={{
-                padding: '8px 16px',
-                backgroundColor: '#114488',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                marginRight: '10px'
-              }}
-            >
-              Manual Connect
-            </button>
-            <button 
-              onClick={tryFallbackConnection}
-              style={{
-                padding: '8px 16px',
-                backgroundColor: '#666',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: 'pointer'
-              }}
-            >
-              Try Fallback
-            </button>
-            <button 
-              onClick={runConnectionTests}
-              style={{
-                padding: '8px 16px',
-                backgroundColor: '#28a745',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: 'pointer'
-              }}
-            >
-              Run Tests
-            </button>
-            <button 
-              onClick={() => detectEnvironment()}
-              style={{
-                padding: '8px 16px',
-                backgroundColor: '#ffc107',
-                color: 'black',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: 'pointer'
-              }}
-            >
-              Check Environment
-            </button>
-            <button 
-              onClick={handleReset}
-              style={{
-                padding: '8px 16px',
-                backgroundColor: '#dc3545',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: 'pointer'
-              }}
-            >
-              Reset All
-            </button>
-          </div>
-        </div>
-      </div>
-    );
+    return null; // Don't show error states
   }
 
-  // If wallet is connected, show wallet info
+  // If wallet is connected, show only the coin dropdown
   if (walletConnected && walletAddress) {
     return (
       <div className="wallet-connected">
-        <div className="wallet-info">
-          <div className="wallet-provider">
-            {getProviderIcon(walletProvider)}
-            <span>{getProviderName(walletProvider)}</span>
-          </div>
-          <div className="wallet-address">
-            <span>{walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}</span>
-            <button onClick={copyAddress} className="copy-btn">
-              {copied ? 'Copied!' : <FaCopy size={14} />}
-            </button>
-          </div>
-          <div className="wallet-network">
-            {getNetworkName(walletChainId)}
-          </div>
-          
-          {/* Debug info for chain ID */}
-          <div style={{ 
-            fontSize: '11px', 
-            color: '#666', 
-            backgroundColor: '#f8f9fa', 
-            padding: '4px 8px', 
-            borderRadius: '4px',
-            margin: '5px 0',
-            fontFamily: 'monospace'
-          }}>
-            Chain ID: {walletChainId} | Expected: 0x2105/8453 (Base) or 0xa4ec/42220 (Celo) | 
-            Is Base: {(walletChainId === '0x2105' || walletChainId === '8453' || walletChainId === 8453) ? '✅' : '❌'} | 
-            Is Celo: {(walletChainId === '0xa4ec' || walletChainId === '42220' || walletChainId === 42220) ? '✅' : '❌'}
-          </div>
-          
-          {/* Manual test button */}
-          <button 
-            onClick={() => {
-              console.log('🧪 Manual test button clicked');
-              console.log('Current state:', { walletConnected, walletAddress, walletChainId, topCoins, topCoinsLoading });
-              if (walletAddress) {
-                console.log('Calling getTopCoins manually with force refresh...');
-                debouncedRefresh(walletAddress, true);
-              }
-            }}
-            disabled={topCoinsLoading || (Date.now() - lastRefreshTime) < 2000}
-            style={{
-              padding: '4px 8px',
-              backgroundColor: topCoinsLoading || (Date.now() - lastRefreshTime) < 2000 ? '#6c757d' : '#ffc107',
-              color: 'black',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: topCoinsLoading || (Date.now() - lastRefreshTime) < 2000 ? 'not-allowed' : 'pointer',
-              fontSize: '11px',
-              margin: '5px 0'
-            }}
-          >
-            🧪 Test Get Top Coins
-            {topCoinsLoading && ' (Loading...)'}
-            {(Date.now() - lastRefreshTime) < 2000 && !topCoinsLoading && ' (Wait...)'}
-          </button>
-          
-          {/* Show top coins when connected to Base or Celo */}
-          {(() => {
-            // Check for supported chains: Base (0x2105/8453) or Celo (0xa4ec/42220)
-            const isBaseChain = walletChainId === '0x2105' || walletChainId === '8453' || walletChainId === 8453;
-            const isCeloChain = walletChainId === '0xa4ec' || walletChainId === '42220' || walletChainId === 42220;
+        {/* Show all tokens from all networks */}
+        {walletConnected && walletAddress && (
+          <div className="all-tokens-section">
+
             
-            console.log('🔍 Rendering top coins section:', {
-              walletChainId,
-              isBaseChain,
-              isCeloChain,
-              expectedChainIds: ['0x2105', '8453', 8453, '0xa4ec', '42220', 42220],
-              topCoinsLength: topCoins.length,
-              topCoinsLoading
-            });
-            
-            return (isBaseChain || isCeloChain) && (
-              <div className="top-coins-section">
-                <h4 style={{ margin: '10px 0 5px 0', fontSize: '14px', color: '#333' }}>
-                  Top Coins by $ Value {isBaseChain ? '(Base)' : '(Celo)'}
-                </h4>
-                
-                {/* RPC Rate Limit Status */}
-                {(() => {
-                  const now = Date.now();
-                  const timeSinceLastRpc = now - (lastRpcCall || 0);
-                  const isRateLimited = timeSinceLastRpc < 10000;
+            <div>
+              {/* Token Selection Dropdown */}
+                <div style={{ marginBottom: '10px' }}>
+                  {/* Custom Dropdown */}
+                  <div style={{ position: 'relative' }} className="custom-dropdown">
+                    <button
+                      onClick={() => setDropdownOpen(!dropdownOpen)}
+                      style={{
+                        padding: '8px 12px',
+                        borderRadius: '10px',
+                        border: '1px solid #ddd',
+                        fontSize: '12px',
+                        backgroundColor: 'white',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        minWidth: '260px', // 30% wider (was 200px)
+                        justifyContent: 'space-between'
+                      }}
+                    >
+                      {(() => {
+                        let token;
+                        if (selectedToken === 'default') {
+                          // Find USDC on Base as default
+                          token = getSelectedToken();
+                        } else {
+                          // Use the selected token index
+                          token = selectedToken;
+                        }
+                        
+                        // Show loading state if wallet is connected and tokens are loading
+                        if (walletConnected && topCoinsLoading) {
+                          return (
+                            <>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                {/* USDC Icon */}
+                                <div style={{
+                                  width: '30px',
+                                  height: '30px',
+                                  borderRadius: '50%',
+                                  backgroundColor: '#2775ca',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  position: 'relative'
+                                }}>
+                                  <img 
+                                    src="/images/tokens/usdc.png" 
+                                    alt="USDC" 
+                                    style={{ 
+                                      width: '100%', 
+                                      height: '100%', 
+                                      objectFit: 'cover',
+                                      borderRadius: '50%'
+                                    }} 
+                                  />
+                                  
+                                  {/* Network Icon Overlay */}
+                                  <div style={{
+                                    position: 'absolute',
+                                    bottom: '-1px',
+                                    right: '-1px',
+                                    width: '19px', // 1px smaller (was 20px)
+                                    height: '19px', // 1px smaller (was 20px)
+                                    borderRadius: '50%',
+                                    backgroundColor: '#0052ff',
+                                    border: '2px solid white',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    overflow: 'hidden',
+                                    zIndex: 9999,
+                                    boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                                  }}>
+                                    <img 
+                                      src="/images/tokens/base.png" 
+                                      alt="Base" 
+                                      style={{ 
+                                        width: '100%', 
+                                        height: '100%', 
+                                        objectFit: 'cover',
+                                        borderRadius: '50%'
+                                      }} 
+                                    />
+                                  </div>
+                                </div>
+                                <div style={{ textAlign: 'left' }}>
+                                  <div style={{ fontSize: '13px', fontWeight: 'bold' }}>USDC</div>
+                                  <div style={{ fontSize: '11px', color: '#666' }}>Base</div>
+                                </div>
+                              </div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <span style={{ color: '#999' }}>--</span>
+                              </div>
+                              <Spinner size={31} color={'#999'} />
+                            </>
+                          );
+                        }
+                        
+                        if (token) {
+                          return (
+                            <>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                {/* Token Icon */}
+                                <div style={{
+                                  width: '34px', // 2px larger (was 32px)
+                                  height: '34px', // 2px larger (was 32px)
+                                  borderRadius: '50%',
+                                  backgroundColor: getTokenColor(token.symbol),
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  position: 'relative',
+                                  border: '2px solid #e0e0e0',
+                                  boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                                }}>
+                                  <img 
+                                    src={getTokenImage(token.symbol)} 
+                                    alt={token.symbol} 
+                                    style={{ 
+                                      width: '100%', 
+                                      height: '100%', 
+                                      objectFit: 'cover',
+                                      borderRadius: '50%'
+                                    }}
+                                    onError={(e) => {
+                                      // Fallback to text if image fails to load
+                                      e.target.style.display = 'none';
+                                      const fallback = document.createElement('div');
+                                      fallback.textContent = token.symbol.charAt(0);
+                                      fallback.style.cssText = `
+                                        width: 100%; 
+                                        height: 100%; 
+                                        display: flex; 
+                                        alignItems: center; 
+                                        justifyContent: center; 
+                                        fontSize: 15px; 
+                                        fontWeight: bold; 
+                                        color: white;
+                                      `;
+                                      e.target.parentNode.appendChild(fallback);
+                                    }}
+                                  />
+                                  
+                                  {/* Network Icon Overlay */}
+                                  <div style={{
+                                    position: 'absolute',
+                                    bottom: '-2px',
+                                    right: '-2px',
+                                    width: '18px', // 1px smaller (was 19px)
+                                    height: '18px', // 1px smaller (was 19px)
+                                    borderRadius: '50%',
+                                    backgroundColor: getNetworkColor(token.chainId),
+                                    border: '2px solid white',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    overflow: 'hidden',
+                                    zIndex: 9999,
+                                    boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                                  }}>
+                                    <img 
+                                      src={getNetworkImage(token.chainId)} 
+                                      alt={token.network} 
+                                      style={{ 
+                                        width: '100%', 
+                                        height: '100%', 
+                                        objectFit: 'cover',
+                                        borderRadius: '50%'
+                                      }}
+                                      onError={(e) => {
+                                        // Fallback to text if image fails to load
+                                        e.target.style.display = 'none';
+                                        const fallback = document.createElement('div');
+                                        fallback.textContent = token.network.charAt(0);
+                                        fallback.style.cssText = `
+                                          width: 100%; 
+                                          height: 100%; 
+                                          display: flex; 
+                                          alignItems: center; 
+                                          justifyContent: center; 
+                                          fontSize: 10px; 
+                                          fontWeight: bold; 
+                                          color: white;
+                                        `;
+                                        e.target.parentNode.appendChild(fallback);
+                                      }}
+                                    />
+                                  </div>
+                                </div>
+                                <div style={{ textAlign: 'left' }}>
+                                  <div style={{ fontSize: '13px', fontWeight: 'bold' }}>{token.symbol}</div>
+                                  <div style={{ fontSize: '11px', color: '#666' }}>{formatAmount(token.balance, token.symbol)}</div>
+                                </div>
+                              </div>
+                                                                                                    <span style={{ 
+                               color: '#28a745', 
+                               fontWeight: 'bold' }}>
+                              ${(() => {
+                                const calculated = parseFloat(token.balance) * parseFloat(token.price);
+                                // For very small values, show more precision
+                                if (calculated < 0.01) {
+                                  return calculated.toFixed(6);
+                                } else if (calculated < 1) {
+                                  return calculated.toFixed(4);
+                                } else {
+                                  return calculated.toFixed(2);
+                                }
+                              })()}
+                            </span>
+                          </>
+                        );
+                      }
+                    })()}
+                    </button>
                   
-                  if (isRateLimited) {
+                  {/* Tip Amount Slider - Show when tokens are loaded and not loading */}
+
+                  {/* Dropdown Options */}
+                  {dropdownOpen && (
+                    <div style={{
+                      position: 'absolute',
+                      top: '55px',
+                      left: 0,
+                      right: 0,
+                      backgroundColor: 'white',
+                      border: '1px solid #ddd',
+                      borderRadius: '12px',
+                      maxHeight: '300px',
+                      overflowY: 'auto',
+                      zIndex: 9999,
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+                    }}>
+                        {/* Loading State */}
+                        {walletConnected && topCoinsLoading ? (
+                          <div style={{
+                            padding: '20px',
+                            textAlign: 'center',
+                            color: '#333',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: '10px'
+                          }}>
+                            <Spinner size={31} color={'#999'} />
+                            <span>Loading tokens...</span>
+                          </div>
+                        ) : topCoins.length === 0 ? (
+                          <div style={{
+                            padding: '20px',
+                            textAlign: 'center',
+                            color: '#666'
+                          }}>
+                            No tokens available
+                          </div>
+                        ) : (
+                          /* Token Options - Only show tokens with > 0 balance */
+                          topCoins
+                            .filter(coin => parseFloat(coin.balance) > 0)
+                            .map((coin, index) => (
+                            <div
+                              key={`${coin.networkKey}-${coin.symbol}-${index}`}
+                              onClick={() => {
+                                setSelectedToken(coin); // Store the actual token object
+                                setTipAmount(0); // Reset tip amount when selecting new token
+                                setDropdownOpen(false);
+                              }}
+                              style={{
+                                padding: '10px',
+                                cursor: 'pointer',
+                                borderBottom: '1px solid #eee',
+                                backgroundColor: (() => {
+                                  if (selectedToken === 'default') {
+                                    return coin.symbol === 'USDC' && coin.networkKey === 'base' ? '#f8f9fa' : 'white';
+                                  } else {
+                                    return selectedToken && selectedToken.symbol === coin.symbol && selectedToken.networkKey === coin.networkKey ? '#f8f9fa' : 'white';
+                                  }
+                                })(),
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px'
+                              }}
+                            >
+                              {/* Token Icon */}
+                              <div style={{
+                                width: '38px', // 2px larger (was 36px)
+                                height: '38px', // 2px larger (was 36px)
+                                borderRadius: '50%',
+                                backgroundColor: getTokenColor(coin.symbol),
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                position: 'relative',
+                                border: '2px solid #e0e0e0',
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                              }}>
+                                <img 
+                                  src={getTokenImage(coin.symbol)} 
+                                  alt={coin.symbol} 
+                                  style={{ 
+                                    width: '100%', 
+                                    height: '100%', 
+                                    objectFit: 'cover',
+                                    borderRadius: '50%'
+                                  }}
+                                  onError={(e) => {
+                                    // Fallback to text if image fails to load
+                                    e.target.style.display = 'none';
+                                    const fallback = document.createElement('div');
+                                    fallback.textContent = coin.symbol.charAt(0);
+                                    fallback.style.cssText = `
+                                      width: 100%; 
+                                      height: 100%; 
+                                      display: flex; 
+                                      alignItems: center; 
+                                      justifyContent: center; 
+                                      fontSize: 18px; 
+                                      fontWeight: bold; 
+                                      color: white;
+                                    `;
+                                    e.target.parentNode.appendChild(fallback);
+                                  }}
+                                />
+                                
+                                {/* Network Icon Overlay */}
+                                <div style={{
+                                  position: 'absolute',
+                                  bottom: '-1px',
+                                  right: '-1px',
+                                  width: '19px', // 1px smaller (was 20px)
+                                  height: '19px', // 1px smaller (was 20px)
+                                  borderRadius: '50%',
+                                  backgroundColor: getNetworkColor(coin.chainId),
+                                  border: '2px solid white',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  overflow: 'hidden',
+                                  zIndex: 9999,
+                                  boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                                }}>
+                                  <img 
+                                    src={getNetworkImage(coin.chainId)} 
+                                    alt={coin.network} 
+                                    style={{ 
+                                      width: '100%', 
+                                      height: '100%', 
+                                      objectFit: 'cover',
+                                      borderRadius: '50%'
+                                    }}
+                                    onError={(e) => {
+                                      // Fallback to text if image fails to load
+                                      e.target.style.display = 'none';
+                                      const fallback = document.createElement('div');
+                                      fallback.textContent = coin.network.charAt(0);
+                                      fallback.style.cssText = `
+                                        width: 100%; 
+                                        height: 100%; 
+                                        display: flex; 
+                                        alignItems: center; 
+                                        justifyContent: center; 
+                                        fontSize: 12px; 
+                                        fontWeight: bold; 
+                                        color: white;
+                                      `;
+                                      e.target.parentNode.appendChild(fallback);
+                                    }}
+                                  />
+                                </div>
+                              </div>
+                              
+                              {/* Token Details */}
+                              <div style={{ flex: 1 }}>
+                                <div style={{ fontSize: '13px', fontWeight: 'bold', color: '#000' }}>
+                                  {coin.symbol}
+                                </div>
+                                <div style={{ fontSize: '11px', color: '#000' }}>
+                                  {formatAmount(coin.balance, coin.symbol)} @ ${parseFloat(coin.price).toFixed(6)}
+                                </div>
+                              </div>
+                              
+                              {/* Total Value */}
+                              <div style={{ 
+                                fontSize: '12px', 
+                                fontWeight: 'bold', 
+                                color: '#28a745',
+                                textAlign: 'right',
+                                minWidth: '60px'
+                              }}>
+                                ${parseFloat(coin.value).toFixed(2)}
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    )}
+
+                  {!topCoinsLoading && (() => {
+                    const displayToken = selectedToken === 'default' ? getSelectedToken() : selectedToken;
+                    if (!displayToken) return null;
+                    
                     return (
                       <div style={{
-                        fontSize: '11px',
-                        color: '#ff6b35',
-                        backgroundColor: '#fff3cd',
-                        padding: '4px 8px',
-                        borderRadius: '4px',
-                        margin: '5px 0',
-                        border: '1px solid #ffeaa7'
+                        marginTop: '15px',
+                        padding: '15px',
+                        backgroundColor: '#00112299',
+                        borderRadius: '10px',
+                        border: '1px solid #688'
                       }}>
-                        ⏳ RPC Rate Limit: {Math.ceil((10000 - timeSinceLastRpc) / 1000)}s remaining
-                      </div>
-                    );
-                  }
-                  return null;
-                })()}
-                
-                {topCoinsLoading ? (
-                  <div style={{ fontSize: '12px', color: '#666', fontStyle: 'italic' }}>
-                    Loading top coins...
-                  </div>
-                ) : topCoins.length > 0 ? (
-                  <>
-                    {/* Total Portfolio Value */}
-                    <div style={{
-                      padding: '8px 12px',
-                      backgroundColor: '#e8f5e8',
-                      borderRadius: '6px',
-                      marginBottom: '10px',
-                      textAlign: 'center'
-                    }}>
-                      <span style={{ fontSize: '12px', color: '#666' }}>Total Portfolio: </span>
-                      <span style={{ fontSize: '14px', fontWeight: 'bold', color: '#28a745' }}>
-                        ${topCoins.reduce((sum, coin) => sum + parseFloat(coin.value), 0).toFixed(2)}
-                      </span>
-                    </div>
-                    
-                    <div className="top-coins-list">
-                      {topCoins.slice(0, 5).map((coin, index) => (
-                        <div key={coin.address} className="coin-item" style={{
+                        <div style={{
                           display: 'flex',
                           justifyContent: 'space-between',
                           alignItems: 'center',
-                          padding: '4px 8px',
-                          margin: '2px 0',
-                          backgroundColor: index % 2 === 0 ? '#f8f9fa' : '#ffffff',
-                          borderRadius: '4px',
-                          fontSize: '12px'
+                          marginBottom: '10px'
                         }}>
-                          <span style={{ fontWeight: 'bold', color: '#333' }}>
-                            {coin.symbol}
+                          <span style={{ fontSize: '13px', fontWeight: 'bold', color: '#cde' }}>
+                            Tip Amount
                           </span>
-                          <span style={{ color: '#666' }}>
-                            {coin.balance}
-                          </span>
-                          <span style={{ color: '#28a745', fontWeight: 'bold' }}>
-                            ${coin.value}
-                          </span>
+                          <div style={{ textAlign: 'right' }}>
+                            <div style={{ fontSize: '14px', fontWeight: 'bold', color: '#007bff' }}>
+                              {formatAmount(tipAmount, displayToken.symbol)} {displayToken.symbol}
+                            </div>
+                            <div style={{ fontSize: '11px', color: '#9df' }}>
+                              ${(parseFloat(tipAmount) * parseFloat(displayToken.price)).toFixed(2)}
+                            </div>
+                          </div>
                         </div>
-                      ))}
-                    </div>
-                    
-                    <div style={{ 
-                      fontSize: '10px', 
-                      color: '#999', 
-                      textAlign: 'center', 
-                      marginTop: '8px',
-                      fontStyle: 'italic'
-                    }}>
-                      Last updated: {new Date().toLocaleTimeString()}
-                      {lastRefreshTime > 0 && (
-                        <span style={{ display: 'block', marginTop: '2px' }}>
-                          Last refresh: {new Date(lastRefreshTime).toLocaleTimeString()}
-                        </span>
-                      )}
-                      <span style={{ display: 'block', marginTop: '2px', color: '#17a2b8' }}>
-                        {(() => {
-                          const now = Date.now();
-                          const cacheAge = now - (lastRefreshTime || 0);
-                          const cacheAgeMinutes = Math.round(cacheAge / (1000 * 60));
-                          if (cacheAge < 5 * 60 * 1000) {
-                            return `📦 Cached data (${cacheAgeMinutes} min old)`;
-                          } else {
-                            return '🔄 Fresh data';
-                          }
-                        })()}
-                      </span>
-                    </div>
-                  </>
-                ) : (
-                  <div style={{ fontSize: '12px', color: '#666', fontStyle: 'italic' }}>
-                    No tokens found
+                        
+                        <input
+                          type="range"
+                          min="0"
+                          max={parseFloat(displayToken.balance)}
+                          step="0.000001"
+                          value={tipAmount}
+                          onChange={(e) => setTipAmount(parseFloat(e.target.value))}
+                          style={{
+                            width: '100%',
+                            height: '8px',
+                            borderRadius: '4px',
+                            background: 'linear-gradient(to right, #007bff 0%, #007bff ' + (tipAmount / parseFloat(displayToken.balance) * 100) + '%, #688 ' + (tipAmount / parseFloat(displayToken.balance) * 100) + '%, #688 100%)',
+                            outline: 'none',
+                            cursor: 'pointer',
+                            WebkitAppearance: 'none',
+                            appearance: 'none',
+                            border: '1px solid #357'
+                          }}
+                        />
+                        
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          fontSize: '11px',
+                          color: '#666',
+                          marginTop: '5px'
+                        }}>
+                          <span style={{ color: '#9df' }}>0</span>
+                          <span style={{ color: '#9df' }}>{formatAmount(displayToken.balance, displayToken.symbol)} {displayToken.symbol}</span>
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+
                   </div>
-                )}
-                <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
-                  <button 
-                    onClick={() => debouncedRefresh(walletAddress, true)}
-                    disabled={topCoinsLoading || (Date.now() - lastRefreshTime) < 2000}
-                    style={{
-                      padding: '4px 8px',
-                      backgroundColor: topCoinsLoading || (Date.now() - lastRefreshTime) < 2000 ? '#6c757d' : '#17a2b8',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: topCoinsLoading || (Date.now() - lastRefreshTime) < 2000 ? 'not-allowed' : 'pointer',
-                      fontSize: '11px'
-                    }}
-                  >
-                    {topCoinsLoading ? 'Loading...' : 
-                     (Date.now() - lastRefreshTime) < 2000 ? 'Wait...' : 'Refresh'}
-                  </button>
-                  <button 
-                    onClick={() => {
-                      const isBaseChain = walletChainId === '0x2105' || walletChainId === '8453' || walletChainId === 8453;
-                      const isCeloChain = walletChainId === '0xa4ec' || walletChainId === '42220' || walletChainId === 42220;
-                      
-                      if (isBaseChain) {
-                        window.open(`https://basescan.org/address/${walletAddress}`, '_blank');
-                      } else if (isCeloChain) {
-                        window.open(`https://explorer.celo.org/address/${walletAddress}`, '_blank');
-                      }
-                    }}
-                    style={{
-                      padding: '4px 8px',
-                      backgroundColor: '#6c757d',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      fontSize: '11px'
-                    }}
-                  >
-                    View on {(() => {
-                      const isBaseChain = walletChainId === '0x2105' || walletChainId === '8453' || walletChainId === 8453;
-                      const isCeloChain = walletChainId === '0xa4ec' || walletChainId === '42220' || walletChainId === 42220;
-                      
-                      if (isBaseChain) return 'BaseScan';
-                      if (isCeloChain) return 'Celo Explorer';
-                      return 'Explorer';
-                    })()}
-                  </button>
                 </div>
+                
+
+                
+
               </div>
-            );
-          })()}
-          
-          {/* Debug fallback - show top coins section even when not on supported chains */}
-          {(() => {
-            const isBaseChain = walletChainId === '0x2105' || walletChainId === '8453' || walletChainId === 8453;
-            const isCeloChain = walletChainId === '0xa4ec' || walletChainId === '42220' || walletChainId === 42220;
-            
-            if (!isBaseChain && !isCeloChain && walletConnected && walletAddress) {
-              return (
-                <div style={{ 
-                  padding: '10px', 
-                  backgroundColor: '#fff3cd', 
-                  border: '1px solid #ffeaa7',
-                  borderRadius: '6px',
-                  margin: '10px 0',
-                  fontSize: '12px'
-                }}>
-                  <div style={{ fontWeight: 'bold', marginBottom: '5px' }}>🔍 Debug: Top Coins Section Hidden</div>
-                  <div>Chain ID: <code>{walletChainId}</code></div>
-                  <div>Expected: <code>0x2105</code> or <code>8453</code> (Base) | <code>0xa4ec</code> or <code>42220</code> (Celo)</div>
-                  <div>Is Base: {isBaseChain ? '✅' : '❌'}</div>
-                  <div>Is Celo: {isCeloChain ? '✅' : '❌'}</div>
-                  <div>Top Coins Data: {topCoins.length > 0 ? `${topCoins.length} coins` : 'No coins'}</div>
-                  <div>Loading: {topCoinsLoading ? 'Yes' : 'No'}</div>
-                  <button 
-                    onClick={() => {
-                      console.log('🧪 Debug: Calling getTopCoins from fallback...');
-                      // Try to call the appropriate function based on chain
-                      if (isBaseChain) {
-                        getTopCoins(walletAddress, true);
-                      } else if (isCeloChain) {
-                        getTopCoinsCelo(walletAddress, true);
-                      } else {
-                        // Try Base as fallback
-                        getTopCoins(walletAddress, true);
-                      }
-                    }}
-                    style={{
-                      padding: '4px 8px',
-                      backgroundColor: '#17a2b8',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      fontSize: '11px',
-                      marginTop: '5px'
-                    }}
-                  >
-                    Force Fetch Top Coins
-                  </button>
-                </div>
-              );
-            }
-            return null;
-          })()}
-          
-          <div className="wallet-actions">
-            <button 
-              onClick={() => disconnect()}
-              style={{
-                padding: '4px 8px',
-                backgroundColor: '#dc3545',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontSize: '12px'
-              }}
-            >
-              Disconnect
-            </button>
           </div>
-        </div>
+        )}
       </div>
     );
   }
 
-  // If no wallet connected and not in Mini App, show manual connection info
-  if (!isMiniApp) {
-    return (
-      <div className="wallet-connect">
-        <div className="farcaster-wallet-info">
-          <div className="wallet-status">
-            <FaWallet size={24} />
-            <span>Wallet Status</span>
-          </div>
-          <div className="regular-browser-status">
-            <div className="status-item">
-              <span className="status-label">Environment:</span>
-              <span className="status-value info">Regular Browser</span>
-            </div>
-            <div className="status-item">
-              <span className="status-label">Wallet Access:</span>
-              <span className="status-value warning">Requires wallet extension</span>
-            </div>
-          </div>
-          <div className="wallet-note">
-            <small>Connect your wallet extension to interact with blockchain features.</small>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Fallback: show connection status
-  return (
-    <div className="wallet-connect">
-      <div className="farcaster-wallet-info">
-        <div className="wallet-status">
-          <FaWallet size={24} />
-          <span>Wallet Status</span>
-        </div>
-        <div className="mini-app-status">
-          <div className="status-item">
-            <span className="status-label">Environment:</span>
-            <span className="status-value success">Farcaster Mini App</span>
-          </div>
-          <div className="status-item">
-            <span className="status-label">Wallet Access:</span>
-            <span className="status-value info">Available through Farcaster</span>
-          </div>
-          <div className="status-item">
-            <span className="status-label">Connection:</span>
-            <span className="status-value warning">Attempting to connect...</span>
-          </div>
-          <div className="status-item">
-            <span className="status-label">Debug State:</span>
-            <span className="status-value info">
-              isMiniApp: {String(isMiniApp)} | 
-              walletConnected: {String(walletConnected)} | 
-              walletLoading: {String(walletLoading)}
-            </span>
-          </div>
-        </div>
-        <div className="wallet-note">
-          <small>Your wallet will be automatically connected when you perform blockchain actions in this Farcaster Mini App.</small>
-          <br />
-          <small style={{ color: '#666', marginTop: '5px' }}>
-            <strong>Note:</strong> You may need to approve the wallet connection in your Farcaster client. 
-            The Farcaster client hosting this app will handle getting you connected to your preferred crypto wallet.
-          </small>
-        </div>
-        <div style={{ marginTop: '10px' }}>
-          <button 
-            onClick={runConnectionTests}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: '#28a745',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              marginRight: '10px'
-            }}
-          >
-            Test Connection
-          </button>
-          <button 
-            onClick={handleManualConnect}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: '#114488',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              marginRight: '10px'
-            }}
-          >
-            Manual Connect
-          </button>
-          <button 
-            onClick={() => detectEnvironment()}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: '#ffc107',
-              color: 'black',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer'
-            }}
-          >
-            Check Environment
-          </button>
-          <button 
-            onClick={handleReset}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: '#dc3545',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer'
-            }}
-          >
-            Reset All
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+  // If no wallet connected, show nothing
+  return null;
 } 

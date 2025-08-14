@@ -145,6 +145,13 @@ export default function WalletActions() {
                 Ethereum
               </button>
               <button 
+                onClick={() => handleSwitchNetwork('0xa4ec')}
+                className={`network-btn ${walletChainId === '0xa4ec' ? 'active' : ''}`}
+                disabled={loading || walletChainId === '0xa4ec'}
+              >
+                Celo
+              </button>
+              <button 
                 onClick={() => handleSwitchNetwork('0xa')}
                 className={`network-btn ${walletChainId === '0xa' ? 'active' : ''}`}
                 disabled={loading || walletChainId === '0xa'}
@@ -164,13 +171,6 @@ export default function WalletActions() {
                 disabled={loading || walletChainId === '0x2105'}
               >
                 Base
-              </button>
-              <button 
-                onClick={() => handleSwitchNetwork('0xa4ec')}
-                className={`network-btn ${walletChainId === '0xa4ec' ? 'active' : ''}`}
-                disabled={loading || walletChainId === '0xa4ec'}
-              >
-                Celo
               </button>
             </div>
           </div>

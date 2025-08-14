@@ -464,13 +464,21 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
         // Add delay to respect rate limits
         await new Promise(resolve => setTimeout(resolve, 100));
         
-        const priceResponse = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum,usd-coin,degen,betr,noice,tipn&vs_currencies=usd');
+        const priceResponse = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum,usd-coin,degen-token,betr,noice,tipn&vs_currencies=usd');
         if (priceResponse.ok) {
           const priceData = await priceResponse.json();
+          
+          // Check if DEGEN price is valid, if not use current market price
+          let degenPrice = priceData['degen-token']?.usd;
+          if (!degenPrice || degenPrice < 0.001) {
+            console.warn('⚠️ DEGEN price from CoinGecko is invalid or too low, using current market price');
+            degenPrice = 0.004144; // Current DEGEN price as of now
+          }
+          
           tokenPrices = {
             'WETH': priceData.ethereum?.usd || 3000,
             'USDC': priceData['usd-coin']?.usd || 1,
-            'DEGEN': priceData.degen?.usd || 0.01,
+            'DEGEN': degenPrice,
             'BETR': priceData.betr?.usd || 0.01,
             'NOICE': priceData.noice?.usd || 0.01,
             'TIPN': priceData.tipn?.usd || 0.01
@@ -481,9 +489,9 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
         }
       } catch (error) {
         console.warn('Failed to fetch token prices, using fallback prices:', error);
-        // Fallback prices
+        // Fallback prices with more accurate DEGEN price
         tokenPrices = {
-          'WETH': 3000, 'USDC': 1, 'DEGEN': 0.01, 'BETR': 0.01, 'NOICE': 0.01, 'TIPN': 0.01
+          'WETH': 3000, 'USDC': 1, 'DEGEN': 0.004144, 'BETR': 0.01, 'NOICE': 0.01, 'TIPN': 0.01
         };
       }
 
@@ -515,6 +523,9 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
               balance: ethBalance.toFixed(4),
               price: ethPrice,
               value: ethValue.toFixed(2),
+              network: 'Base',
+              networkKey: 'base',
+              chainId: '0x2105',
               isNative: true
             });
           }
@@ -572,7 +583,10 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
                 address: token.address,
                 balance: balance.toFixed(4),
                 price: price,
-                value: value.toFixed(2)
+                value: value.toFixed(2),
+                network: 'Base',
+                networkKey: 'base',
+                chainId: '0x2105'
               });
             }
           }
@@ -701,6 +715,9 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
               balance: celoBalance.toFixed(4),
               price: celoPrice,
               value: celoValue.toFixed(2),
+              network: 'Celo',
+              networkKey: 'celo',
+              chainId: '0xa4ec',
               isNative: true
             });
           }
@@ -746,7 +763,10 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
                 address: token.address,
                 balance: balance.toFixed(4),
                 price: price,
-                value: value.toFixed(2)
+                value: value.toFixed(2),
+                network: 'Celo',
+                networkKey: 'celo',
+                chainId: '0xa4ec'
               });
             }
           }
@@ -772,6 +792,371 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
     }
   };
 
+  // Get all tokens from all supported networks
+  const getAllTokens = async (address, forceRefresh = false) => {
+    if (!address) return [];
+    
+    // Check cache first (5 minute cache)
+    const cacheKey = `all_${address.toLowerCase()}`;
+    const now = Date.now();
+    const cacheAge = now - (lastTopCoinsFetch || 0);
+    const cacheValid = cacheAge < 5 * 60 * 1000; // 5 minutes
+    
+    if (!forceRefresh && cacheValid && topCoinsCache[cacheKey] && topCoinsCache[cacheKey].length > 0) {
+      console.log('📦 Using cached all tokens data (age:', Math.round(cacheAge / 1000), 'seconds)');
+      return topCoinsCache[cacheKey];
+    }
+    
+    // Prevent multiple simultaneous calls
+    if (topCoinsLoading) {
+      console.log('⏳ Already loading tokens, skipping...');
+      return topCoins || [];
+    }
+    
+    // RPC rate limiting - prevent calls within 10 seconds of each other
+    const timeSinceLastRpc = now - (lastRpcCall || 0);
+    if (timeSinceLastRpc < 10000) { // 10 seconds
+      console.log('⏳ RPC rate limit active, please wait...', Math.ceil((10000 - timeSinceLastRpc) / 1000), 'seconds remaining');
+      return topCoins || [];
+    }
+    
+    try {
+      setTopCoinsLoading(true);
+      setLastRpcCall(now);
+      console.log('Fetching all tokens for address:', address);
+      
+      // Define all supported networks and their tokens
+      const networkTokens = {
+        base: {
+          name: 'Base',
+          rpcUrl: process.env.NEXT_PUBLIC_BASE_RPC_URL || 'https://mainnet.base.org',
+          chainId: '0x2105',
+          tokens: [
+            { symbol: 'ETH', address: '0x0000000000000000000000000000000000000000', decimals: 18, isNative: true },
+            { symbol: 'USDC', address: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', decimals: 6 },
+            { symbol: 'WETH', address: '0x4200000000000000000000000000000000000006', decimals: 18 },
+            { symbol: 'DEGEN', address: '0x4ed4E862860beD51a9570b96d89aF5E1B0Efefed', decimals: 18 },
+            { symbol: 'BETR', address: '0x763F4B31C8c86C56C802eB0fB3edd4C9d19e0eA8', decimals: 18 },
+            { symbol: 'NOICE', address: '0x9cb41fd9dc6891bae8187029461bfaadf6cc0c69', decimals: 18 },
+            { symbol: 'TIPN', address: '0x5ba8d32579a4497c12d327289a103c3ad5b64eb1', decimals: 18 }
+          ]
+        },
+        celo: {
+          name: 'Celo',
+          rpcUrl: process.env.NEXT_PUBLIC_CELO_RPC_URL || 'https://forno.celo.org',
+          chainId: '0xa4ec',
+          tokens: [
+            { symbol: 'CELO', address: '0x0000000000000000000000000000000000000000', decimals: 18, isNative: true },
+            { symbol: 'USDC', address: '0x765DE816845861e75A25fCA122bb6898B8B1282a', decimals: 6 },
+            { symbol: 'WETH', address: '0x122013fd7dF1C6F636a5bb8f03108E876548b455', decimals: 18 }
+          ]
+        },
+        optimism: {
+          name: 'Optimism',
+          rpcUrl: process.env.NEXT_PUBLIC_OPTIMISM_RPC_URL || 'https://mainnet.optimism.io',
+          chainId: '0xa',
+          tokens: [
+            { symbol: 'ETH', address: '0x0000000000000000000000000000000000000000', decimals: 18, isNative: true },
+            { symbol: 'WETH', address: '0x4200000000000000000000000000000000000006', decimals: 18 },
+            { symbol: 'USDC', address: '0x7F5c764cBc14f9669B88837ca1490cCa17c31607', decimals: 6 },
+            { symbol: 'OP', address: '0x4200000000000000000000000000000000000042', decimals: 18 }
+          ]
+        },
+        arbitrum: {
+          name: 'Arbitrum',
+          rpcUrl: process.env.NEXT_PUBLIC_ARBITRUM_RPC_URL || 'https://arb1.arbitrum.io/rpc',
+          chainId: '0xa4b1',
+          tokens: [
+            { symbol: 'ETH', address: '0x0000000000000000000000000000000000000000', decimals: 18, isNative: true },
+            { symbol: 'WETH', address: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1', decimals: 18 },
+            { symbol: 'ARB', address: '0x912CE59144191C1204E64559FE8253a0e49E6548', decimals: 18 }
+          ]
+        }
+      };
+      
+      // Get token prices from CoinGecko API
+      let tokenPrices = {};
+      try {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        const priceResponse = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum,usd-coin,degen-token,betr,noice,tipn,celo,optimism,arbitrum&vs_currencies=usd');
+        if (priceResponse.ok) {
+          const priceData = await priceResponse.json();
+          
+          // Debug logging for price data
+          console.log('🔍 CoinGecko Price Response:', priceData);
+          console.log('🔍 DEGEN Price Data:', {
+            raw: priceData['degen-token'],
+            usd: priceData['degen-token']?.usd,
+            fallback: 0.004144
+          });
+          
+          // Debug: Show all available price data
+          console.log('🔍 All Available Token Prices:', Object.keys(priceData).map(key => ({
+            key,
+            usd: priceData[key]?.usd
+          })));
+          
+          // Check if DEGEN price is valid, if not use current market price
+          let degenPrice = priceData['degen-token']?.usd;
+          if (!degenPrice || degenPrice < 0.001) {
+            console.warn('⚠️ DEGEN price from CoinGecko is invalid or too low, using current market price');
+            degenPrice = 0.004144; // Current DEGEN price as of now
+          }
+          
+          tokenPrices = {
+            'ETH': priceData.ethereum?.usd || 3000,
+            'WETH': priceData.ethereum?.usd || 3000,
+            'USDC': priceData['usd-coin']?.usd || 1,
+            'CELO': priceData.celo?.usd || 0.5,
+            'DEGEN': degenPrice,
+            'BETR': priceData.betr?.usd || 0.01,
+            'NOICE': priceData.noice?.usd || 0.01,
+            'TIPN': priceData.tipn?.usd || 0.01,
+            'OP': priceData.optimism?.usd || 2.5,
+            'ARB': priceData.arbitrum?.usd || 1.5
+          };
+          
+          // Debug: Show final tokenPrices object
+          console.log('🔍 Final Token Prices Object:', tokenPrices);
+          console.log('🔍 DEGEN Final Price:', tokenPrices.DEGEN);
+        } else if (priceResponse.status === 429) {
+          console.warn('CoinGecko rate limit hit, using fallback prices');
+          throw new Error('Rate limit exceeded');
+        }
+      } catch (error) {
+        console.warn('Failed to fetch token prices, using fallback prices:', error);
+        // Fallback prices
+        tokenPrices = {
+          'ETH': 3000, 'WETH': 3000, 'USDC': 1, 'CELO': 0.5, 'DEGEN': 0.004144, 
+          'BETR': 0.01, 'NOICE': 0.01, 'TIPN': 0.01, 'OP': 2.5, 'ARB': 1.5
+        };
+      }
+      
+      const allTokenBalances = [];
+      
+      // Fetch balances for each network
+      for (const [networkKey, network] of Object.entries(networkTokens)) {
+        try {
+          console.log(`Fetching ${network.name} tokens...`);
+          console.log(`📋 ${network.name} token list:`, network.tokens.map(t => `${t.symbol} (${t.address})`));
+          
+          // Get native token balance
+          if (network.tokens.find(t => t.isNative)) {
+            try {
+              const nativeToken = network.tokens.find(t => t.isNative);
+              const balanceResponse = await fetch(network.rpcUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  jsonrpc: '2.0',
+                  method: 'eth_getBalance',
+                  params: [address, 'latest'],
+                  id: 1
+                })
+              });
+              
+              const balanceData = await balanceResponse.json();
+              if (balanceData.result && balanceData.result !== '0x') {
+                const balance = parseInt(balanceData.result, 16) / Math.pow(10, nativeToken.decimals);
+                if (balance > 0.000001) {
+                  const price = tokenPrices[nativeToken.symbol] || 1;
+                  const value = balance * price;
+                  
+                  // Debug logging for native tokens
+                  console.log(`✅ ${nativeToken.symbol} on ${network.name} (native):`, {
+                    balance: balance.toFixed(8),
+                    price: price,
+                    value: value.toFixed(6),
+                    finalValue: value.toFixed(2)
+                  });
+                  
+                  allTokenBalances.push({
+                    symbol: nativeToken.symbol,
+                    address: nativeToken.address,
+                    balance: balance.toFixed(4),
+                    price: price,
+                    value: value.toFixed(2),
+                    network: network.name,
+                    networkKey: networkKey,
+                    chainId: network.chainId,
+                    isNative: true
+                  });
+                } else {
+                  console.log(`❌ ${nativeToken.symbol} on ${network.name} (native) balance too low:`, balance);
+                }
+              }
+            } catch (error) {
+              console.error(`Error fetching ${network.name} native balance:`, error);
+            }
+          }
+          
+          // Get ERC20 token balances
+          for (const token of network.tokens.filter(t => !t.isNative)) {
+            try {
+              await new Promise(resolve => setTimeout(resolve, 200)); // Rate limiting
+              
+              const balanceResponse = await fetch(network.rpcUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  jsonrpc: '2.0',
+                  method: 'eth_call',
+                  params: [{
+                    to: token.address,
+                    data: `0x70a08231${address.slice(2).padStart(64, '0')}`
+                  }, 'latest'],
+                  id: 1
+                })
+              });
+              
+              if (!balanceResponse.ok) {
+                if (balanceResponse.status === 429) {
+                  console.warn(`Rate limit hit for ${network.name} ${token.symbol}, skipping remaining tokens`);
+                  break;
+                }
+                continue;
+              }
+              
+              const balanceData = await balanceResponse.json();
+              if (balanceData.error) continue;
+              
+              // Debug: Show RPC response for DEGEN
+              if (token.symbol === 'DEGEN') {
+                console.log('�� DEGEN RPC Response:', {
+                  response: balanceData,
+                  hasResult: !!balanceData.result,
+                  resultValue: balanceData.result,
+                  isZero: balanceData.result === '0x',
+                  network: network.name,
+                  address: token.address
+                });
+              }
+              
+              if (balanceData.result && balanceData.result !== '0x') {
+                const balance = parseInt(balanceData.result, 16) / Math.pow(10, token.decimals);
+                
+                // Debug logging for DEGEN
+                if (token.symbol === 'DEGEN') {
+                  console.log('🔍 DEGEN Debug:', {
+                    rawResult: balanceData.result,
+                    parsedBalance: balance,
+                    decimals: token.decimals,
+                    address: token.address,
+                    network: network.name
+                  });
+                }
+                
+                if (balance > 0.000001) {
+                  const price = tokenPrices[token.symbol] || 1;
+                  const value = balance * price;
+                  
+                  // Debug logging for DEGEN value calculation
+                  if (token.symbol === 'DEGEN') {
+                    console.log('💰 DEGEN Value Calculation:', {
+                      balance,
+                      price,
+                      calculatedValue: value,
+                      finalValue: value.toFixed(2),
+                      tokenPrices: tokenPrices,
+                      symbol: token.symbol,
+                      priceFromTokenPrices: tokenPrices[token.symbol]
+                    });
+                  }
+                  
+                  // Debug logging for all tokens
+                  console.log(`✅ ${token.symbol} on ${network.name}:`, {
+                    balance: balance.toFixed(8),
+                    price: price,
+                    value: value.toFixed(6),
+                    finalValue: value.toFixed(2)
+                  });
+                  
+                  allTokenBalances.push({
+                    symbol: token.symbol,
+                    address: token.address,
+                    balance: balance.toFixed(4),
+                    price: price,
+                    value: value.toFixed(2),
+                    network: network.name,
+                    networkKey: networkKey,
+                    chainId: network.chainId,
+                    isNative: false
+                  });
+                  
+                  // Debug: Show DEGEN token when added
+                  if (token.symbol === 'DEGEN') {
+                    console.log('✅ DEGEN Token Added to Balances:', {
+                      symbol: token.symbol,
+                      balance: balance.toFixed(4),
+                      price: price,
+                      value: value.toFixed(2),
+                      network: network.name,
+                      networkKey: networkKey,
+                      chainId: network.chainId
+                    });
+                  }
+                } else {
+                  console.log(`❌ ${token.symbol} on ${network.name} balance too low:`, balance);
+                }
+              } else if (token.symbol === 'DEGEN') {
+                console.log('❌ DEGEN balance result is invalid:', balanceData.result);
+              }
+            } catch (error) {
+              console.error(`Error fetching ${network.name} ${token.symbol} balance:`, error);
+            }
+          }
+          
+        } catch (error) {
+          console.error(`Error processing ${network.name}:`, error);
+        }
+      }
+      
+      // Sort by $ value (highest first)
+      const sortedTokens = allTokenBalances.sort((a, b) => parseFloat(b.value) - parseFloat(a.value));
+      
+      console.log('All tokens by value:', sortedTokens);
+      
+      // Debug: Check if DEGEN is in the results
+      const degenToken = sortedTokens.find(t => t.symbol === 'DEGEN');
+      if (degenToken) {
+        console.log('✅ DEGEN found in results:', degenToken);
+      } else {
+        console.log('❌ DEGEN NOT found in results. All tokens:', sortedTokens.map(t => `${t.symbol}: ${t.balance} @ $${t.price} = $${t.value}`));
+      }
+      
+      // Debug: Show all tokens processed
+      console.log('🔍 All tokens processed:', {
+        totalTokens: allTokenBalances.length,
+        tokensByNetwork: Object.fromEntries(
+          Object.entries(networkTokens).map(([key, network]) => [
+            key, 
+            network.tokens.map(t => t.symbol)
+          ])
+        ),
+        finalResults: sortedTokens.map(t => ({
+          symbol: t.symbol,
+          network: t.network,
+          balance: t.balance,
+          price: t.price,
+          value: t.value
+        }))
+      });
+      
+      setTopCoins(sortedTokens);
+      setTopCoinsCache(prev => ({ ...prev, [cacheKey]: sortedTokens }));
+      setLastTopCoinsFetch(now);
+      
+      return sortedTokens;
+      
+    } catch (error) {
+      console.error('Error fetching all tokens:', error);
+      return topCoins || [];
+    } finally {
+      setTopCoinsLoading(false);
+    }
+  };
+
   const initialState = cookieToInitialState(wagmiConfig, cookies);
 
   const contextValue = {
@@ -786,6 +1171,7 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
     getRemainingBalances,
     getTopCoins,
     getTopCoinsCelo,
+    getAllTokens,
     miniApp, setMiniApp,
     fid, setFid,
     points, setPoints,
