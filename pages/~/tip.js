@@ -18,129 +18,15 @@ import WalletActions from "../../components/WalletActions";
 
 const version = process.env.NEXT_PUBLIC_VERSION;
 
-// Wagmi-based wallet component
-function WagmiWalletStatus() {
-  const [mounted, setMounted] = useState(false);
-  const [wagmiStatus, setWagmiStatus] = useState({
-    isConnected: false,
-    address: null,
-    chain: null,
-    error: null
-  });
+// Wagmi Status Component
+function WagmiStatus() {
+  const { wagmiStatus } = useContext(AccountContext);
 
-  // Ensure client-side only rendering
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // Test Wagmi integration
-  useEffect(() => {
-    if (!mounted) return;
-
-    const testWagmi = async () => {
-      try {
-        // Dynamic import to avoid SSR issues
-        const { useAccount } = await import('wagmi');
-        const { config } = await import('../../config/wagmi');
-        
-        // Note: This is just a demo - in a real implementation, 
-        // you'd use the hooks directly in a component wrapped with WagmiProvider
-        setWagmiStatus({
-          isConnected: false,
-          address: null,
-          chain: 'base',
-          error: null,
-          configLoaded: true
-        });
-      } catch (error) {
-        console.error('Wagmi test failed:', error);
-        setWagmiStatus({
-          isConnected: false,
-          address: null,
-          chain: null,
-          error: error.message,
-          configLoaded: false
-        });
-      }
-    };
-
-    testWagmi();
-  }, [mounted]);
-
-  if (!mounted) {
-    return (
-      <div style={{ 
-        padding: '20px', 
-        border: '1px solid #333', 
-        borderRadius: '8px', 
-        margin: '10px 0',
-        backgroundColor: '#111'
-      }}>
-        <div style={{ color: '#888' }}>Loading Wagmi status...</div>
-      </div>
-    );
+  if (!wagmiStatus) {
+    return null;
   }
 
-  return (
-    <div style={{ 
-      padding: '20px', 
-      border: '1px solid #333', 
-      borderRadius: '8px', 
-      margin: '10px 0',
-      backgroundColor: '#111'
-    }}>
-      <h3 style={{ color: '#fff', marginBottom: '15px' }}>⚡ Wagmi Configuration Status</h3>
-      
-      <div style={{ marginBottom: '15px' }}>
-        <div style={{ color: '#888', fontSize: '14px' }}>Wagmi Config Status:</div>
-        <div style={{ color: wagmiStatus.configLoaded ? '#4CAF50' : '#f44336', fontWeight: 'bold' }}>
-          {wagmiStatus.configLoaded ? '✅ Wagmi Config Loaded' : '❌ Wagmi Config Failed'}
-        </div>
-        
-        {wagmiStatus.configLoaded && (
-          <div style={{ marginTop: '10px', fontSize: '13px', color: '#aaa' }}>
-            <div>Chain: Base</div>
-            <div>Connector: Farcaster MiniApp</div>
-            <div>Transport: HTTP</div>
-          </div>
-        )}
-        
-        {wagmiStatus.error && (
-          <div style={{ marginTop: '10px', fontSize: '13px', color: '#f44336' }}>
-            Error: {wagmiStatus.error}
-          </div>
-        )}
-      </div>
-
-      <div style={{ 
-        padding: '10px', 
-        borderRadius: '4px', 
-        backgroundColor: wagmiStatus.configLoaded ? '#1a4d1a' : '#4d1a1a',
-        border: `1px solid ${wagmiStatus.configLoaded ? '#4CAF50' : '#f44336'}`
-      }}>
-        <div style={{ 
-          color: wagmiStatus.configLoaded ? '#4CAF50' : '#f44336',
-          fontWeight: 'bold',
-          fontSize: '14px'
-        }}>
-          {wagmiStatus.configLoaded 
-            ? '🎯 Wagmi Ready for Integration!' 
-            : '⚠️ Wagmi Configuration Issue'
-          }
-        </div>
-        <div style={{ fontSize: '12px', color: '#ccc', marginTop: '5px' }}>
-          {wagmiStatus.configLoaded 
-            ? 'Wagmi config with Farcaster connector is loaded and ready to use'
-            : 'There was an issue loading the Wagmi configuration'
-          }
-        </div>
-      </div>
-
-      <div style={{ marginTop: '15px', fontSize: '12px', color: '#888', fontStyle: 'italic' }}>
-        Note: To fully activate Wagmi hooks, wrap your app with WagmiProvider and QueryClientProvider
-      </div>
-    </div>
-  );
+  return null; // Don't show anything
 }
 
 // Simple Wallet Demo Component
@@ -182,88 +68,22 @@ function WalletDemo() {
 
   const getNetworkName = (chainId) => {
     switch (chainId) {
-      case '0x1': return 'Ethereum';
-      case '0xa': return 'Optimism';
-      case '0xa4b1': return 'Arbitrum';
-      case '0x2105': return 'Base';
-      default: return `Chain ${chainId}`;
+      case '0x1':
+        return 'Ethereum';
+      case '0xa':
+        return 'Optimism';
+      case '0xa4b1':
+        return 'Arbitrum';
+      case '0x2105':
+        return 'Base';
+      case '0xa4ec':
+        return 'Celo';
+      default:
+        return `Chain ${chainId}`;
     }
   };
 
-  return (
-    <div style={{ 
-      padding: '20px', 
-      border: '1px solid #333', 
-      borderRadius: '8px', 
-      margin: '10px 0',
-      backgroundColor: '#111'
-    }}>
-      <h3 style={{ color: '#fff', marginBottom: '15px' }}>🔗 Farcaster Wallet Integration Test</h3>
-      
-      {/* SDK Status */}
-      <div style={{ marginBottom: '15px' }}>
-        <div style={{ color: '#888', fontSize: '14px' }}>Farcaster Mini App Status:</div>
-        <div style={{ color: isMiniApp ? '#4CAF50' : '#f44336', fontWeight: 'bold' }}>
-          {isMiniApp ? '✅ Inside Farcaster Mini App' : '❌ Not in Farcaster Mini App'}
-        </div>
-        
-        {sdkTest && !sdkTest.error && (
-          <div style={{ marginTop: '10px', fontSize: '13px', color: '#aaa' }}>
-            <div>User: {sdkTest.user} ({sdkTest.displayName})</div>
-            <div>FID: {sdkTest.fid}</div>
-            <div>Custody Address: {sdkTest.ethAddress}</div>
-          </div>
-        )}
-        
-        {sdkTest?.error && (
-          <div style={{ marginTop: '10px', fontSize: '13px', color: '#f44336' }}>
-            Error: {sdkTest.error}
-          </div>
-        )}
-      </div>
-
-      {/* Wallet Status */}
-      <div style={{ marginBottom: '15px' }}>
-        <div style={{ color: '#888', fontSize: '14px' }}>Wallet Connection Status:</div>
-        <div style={{ color: walletConnected ? '#4CAF50' : '#f44336', fontWeight: 'bold' }}>
-          {walletConnected ? '✅ Wallet Connected' : '❌ Wallet Not Connected'}
-        </div>
-        
-        {walletConnected && (
-          <div style={{ marginTop: '10px', fontSize: '13px', color: '#aaa' }}>
-            <div>Provider: {walletProvider}</div>
-            <div>Address: {walletAddress?.slice(0, 6)}...{walletAddress?.slice(-4)}</div>
-            <div>Network: {getNetworkName(walletChainId)}</div>
-          </div>
-        )}
-      </div>
-
-      {/* Integration Status */}
-      <div style={{ 
-        padding: '10px', 
-        borderRadius: '4px', 
-        backgroundColor: isMiniApp && walletConnected ? '#1a4d1a' : '#4d1a1a',
-        border: `1px solid ${isMiniApp && walletConnected ? '#4CAF50' : '#f44336'}`
-      }}>
-        <div style={{ 
-          color: isMiniApp && walletConnected ? '#4CAF50' : '#f44336',
-          fontWeight: 'bold',
-          fontSize: '14px'
-        }}>
-          {isMiniApp && walletConnected 
-            ? '🎉 Full Integration Working!' 
-            : '⚠️ Integration Incomplete'
-          }
-        </div>
-        <div style={{ fontSize: '12px', color: '#ccc', marginTop: '5px' }}>
-          {isMiniApp && walletConnected 
-            ? 'Context isMiniApp=true and wallet connected via sdk.wallet.getEthereumProvider()'
-            : 'Either not in miniapp or wallet connection failed'
-          }
-        </div>
-      </div>
-    </div>
-  );
+  return null; // Don't show anything
 }
 
 export default function Tip() {
@@ -1249,7 +1069,7 @@ export default function Tip() {
               </div>
 
               <div style={{ padding: "0 20px 20px 20px" }}>
-                <WagmiWalletStatus />
+                <WagmiStatus />
               </div>
 
               <div style={{ padding: "0 20px 20px 20px" }}>
