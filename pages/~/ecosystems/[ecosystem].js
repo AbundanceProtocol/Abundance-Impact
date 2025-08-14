@@ -298,7 +298,7 @@ export default function Eco() {
     async function getSearch(time, tags, channel, curators, text, shuffle, ecosystem, page, order, timeSort) {
 
       try {
-        const response = await axios.get('/api/curation/getUserSearch', {
+        const response = await axios.get('/api/curation/getImpactSearch', {
           params: { time, tags, channel, curators, text, shuffle, ecosystem, page, order, timeSort }
         })
 

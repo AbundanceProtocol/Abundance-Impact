@@ -54,6 +54,7 @@ cache
 # scraps
 .scraps.*
 
+# testing & temp
 /pages/api/test/
 /pages/api/test/**
 /pages/api/testing/
@@ -61,5 +62,7 @@ cache
 distribution-s7*.csv
 contracts/
 models/WeeklyClaim.js
-pages/api/curation/
+/pages/api/curation/postInvitedBy.js
+/pages/api/curation/getCuratorData.js
 pages/~/validate.js
+# pages/api/curation/

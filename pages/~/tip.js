@@ -4,9 +4,12 @@ import Link from "next/link";
 import axios from "axios";
 import Head from "next/head";
 
-import { IoIosRocket, IoMdTrophy, IoMdRefresh as Refresh } from "react-icons/io";
+import { IoIosRocket, IoMdTrophy, IoMdRefresh as Refresh, IoCloseCircle } from "react-icons/io";
 import { BsLightningChargeFill as Impact, BsPiggyBankFill, BsQuestionCircle, BsGiftFill, BsCurrencyExchange, BsFillFunnelFill } from "react-icons/bs";
-import { confirmUser, timePassed } from "../../utils/utils";
+import { BiSortDown, BiSortUp } from "react-icons/bi";
+import { IoShuffleOutline as ShuffleIcon } from "react-icons/io5";
+import { PiClockClockwiseBold as ClockForward, PiClockCounterClockwiseBold as ClockBack } from "react-icons/pi";
+import { confirmUser, timePassed, getTimeRange } from "../../utils/utils";
 import Spinner from "../../components/Common/Spinner";
 import ExpandImg from "../../components/Cast/ExpandImg";
 import useMatchBreakpoints from "../../hooks/useMatchBreakpoints";
@@ -124,6 +127,26 @@ export default function Tip() {
   const [claimsLoading, setClaimsLoading] = useState(true);
   const initChannels = [" ", "impact"];
   const [modal, setModal] = useState({ on: false, success: false, text: "" });
+  
+  // Filter state variables
+  const [timeframe, setTimeframe] = useState('3d');
+  const [sortBy, setSortBy] = useState('down');
+  const [channelOptions, setChannelOptions] = useState(initChannels);
+  const [selectedChannel, setSelectedChannel] = useState(' ');
+  
+  // Combined query state for filters
+  const initialQuery = {shuffle: false, time: '3d', tags: [], channels: [], curators: null, order: -1, timeSort: null};
+  const [userQuery, setUserQuery] = useState(initialQuery);
+  
+  // Search results state
+  const [creatorResults, setCreatorResults] = useState([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  
+  // Curators search state
+  const [curatorSearchInput, setCuratorSearchInput] = useState("");
+  const [curatorData, setCuratorData] = useState([]);
+  const [curatorsLength, setCuratorsLength] = useState(0);
+  const [curatorList, setCuratorList] = useState([]);
 
   useEffect(() => {
     if (fid) {
@@ -432,6 +455,188 @@ export default function Tip() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Filter functions
+  function updateTime(time) {
+    console.log('updateTime called with:', time);
+    setTimeframe(time);
+    setUserQuery({
+      ...userQuery,
+      time: time
+    });
+  }
+
+  function updateOrder(order) {
+    console.log('updateOrder called with:', order);
+    setSortBy(order);
+    if (order == 'up') {
+      setUserQuery({
+        ...userQuery,
+        order: 1, shuffle: false, timeSort: null
+      });
+    } else if (order == 'down') {
+      setUserQuery({
+        ...userQuery,
+        order: -1, shuffle: false, timeSort: null
+      });
+    } else if (order == 'shuffle') {
+      setUserQuery({
+        ...userQuery,
+        order: -1, shuffle: true, timeSort: null
+      });
+    } else if (order == 'clock-forward') {
+      setUserQuery({
+        ...userQuery,
+        order: -1, shuffle: false, timeSort: -1
+      });
+    } else if (order == 'clock-back') {
+      setUserQuery({
+        ...userQuery,
+        order: -1, shuffle: false, timeSort: 1
+      });
+    }
+  }
+
+  const updateChannel = (event) => {
+    console.log('updateChannel called with:', event.target.value);
+    setSelectedChannel(event.target.value);
+    let channelUpdate = [];
+    if (event.target.value !== ' ') {
+      channelUpdate = event.target.value;
+    }
+    setUserQuery({
+      ...userQuery,
+      channels: channelUpdate
+    });
+  };
+
+  async function getChannels(points) {
+    try {
+      const channelData = await axios.get('/api/curation/getChannelNames', { params: { points } });
+      if (channelData) {
+        const ecoChannels = channelData?.data?.channels;
+        console.log('channels', ecoChannels);
+
+        const updatedChannels = [
+          ' ',
+          ...ecoChannels
+        ];
+        setChannelOptions(updatedChannels);
+      }
+    } catch (error) {
+      console.error('Error updating channels:', error);
+    }
+  }
+
+  // Load channels on component mount
+  useEffect(() => {
+    getChannels('$IMPACT');
+  }, []);
+
+  // Curators search functions
+  async function updateCurators(text, more) {
+    setCuratorData([]);
+    setCuratorsLength(0);
+    if (text?.length > 0) {
+      try {
+        const response = await axios.get("/api/curation/getCurators", {
+          params: { name: text, more }
+        });
+        const sortedData = response?.data?.users.sort((a, b) => a.username.localeCompare(b.username));
+        setCuratorData(sortedData);
+        setCuratorsLength(response?.data?.length);
+        console.log("curator response", response?.data?.users);
+      } catch (error) {
+        console.error("Error searching curators:", error);
+        setCuratorData([]);
+        setCuratorsLength(0);
+      }
+    } else {
+      setCuratorData([]);
+      setCuratorsLength(0);
+    }
+  }
+
+  async function getCuratorInput(text, more) {
+    console.log('curator search:', text);
+    setCuratorSearchInput(text);
+    if (text.length > 0) {
+      updateCurators(text, more);
+    } else {
+      setCuratorData([]);
+      setCuratorsLength(0);
+    }
+  }
+
+  async function updateCuratorSchedule(curator) {
+    setCuratorData([]);
+    setCuratorsLength(0);
+    setCuratorSearchInput("");
+    
+    // Update userQuery with selected curator
+    const curatorFid = curator?.fid;
+    if (curatorFid) {
+      // Check if curator is already selected
+      const isAlreadySelected = curatorList.some(existing => existing.fid === curatorFid);
+      
+      if (!isAlreadySelected) {
+        // Add new curator to the list
+        const updatedCuratorList = [...curatorList, curator];
+        setCuratorList(updatedCuratorList);
+        
+        // Update userQuery with array of curator FIDs
+        const curatorFids = updatedCuratorList.map(c => c.fid);
+        setUserQuery({
+          ...userQuery,
+          curators: curatorFids
+        });
+      }
+    }
+  }
+
+  // Trigger search when userQuery changes
+  useEffect(() => {
+    // Always trigger search when filters change, regardless of ecosystem
+    console.log('userQuery changed, triggering search:', userQuery);
+    feedRouter();
+  }, [userQuery]);
+
+  // Feed router to trigger searches when filters change
+  function feedRouter() {
+    const { shuffle, time, tags, channels, curators, order, timeSort } = userQuery;
+    // Use a default ecosystem if none is provided, or you can modify this based on your needs
+    const searchEcosystem = ecosystem || 'abundance'; // Default to 'abundance' ecosystem
+    console.log('get user executed', shuffle, time, tags, channels, searchEcosystem, curators, order);
+    getUserSearch(time, tags, channels, curators, null, shuffle, order, searchEcosystem, timeSort);
+  }
+
+  async function getUserSearch(getTime, tags, channel, curators, text, shuffle, order, ecosystem, timeSort) {
+    console.log('getUserSearch called with params:', { getTime, tags, channel, curators, text, shuffle, order, ecosystem, timeSort });
+    const time = getTimeRange(getTime);
+
+    console.log('Processed time:', time);
+    
+    setSearchLoading(true);
+    
+    try {
+      // Call the API to get filtered creators
+      const response = await axios.get('/api/curation/getUserSearch', {
+        params: { time, tags, channel, curators, text, shuffle, ecosystem, order, timeSort }
+      });
+      
+      if (response?.data?.casts) {
+        setCreatorResults(response.data.casts);
+        console.log('Creator search results:', response.data.casts);
+      } else {
+        setCreatorResults([]);
+      }
+    } catch (error) {
+      console.error('Error searching creators:', error);
+      setCreatorResults([]);
+    } finally {
+      setSearchLoading(false);
+    }
+  }
 
   return (
     <div className="flex-col" style={{ width: "auto", position: "relative" }} ref={ref1}>
@@ -1132,7 +1337,7 @@ export default function Tip() {
                             padding: "0px 3px"
                           }}
                         >
-                          Select Creators
+                          Impact Filter
                         </div>
                       </div>
                     </div>
@@ -1153,9 +1358,240 @@ export default function Tip() {
                 position: "relative"
               }}>
 
-              {/* <div style={{ padding: "0 20px 5px 20px" }}>
-                <WalletConnect />
-              </div> */}
+                             {/* Filter Components */}
+               <div className={'flex-row'} style={{justifyContent: 'center', marginTop: '15px', marginBottom: '30px', gap: isMobile ? '0.35rem' : '0.35rem', flexWrap: 'wrap'}}>
+                 
+                 {/* SORT Filter */}
+                 <div className='flex-row' style={{height: '42px', alignItems: 'center', justifyContent: 'center', padding: '28px 0'}}>
+                   <div className='flex-row' style={{padding: '6px 11px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '28px', alignItems: 'center', gap: '0.35rem'}}>
+                     <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '13px' : '14px'}}>SORT</div>
+
+                     <div className={sortBy == 'down' ? 'filter-item-on' : 'filter-item'} style={{padding: '3px 8px 0px 8px'}} onClick={() => {updateOrder('down')}}><BiSortDown size={17} /></div>
+                     <div className={sortBy == 'up' ? 'filter-item-on' : 'filter-item'} style={{padding: '3px 8px 0px 8px'}} onClick={() => {updateOrder('up')}}><BiSortUp size={17} /></div>
+                     <div className={sortBy == 'shuffle' ? 'filter-item-on' : 'filter-item'} style={{padding: '3px 8px 0px 8px'}} onClick={() => {updateOrder('shuffle')}}><ShuffleIcon size={17} /></div>
+                     <div className={sortBy == 'clock-forward' ? 'filter-item-on' : 'filter-item'} style={{padding: '3px 8px 0px 8px'}} onClick={() => {updateOrder('clock-forward')}}><ClockForward size={17} /></div>
+                     <div className={sortBy == 'clock-back' ? 'filter-item-on' : 'filter-item'} style={{padding: '3px 8px 0px 8px'}} onClick={() => {updateOrder('clock-back')}}><ClockBack size={17} /></div>
+                   </div>
+                 </div>
+
+                 {/* TIME Filter */}
+                 <div className='flex-row' style={{height: '42px', alignItems: 'center', justifyContent: 'center', padding: '28px 0'}}>
+                   <div className='flex-row' style={{padding: '6px 11px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '28px', alignItems: 'center', gap: '0.35rem'}}>
+                     <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '13px' : '14px'}}>TIME</div>
+
+                     <div className={timeframe == '24h' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('24h')}} style={{fontSize: isMobile ? '13px' : '14px'}}>24hr</div>
+                     <div className={timeframe == '3d' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('3d')}} style={{fontSize: isMobile ? '13px' : '14px'}}>3d</div>
+                     <div className={timeframe == '7d' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('7d')}} style={{fontSize: isMobile ? '13px' : '14px'}}>7d</div>
+                     <div className={timeframe == '30d' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('30d')}} style={{fontSize: isMobile ? '13px' : '14px'}}>30d</div>
+                     <div className={timeframe == 'all' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('all')}} style={{fontSize: isMobile ? '13px' : '14px'}}>all</div>
+                   </div>
+                 </div>
+
+                 {/* CHANNEL Filter */}
+                 <div className='flex-row' style={{height: '42px', alignItems: 'center', justifyContent: 'center', padding: '28px 0'}}>
+                   <div className='flex-row' style={{padding: '6px 11px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '28px', alignItems: 'center', gap: '0.35rem'}}>
+                     <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '13px' : '14px'}}>CHANNEL</div>
+
+                     <select value={selectedChannel} onChange={updateChannel} style={{backgroundColor: '#adf', borderRadius: '6px', padding: isMobile ? '2px 6px' : '2px', fontSize: isMobile ? '14px' : '17px', width: '100%', fontWeight: '600'}}>
+                       {channelOptions.map((channel) => (
+                         <option key={channel} value={channel}>
+                           {(channel !== ' ') ? '/' + channel : channel}
+                         </option>
+                       ))}
+                     </select>
+                   </div>
+                 </div>
+
+                 {/* CURATORS Filter */}
+                 <div className='flex-row' style={{height: '42px', alignItems: 'center', justifyContent: 'center', padding: '28px 0'}}>
+                   <div className='flex-row' style={{padding: '6px 11px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '28px', alignItems: 'center', gap: '0.35rem'}}>
+                     <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '13px' : '14px'}}>CURATORS</div>
+
+                     <input
+                       type="text"
+                       value={curatorSearchInput}
+                       onChange={e => getCuratorInput(e.target.value, null)}
+                       style={{
+                         backgroundColor: "#adf",
+                         borderRadius: "6px",
+                         padding: isMobile ? "2px 6px" : "2px 6px",
+                         fontSize: isMobile ? "14px" : "17px",
+                         width: "150px",
+                         fontWeight: "600",
+                         margin: "0 0 0 4px"
+                       }}
+                       placeholder="search curators"
+                     />
+                   </div>
+                 </div>
+
+                             </div>
+
+                               {/* Search Results Display */}
+                <div style={{ padding: "20px 0 0 0" }}>
+                  {searchLoading ? (
+                    <div className="flex-row" style={{justifyContent: 'center', padding: '20px'}}>
+                      <Spinner size={31} color={'#999'} />
+                    </div>
+                  ) : creatorResults.length > 0 ? (
+                    <div className="flex-col" style={{gap: '10px'}}>
+                      <div style={{textAlign: 'center', color: '#ace', fontSize: '14px', fontWeight: '600'}}>
+                        Found {creatorResults.length} creators
+                      </div>
+                      {/* TODO: Display creator results here */}
+                      <div style={{color: '#999', fontSize: '12px', textAlign: 'center'}}>
+                        Creator results will be displayed here
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{textAlign: 'center', color: '#999', fontSize: '12px'}}>
+                      No creators found with current filters
+                    </div>
+                  )}
+                </div>
+
+                {/* Curators Search Results */}
+                {curatorData?.length > 0 && (
+                  <div style={{ padding: "20px 0 0 0" }}>
+                    <div style={{textAlign: 'center', color: '#ace', fontSize: '14px', fontWeight: '600', marginBottom: '15px'}}>
+                      Found {curatorsLength} curators
+                    </div>
+                    <div className="flex-row" style={{justifyContent: 'center', flexWrap: 'wrap', gap: '10px'}}>
+                      {curatorData?.map((curator, index) => (
+                        <div
+                          key={index}
+                          style={{
+                            display: "flex",
+                            flexDirection: "row",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: "0.25rem",
+                            border: "1px solid #666",
+                            borderRadius: "20px",
+                            padding: "8px 12px",
+                            backgroundColor: "#33445522",
+                            cursor: "pointer",
+                            transition: "all 0.2s ease"
+                          }}
+                          onClick={() => updateCuratorSchedule(curator)}
+                          onMouseEnter={(e) => {
+                            e.target.style.backgroundColor = "#44556644";
+                            e.target.style.borderColor = "#888";
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.backgroundColor = "#33445522";
+                            e.target.style.borderColor = "#666";
+                          }}
+                        >
+                          {curator?.pfp && (
+                            <img
+                              src={curator?.pfp}
+                              width={24}
+                              height={24}
+                              style={{
+                                borderRadius: "80px",
+                                border: "2px solid #eee",
+                                backgroundColor: "#8363ca"
+                              }}
+                            />
+                          )}
+                          <div style={{ 
+                            display: "flex", 
+                            textAlign: "center", 
+                            fontSize: "14px", 
+                            margin: "0",
+                            color: "#ace",
+                            fontWeight: "500"
+                          }}>
+                            {curator ? `@${curator?.username}` : " curator not found"}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Selected Curators Display */}
+                {curatorList?.length > 0 && (
+                  <div style={{ padding: "20px 0 0 0" }}>
+                    <div style={{textAlign: 'center', color: '#ace', fontSize: '14px', fontWeight: '600', marginBottom: '15px'}}>
+                      Selected Curators:
+                    </div>
+                    <div className="flex-row" style={{justifyContent: 'center', flexWrap: 'wrap', gap: '10px'}}>
+                      {curatorList?.map((curator, index) => (
+                        <div
+                          key={index}
+                          style={{
+                            display: "flex",
+                            flexDirection: "row",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: "0.25rem",
+                            border: "1px solid #666",
+                            borderRadius: "20px",
+                            padding: "8px 12px",
+                            backgroundColor: "#44556644",
+                            position: "relative"
+                          }}
+                        >
+                          {curator?.pfp && (
+                            <img
+                              src={curator?.pfp}
+                              width={24}
+                              height={24}
+                              style={{
+                                borderRadius: "80px",
+                                border: "2px solid #eee",
+                                backgroundColor: "#8363ca"
+                              }}
+                            />
+                          )}
+                          <div style={{ 
+                            display: "flex", 
+                            textAlign: "center", 
+                            fontSize: "14px", 
+                            margin: "0",
+                            color: "#ace",
+                            fontWeight: "500"
+                          }}>
+                            {curator ? `@${curator?.username}` : " curator not found"}
+                          </div>
+                          <div
+                            style={{
+                              position: "absolute",
+                              top: "-8px",
+                              right: "-8px",
+                              cursor: "pointer",
+                              backgroundColor: "#a00",
+                              borderRadius: "50%",
+                              width: "20px",
+                              height: "20px",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              fontSize: "12px",
+                              color: "white",
+                              fontWeight: "bold"
+                            }}
+                            onClick={() => {
+                              setCuratorList([]);
+                              setUserQuery({
+                                ...userQuery,
+                                curators: null
+                              });
+                            }}
+                          >
+                            ×
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+               {/* <div style={{ padding: "0 20px 5px 20px" }}>
+                 <WalletConnect />
+               </div> */}
 
             </div>
           </div>
