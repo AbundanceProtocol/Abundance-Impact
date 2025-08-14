@@ -5,7 +5,7 @@ import axios from "axios";
 import Head from "next/head";
 
 import { IoIosRocket, IoMdTrophy, IoMdRefresh as Refresh } from "react-icons/io";
-import { BsLightningChargeFill as Impact, BsPiggyBankFill, BsQuestionCircle, BsGiftFill, BsCurrencyExchange } from "react-icons/bs";
+import { BsLightningChargeFill as Impact, BsPiggyBankFill, BsQuestionCircle, BsGiftFill, BsCurrencyExchange, BsFillFunnelFill } from "react-icons/bs";
 import { confirmUser, timePassed } from "../../utils/utils";
 import Spinner from "../../components/Common/Spinner";
 import ExpandImg from "../../components/Cast/ExpandImg";
@@ -628,7 +628,7 @@ export default function Tip() {
                           padding: "0 20px"
                         }}
                       >
-                        <Spinner size={31} color={"#468"} />
+                        <Spinner size={28} color={"#468"} />
                       </div>
                     ) : (
                       <div
@@ -742,7 +742,7 @@ export default function Tip() {
                           padding: "0 20px"
                         }}
                       >
-                        <Spinner size={31} color={"#468"} />
+                        <Spinner size={28} color={"#468"} />
                       </div>
                     ) : (
                       <div
@@ -836,7 +836,7 @@ export default function Tip() {
                           padding: "0 20px"
                         }}
                       >
-                        <Spinner size={31} color={"#468"} />
+                        <Spinner size={28} color={"#468"} />
                       </div>
                     ) : (
                       <div
@@ -1040,51 +1040,140 @@ export default function Tip() {
                 position: "relative"
               }}>
 
-              {/* <div
-                className="flex-row"
-                style={{
-                  color: "#9df",
-                  width: "100%",
-                  fontSize: isMobile ? "15px" : "17px",
-                  padding: "10px 10px 15px 10px",
-                  justifyContent: "center",
-                  userSelect: "none"
-                }}
-              >
-                Manage your wallet and perform blockchain actions
-              </div> */}
-
-              {/* <div
-                className="flex-row"
-                style={{
-                  color: "#59b",
-                  width: "100%",
-                  fontSize: isMobile ? "13px" : "15px",
-                  padding: "10px 10px 15px 10px",
-                  justifyContent: "center",
-                  textAlign: "center"
-                }}
-              >
-                In Farcaster Mini Apps, wallet connection is handled automatically
-              </div> */}
-
-              {/* <div style={{ padding: "0 20px 20px 20px" }}>
-                <WagmiStatus />
-              </div>
-
-              <div style={{ padding: "0 20px 20px 20px" }}>
-                <WalletDemo />
-              </div> */}
-
               <div style={{ padding: "0 20px 5px 20px" }}>
                 <WalletConnect />
               </div>
 
-              {/* <div style={{ padding: "0 20px 20px 20px" }}>
-                <WalletActions />
-              </div> */}
             </div>
           </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          <div
+            className="shadow flex-col"
+            style={{
+              backgroundColor: isLogged ? "#002244" : "#333",
+              borderRadius: "15px",
+              border: isLogged ? "1px solid #11447799" : "1px solid #555",
+              width: isMiniApp || isMobile ? "340px" : "100%",
+              margin: isMiniApp || isMobile ? "20px auto 0 auto" : "0px auto 0 auto"
+            }}
+          >
+            <div
+              className="shadow flex-row"
+              style={{
+                backgroundColor: isLogged ? "#11448888" : "#444",
+                width: "100%",
+                justifyContent: "space-between",
+                alignItems: "center",
+                padding: "8px",
+                borderRadius: "15px",
+                margin: "0 0 10px 0",
+                gap: "1rem"
+              }}
+            >
+              <div
+                className="flex-row"
+                style={{
+                  width: "100%",
+                  justifyContent: "flex-start",
+                  alignItems: "center",
+                  padding: "0px 0 0 4px",
+                  margin: "0 0 0px 0"
+                }}
+              >
+                <BsFillFunnelFill style={{ fill: "#cde" }} size={20} />
+                <div>
+                  <div
+                    style={{
+                      border: "0px solid #777",
+                      padding: "2px",
+                      borderRadius: "10px",
+                      backgroundColor: "",
+                      maxWidth: "fit-content",
+                      cursor: "pointer",
+                      color: "#cde"
+                    }}
+                  >
+                    <div className="top-layer flex-row">
+                      <div
+                        className="flex-row"
+                        style={{
+                          padding: "4px 0 4px 10px",
+                          marginBottom: "0px",
+                          flexWrap: "wrap",
+                          justifyContent: "flex-start",
+                          gap: "0.00rem",
+                          width: "",
+                          alignItems: "center"
+                        }}
+                      >
+                        <div
+                          style={{
+                            fontSize: isMobile ? "18px" : "22px",
+                            fontWeight: "600",
+                            color: "",
+                            padding: "0px 3px"
+                          }}
+                        >
+                          Select Creators
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div
+              className="flex-col"
+              style={{
+                backgroundColor: isLogged ? "#002244ff" : "#333",
+                padding: "10px 18px 12px 18px",
+                borderRadius: "0 0 15px 15px",
+                color: isLogged ? "#ace" : "#ddd",
+                fontSize: "12px",
+                gap: "0.75rem",
+                position: "relative"
+              }}>
+
+              {/* <div style={{ padding: "0 20px 5px 20px" }}>
+                <WalletConnect />
+              </div> */}
+
+            </div>
+          </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         </div>
       </div>)}
 

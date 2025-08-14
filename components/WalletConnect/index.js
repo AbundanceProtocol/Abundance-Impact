@@ -25,6 +25,21 @@ export default function WalletConnect() {
   const [selectedToken, setSelectedToken] = useState('default');
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [lastRefreshTime, setLastRefreshTime] = useState(0);
+  const [tipAmount, setTipAmount] = useState(0);
+
+  // Helper function for dynamic decimal formatting
+  const formatAmount = (amount, symbol) => {
+    const numAmount = parseFloat(amount);
+    
+    if (symbol === 'ETH') {
+      return numAmount.toFixed(4);
+    } else if (numAmount >= 10) {
+      return numAmount.toFixed(2);
+    } else if (numAmount < 10) {
+      return numAmount.toFixed(3);
+    }
+    return numAmount.toFixed(2);
+  };
 
   // Helper functions for token display
   const getTokenImage = (symbol) => {
@@ -308,7 +323,7 @@ export default function WalletConnect() {
                               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <span style={{ color: '#999' }}>--</span>
                               </div>
-                              <Spinner size={28} color={'#999'} />
+                              <Spinner size={31} color={'#999'} />
                             </>
                           );
                         }
@@ -406,51 +421,110 @@ export default function WalletConnect() {
                                 </div>
                                 <div style={{ textAlign: 'left' }}>
                                   <div style={{ fontSize: '13px', fontWeight: 'bold' }}>{token.symbol}</div>
-                                  <div style={{ fontSize: '11px', color: '#666' }}>{token.balance}</div>
+                                  <div style={{ fontSize: '11px', color: '#666' }}>{formatAmount(token.balance, token.symbol)}</div>
                                 </div>
                               </div>
-                              <span style={{ color: '#28a745', fontWeight: 'bold' }}>
-                                ${(() => {
-                                  const calculated = parseFloat(token.balance) * parseFloat(token.price);
-                                  // For very small values, show more precision
-                                  if (calculated < 0.01) {
-                                    return calculated.toFixed(6);
-                                  } else if (calculated < 1) {
-                                    return calculated.toFixed(4);
-                                  } else {
-                                    return calculated.toFixed(2);
-                                  }
-                                })()}
-                              </span>
-
-                            </>
-                          );
-                        } else {
-                          return (
-                            <>
-                              <span>Select a token</span>
-                              <span style={{ color: '#999' }}>▼</span>
-                            </>
-                          );
-                        }
-                      })()}
-                    </button>
+                                                                                                    <span style={{ 
+                               color: '#28a745', 
+                               fontWeight: 'bold' }}>
+                              ${(() => {
+                                const calculated = parseFloat(token.balance) * parseFloat(token.price);
+                                // For very small values, show more precision
+                                if (calculated < 0.01) {
+                                  return calculated.toFixed(6);
+                                } else if (calculated < 1) {
+                                  return calculated.toFixed(4);
+                                } else {
+                                  return calculated.toFixed(2);
+                                }
+                              })()}
+                            </span>
+                          </>
+                        );
+                      }
+                    })()}
+                                    </button>
+                  
+                  {/* Tip Amount Slider - Show when tokens are loaded and not loading */}
+                  {!topCoinsLoading && (() => {
+                    const displayToken = selectedToken === 'default' ? getSelectedToken() : selectedToken;
+                    if (!displayToken) return null;
                     
-                    {/* Dropdown Options */}
-                    {dropdownOpen && (
+                    return (
                       <div style={{
-                        position: 'absolute',
-                        top: '100%',
-                        left: 0,
-                        right: 0,
-                        backgroundColor: 'white',
-                        border: '1px solid #ddd',
-                        borderRadius: '12px',
-                        maxHeight: '300px',
-                        overflowY: 'auto',
-                        zIndex: 1000,
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+                        marginTop: '15px',
+                        padding: '15px',
+                        backgroundColor: '#00112299',
+                        borderRadius: '10px',
+                        border: '1px solid #688'
                       }}>
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          marginBottom: '10px'
+                        }}>
+                          <span style={{ fontSize: '13px', fontWeight: 'bold', color: '#cde' }}>
+                            Tip Amount
+                          </span>
+                          <div style={{ textAlign: 'right' }}>
+                            <div style={{ fontSize: '14px', fontWeight: 'bold', color: '#007bff' }}>
+                              {formatAmount(tipAmount, displayToken.symbol)} {displayToken.symbol}
+                            </div>
+                            <div style={{ fontSize: '11px', color: '#9df' }}>
+                              ${(parseFloat(tipAmount) * parseFloat(displayToken.price)).toFixed(2)}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <input
+                          type="range"
+                          min="0"
+                          max={parseFloat(displayToken.balance)}
+                          step="0.000001"
+                          value={tipAmount}
+                          onChange={(e) => setTipAmount(parseFloat(e.target.value))}
+                          style={{
+                            width: '100%',
+                            height: '8px',
+                            borderRadius: '4px',
+                            background: 'linear-gradient(to right, #007bff 0%, #007bff ' + (tipAmount / parseFloat(displayToken.balance) * 100) + '%, #688 ' + (tipAmount / parseFloat(displayToken.balance) * 100) + '%, #688 100%)',
+                            outline: 'none',
+                            cursor: 'pointer',
+                            WebkitAppearance: 'none',
+                            appearance: 'none',
+                            border: '1px solid #357'
+                          }}
+                        />
+                        
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          fontSize: '11px',
+                          color: '#666',
+                          marginTop: '5px'
+                        }}>
+                          <span style={{ color: '#9df' }}>0</span>
+                          <span style={{ color: '#9df' }}>{formatAmount(displayToken.balance, displayToken.symbol)} {displayToken.symbol}</span>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                  {/* Dropdown Options */}
+                  {dropdownOpen && (
+                    <div style={{
+                      position: 'absolute',
+                      top: '100%',
+                      left: 0,
+                      right: 0,
+                      backgroundColor: 'white',
+                      border: '1px solid #ddd',
+                      borderRadius: '12px',
+                      maxHeight: '300px',
+                      overflowY: 'auto',
+                      zIndex: 9999,
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+                    }}>
                         {/* Loading State */}
                         {walletConnected && topCoinsLoading ? (
                           <div style={{
@@ -462,7 +536,7 @@ export default function WalletConnect() {
                             alignItems: 'center',
                             gap: '10px'
                           }}>
-                            <Spinner size={28} color={'#999'} />
+                            <Spinner size={31} color={'#999'} />
                             <span>Loading tokens...</span>
                           </div>
                         ) : topCoins.length === 0 ? (
@@ -482,6 +556,7 @@ export default function WalletConnect() {
                               key={`${coin.networkKey}-${coin.symbol}-${index}`}
                               onClick={() => {
                                 setSelectedToken(coin); // Store the actual token object
+                                setTipAmount(0); // Reset tip amount when selecting new token
                                 setDropdownOpen(false);
                               }}
                               style={{
@@ -594,7 +669,7 @@ export default function WalletConnect() {
                                   {coin.symbol}
                                 </div>
                                 <div style={{ fontSize: '11px', color: '#000' }}>
-                                  {coin.balance} @ ${parseFloat(coin.price).toFixed(6)}
+                                  {formatAmount(coin.balance, coin.symbol)} @ ${parseFloat(coin.price).toFixed(6)}
                                 </div>
                               </div>
                               
