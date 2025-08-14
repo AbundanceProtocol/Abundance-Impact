@@ -1019,7 +1019,7 @@ export default function Tip() {
                             padding: "0px 3px"
                           }}
                         >
-                          Wallet Management
+                          Select Token
                         </div>
                       </div>
                     </div>
@@ -1032,15 +1032,15 @@ export default function Tip() {
               className="flex-col"
               style={{
                 backgroundColor: isLogged ? "#002244ff" : "#333",
-                padding: "0px 18px 12px 18px",
+                padding: "10px 18px 12px 18px",
                 borderRadius: "0 0 15px 15px",
                 color: isLogged ? "#ace" : "#ddd",
                 fontSize: "12px",
                 gap: "0.75rem",
                 position: "relative"
-              }}
-            >
-              <div
+              }}>
+
+              {/* <div
                 className="flex-row"
                 style={{
                   color: "#9df",
@@ -1052,9 +1052,9 @@ export default function Tip() {
                 }}
               >
                 Manage your wallet and perform blockchain actions
-              </div>
+              </div> */}
 
-              <div
+              {/* <div
                 className="flex-row"
                 style={{
                   color: "#59b",
@@ -1066,23 +1066,23 @@ export default function Tip() {
                 }}
               >
                 In Farcaster Mini Apps, wallet connection is handled automatically
-              </div>
+              </div> */}
 
-              <div style={{ padding: "0 20px 20px 20px" }}>
+              {/* <div style={{ padding: "0 20px 20px 20px" }}>
                 <WagmiStatus />
               </div>
 
               <div style={{ padding: "0 20px 20px 20px" }}>
                 <WalletDemo />
-              </div>
+              </div> */}
 
-              <div style={{ padding: "0 20px 20px 20px" }}>
+              <div style={{ padding: "0 20px 5px 20px" }}>
                 <WalletConnect />
               </div>
 
-              <div style={{ padding: "0 20px 20px 20px" }}>
+              {/* <div style={{ padding: "0 20px 20px 20px" }}>
                 <WalletActions />
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

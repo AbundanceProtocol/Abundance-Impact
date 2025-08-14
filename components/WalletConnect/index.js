@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AccountContext } from '../../context';
 import { useAccount, useDisconnect } from 'wagmi';
+import Spinner from '../Common/Spinner';
 
 export default function WalletConnect() {
   const {
@@ -26,6 +27,33 @@ export default function WalletConnect() {
   const [lastRefreshTime, setLastRefreshTime] = useState(0);
 
   // Helper functions for token display
+  const getTokenImage = (symbol) => {
+    const tokenImages = {
+      'ETH': '/images/tokens/ethereum.png',
+      'WETH': '/images/tokens/ethereum.png',
+      'USDC': '/images/tokens/usdc.png',
+      'CELO': '/images/tokens/celo.jpg',
+      'DEGEN': '/images/tokens/degen.png',
+      'BETR': '/images/tokens/ethereum.png', // Fallback to ethereum for now
+      'NOICE': '/images/tokens/noice.jpg',
+      'TIPN': '/images/tokens/tipn.png',
+      'OP': '/images/tokens/optimism.png', // Use optimism image for OP token
+      'ARB': '/images/tokens/ethereum.png' // Fallback to ethereum for now
+    };
+    return tokenImages[symbol] || '/images/tokens/ethereum.png'; // Default fallback
+  };
+
+  const getNetworkImage = (chainId) => {
+    const networkImages = {
+      '0x1': '/images/tokens/ethereum.png',      // Ethereum
+      '0xa': '/images/tokens/optimism.png',      // Optimism
+      '0xa4b1': '/images/tokens/ethereum.png',  // Arbitrum (fallback to ethereum for now)
+      '0x2105': '/images/tokens/base.png',      // Base
+      '0xa4ec': '/images/tokens/celo.jpg'       // Celo
+    };
+    return networkImages[chainId] || '/images/tokens/ethereum.png'; // Default fallback
+  };
+
   const getTokenColor = (symbol) => {
     const colors = {
       'ETH': '#627eea',
@@ -63,6 +91,40 @@ export default function WalletConnect() {
     };
     return explorers[chainId] || 'Explorer';
   };
+
+  // Helper function to find token by symbol and network
+  const findToken = (symbol, networkKey) => {
+    return topCoins.find(t => t.symbol === symbol && t.networkKey === networkKey);
+  };
+
+  // Helper function to get selected token
+  const getSelectedToken = () => {
+    if (selectedToken === 'default') {
+      // Find USDC on Base as default
+      let token = findToken('USDC', 'base');
+      if (!token) {
+        // If no USDC on Base, use first available token
+        token = topCoins.find(t => parseFloat(t.balance) > 0);
+      }
+      return token;
+    } else {
+      // selectedToken should be the actual token object
+      // Verify it's a valid token object with required properties
+      if (selectedToken && typeof selectedToken === 'object' && selectedToken.symbol && selectedToken.balance !== undefined) {
+        return selectedToken;
+      } else {
+        // Fallback to default if selectedToken is invalid
+        console.warn('Invalid selectedToken:', selectedToken);
+        let token = findToken('USDC', 'base');
+        if (!token) {
+          token = topCoins.find(t => parseFloat(t.balance) > 0);
+        }
+        return token;
+      }
+    }
+  };
+
+
 
   // Debounced refresh function
   const debouncedRefresh = (address, forceRefresh = false) => {
@@ -149,29 +211,7 @@ export default function WalletConnect() {
         {/* Show all tokens from all networks */}
         {walletConnected && walletAddress && (
           <div className="all-tokens-section">
-            {/* RPC Rate Limit Status */}
-            {(() => {
-              const now = Date.now();
-              const timeSinceLastRpc = now - (lastRpcCall || 0);
-              const isRateLimited = timeSinceLastRpc < 10000;
-              
-              if (isRateLimited) {
-                return (
-                  <div style={{
-                    fontSize: '11px',
-                    color: '#ff6b35',
-                    backgroundColor: '#fff3cd',
-                    padding: '4px 8px',
-                    borderRadius: '4px',
-                    margin: '5px 0',
-                    border: '1px solid #ffeaa7'
-                  }}>
-                    ⏳ RPC Rate Limit: {Math.ceil((10000 - timeSinceLastRpc) / 1000)}s remaining
-                  </div>
-                );
-              }
-              return null;
-            })()}
+
             
             {topCoinsLoading ? (
               <div style={{ fontSize: '12px', color: '#666', fontStyle: 'italic' }}>
@@ -187,7 +227,7 @@ export default function WalletConnect() {
                       onClick={() => setDropdownOpen(!dropdownOpen)}
                       style={{
                         padding: '8px 12px',
-                        borderRadius: '4px',
+                        borderRadius: '10px',
                         border: '1px solid #ddd',
                         fontSize: '12px',
                         backgroundColor: 'white',
@@ -195,60 +235,199 @@ export default function WalletConnect() {
                         display: 'flex',
                         alignItems: 'center',
                         gap: '8px',
-                        minWidth: '200px',
+                        minWidth: '260px', // 30% wider (was 200px)
                         justifyContent: 'space-between'
                       }}
                     >
                       {(() => {
-                        const token = selectedToken === 'default' 
-                          ? topCoins.find(t => t.symbol === 'USDC' && t.networkKey === 'base')
-                          : topCoins[selectedToken];
-                          
-                        if (token) {
+                        let token;
+                        if (selectedToken === 'default') {
+                          // Find USDC on Base as default
+                          token = getSelectedToken();
+                        } else {
+                          // Use the selected token index
+                          token = selectedToken;
+                        }
+                        
+                        // Show loading state if wallet is connected and tokens are loading
+                        if (walletConnected && topCoinsLoading) {
                           return (
                             <>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                {/* Token Icon */}
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                {/* USDC Icon */}
                                 <div style={{
-                                  width: '20px',
-                                  height: '20px',
+                                  width: '30px',
+                                  height: '30px',
                                   borderRadius: '50%',
-                                  backgroundColor: getTokenColor(token.symbol),
+                                  backgroundColor: '#2775ca',
                                   display: 'flex',
                                   alignItems: 'center',
                                   justifyContent: 'center',
-                                  fontSize: '10px',
-                                  fontWeight: 'bold',
-                                  color: 'white',
                                   position: 'relative'
                                 }}>
-                                  {token.symbol.charAt(0)}
+                                  <img 
+                                    src="/images/tokens/usdc.png" 
+                                    alt="USDC" 
+                                    style={{ 
+                                      width: '100%', 
+                                      height: '100%', 
+                                      objectFit: 'cover',
+                                      borderRadius: '50%'
+                                    }} 
+                                  />
                                   
                                   {/* Network Icon Overlay */}
                                   <div style={{
                                     position: 'absolute',
                                     bottom: '-1px',
                                     right: '-1px',
-                                    width: '10px',
-                                    height: '10px',
+                                    width: '19px', // 1px smaller (was 20px)
+                                    height: '19px', // 1px smaller (was 20px)
                                     borderRadius: '50%',
-                                    backgroundColor: getNetworkColor(token.chainId),
-                                    border: '1px solid white',
+                                    backgroundColor: '#0052ff',
+                                    border: '2px solid white',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    fontSize: '7px',
-                                    fontWeight: 'bold',
-                                    color: 'white'
+                                    overflow: 'hidden',
+                                    zIndex: 9999,
+                                    boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
                                   }}>
-                                    {token.network.charAt(0)}
+                                    <img 
+                                      src="/images/tokens/base.png" 
+                                      alt="Base" 
+                                      style={{ 
+                                        width: '100%', 
+                                        height: '100%', 
+                                        objectFit: 'cover',
+                                        borderRadius: '50%'
+                                      }} 
+                                    />
                                   </div>
                                 </div>
-                                <span>{token.symbol}</span>
+                                <div>
+                                  <div style={{ fontSize: '13px', fontWeight: 'bold' }}>USDC</div>
+                                  <div style={{ fontSize: '11px', color: '#666' }}>--</div>
+                                </div>
+                              </div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <span style={{ color: '#999' }}>--</span>
+                                <Spinner size="16px" />
+                              </div>
+                            </>
+                          );
+                        }
+                        
+                        if (token) {
+                          return (
+                            <>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                {/* Token Icon */}
+                                <div style={{
+                                  width: '34px', // 2px larger (was 32px)
+                                  height: '34px', // 2px larger (was 32px)
+                                  borderRadius: '50%',
+                                  backgroundColor: getTokenColor(token.symbol),
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  position: 'relative',
+                                  border: '2px solid #e0e0e0',
+                                  boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                                }}>
+                                  <img 
+                                    src={getTokenImage(token.symbol)} 
+                                    alt={token.symbol} 
+                                    style={{ 
+                                      width: '100%', 
+                                      height: '100%', 
+                                      objectFit: 'cover',
+                                      borderRadius: '50%'
+                                    }}
+                                    onError={(e) => {
+                                      // Fallback to text if image fails to load
+                                      e.target.style.display = 'none';
+                                      const fallback = document.createElement('div');
+                                      fallback.textContent = token.symbol.charAt(0);
+                                      fallback.style.cssText = `
+                                        width: 100%; 
+                                        height: 100%; 
+                                        display: flex; 
+                                        alignItems: center; 
+                                        justifyContent: center; 
+                                        fontSize: 15px; 
+                                        fontWeight: bold; 
+                                        color: white;
+                                      `;
+                                      e.target.parentNode.appendChild(fallback);
+                                    }}
+                                  />
+                                  
+                                  {/* Network Icon Overlay */}
+                                  <div style={{
+                                    position: 'absolute',
+                                    bottom: '-2px',
+                                    right: '-2px',
+                                    width: '18px', // 1px smaller (was 19px)
+                                    height: '18px', // 1px smaller (was 19px)
+                                    borderRadius: '50%',
+                                    backgroundColor: getNetworkColor(token.chainId),
+                                    border: '2px solid white',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    overflow: 'hidden',
+                                    zIndex: 9999,
+                                    boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                                  }}>
+                                    <img 
+                                      src={getNetworkImage(token.chainId)} 
+                                      alt={token.network} 
+                                      style={{ 
+                                        width: '100%', 
+                                        height: '100%', 
+                                        objectFit: 'cover',
+                                        borderRadius: '50%'
+                                      }}
+                                      onError={(e) => {
+                                        // Fallback to text if image fails to load
+                                        e.target.style.display = 'none';
+                                        const fallback = document.createElement('div');
+                                        fallback.textContent = token.network.charAt(0);
+                                        fallback.style.cssText = `
+                                          width: 100%; 
+                                          height: 100%; 
+                                          display: flex; 
+                                          alignItems: center; 
+                                          justifyContent: center; 
+                                          fontSize: 10px; 
+                                          fontWeight: bold; 
+                                          color: white;
+                                        `;
+                                        e.target.parentNode.appendChild(fallback);
+                                      }}
+                                    />
+                                  </div>
+                                </div>
+                                <div style={{ textAlign: 'left' }}>
+                                  <div style={{ fontSize: '13px', fontWeight: 'bold' }}>{token.symbol}</div>
+                                  <div style={{ fontSize: '11px', color: '#666' }}>{token.balance}</div>
+                                </div>
                               </div>
                               <span style={{ color: '#28a745', fontWeight: 'bold' }}>
-                                ${parseFloat(token.value).toFixed(2)}
+                                ${(() => {
+                                  const calculated = parseFloat(token.balance) * parseFloat(token.price);
+                                  // For very small values, show more precision
+                                  if (calculated < 0.01) {
+                                    return calculated.toFixed(6);
+                                  } else if (calculated < 1) {
+                                    return calculated.toFixed(4);
+                                  } else {
+                                    return calculated.toFixed(2);
+                                  }
+                                })()}
                               </span>
+
                             </>
                           );
                         } else {
@@ -271,82 +450,56 @@ export default function WalletConnect() {
                         right: 0,
                         backgroundColor: 'white',
                         border: '1px solid #ddd',
-                        borderRadius: '4px',
+                        borderRadius: '12px',
                         maxHeight: '300px',
                         overflowY: 'auto',
                         zIndex: 1000,
                         boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
                       }}>
-                        {/* Default Option */}
-                        <div
-                          onClick={() => {
-                            setSelectedToken('default');
-                            setDropdownOpen(false);
-                          }}
-                          style={{
-                            padding: '10px',
-                            cursor: 'pointer',
-                            borderBottom: '1px solid #eee',
-                            backgroundColor: selectedToken === 'default' ? '#f8f9fa' : 'white',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px'
-                          }}
-                        >
+                        {/* Loading State */}
+                        {walletConnected && topCoinsLoading ? (
                           <div style={{
-                            width: '24px',
-                            height: '24px',
-                            borderRadius: '50%',
-                            backgroundColor: '#2775ca',
+                            padding: '20px',
+                            textAlign: 'center',
+                            color: '#666',
                             display: 'flex',
+                            flexDirection: 'column',
                             alignItems: 'center',
-                            justifyContent: 'center',
-                            fontSize: '12px',
-                            fontWeight: 'bold',
-                            color: 'white',
-                            position: 'relative'
+                            gap: '10px'
                           }}>
-                            U
-                            <div style={{
-                              position: 'absolute',
-                              bottom: '-2px',
-                              right: '-2px',
-                              width: '12px',
-                              height: '12px',
-                              borderRadius: '50%',
-                              backgroundColor: '#0052ff',
-                              border: '2px solid white',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              fontSize: '8px',
-                              fontWeight: 'bold',
-                              color: 'white'
-                            }}>
-                              B
-                            </div>
+                            <Spinner size="24px" />
+                            <span>Loading tokens...</span>
                           </div>
-                          <div style={{ flex: 1 }}>
-                            <div style={{ fontSize: '13px', fontWeight: 'bold' }}>USDC</div>
-                            <div style={{ fontSize: '11px', color: '#666' }}>Default selection</div>
+                        ) : topCoins.length === 0 ? (
+                          <div style={{
+                            padding: '20px',
+                            textAlign: 'center',
+                            color: '#666'
+                          }}>
+                            No tokens available
                           </div>
-                        </div>
-                        
-                        {/* Token Options - Only show tokens with > 0 balance */}
-                        {topCoins
-                          .filter(coin => parseFloat(coin.balance) > 0)
-                          .map((coin, index) => (
+                        ) : (
+                          /* Token Options - Only show tokens with > 0 balance */
+                          topCoins
+                            .filter(coin => parseFloat(coin.balance) > 0)
+                            .map((coin, index) => (
                             <div
                               key={`${coin.networkKey}-${coin.symbol}-${index}`}
                               onClick={() => {
-                                setSelectedToken(index);
+                                setSelectedToken(coin); // Store the actual token object
                                 setDropdownOpen(false);
                               }}
                               style={{
                                 padding: '10px',
                                 cursor: 'pointer',
                                 borderBottom: '1px solid #eee',
-                                backgroundColor: selectedToken === index ? '#f8f9fa' : 'white',
+                                backgroundColor: (() => {
+                                  if (selectedToken === 'default') {
+                                    return coin.symbol === 'USDC' && coin.networkKey === 'base' ? '#f8f9fa' : 'white';
+                                  } else {
+                                    return selectedToken && selectedToken.symbol === coin.symbol && selectedToken.networkKey === coin.networkKey ? '#f8f9fa' : 'white';
+                                  }
+                                })(),
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '8px'
@@ -354,47 +507,98 @@ export default function WalletConnect() {
                             >
                               {/* Token Icon */}
                               <div style={{
-                                width: '24px',
-                                height: '24px',
+                                width: '38px', // 2px larger (was 36px)
+                                height: '38px', // 2px larger (was 36px)
                                 borderRadius: '50%',
                                 backgroundColor: getTokenColor(coin.symbol),
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                fontSize: '12px',
-                                fontWeight: 'bold',
-                                color: 'white',
-                                position: 'relative'
+                                position: 'relative',
+                                border: '2px solid #e0e0e0',
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
                               }}>
-                                {coin.symbol.charAt(0)}
+                                <img 
+                                  src={getTokenImage(coin.symbol)} 
+                                  alt={coin.symbol} 
+                                  style={{ 
+                                    width: '100%', 
+                                    height: '100%', 
+                                    objectFit: 'cover',
+                                    borderRadius: '50%'
+                                  }}
+                                  onError={(e) => {
+                                    // Fallback to text if image fails to load
+                                    e.target.style.display = 'none';
+                                    const fallback = document.createElement('div');
+                                    fallback.textContent = coin.symbol.charAt(0);
+                                    fallback.style.cssText = `
+                                      width: 100%; 
+                                      height: 100%; 
+                                      display: flex; 
+                                      alignItems: center; 
+                                      justifyContent: center; 
+                                      fontSize: 18px; 
+                                      fontWeight: bold; 
+                                      color: white;
+                                    `;
+                                    e.target.parentNode.appendChild(fallback);
+                                  }}
+                                />
                                 
                                 {/* Network Icon Overlay */}
                                 <div style={{
                                   position: 'absolute',
-                                  bottom: '-2px',
-                                  right: '-2px',
-                                  width: '12px',
-                                  height: '12px',
+                                  bottom: '-1px',
+                                  right: '-1px',
+                                  width: '19px', // 1px smaller (was 20px)
+                                  height: '19px', // 1px smaller (was 20px)
                                   borderRadius: '50%',
                                   backgroundColor: getNetworkColor(coin.chainId),
                                   border: '2px solid white',
                                   display: 'flex',
                                   alignItems: 'center',
                                   justifyContent: 'center',
-                                  fontSize: '8px',
-                                  fontWeight: 'bold',
-                                  color: 'white'
+                                  overflow: 'hidden',
+                                  zIndex: 9999,
+                                  boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
                                 }}>
-                                  {coin.network.charAt(0)}
+                                  <img 
+                                    src={getNetworkImage(coin.chainId)} 
+                                    alt={coin.network} 
+                                    style={{ 
+                                      width: '100%', 
+                                      height: '100%', 
+                                      objectFit: 'cover',
+                                      borderRadius: '50%'
+                                    }}
+                                    onError={(e) => {
+                                      // Fallback to text if image fails to load
+                                      e.target.style.display = 'none';
+                                      const fallback = document.createElement('div');
+                                      fallback.textContent = coin.network.charAt(0);
+                                      fallback.style.cssText = `
+                                        width: 100%; 
+                                        height: 100%; 
+                                        display: flex; 
+                                        alignItems: center; 
+                                        justifyContent: center; 
+                                        fontSize: 12px; 
+                                        fontWeight: bold; 
+                                        color: white;
+                                      `;
+                                      e.target.parentNode.appendChild(fallback);
+                                    }}
+                                  />
                                 </div>
                               </div>
                               
                               {/* Token Details */}
                               <div style={{ flex: 1 }}>
-                                <div style={{ fontSize: '13px', fontWeight: 'bold' }}>
+                                <div style={{ fontSize: '13px', fontWeight: 'bold', color: '#000' }}>
                                   {coin.symbol}
                                 </div>
-                                <div style={{ fontSize: '11px', color: '#666' }}>
+                                <div style={{ fontSize: '11px', color: '#000' }}>
                                   {coin.balance} @ ${parseFloat(coin.price).toFixed(6)}
                                 </div>
                               </div>
@@ -410,179 +614,16 @@ export default function WalletConnect() {
                                 ${parseFloat(coin.value).toFixed(2)}
                               </div>
                             </div>
-                          ))}
+                          ))
+                        )}
                       </div>
                     )}
                   </div>
                 </div>
                 
-                {/* Selected Token Display */}
-                {(() => {
-                  const token = selectedToken === 'default' 
-                    ? topCoins.find(t => t.symbol === 'USDC' && t.networkKey === 'base')
-                    : topCoins[selectedToken];
-                    
-                  if (!token) {
-                    return (
-                      <div style={{
-                        padding: '10px',
-                        backgroundColor: '#f8f9fa',
-                        borderRadius: '6px',
-                        border: '1px solid #e9ecef'
-                      }}>
-                        <div style={{ fontSize: '12px', color: '#666', marginBottom: '5px' }}>
-                          Default: USDC
-                        </div>
-                        <div style={{ fontSize: '11px', color: '#999', fontStyle: 'italic' }}>
-                          No USDC balance found on Base network
-                        </div>
-                      </div>
-                    );
-                  }
-                  
-                  return (
-                    <div style={{
-                      padding: '10px',
-                      backgroundColor: '#f8f9fa',
-                      borderRadius: '6px',
-                      border: '1px solid #e9ecef'
-                    }}>
-                      {/* Token Header with Icons */}
-                      <div style={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        gap: '8px', 
-                        marginBottom: '8px' 
-                      }}>
-                        {/* Token Icon */}
-                        <div style={{
-                          width: '24px',
-                          height: '24px',
-                          borderRadius: '50%',
-                          backgroundColor: getTokenColor(token.symbol),
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '12px',
-                          fontWeight: 'bold',
-                          color: 'white',
-                          position: 'relative'
-                        }}>
-                          {token.symbol.charAt(0)}
-                          
-                          {/* Network Icon Overlay */}
-                          <div style={{
-                            position: 'absolute',
-                            bottom: '-2px',
-                            right: '-2px',
-                            width: '12px',
-                            height: '12px',
-                            borderRadius: '50%',
-                            backgroundColor: getNetworkColor(token.chainId),
-                            border: '2px solid white',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontSize: '8px',
-                            fontWeight: 'bold',
-                            color: 'white'
-                          }}>
-                            {token.network.charAt(0)}
-                          </div>
-                        </div>
-                        
-                        <div>
-                          <div style={{ fontSize: '14px', fontWeight: 'bold', color: '#333' }}>
-                            {token.symbol}
-                          </div>
-                          <div style={{ fontSize: '11px', color: '#666' }}>
-                            {token.network} Network
-                          </div>
-                        </div>
-                      </div>
-                      
-                      {/* Token Details */}
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '12px' }}>
-                        <div>
-                          <span style={{ color: '#666' }}>Balance:</span>
-                          <br />
-                          <span style={{ fontWeight: 'bold' }}>{token.balance}</span>
-                        </div>
-                        <div>
-                          <span style={{ color: '#666' }}>Price:</span>
-                          <br />
-                          <span style={{ fontWeight: 'bold' }}>${token.price}</span>
-                        </div>
-                        <div style={{ gridColumn: '1 / -1' }}>
-                          <span style={{ color: '#666' }}>Total Value:</span>
-                          <br />
-                          <span style={{ fontWeight: 'bold', fontSize: '14px', color: '#28a745' }}>
-                            ${parseFloat(token.value).toFixed(2)}
-                          </span>
-                        </div>
-                      </div>
-                      
-                      {/* Network Explorer Link */}
-                      <div style={{ marginTop: '8px' }}>
-                        <button
-                          onClick={() => {
-                            const explorerUrls = {
-                              '0x2105': `https://basescan.org/address/${token.address}`,
-                              '0xa4ec': `https://explorer.celo.org/address/${token.address}`,
-                              '0xa': `https://optimistic.etherscan.io/address/${token.address}`,
-                              '0xa4b1': `https://arbiscan.io/address/${token.address}`
-                            };
-                            const url = explorerUrls[token.chainId] || `https://etherscan.io/address/${token.address}`;
-                            window.open(url, '_blank');
-                          }}
-                          style={{
-                            padding: '4px 8px',
-                            backgroundColor: '#6c757d',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            fontSize: '11px',
-                            width: '100%'
-                          }}
-                        >
-                          View on {getNetworkExplorer(token.chainId)}
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })()}
+
                 
-                {/* All Tokens Summary */}
-                <div style={{ marginTop: '10px' }}>
-                  <div style={{ fontSize: '11px', color: '#666', marginBottom: '5px' }}>
-                    Total Portfolio Value: <strong>${topCoins.reduce((sum, coin) => sum + parseFloat(coin.value), 0).toFixed(2)}</strong>
-                  </div>
-                  <div style={{ fontSize: '10px', color: '#999' }}>
-                    Showing {topCoins.length} tokens across {new Set(topCoins.map(c => c.network)).size} networks
-                  </div>
-                </div>
-                
-                {/* Action Buttons */}
-                <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
-                  <button
-                    onClick={() => debouncedRefresh(walletAddress, true)}
-                    disabled={topCoinsLoading || (Date.now() - lastRefreshTime) < 2000}
-                    style={{
-                      padding: '6px 12px',
-                      backgroundColor: '#007bff',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      fontSize: '11px',
-                      opacity: (Date.now() - lastRefreshTime) < 2000 ? 0.6 : 1
-                    }}
-                  >
-                    {topCoinsLoading ? 'Loading...' : 
-                     (Date.now() - lastRefreshTime) < 2000 ? 'Wait...' : 'Refresh All'}
-                  </button>
-                </div>
+
               </div>
             ) : (
               <div style={{ fontSize: '12px', color: '#666', fontStyle: 'italic' }}>

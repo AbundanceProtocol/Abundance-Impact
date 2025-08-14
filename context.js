@@ -464,14 +464,21 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
         // Add delay to respect rate limits
         await new Promise(resolve => setTimeout(resolve, 100));
         
-        // Use a more comprehensive price fetch for Base tokens
-        const priceResponse = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum,usd-coin,degen,betr,noice,tipn&vs_currencies=usd');
+        const priceResponse = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum,usd-coin,degen-token,betr,noice,tipn&vs_currencies=usd');
         if (priceResponse.ok) {
           const priceData = await priceResponse.json();
+          
+          // Check if DEGEN price is valid, if not use current market price
+          let degenPrice = priceData['degen-token']?.usd;
+          if (!degenPrice || degenPrice < 0.001) {
+            console.warn('⚠️ DEGEN price from CoinGecko is invalid or too low, using current market price');
+            degenPrice = 0.004144; // Current DEGEN price as of now
+          }
+          
           tokenPrices = {
             'WETH': priceData.ethereum?.usd || 3000,
             'USDC': priceData['usd-coin']?.usd || 1,
-            'DEGEN': priceData.degen?.usd || 0.0001, // Use actual DEGEN price or fallback
+            'DEGEN': degenPrice,
             'BETR': priceData.betr?.usd || 0.01,
             'NOICE': priceData.noice?.usd || 0.01,
             'TIPN': priceData.tipn?.usd || 0.01
@@ -484,7 +491,7 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
         console.warn('Failed to fetch token prices, using fallback prices:', error);
         // Fallback prices with more accurate DEGEN price
         tokenPrices = {
-          'WETH': 3000, 'USDC': 1, 'DEGEN': 0.0001, 'BETR': 0.01, 'NOICE': 0.01, 'TIPN': 0.01
+          'WETH': 3000, 'USDC': 1, 'DEGEN': 0.004144, 'BETR': 0.01, 'NOICE': 0.01, 'TIPN': 0.01
         };
       }
 
@@ -872,21 +879,47 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
       try {
         await new Promise(resolve => setTimeout(resolve, 100));
         
-        const priceResponse = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum,usd-coin,degen,betr,noice,tipn,celo,optimism,arbitrum&vs_currencies=usd');
+        const priceResponse = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum,usd-coin,degen-token,betr,noice,tipn,celo,optimism,arbitrum&vs_currencies=usd');
         if (priceResponse.ok) {
           const priceData = await priceResponse.json();
+          
+          // Debug logging for price data
+          console.log('🔍 CoinGecko Price Response:', priceData);
+          console.log('🔍 DEGEN Price Data:', {
+            raw: priceData['degen-token'],
+            usd: priceData['degen-token']?.usd,
+            fallback: 0.004144
+          });
+          
+          // Debug: Show all available price data
+          console.log('🔍 All Available Token Prices:', Object.keys(priceData).map(key => ({
+            key,
+            usd: priceData[key]?.usd
+          })));
+          
+          // Check if DEGEN price is valid, if not use current market price
+          let degenPrice = priceData['degen-token']?.usd;
+          if (!degenPrice || degenPrice < 0.001) {
+            console.warn('⚠️ DEGEN price from CoinGecko is invalid or too low, using current market price');
+            degenPrice = 0.004144; // Current DEGEN price as of now
+          }
+          
           tokenPrices = {
             'ETH': priceData.ethereum?.usd || 3000,
             'WETH': priceData.ethereum?.usd || 3000,
             'USDC': priceData['usd-coin']?.usd || 1,
             'CELO': priceData.celo?.usd || 0.5,
-            'DEGEN': priceData.degen?.usd || 0.0001,
+            'DEGEN': degenPrice,
             'BETR': priceData.betr?.usd || 0.01,
             'NOICE': priceData.noice?.usd || 0.01,
             'TIPN': priceData.tipn?.usd || 0.01,
             'OP': priceData.optimism?.usd || 2.5,
             'ARB': priceData.arbitrum?.usd || 1.5
           };
+          
+          // Debug: Show final tokenPrices object
+          console.log('🔍 Final Token Prices Object:', tokenPrices);
+          console.log('🔍 DEGEN Final Price:', tokenPrices.DEGEN);
         } else if (priceResponse.status === 429) {
           console.warn('CoinGecko rate limit hit, using fallback prices');
           throw new Error('Rate limit exceeded');
@@ -895,7 +928,7 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
         console.warn('Failed to fetch token prices, using fallback prices:', error);
         // Fallback prices
         tokenPrices = {
-          'ETH': 3000, 'WETH': 3000, 'USDC': 1, 'CELO': 0.5, 'DEGEN': 0.0001, 
+          'ETH': 3000, 'WETH': 3000, 'USDC': 1, 'CELO': 0.5, 'DEGEN': 0.004144, 
           'BETR': 0.01, 'NOICE': 0.01, 'TIPN': 0.01, 'OP': 2.5, 'ARB': 1.5
         };
       }
@@ -990,7 +1023,7 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
               
               // Debug: Show RPC response for DEGEN
               if (token.symbol === 'DEGEN') {
-                console.log('🔍 DEGEN RPC Response:', {
+                console.log('�� DEGEN RPC Response:', {
                   response: balanceData,
                   hasResult: !!balanceData.result,
                   resultValue: balanceData.result,
@@ -1024,7 +1057,10 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
                       balance,
                       price,
                       calculatedValue: value,
-                      finalValue: value.toFixed(2)
+                      finalValue: value.toFixed(2),
+                      tokenPrices: tokenPrices,
+                      symbol: token.symbol,
+                      priceFromTokenPrices: tokenPrices[token.symbol]
                     });
                   }
                   
@@ -1047,6 +1083,19 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
                     chainId: network.chainId,
                     isNative: false
                   });
+                  
+                  // Debug: Show DEGEN token when added
+                  if (token.symbol === 'DEGEN') {
+                    console.log('✅ DEGEN Token Added to Balances:', {
+                      symbol: token.symbol,
+                      balance: balance.toFixed(4),
+                      price: price,
+                      value: value.toFixed(2),
+                      network: network.name,
+                      networkKey: networkKey,
+                      chainId: network.chainId
+                    });
+                  }
                 } else {
                   console.log(`❌ ${token.symbol} on ${network.name} balance too low:`, balance);
                 }
