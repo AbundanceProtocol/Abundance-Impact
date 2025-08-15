@@ -4,6 +4,21 @@ import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagm
 import { parseUnits } from 'viem';
 import Link from "next/link";
 import axios from "axios";
+
+// Disperse contract ABI - defined at module level to avoid initialization issues
+const disperseABI = [
+  {
+    name: 'disperseToken',
+    type: 'function',
+    stateMutability: 'nonpayable',
+    inputs: [
+      { name: 'token', type: 'address' },
+      { name: 'recipients', type: 'address[]' },
+      { name: 'values', type: 'uint256[]' }
+    ],
+    outputs: []
+  }
+];
 import Head from "next/head";
 
 import { IoIosRocket, IoMdTrophy, IoMdRefresh as Refresh, IoCloseCircle } from "react-icons/io";
@@ -702,10 +717,16 @@ export default function Tip() {
 
   // Disperse function using proper Wagmi hooks as per Farcaster documentation
   const disperseTokens = async () => {
+    console.log('🚀 disperseTokens function started - Entry point');
+    
     try {
-      console.log('🚀 disperseTokens function started - USING WAGMI HOOKS');
+      console.log('🚀 Inside try block - Starting disperse');
+      console.log('🔍 Available functions:', { parseUnits: typeof parseUnits, writeContract: typeof writeContract });
+      
       setIsDispersing(true);
       setDisperseStatus('Preparing transaction...');
+      
+      console.log('🚀 Basic setup completed - USING WAGMI HOOKS');
 
       // Validate inputs
       if (!tipAmount || tipAmount <= 0) {
@@ -814,14 +835,22 @@ export default function Tip() {
           // Format the amount to avoid precision issues with parseUnits
           const formattedAmount = finalAmount.toFixed(tokenDecimals);
           
-          return {
-            address: creator.wallet,
-            // Convert to token units using correct decimals
-            amount: parseUnits(formattedAmount, tokenDecimals),
-            impact_sum: creator.impact_sum,
-            calculatedAmount: finalAmount,
-            formattedAmount: formattedAmount
-          };
+          try {
+            const parsedAmount = parseUnits(formattedAmount, tokenDecimals);
+            console.log(`✅ Parsed amount for ${creator.wallet}: ${formattedAmount} -> ${parsedAmount.toString()}`);
+            
+            return {
+              address: creator.wallet,
+              amount: parsedAmount,
+              impact_sum: creator.impact_sum,
+              calculatedAmount: finalAmount,
+              formattedAmount: formattedAmount
+            };
+          } catch (parseError) {
+            console.error(`❌ Error parsing amount for ${creator.wallet}:`, parseError);
+            console.error(`Failed to parse: ${formattedAmount} with decimals: ${tokenDecimals}`);
+            throw new Error(`Failed to parse amount: ${parseError.message}`);
+          }
         });
 
       if (recipients.length === 0) {
@@ -844,21 +873,6 @@ export default function Tip() {
       })));
 
       setDisperseStatus(`Dispersing ${selectedToken?.symbol} to ${validRecipients.length} recipients...`);
-
-      // Disperse contract ABI
-      const disperseABI = [
-        {
-          name: 'disperseToken',
-          type: 'function',
-          stateMutability: 'nonpayable',
-          inputs: [
-            { name: 'token', type: 'address' },
-            { name: 'recipients', type: 'address[]' },
-            { name: 'values', type: 'uint256[]' }
-          ],
-          outputs: []
-        }
-      ];
 
       // Get the correct token address
       let tokenAddress = selectedToken?.address || selectedToken?.contractAddress;
