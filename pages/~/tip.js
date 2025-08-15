@@ -1,5 +1,7 @@
 import { useRouter } from "next/router";
 import { useRef, useContext, useEffect, useState } from "react";
+import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
+import { parseUnits } from 'viem';
 import Link from "next/link";
 import axios from "axios";
 import Head from "next/head";
@@ -120,6 +122,13 @@ export default function Tip() {
   
   // Use the existing wallet hook for transactions
   const { sendTransaction, getProvider } = useWallet();
+  
+  // Use Wagmi hooks for proper Farcaster Mini App wallet integration
+  const { address: wagmiAddress, isConnected: wagmiConnected, chainId: wagmiChainId } = useAccount();
+  const { writeContract, data: hash, error: writeError, isPending } = useWriteContract();
+  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
+    hash,
+  });
   const ref1 = useRef(null);
   const [textMax, setTextMax] = useState("430px");
   const [screenWidth, setScreenWidth] = useState(undefined);
@@ -203,6 +212,27 @@ export default function Tip() {
     // Initialize tipAmount to 0 to match the slider
     updateTipAmount(0);
   }, []);
+
+  // Monitor transaction status using Wagmi hooks
+  useEffect(() => {
+    if (isConfirming) {
+      setDisperseStatus('Transaction confirming...');
+    } else if (isConfirmed && hash) {
+      setDisperseStatus(`Transaction confirmed! Hash: ${hash}`);
+      setIsDispersing(false);
+    } else if (writeError) {
+      let errorMessage = 'Transaction failed';
+      if (writeError.message.includes('User rejected')) {
+        errorMessage = 'Transaction was rejected by user';
+      } else if (writeError.message.includes('insufficient funds')) {
+        errorMessage = 'Insufficient funds for transaction';
+      } else if (writeError.message) {
+        errorMessage = `Error: ${writeError.message}`;
+      }
+      setDisperseStatus(errorMessage);
+      setIsDispersing(false);
+    }
+  }, [isConfirming, isConfirmed, hash, writeError]);
 
   useEffect(() => {
     if (fid) {
@@ -670,214 +700,125 @@ export default function Tip() {
 
 
 
+  // Disperse function using proper Wagmi hooks as per Farcaster documentation
   const disperseTokens = async () => {
-    console.log('🚀 disperseTokens function started - TEST');
     try {
-      console.log('🚀 disperseTokens function started');
-    setIsDispersing(true);
-    setDisperseStatus('Preparing transaction...');
-    console.log('🔍 Step 1: Function started, status set to preparing');
-  
-          // Validate inputs
-    console.log('🔍 Step 2: Validating inputs');
-    console.log('🔍 tipAmount:', tipAmount);
-    console.log('🔍 selectedToken:', selectedToken);
-    console.log('🔍 creatorResults:', creatorResults);
-    
-    if (!tipAmount || tipAmount <= 0) {
-      console.log('❌ Validation failed: Invalid tip amount');
-      setDisperseStatus('Please enter a valid tip amount');
-      setIsDispersing(false);
-      return;
-    }
-  
-          if (!selectedToken) {
-      console.log('❌ Validation failed: No token selected');
-      setDisperseStatus('Please select a token');
-      setIsDispersing(false);
-      return;
-    }
-  
-          if (!creatorResults || creatorResults.length === 0) {
-      console.log('❌ Validation failed: No creator results');
-      setDisperseStatus('No creators found to tip');
-      setIsDispersing(false);
-      return;
-    }
-  
-          // Calculate amounts for each creator based on impact_sum
-    console.log('🔍 Step 2.5: Calculating total impact sum');
-    const totalImpactSum = creatorResults.reduce((sum, creator) => sum + (creator.impact_sum || 0), 0);
-    console.log('🔍 totalImpactSum:', totalImpactSum);
-    
-    if (totalImpactSum <= 0) {
-      console.log('❌ Validation failed: Total impact sum <= 0');
-      setDisperseStatus('No valid impact data found');
-      setIsDispersing(false);
-      return;
-    }
-  
-          console.log('🔍 Step 2.6: Filtering and mapping recipients');
-    const recipients = creatorResults
-      .filter(creator => {
-        console.log('🔍 Filtering creator:', creator);
-        const hasAddress = creator.wallet; // Use 'wallet' field instead of 'address'
-        const hasImpact = creator.impact_sum !== null && creator.impact_sum !== undefined;
-        const meetsThreshold = creator.impact_sum >= 0.000001;
-        console.log('🔍 Creator filter results:', { hasAddress, hasImpact, meetsThreshold, impact_sum: creator.impact_sum, wallet: creator.wallet });
-        return hasAddress && hasImpact && meetsThreshold;
-      })
-      .map(creator => {
-          const calculatedAmount = (tipAmount * creator.impact_sum) / totalImpactSum;
-          let amountInSmallestUnit;
-  
-          // Handle large numbers safely
-          if (calculatedAmount >= Number.MAX_SAFE_INTEGER) {
-            // Use scientific notation for extremely large numbers
-            const scientificNotation = calculatedAmount.toExponential();
-            const [coefficient, exponent] = scientificNotation.split('e');
-            const adjustedCoefficient = parseFloat(coefficient) * Math.pow(10, parseInt(exponent));
-            amountInSmallestUnit = adjustedCoefficient.toFixed(0);
-          } else {
-            amountInSmallestUnit = Math.floor(calculatedAmount * Math.pow(10, 18)).toString();
-          }
-  
-                  return {
-          address: creator.wallet, // Use 'wallet' field instead of 'address'
-          amount: amountInSmallestUnit,
-          impact_sum: creator.impact_sum
-        };
-        });
-  
-          console.log('🔍 Step 2.7: Checking recipients length');
-    console.log('🔍 recipients array:', recipients);
-    console.log('🔍 recipients.length:', recipients.length);
-    
-    if (recipients.length === 0) {
-      console.log('❌ Validation failed: No valid recipients found');
-      setDisperseStatus('No valid recipients found');
-      setIsDispersing(false);
-      return;
-    }
-  
-          console.log('Valid recipients for disperse:', recipients);
+      console.log('🚀 disperseTokens function started - USING WAGMI HOOKS');
+      setIsDispersing(true);
+      setDisperseStatus('Preparing transaction...');
 
-    // Use the same wallet connection approach that the app already uses for showing tokens
-    console.log('🎯 Using existing wallet connection approach');
-    console.log('🔍 Current wallet state:', { walletConnected, walletAddress, walletChainId, walletProvider });
-    console.log('🔍 Debug: About to call getProvider()');
+      // Validate inputs
+      if (!tipAmount || tipAmount <= 0) {
+        setDisperseStatus('Please enter a valid tip amount');
+        setIsDispersing(false);
+        return;
+      }
+
+      if (!selectedToken) {
+        setDisperseStatus('Please select a token');
+        setIsDispersing(false);
+        return;
+      }
+
+      if (!creatorResults || creatorResults.length === 0) {
+        setDisperseStatus('No creators found to tip');
+        setIsDispersing(false);
+        return;
+      }
+
+      // Check Wagmi wallet connection (same as used for token balances)
+      if (!wagmiConnected || !wagmiAddress) {
+        setDisperseStatus('Wallet not connected. Please connect your wallet first.');
+        setIsDispersing(false);
+        return;
+      }
+
+      // Check if user is on Base network (chainId: 8453)
+      if (wagmiChainId !== 8453) {
+        setDisperseStatus('Please switch to Base network to use this feature');
+        setIsDispersing(false);
+        return;
+      }
+
+      // Calculate amounts for each creator based on impact_sum
+      const totalImpactSum = creatorResults.reduce((sum, creator) => sum + (creator.impact_sum || 0), 0);
       
-          // Check if wallet is connected (same check used throughout the app)
-    console.log('🔍 Step 3: Checking wallet connection');
-    console.log('🔍 walletConnected:', walletConnected);
-    console.log('🔍 walletAddress:', walletAddress);
-    
-    if (!walletConnected || !walletAddress) {
-      console.log('❌ Wallet validation failed: Not connected');
-      throw new Error('Wallet not connected. Please connect your wallet first.');
-    }
-      
-          // Get the provider using the same method the app uses
-    console.log('🔍 Step 4: Getting wallet provider');
-    const provider = getProvider();
-    console.log('🔍 getProvider() returned:', provider);
-    
-    if (!provider) {
-      console.log('❌ Provider validation failed: No provider returned');
-      throw new Error('No wallet provider available. Please check your wallet connection.');
-    }
-    
-    console.log('✅ Provider obtained:', provider);
-      
-          // Check if user is on Base network
-    console.log('🔍 Step 5: Checking network');
-    console.log('🔍 walletChainId:', walletChainId);
-    const isBaseNetwork = walletChainId === '0x2105' || walletChainId === '8453' || walletChainId === 8453;
-    console.log('🔍 isBaseNetwork:', isBaseNetwork);
-    
-    if (!isBaseNetwork) {
-      console.log('❌ Network validation failed: Not on Base');
-      setDisperseStatus("Please switch to Base network to use this feature");
-      setIsDispersing(false);
-      return;
-    }
-      
-      setDisperseStatus(`Dispersing to ${recipients.length} recipients...`);
-      
-      // Import ethers for contract interaction
-      const { ethers } = await import('ethers');
-      
-      // Disperse contract ABI and address
+      if (totalImpactSum <= 0) {
+        setDisperseStatus('No valid impact data found');
+        setIsDispersing(false);
+        return;
+      }
+
+      // Filter valid recipients and calculate amounts
+      const recipients = creatorResults
+        .filter(creator => creator.wallet && creator.impact_sum >= 0.000001)
+        .map(creator => {
+          const calculatedAmount = (tipAmount * creator.impact_sum) / totalImpactSum;
+          
+          return {
+            address: creator.wallet,
+            // Convert to token units (assuming 18 decimals for most tokens)
+            amount: parseUnits(calculatedAmount.toString(), 18),
+            impact_sum: creator.impact_sum
+          };
+        });
+
+      if (recipients.length === 0) {
+        setDisperseStatus('No valid recipients found');
+        setIsDispersing(false);
+        return;
+      }
+
+      console.log('📋 Transaction details:');
+      console.log('- Token:', selectedToken?.symbol);
+      console.log('- Recipients:', recipients.length);
+      console.log('- Total amount:', tipAmount);
+
+      setDisperseStatus(`Dispersing ${selectedToken?.symbol} to ${recipients.length} recipients...`);
+
+      // Disperse contract ABI
       const disperseABI = [
-        "function disperseToken(address token, address[] recipients, uint256[] values) external"
+        {
+          name: 'disperseToken',
+          type: 'function',
+          stateMutability: 'nonpayable',
+          inputs: [
+            { name: 'token', type: 'address' },
+            { name: 'recipients', type: 'address[]' },
+            { name: 'values', type: 'uint256[]' }
+          ],
+          outputs: []
+        }
       ];
-      const disperseContractAddress = "0xD152f549545093347A162Dce210e7293f1452150";
-      
-      // Create interface
-      const disperseInterface = new ethers.utils.Interface(disperseABI);
-      
-      // Prepare disperseToken parameters
-      const tokenAddress = selectedToken?.address || selectedToken?.contractAddress;
-      const recipientAddresses = recipients.map(r => r.address);
-      const recipientAmounts = recipients.map(r => r.amount);
-      
-      // Encode function data
-      const functionData = disperseInterface.encodeFunctionData("disperseToken", [
-        tokenAddress,
-        recipientAddresses,
-        recipientAmounts
-      ]);
-      
-      console.log('📋 Transaction parameters:');
-      console.log('- Token:', selectedToken?.symbol, 'at', tokenAddress);
-      console.log('- Recipients:', recipientAddresses.length);
-      console.log('- Function data:', functionData);
-      
-          // Send transaction using the existing working Wagmi setup
-    console.log('🔍 Step 6: Sending transaction via existing Wagmi hooks');
-    console.log('🔍 About to send transaction with:', {
-      to: disperseContractAddress,
-      value: '0',
-      data: functionData
-    });
-    
-    let tx;
-    
-    // Use the same approach that already works for wallet connection
-    // Since your app already successfully connects and shows tokens using Wagmi,
-    // we'll use the existing wallet connection that's proven to work
-    
-    console.log('🎯 Using existing working wallet connection via Wagmi');
-    console.log('🔍 Current wallet state from context:', { walletConnected, walletAddress, walletChainId, walletProvider });
-    
-    // The existing wallet connection is working, so let's use it directly
-    // This follows the same pattern that successfully shows your token balances
-    
-    if (walletProvider === 'farcaster' && window.farcasterEthProvider) {
-      console.log('🎯 Using Farcaster wallet provider directly (same method that shows tokens)');
-      tx = await window.farcasterEthProvider.request({
-        method: 'eth_sendTransaction',
-        params: [{
-          to: disperseContractAddress,
-          data: functionData,
-          from: walletAddress,
-          value: '0x0'
-        }]
+
+      // Use Wagmi's writeContract hook (as recommended by Farcaster docs)
+      await writeContract({
+        address: '0xD152f549545093347A162Dce210e7293f1452150', // Disperse contract
+        abi: disperseABI,
+        functionName: 'disperseToken',
+        args: [
+          selectedToken?.address || selectedToken?.contractAddress, // token address
+          recipients.map(r => r.address), // recipient addresses
+          recipients.map(r => r.amount) // amounts in wei
+        ],
       });
-      console.log('✅ Transaction sent via Farcaster wallet:', tx);
-    } else {
-      console.log('🔄 Using fallback wallet method');
-      // Fallback to the existing working method
-      tx = await sendTransaction(disperseContractAddress, '0', functionData);
-      console.log('✅ Transaction sent via fallback method:', tx);
-    }
-    
-    console.log('✅ Transaction sent successfully:', tx);
-    setDisperseStatus(`Transaction sent! Hash: ${tx}`);
+
+      console.log('✅ Transaction initiated via Wagmi writeContract');
+      setDisperseStatus('Transaction sent! Waiting for confirmation...');
       
     } catch (error) {
       console.error('Disperse error:', error);
-      setDisperseStatus(`Error: ${error.message}`);
+      
+      let errorMessage = 'Transaction failed';
+      if (error.message.includes('User rejected')) {
+        errorMessage = 'Transaction was rejected by user';
+      } else if (error.message.includes('insufficient funds')) {
+        errorMessage = 'Insufficient funds for transaction';
+      } else if (error.message) {
+        errorMessage = `Error: ${error.message}`;
+      }
+      
+      setDisperseStatus(errorMessage);
     } finally {
       setIsDispersing(false);
     }
@@ -1552,20 +1493,24 @@ export default function Tip() {
                         console.log('🔍 About to call disperseTokens...');
                         disperseTokens();
                       }}
-                      disabled={isDispersing || !walletConnected || !tipAmount}
+                      disabled={isPending || isConfirming || !wagmiConnected || !tipAmount}
                       style={{
                         width: "100%",
                         padding: "10px 16px",
                         borderRadius: "8px",
                         border: "none",
-                        backgroundColor: isDispersing || !walletConnected || !tipAmount ? "#555" : "#114477",
+                        backgroundColor: isPending || isConfirming || !wagmiConnected || !tipAmount ? "#555" : "#114477",
                         color: "#fff",
                         fontSize: "12px",
                         fontWeight: "600",
-                        cursor: isDispersing || !walletConnected || !tipAmount ? "not-allowed" : "pointer"
+                        cursor: isPending || isConfirming || !wagmiConnected || !tipAmount ? "not-allowed" : "pointer"
                       }}
                     >
-                      {isDispersing ? "Dispersing..." : `Disperse ${selectedToken?.symbol || 'Token'}`}
+                      {isPending 
+                       ? "Preparing..." 
+                       : isConfirming 
+                       ? "Confirming..." 
+                       : `Disperse ${selectedToken?.symbol || 'Token'}`}
                     </button>
                   </div>
                 )}
