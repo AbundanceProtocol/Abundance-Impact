@@ -1013,33 +1013,15 @@ export default function Tip() {
       console.log('- walletProvider type:', typeof walletProvider, 'value:', walletProvider);
       console.log('- window.farcasterEthProvider:', !!window.farcasterEthProvider);
       console.log('- window.ethereum:', !!window.ethereum);
-      console.log('- Running in Farcaster Mini App:', typeof sdk !== 'undefined');
-      console.log('- SDK wallet available:', !!(sdk?.wallet));
+      console.log('- Using existing wallet hook approach');
       
-      // Method 1: Try to get the Farcaster Mini App wallet provider using the SDK
-      try {
-        console.log('🔍 Checking SDK availability:');
-        console.log('- sdk defined:', typeof sdk !== 'undefined');
-        console.log('- sdk.wallet:', !!sdk?.wallet);
-        console.log('- sdk.wallet.getEthereumProvider:', typeof sdk?.wallet?.getEthereumProvider);
-        
-        if (typeof sdk !== 'undefined' && sdk.wallet && typeof sdk.wallet.getEthereumProvider === 'function') {
-          console.log('🎯 Using Farcaster Mini App SDK wallet provider');
-          availableWalletProvider = sdk.wallet.getEthereumProvider();
-          availableWalletAddress = walletAddress || detectedAddress;
-          
-          if (availableWalletProvider) {
-            console.log('✅ SDK wallet provider obtained successfully');
-            console.log('🔍 SDK wallet provider type:', typeof availableWalletProvider);
-            console.log('🔍 SDK wallet provider methods:', Object.getOwnPropertyNames(availableWalletProvider));
-          } else {
-            console.log('⚠️ SDK wallet provider returned null/undefined');
-          }
-        } else {
-          console.log('⚠️ SDK wallet methods not available');
-        }
-      } catch (sdkError) {
-        console.log('❌ Failed to get SDK wallet provider:', sdkError.message);
+      // Method 1: Use the existing wallet hook (which already works for showing tokens)
+      console.log('🎯 Using existing wallet hook approach');
+      const provider = getProvider();
+      if (provider) {
+        availableWalletProvider = provider;
+        availableWalletAddress = walletAddress;
+        console.log('✅ Provider obtained from existing hook:', provider);
       }
       
       // Method 2: Fallback to window.farcasterEthProvider if SDK method failed
