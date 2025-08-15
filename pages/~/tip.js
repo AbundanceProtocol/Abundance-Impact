@@ -9,6 +9,7 @@ import { BsLightningChargeFill as Impact, BsPiggyBankFill, BsQuestionCircle, BsG
 import { BiSortDown, BiSortUp } from "react-icons/bi";
 import { IoShuffleOutline as ShuffleIcon } from "react-icons/io5";
 import { PiClockClockwiseBold as ClockForward, PiClockCounterClockwiseBold as ClockBack } from "react-icons/pi";
+import { FaAngleDown } from "react-icons/fa";
 import { confirmUser, timePassed, getTimeRange } from "../../utils/utils";
 import Spinner from "../../components/Common/Spinner";
 import ExpandImg from "../../components/Cast/ExpandImg";
@@ -112,7 +113,8 @@ export default function Tip() {
     walletConnected,
     walletAddress,
     walletChainId,
-    walletProvider
+    walletProvider,
+    setUserInfo
   } = useContext(AccountContext);
   const ref1 = useRef(null);
   const [textMax, setTextMax] = useState("430px");
@@ -156,6 +158,9 @@ export default function Tip() {
   const [tipAmount, setTipAmount] = useState(0);
   const [isDispersing, setIsDispersing] = useState(false);
   const [disperseStatus, setDisperseStatus] = useState("");
+  
+  // Collapsible state for Impact Filter
+  const [isImpactFilterCollapsed, setIsImpactFilterCollapsed] = useState(true);
   
   // Token selection from WalletConnect - Set USDC as default
   const [selectedToken, setSelectedToken] = useState({
@@ -1783,8 +1788,9 @@ export default function Tip() {
                 alignItems: "center",
                 padding: "8px",
                 borderRadius: "15px",
-                margin: "0 0 10px 0",
-                gap: "1rem"
+                margin: isImpactFilterCollapsed ? "0 0 0 0" : "0 0 10px 0",
+                gap: "1rem",
+                position: "relative"
               }}
             >
               <div
@@ -1828,19 +1834,36 @@ export default function Tip() {
                             fontSize: isMobile ? "18px" : "22px",
                             fontWeight: "600",
                             color: "",
-                            padding: "0px 3px"
+                            padding: "0px 3px",
+                            display: "flex",
+                            alignItems: "center",
+                            cursor: "pointer"
                           }}
+                          onClick={() => setIsImpactFilterCollapsed(!isImpactFilterCollapsed)}
                         >
-                          Impact Filter
+                          <span>Impact Filter</span>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
+              
+              {/* Chevron positioned 10px from the right edge of the container */}
+              <FaAngleDown 
+                size={26} 
+                style={{
+                  transform: isImpactFilterCollapsed ? 'rotate(0deg)' : 'rotate(180deg)',
+                  transition: 'transform 0.2s ease',
+                  color: '#cde',
+                  cursor: "pointer",
+                  marginRight: "10px"
+                }}
+                onClick={() => setIsImpactFilterCollapsed(!isImpactFilterCollapsed)}
+              />
             </div>
 
-            <div
+            {!isImpactFilterCollapsed && (<div
               className="flex-col"
               style={{
                 backgroundColor: isLogged ? "#002244ff" : "#333",
@@ -1852,74 +1875,84 @@ export default function Tip() {
                 position: "relative"
               }}>
 
-                             {/* Filter Components */}
-               <div className={'flex-row'} style={{justifyContent: 'center', marginTop: '5px', marginBottom: '0px', gap: isMobile ? '0.35rem' : '0.35rem', flexWrap: 'wrap'}}>
-                 
-                 {/* SORT Filter */}
-                 {/* <div className='flex-row' style={{height: '42px', alignItems: 'center', justifyContent: 'center', padding: '28px 0'}}>
-                   <div className='flex-row' style={{padding: '6px 11px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '28px', alignItems: 'center', gap: '0.35rem'}}>
-                     <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '13px' : '14px'}}>SORT</div>
+                {/* Filter Components */}
+                {!isImpactFilterCollapsed && (
+                  <div className={'flex-row'} style={{
+                    justifyContent: 'center', 
+                    marginTop: '5px', 
+                    marginBottom: '0px', 
+                    gap: isMobile ? '0.35rem' : '0.35rem', 
+                    flexWrap: 'wrap',
+                    overflow: 'hidden',
+                    transition: 'all 0.3s ease'
+                  }}>
+                    
+                    {/* SORT Filter */}
+                    {/* <div className='flex-row' style={{height: '42px', alignItems: 'center', justifyContent: 'center', padding: '28px 0'}}>
+                      <div className='flex-row' style={{padding: '6px 11px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '28px', alignItems: 'center', gap: '0.35rem'}}>
+                        <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '13px' : '14px'}}>SORT</div>
 
-                     <div className={sortBy == 'down' ? 'filter-item-on' : 'filter-item'} style={{padding: '3px 8px 0px 8px'}} onClick={() => {updateOrder('down')}}><BiSortDown size={17} /></div>
-                     <div className={sortBy == 'up' ? 'filter-item-on' : 'filter-item'} style={{padding: '3px 8px 0px 8px'}} onClick={() => {updateOrder('up')}}><BiSortUp size={17} /></div>
-                     <div className={sortBy == 'shuffle' ? 'filter-item-on' : 'filter-item'} style={{padding: '3px 8px 0px 8px'}} onClick={() => {updateOrder('shuffle')}}><ShuffleIcon size={17} /></div>
-                     <div className={sortBy == 'clock-forward' ? 'filter-item-on' : 'filter-item'} style={{padding: '3px 8px 0px 8px'}} onClick={() => {updateOrder('clock-forward')}}><ClockForward size={17} /></div>
-                     <div className={sortBy == 'clock-back' ? 'filter-item-on' : 'filter-item'} style={{padding: '3px 8px 0px 8px'}} onClick={() => {updateOrder('clock-back')}}><ClockBack size={17} /></div>
-                   </div>
-                 </div> */}
+                        <div className={sortBy == 'down' ? 'filter-item-on' : 'filter-item'} style={{padding: '3px 8px 0px 8px'}} onClick={() => {updateOrder('down')}}><BiSortDown size={17} /></div>
+                        <div className={sortBy == 'up' ? 'filter-item-on' : 'filter-item'} style={{padding: '3px 8px 0px 8px'}} onClick={() => {updateOrder('up')}}><BiSortUp size={17} /></div>
+                        <div className={sortBy == 'shuffle' ? 'filter-item-on' : 'filter-item'} style={{padding: '3px 8px 0px 8px'}} onClick={() => {updateOrder('shuffle')}}><ShuffleIcon size={17} /></div>
+                        <div className={sortBy == 'clock-forward' ? 'filter-item-on' : 'filter-item'} style={{padding: '3px 8px 0px 8px'}} onClick={() => {updateOrder('clock-forward')}}><ClockForward size={17} /></div>
+                        <div className={sortBy == 'clock-back' ? 'filter-item-on' : 'filter-item'} style={{padding: '3px 8px 0px 8px'}} onClick={() => {updateOrder('clock-back')}}><ClockBack size={17} /></div>
+                      </div>
+                    </div> */}
 
-                 {/* TIME Filter */}
-                 <div className='flex-row' style={{height: '42px', alignItems: 'center', justifyContent: 'center', padding: '28px 0'}}>
-                   <div className='flex-row' style={{padding: '6px 11px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '28px', alignItems: 'center', gap: '0.35rem'}}>
-                     <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '13px' : '14px'}}>TIME</div>
+                    {/* TIME Filter */}
+                    <div className='flex-row' style={{height: '42px', alignItems: 'center', justifyContent: 'center', padding: '28px 0'}}>
+                      <div className='flex-row' style={{padding: '6px 11px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '28px', alignItems: 'center', gap: '0.35rem'}}>
+                        <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '13px' : '14px'}}>TIME</div>
 
-                     <div className={timeframe == '24h' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('24h')}} style={{fontSize: isMobile ? '13px' : '14px'}}>24hr</div>
-                     <div className={timeframe == '3d' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('3d')}} style={{fontSize: isMobile ? '13px' : '14px'}}>3d</div>
-                     <div className={timeframe == '7d' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('7d')}} style={{fontSize: isMobile ? '13px' : '14px'}}>7d</div>
-                     <div className={timeframe == '14d' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('14d')}} style={{fontSize: isMobile ? '13px' : '14px'}}>14d</div>
-                     <div className={timeframe == '30d' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('30d')}} style={{fontSize: isMobile ? '13px' : '14px'}}>30d</div>
-                     {/* <div className={timeframe == 'all' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('all')}} style={{fontSize: isMobile ? '13px' : '14px'}}>all</div> */}
-                   </div>
-                 </div>
+                        <div className={timeframe == '24h' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('24h')}} style={{fontSize: isMobile ? '13px' : '14px'}}>24hr</div>
+                        <div className={timeframe == '3d' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('3d')}} style={{fontSize: isMobile ? '13px' : '14px'}}>3d</div>
+                        <div className={timeframe == '7d' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('7d')}} style={{fontSize: isMobile ? '13px' : '14px'}}>7d</div>
+                        <div className={timeframe == '14d' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('14d')}} style={{fontSize: isMobile ? '13px' : '14px'}}>14d</div>
+                        <div className={timeframe == '30d' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('30d')}} style={{fontSize: isMobile ? '13px' : '14px'}}>30d</div>
+                        {/* <div className={timeframe == 'all' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('all')}} style={{fontSize: isMobile ? '13px' : '14px'}}>all</div> */}
+                      </div>
+                    </div>
 
-                 {/* CHANNEL Filter */}
-                 <div className='flex-row' style={{height: '42px', alignItems: 'center', justifyContent: 'center', padding: '28px 0'}}>
-                   <div className='flex-row' style={{padding: '6px 11px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '28px', alignItems: 'center', gap: '0.35rem'}}>
-                     <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '13px' : '14px'}}>CHANNEL</div>
+                    {/* CHANNEL Filter */}
+                    <div className='flex-row' style={{height: '42px', alignItems: 'center', justifyContent: 'center', padding: '28px 0'}}>
+                      <div className='flex-row' style={{padding: '6px 11px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '28px', alignItems: 'center', gap: '0.35rem'}}>
+                        <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '13px' : '14px'}}>CHANNEL</div>
 
-                     <select value={selectedChannel} onChange={updateChannel} style={{backgroundColor: '#adf', borderRadius: '6px', padding: isMobile ? '2px 6px' : '2px', fontSize: isMobile ? '14px' : '17px', width: '100%', fontWeight: '600'}}>
-                       {channelOptions.map((channel) => (
-                         <option key={channel} value={channel}>
-                           {(channel !== ' ') ? '/' + channel : channel}
-                         </option>
-                       ))}
-                     </select>
-                   </div>
-                 </div>
+                        <select value={selectedChannel} onChange={updateChannel} style={{backgroundColor: '#adf', borderRadius: '6px', padding: isMobile ? '2px 6px' : '2px', fontSize: isMobile ? '14px' : '17px', width: '100%', fontWeight: '600'}}>
+                          {channelOptions.map((channel) => (
+                            <option key={channel} value={channel}>
+                              {(channel !== ' ') ? '/' + channel : channel}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
 
-                 {/* CURATORS Filter */}
-                 <div className='flex-row' style={{height: '42px', alignItems: 'center', justifyContent: 'center', padding: '28px 0'}}>
-                   <div className='flex-row' style={{padding: '6px 11px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '28px', alignItems: 'center', gap: '0.35rem'}}>
-                     <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '13px' : '14px'}}>CURATORS</div>
+                    {/* CURATORS Filter */}
+                    <div className='flex-row' style={{height: '42px', alignItems: 'center', justifyContent: 'center', padding: '28px 0'}}>
+                      <div className='flex-row' style={{padding: '6px 11px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '28px', alignItems: 'center', gap: '0.35rem'}}>
+                        <div className='filter-desc' style={{fontSize: isMobile ? '13px' : '14px'}}>CURATORS</div>
 
-                     <input
-                       type="text"
-                       value={curatorSearchInput}
-                       onChange={e => getCuratorInput(e.target.value, null)}
-                       style={{
-                         backgroundColor: "#adf",
-                         borderRadius: "6px",
-                         padding: isMobile ? "2px 6px" : "2px 6px",
-                         fontSize: isMobile ? "14px" : "17px",
-                         width: "150px",
-                         fontWeight: "600",
-                         margin: "0 0 0 4px"
-                       }}
-                       placeholder="search curators"
-                     />
-                   </div>
-                 </div>
-                </div>
+                        <input
+                          type="text"
+                          value={curatorSearchInput}
+                          onChange={e => getCuratorInput(e.target.value, null)}
+                          style={{
+                            backgroundColor: "#adf",
+                            borderRadius: "6px",
+                            padding: isMobile ? "2px 6px" : "2px 6px",
+                            fontSize: isMobile ? "14px" : "17px",
+                            width: "150px",
+                            fontWeight: "600",
+                            margin: "0 0 0 4px"
+                          }}
+                          placeholder="search curators"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Search Results Display */}
                 {/* <div style={{ padding: "0px 0 0 0" }}>
@@ -1939,7 +1972,7 @@ export default function Tip() {
                 </div> */}
 
                 {/* Curators Search Results */}
-                {curatorData?.length > 0 && (
+                {!isImpactFilterCollapsed && curatorData?.length > 0 && (
                   <div style={{ padding: "0px 0 0 0" }}>
                     <div style={{textAlign: 'center', color: '#ace', fontSize: '14px', fontWeight: '600', marginBottom: '5px'}}>
                       Found {curatorsLength} curators
@@ -2009,7 +2042,7 @@ export default function Tip() {
                 )}
 
                 {/* Selected Curators Display */}
-                 {curatorList?.length > 0 && (
+                 {!isImpactFilterCollapsed && curatorList?.length > 0 && (
                    <div style={{ padding: "10px 0 0 0" }}>
                      <div style={{textAlign: 'center', color: '#ace', fontSize: '14px', fontWeight: '600', marginBottom: '5px'}}>
                        Selected Curators:
@@ -2132,7 +2165,7 @@ export default function Tip() {
                  <WalletConnect />
                </div> */}
 
-            </div>
+            </div>)}
           </div>
 
 
@@ -2302,7 +2335,7 @@ export default function Tip() {
                      </div> */}
                      
                      <div style={{
-                       maxHeight: "300px",
+                       maxHeight: "340px",
                        overflowY: "auto",
                        padding: "0"
                      }}>
