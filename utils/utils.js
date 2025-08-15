@@ -145,6 +145,8 @@ export function getTimeRange(time) {
     timeRange = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
   } else if (time === '7days' || time === '7d') {
     timeRange = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  } else if (time === '14days' || time === '14d') {
+    timeRange = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);
   } else if (time === '30days' || time === '30d') {
     timeRange = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
   } else if (time === 'all') {

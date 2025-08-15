@@ -620,11 +620,12 @@ export default function Tip() {
     
     try {
       // Call the API to get filtered creators
-      const response = await axios.get('/api/curation/getUserSearch', {
+      const response = await axios.get('/api/curation/getImpactSearch', {
         params: { time, tags, channel, curators, text, shuffle, ecosystem, order, timeSort }
       });
       
       if (response?.data?.casts) {
+        console.log('response', response.data);
         setCreatorResults(response.data.casts);
         console.log('Creator search results:', response.data.casts);
       } else {
@@ -1382,8 +1383,9 @@ export default function Tip() {
                      <div className={timeframe == '24h' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('24h')}} style={{fontSize: isMobile ? '13px' : '14px'}}>24hr</div>
                      <div className={timeframe == '3d' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('3d')}} style={{fontSize: isMobile ? '13px' : '14px'}}>3d</div>
                      <div className={timeframe == '7d' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('7d')}} style={{fontSize: isMobile ? '13px' : '14px'}}>7d</div>
+                     <div className={timeframe == '14d' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('14d')}} style={{fontSize: isMobile ? '13px' : '14px'}}>14d</div>
                      <div className={timeframe == '30d' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('30d')}} style={{fontSize: isMobile ? '13px' : '14px'}}>30d</div>
-                     <div className={timeframe == 'all' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('all')}} style={{fontSize: isMobile ? '13px' : '14px'}}>all</div>
+                     {/* <div className={timeframe == 'all' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('all')}} style={{fontSize: isMobile ? '13px' : '14px'}}>all</div> */}
                    </div>
                  </div>
 

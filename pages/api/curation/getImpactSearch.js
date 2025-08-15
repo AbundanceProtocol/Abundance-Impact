@@ -59,9 +59,15 @@ export default async function handler(req, res) {
       query.points = await getPoints(req?.query?.ecosystem)
     }
 
-    if (req?.query?.time) {
-      query.createdAt = { $gte: req?.query?.time } ;
-    }
+         if (req?.query?.time) {
+       // Convert the time string to a proper Date object
+       const timeDate = new Date(req?.query?.time);
+       if (!isNaN(timeDate.getTime())) {
+         query.createdAt = { $gte: timeDate };
+       } else {
+         console.log('Invalid time format:', req?.query?.time);
+       }
+     }
     
     if (req?.query?.author_fid) {
       query.author_fid = { $in: req?.query?.author_fid } ;
@@ -168,7 +174,137 @@ export default async function handler(req, res) {
     
         let totalCount;
         let returnedCasts = []
-    
+
+        let creators = await Cast.aggregate([
+          { 
+            $match: { 
+              ...query, 
+              wallet: { $exists: true, $ne: '' } 
+            }
+          },
+          { 
+            $group: {
+              _id: "$author_fid",
+              impact_sum: { $sum: { $ifNull: ["$impact_total", 0] } },
+              wallet: { $first: "$wallet" },
+              author_pfp: { $first: "$author_pfp" },
+              author_username: { $first: "$author_username" },
+            }
+          },
+          { 
+            $project: {
+              author_fid: "$_id",
+              impact_sum: 1,
+              wallet: 1,
+              author_pfp: 1,
+              author_username: 1,
+              type: 'creator',
+              _id: 0
+            }
+          },
+          { $sort: { impact_sum: order } },
+          { $limit: 200 },
+        ]);
+
+        const totalImpactSum = creators.reduce((acc, item) => acc + (item.impact_sum || 0), 0);
+
+        creators.forEach(item => {
+          if (totalImpactSum > 0) {
+            item.impact_sum = (item.impact_sum / totalImpactSum) * 0.9;
+          } else {
+            item.impact_sum = 0;
+          }
+        });
+
+        const castHashes = await Cast.find({
+          ...query,
+          wallet: { $exists: true, $ne: '' }
+        }).select('cast_hash -_id');
+
+        const castHashList = castHashes.map(c => c.cast_hash);
+
+        const impactAggregation = await Impact.aggregate([
+          { $match: { target_cast_hash: { $in: castHashList } } },
+          {
+            $group: {
+              _id: "$curator_fid",
+              impact_sum: { $sum: { $ifNull: ["$impact_points", 0] } }
+            }
+          },
+          { $sort: { _id: 1 } }
+        ]);
+
+        const curatorFids = impactAggregation.map(item => item._id);
+
+        const users = await User.find({ fid: { $in: curatorFids } }).select('fid pfp username wallet -_id').lean();
+
+        const userMap = {};
+        users.forEach(user => {
+          userMap[Number(user.fid)] = user;
+        });
+
+        let impactCuratorDataset = impactAggregation.map(item => {
+          const user = userMap[item._id];
+          return {
+            author_fid: item._id,
+            author_pfp: user ? user.pfp : null,
+            author_username: user ? user.username : null,
+            impact_sum: item.impact_sum,
+            wallet: user ? user.wallet : null,
+            type: 'curator'
+          };
+        });
+
+        const totalCuratorImpactSum = impactCuratorDataset.reduce((acc, item) => acc + (item.impact_sum || 0), 0);
+
+        impactCuratorDataset.forEach(item => {
+          if (totalCuratorImpactSum > 0) {
+            item.impact_sum = (item.impact_sum / totalCuratorImpactSum) * 0.1;
+          } else {
+            item.impact_sum = 0;
+          }
+        });
+
+        const resultMap = {};
+        creators.forEach(item => {
+          resultMap[item.author_fid] = { ...item };
+        });
+
+        const combinedFids = new Set();
+
+        let combinedImpact = creators.map(item => {
+          const curatorItem = impactCuratorDataset.find(curator => curator.author_fid === item.author_fid);
+          if (curatorItem) {
+            combinedFids.add(item.author_fid);
+            return {
+              ...item,
+              impact_sum: (item.impact_sum || 0) + (curatorItem.impact_sum || 0)
+            };
+          } else {
+            return { ...item };
+          }
+        });
+
+
+        impactCuratorDataset.forEach(curatorItem => {
+          if (!resultMap[curatorItem.author_fid]) {
+            combinedImpact.push({ ...curatorItem });
+          }
+        });
+
+        const combinedTotal = combinedImpact.reduce((acc, item) => acc + (item.impact_sum || 0), 0);
+
+
+        if (combinedTotal > 1) {
+          combinedImpact = combinedImpact.map(item => ({
+            ...item,
+            impact_sum: (item.impact_sum || 0) / combinedTotal
+          }));
+        }
+
+
+
+
         if (!shuffle) {
           totalCount = await Cast.countDocuments(query);
           returnedCasts = await Cast.find(query)
@@ -244,13 +380,13 @@ export default async function handler(req, res) {
         if (!returnedCasts) {
           returnedCasts = []
         }
-        return { casts: returnedCasts, totalCount };
+        return { casts: returnedCasts, totalCount, combinedImpact };
       } catch (err) {
         console.error(err);
         return null;
       }
     }
-    const { casts, totalCount } = await fetchCasts(query, req.query.shuffle === 'true', page, limit, order);
+    const { casts, totalCount, combinedImpact } = await fetchCasts(query, req.query.shuffle === 'true', page, limit, order);
     // console.log('casts 157', casts)
     res.status(200).json({
       total: totalCount,
@@ -258,6 +394,7 @@ export default async function handler(req, res) {
       pages: Math.ceil(totalCount / limit),
       per_page: limit,
       casts: casts,
+      combinedImpact: combinedImpact,
       message: 'User selection fetched successfully'
     });
   } else {
