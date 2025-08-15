@@ -843,7 +843,7 @@ export default function Tip() {
         impact_sum: r.impact_sum
       })));
 
-      setDisperseStatus(`Dispersing ${selectedToken?.symbol} to ${recipients.length} recipients...`);
+      setDisperseStatus(`Dispersing ${selectedToken?.symbol} to ${validRecipients.length} recipients...`);
 
       // Disperse contract ABI
       const disperseABI = [
@@ -884,6 +884,56 @@ export default function Tip() {
       console.log('- Is native token:', isNativeToken);
       console.log('- Recipients:', recipients.map(r => r.address));
       console.log('- Amounts:', recipients.map(r => r.amount.toString()));
+      
+      // Additional debugging - check for common issues
+      console.log('🔍 Debugging potential issues:');
+      console.log('- Total recipients:', recipients.length);
+      console.log('- Sum of amounts:', recipients.reduce((sum, r) => sum + Number(r.amount), 0n).toString());
+      console.log('- Wallet address:', wagmiAddress);
+      console.log('- Selected token object:', selectedToken);
+      
+      // Check if any amounts are zero and filter them out
+      const validRecipients = recipients.filter(r => r.amount > 0n);
+      const zeroAmounts = recipients.filter(r => r.amount === 0n);
+      
+      if (zeroAmounts.length > 0) {
+        console.log(`⚠️ Filtered out ${zeroAmounts.length} recipients with zero amounts`);
+        console.log('Zero amount recipients:', zeroAmounts.map(r => r.address));
+      }
+      
+      if (validRecipients.length === 0) {
+        throw new Error('No recipients with valid amounts found');
+      }
+      
+      console.log(`✅ Using ${validRecipients.length} recipients with valid amounts`);
+      
+      // Check for duplicate recipients
+      const addresses = recipients.map(r => r.address.toLowerCase());
+      const duplicates = addresses.filter((addr, index) => addresses.indexOf(addr) !== index);
+      if (duplicates.length > 0) {
+        console.log('⚠️ Found duplicate recipients:', duplicates);
+      }
+      
+      // Calculate total amount needed (using valid recipients only)
+      const totalAmount = validRecipients.reduce((sum, r) => sum + r.amount, 0n);
+      console.log('- Total amount to disperse:', totalAmount.toString());
+      console.log('- Total amount in token units:', (Number(totalAmount) / Math.pow(10, tokenDecimals)).toFixed(tokenDecimals));
+      
+      // For ERC-20 tokens, we need to check allowance and balance
+      if (!isNativeToken) {
+        console.log('🔍 ERC-20 token detected - checking allowance and balance...');
+        
+        // Add detailed instructions for ERC-20 tokens
+        setDisperseStatus(`⚠️ ERC-20 Token: ${selectedToken?.symbol} must be approved for the disperse contract. If transaction fails, approve token spending first, then try again.`);
+        
+        // Log the requirements
+        console.log('📋 ERC-20 Requirements:');
+        console.log('- Token must be approved for disperse contract');
+        console.log('- Wallet must have sufficient balance');
+        console.log('- Disperse contract address:', '0xD152f549545093347A162Dce210e7293f1452150');
+      } else {
+        console.log('🔍 Native token detected - no approval needed');
+      }
 
       // Use Wagmi's writeContract hook (as recommended by Farcaster docs)
       await writeContract({
@@ -892,8 +942,8 @@ export default function Tip() {
         functionName: 'disperseToken',
         args: [
           tokenAddress, // token address (zero address for native tokens)
-          recipients.map(r => r.address), // recipient addresses
-          recipients.map(r => r.amount) // amounts in token units
+          validRecipients.map(r => r.address), // recipient addresses
+          validRecipients.map(r => r.amount) // amounts in token units
         ],
       });
 
