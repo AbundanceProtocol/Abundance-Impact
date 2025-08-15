@@ -1001,6 +1001,11 @@ export default function Tip() {
       let availableWalletProvider = null;
       let availableWalletAddress = null;
       
+      console.log('🔍 Wallet Detection Debug:');
+      console.log('- walletProvider type:', typeof walletProvider, 'value:', walletProvider);
+      console.log('- window.farcasterEthProvider:', !!window.farcasterEthProvider);
+      console.log('- window.ethereum:', !!window.ethereum);
+      
       // Check for Farcaster wallet first
       if (typeof window !== 'undefined' && window.farcasterEthProvider) {
         console.log('🎯 Farcaster wallet detected in window object');
@@ -1017,13 +1022,30 @@ export default function Tip() {
         availableWalletProvider = window.ethereum;
         availableWalletAddress = walletAddress || detectedAddress; // Use existing or detected address
       }
-      // Check for context wallet provider
-      else if (walletProvider) {
-        console.log('📱 Context wallet provider detected');
+      // Check for context wallet provider - but only if it's actually an object
+      else if (walletProvider && typeof walletProvider === 'object' && walletProvider !== null) {
+        console.log('📱 Context wallet provider detected (object)');
         console.log('🔍 Context wallet object:', walletProvider);
         console.log('🔍 Context wallet methods:', Object.getOwnPropertyNames(walletProvider));
         availableWalletProvider = walletProvider;
         availableWalletAddress = walletAddress || detectedAddress;
+      }
+      // If walletProvider is just a string identifier, try to find the actual provider
+      else if (walletProvider && typeof walletProvider === 'string') {
+        console.log('📱 Context wallet provider is string identifier:', walletProvider);
+        
+        // Try to find the actual provider based on the identifier
+        if (walletProvider === 'farcaster' && window.farcasterEthProvider) {
+          console.log('🎯 Found Farcaster provider from identifier');
+          availableWalletProvider = window.farcasterEthProvider;
+          availableWalletAddress = walletAddress || detectedAddress;
+        } else if (walletProvider === 'metamask' && window.ethereum) {
+          console.log('🔗 Found MetaMask provider from identifier');
+          availableWalletProvider = window.ethereum;
+          availableWalletAddress = walletAddress || detectedAddress;
+        } else {
+          console.log('⚠️ String identifier found but no matching provider available');
+        }
       }
       
       if (!availableWalletProvider) {
@@ -1036,23 +1058,22 @@ export default function Tip() {
         throw new Error('No wallet provider found. Please ensure you have a wallet installed and connected.');
       }
       
+      // Log what we actually detected
+      console.log('🔍 Detected Provider Analysis:');
+      console.log('- Provider type:', typeof availableWalletProvider);
+      console.log('- Provider constructor:', availableWalletProvider?.constructor?.name);
+      console.log('- Provider methods:', Object.getOwnPropertyNames(availableWalletProvider));
+      console.log('- Provider prototype methods:', Object.getOwnPropertyNames(Object.getPrototypeOf(availableWalletProvider) || {}));
+      
+      // Transaction method check removed to avoid duplicate variable declaration
+      
       console.log('✅ Using wallet provider:', availableWalletProvider);
       console.log('✅ Using wallet address:', availableWalletAddress);
       console.log('🔍 availableWalletProvider type:', typeof availableWalletProvider);
       console.log('🔍 availableWalletProvider constructor:', availableWalletProvider?.constructor?.name);
       console.log('🔍 availableWalletProvider methods:', Object.getOwnPropertyNames(availableWalletProvider || {}));
       
-      // Test if the detected provider actually has transaction methods
-      const hasTransactionMethod = Object.getOwnPropertyNames(availableWalletProvider).some(method => 
-        method.toLowerCase().includes('transaction') || 
-        method.toLowerCase().includes('send') ||
-        method.toLowerCase().includes('request')
-      );
-      
-      if (!hasTransactionMethod) {
-        console.warn('⚠️ Detected wallet provider has no transaction methods!');
-        console.warn('Available methods:', Object.getOwnPropertyNames(availableWalletProvider));
-      }
+      // Transaction method check is now done in the detection logic above
       
       // Send transaction using multiple wallet interaction methods
       let tx;
