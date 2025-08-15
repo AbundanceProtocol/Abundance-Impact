@@ -181,6 +181,10 @@ export default function Tip() {
   // Function to update selected token from WalletConnect
   const updateSelectedToken = (token) => {
     console.log('updateSelectedToken called with:', token);
+    // Clear error status when token changes
+    if (disperseStatus && disperseStatus !== '') {
+      setDisperseStatus('');
+    }
     setSelectedToken(token);
   };
   
@@ -188,6 +192,10 @@ export default function Tip() {
   const updateTipAmount = (amount) => {
     console.log('updateTipAmount called with:', amount);
     setTipAmount(amount);
+    // Clear any error status when slider changes
+    if (disperseStatus && disperseStatus !== '') {
+      setDisperseStatus('');
+    }
   };
 
   // Ensure tipAmount is synchronized with WalletConnect on mount
@@ -507,6 +515,10 @@ export default function Tip() {
   // Filter functions
   function updateTime(time) {
     console.log('updateTime called with:', time);
+    // Clear error status when filter changes
+    if (disperseStatus && disperseStatus !== '') {
+      setDisperseStatus('');
+    }
     setTimeframe(time);
     setUserQuery({
       ...userQuery,
@@ -516,6 +528,10 @@ export default function Tip() {
 
   function updateOrder(order) {
     console.log('updateOrder called with:', order);
+    // Clear error status when filter changes
+    if (disperseStatus && disperseStatus !== '') {
+      setDisperseStatus('');
+    }
     setSortBy(order);
     if (order == 'up') {
       setUserQuery({
@@ -547,6 +563,10 @@ export default function Tip() {
 
   const updateChannel = (event) => {
     console.log('updateChannel called with:', event.target.value);
+    // Clear error status when filter changes
+    if (disperseStatus && disperseStatus !== '') {
+      setDisperseStatus('');
+    }
     setSelectedChannel(event.target.value);
     let channelUpdate = [];
     if (event.target.value !== ' ') {
@@ -583,6 +603,10 @@ export default function Tip() {
 
   // Curators search functions
   async function updateCurators(text, more) {
+    // Clear error status when curator search changes
+    if (disperseStatus && disperseStatus !== '') {
+      setDisperseStatus('');
+    }
     setCuratorData([]);
     setCuratorsLength(0);
     if (text?.length > 0) {
@@ -647,41 +671,63 @@ export default function Tip() {
 
 
   const disperseTokens = async () => {
+    console.log('🚀 disperseTokens function started - TEST');
     try {
-      setIsDispersing(true);
-      setDisperseStatus('Preparing transaction...');
+      console.log('🚀 disperseTokens function started');
+    setIsDispersing(true);
+    setDisperseStatus('Preparing transaction...');
+    console.log('🔍 Step 1: Function started, status set to preparing');
   
-      // Validate inputs
-      if (!tipAmount || tipAmount <= 0) {
-        setDisperseStatus('Please enter a valid tip amount');
-        setIsDispersing(false);
-        return;
-      }
+          // Validate inputs
+    console.log('🔍 Step 2: Validating inputs');
+    console.log('🔍 tipAmount:', tipAmount);
+    console.log('🔍 selectedToken:', selectedToken);
+    console.log('🔍 creatorResults:', creatorResults);
+    
+    if (!tipAmount || tipAmount <= 0) {
+      console.log('❌ Validation failed: Invalid tip amount');
+      setDisperseStatus('Please enter a valid tip amount');
+      setIsDispersing(false);
+      return;
+    }
   
-      if (!selectedToken) {
-        setDisperseStatus('Please select a token');
-        setIsDispersing(false);
-        return;
-      }
+          if (!selectedToken) {
+      console.log('❌ Validation failed: No token selected');
+      setDisperseStatus('Please select a token');
+      setIsDispersing(false);
+      return;
+    }
   
-      if (!creatorResults || creatorResults.length === 0) {
-        setDisperseStatus('No creators found to tip');
-        setIsDispersing(false);
-        return;
-      }
+          if (!creatorResults || creatorResults.length === 0) {
+      console.log('❌ Validation failed: No creator results');
+      setDisperseStatus('No creators found to tip');
+      setIsDispersing(false);
+      return;
+    }
   
-      // Calculate amounts for each creator based on impact_sum
-      const totalImpactSum = creatorResults.reduce((sum, creator) => sum + (creator.impact_sum || 0), 0);
-      
-      if (totalImpactSum <= 0) {
-        setDisperseStatus('No valid impact data found');
-        setIsDispersing(false);
-        return;
-      }
+          // Calculate amounts for each creator based on impact_sum
+    console.log('🔍 Step 2.5: Calculating total impact sum');
+    const totalImpactSum = creatorResults.reduce((sum, creator) => sum + (creator.impact_sum || 0), 0);
+    console.log('🔍 totalImpactSum:', totalImpactSum);
+    
+    if (totalImpactSum <= 0) {
+      console.log('❌ Validation failed: Total impact sum <= 0');
+      setDisperseStatus('No valid impact data found');
+      setIsDispersing(false);
+      return;
+    }
   
-      const recipients = creatorResults
-        .filter(creator => creator.address && creator.impact_sum > 0)
-        .map(creator => {
+          console.log('🔍 Step 2.6: Filtering and mapping recipients');
+    const recipients = creatorResults
+      .filter(creator => {
+        console.log('🔍 Filtering creator:', creator);
+        const hasAddress = creator.wallet; // Use 'wallet' field instead of 'address'
+        const hasImpact = creator.impact_sum !== null && creator.impact_sum !== undefined;
+        const meetsThreshold = creator.impact_sum >= 0.000001;
+        console.log('🔍 Creator filter results:', { hasAddress, hasImpact, meetsThreshold, impact_sum: creator.impact_sum, wallet: creator.wallet });
+        return hasAddress && hasImpact && meetsThreshold;
+      })
+      .map(creator => {
           const calculatedAmount = (tipAmount * creator.impact_sum) / totalImpactSum;
           let amountInSmallestUnit;
   
@@ -696,45 +742,65 @@ export default function Tip() {
             amountInSmallestUnit = Math.floor(calculatedAmount * Math.pow(10, 18)).toString();
           }
   
-          return {
-            address: creator.address,
-            amount: amountInSmallestUnit,
-            impact_sum: creator.impact_sum
-          };
+                  return {
+          address: creator.wallet, // Use 'wallet' field instead of 'address'
+          amount: amountInSmallestUnit,
+          impact_sum: creator.impact_sum
+        };
         });
   
-      if (recipients.length === 0) {
-        setDisperseStatus('No valid recipients found');
-        setIsDispersing(false);
-        return;
-      }
+          console.log('🔍 Step 2.7: Checking recipients length');
+    console.log('🔍 recipients array:', recipients);
+    console.log('🔍 recipients.length:', recipients.length);
+    
+    if (recipients.length === 0) {
+      console.log('❌ Validation failed: No valid recipients found');
+      setDisperseStatus('No valid recipients found');
+      setIsDispersing(false);
+      return;
+    }
   
-      console.log('Valid recipients for disperse:', recipients);
-  
-      // Use the same wallet connection approach that the app already uses for showing tokens
-      console.log('🎯 Using existing wallet connection approach');
-      console.log('🔍 Current wallet state:', { walletConnected, walletAddress, walletChainId, walletProvider });
+          console.log('Valid recipients for disperse:', recipients);
+
+    // Use the same wallet connection approach that the app already uses for showing tokens
+    console.log('🎯 Using existing wallet connection approach');
+    console.log('🔍 Current wallet state:', { walletConnected, walletAddress, walletChainId, walletProvider });
+    console.log('🔍 Debug: About to call getProvider()');
       
-      // Check if wallet is connected (same check used throughout the app)
-      if (!walletConnected || !walletAddress) {
-        throw new Error('Wallet not connected. Please connect your wallet first.');
-      }
+          // Check if wallet is connected (same check used throughout the app)
+    console.log('🔍 Step 3: Checking wallet connection');
+    console.log('🔍 walletConnected:', walletConnected);
+    console.log('🔍 walletAddress:', walletAddress);
+    
+    if (!walletConnected || !walletAddress) {
+      console.log('❌ Wallet validation failed: Not connected');
+      throw new Error('Wallet not connected. Please connect your wallet first.');
+    }
       
-      // Get the provider using the same method the app uses
-      const provider = getProvider();
-      if (!provider) {
-        throw new Error('No wallet provider available. Please check your wallet connection.');
-      }
+          // Get the provider using the same method the app uses
+    console.log('🔍 Step 4: Getting wallet provider');
+    const provider = getProvider();
+    console.log('🔍 getProvider() returned:', provider);
+    
+    if (!provider) {
+      console.log('❌ Provider validation failed: No provider returned');
+      throw new Error('No wallet provider available. Please check your wallet connection.');
+    }
+    
+    console.log('✅ Provider obtained:', provider);
       
-      console.log('✅ Provider obtained:', provider);
-      
-      // Check if user is on Base network
-      const isBaseNetwork = walletChainId === '0x2105' || walletChainId === '8453' || walletChainId === 8453;
-      if (!isBaseNetwork) {
-        setDisperseStatus("Please switch to Base network to use this feature");
-        setIsDispersing(false);
-        return;
-      }
+          // Check if user is on Base network
+    console.log('🔍 Step 5: Checking network');
+    console.log('🔍 walletChainId:', walletChainId);
+    const isBaseNetwork = walletChainId === '0x2105' || walletChainId === '8453' || walletChainId === 8453;
+    console.log('🔍 isBaseNetwork:', isBaseNetwork);
+    
+    if (!isBaseNetwork) {
+      console.log('❌ Network validation failed: Not on Base');
+      setDisperseStatus("Please switch to Base network to use this feature");
+      setIsDispersing(false);
+      return;
+    }
       
       setDisperseStatus(`Dispersing to ${recipients.length} recipients...`);
       
@@ -767,11 +833,47 @@ export default function Tip() {
       console.log('- Recipients:', recipientAddresses.length);
       console.log('- Function data:', functionData);
       
-      // Send transaction using the existing wallet hook
-      const tx = await sendTransaction(disperseContractAddress, '0', functionData);
-      
-      console.log('✅ Transaction sent successfully:', tx);
-      setDisperseStatus(`Transaction sent! Hash: ${tx}`);
+          // Send transaction using the existing working Wagmi setup
+    console.log('🔍 Step 6: Sending transaction via existing Wagmi hooks');
+    console.log('🔍 About to send transaction with:', {
+      to: disperseContractAddress,
+      value: '0',
+      data: functionData
+    });
+    
+    let tx;
+    
+    // Use the same approach that already works for wallet connection
+    // Since your app already successfully connects and shows tokens using Wagmi,
+    // we'll use the existing wallet connection that's proven to work
+    
+    console.log('🎯 Using existing working wallet connection via Wagmi');
+    console.log('🔍 Current wallet state from context:', { walletConnected, walletAddress, walletChainId, walletProvider });
+    
+    // The existing wallet connection is working, so let's use it directly
+    // This follows the same pattern that successfully shows your token balances
+    
+    if (walletProvider === 'farcaster' && window.farcasterEthProvider) {
+      console.log('🎯 Using Farcaster wallet provider directly (same method that shows tokens)');
+      tx = await window.farcasterEthProvider.request({
+        method: 'eth_sendTransaction',
+        params: [{
+          to: disperseContractAddress,
+          data: functionData,
+          from: walletAddress,
+          value: '0x0'
+        }]
+      });
+      console.log('✅ Transaction sent via Farcaster wallet:', tx);
+    } else {
+      console.log('🔄 Using fallback wallet method');
+      // Fallback to the existing working method
+      tx = await sendTransaction(disperseContractAddress, '0', functionData);
+      console.log('✅ Transaction sent via fallback method:', tx);
+    }
+    
+    console.log('✅ Transaction sent successfully:', tx);
+    setDisperseStatus(`Transaction sent! Hash: ${tx}`);
       
     } catch (error) {
       console.error('Disperse error:', error);
@@ -1444,7 +1546,12 @@ export default function Tip() {
                   <div style={{ marginTop: "15px" }}>
                     
                     <button
-                      onClick={disperseTokens}
+                      onClick={() => {
+                        console.log('🔍 Disperse button clicked!');
+                        console.log('🔍 disperseTokens function:', typeof disperseTokens);
+                        console.log('🔍 About to call disperseTokens...');
+                        disperseTokens();
+                      }}
                       disabled={isDispersing || !walletConnected || !tipAmount}
                       style={{
                         width: "100%",
