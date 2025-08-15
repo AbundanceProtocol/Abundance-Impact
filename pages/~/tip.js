@@ -14,6 +14,7 @@ import { confirmUser, timePassed, getTimeRange } from "../../utils/utils";
 import Spinner from "../../components/Common/Spinner";
 import ExpandImg from "../../components/Cast/ExpandImg";
 import useMatchBreakpoints from "../../hooks/useMatchBreakpoints";
+import { useWallet } from "../../hooks/useWallet";
 import { AccountContext } from "../../context";
 import qs from "querystring";
 import Modal from "../../components/Layout/Modals/Modal";
@@ -116,6 +117,9 @@ export default function Tip() {
     walletProvider,
     setUserInfo
   } = useContext(AccountContext);
+  
+  // Use the existing wallet hook for transactions
+  const { sendTransaction, getProvider } = useWallet();
   const ref1 = useRef(null);
   const [textMax, setTextMax] = useState("430px");
   const [screenWidth, setScreenWidth] = useState(undefined);
@@ -657,24 +661,11 @@ export default function Tip() {
       return;
     }
     
-    // Import Farcaster SDK for wallet provider
-    let sdk;
-    try {
-      const sdkModule = await import('@farcaster/miniapp-sdk');
-      sdk = sdkModule.sdk;
-      console.log('✅ Farcaster SDK imported successfully');
-      
-      // Verify SDK is working
-      if (!sdk || !sdk.wallet) {
-        throw new Error('SDK wallet not available');
+          // Wallet connection check - use existing wallet state
+      if (!walletConnected || !walletAddress) {
+        setDisperseStatus("Please ensure wallet is connected");
+        return;
       }
-      
-      console.log('🔍 SDK wallet methods available:', Object.getOwnPropertyNames(sdk.wallet));
-    } catch (sdkImportError) {
-      console.error('❌ Failed to import Farcaster SDK:', sdkImportError.message);
-      setDisperseStatus('Error: Failed to load Farcaster SDK');
-      return;
-    }
     
     // Calculate total impact sum for normalization
     const totalImpactSum = creatorResults.reduce((sum, creator) => sum + (creator.impact_sum || 0), 0);
