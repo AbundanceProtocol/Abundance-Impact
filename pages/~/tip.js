@@ -1005,34 +1005,62 @@ export default function Tip() {
       console.log('- walletProvider type:', typeof walletProvider, 'value:', walletProvider);
       console.log('- window.farcasterEthProvider:', !!window.farcasterEthProvider);
       console.log('- window.ethereum:', !!window.ethereum);
+      console.log('- Running in Farcaster Mini App:', typeof sdk !== 'undefined');
+      console.log('- SDK wallet available:', !!(sdk?.wallet));
       
-      // Check for Farcaster wallet first
-      if (typeof window !== 'undefined' && window.farcasterEthProvider) {
-        console.log('🎯 Farcaster wallet detected in window object');
+      // Method 1: Try to get the Farcaster Mini App wallet provider using the SDK
+      try {
+        console.log('🔍 Checking SDK availability:');
+        console.log('- sdk defined:', typeof sdk !== 'undefined');
+        console.log('- sdk.wallet:', !!sdk?.wallet);
+        console.log('- sdk.wallet.getEthereumProvider:', typeof sdk?.wallet?.getEthereumProvider);
+        
+        if (typeof sdk !== 'undefined' && sdk.wallet && typeof sdk.wallet.getEthereumProvider === 'function') {
+          console.log('🎯 Using Farcaster Mini App SDK wallet provider');
+          availableWalletProvider = sdk.wallet.getEthereumProvider();
+          availableWalletAddress = walletAddress || detectedAddress;
+          
+          if (availableWalletProvider) {
+            console.log('✅ SDK wallet provider obtained successfully');
+            console.log('🔍 SDK wallet provider type:', typeof availableWalletProvider);
+            console.log('🔍 SDK wallet provider methods:', Object.getOwnPropertyNames(availableWalletProvider));
+          } else {
+            console.log('⚠️ SDK wallet provider returned null/undefined');
+          }
+        } else {
+          console.log('⚠️ SDK wallet methods not available');
+        }
+      } catch (sdkError) {
+        console.log('❌ Failed to get SDK wallet provider:', sdkError.message);
+      }
+      
+      // Method 2: Fallback to window.farcasterEthProvider if SDK method failed
+      if (!availableWalletProvider && typeof window !== 'undefined' && window.farcasterEthProvider) {
+        console.log('🔄 Fallback: Farcaster wallet detected in window object');
         console.log('🔍 Farcaster wallet object:', window.farcasterEthProvider);
         console.log('🔍 Farcaster wallet methods:', Object.getOwnPropertyNames(window.farcasterEthProvider));
         availableWalletProvider = window.farcasterEthProvider;
-        availableWalletAddress = walletAddress || detectedAddress; // Use existing or detected address
+        availableWalletAddress = walletAddress || detectedAddress;
       }
-      // Check for MetaMask/window.ethereum
-      else if (typeof window !== 'undefined' && window.ethereum) {
-        console.log('🔗 MetaMask/window.ethereum detected');
+      // Method 3: Fallback to MetaMask/window.ethereum
+      else if (!availableWalletProvider && typeof window !== 'undefined' && window.ethereum) {
+        console.log('🔄 Fallback: MetaMask/window.ethereum detected');
         console.log('🔍 MetaMask wallet object:', window.ethereum);
         console.log('🔍 MetaMask wallet methods:', Object.getOwnPropertyNames(window.ethereum));
         availableWalletProvider = window.ethereum;
-        availableWalletAddress = walletAddress || detectedAddress; // Use existing or detected address
+        availableWalletAddress = walletAddress || detectedAddress;
       }
-      // Check for context wallet provider - but only if it's actually an object
-      else if (walletProvider && typeof walletProvider === 'object' && walletProvider !== null) {
-        console.log('📱 Context wallet provider detected (object)');
+      // Method 4: Fallback to context wallet provider - but only if it's actually an object
+      else if (!availableWalletProvider && walletProvider && typeof walletProvider === 'object' && walletProvider !== null) {
+        console.log('🔄 Fallback: Context wallet provider detected (object)');
         console.log('🔍 Context wallet object:', walletProvider);
         console.log('🔍 Context wallet methods:', Object.getOwnPropertyNames(walletProvider));
         availableWalletProvider = walletProvider;
         availableWalletAddress = walletAddress || detectedAddress;
       }
-      // If walletProvider is just a string identifier, try to find the actual provider
-      else if (walletProvider && typeof walletProvider === 'string') {
-        console.log('📱 Context wallet provider is string identifier:', walletProvider);
+      // Method 5: If walletProvider is just a string identifier, try to find the actual provider
+      else if (!availableWalletProvider && walletProvider && typeof walletProvider === 'string') {
+        console.log('🔄 Fallback: Context wallet provider is string identifier:', walletProvider);
         
         // Try to find the actual provider based on the identifier
         if (walletProvider === 'farcaster' && window.farcasterEthProvider) {
