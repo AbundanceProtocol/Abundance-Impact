@@ -879,6 +879,9 @@ export default function Tip() {
       // Debug wallet provider information
       console.log('Wallet Provider Debug Info:', {
         walletProvider: walletProvider,
+        walletConnected: walletConnected,
+        walletAddress: walletAddress,
+        walletChainId: walletChainId,
         hasRequest: walletProvider && typeof walletProvider.request === 'function',
         hasSend: walletProvider && typeof walletProvider.send === 'function',
         hasSendAsync: walletProvider && typeof walletProvider.sendAsync === 'function',
@@ -886,11 +889,159 @@ export default function Tip() {
         hasWindowEthereumRequest: window.ethereum && typeof window.ethereum.request === 'function'
       });
       
+      // Check if wallet is properly connected
+      if (!walletConnected || !walletAddress || !walletProvider) {
+        console.error('Wallet connection check failed:', {
+          walletConnected,
+          walletAddress: walletAddress ? 'Present' : 'Missing',
+          walletProvider: walletProvider ? 'Present' : 'Missing'
+        });
+        
+                          // Check if we're in a Farcaster environment
+      if (typeof window !== 'undefined' && window.farcasterEthProvider) {
+        console.log('🔄 Farcaster wallet detected but not connected. Attempting auto-connection...');
+        try {
+          // Try to auto-connect to Farcaster wallet
+          const accounts = await window.farcasterEthProvider.request({ method: 'eth_requestAccounts' });
+          const address = accounts[0];
+          const chainId = await window.farcasterEthProvider.request({ method: 'eth_chainId' });
+          
+          if (address && chainId) {
+            console.log('✅ Farcaster wallet auto-connected:', { address, chainId });
+            // Update the context state
+            setWalletAddress(address);
+            setWalletChainId(chainId);
+            setWalletProvider('farcaster');
+            setWalletConnected(true);
+          } else {
+            throw new Error('Failed to get account or chain ID from Farcaster wallet');
+          }
+        } catch (autoConnectError) {
+          console.error('❌ Farcaster wallet auto-connection failed:', autoConnectError);
+          throw new Error('Farcaster wallet detected but connection failed. Please try again or check your Farcaster app.');
+        }
+      } else {
+        throw new Error('Wallet not properly connected. Please ensure your wallet is connected and try again.');
+      }
+      
+      // Additional check: If we're using Farcaster wallet, verify it supports transactions
+      if (walletProvider === 'farcaster' && window.farcasterEthProvider) {
+        console.log('🔍 Checking Farcaster wallet transaction support...');
+        const farcasterMethods = Object.getOwnPropertyNames(window.farcasterEthProvider);
+        const farcasterPrototypeMethods = Object.getOwnPropertyNames(Object.getPrototypeOf(window.farcasterEthProvider));
+        console.log('Farcaster wallet methods:', farcasterMethods);
+        console.log('Farcaster wallet prototype methods:', farcasterPrototypeMethods);
+        
+        // Check if any transaction-related methods exist
+        const hasTransactionMethod = farcasterMethods.some(method => 
+          method.toLowerCase().includes('transaction') || 
+          method.toLowerCase().includes('send') ||
+          method.toLowerCase().includes('request')
+        );
+        
+        if (!hasTransactionMethod) {
+          console.warn('⚠️ Farcaster wallet may not support transactions. Available methods:', farcasterMethods);
+        }
+      }
+      }
+      
+      // Log the actual wallet provider object for debugging
+      console.log('Full wallet provider object:', walletProvider);
+      console.log('Wallet provider type:', typeof walletProvider);
+      console.log('Wallet provider constructor:', walletProvider.constructor?.name);
+      
       // Send transaction using multiple wallet interaction methods
       let tx;
       try {
-        // Method 1: Try walletProvider.request (MetaMask style)
-        if (walletProvider && typeof walletProvider.request === 'function') {
+        // Method 1: Try Farcaster wallet first (highest priority)
+        if (typeof window !== 'undefined' && window.farcasterEthProvider) {
+          console.log('🎯 Using Farcaster wallet provider (highest priority)');
+          
+          // Check what methods are available on Farcaster wallet
+          const farcasterMethods = Object.getOwnPropertyNames(window.farcasterEthProvider);
+          const farcasterPrototypeMethods = Object.getOwnPropertyNames(Object.getPrototypeOf(window.farcasterEthProvider));
+          console.log('Farcaster wallet available methods:', farcasterMethods);
+          console.log('Farcaster wallet prototype methods:', farcasterPrototypeMethods);
+          
+          // Find the best transaction method for Farcaster wallet
+          let farcasterTxMethod = null;
+          let farcasterTxParams = null;
+          
+          // Look for transaction-related methods
+          if (typeof window.farcasterEthProvider.sendTransaction === 'function') {
+            farcasterTxMethod = 'sendTransaction';
+            farcasterTxParams = {
+              to: disperseContractAddress,
+              data: functionData,
+              from: walletAddress,
+              value: '0x0',
+              chainId: '0x2105'
+            };
+          } else if (typeof window.farcasterEthProvider.send === 'function') {
+            farcasterTxMethod = 'send';
+            farcasterTxParams = ['eth_sendTransaction', [{
+              to: disperseContractAddress,
+              data: functionData,
+              from: walletAddress,
+              value: '0x0',
+              chainId: '0x2105'
+            }]];
+          } else if (typeof window.farcasterEthProvider.request === 'function') {
+            farcasterTxMethod = 'request';
+            farcasterTxParams = {
+              method: 'eth_sendTransaction',
+              params: [{
+                to: disperseContractAddress,
+                data: functionData,
+                from: walletAddress,
+                value: '0x0',
+                chainId: '0x2105'
+              }]
+            };
+          } else if (typeof window.farcasterEthProvider.sendAsync === 'function') {
+            farcasterTxMethod = 'sendAsync';
+            farcasterTxParams = {
+              method: 'eth_sendTransaction',
+              params: [{
+                to: disperseContractAddress,
+                data: functionData,
+                from: walletAddress,
+                value: '0x0',
+                chainId: '0x2105'
+              }],
+              from: walletAddress,
+              id: Date.now()
+            };
+          }
+          
+          if (farcasterTxMethod) {
+            console.log(`🎯 Farcaster wallet using method: ${farcasterTxMethod}`);
+            try {
+              if (farcasterTxMethod === 'sendTransaction') {
+                tx = await window.farcasterEthProvider.sendTransaction(farcasterTxParams);
+              } else if (farcasterTxMethod === 'send') {
+                tx = await window.farcasterEthProvider.send(...farcasterTxParams);
+              } else if (farcasterTxMethod === 'request') {
+                tx = await window.farcasterEthProvider.request(farcasterTxParams);
+              } else if (farcasterTxMethod === 'sendAsync') {
+                tx = await new Promise((resolve, reject) => {
+                  window.farcasterEthProvider.sendAsync(farcasterTxParams, (error, response) => {
+                    if (error) reject(error);
+                    else resolve(response.result);
+                  });
+                });
+              }
+            } catch (farcasterError) {
+              console.error('❌ All Farcaster wallet methods failed:', farcasterError);
+              console.log('🔄 Falling back to other wallet methods...');
+              // Continue to next method instead of throwing
+            }
+          } else {
+            console.log('⚠️ No transaction methods found on Farcaster wallet, trying other methods...');
+          }
+        }
+        // Method 2: Try walletProvider.request (MetaMask style)
+        if (!tx && walletProvider && typeof walletProvider.request === 'function') {
           console.log('Using walletProvider.request method');
           tx = await walletProvider.request({
             method: 'eth_sendTransaction',
@@ -903,8 +1054,8 @@ export default function Tip() {
             }]
           });
         }
-        // Method 2: Try window.ethereum (fallback for MetaMask)
-        else if (window.ethereum && typeof window.ethereum.request === 'function') {
+        // Method 3: Try window.ethereum (fallback for MetaMask)
+        if (!tx && window.ethereum && typeof window.ethereum.request === 'function') {
           console.log('Using window.ethereum.request method');
           tx = await window.ethereum.request({
             method: 'eth_sendTransaction',
@@ -917,8 +1068,8 @@ export default function Tip() {
             }]
           });
         }
-        // Method 3: Try walletProvider.send (WalletConnect style)
-        else if (walletProvider && typeof walletProvider.send === 'function') {
+        // Method 4: Try walletProvider.send (WalletConnect style)
+        if (!tx && walletProvider && typeof walletProvider.send === 'function') {
           console.log('Using walletProvider.send method');
           tx = await walletProvider.send('eth_sendTransaction', [{
             to: disperseContractAddress,
@@ -928,8 +1079,8 @@ export default function Tip() {
             chainId: '0x2105'
           }]);
         }
-        // Method 4: Try walletProvider.sendAsync (legacy)
-        else if (walletProvider && typeof walletProvider.sendAsync === 'function') {
+        // Method 5: Try walletProvider.sendAsync (legacy)
+        if (!tx && walletProvider && typeof walletProvider.sendAsync === 'function') {
           console.log('Using walletProvider.sendAsync method');
           tx = await new Promise((resolve, reject) => {
             walletProvider.sendAsync({
@@ -949,8 +1100,73 @@ export default function Tip() {
             });
           });
         }
-        else {
-          throw new Error('No compatible wallet provider method found. Please check your wallet connection.');
+        // Method 6: Try to detect any available wallet provider
+        if (!tx) {
+          console.log('No standard methods found, trying to detect available wallet...');
+          
+          // Try to find any available wallet provider
+          let availableProvider = null;
+          
+          // Check if we have any provider-like object
+          if (walletProvider) {
+            console.log('walletProvider object keys:', Object.keys(walletProvider));
+            console.log('walletProvider prototype:', Object.getPrototypeOf(walletProvider));
+            
+            // Try to find any method that might work
+            for (const key in walletProvider) {
+              if (typeof walletProvider[key] === 'function') {
+                console.log(`Found method: ${key}`);
+                if (key.toLowerCase().includes('request') || key.toLowerCase().includes('send') || key.toLowerCase().includes('transaction')) {
+                  availableProvider = { method: key, provider: walletProvider };
+                  break;
+                }
+              }
+            }
+          }
+          
+          if (availableProvider) {
+            console.log(`Trying custom method: ${availableProvider.method}`);
+            try {
+              if (availableProvider.method === 'request') {
+                tx = await availableProvider.provider.request({
+                  method: 'eth_sendTransaction',
+                  params: [{
+                    to: disperseContractAddress,
+                    data: functionData,
+                    from: walletAddress,
+                    value: '0x0',
+                    chainId: '0x2105'
+                  }]
+                });
+              } else if (availableProvider.method === 'sendTransaction') {
+                tx = await availableProvider.provider.sendTransaction({
+                  to: disperseContractAddress,
+                  data: functionData,
+                  from: walletAddress,
+                  value: '0x0',
+                  chainId: '0x2105'
+                });
+              } else {
+                tx = await availableProvider.provider[availableProvider.method]('eth_sendTransaction', [{
+                  to: disperseContractAddress,
+                  data: functionData,
+                  from: walletAddress,
+                  value: '0x0',
+                  chainId: '0x2105'
+                }]);
+              }
+            } catch (customError) {
+              console.error('Custom method failed:', customError);
+              throw new Error(`Custom wallet method failed: ${customError.message}`);
+            }
+          } else {
+            throw new Error('No compatible wallet provider method found. Please check your wallet connection and ensure you are using a supported wallet.');
+          }
+        }
+        
+        // Check if we successfully got a transaction
+        if (!tx) {
+          throw new Error('No wallet method was able to send the transaction. Please check your wallet connection and try again.');
         }
         
         console.log('Transaction sent successfully:', tx);
@@ -1688,6 +1904,22 @@ export default function Tip() {
                 {/* Disperse Button - Underneath the WalletConnect container */}
                 {isLogged && creatorResults.length > 0 && (
                   <div style={{ marginTop: "15px" }}>
+                    {/* Wallet Status Indicator */}
+                    {/* {walletProvider === 'farcaster' && (
+                      <div style={{
+                        padding: "8px 12px",
+                        marginBottom: "10px",
+                        backgroundColor: "#114477",
+                        borderRadius: "6px",
+                        fontSize: "12px",
+                        color: "#ace",
+                        textAlign: "center",
+                        border: "1px solid #225588"
+                      }}>
+                        🎯 Using Farcaster Wallet
+                      </div>
+                    )} */}
+                    
                     <button
                       onClick={disperseTokens}
                       disabled={isDispersing || !walletConnected || !tipAmount}

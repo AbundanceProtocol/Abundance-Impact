@@ -19,11 +19,22 @@ export const useWallet = () => {
 
   // Get the appropriate provider based on wallet type
   const getProvider = useCallback(() => {
-    if (walletProvider === 'farcaster' && typeof window !== 'undefined' && window.farcasterEthProvider) {
+    // First priority: Farcaster wallet provider
+    if (typeof window !== 'undefined' && window.farcasterEthProvider) {
+      console.log('Using Farcaster wallet provider');
       return window.farcasterEthProvider;
-    } else if (typeof window !== 'undefined' && window.ethereum) {
+    }
+    // Second priority: Explicitly set wallet provider
+    if (walletProvider === 'farcaster' && typeof window !== 'undefined' && window.farcasterEthProvider) {
+      console.log('Using explicitly set Farcaster wallet provider');
+      return window.farcasterEthProvider;
+    }
+    // Fallback: Generic ethereum provider
+    if (typeof window !== 'undefined' && window.ethereum) {
+      console.log('Using generic ethereum provider');
       return window.ethereum;
     }
+    console.log('No wallet provider available');
     return null;
   }, [walletProvider]);
 
@@ -69,6 +80,36 @@ export const useWallet = () => {
       setWalletLoading(false);
     }
   }, [setWalletLoading, setWalletError, setWalletAddress, setWalletChainId, setWalletProvider, setWalletConnected]);
+
+  // Auto-detect and connect to Farcaster wallet when available
+  const detectFarcasterWallet = useCallback(async () => {
+    if (typeof window !== 'undefined' && window.farcasterEthProvider && !walletConnected) {
+      console.log('Auto-detecting Farcaster wallet...');
+      try {
+        setWalletLoading(true);
+        setWalletError(null);
+        
+        // Request accounts from Farcaster wallet
+        const accounts = await window.farcasterEthProvider.request({ method: 'eth_requestAccounts' });
+        const address = accounts[0];
+        const chainId = await window.farcasterEthProvider.request({ method: 'eth_chainId' });
+        
+        if (address && chainId) {
+          console.log('Farcaster wallet auto-connected:', { address, chainId });
+          setWalletAddress(address);
+          setWalletChainId(chainId);
+          setWalletProvider('farcaster');
+          setWalletConnected(true);
+          setWalletError(null);
+        }
+      } catch (error) {
+        console.error('Farcaster wallet auto-connection failed:', error);
+        setWalletError(error.message);
+      } finally {
+        setWalletLoading(false);
+      }
+    }
+  }, [walletConnected, setWalletLoading, setWalletError, setWalletAddress, setWalletChainId, setWalletProvider, setWalletConnected]);
 
   const disconnectWallet = useCallback(() => {
     setWalletConnected(false);
@@ -193,6 +234,7 @@ export const useWallet = () => {
     signMessage,
     getBalance,
     getProvider,
+    detectFarcasterWallet,
     
     // Setters
     setWalletError,

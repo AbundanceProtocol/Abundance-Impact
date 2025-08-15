@@ -74,6 +74,61 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
   const [topCoinsCache, setTopCoinsCache] = useState({})
   const [lastRpcCall, setLastRpcCall] = useState(0) // Track last RPC call time
   
+  // Auto-detect Farcaster wallet when available
+  useEffect(() => {
+    const detectFarcasterWallet = async () => {
+      if (typeof window !== 'undefined' && window.farcasterEthProvider && !walletConnected) {
+        console.log('🔄 Auto-detecting Farcaster wallet in context...');
+        try {
+          setWalletLoading(true);
+          setWalletError(null);
+          
+          // Request accounts from Farcaster wallet
+          const accounts = await window.farcasterEthProvider.request({ method: 'eth_requestAccounts' });
+          const address = accounts[0];
+          const chainId = await window.farcasterEthProvider.request({ method: 'eth_chainId' });
+          
+          if (address && chainId) {
+            console.log('✅ Farcaster wallet auto-connected in context:', { address, chainId });
+            setWalletAddress(address);
+            setWalletChainId(chainId);
+            setWalletProvider('farcaster');
+            setWalletConnected(true);
+            setWalletError(null);
+          }
+        } catch (error) {
+          console.error('❌ Farcaster wallet auto-connection failed in context:', error);
+          setWalletError(error.message);
+        } finally {
+          setWalletLoading(false);
+        }
+      }
+    };
+
+    // Check immediately
+    detectFarcasterWallet();
+    
+    // Also check when window.farcasterEthProvider becomes available
+    const checkFarcasterWallet = () => {
+      if (window.farcasterEthProvider) {
+        detectFarcasterWallet();
+      }
+    };
+
+    // Listen for when Farcaster wallet becomes available
+    if (typeof window !== 'undefined') {
+      window.addEventListener('farcasterWalletReady', checkFarcasterWallet);
+      
+      // Also check periodically
+      const interval = setInterval(checkFarcasterWallet, 1000);
+      
+      return () => {
+        window.removeEventListener('farcasterWalletReady', checkFarcasterWallet);
+        clearInterval(interval);
+      };
+    }
+  }, [walletConnected, setWalletLoading, setWalletError, setWalletAddress, setWalletChainId, setWalletProvider, setWalletConnected]);
+  
   const router = useRouter()
   const initEcosystems = [{
     channels: [],
