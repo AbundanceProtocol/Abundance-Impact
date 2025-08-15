@@ -1340,14 +1340,6 @@ export default function Tip() {
 
 
 
-
-
-
-
-
-
-
-
       {/* Wallet Integration Section */}
       {(version == '2.0' || adminTest) && (<div style={{ padding: "20px 4px 0px 4px", width: feedMax }}>
         <div className="flex-col" style={{ backgroundColor: "" }}>
@@ -1447,80 +1439,9 @@ export default function Tip() {
               <div style={{ padding: "0 20px 5px 20px" }}>
                 <WalletConnect onTipAmountChange={updateTipAmount} onTokenChange={updateSelectedToken} />
                 
-                {/* Disperse Parameters Preview - Shows what will be sent before clicking */}
-                {/* {isLogged && creatorResults.length > 0 && tipAmount > 0 && (
-                  <div style={{ 
-                    marginTop: "15px", 
-                    padding: "12px", 
-                    backgroundColor: "#001122", 
-                    borderRadius: "8px", 
-                    border: "1px solid #114477" 
-                  }}>
-                    <div style={{ 
-                      fontSize: "11px", 
-                      color: "#ace", 
-                      fontWeight: "600", 
-                      marginBottom: "8px" 
-                    }}>
-                      Disperse Parameters Preview:
-                    </div>
-                    {(() => {
-                      const totalImpactSum = creatorResults.reduce((sum, creator) => sum + (creator.impact_sum || 0), 0);
-                      const validRecipients = creatorResults
-                        .filter(creator => creator.wallet && creator.wallet !== '')
-                        .map(creator => {
-                          const proportion = creator.impact_sum / totalImpactSum;
-                          const calculatedAmount = parseFloat(tipAmount) * proportion;
-                          const tokenDecimals = selectedToken?.symbol === 'USDC' ? 6 : 18;
-                          // Use a safer calculation method to avoid overflow
-                          const amountInSmallestUnit = (calculatedAmount * Math.pow(10, tokenDecimals)).toFixed(0);
-                          
-                          return {
-                            address: creator.wallet,
-                            amount: amountInSmallestUnit,
-                            proportion: proportion,
-                            calculatedAmount: calculatedAmount
-                          };
-                        });
-                      
-                      return (
-                        <div style={{ fontSize: "10px", color: "#999" }}>
-                          <div>Token: {selectedToken?.symbol || 'Unknown'}</div>
-                          <div>Token Address: {selectedToken?.address?.slice(0, 10)}...{selectedToken?.address?.slice(-8)}</div>
-                          <div>Recipients: {validRecipients.length}</div>
-                          <div>Total Amount: {tipAmount} {selectedToken?.symbol}</div>
-                          <div style={{ marginTop: "8px", fontSize: "9px", color: "#666" }}>
-                            {validRecipients.slice(0, 3).map((r, i) => (
-                              <div key={i}>
-                                {r.address.slice(0, 8)}...{r.address.slice(-6)}: {r.calculatedAmount.toFixed(4)} {selectedToken?.symbol}
-                              </div>
-                            ))}
-                            {validRecipients.length > 3 && <div>... and {validRecipients.length - 3} more</div>}
-                          </div>
-                        </div>
-                      );
-                    })()}
-                  </div>
-                )} */}
-
                 {/* Disperse Button - Underneath the WalletConnect container */}
                 {isLogged && creatorResults.length > 0 && (
                   <div style={{ marginTop: "15px" }}>
-                    {/* Wallet Status Indicator */}
-                    {/* {walletProvider === 'farcaster' && (
-                      <div style={{
-                        padding: "8px 12px",
-                        marginBottom: "10px",
-                        backgroundColor: "#114477",
-                        borderRadius: "6px",
-                        fontSize: "12px",
-                        color: "#ace",
-                        textAlign: "center",
-                        border: "1px solid #225588"
-                      }}>
-                        🎯 Using Farcaster Wallet
-                      </div>
-                    )} */}
                     
                     <button
                       onClick={disperseTokens}
@@ -1539,27 +1460,6 @@ export default function Tip() {
                     >
                       {isDispersing ? "Dispersing..." : `Disperse ${selectedToken?.symbol || 'Token'}`}
                     </button>
-                    
-                    {/* Network Status Info */}
-                    {/* {walletConnected && (
-                      <div style={{ 
-                        marginTop: "8px", 
-                        padding: "6px 10px", 
-                        backgroundColor: "#001122", 
-                        borderRadius: "6px", 
-                        border: "1px solid #114477",
-                        fontSize: "10px",
-                        color: "#999"
-                      }}>
-                        Network: {walletChainId === '0x2105' || walletChainId === '8453' || walletChainId === 8453 ? 
-                                  '✅ Base Network' : 
-                                  `❌ ${walletChainId === '0x1' ? 'Ethereum Mainnet' : 
-                                        walletChainId === '0x89' ? 'Polygon' : 
-                                        walletChainId === '0xa' ? 'Optimism' : 
-                                        walletChainId === '0xa4b1' ? 'Arbitrum' : 
-                                        `Network ${walletChainId || 'Unknown'}`}`}
-                      </div>
-                    )} */}
                   </div>
                 )}
                 
@@ -1584,17 +1484,6 @@ export default function Tip() {
 
             </div>
           </div>
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1788,22 +1677,6 @@ export default function Tip() {
                   </div>
                 )}
 
-                {/* Search Results Display */}
-                {/* <div style={{ padding: "0px 0 0 0" }}>
-                  {searchLoading ? (
-                    <div className="flex-row" style={{justifyContent: 'center', padding: '0px'}}>
-                      <Spinner size={31} color={'#999'} />
-                    </div>
-                  ) : creatorResults.length > 0 ? (
-                    <div className="flex-col" style={{gap: '10px'}}> */}
-                      {/* TODO: Display creator results here */}
-                    {/* </div>
-                  ) : (
-                    <div style={{textAlign: 'center', color: '#999', fontSize: '12px'}}>
-                      No creators found with current filters
-                    </div>
-                  )}
-                </div> */}
 
                 {/* Curators Search Results */}
                 {!isImpactFilterCollapsed && curatorData?.length > 0 && (
@@ -1982,47 +1855,8 @@ export default function Tip() {
                  )}
 
 
-
-                 {/* Found Creators Count - At Bottom */}
-                 {/* {creatorResults.length > 0 && (
-                   <div style={{ padding: "20px 0 0 0", textAlign: 'center' }}>
-                     <div style={{color: '#ace', fontSize: '14px', fontWeight: '600'}}>
-                       Found {creatorResults.length} creators
-                     </div>
-                     <div style={{color: '#999', fontSize: '12px', textAlign: 'center', marginTop: '10px'}}>
-                       Creator results will be displayed here
-                     </div>
-                   </div>
-                 )} */}
-
-               {/* <div style={{ padding: "0 20px 5px 20px" }}>
-                 <WalletConnect />
-               </div> */}
-
             </div>)}
           </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -2132,41 +1966,7 @@ export default function Tip() {
                       //  border: "1px solid #114477",
                        margin: "5px 0"
                      }}>
-                     {/* <div style={{
-                       textAlign: 'center', 
-                       color: '#ace', 
-                       fontSize: '16px', 
-                       fontWeight: '600',
-                       marginBottom: '15px',
-                       padding: "0 20px"
-                     }}>
-                       Distribution Preview: Proportional to impact_sum ({selectedToken?.symbol || 'No Token Selected'})
-                     </div> */}
-                     
-                     {/* Debug Info */}
-                     {/* <div style={{
-                       padding: "10px 20px",
-                       backgroundColor: "#002244",
-                       margin: "0 20px 15px 20px",
-                       borderRadius: "5px",
-                       fontSize: "11px",
-                       color: "#999"
-                     }}>
-                       Debug: tipAmount = {tipAmount}, creatorResults.length = {creatorResults.length}, selectedToken = {selectedToken?.symbol || 'None'}, Network = {selectedToken?.networkKey || 'None'}
-                     </div> */}
-                     
-                     {/* Token Display Test */}
-                     {/* <div style={{
-                       padding: "5px 20px",
-                       backgroundColor: "#003366",
-                       margin: "0 20px 10px 20px",
-                       borderRadius: "5px",
-                       fontSize: "14px",
-                       color: "#9df",
-                       textAlign: "center"
-                     }}>
-                       CURRENT TOKEN: {selectedToken?.symbol || 'None'} | NETWORK: {selectedToken?.networkKey || 'None'} | ADDRESS: {selectedToken?.address || selectedToken?.contractAddress || 'None'}
-                     </div> */}
+
                      
                      <div style={{
                        maxHeight: "340px",
@@ -2316,18 +2116,8 @@ export default function Tip() {
                    </div>
                  )}
 
-               {/* <div style={{ padding: "0 20px 5px 20px" }}>
-                 <WalletConnect />
-               </div> */}
-
             </div>
           </div>
-
-
-
-
-
-
         </div>
       </div>)}
 
