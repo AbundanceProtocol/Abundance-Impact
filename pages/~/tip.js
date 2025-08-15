@@ -139,7 +139,7 @@ export default function Tip() {
   const [selectedChannel, setSelectedChannel] = useState(' ');
   
   // Combined query state for filters
-  const initialQuery = {shuffle: false, time: '3d', tags: [], channels: [], curators: null, order: -1, timeSort: null};
+  const initialQuery = {shuffle: false, time: '7d', tags: [], channels: [], curators: null, order: -1, timeSort: null};
   const [userQuery, setUserQuery] = useState(initialQuery);
   
   // Search results state
@@ -1398,7 +1398,7 @@ export default function Tip() {
                       style={{
                         width: "100%",
                         padding: "10px 16px",
-                        borderRadius: "5px",
+                        borderRadius: "8px",
                         border: "none",
                         backgroundColor: isDispersing || !walletConnected || !tipAmount ? "#555" : "#114477",
                         color: "#fff",
