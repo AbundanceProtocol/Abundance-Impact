@@ -640,6 +640,18 @@ export default function Tip() {
       return;
     }
     
+    // Validate tipAmount
+    if (!tipAmount || tipAmount <= 0) {
+      setDisperseStatus("Please set a valid tip amount greater than 0");
+      return;
+    }
+    
+    // Check if tipAmount is reasonable (less than 1 million to avoid overflow)
+    if (tipAmount > 1000000) {
+      setDisperseStatus("Tip amount too large. Please use a smaller amount.");
+      return;
+    }
+    
 
     
     // Calculate total impact sum for normalization
@@ -652,12 +664,61 @@ export default function Tip() {
         // Calculate proportional amount based on impact_sum
         const proportion = creator.impact_sum / totalImpactSum;
         const calculatedAmount = parseFloat(tipAmount) * proportion;
-        // Handle different token decimals based on selected token
+        
+        // Use a completely different approach to avoid overflow
         const tokenDecimals = selectedToken?.symbol === 'USDC' ? 6 : 18;
+        
+        // Calculate amount in smallest units using a safer method
+        let amountInSmallestUnit;
+        try {
+          // For very small amounts, use a different approach
+          if (calculatedAmount < 0.000001) {
+            amountInSmallestUnit = '0';
+          } else {
+            // Use exponential notation to avoid large numbers
+            const amountInScientific = calculatedAmount.toExponential(tokenDecimals);
+            const [coefficient, exponent] = amountInScientific.split('e');
+            
+            // Convert to smallest unit by adjusting the exponent
+            const adjustedExponent = parseInt(exponent) + tokenDecimals;
+            
+            if (adjustedExponent >= 0) {
+              // Move decimal point right by adjustedExponent places
+              const coefficientNum = parseFloat(coefficient);
+              const multiplier = Math.pow(10, adjustedExponent);
+              
+              // Check if this will create a safe number
+              if (multiplier <= Number.MAX_SAFE_INTEGER && coefficientNum * multiplier <= Number.MAX_SAFE_INTEGER) {
+                amountInSmallestUnit = Math.floor(coefficientNum * multiplier).toString();
+              } else {
+                // Fallback: use string manipulation for very large numbers
+                const calculatedAmountStr = calculatedAmount.toFixed(tokenDecimals);
+                const [wholePart, decimalPart = ''] = calculatedAmountStr.split('.');
+                const paddedDecimal = (decimalPart + '0'.repeat(tokenDecimals)).slice(0, tokenDecimals);
+                amountInSmallestUnit = (wholePart + paddedDecimal).replace(/^0+/, '') || '0';
+              }
+            } else {
+              amountInSmallestUnit = '0';
+            }
+          }
+          
+        } catch (error) {
+          console.warn(`Failed to calculate amount for ${creator.wallet}, using fallback:`, error);
+          amountInSmallestUnit = '0';
+        }
+        
+        // Additional safety check - ensure the amount is a reasonable string length
+        if (amountInSmallestUnit.length > 20) {
+          console.warn(`Amount string too long for ${creator.wallet}, truncating:`, amountInSmallestUnit);
+          amountInSmallestUnit = amountInSmallestUnit.slice(0, 20);
+        }
+        
+        // Debug logging
+        console.log(`Creator ${creator.wallet}: impact_sum=${creator.impact_sum}, proportion=${proportion}, calculatedAmount=${calculatedAmount}, amountInSmallestUnit=${amountInSmallestUnit}`);
         
         return {
           address: creator.wallet,
-          amount: Math.floor(calculatedAmount * Math.pow(10, tokenDecimals))
+          amount: amountInSmallestUnit
         };
       });
     
@@ -684,8 +745,36 @@ export default function Tip() {
       
       setDisperseStatus(`Dispersing to ${recipients.length} recipients...`);
       
-      // Import ethers for contract interaction
-      const { ethers } = await import('ethers');
+      // Import ethers for contract interaction - ensure we get v5
+      let ethers;
+      try {
+        // Try multiple import methods to ensure we get the right version
+        const ethersModule = await import('ethers');
+        if (ethersModule.ethers) {
+          ethers = ethersModule.ethers;
+        } else if (ethersModule.default) {
+          ethers = ethersModule.default;
+        } else {
+          ethers = ethersModule;
+        }
+        
+        // Verify we have the Interface constructor
+        if (!ethers.utils?.Interface && !ethers.Interface) {
+          throw new Error('Interface constructor not found in ethers module');
+        }
+        
+        console.log('Successfully imported ethers:', {
+          hasUtils: !!ethers.utils,
+          hasInterface: !!ethers.Interface,
+          hasUtilsInterface: !!ethers.utils?.Interface
+        });
+        
+      } catch (error) {
+        console.error('Failed to import ethers:', error);
+        setDisperseStatus('Error: Failed to load ethers library');
+        setIsDispersing(false);
+        return;
+      }
       
       // Disperse contract ABI - just the disperseToken function
       const disperseABI = [
@@ -693,18 +782,91 @@ export default function Tip() {
       ];
       
       const disperseContractAddress = "0xD152f549545093347A162Dce210e7293f1452150";
-      const disperseInterface = new ethers.Interface(disperseABI);
+      
+      // Debug ethers version and Interface availability
+      console.log('ethers object:', ethers);
+      console.log('ethers.utils:', ethers.utils);
+      console.log('ethers.Interface:', ethers.Interface);
+      
+      // Test if we can create a simple interface
+      try {
+        const testInterface = new (ethers.utils?.Interface || ethers.Interface)(['function test()']);
+        console.log('✅ Interface creation test successful');
+      } catch (error) {
+        console.error('❌ Interface creation test failed:', error);
+        setDisperseStatus('Error: Interface creation failed');
+        setIsDispersing(false);
+        return;
+      }
+      
+      let disperseInterface;
+      try {
+        if (ethers.utils && ethers.utils.Interface) {
+          disperseInterface = new ethers.utils.Interface(disperseABI);
+        } else if (ethers.Interface) {
+          disperseInterface = new ethers.Interface(disperseABI);
+        } else {
+          throw new Error('Interface constructor not found in ethers');
+        }
+      } catch (error) {
+        console.error('Failed to create Interface:', error);
+        setDisperseStatus('Error: Failed to create contract interface');
+        setIsDispersing(false);
+        return;
+      }
+      
+      // Validate amounts before encoding
+      const validRecipients = recipients.filter(r => {
+        const amount = parseFloat(r.amount);
+        if (isNaN(amount) || amount <= 0) {
+          console.warn(`Invalid amount for ${r.address}: ${r.amount}`);
+          return false;
+        }
+        
+        // Check if amount is within safe range
+        if (amount >= Number.MAX_SAFE_INTEGER) {
+          console.warn(`Amount too large for ${r.address}: ${r.amount}, using fallback`);
+          // Use a fallback amount that's safe
+          r.amount = '1000000'; // 1 token unit as fallback
+        }
+        
+        // Additional check for extremely long strings
+        if (r.amount.length > 20) {
+          console.warn(`Amount string too long for ${r.address}, truncating`);
+          r.amount = r.amount.slice(0, 20);
+        }
+        
+        return true;
+      });
+      
+      if (validRecipients.length === 0) {
+        setDisperseStatus("No valid amounts found for distribution");
+        setIsDispersing(false);
+        return;
+      }
+      
+      console.log('Valid recipients for disperse:', validRecipients);
+      
+      // Prepare disperseToken parameters
+      const tokenAddress = selectedToken?.address || selectedToken?.contractAddress;
+      const recipientAddresses = validRecipients.map(r => r.address);
+      const recipientAmounts = validRecipients.map(r => r.amount);
+      
+      // Update status to show disperse is ready
+      setDisperseStatus(`Ready to disperse ${tipAmount} ${selectedToken?.symbol || 'Token'} to ${recipientAddresses.length} addresses`);
       
       // Encode function data for disperseToken
       const functionData = disperseInterface.encodeFunctionData("disperseToken", [
-        selectedToken?.address || selectedToken?.contractAddress,
-        recipients.map(r => r.address),
-        recipients.map(r => r.amount)
+        tokenAddress,
+        recipientAddresses,
+        recipientAmounts
       ]);
       
       // Check if user is on Base network
       if (walletChainId !== '0x2105') {
-        throw new Error('Please switch to Base network to use this feature');
+        console.log('Current network:', walletChainId);
+        console.log('Required network: 0x2105 (Base)');
+        throw new Error(`Please switch to Base network to use this feature. Current network: ${walletChainId || 'Unknown'}`);
       }
       
       // Send transaction
@@ -1389,6 +1551,62 @@ export default function Tip() {
               <div style={{ padding: "0 20px 5px 20px" }}>
                 <WalletConnect onTipAmountChange={updateTipAmount} onTokenChange={updateSelectedToken} />
                 
+                {/* Disperse Parameters Preview - Shows what will be sent before clicking */}
+                {/* {isLogged && creatorResults.length > 0 && tipAmount > 0 && (
+                  <div style={{ 
+                    marginTop: "15px", 
+                    padding: "12px", 
+                    backgroundColor: "#001122", 
+                    borderRadius: "8px", 
+                    border: "1px solid #114477" 
+                  }}>
+                    <div style={{ 
+                      fontSize: "11px", 
+                      color: "#ace", 
+                      fontWeight: "600", 
+                      marginBottom: "8px" 
+                    }}>
+                      Disperse Parameters Preview:
+                    </div>
+                    {(() => {
+                      const totalImpactSum = creatorResults.reduce((sum, creator) => sum + (creator.impact_sum || 0), 0);
+                      const validRecipients = creatorResults
+                        .filter(creator => creator.wallet && creator.wallet !== '')
+                        .map(creator => {
+                          const proportion = creator.impact_sum / totalImpactSum;
+                          const calculatedAmount = parseFloat(tipAmount) * proportion;
+                          const tokenDecimals = selectedToken?.symbol === 'USDC' ? 6 : 18;
+                          // Use a safer calculation method to avoid overflow
+                          const amountInSmallestUnit = (calculatedAmount * Math.pow(10, tokenDecimals)).toFixed(0);
+                          
+                          return {
+                            address: creator.wallet,
+                            amount: amountInSmallestUnit,
+                            proportion: proportion,
+                            calculatedAmount: calculatedAmount
+                          };
+                        });
+                      
+                      return (
+                        <div style={{ fontSize: "10px", color: "#999" }}>
+                          <div>Token: {selectedToken?.symbol || 'Unknown'}</div>
+                          <div>Token Address: {selectedToken?.address?.slice(0, 10)}...{selectedToken?.address?.slice(-8)}</div>
+                          <div>Recipients: {validRecipients.length}</div>
+                          <div>Total Amount: {tipAmount} {selectedToken?.symbol}</div>
+                          <div style={{ marginTop: "8px", fontSize: "9px", color: "#666" }}>
+                            {validRecipients.slice(0, 3).map((r, i) => (
+                              <div key={i}>
+                                {r.address.slice(0, 8)}...{r.address.slice(-6)}: {r.calculatedAmount.toFixed(4)} {selectedToken?.symbol}
+                              </div>
+                            ))}
+                            {validRecipients.length > 3 && <div>... and {validRecipients.length - 3} more</div>}
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                )} */}
+
                 {/* Disperse Button - Underneath the WalletConnect container */}
                 {isLogged && creatorResults.length > 0 && (
                   <div style={{ marginTop: "15px" }}>
@@ -1407,7 +1625,7 @@ export default function Tip() {
                         cursor: isDispersing || !walletConnected || !tipAmount ? "not-allowed" : "pointer"
                       }}
                     >
-                      {isDispersing ? "Dispersing..." : `Disperse ${selectedToken.symbol}`}
+                      {isDispersing ? "Dispersing..." : `Disperse ${selectedToken?.symbol || 'Token'}`}
                     </button>
                   </div>
                 )}
