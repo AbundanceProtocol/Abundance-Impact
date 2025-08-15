@@ -733,9 +733,26 @@ export default function Tip() {
         return;
       }
 
-      // Check if user is on Base network (chainId: 8453)
+      // Check if user is on Base network (only network with disperse contract deployed)
       if (wagmiChainId !== 8453) {
-        setDisperseStatus('Please switch to Base network to use this feature');
+        const networkNames = {
+          42220: 'Celo',
+          10: 'Optimism', 
+          42161: 'Arbitrum'
+        };
+        const currentNetworkName = networkNames[wagmiChainId] || `Network ${wagmiChainId}`;
+        
+        setDisperseStatus(`Disperse is only available on Base network. Please switch from ${currentNetworkName} to Base to use this feature.`);
+        setIsDispersing(false);
+        return;
+      }
+      
+      console.log('Operating on Base network - disperse functionality enabled');
+      
+      // Validate that the selected token is available on Base
+      const tokenNetworkKey = selectedToken?.networkKey;
+      if (tokenNetworkKey && tokenNetworkKey !== 'base') {
+        setDisperseStatus(`Token ${selectedToken?.symbol} is not available on Base network. Please select a Base token to disperse.`);
         setIsDispersing(false);
         return;
       }
@@ -749,17 +766,61 @@ export default function Tip() {
         return;
       }
 
+      // Get token decimals from the actual token object (same as used in wallet display)
+      const getTokenDecimals = (token) => {
+        // If the token object has decimals property, use it
+        if (token?.decimals !== undefined) {
+          return token.decimals;
+        }
+        
+        // Use the same mapping as defined in context.js for Base network tokens
+        const tokenDecimalMap = {
+          'ETH': 18,
+          'USDC': 6,
+          'WETH': 18,
+          'DEGEN': 18,
+          'BETR': 18,
+          'NOICE': 18,
+          'TIPN': 18
+        };
+        
+        const decimals = tokenDecimalMap[token?.symbol] || 18;
+        console.log(`Token ${token?.symbol} mapped to ${decimals} decimals`);
+        return decimals;
+      };
+
+      const tokenDecimals = getTokenDecimals(selectedToken);
+      console.log(`Using ${tokenDecimals} decimals for ${selectedToken?.symbol}`);
+
       // Filter valid recipients and calculate amounts
       const recipients = creatorResults
         .filter(creator => creator.wallet && creator.impact_sum >= 0.000001)
         .map(creator => {
           const calculatedAmount = (tipAmount * creator.impact_sum) / totalImpactSum;
           
+          // Calculate minimum amount based on token decimals to avoid dust
+          const getMinimumAmount = (decimals) => {
+            // Set minimum to 1 unit in the token's smallest denomination
+            switch(decimals) {
+              case 6:  return 0.000001;  // 1 micro unit (USDC)
+              case 18: return 0.000000000000000001; // 1 wei (ETH, most tokens)
+              default: return Math.pow(10, -decimals);
+            }
+          };
+          
+          const minimumAmount = getMinimumAmount(tokenDecimals);
+          const finalAmount = Math.max(calculatedAmount, minimumAmount);
+          
+          // Format the amount to avoid precision issues with parseUnits
+          const formattedAmount = finalAmount.toFixed(tokenDecimals);
+          
           return {
             address: creator.wallet,
-            // Convert to token units (assuming 18 decimals for most tokens)
-            amount: parseUnits(calculatedAmount.toString(), 18),
-            impact_sum: creator.impact_sum
+            // Convert to token units using correct decimals
+            amount: parseUnits(formattedAmount, tokenDecimals),
+            impact_sum: creator.impact_sum,
+            calculatedAmount: finalAmount,
+            formattedAmount: formattedAmount
           };
         });
 
@@ -770,9 +831,17 @@ export default function Tip() {
       }
 
       console.log('📋 Transaction details:');
-      console.log('- Token:', selectedToken?.symbol);
+      console.log('- Token:', selectedToken?.symbol, 'at', selectedToken?.address);
+      console.log('- Token decimals:', tokenDecimals);
       console.log('- Recipients:', recipients.length);
       console.log('- Total amount:', tipAmount);
+      console.log('- Recipients data:', recipients.map(r => ({
+        address: r.address,
+        amount: r.amount.toString(),
+        formattedAmount: r.formattedAmount,
+        calculatedAmount: r.calculatedAmount,
+        impact_sum: r.impact_sum
+      })));
 
       setDisperseStatus(`Dispersing ${selectedToken?.symbol} to ${recipients.length} recipients...`);
 
@@ -791,15 +860,40 @@ export default function Tip() {
         }
       ];
 
+      // Get the correct token address
+      let tokenAddress = selectedToken?.address || selectedToken?.contractAddress;
+      
+      // Handle native tokens (ETH, CELO) - they use zero address in the disperse contract
+      const isNativeToken = selectedToken?.isNative || 
+                           tokenAddress === '0x0000000000000000000000000000000000000000' ||
+                           ['ETH', 'CELO'].includes(selectedToken?.symbol);
+      
+      if (isNativeToken) {
+        tokenAddress = '0x0000000000000000000000000000000000000000';
+        console.log(`Using native token (${selectedToken?.symbol}) with zero address`);
+      }
+      
+      // Validate token address
+      if (!tokenAddress || tokenAddress.length !== 42) {
+        throw new Error(`Invalid token address: ${tokenAddress}`);
+      }
+      
+      console.log('Final transaction parameters:');
+      console.log('- Contract:', '0xD152f549545093347A162Dce210e7293f1452150');
+      console.log('- Token address:', tokenAddress);
+      console.log('- Is native token:', isNativeToken);
+      console.log('- Recipients:', recipients.map(r => r.address));
+      console.log('- Amounts:', recipients.map(r => r.amount.toString()));
+
       // Use Wagmi's writeContract hook (as recommended by Farcaster docs)
       await writeContract({
         address: '0xD152f549545093347A162Dce210e7293f1452150', // Disperse contract
         abi: disperseABI,
         functionName: 'disperseToken',
         args: [
-          selectedToken?.address || selectedToken?.contractAddress, // token address
+          tokenAddress, // token address (zero address for native tokens)
           recipients.map(r => r.address), // recipient addresses
-          recipients.map(r => r.amount) // amounts in wei
+          recipients.map(r => r.amount) // amounts in token units
         ],
       });
 
@@ -1493,26 +1587,28 @@ export default function Tip() {
                         console.log('🔍 About to call disperseTokens...');
                         disperseTokens();
                       }}
-                      disabled={isPending || isConfirming || !wagmiConnected || !tipAmount}
+                      disabled={isPending || isConfirming || !wagmiConnected || !tipAmount || wagmiChainId !== 8453}
                       style={{
                         width: "100%",
                         padding: "10px 16px",
                         borderRadius: "8px",
                         border: "none",
-                        backgroundColor: isPending || isConfirming || !wagmiConnected || !tipAmount ? "#555" : "#114477",
+                        backgroundColor: isPending || isConfirming || !wagmiConnected || !tipAmount || wagmiChainId !== 8453 ? "#555" : "#114477",
                         color: "#fff",
                         fontSize: "12px",
                         fontWeight: "600",
-                        cursor: isPending || isConfirming || !wagmiConnected || !tipAmount ? "not-allowed" : "pointer"
+                        cursor: isPending || isConfirming || !wagmiConnected || !tipAmount || wagmiChainId !== 8453 ? "not-allowed" : "pointer"
                       }}
                     >
                       {isPending 
                        ? "Preparing..." 
                        : isConfirming 
                        ? "Confirming..." 
+                       : wagmiChainId !== 8453
+                       ? "Disperse (Base Only)"
                        : `Disperse ${selectedToken?.symbol || 'Token'}`}
                     </button>
-                  </div>
+              </div>
                 )}
                 
 
@@ -1529,10 +1625,10 @@ export default function Tip() {
                         textAlign: "center"
                     }}>
                       {disperseStatus}
-                    </div>
+            </div>
                   </div>
                 )}
-              </div>
+          </div>
 
             </div>
           </div>
