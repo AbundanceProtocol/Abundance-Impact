@@ -148,7 +148,7 @@ export default function Tip() {
   const [modal, setModal] = useState({ on: false, success: false, text: "" });
   
   // Filter state variables
-  const [timeframe, setTimeframe] = useState('3d');
+  const [timeframe, setTimeframe] = useState('7d');
   const [sortBy, setSortBy] = useState('down');
   const [channelOptions, setChannelOptions] = useState(initChannels);
   const [selectedChannel, setSelectedChannel] = useState(' ');
@@ -190,8 +190,8 @@ export default function Tip() {
   // Function to update selected token from WalletConnect
   const updateSelectedToken = (token) => {
     console.log('updateSelectedToken called with:', token);
-    // Clear error status when token changes
-    if (disperseStatus && disperseStatus !== '') {
+    // Only clear non-error status when token changes
+    if (disperseStatus && disperseStatus !== '' && !disperseStatus.includes('Error') && !disperseStatus.includes('⚠️')) {
       setDisperseStatus('');
     }
     setSelectedToken(token);
@@ -201,8 +201,8 @@ export default function Tip() {
   const updateTipAmount = (amount) => {
     console.log('updateTipAmount called with:', amount);
     setTipAmount(amount);
-    // Clear any error status when slider changes
-    if (disperseStatus && disperseStatus !== '') {
+    // Only clear non-error status when slider changes
+    if (disperseStatus && disperseStatus !== '' && !disperseStatus.includes('Error') && !disperseStatus.includes('⚠️')) {
       setDisperseStatus('');
     }
   };
@@ -545,8 +545,8 @@ export default function Tip() {
   // Filter functions
   function updateTime(time) {
     console.log('updateTime called with:', time);
-    // Clear error status when filter changes
-    if (disperseStatus && disperseStatus !== '') {
+    // Only clear non-error status when filter changes
+    if (disperseStatus && disperseStatus !== '' && !disperseStatus.includes('Error') && !disperseStatus.includes('⚠️')) {
       setDisperseStatus('');
     }
     setTimeframe(time);
@@ -558,8 +558,8 @@ export default function Tip() {
 
   function updateOrder(order) {
     console.log('updateOrder called with:', order);
-    // Clear error status when filter changes
-    if (disperseStatus && disperseStatus !== '') {
+    // Only clear non-error status when filter changes
+    if (disperseStatus && disperseStatus !== '' && !disperseStatus.includes('Error') && !disperseStatus.includes('⚠️')) {
       setDisperseStatus('');
     }
     setSortBy(order);
@@ -593,8 +593,8 @@ export default function Tip() {
 
   const updateChannel = (event) => {
     console.log('updateChannel called with:', event.target.value);
-    // Clear error status when filter changes
-    if (disperseStatus && disperseStatus !== '') {
+    // Only clear non-error status when filter changes
+    if (disperseStatus && disperseStatus !== '' && !disperseStatus.includes('Error') && !disperseStatus.includes('⚠️')) {
       setDisperseStatus('');
     }
     setSelectedChannel(event.target.value);
@@ -633,8 +633,8 @@ export default function Tip() {
 
   // Curators search functions
   async function updateCurators(text, more) {
-    // Clear error status when curator search changes
-    if (disperseStatus && disperseStatus !== '') {
+    // Only clear non-error status when curator search changes
+    if (disperseStatus && disperseStatus !== '' && !disperseStatus.includes('Error') && !disperseStatus.includes('⚠️')) {
       setDisperseStatus('');
     }
     setCuratorData([]);
@@ -936,7 +936,9 @@ export default function Tip() {
       }
 
       // Use Wagmi's writeContract hook (as recommended by Farcaster docs)
-      await writeContract({
+      console.log('🚀 Calling writeContract...');
+      
+      const result = await writeContract({
         address: '0xD152f549545093347A162Dce210e7293f1452150', // Disperse contract
         abi: disperseABI,
         functionName: 'disperseToken',
@@ -948,23 +950,33 @@ export default function Tip() {
       });
 
       console.log('✅ Transaction initiated via Wagmi writeContract');
+      console.log('Transaction result:', result);
       setDisperseStatus('Transaction sent! Waiting for confirmation...');
+      
+      // Don't set isDispersing to false here - let the useEffect handle it
       
     } catch (error) {
       console.error('Disperse error:', error);
+      console.error('Error details:', {
+        message: error.message,
+        code: error.code,
+        data: error.data,
+        stack: error.stack
+      });
       
       let errorMessage = 'Transaction failed';
-      if (error.message.includes('User rejected')) {
+      if (error.message.includes('User rejected') || error.message.includes('User denied')) {
         errorMessage = 'Transaction was rejected by user';
       } else if (error.message.includes('insufficient funds')) {
         errorMessage = 'Insufficient funds for transaction';
+      } else if (error.message.includes('execution reverted')) {
+        errorMessage = 'Transaction reverted - check token approval and balance';
       } else if (error.message) {
         errorMessage = `Error: ${error.message}`;
       }
       
       setDisperseStatus(errorMessage);
-    } finally {
-      setIsDispersing(false);
+      setIsDispersing(false); // Only set to false on actual error
     }
   };
 
@@ -1663,21 +1675,41 @@ export default function Tip() {
                 
 
                 
-                {/* Disperse Status */}
-                {isLogged && disperseStatus && (
-                  <div style={{ marginTop: "15px" }}>
-                    <div style={{
-                      padding: "8px 12px",
-                      borderRadius: "4px",
-                      backgroundColor: disperseStatus.includes("Error") ? "#442222" : "#224422",
-                      color: disperseStatus.includes("Error") ? "#ffaaaa" : "#aaffaa",
-                      fontSize: "11px",
-                        textAlign: "center"
-                    }}>
-                      {disperseStatus}
-            </div>
-                  </div>
-                )}
+                                 {/* Disperse Status */}
+                 {isLogged && disperseStatus && (
+                   <div style={{ marginTop: "15px" }}>
+                     <div style={{
+                       padding: "8px 12px",
+                       borderRadius: "4px",
+                       backgroundColor: disperseStatus.includes("Error") || disperseStatus.includes("⚠️") ? "#442222" : "#224422",
+                       color: disperseStatus.includes("Error") || disperseStatus.includes("⚠️") ? "#ffaaaa" : "#aaffaa",
+                       fontSize: "11px",
+                       textAlign: "center",
+                       position: "relative"
+                     }}>
+                       {disperseStatus}
+                       {(disperseStatus.includes("Error") || disperseStatus.includes("⚠️")) && (
+                         <button
+                           onClick={() => setDisperseStatus('')}
+                           style={{
+                             position: "absolute",
+                             top: "4px",
+                             right: "8px",
+                             background: "none",
+                             border: "none",
+                             color: "#ffaaaa",
+                             cursor: "pointer",
+                             fontSize: "14px",
+                             fontWeight: "bold"
+                           }}
+                           title="Clear status"
+                         >
+                           ×
+                         </button>
+                       )}
+                     </div>
+                   </div>
+                 )}
           </div>
 
             </div>
