@@ -108,7 +108,11 @@ export default function Tip() {
     setIsMiniApp,
     userBalances,
     setUserBalances,
-    adminTest
+    adminTest,
+    walletConnected,
+    walletAddress,
+    walletChainId,
+    walletProvider
   } = useContext(AccountContext);
   const ref1 = useRef(null);
   const [textMax, setTextMax] = useState("430px");
@@ -147,6 +151,41 @@ export default function Tip() {
   const [curatorData, setCuratorData] = useState([]);
   const [curatorsLength, setCuratorsLength] = useState(0);
   const [curatorList, setCuratorList] = useState([]);
+  
+  // Disperse functionality state
+  const [tipAmount, setTipAmount] = useState(0);
+  const [isDispersing, setIsDispersing] = useState(false);
+  const [disperseStatus, setDisperseStatus] = useState("");
+  
+  // Token selection from WalletConnect - Set USDC as default
+  const [selectedToken, setSelectedToken] = useState({
+    symbol: 'USDC',
+    networkKey: 'base',
+    address: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'
+  });
+  
+  // Debug: Log when selectedToken changes
+  useEffect(() => {
+    console.log('selectedToken changed to:', selectedToken);
+  }, [selectedToken]);
+  
+  // Function to update selected token from WalletConnect
+  const updateSelectedToken = (token) => {
+    console.log('updateSelectedToken called with:', token);
+    setSelectedToken(token);
+  };
+  
+  // Function to update tip amount from WalletConnect slider
+  const updateTipAmount = (amount) => {
+    console.log('updateTipAmount called with:', amount);
+    setTipAmount(amount);
+  };
+
+  // Ensure tipAmount is synchronized with WalletConnect on mount
+  useEffect(() => {
+    // Initialize tipAmount to 0 to match the slider
+    updateTipAmount(0);
+  }, []);
 
   useEffect(() => {
     if (fid) {
@@ -593,6 +632,102 @@ export default function Tip() {
       }
     }
   }
+  
+  // Disperse tokens among creators based on impact_sum
+  const disperseTokens = async () => {
+    if (!creatorResults.length || !walletConnected) {
+      setDisperseStatus("Please ensure wallet is connected and creators are loaded");
+      return;
+    }
+    
+
+    
+    // Calculate total impact sum for normalization
+    const totalImpactSum = creatorResults.reduce((sum, creator) => sum + (creator.impact_sum || 0), 0);
+    
+    // Log the addresses and amounts that will receive tokens
+    const recipients = creatorResults
+      .filter(creator => creator.wallet && creator.wallet !== '')
+      .map(creator => {
+        // Calculate proportional amount based on impact_sum
+        const proportion = creator.impact_sum / totalImpactSum;
+        const calculatedAmount = parseFloat(tipAmount) * proportion;
+        // Handle different token decimals based on selected token
+        const tokenDecimals = selectedToken?.symbol === 'USDC' ? 6 : 18;
+        
+        return {
+          address: creator.wallet,
+          amount: Math.floor(calculatedAmount * Math.pow(10, tokenDecimals))
+        };
+      });
+    
+            console.log(`Disperse Preview: ${tipAmount} ${selectedToken?.symbol || 'Unknown'} distributed proportionally to ${recipients.length} addresses:`, recipients);
+    
+    setIsDispersing(true);
+    setDisperseStatus("Preparing disperse transaction...");
+    
+    try {
+      // Calculate total impact sum for normalization
+      const totalImpactSum = creatorResults.reduce((sum, creator) => sum + (creator.impact_sum || 0), 0);
+      
+      if (totalImpactSum === 0) {
+        setDisperseStatus("No impact data available for distribution");
+        setIsDispersing(false);
+        return;
+      }
+
+      if (recipients.length === 0) {
+        setDisperseStatus("No valid recipients found");
+        setIsDispersing(false);
+        return;
+      }
+      
+      setDisperseStatus(`Dispersing to ${recipients.length} recipients...`);
+      
+      // Import ethers for contract interaction
+      const { ethers } = await import('ethers');
+      
+      // Disperse contract ABI - just the disperseToken function
+      const disperseABI = [
+        "function disperseToken(address token, address[] recipients, uint256[] values) external"
+      ];
+      
+      const disperseContractAddress = "0xD152f549545093347A162Dce210e7293f1452150";
+      const disperseInterface = new ethers.Interface(disperseABI);
+      
+      // Encode function data for disperseToken
+      const functionData = disperseInterface.encodeFunctionData("disperseToken", [
+        selectedToken?.address || selectedToken?.contractAddress,
+        recipients.map(r => r.address),
+        recipients.map(r => r.amount)
+      ]);
+      
+      // Check if user is on Base network
+      if (walletChainId !== '0x2105') {
+        throw new Error('Please switch to Base network to use this feature');
+      }
+      
+      // Send transaction
+      const tx = await walletProvider.request({
+        method: 'eth_sendTransaction',
+        params: [{
+          to: disperseContractAddress,
+          data: functionData,
+          from: walletAddress,
+          value: '0x0', // No ETH sent, only tokens
+          chainId: '0x2105'
+        }]
+      });
+      
+      setDisperseStatus(`Transaction sent! Hash: ${tx}`);
+      
+    } catch (error) {
+      console.error('Disperse error:', error);
+      setDisperseStatus(`Error: ${error.message}`);
+    } finally {
+      setIsDispersing(false);
+    }
+  };
 
   // Trigger search when userQuery changes
   useEffect(() => {
@@ -626,8 +761,8 @@ export default function Tip() {
       
       if (response?.data?.casts) {
         console.log('response', response.data);
-        setCreatorResults(response.data.casts);
-        console.log('Creator search results:', response.data.casts);
+        setCreatorResults(response.data.combinedImpact);
+        console.log('Creator search results:', response.data.combinedImpact);
       } else {
         setCreatorResults([]);
       }
@@ -1227,6 +1362,11 @@ export default function Tip() {
                         >
                           Select Token
                         </div>
+                        
+
+                        
+                        {/* Amount Input */}
+
                       </div>
                     </div>
                   </div>
@@ -1247,7 +1387,48 @@ export default function Tip() {
               }}>
 
               <div style={{ padding: "0 20px 5px 20px" }}>
-                <WalletConnect />
+                <WalletConnect onTipAmountChange={updateTipAmount} onTokenChange={updateSelectedToken} />
+                
+                {/* Disperse Button - Underneath the WalletConnect container */}
+                {isLogged && creatorResults.length > 0 && (
+                  <div style={{ marginTop: "15px" }}>
+                    <button
+                      onClick={disperseTokens}
+                      disabled={isDispersing || !walletConnected || !tipAmount}
+                      style={{
+                        width: "100%",
+                        padding: "10px 16px",
+                        borderRadius: "5px",
+                        border: "none",
+                        backgroundColor: isDispersing || !walletConnected || !tipAmount ? "#555" : "#114477",
+                        color: "#fff",
+                        fontSize: "12px",
+                        fontWeight: "600",
+                        cursor: isDispersing || !walletConnected || !tipAmount ? "not-allowed" : "pointer"
+                      }}
+                    >
+                      {isDispersing ? "Dispersing..." : `Disperse ${selectedToken.symbol}`}
+                    </button>
+                  </div>
+                )}
+                
+
+                
+                {/* Disperse Status */}
+                {isLogged && disperseStatus && (
+                  <div style={{ marginTop: "15px" }}>
+                    <div style={{
+                      padding: "8px 12px",
+                      borderRadius: "4px",
+                      backgroundColor: disperseStatus.includes("Error") ? "#442222" : "#224422",
+                      color: disperseStatus.includes("Error") ? "#ffaaaa" : "#aaffaa",
+                      fontSize: "11px",
+                        textAlign: "center"
+                    }}>
+                      {disperseStatus}
+                    </div>
+                  </div>
+                )}
               </div>
 
             </div>
@@ -1360,10 +1541,10 @@ export default function Tip() {
               }}>
 
                              {/* Filter Components */}
-               <div className={'flex-row'} style={{justifyContent: 'center', marginTop: '15px', marginBottom: '0px', gap: isMobile ? '0.35rem' : '0.35rem', flexWrap: 'wrap'}}>
+               <div className={'flex-row'} style={{justifyContent: 'center', marginTop: '5px', marginBottom: '0px', gap: isMobile ? '0.35rem' : '0.35rem', flexWrap: 'wrap'}}>
                  
                  {/* SORT Filter */}
-                 <div className='flex-row' style={{height: '42px', alignItems: 'center', justifyContent: 'center', padding: '28px 0'}}>
+                 {/* <div className='flex-row' style={{height: '42px', alignItems: 'center', justifyContent: 'center', padding: '28px 0'}}>
                    <div className='flex-row' style={{padding: '6px 11px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '28px', alignItems: 'center', gap: '0.35rem'}}>
                      <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '13px' : '14px'}}>SORT</div>
 
@@ -1373,7 +1554,7 @@ export default function Tip() {
                      <div className={sortBy == 'clock-forward' ? 'filter-item-on' : 'filter-item'} style={{padding: '3px 8px 0px 8px'}} onClick={() => {updateOrder('clock-forward')}}><ClockForward size={17} /></div>
                      <div className={sortBy == 'clock-back' ? 'filter-item-on' : 'filter-item'} style={{padding: '3px 8px 0px 8px'}} onClick={() => {updateOrder('clock-back')}}><ClockBack size={17} /></div>
                    </div>
-                 </div>
+                 </div> */}
 
                  {/* TIME Filter */}
                  <div className='flex-row' style={{height: '42px', alignItems: 'center', justifyContent: 'center', padding: '28px 0'}}>
@@ -1621,8 +1802,10 @@ export default function Tip() {
                    </div>
                  )}
 
+
+
                  {/* Found Creators Count - At Bottom */}
-                 {creatorResults.length > 0 && (
+                 {/* {creatorResults.length > 0 && (
                    <div style={{ padding: "20px 0 0 0", textAlign: 'center' }}>
                      <div style={{color: '#ace', fontSize: '14px', fontWeight: '600'}}>
                        Found {creatorResults.length} creators
@@ -1631,7 +1814,7 @@ export default function Tip() {
                        Creator results will be displayed here
                      </div>
                    </div>
-                 )}
+                 )} */}
 
                {/* <div style={{ padding: "0 20px 5px 20px" }}>
                  <WalletConnect />
@@ -1648,6 +1831,318 @@ export default function Tip() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          <div
+            className="shadow flex-col"
+            style={{
+              backgroundColor: isLogged ? "#002244" : "#333",
+              borderRadius: "15px",
+              border: isLogged ? "1px solid #11447799" : "1px solid #555",
+              width: isMiniApp || isMobile ? "340px" : "100%",
+              margin: isMiniApp || isMobile ? "20px auto 0 auto" : "0px auto 0 auto"
+            }}
+          >
+            <div
+              className="shadow flex-row"
+              style={{
+                backgroundColor: isLogged ? "#11448888" : "#444",
+                width: "100%",
+                justifyContent: "space-between",
+                alignItems: "center",
+                padding: "8px",
+                borderRadius: "15px",
+                margin: "0 0 10px 0",
+                gap: "1rem"
+              }}
+            >
+              <div
+                className="flex-row"
+                style={{
+                  width: "100%",
+                  justifyContent: "flex-start",
+                  alignItems: "center",
+                  padding: "0px 0 0 4px",
+                  margin: "0 0 0px 0"
+                }}
+              >
+                <BsCurrencyExchange style={{ fill: "#cde" }} size={20} />
+                <div>
+                  <div
+                    style={{
+                      border: "0px solid #777",
+                      padding: "2px",
+                      borderRadius: "10px",
+                      backgroundColor: "",
+                      maxWidth: "fit-content",
+                      cursor: "pointer",
+                      color: "#cde"
+                    }}
+                  >
+                    <div className="top-layer flex-row">
+                      <div
+                        className="flex-row"
+                        style={{
+                          padding: "4px 0 4px 10px",
+                          marginBottom: "0px",
+                          flexWrap: "wrap",
+                          justifyContent: "flex-start",
+                          gap: "0.00rem",
+                          width: "",
+                          alignItems: "center"
+                        }}
+                      >
+                        <div
+                          style={{
+                            fontSize: isMobile ? "18px" : "22px",
+                            fontWeight: "600",
+                            color: "",
+                            padding: "0px 3px"
+                          }}
+                        >
+                          Tip Distribution
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div
+              className="flex-col"
+              style={{
+                backgroundColor: isLogged ? "#002244ff" : "#333",
+                padding: "10px 8px 12px 8px",
+                borderRadius: "0 0 15px 15px",
+                color: isLogged ? "#ace" : "#ddd",
+                fontSize: "12px",
+                gap: "0.75rem",
+                position: "relative"
+              }}>
+
+                             {/* Filter Components */}
+
+
+                 {/* Distribution Preview - Shows how much each author gets */}
+                 {isLogged && creatorResults.length > 0 && (() => {
+                   console.log('Distribution Preview Container - selectedToken:', selectedToken);
+                   return (
+                     <div style={{ 
+                       padding: "5px 0 0 0", 
+                      //  backgroundColor: "#001122", 
+                       borderRadius: "10px", 
+                      //  border: "1px solid #114477",
+                       margin: "5px 0"
+                     }}>
+                     {/* <div style={{
+                       textAlign: 'center', 
+                       color: '#ace', 
+                       fontSize: '16px', 
+                       fontWeight: '600',
+                       marginBottom: '15px',
+                       padding: "0 20px"
+                     }}>
+                       Distribution Preview: Proportional to impact_sum ({selectedToken?.symbol || 'No Token Selected'})
+                     </div> */}
+                     
+                     {/* Debug Info */}
+                     {/* <div style={{
+                       padding: "10px 20px",
+                       backgroundColor: "#002244",
+                       margin: "0 20px 15px 20px",
+                       borderRadius: "5px",
+                       fontSize: "11px",
+                       color: "#999"
+                     }}>
+                       Debug: tipAmount = {tipAmount}, creatorResults.length = {creatorResults.length}, selectedToken = {selectedToken?.symbol || 'None'}, Network = {selectedToken?.networkKey || 'None'}
+                     </div> */}
+                     
+                     {/* Token Display Test */}
+                     {/* <div style={{
+                       padding: "5px 20px",
+                       backgroundColor: "#003366",
+                       margin: "0 20px 10px 20px",
+                       borderRadius: "5px",
+                       fontSize: "14px",
+                       color: "#9df",
+                       textAlign: "center"
+                     }}>
+                       CURRENT TOKEN: {selectedToken?.symbol || 'None'} | NETWORK: {selectedToken?.networkKey || 'None'} | ADDRESS: {selectedToken?.address || selectedToken?.contractAddress || 'None'}
+                     </div> */}
+                     
+                     <div style={{
+                       maxHeight: "300px",
+                       overflowY: "auto",
+                       padding: "0"
+                     }}>
+                       {(() => {
+                         // Calculate total impact sum for normalization
+                         const totalImpactSum = creatorResults.reduce((sum, creator) => sum + (creator.impact_sum || 0), 0);
+                         
+                         console.log('Distribution Preview Debug:', {
+                           tipAmount,
+                           totalImpactSum,
+                           creatorResults: creatorResults.length,
+                           hasWallet: creatorResults.filter(c => c.wallet && c.wallet !== '').length
+                         });
+                         
+                         // Show all creators even when tip amount is 0
+                         if (totalImpactSum <= 0) {
+                           return (
+                             <div style={{ 
+                               textAlign: 'center', 
+                               color: '#999', 
+                               fontSize: '12px',
+                               fontStyle: 'italic',
+                               padding: "20px"
+                             }}>
+                               No impact data available for distribution
+                             </div>
+                           );
+                         }
+                         
+                         if (totalImpactSum <= 0) {
+                           return (
+                             <div style={{ 
+                               textAlign: 'center', 
+                               color: '#999', 
+                               fontSize: '12px',
+                               fontStyle: 'italic',
+                               padding: "20px"
+                             }}>
+                               No impact data available for distribution
+                             </div>
+                           );
+                         }
+                         
+                         console.log('About to render creators with selectedToken:', selectedToken?.symbol || 'None');
+                         
+                         return creatorResults
+                           .filter(creator => creator.wallet && creator.wallet !== '')
+                           .sort((a, b) => (b.impact_sum || 0) - (a.impact_sum || 0)) // Sort by impact_sum descending
+                           .map((creator, index) => {
+                             // Calculate proportional amount based on impact_sum
+                             const proportion = creator.impact_sum / totalImpactSum;
+                             const calculatedAmount = tipAmount > 0 ? parseFloat(tipAmount) * proportion : 0;
+                             
+                             return (
+                               <div key={index} style={{
+                                 display: "flex",
+                                 justifyContent: "space-between",
+                                 alignItems: "center",
+                                 padding: "8px 12px",
+                                 marginBottom: "8px",
+                                 backgroundColor: "#001122",
+                                 borderRadius: "12px",
+                                 border: "1px solid #114477"
+                               }}>
+                                 <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                   {/* Rank indicator */}
+                                   <div style={{
+                                     width: "20px",
+                                     height: "20px",
+                                     borderRadius: "3px",
+                                    //  backgroundColor: "#114477",
+                                     color: "#fff",
+                                     fontSize: "10px",
+                                     fontWeight: "bold",
+                                     display: "flex",
+                                     alignItems: "center",
+                                     justifyContent: "center",
+                                     flexShrink: 0
+                                   }}>
+                                     {index + 1}
+                                   </div>
+                                   
+                                   {creator.author_pfp && (
+                                     <img
+                                       src={creator.author_pfp}
+                                       width={24}
+                                       height={24}
+                                       style={{
+                                         borderRadius: "50%",
+                                         border: "1px solid #114477"
+                                       }}
+                                     />
+                                   )}
+                                   <span style={{ 
+                                     color: "#ace", 
+                                     fontSize: "14px", 
+                                     fontWeight: "500" 
+                                   }}>
+                                     {creator.author_username || creator.author_fid || "Unknown"}
+                                   </span>
+                                 </div>
+                                 <div style={{ 
+                                   color: "#9df", 
+                                   fontSize: "14px", 
+                                   fontWeight: "600" 
+                                 }}>
+                                   {(() => {
+                                     const amount = calculatedAmount;
+                                     if (amount >= 1) {
+                                       return amount.toFixed(2);
+                                     } else {
+                                       return amount.toFixed(4);
+                                     }
+                                   })()} {selectedToken?.symbol || 'Unknown'}
+                                 </div>
+                               </div>
+                             );
+                           });
+                       })()}
+                       {creatorResults.filter(c => c.wallet && c.wallet !== '').length === 0 && (
+                         <div style={{ 
+                           textAlign: 'center', 
+                           color: '#999', 
+                           fontSize: '12px',
+                           fontStyle: 'italic'
+                         }}>
+                           No valid wallet addresses found
+                         </div>
+                       )}
+                     </div>
+                   </div>
+                     );
+                   })()}
+
+                 {/* Found Creators Count - At Bottom */}
+                 {creatorResults.length > 0 && (
+                   <div style={{ padding: "0px 0 0 0", textAlign: 'center' }}>
+                     <div style={{color: '#ace', fontSize: '14px', fontWeight: '600'}}>
+                       Found {creatorResults.length} creators
+                     </div>
+                     <div style={{color: '#999', fontSize: '12px', textAlign: 'center', marginTop: '10px'}}>
+                       Creator results will be displayed here
+                     </div>
+                   </div>
+                 )}
+
+               {/* <div style={{ padding: "0 20px 5px 20px" }}>
+                 <WalletConnect />
+               </div> */}
+
+            </div>
+          </div>
 
 
 

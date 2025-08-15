@@ -5,7 +5,7 @@ import { AccountContext } from '../../context';
 import { useAccount, useDisconnect } from 'wagmi';
 import Spinner from '../Common/Spinner';
 
-export default function WalletConnect() {
+export default function WalletConnect({ onTipAmountChange, onTokenChange }) {
   const {
     walletConnected, setWalletConnected,
     walletAddress, setWalletAddress,
@@ -26,6 +26,36 @@ export default function WalletConnect() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [lastRefreshTime, setLastRefreshTime] = useState(0);
   const [tipAmount, setTipAmount] = useState(0);
+  
+  // Call the callback when tipAmount changes
+  useEffect(() => {
+    if (onTipAmountChange) {
+      onTipAmountChange(tipAmount);
+    }
+  }, [tipAmount, onTipAmountChange]);
+
+  // Call the callback when selectedToken changes
+  useEffect(() => {
+    if (onTokenChange && selectedToken !== 'default') {
+      onTokenChange(selectedToken);
+    }
+  }, [selectedToken, onTokenChange]);
+
+  // Set default token and notify parent on mount (only once)
+  const [hasSetDefault, setHasSetDefault] = useState(false);
+  
+  useEffect(() => {
+    if (onTokenChange && topCoins.length > 0 && !hasSetDefault) {
+      // Find USDC on Base as default, but only set it once
+      const defaultToken = topCoins.find(t => t.symbol === 'USDC' && t.networkKey === 'base');
+      if (defaultToken) {
+        console.log('Setting default token:', defaultToken);
+        setSelectedToken(defaultToken);
+        onTokenChange(defaultToken);
+        setHasSetDefault(true); // Mark that we've set the default
+      }
+    }
+  }, [topCoins, onTokenChange, hasSetDefault]);
 
   // Helper function for dynamic decimal formatting
   const formatAmount = (amount, symbol) => {
@@ -492,9 +522,20 @@ export default function WalletConnect() {
                             <div
                               key={`${coin.networkKey}-${coin.symbol}-${index}`}
                               onClick={() => {
+                                console.log('User selected token:', coin);
                                 setSelectedToken(coin); // Store the actual token object
                                 setTipAmount(0); // Reset tip amount when selecting new token
                                 setDropdownOpen(false);
+                                
+                                // Also call the callback to reset tip amount in parent
+                                if (onTipAmountChange) {
+                                  onTipAmountChange(0);
+                                }
+                                
+                                // Notify parent of token change
+                                if (onTokenChange) {
+                                  onTokenChange(coin);
+                                }
                               }}
                               style={{
                                 padding: '10px',
@@ -663,7 +704,14 @@ export default function WalletConnect() {
                           max={parseFloat(displayToken.balance)}
                           step="0.000001"
                           value={tipAmount}
-                          onChange={(e) => setTipAmount(parseFloat(e.target.value))}
+                          onChange={(e) => {
+                            const newAmount = parseFloat(e.target.value);
+                            setTipAmount(newAmount);
+                            // Call the callback to update parent component
+                            if (onTipAmountChange) {
+                              onTipAmountChange(newAmount);
+                            }
+                          }}
                           style={{
                             width: '100%',
                             height: '8px',
