@@ -862,26 +862,99 @@ export default function Tip() {
         recipientAmounts
       ]);
       
-      // Check if user is on Base network
-      if (walletChainId !== '0x2105') {
+      // Check if user is on Base network (handle both decimal and hex chain IDs)
+      const isBaseNetwork = walletChainId === '0x2105' || walletChainId === '8453' || walletChainId === 8453;
+      
+      if (!isBaseNetwork) {
         console.log('Current network:', walletChainId);
-        console.log('Required network: 0x2105 (Base)');
+        console.log('Required network: 0x2105 (Base) or 8453 (Base)');
         throw new Error(`Please switch to Base network to use this feature. Current network: ${walletChainId || 'Unknown'}`);
       }
       
-      // Send transaction
-      const tx = await walletProvider.request({
-        method: 'eth_sendTransaction',
-        params: [{
-          to: disperseContractAddress,
-          data: functionData,
-          from: walletAddress,
-          value: '0x0', // No ETH sent, only tokens
-          chainId: '0x2105'
-        }]
+      // Debug wallet provider information
+      console.log('Wallet Provider Debug Info:', {
+        walletProvider: walletProvider,
+        hasRequest: walletProvider && typeof walletProvider.request === 'function',
+        hasSend: walletProvider && typeof walletProvider.send === 'function',
+        hasSendAsync: walletProvider && typeof walletProvider.sendAsync === 'function',
+        windowEthereum: !!window.ethereum,
+        hasWindowEthereumRequest: window.ethereum && typeof window.ethereum.request === 'function'
       });
       
-      setDisperseStatus(`Transaction sent! Hash: ${tx}`);
+      // Send transaction using multiple wallet interaction methods
+      let tx;
+      try {
+        // Method 1: Try walletProvider.request (MetaMask style)
+        if (walletProvider && typeof walletProvider.request === 'function') {
+          console.log('Using walletProvider.request method');
+          tx = await walletProvider.request({
+            method: 'eth_sendTransaction',
+            params: [{
+              to: disperseContractAddress,
+              data: functionData,
+              from: walletAddress,
+              value: '0x0', // No ETH sent, only tokens
+              chainId: '0x2105'
+            }]
+          });
+        }
+        // Method 2: Try window.ethereum (fallback for MetaMask)
+        else if (window.ethereum && typeof window.ethereum.request === 'function') {
+          console.log('Using window.ethereum.request method');
+          tx = await window.ethereum.request({
+            method: 'eth_sendTransaction',
+            params: [{
+              to: disperseContractAddress,
+              data: functionData,
+              from: walletAddress,
+              value: '0x0',
+              chainId: '0x2105'
+            }]
+          });
+        }
+        // Method 3: Try walletProvider.send (WalletConnect style)
+        else if (walletProvider && typeof walletProvider.send === 'function') {
+          console.log('Using walletProvider.send method');
+          tx = await walletProvider.send('eth_sendTransaction', [{
+            to: disperseContractAddress,
+            data: functionData,
+            from: walletAddress,
+            value: '0x0',
+            chainId: '0x2105'
+          }]);
+        }
+        // Method 4: Try walletProvider.sendAsync (legacy)
+        else if (walletProvider && typeof walletProvider.sendAsync === 'function') {
+          console.log('Using walletProvider.sendAsync method');
+          tx = await new Promise((resolve, reject) => {
+            walletProvider.sendAsync({
+              method: 'eth_sendTransaction',
+              params: [{
+                to: disperseContractAddress,
+                data: functionData,
+                from: walletAddress,
+                value: '0x0',
+                chainId: '0x2105'
+              }],
+              from: walletAddress,
+              id: Date.now()
+            }, (error, response) => {
+              if (error) reject(error);
+              else resolve(response.result);
+            });
+          });
+        }
+        else {
+          throw new Error('No compatible wallet provider method found. Please check your wallet connection.');
+        }
+        
+        console.log('Transaction sent successfully:', tx);
+        setDisperseStatus(`Transaction sent! Hash: ${tx}`);
+        
+      } catch (txError) {
+        console.error('Transaction failed:', txError);
+        throw new Error(`Transaction failed: ${txError.message}`);
+      }
       
     } catch (error) {
       console.error('Disperse error:', error);
@@ -1627,6 +1700,27 @@ export default function Tip() {
                     >
                       {isDispersing ? "Dispersing..." : `Disperse ${selectedToken?.symbol || 'Token'}`}
                     </button>
+                    
+                    {/* Network Status Info */}
+                    {/* {walletConnected && (
+                      <div style={{ 
+                        marginTop: "8px", 
+                        padding: "6px 10px", 
+                        backgroundColor: "#001122", 
+                        borderRadius: "6px", 
+                        border: "1px solid #114477",
+                        fontSize: "10px",
+                        color: "#999"
+                      }}>
+                        Network: {walletChainId === '0x2105' || walletChainId === '8453' || walletChainId === 8453 ? 
+                                  '✅ Base Network' : 
+                                  `❌ ${walletChainId === '0x1' ? 'Ethereum Mainnet' : 
+                                        walletChainId === '0x89' ? 'Polygon' : 
+                                        walletChainId === '0xa' ? 'Optimism' : 
+                                        walletChainId === '0xa4b1' ? 'Arbitrum' : 
+                                        `Network ${walletChainId || 'Unknown'}`}`}
+                      </div>
+                    )} */}
                   </div>
                 )}
                 
