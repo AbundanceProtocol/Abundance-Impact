@@ -813,45 +813,59 @@ export default function Tip() {
       const tokenDecimals = getTokenDecimals(selectedToken);
       console.log(`Using ${tokenDecimals} decimals for ${selectedToken?.symbol}`);
 
-      // Filter valid recipients and calculate amounts
-      const recipients = creatorResults
-        .filter(creator => creator.wallet && creator.impact_sum >= 0.000001)
-        .map(creator => {
+      // Calculate minimum amount helper function - declare first to avoid hoisting issues
+      const getMinimumAmount = (decimals) => {
+        switch(decimals) {
+          case 6:  return 0.000001;  // 1 micro unit (USDC)
+          case 18: return 0.000000000000000001; // 1 wei (ETH, most tokens)
+          default: return Math.pow(10, -decimals);
+        }
+      };
+
+      console.log('🔍 Starting recipient processing...');
+      
+      // Filter valid creators first
+      const validCreators = creatorResults.filter(creator => {
+        const hasWallet = Boolean(creator.wallet);
+        const hasImpact = creator.impact_sum >= 0.000001;
+        console.log(`Creator ${creator.author_username}: wallet=${hasWallet}, impact=${hasImpact}`);
+        return hasWallet && hasImpact;
+      });
+
+      console.log(`Found ${validCreators.length} valid creators from ${creatorResults.length} total`);
+
+      // Process each creator into recipient format
+      const recipients = [];
+      for (let i = 0; i < validCreators.length; i++) {
+        const creator = validCreators[i];
+        console.log(`Processing creator ${i + 1}/${validCreators.length}: ${creator.author_username}`);
+        
+        try {
           const calculatedAmount = (tipAmount * creator.impact_sum) / totalImpactSum;
-          
-          // Calculate minimum amount based on token decimals to avoid dust
-          const getMinimumAmount = (decimals) => {
-            // Set minimum to 1 unit in the token's smallest denomination
-            switch(decimals) {
-              case 6:  return 0.000001;  // 1 micro unit (USDC)
-              case 18: return 0.000000000000000001; // 1 wei (ETH, most tokens)
-              default: return Math.pow(10, -decimals);
-            }
-          };
-          
           const minimumAmount = getMinimumAmount(tokenDecimals);
           const finalAmount = Math.max(calculatedAmount, minimumAmount);
-          
-          // Format the amount to avoid precision issues with parseUnits
           const formattedAmount = finalAmount.toFixed(tokenDecimals);
           
-          try {
-            const parsedAmount = parseUnits(formattedAmount, tokenDecimals);
-            console.log(`✅ Parsed amount for ${creator.wallet}: ${formattedAmount} -> ${parsedAmount.toString()}`);
-            
-            return {
-              address: creator.wallet,
-              amount: parsedAmount,
-              impact_sum: creator.impact_sum,
-              calculatedAmount: finalAmount,
-              formattedAmount: formattedAmount
-            };
-          } catch (parseError) {
-            console.error(`❌ Error parsing amount for ${creator.wallet}:`, parseError);
-            console.error(`Failed to parse: ${formattedAmount} with decimals: ${tokenDecimals}`);
-            throw new Error(`Failed to parse amount: ${parseError.message}`);
-          }
-        });
+          console.log(`Amount calculation: ${calculatedAmount} -> ${finalAmount} -> ${formattedAmount}`);
+          
+          const parsedAmount = parseUnits(formattedAmount, tokenDecimals);
+          
+          const recipient = {
+            address: creator.wallet,
+            amount: parsedAmount,
+            impact_sum: creator.impact_sum,
+            calculatedAmount: finalAmount,
+            formattedAmount: formattedAmount
+          };
+          
+          recipients.push(recipient);
+          console.log(`✅ Added recipient: ${creator.wallet} = ${formattedAmount} ${selectedToken?.symbol}`);
+          
+        } catch (parseError) {
+          console.error(`❌ Error processing creator ${creator.author_username}:`, parseError);
+          throw new Error(`Failed to process recipient: ${parseError.message}`);
+        }
+      }
 
       if (recipients.length === 0) {
         setDisperseStatus('No valid recipients found');
@@ -872,7 +886,7 @@ export default function Tip() {
         impact_sum: r.impact_sum
       })));
 
-      setDisperseStatus(`Dispersing ${selectedToken?.symbol} to ${validRecipients.length} recipients...`);
+      setDisperseStatus(`Dispersing ${selectedToken?.symbol} to ${recipients.length} recipients...`);
 
       // Get the correct token address
       let tokenAddress = selectedToken?.address || selectedToken?.contractAddress;
