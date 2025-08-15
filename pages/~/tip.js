@@ -657,7 +657,24 @@ export default function Tip() {
       return;
     }
     
-
+    // Import Farcaster SDK for wallet provider
+    let sdk;
+    try {
+      const sdkModule = await import('@farcaster/miniapp-sdk');
+      sdk = sdkModule.sdk;
+      console.log('✅ Farcaster SDK imported successfully');
+      
+      // Verify SDK is working
+      if (!sdk || !sdk.wallet) {
+        throw new Error('SDK wallet not available');
+      }
+      
+      console.log('🔍 SDK wallet methods available:', Object.getOwnPropertyNames(sdk.wallet));
+    } catch (sdkImportError) {
+      console.error('❌ Failed to import Farcaster SDK:', sdkImportError.message);
+      setDisperseStatus('Error: Failed to load Farcaster SDK');
+      return;
+    }
     
     // Calculate total impact sum for normalization
     const totalImpactSum = creatorResults.reduce((sum, creator) => sum + (creator.impact_sum || 0), 0);
