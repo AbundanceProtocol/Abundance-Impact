@@ -5,7 +5,7 @@ import { AccountContext } from '../../context';
 import { useAccount, useDisconnect } from 'wagmi';
 import Spinner from '../Common/Spinner';
 
-export default function WalletConnect() {
+export default function WalletConnect({ onTipAmountChange, onTokenChange }) {
   const {
     walletConnected, setWalletConnected,
     walletAddress, setWalletAddress,
@@ -26,6 +26,36 @@ export default function WalletConnect() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [lastRefreshTime, setLastRefreshTime] = useState(0);
   const [tipAmount, setTipAmount] = useState(0);
+  
+  // Call the callback when tipAmount changes
+  useEffect(() => {
+    if (onTipAmountChange) {
+      onTipAmountChange(tipAmount);
+    }
+  }, [tipAmount, onTipAmountChange]);
+
+  // Call the callback when selectedToken changes
+  useEffect(() => {
+    if (onTokenChange && selectedToken !== 'default') {
+      onTokenChange(selectedToken);
+    }
+  }, [selectedToken, onTokenChange]);
+
+  // Set default token and notify parent on mount (only once)
+  const [hasSetDefault, setHasSetDefault] = useState(false);
+  
+  useEffect(() => {
+    if (onTokenChange && topCoins.length > 0 && !hasSetDefault) {
+      // Find USDC on Base as default, but only set it once
+      const defaultToken = topCoins.find(t => t.symbol === 'USDC' && t.networkKey === 'base');
+      if (defaultToken) {
+        console.log('Setting default token:', defaultToken);
+        setSelectedToken(defaultToken);
+        onTokenChange(defaultToken);
+        setHasSetDefault(true); // Mark that we've set the default
+      }
+    }
+  }, [topCoins, onTokenChange, hasSetDefault]);
 
   // Helper function for dynamic decimal formatting
   const formatAmount = (amount, symbol) => {
@@ -236,17 +266,19 @@ export default function WalletConnect() {
                     <button
                       onClick={() => setDropdownOpen(!dropdownOpen)}
                       style={{
-                        padding: '8px 12px',
+                        padding: '12px 12px',
                         borderRadius: '10px',
-                        border: '1px solid #ddd',
+                        border: '1px solid #114477',
                         fontSize: '12px',
-                        backgroundColor: 'white',
+                        backgroundColor: '#001122',
+                        color: '#ace',
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
                         gap: '8px',
                         minWidth: '260px', // 30% wider (was 200px)
-                        justifyContent: 'space-between'
+                        justifyContent: 'space-between',
+                        outline: 'none'
                       }}
                     >
                       {(() => {
@@ -316,8 +348,8 @@ export default function WalletConnect() {
                                   </div>
                                 </div>
                                 <div style={{ textAlign: 'left' }}>
-                                  <div style={{ fontSize: '13px', fontWeight: 'bold' }}>USDC</div>
-                                  <div style={{ fontSize: '11px', color: '#666' }}>Base</div>
+                                  <div style={{ fontSize: '13px', fontWeight: 'bold', color: '#ace' }}>USDC</div>
+                                  <div style={{ fontSize: '11px', color: '#bdf' }}>Base</div>
                                 </div>
                               </div>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -420,13 +452,14 @@ export default function WalletConnect() {
                                   </div>
                                 </div>
                                 <div style={{ textAlign: 'left' }}>
-                                  <div style={{ fontSize: '13px', fontWeight: 'bold' }}>{token.symbol}</div>
-                                  <div style={{ fontSize: '11px', color: '#666' }}>{formatAmount(token.balance, token.symbol)}</div>
+                                  <div style={{ fontSize: '13px', fontWeight: 'bold', color: '#ace' }}>{token.symbol}</div>
+                                  <div style={{ fontSize: '11px', color: '#bdf' }}>{formatAmount(token.balance, token.symbol)}</div>
                                 </div>
                               </div>
                                                                                                     <span style={{ 
-                               color: '#28a745', 
-                               fontWeight: 'bold' }}>
+                               color: '#9df', 
+                               fontWeight: 'bold',
+                               fontSize: '14px' }}>
                               ${(() => {
                                 const calculated = parseFloat(token.balance) * parseFloat(token.price);
                                 // For very small values, show more precision
@@ -451,36 +484,38 @@ export default function WalletConnect() {
                   {dropdownOpen && (
                     <div style={{
                       position: 'absolute',
-                      top: '55px',
+                      top: '65px',
                       left: 0,
                       right: 0,
-                      backgroundColor: 'white',
-                      border: '1px solid #ddd',
+                      backgroundColor: '#00112233',
+                      border: '1px solid #114477',
                       borderRadius: '12px',
                       maxHeight: '300px',
                       overflowY: 'auto',
                       zIndex: 9999,
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                      backdropFilter: 'blur(12px)',
+                      WebkitBackdropFilter: 'blur(12px)'
                     }}>
                         {/* Loading State */}
                         {walletConnected && topCoinsLoading ? (
                           <div style={{
                             padding: '20px',
                             textAlign: 'center',
-                            color: '#333',
+                            color: '#ace',
                             display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center',
                             gap: '10px'
                           }}>
-                            <Spinner size={31} color={'#999'} />
+                            <Spinner size={31} color={'#ccc'} />
                             <span>Loading tokens...</span>
                           </div>
                         ) : topCoins.length === 0 ? (
                           <div style={{
                             padding: '20px',
                             textAlign: 'center',
-                            color: '#666'
+                            color: '#ccc'
                           }}>
                             No tokens available
                           </div>
@@ -492,19 +527,30 @@ export default function WalletConnect() {
                             <div
                               key={`${coin.networkKey}-${coin.symbol}-${index}`}
                               onClick={() => {
+                                console.log('User selected token:', coin);
                                 setSelectedToken(coin); // Store the actual token object
                                 setTipAmount(0); // Reset tip amount when selecting new token
                                 setDropdownOpen(false);
+                                
+                                // Also call the callback to reset tip amount in parent
+                                if (onTipAmountChange) {
+                                  onTipAmountChange(0);
+                                }
+                                
+                                // Notify parent of token change
+                                if (onTokenChange) {
+                                  onTokenChange(coin);
+                                }
                               }}
                               style={{
                                 padding: '10px',
                                 cursor: 'pointer',
-                                borderBottom: '1px solid #eee',
+                                borderBottom: '1px solid #114477',
                                 backgroundColor: (() => {
                                   if (selectedToken === 'default') {
-                                    return coin.symbol === 'USDC' && coin.networkKey === 'base' ? '#f8f9fa' : 'white';
+                                    return coin.symbol === 'USDC' && coin.networkKey === 'base' ? '#11447799' : '#00112299';
                                   } else {
-                                    return selectedToken && selectedToken.symbol === coin.symbol && selectedToken.networkKey === coin.networkKey ? '#f8f9fa' : 'white';
+                                    return selectedToken && selectedToken.symbol === coin.symbol && selectedToken.networkKey === coin.networkKey ? '#11447799' : '#00112299';
                                   }
                                 })(),
                                 display: 'flex',
@@ -602,10 +648,10 @@ export default function WalletConnect() {
                               
                               {/* Token Details */}
                               <div style={{ flex: 1 }}>
-                                <div style={{ fontSize: '13px', fontWeight: 'bold', color: '#000' }}>
+                                <div style={{ fontSize: '13px', fontWeight: 'bold', color: '#ace' }}>
                                   {coin.symbol}
                                 </div>
-                                <div style={{ fontSize: '11px', color: '#000' }}>
+                                <div style={{ fontSize: '11px', color: '#ccc' }}>
                                   {formatAmount(coin.balance, coin.symbol)} @ ${parseFloat(coin.price).toFixed(6)}
                                 </div>
                               </div>
@@ -614,7 +660,7 @@ export default function WalletConnect() {
                               <div style={{ 
                                 fontSize: '12px', 
                                 fontWeight: 'bold', 
-                                color: '#28a745',
+                                color: '#9df',
                                 textAlign: 'right',
                                 minWidth: '60px'
                               }}>
@@ -636,7 +682,7 @@ export default function WalletConnect() {
                         padding: '15px',
                         backgroundColor: '#00112299',
                         borderRadius: '10px',
-                        border: '1px solid #688'
+                        border: '1px solid #114477'
                       }}>
                         <div style={{
                           display: 'flex',
@@ -663,7 +709,14 @@ export default function WalletConnect() {
                           max={parseFloat(displayToken.balance)}
                           step="0.000001"
                           value={tipAmount}
-                          onChange={(e) => setTipAmount(parseFloat(e.target.value))}
+                          onChange={(e) => {
+                            const newAmount = parseFloat(e.target.value);
+                            setTipAmount(newAmount);
+                            // Call the callback to update parent component
+                            if (onTipAmountChange) {
+                              onTipAmountChange(newAmount);
+                            }
+                          }}
                           style={{
                             width: '100%',
                             height: '8px',
