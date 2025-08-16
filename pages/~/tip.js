@@ -1858,7 +1858,7 @@ export default function Tip() {
 
 
       {/* Wallet Integration Section */}
-      {(version == '2.0' || adminTest) && (<div style={{ padding: "20px 4px 0px 4px", width: feedMax }}>
+      {(version == '1.0' || version == '2.0' || adminTest) && (<div style={{ padding: "20px 4px 0px 4px", width: feedMax }}>
         <div className="flex-col" style={{ backgroundColor: "" }}>
           <div
             className="shadow flex-col"
