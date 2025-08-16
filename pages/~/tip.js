@@ -201,7 +201,8 @@ export default function Tip() {
     walletAddress,
     walletChainId,
     walletProvider,
-    setUserInfo
+    setUserInfo,
+    getAllTokens
   } = useContext(AccountContext);
   
   // Use the existing wallet hook for transactions
@@ -256,6 +257,8 @@ export default function Tip() {
   const [tipAmount, setTipAmount] = useState(0);
   const [isDispersing, setIsDispersing] = useState(false);
   const [disperseStatus, setDisperseStatus] = useState("");
+  const [lastSuccessHash, setLastSuccessHash] = useState(null);
+  const [pendingTxTokenSymbol, setPendingTxTokenSymbol] = useState(null);
   
   // Collapsible state for Impact Filter
   const [isImpactFilterCollapsed, setIsImpactFilterCollapsed] = useState(true);
@@ -315,9 +318,25 @@ export default function Tip() {
   useEffect(() => {
     if (isConfirming) {
       setDisperseStatus('Transaction confirming...');
-    } else if (isConfirmed && hash) {
+    } else if (isConfirmed && hash && hash !== lastSuccessHash) {
       setDisperseStatus(`Transaction confirmed! Hash: ${hash}`);
       setIsDispersing(false);
+      // Show success modal
+      setModal({ on: true, success: true, text: `${pendingTxTokenSymbol || selectedToken?.symbol || 'Token'} multi-tipped successfully` });
+      // Auto-close modal after 2.5 seconds using existing Modal logic
+      setTimeout(() => {
+        setModal(prev => ({ ...prev, on: false }));
+      }, 2500);
+      // Refresh token balances/prices after success
+      try {
+        if (walletConnected && walletAddress) {
+          getAllTokens(walletAddress, true);
+        }
+      } catch (e) {
+        console.warn('Failed to refresh tokens after disperse:', e);
+      }
+      // Remember last success hash to prevent duplicate modal
+      setLastSuccessHash(hash);
     } else if (writeError) {
       let errorMessage = 'Transaction failed';
       if (writeError.message.includes('User rejected')) {
@@ -330,7 +349,7 @@ export default function Tip() {
       setDisperseStatus(errorMessage);
       setIsDispersing(false);
     }
-  }, [isConfirming, isConfirmed, hash, writeError]);
+  }, [isConfirming, isConfirmed, hash, writeError, walletConnected, walletAddress, getAllTokens, lastSuccessHash, pendingTxTokenSymbol]);
 
   useEffect(() => {
     if (fid) {
@@ -817,7 +836,7 @@ export default function Tip() {
       
       // If allowance is very low, show approval message
       if (allowanceResult < parseUnits('0.01', selectedToken?.decimals || 18)) {
-        setDisperseStatus(`⚠️ Token approval required. Please approve ${selectedToken?.symbol} spending for the disperse contract first.`);
+        setDisperseStatus(`⚠️ Token approval required. Please approve ${selectedToken?.symbol} spending first.`);
       } else {
         // Clear any approval-related status
         if (disperseStatus && disperseStatus.includes('Token approval required')) {
@@ -852,7 +871,7 @@ export default function Tip() {
         args: ['0xD152f549545093347A162Dce210e7293f1452150', maxApproval],
       });
       
-      console.log('✅ Token approval initiated:', result);
+      console.log('Token approval initiated:', result);
       setDisperseStatus('Token approval sent! Waiting for confirmation...');
       
     } catch (error) {
@@ -869,9 +888,6 @@ export default function Tip() {
     try {
       console.log('🚀 Inside try block - Starting disperse');
       console.log('🔍 Available functions:', { parseUnits: typeof parseUnits, writeContract: typeof writeContract });
-      
-      setIsDispersing(true);
-      setDisperseStatus('Preparing transaction...');
       
       console.log('🚀 Basic setup completed - USING WAGMI HOOKS');
 
@@ -910,17 +926,21 @@ export default function Tip() {
         };
         const currentNetworkName = networkNames[wagmiChainId] || `Network ${wagmiChainId}`;
         
-        setDisperseStatus(`Disperse is only available on Base network. Please switch from ${currentNetworkName} to Base to use this feature.`);
+        setDisperseStatus(`⚠️ Multi-Tip is only available on Base network. Please switch from ${currentNetworkName} to Base to use this feature.`);
         setIsDispersing(false);
         return;
       }
       
-      console.log('Operating on Base network - disperse functionality enabled');
+      console.log('Operating on Base network - multi-tip functionality enabled');
+      
+      // Now begin transaction preparation after passing network checks
+      setIsDispersing(true);
+      setDisperseStatus('Preparing transaction...');
       
       // Validate that the selected token is available on Base
       const tokenNetworkKey = selectedToken?.networkKey;
       if (tokenNetworkKey && tokenNetworkKey !== 'base') {
-        setDisperseStatus(`Token ${selectedToken?.symbol} is not available on Base network. Please select a Base token to disperse.`);
+        setDisperseStatus(`⚠️ Token ${selectedToken?.symbol} is not available on Base network. Please select a Base token to multi-tip.`);
         setIsDispersing(false);
         return;
       }
@@ -1161,6 +1181,9 @@ export default function Tip() {
       // Use Wagmi's writeContract hook (as recommended by Farcaster docs)
       console.log('🚀 Calling writeContract...');
       
+      // Capture the token symbol at the moment we send the tx
+      setPendingTxTokenSymbol(selectedToken?.symbol || 'Token');
+
       const result = await writeContract({
         address: '0xD152f549545093347A162Dce210e7293f1452150', // Disperse contract
         abi: disperseABI,
@@ -1179,7 +1202,7 @@ export default function Tip() {
       // Don't set isDispersing to false here - let the useEffect handle it
       
     } catch (error) {
-      console.error('Disperse error:', error);
+      console.error('Multi-Tip error:', error);
       console.error('Error details:', {
         message: error.message,
         code: error.code,
@@ -1879,7 +1902,7 @@ export default function Tip() {
                           padding: "10px 16px",
                           borderRadius: "8px",
                           border: "none",
-                          backgroundColor: isPending || isConfirming ? "#555" : "#aa4400",
+                          backgroundColor: isPending || isConfirming ? "#555" : "#007bff",
                           color: "#fff",
                           fontSize: "12px",
                           fontWeight: "600",
@@ -1887,46 +1910,45 @@ export default function Tip() {
                           marginBottom: "10px"
                         }}
                       >
-                        {isPending || isConfirming ? "Approving..." : `Approve ${selectedToken?.symbol || 'Token'}`}
+                        {isPending || isConfirming ? "Approving..." : `Approve ${selectedToken?.symbol || 'Token'} Multi-Tip`}
                       </button>
                     )}
-                    
-                    <button
-                      onClick={() => {
-                        console.log('🔍 Disperse button clicked!');
-                        console.log('🔍 disperseTokens function:', typeof disperseTokens);
-                        console.log('🔍 About to call disperseTokens...');
-                        disperseTokens();
-                      }}
-                      disabled={isPending || isConfirming || !wagmiConnected || !tipAmount || wagmiChainId !== 8453 || (disperseStatus && disperseStatus.includes('Token approval required'))}
-                      style={{
-                        width: "100%",
-                        padding: "10px 16px",
-                        borderRadius: "8px",
-                        border: "none",
-                        backgroundColor: isPending || isConfirming || !wagmiConnected || !tipAmount || wagmiChainId !== 8453 || (disperseStatus && disperseStatus.includes('Token approval required')) ? "#555" : "#114477",
-                        color: "#fff",
-                        fontSize: "12px",
-                        fontWeight: "600",
-                        cursor: isPending || isConfirming || !wagmiConnected || !tipAmount || wagmiChainId !== 8453 || (disperseStatus && disperseStatus.includes('Token approval required')) ? "not-allowed" : "pointer"
-                      }}
-                    >
-                      {isPending 
-                       ? "Preparing..." 
-                       : isConfirming 
-                       ? "Confirming..." 
-                       : wagmiChainId !== 8453
-                       ? "Disperse (Base Only)"
-                       : disperseStatus && disperseStatus.includes('Token approval required')
-                       ? "Approve Token First"
-                       : `Disperse ${selectedToken?.symbol || 'Token'}`}
-                    </button>
+                    {!(disperseStatus && disperseStatus.includes('Token approval required')) && (
+                      <button
+                        onClick={() => {
+                          console.log('🔍 Multi-Tip button clicked!');
+                          console.log('🔍 disperseTokens function:', typeof disperseTokens);
+                          console.log('🔍 About to call disperseTokens...');
+                          disperseTokens();
+                        }}
+                        disabled={isPending || isConfirming || !wagmiConnected || !tipAmount || wagmiChainId !== 8453}
+                        style={{
+                          width: "100%",
+                          padding: "10px 16px",
+                          borderRadius: "8px",
+                          border: "none",
+                          backgroundColor: isPending || isConfirming || !wagmiConnected || !tipAmount || wagmiChainId !== 8453 ? "#555" : "#007bff",
+                          color: "#fff",
+                          fontSize: "12px",
+                          fontWeight: "600",
+                          cursor: isPending || isConfirming || !wagmiConnected || !tipAmount || wagmiChainId !== 8453 ? "not-allowed" : "pointer"
+                        }}
+                      >
+                        {isPending 
+                         ? "Preparing..." 
+                         : isConfirming 
+                         ? "Confirming..." 
+                         : wagmiChainId !== 8453
+                         ? "Multi-Tip (Base Only)"
+                         : `Multi-Tip ${selectedToken?.symbol || 'Token'}`}
+                      </button>
+                    )}
               </div>
                 )}
                 
 
                 
-                                 {/* Disperse Status */}
+                {/* Disperse Status */}
                  {isLogged && disperseStatus && (
                    <div style={{ marginTop: "15px" }}>
                      <div style={{
@@ -1962,26 +1984,7 @@ export default function Tip() {
                    </div>
                  )}
 
-                 {/* Check Allowance Button */}
-                 {isLogged && selectedToken && !selectedToken?.isNative && wagmiConnected && (
-                   <div style={{ marginTop: "10px", textAlign: "center" }}>
-                     <button
-                       onClick={checkTokenApproval}
-                       style={{
-                         padding: "6px 12px",
-                         borderRadius: "6px",
-                         border: "1px solid #114477",
-                         backgroundColor: "transparent",
-                         color: "#9df",
-                         fontSize: "10px",
-                         cursor: "pointer"
-                       }}
-                       title="Check current token allowance for disperse contract"
-                     >
-                       Check Allowance
-                     </button>
-                   </div>
-                 )}
+                 
           </div>
 
             </div>
