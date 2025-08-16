@@ -945,14 +945,7 @@ export default function Tip() {
         return;
       }
 
-      // Calculate amounts for each creator based on impact_sum
-      const totalImpactSum = creatorResults.reduce((sum, creator) => sum + (creator.impact_sum || 0), 0);
-      
-      if (totalImpactSum <= 0) {
-        setDisperseStatus('No valid impact data found');
-        setIsDispersing(false);
-        return;
-      }
+      // We'll calculate total impact after filtering valid creators below
 
       // Get token decimals from the actual token object (same as used in wallet display)
       const getTokenDecimals = (token) => {
@@ -1001,11 +994,28 @@ export default function Tip() {
 
       console.log(`Found ${validCreators.length} valid creators from ${creatorResults.length} total`);
 
+      // Exclude self if author's fid equals the current user's fid
+      const selfFidStr = (fid !== undefined && fid !== null) ? String(fid) : null;
+      const filteredCreators = selfFidStr
+        ? validCreators.filter(c => String(c.author_fid ?? '') !== selfFidStr)
+        : validCreators;
+      if (selfFidStr) {
+        console.log(`Self-exclusion applied (fid=${selfFidStr}). Remaining creators: ${filteredCreators.length}`);
+      }
+
+      // Calculate amounts for each creator based on impact_sum after filtering
+      const totalImpactSum = filteredCreators.reduce((sum, creator) => sum + (creator.impact_sum || 0), 0);
+      if (filteredCreators.length === 0 || totalImpactSum <= 0) {
+        setDisperseStatus('No valid recipients found');
+        setIsDispersing(false);
+        return;
+      }
+
       // Process each creator into recipient format
       const recipients = [];
-      for (let i = 0; i < validCreators.length; i++) {
-        const creator = validCreators[i];
-        console.log(`Processing creator ${i + 1}/${validCreators.length}: ${creator.author_username}`);
+      for (let i = 0; i < filteredCreators.length; i++) {
+        const creator = filteredCreators[i];
+        console.log(`Processing creator ${i + 1}/${filteredCreators.length}: ${creator.author_username}`);
         
         try {
           const calculatedAmount = (tipAmount * creator.impact_sum) / totalImpactSum;
