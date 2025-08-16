@@ -201,6 +201,7 @@ export default function Tip() {
     walletAddress,
     walletChainId,
     walletProvider,
+    userInfo,
     setUserInfo,
     getAllTokens
   } = useContext(AccountContext);
@@ -263,6 +264,10 @@ export default function Tip() {
   const [disperseStatus, setDisperseStatus] = useState("");
   const [lastSuccessHash, setLastSuccessHash] = useState(null);
   const [pendingTxTokenSymbol, setPendingTxTokenSymbol] = useState(null);
+  const [pendingTxTokenDecimals, setPendingTxTokenDecimals] = useState(null);
+  const [pendingTxReceivers, setPendingTxReceivers] = useState([]);
+  const [pendingTxTotalAmountDecimal, setPendingTxTotalAmountDecimal] = useState(0);
+  const [pendingTxKind, setPendingTxKind] = useState(null); // 'approval' | 'disperse' | null
   
   // Collapsible state for Impact Filter
   const [isImpactFilterCollapsed, setIsImpactFilterCollapsed] = useState(true);
@@ -323,6 +328,11 @@ export default function Tip() {
     if (isConfirming) {
       setDisperseStatus('Transaction confirming...');
     } else if (isConfirmed && hash && hash !== lastSuccessHash) {
+      // Only react to success of disperse, not approval
+      if (pendingTxKind !== 'disperse') {
+        setLastSuccessHash(hash);
+        return;
+      }
       setDisperseStatus(`Transaction confirmed! Hash: ${hash}`);
       setIsDispersing(false);
       // Show success modal
@@ -339,8 +349,41 @@ export default function Tip() {
       } catch (e) {
         console.warn('Failed to refresh tokens after disperse:', e);
       }
+      // Create OnchainTip document via API (non-blocking)
+      (async () => {
+        try {
+          const tipPayload = {
+            tipper_fid: userInfo?.fid,
+            tipper_pfp: userInfo?.pfp,
+            tipper_username: userInfo?.username,
+            tip: [{
+              currency: pendingTxTokenSymbol || selectedToken?.symbol || 'Token',
+              amount: Number(pendingTxTotalAmountDecimal || 0),
+              value: Number(pendingTxTotalAmountDecimal || 0) * Number(selectedToken?.price || 0)
+            }],
+            receiver: pendingTxReceivers || [],
+            transaction_hash: hash,
+          };
+          const res = await fetch('/api/onchain-tip', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(tipPayload),
+          });
+          if (!res.ok) {
+            const txt = await res.text();
+            console.warn('OnchainTip API returned non-200:', res.status, txt);
+          } else {
+            const data = await res.json().catch(() => ({}));
+            console.log('OnchainTip persisted:', data);
+          }
+        } catch (e) {
+          console.warn('Failed to persist OnchainTip:', e);
+        }
+      })();
       // Remember last success hash to prevent duplicate modal
       setLastSuccessHash(hash);
+      // clear pending kind
+      setPendingTxKind(null);
     } else if (writeError) {
       let errorMessage = 'Transaction failed';
       if (writeError.message.includes('User rejected')) {
@@ -886,6 +929,8 @@ export default function Tip() {
       // Use a large approval amount (max uint256)
       const maxApproval = '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
       
+      // mark pending kind as approval
+      setPendingTxKind('approval');
       const result = await writeContract({
         address: tokenAddress,
         abi: erc20ABI,
@@ -1088,13 +1133,23 @@ export default function Tip() {
 
       setDisperseStatus(`Dispersing ${selectedToken?.symbol} to ${recipients.length} recipients...`);
 
+      // Capture data needed for OnchainTip creation
+      setPendingTxTokenDecimals(tokenDecimals);
+      setPendingTxReceivers(filteredCreators.map((c) => ({
+        fid: c.author_fid,
+        pfp: c.author_pfp || c.pfp || '',
+        username: c.author_username || c.username || '',
+        amount: Number(((tipAmount * c.impact_sum) / totalImpactSum).toFixed(tokenDecimals))
+      })));
+      setPendingTxTotalAmountDecimal(Number(tipAmount));
+
       // Get the correct token address
       let tokenAddress = selectedToken?.address || selectedToken?.contractAddress;
       
       // Handle native tokens (ETH, CELO) - they use zero address in the disperse contract
       const isNativeToken = selectedToken?.isNative || 
-                           tokenAddress === '0x0000000000000000000000000000000000000000' ||
-                           ['ETH', 'CELO'].includes(selectedToken?.symbol);
+        tokenAddress === '0x0000000000000000000000000000000000000000' ||
+        ['ETH', 'CELO'].includes(selectedToken?.symbol);
       
       if (isNativeToken) {
         tokenAddress = '0x0000000000000000000000000000000000000000';
@@ -1215,7 +1270,8 @@ export default function Tip() {
       // Use Wagmi's writeContract hook (as recommended by Farcaster docs)
       console.log('🚀 Calling writeContract...');
       
-      // Capture the token symbol at the moment we send the tx
+      // Capture disperse metadata at the moment we send the tx
+      setPendingTxKind('disperse');
       setPendingTxTokenSymbol(selectedToken?.symbol || 'Token');
 
       const result = await writeContract({
@@ -1320,7 +1376,7 @@ export default function Tip() {
       <Head>
         <meta
           name="fc:frame"
-          content='{"version":"next","imageUrl":"https://impact.abundance.id/images/icon-02.png","button":{"title":"Check Rewards","action":{"type":"launch_frame","name":"Impact 2.0","url":"https://impact.abundance.id/~/rewards","splashImageUrl":"https://impact.abundance.id/images/icon.png","splashBackgroundColor":"#011222"}}}'
+          content='{"version":"next","imageUrl":"https://impact.abundance.id/images/icon-02.png","button":{"title":"Onchain Multi-Tip","action":{"type":"launch_frame","name":"Impact 2.0","url":"https://impact.abundance.id/~/tip","splashImageUrl":"https://impact.abundance.id/images/icon.png","splashBackgroundColor":"#011222"}}}'
         />
 
         {/* Mini App specific metadata */}
@@ -1328,7 +1384,7 @@ export default function Tip() {
         <meta name="fc:miniapp:name" content="Impact 2.0" />
         <meta name="fc:miniapp:description" content="Get boosted and rewarded for your impact on Farcaster" />
         <meta name="fc:miniapp:icon" content="https://impact.abundance.id/images/icon-02.png" />
-        <meta name="fc:miniapp:url" content="https://impact.abundance.id/~/rewards" />
+        <meta name="fc:miniapp:url" content="https://impact.abundance.id/~/tip" />
       </Head>
 
       {/* <div className="" style={{padding: '58px 0 0 0'}}>
@@ -1824,7 +1880,7 @@ export default function Tip() {
 
 
       {/* Wallet Integration Section */}
-      {(version == '2.0' || adminTest) && (<div style={{ padding: "20px 4px 0px 4px", width: feedMax }}>
+      {(version == '1.0' || version == '2.0' || adminTest) && (<div style={{ padding: "20px 4px 0px 4px", width: feedMax }}>
         <div className="flex-col" style={{ backgroundColor: "" }}>
           <div
             className="shadow flex-col"
