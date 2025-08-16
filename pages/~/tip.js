@@ -1,6 +1,6 @@
 import { useRouter } from "next/router";
 import { useRef, useContext, useEffect, useState } from "react";
-import { useAccount, useWriteContract, useReadContract, useWaitForTransactionReceipt } from 'wagmi';
+import { useAccount, useWriteContract, usePublicClient, useWaitForTransactionReceipt } from 'wagmi';
 import { parseUnits } from 'viem';
 import Link from "next/link";
 import axios from "axios";
@@ -210,7 +210,7 @@ export default function Tip() {
   // Use Wagmi hooks for proper Farcaster Mini App wallet integration
   const { address: wagmiAddress, isConnected: wagmiConnected, chainId: wagmiChainId } = useAccount();
   const { writeContract, data: hash, error: writeError, isPending } = useWriteContract();
-  const readContract = useReadContract();
+  const publicClient = usePublicClient();
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
     hash,
   });
@@ -807,8 +807,8 @@ export default function Tip() {
     try {
       const tokenAddress = selectedToken?.address || selectedToken?.contractAddress;
       
-      // Check current allowance using readContract (read-only operation)
-      const allowanceResult = await readContract({
+      // Check current allowance using publicClient.readContract (read-only operation)
+      const allowanceResult = await publicClient.readContract({
         address: tokenAddress,
         abi: erc20ABI,
         functionName: 'allowance',
@@ -1110,7 +1110,7 @@ export default function Tip() {
         
         // Check token balance first
         try {
-          const balanceResult = await readContract({
+          const balanceResult = await publicClient.readContract({
             address: tokenAddress,
             abi: erc20ABI,
             functionName: 'balanceOf',
@@ -1131,7 +1131,7 @@ export default function Tip() {
         
         // Check allowance
         try {
-          const allowanceResult = await readContract({
+          const allowanceResult = await publicClient.readContract({
             address: tokenAddress,
             abi: erc20ABI,
             functionName: 'allowance',
