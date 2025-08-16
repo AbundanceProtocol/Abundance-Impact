@@ -1,6 +1,6 @@
 import { useRouter } from "next/router";
 import { useRef, useContext, useEffect, useState } from "react";
-import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
+import { useAccount, useWriteContract, useReadContract, useWaitForTransactionReceipt } from 'wagmi';
 import { parseUnits } from 'viem';
 import Link from "next/link";
 import axios from "axios";
@@ -17,8 +17,77 @@ const disperseABI = [
       { name: 'values', type: 'uint256[]' }
     ],
     outputs: []
+  },
+  // Add ERC20 approval function
+  {
+    name: 'approve',
+    type: 'function',
+    stateMutability: 'nonpayable',
+    inputs: [
+      { name: 'spender', type: 'address' },
+      { name: 'amount', type: 'uint256' }
+    ],
+    outputs: [{ name: '', type: 'bool' }]
+  },
+  // Add ERC20 allowance function
+  {
+    name: 'allowance',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [
+      { name: 'owner', type: 'address' },
+      { name: 'spender', type: 'address' }
+    ],
+    outputs: [{ name: '', type: 'uint256' }]
+  },
+  // Add ERC20 balanceOf function
+  {
+    name: 'balanceOf',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [{ name: 'account', type: 'address' }],
+    outputs: [{ name: '', type: 'uint256' }]
   }
 ];
+
+// ERC20 token ABI for approval and balance checks
+const erc20ABI = [
+  {
+    name: 'approve',
+    type: 'function',
+    stateMutability: 'nonpayable',
+    inputs: [
+      { name: 'spender', type: 'address' },
+      { name: 'amount', type: 'uint256' }
+    ],
+    outputs: [{ name: '', type: 'bool' }]
+  },
+  {
+    name: 'allowance',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [
+      { name: 'owner', type: 'address' },
+      { name: 'spender', type: 'address' }
+    ],
+    outputs: [{ name: '', type: 'uint256' }]
+  },
+  {
+    name: 'balanceOf',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [{ name: 'account', type: 'address' }],
+    outputs: [{ name: '', type: 'uint256' }]
+  },
+  {
+    name: 'decimals',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [],
+    outputs: [{ name: '', type: 'uint8' }]
+  }
+];
+
 import Head from "next/head";
 
 import { IoIosRocket, IoMdTrophy, IoMdRefresh as Refresh, IoCloseCircle } from "react-icons/io";
@@ -141,6 +210,7 @@ export default function Tip() {
   // Use Wagmi hooks for proper Farcaster Mini App wallet integration
   const { address: wagmiAddress, isConnected: wagmiConnected, chainId: wagmiChainId } = useAccount();
   const { writeContract, data: hash, error: writeError, isPending } = useWriteContract();
+  const readContract = useReadContract();
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
     hash,
   });
@@ -227,6 +297,19 @@ export default function Tip() {
     // Initialize tipAmount to 0 to match the slider
     updateTipAmount(0);
   }, []);
+
+  // Check token approval when selected token changes
+  useEffect(() => {
+    if (selectedToken && wagmiConnected && wagmiAddress && !selectedToken?.isNative) {
+      // Only check approval for non-native tokens
+      // Add a small delay to ensure wallet is fully connected
+      const timer = setTimeout(() => {
+        checkTokenApproval();
+      }, 1000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [selectedToken, wagmiConnected, wagmiAddress]);
 
   // Monitor transaction status using Wagmi hooks
   useEffect(() => {
@@ -715,6 +798,70 @@ export default function Tip() {
 
 
 
+  // Function to check if token approval is needed
+  const checkTokenApproval = async () => {
+    if (!selectedToken || !wagmiConnected || !wagmiAddress || selectedToken?.isNative) {
+      return; // No approval needed for native tokens
+    }
+
+    try {
+      const tokenAddress = selectedToken?.address || selectedToken?.contractAddress;
+      
+      // Check current allowance using readContract (read-only operation)
+      const allowanceResult = await readContract({
+        address: tokenAddress,
+        abi: erc20ABI,
+        functionName: 'allowance',
+        args: [wagmiAddress, '0xD152f549545093347A162Dce210e7293f1452150'],
+      });
+      
+      // If allowance is very low, show approval message
+      if (allowanceResult < parseUnits('0.01', selectedToken?.decimals || 18)) {
+        setDisperseStatus(`⚠️ Token approval required. Please approve ${selectedToken?.symbol} spending for the disperse contract first.`);
+      } else {
+        // Clear any approval-related status
+        if (disperseStatus && disperseStatus.includes('Token approval required')) {
+          setDisperseStatus('');
+        }
+      }
+    } catch (error) {
+      console.error('Error checking token approval:', error);
+    }
+  };
+
+  // Function to approve token spending for the disperse contract
+  const approveToken = async () => {
+    if (!selectedToken || !wagmiConnected || !wagmiAddress) {
+      setDisperseStatus('Wallet not connected or no token selected');
+      return;
+    }
+
+    try {
+      setIsDispersing(true);
+      setDisperseStatus('Approving token spending...');
+      
+      const tokenAddress = selectedToken?.address || selectedToken?.contractAddress;
+      
+      // Use a large approval amount (max uint256)
+      const maxApproval = '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
+      
+      const result = await writeContract({
+        address: tokenAddress,
+        abi: erc20ABI,
+        functionName: 'approve',
+        args: ['0xD152f549545093347A162Dce210e7293f1452150', maxApproval],
+      });
+      
+      console.log('✅ Token approval initiated:', result);
+      setDisperseStatus('Token approval sent! Waiting for confirmation...');
+      
+    } catch (error) {
+      console.error('Token approval error:', error);
+      setDisperseStatus(`Approval failed: ${error.message}`);
+      setIsDispersing(false);
+    }
+  };
+
   // Disperse function using proper Wagmi hooks as per Farcaster documentation
   const disperseTokens = async () => {
     console.log('🚀 disperseTokens function started - Entry point');
@@ -961,14 +1108,52 @@ export default function Tip() {
       if (!isNativeToken) {
         console.log('🔍 ERC-20 token detected - checking allowance and balance...');
         
-        // Add detailed instructions for ERC-20 tokens
-        setDisperseStatus(`⚠️ ERC-20 Token: ${selectedToken?.symbol} must be approved for the disperse contract. If transaction fails, approve token spending first, then try again.`);
+        // Check token balance first
+        try {
+          const balanceResult = await readContract({
+            address: tokenAddress,
+            abi: erc20ABI,
+            functionName: 'balanceOf',
+            args: [wagmiAddress],
+          });
+          
+          if (balanceResult < totalAmount) {
+            throw new Error(`Insufficient token balance. You have ${balanceResult.toString()} but need ${totalAmount.toString()}`);
+          }
+          
+          console.log(`✅ Token balance sufficient: ${balanceResult.toString()}`);
+        } catch (balanceError) {
+          console.error('Error checking token balance:', balanceError);
+          setDisperseStatus(`Error checking token balance: ${balanceError.message}`);
+          setIsDispersing(false);
+          return;
+        }
         
-        // Log the requirements
-        console.log('📋 ERC-20 Requirements:');
-        console.log('- Token must be approved for disperse contract');
-        console.log('- Wallet must have sufficient balance');
-        console.log('- Disperse contract address:', '0xD152f549545093347A162Dce210e7293f1452150');
+        // Check allowance
+        try {
+          const allowanceResult = await readContract({
+            address: tokenAddress,
+            abi: erc20ABI,
+            functionName: 'allowance',
+            args: [wagmiAddress, '0xD152f549545093347A162Dce210e7293f1452150'],
+          });
+          
+          if (allowanceResult < totalAmount) {
+            console.log(`⚠️ Insufficient allowance: ${allowanceResult.toString()} < ${totalAmount.toString()}`);
+            setDisperseStatus(`⚠️ Token approval required. Please approve ${selectedToken?.symbol} spending for the disperse contract first.`);
+            setIsDispersing(false);
+            return;
+          }
+          
+          console.log(`✅ Token allowance sufficient: ${allowanceResult.toString()}`);
+        } catch (allowanceError) {
+          console.error('Error checking token allowance:', allowanceError);
+          setDisperseStatus(`Error checking token allowance: ${allowanceError.message}`);
+          setIsDispersing(false);
+          return;
+        }
+        
+        setDisperseStatus(`✅ ${selectedToken?.symbol} approved and ready to disperse`);
       } else {
         console.log('🔍 Native token detected - no approval needed');
       }
@@ -1009,6 +1194,10 @@ export default function Tip() {
         errorMessage = 'Insufficient funds for transaction';
       } else if (error.message.includes('execution reverted')) {
         errorMessage = 'Transaction reverted - check token approval and balance';
+      } else if (error.message.includes('Insufficient token balance')) {
+        errorMessage = error.message;
+      } else if (error.message.includes('Token approval required')) {
+        errorMessage = error.message;
       } else if (error.message) {
         errorMessage = `Error: ${error.message}`;
       }
@@ -1680,6 +1869,28 @@ export default function Tip() {
                 {isLogged && creatorResults.length > 0 && (
                   <div style={{ marginTop: "15px" }}>
                     
+                    {/* Show approval button if token approval is needed */}
+                    {disperseStatus && disperseStatus.includes('Token approval required') && (
+                      <button
+                        onClick={approveToken}
+                        disabled={isPending || isConfirming}
+                        style={{
+                          width: "100%",
+                          padding: "10px 16px",
+                          borderRadius: "8px",
+                          border: "none",
+                          backgroundColor: isPending || isConfirming ? "#555" : "#aa4400",
+                          color: "#fff",
+                          fontSize: "12px",
+                          fontWeight: "600",
+                          cursor: isPending || isConfirming ? "not-allowed" : "pointer",
+                          marginBottom: "10px"
+                        }}
+                      >
+                        {isPending || isConfirming ? "Approving..." : `Approve ${selectedToken?.symbol || 'Token'}`}
+                      </button>
+                    )}
+                    
                     <button
                       onClick={() => {
                         console.log('🔍 Disperse button clicked!');
@@ -1687,17 +1898,17 @@ export default function Tip() {
                         console.log('🔍 About to call disperseTokens...');
                         disperseTokens();
                       }}
-                      disabled={isPending || isConfirming || !wagmiConnected || !tipAmount || wagmiChainId !== 8453}
+                      disabled={isPending || isConfirming || !wagmiConnected || !tipAmount || wagmiChainId !== 8453 || (disperseStatus && disperseStatus.includes('Token approval required'))}
                       style={{
                         width: "100%",
                         padding: "10px 16px",
                         borderRadius: "8px",
                         border: "none",
-                        backgroundColor: isPending || isConfirming || !wagmiConnected || !tipAmount || wagmiChainId !== 8453 ? "#555" : "#114477",
+                        backgroundColor: isPending || isConfirming || !wagmiConnected || !tipAmount || wagmiChainId !== 8453 || (disperseStatus && disperseStatus.includes('Token approval required')) ? "#555" : "#114477",
                         color: "#fff",
                         fontSize: "12px",
                         fontWeight: "600",
-                        cursor: isPending || isConfirming || !wagmiConnected || !tipAmount || wagmiChainId !== 8453 ? "not-allowed" : "pointer"
+                        cursor: isPending || isConfirming || !wagmiConnected || !tipAmount || wagmiChainId !== 8453 || (disperseStatus && disperseStatus.includes('Token approval required')) ? "not-allowed" : "pointer"
                       }}
                     >
                       {isPending 
@@ -1706,6 +1917,8 @@ export default function Tip() {
                        ? "Confirming..." 
                        : wagmiChainId !== 8453
                        ? "Disperse (Base Only)"
+                       : disperseStatus && disperseStatus.includes('Token approval required')
+                       ? "Approve Token First"
                        : `Disperse ${selectedToken?.symbol || 'Token'}`}
                     </button>
               </div>
@@ -1746,6 +1959,27 @@ export default function Tip() {
                          </button>
                        )}
                      </div>
+                   </div>
+                 )}
+
+                 {/* Check Allowance Button */}
+                 {isLogged && selectedToken && !selectedToken?.isNative && wagmiConnected && (
+                   <div style={{ marginTop: "10px", textAlign: "center" }}>
+                     <button
+                       onClick={checkTokenApproval}
+                       style={{
+                         padding: "6px 12px",
+                         borderRadius: "6px",
+                         border: "1px solid #114477",
+                         backgroundColor: "transparent",
+                         color: "#9df",
+                         fontSize: "10px",
+                         cursor: "pointer"
+                       }}
+                       title="Check current token allowance for disperse contract"
+                     >
+                       Check Allowance
+                     </button>
                    </div>
                  )}
           </div>
