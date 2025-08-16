@@ -364,11 +364,18 @@ export default function Tip() {
             receiver: pendingTxReceivers || [],
             transaction_hash: hash,
           };
-          await fetch('/api/onchain-tip', {
+          const res = await fetch('/api/onchain-tip', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(tipPayload),
           });
+          if (!res.ok) {
+            const txt = await res.text();
+            console.warn('OnchainTip API returned non-200:', res.status, txt);
+          } else {
+            const data = await res.json().catch(() => ({}));
+            console.log('OnchainTip persisted:', data);
+          }
         } catch (e) {
           console.warn('Failed to persist OnchainTip:', e);
         }
@@ -1369,7 +1376,7 @@ export default function Tip() {
       <Head>
         <meta
           name="fc:frame"
-          content='{"version":"next","imageUrl":"https://impact.abundance.id/images/icon-02.png","button":{"title":"Check Rewards","action":{"type":"launch_frame","name":"Impact 2.0","url":"https://impact.abundance.id/~/rewards","splashImageUrl":"https://impact.abundance.id/images/icon.png","splashBackgroundColor":"#011222"}}}'
+          content='{"version":"next","imageUrl":"https://impact.abundance.id/images/icon-02.png","button":{"title":"Onchain Multi-Tip","action":{"type":"launch_frame","name":"Impact 2.0","url":"https://impact.abundance.id/~/tip","splashImageUrl":"https://impact.abundance.id/images/icon.png","splashBackgroundColor":"#011222"}}}'
         />
 
         {/* Mini App specific metadata */}
@@ -1377,7 +1384,7 @@ export default function Tip() {
         <meta name="fc:miniapp:name" content="Impact 2.0" />
         <meta name="fc:miniapp:description" content="Get boosted and rewarded for your impact on Farcaster" />
         <meta name="fc:miniapp:icon" content="https://impact.abundance.id/images/icon-02.png" />
-        <meta name="fc:miniapp:url" content="https://impact.abundance.id/~/rewards" />
+        <meta name="fc:miniapp:url" content="https://impact.abundance.id/~/tip" />
       </Head>
 
       {/* <div className="" style={{padding: '58px 0 0 0'}}>
