@@ -267,6 +267,7 @@ export default function Tip() {
   const [pendingTxTokenDecimals, setPendingTxTokenDecimals] = useState(null);
   const [pendingTxReceivers, setPendingTxReceivers] = useState([]);
   const [pendingTxTotalAmountDecimal, setPendingTxTotalAmountDecimal] = useState(0);
+  const [pendingTxKind, setPendingTxKind] = useState(null); // 'approval' | 'disperse' | null
   
   // Collapsible state for Impact Filter
   const [isImpactFilterCollapsed, setIsImpactFilterCollapsed] = useState(true);
@@ -327,6 +328,11 @@ export default function Tip() {
     if (isConfirming) {
       setDisperseStatus('Transaction confirming...');
     } else if (isConfirmed && hash && hash !== lastSuccessHash) {
+      // Only react to success of disperse, not approval
+      if (pendingTxKind !== 'disperse') {
+        setLastSuccessHash(hash);
+        return;
+      }
       setDisperseStatus(`Transaction confirmed! Hash: ${hash}`);
       setIsDispersing(false);
       // Show success modal
@@ -350,7 +356,11 @@ export default function Tip() {
             tipper_fid: userInfo?.fid,
             tipper_pfp: userInfo?.pfp,
             tipper_username: userInfo?.username,
-            tip: [{ currency: pendingTxTokenSymbol || selectedToken?.symbol || 'Token', amount: Number(pendingTxTotalAmountDecimal || 0) }],
+            tip: [{
+              currency: pendingTxTokenSymbol || selectedToken?.symbol || 'Token',
+              amount: Number(pendingTxTotalAmountDecimal || 0),
+              value: Number(pendingTxTotalAmountDecimal || 0) * Number(selectedToken?.price || 0)
+            }],
             receiver: pendingTxReceivers || [],
             transaction_hash: hash,
           };
@@ -365,6 +375,8 @@ export default function Tip() {
       })();
       // Remember last success hash to prevent duplicate modal
       setLastSuccessHash(hash);
+      // clear pending kind
+      setPendingTxKind(null);
     } else if (writeError) {
       let errorMessage = 'Transaction failed';
       if (writeError.message.includes('User rejected')) {
@@ -910,6 +922,8 @@ export default function Tip() {
       // Use a large approval amount (max uint256)
       const maxApproval = '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
       
+      // mark pending kind as approval
+      setPendingTxKind('approval');
       const result = await writeContract({
         address: tokenAddress,
         abi: erc20ABI,
@@ -1127,8 +1141,8 @@ export default function Tip() {
       
       // Handle native tokens (ETH, CELO) - they use zero address in the disperse contract
       const isNativeToken = selectedToken?.isNative || 
-                           tokenAddress === '0x0000000000000000000000000000000000000000' ||
-                           ['ETH', 'CELO'].includes(selectedToken?.symbol);
+        tokenAddress === '0x0000000000000000000000000000000000000000' ||
+        ['ETH', 'CELO'].includes(selectedToken?.symbol);
       
       if (isNativeToken) {
         tokenAddress = '0x0000000000000000000000000000000000000000';
@@ -1249,7 +1263,8 @@ export default function Tip() {
       // Use Wagmi's writeContract hook (as recommended by Farcaster docs)
       console.log('🚀 Calling writeContract...');
       
-      // Capture the token symbol at the moment we send the tx
+      // Capture disperse metadata at the moment we send the tx
+      setPendingTxKind('disperse');
       setPendingTxTokenSymbol(selectedToken?.symbol || 'Token');
 
       const result = await writeContract({
@@ -1858,7 +1873,7 @@ export default function Tip() {
 
 
       {/* Wallet Integration Section */}
-      {(version == '2.0' || adminTest) && (<div style={{ padding: "20px 4px 0px 4px", width: feedMax }}>
+      {(version == '1.0' || version == '2.0' || adminTest) && (<div style={{ padding: "20px 4px 0px 4px", width: feedMax }}>
         <div className="flex-col" style={{ backgroundColor: "" }}>
           <div
             className="shadow flex-col"

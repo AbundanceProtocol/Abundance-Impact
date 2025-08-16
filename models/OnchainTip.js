@@ -7,7 +7,8 @@ const onchainTipSchema = new mongoose.Schema({
   points: { type: String, default: '$IMPACT', index: true },
   tip: [{
     currency: String,
-    amount: Number
+    amount: Number,
+    value: Number
   }],
   receiver: [{
     fid: Number,
