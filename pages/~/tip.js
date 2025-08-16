@@ -201,6 +201,7 @@ export default function Tip() {
     walletAddress,
     walletChainId,
     walletProvider,
+    userInfo,
     setUserInfo,
     getAllTokens
   } = useContext(AccountContext);
@@ -263,6 +264,9 @@ export default function Tip() {
   const [disperseStatus, setDisperseStatus] = useState("");
   const [lastSuccessHash, setLastSuccessHash] = useState(null);
   const [pendingTxTokenSymbol, setPendingTxTokenSymbol] = useState(null);
+  const [pendingTxTokenDecimals, setPendingTxTokenDecimals] = useState(null);
+  const [pendingTxReceivers, setPendingTxReceivers] = useState([]);
+  const [pendingTxTotalAmountDecimal, setPendingTxTotalAmountDecimal] = useState(0);
   
   // Collapsible state for Impact Filter
   const [isImpactFilterCollapsed, setIsImpactFilterCollapsed] = useState(true);
@@ -339,6 +343,26 @@ export default function Tip() {
       } catch (e) {
         console.warn('Failed to refresh tokens after disperse:', e);
       }
+      // Create OnchainTip document via API (non-blocking)
+      (async () => {
+        try {
+          const tipPayload = {
+            tipper_fid: userInfo?.fid,
+            tipper_pfp: userInfo?.pfp,
+            tipper_username: userInfo?.username,
+            tip: [{ currency: pendingTxTokenSymbol || selectedToken?.symbol || 'Token', amount: Number(pendingTxTotalAmountDecimal || 0) }],
+            receiver: pendingTxReceivers || [],
+            transaction_hash: hash,
+          };
+          await fetch('/api/onchain-tip', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(tipPayload),
+          });
+        } catch (e) {
+          console.warn('Failed to persist OnchainTip:', e);
+        }
+      })();
       // Remember last success hash to prevent duplicate modal
       setLastSuccessHash(hash);
     } else if (writeError) {
@@ -1087,6 +1111,16 @@ export default function Tip() {
       })));
 
       setDisperseStatus(`Dispersing ${selectedToken?.symbol} to ${recipients.length} recipients...`);
+
+      // Capture data needed for OnchainTip creation
+      setPendingTxTokenDecimals(tokenDecimals);
+      setPendingTxReceivers(filteredCreators.map((c) => ({
+        fid: c.author_fid,
+        pfp: c.author_pfp || c.pfp || '',
+        username: c.author_username || c.username || '',
+        amount: Number(((tipAmount * c.impact_sum) / totalImpactSum).toFixed(tokenDecimals))
+      })));
+      setPendingTxTotalAmountDecimal(Number(tipAmount));
 
       // Get the correct token address
       let tokenAddress = selectedToken?.address || selectedToken?.contractAddress;
