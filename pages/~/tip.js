@@ -849,6 +849,7 @@ export default function Tip() {
           console.log(`Amount calculation: ${calculatedAmount} -> ${finalAmount} -> ${formattedAmount}`);
           
           const parsedAmount = parseUnits(formattedAmount, tokenDecimals);
+          console.log(`Parsed amount type: ${typeof parsedAmount}, value: ${parsedAmount.toString()}`);
           
           const recipient = {
             address: creator.wallet,
@@ -916,7 +917,10 @@ export default function Tip() {
       // Additional debugging - check for common issues
       console.log('🔍 Debugging potential issues:');
       console.log('- Total recipients:', recipients.length);
-      console.log('- Sum of amounts:', recipients.reduce((sum, r) => sum + Number(r.amount), 0n).toString());
+      console.log('- Sum of amounts:', recipients.reduce((sum, r) => {
+        console.log(`Adding: ${typeof sum} + ${typeof r.amount}`);
+        return sum + r.amount;
+      }, 0n).toString());
       console.log('- Wallet address:', wagmiAddress);
       console.log('- Selected token object:', selectedToken);
       
@@ -943,7 +947,13 @@ export default function Tip() {
       }
       
       // Calculate total amount needed (using valid recipients only)
-      const totalAmount = validRecipients.reduce((sum, r) => sum + r.amount, 0n);
+      const totalAmount = validRecipients.reduce((sum, r) => {
+        if (typeof sum !== 'bigint' || typeof r.amount !== 'bigint') {
+          console.error(`Type mismatch in totalAmount reduce: sum=${typeof sum}, r.amount=${typeof r.amount}`);
+          console.error(`Values: sum=${sum}, r.amount=${r.amount}`);
+        }
+        return sum + r.amount;
+      }, 0n);
       console.log('- Total amount to disperse:', totalAmount.toString());
       console.log('- Total amount in token units:', (Number(totalAmount) / Math.pow(10, tokenDecimals)).toFixed(tokenDecimals));
       
