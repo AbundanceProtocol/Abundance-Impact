@@ -138,39 +138,37 @@ const BottomBar = () => {
               </Link>
             )}
 
-            {(version == "2.0" || adminTest) && (
-              <Link href={"/~/tip"}>
-                <div
-                  className="flex-col"
-                  style={{
-                    justifyContent: "center",
-                    alignItems: "center",
-                    height: "54px",
-                    width: "56px",
-                    padding: "5px 10px",
-                    borderRadius: "10px",
-                    border: "1px solid #567",
-                    backgroundColor: router.route == "/~/tip" ? "#224466aa" : "#002244aa",
-                    backdropFilter: "blur(12px)"
-                  }}
-                >
-                  <div className="flex-col" style={{ justifyContent: "center", alignItems: "center", height: "40px" }}>
-                    <BsCurrencyExchange size={20} color={"#99ddff"} />
-                    <div
-                      style={{
-                        fontSize: "12px",
-                        fontWeight: "400",
-                        padding: "0 0 0 0",
-                        color: "#99ddff",
-                        margin: "4px 0 0 0"
-                      }}
-                    >
-                      Tip
-                    </div>
+            <Link href={"/~/tip"}>
+              <div
+                className="flex-col"
+                style={{
+                  justifyContent: "center",
+                  alignItems: "center",
+                  height: "54px",
+                  width: "56px",
+                  padding: "5px 10px",
+                  borderRadius: "10px",
+                  border: "1px solid #567",
+                  backgroundColor: router.route == "/~/tip" ? "#224466aa" : "#002244aa",
+                  backdropFilter: "blur(12px)"
+                }}
+              >
+                <div className="flex-col" style={{ justifyContent: "center", alignItems: "center", height: "40px" }}>
+                  <BsCurrencyExchange size={20} color={"#99ddff"} />
+                  <div
+                    style={{
+                      fontSize: "12px",
+                      fontWeight: "400",
+                      padding: "0 0 0 0",
+                      color: "#99ddff",
+                      margin: "4px 0 0 0"
+                    }}
+                  >
+                    Tip
                   </div>
                 </div>
-              </Link>
-            )}
+              </div>
+            </Link>
 
             <Link href={"/~/ecosystems/abundance"}>
               <div

@@ -216,6 +216,10 @@ export default function Tip() {
     hash,
   });
   const ref1 = useRef(null);
+  // RPC rate limiting for read calls to avoid 429 from public endpoints
+  const approvalCheckInFlightRef = useRef(false);
+  const lastApprovalCheckRef = useRef(0);
+  const APPROVAL_CHECK_COOLDOWN_MS = 10000; // 10s
   const [textMax, setTextMax] = useState("430px");
   const [screenWidth, setScreenWidth] = useState(undefined);
   const [screenHeight, setScreenHeight] = useState(undefined);
@@ -824,6 +828,17 @@ export default function Tip() {
     }
 
     try {
+      // Rate limit: skip if last check was too recent or a check is in flight
+      const now = Date.now();
+      if (approvalCheckInFlightRef.current) {
+        return;
+      }
+      if (now - lastApprovalCheckRef.current < APPROVAL_CHECK_COOLDOWN_MS) {
+        return;
+      }
+      approvalCheckInFlightRef.current = true;
+      lastApprovalCheckRef.current = now;
+
       const tokenAddress = selectedToken?.address || selectedToken?.contractAddress;
       
       // Check current allowance using publicClient.readContract (read-only operation)
@@ -845,6 +860,13 @@ export default function Tip() {
       }
     } catch (error) {
       console.error('Error checking token approval:', error);
+      // If RPC 429, extend cooldown to back off
+      const message = error?.message || '';
+      if (message.includes('429') || message.toLowerCase().includes('too many requests')) {
+        lastApprovalCheckRef.current = Date.now();
+      }
+    } finally {
+      approvalCheckInFlightRef.current = false;
     }
   };
 
@@ -1138,8 +1160,9 @@ export default function Tip() {
       if (!isNativeToken) {
         console.log('🔍 ERC-20 token detected - checking allowance and balance...');
         
-        // Check token balance first
+        // Check token balance first (tiny delay to stagger RPC calls)
         try {
+          await new Promise(r => setTimeout(r, 150));
           const balanceResult = await publicClient.readContract({
             address: tokenAddress,
             abi: erc20ABI,
@@ -1159,8 +1182,9 @@ export default function Tip() {
           return;
         }
         
-        // Check allowance
+        // Check allowance (tiny delay to stagger RPC calls)
         try {
+          await new Promise(r => setTimeout(r, 150));
           const allowanceResult = await publicClient.readContract({
             address: tokenAddress,
             abi: erc20ABI,
