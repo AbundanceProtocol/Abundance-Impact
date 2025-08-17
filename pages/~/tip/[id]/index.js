@@ -96,16 +96,16 @@ import { BiSortDown, BiSortUp } from "react-icons/bi";
 import { IoShuffleOutline as ShuffleIcon } from "react-icons/io5";
 import { PiClockClockwiseBold as ClockForward, PiClockCounterClockwiseBold as ClockBack } from "react-icons/pi";
 import { FaAngleDown } from "react-icons/fa";
-import { confirmUser, timePassed, getTimeRange } from "../../../utils/utils";
-import Spinner from "../../../components/Common/Spinner";
-import ExpandImg from "../../../components/Cast/ExpandImg";
-import useMatchBreakpoints from "../../../hooks/useMatchBreakpoints";
-import { useWallet } from "../../../hooks/useWallet";
-import { AccountContext } from "../../../context";
+import { confirmUser, timePassed, getTimeRange } from "../../../../utils/utils";
+import Spinner from "../../../../components/Common/Spinner";
+import ExpandImg from "../../../../components/Cast/ExpandImg";
+import useMatchBreakpoints from "../../../../hooks/useMatchBreakpoints";
+import { useWallet } from "../../../../hooks/useWallet";
+import { AccountContext } from "../../../../context";
 import qs from "querystring";
-import Modal from "../../../components/Layout/Modals/Modal";
-import WalletConnect from "../../../components/WalletConnect";
-import WalletActions from "../../../components/WalletActions";
+import Modal from "../../../../components/Layout/Modals/Modal";
+import WalletConnect from "../../../../components/WalletConnect";
+import WalletActions from "../../../../components/WalletActions";
 
 const version = process.env.NEXT_PUBLIC_VERSION;
 
