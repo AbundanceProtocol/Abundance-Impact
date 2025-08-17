@@ -1541,11 +1541,11 @@ export default function Tip() {
         </div>
       )}
 
-      <img
+      {/* <img
         src={`${baseURL}/api/frames/tip/onchain-tip-v1?${qs.stringify({ id: '68a13ca236c2006e443623bd' })}`}
         alt="Onchain Tip"
         style={{ width: '300px', height: '200px', objectFit: 'cover', borderRadius: '8px' }}
-      />
+      /> */}
 
 
       {/* Wallet Integration Section */}
