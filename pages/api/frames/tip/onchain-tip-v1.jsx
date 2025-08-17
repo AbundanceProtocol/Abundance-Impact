@@ -66,8 +66,8 @@ export default async function handler(req, res) {
             backgroundColor: '#0a021f',
           }}
         >
-          <div style={{ color: '#ace', fontSize: 30, textAlign: 'center', whiteSpace: 'pre-wrap', padding: 12 }}>
-            Impact 2.0 Multi-Tip
+          <div style={{ color: '#ace', fontSize: 40, textAlign: 'center', whiteSpace: 'pre-wrap', padding: 12 }}>
+          {`Impact 2.0\nMulti-Tip`}
           </div>
         </div>,
         { width, height, fonts: [{ data: fontData, name: 'Inter', style: 'normal', weight: 600 }] }
