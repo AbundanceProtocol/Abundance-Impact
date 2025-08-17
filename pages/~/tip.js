@@ -268,6 +268,7 @@ export default function Tip() {
   const [pendingTxReceivers, setPendingTxReceivers] = useState([]);
   const [pendingTxTotalAmountDecimal, setPendingTxTotalAmountDecimal] = useState(0);
   const [pendingTxKind, setPendingTxKind] = useState(null); // 'approval' | 'disperse' | null
+  const [approveOnlyAmount, setApproveOnlyAmount] = useState(false); // when true, approve only needed amount
   
   // Collapsible state for Impact Filter
   const [isImpactFilterCollapsed, setIsImpactFilterCollapsed] = useState(true);
@@ -316,8 +317,8 @@ export default function Tip() {
       // Only check approval for non-native tokens
       // Add a small delay to ensure wallet is fully connected
       const timer = setTimeout(() => {
-        checkTokenApproval();
-      }, 1000);
+        checkTokenApproval(true);
+      }, 600);
       
       return () => clearTimeout(timer);
     }
@@ -865,22 +866,24 @@ export default function Tip() {
 
 
   // Function to check if token approval is needed
-  const checkTokenApproval = async () => {
+  const checkTokenApproval = async (force = false) => {
     if (!selectedToken || !wagmiConnected || !wagmiAddress || selectedToken?.isNative) {
       return; // No approval needed for native tokens
     }
 
     try {
-      // Rate limit: skip if last check was too recent or a check is in flight
+      // Rate limit: skip if last check was too recent or a check is in flight, unless forced
       const now = Date.now();
-      if (approvalCheckInFlightRef.current) {
-        return;
+      if (!force) {
+        if (approvalCheckInFlightRef.current) {
+          return;
+        }
+        if (now - lastApprovalCheckRef.current < APPROVAL_CHECK_COOLDOWN_MS) {
+          return;
+        }
+        approvalCheckInFlightRef.current = true;
+        lastApprovalCheckRef.current = now;
       }
-      if (now - lastApprovalCheckRef.current < APPROVAL_CHECK_COOLDOWN_MS) {
-        return;
-      }
-      approvalCheckInFlightRef.current = true;
-      lastApprovalCheckRef.current = now;
 
       const tokenAddress = selectedToken?.address || selectedToken?.contractAddress;
       
@@ -926,8 +929,49 @@ export default function Tip() {
       
       const tokenAddress = selectedToken?.address || selectedToken?.contractAddress;
       
-      // Use a large approval amount (max uint256)
-      const maxApproval = '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
+      // Determine approval amount: full (max) by default, or only needed amount if user checked
+      let approvalAmount = '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
+      if (approveOnlyAmount) {
+        try {
+          // Recompute EXACT total needed (sum of per-recipient minimum-adjusted amounts)
+          const tokenDecimals = (() => {
+            if (selectedToken?.decimals !== undefined) return selectedToken.decimals;
+            const tokenDecimalMap = { ETH: 18, USDC: 6, WETH: 18, DEGEN: 18, BETR: 18, NOICE: 18, TIPN: 18 };
+            return tokenDecimalMap[selectedToken?.symbol] || 18;
+          })();
+
+          const getMinimumAmount = (decimals) => {
+            switch (decimals) {
+              case 6: return 0.000001;
+              case 18: return 0.000000000000000001;
+              default: return Math.pow(10, -decimals);
+            }
+          };
+
+          const validCreators = (creatorResults || []).filter(creator => Boolean(creator.wallet) && (creator.impact_sum ?? 0) >= 0.000001);
+          const selfFidStr = (fid !== undefined && fid !== null) ? String(fid) : null;
+          const filteredCreators = selfFidStr ? validCreators.filter(c => String(c.author_fid ?? '') !== selfFidStr) : validCreators;
+          const totalImpactSum = filteredCreators.reduce((sum, c) => sum + (c.impact_sum || 0), 0);
+          if (filteredCreators.length === 0 || totalImpactSum <= 0) {
+            throw new Error('No valid recipients to compute approval amount');
+          }
+
+          let totalUnits = 0n;
+          const minAmt = getMinimumAmount(tokenDecimals);
+          const tipAmt = Number(tipAmount || 0);
+          for (const c of filteredCreators) {
+            const calculatedAmount = (tipAmt * (c.impact_sum || 0)) / totalImpactSum;
+            const finalAmount = Math.max(calculatedAmount, minAmt);
+            const formattedAmount = Number(finalAmount).toFixed(tokenDecimals);
+            const units = parseUnits(formattedAmount, tokenDecimals);
+            totalUnits += units;
+          }
+
+          approvalAmount = totalUnits;
+        } catch (e) {
+          console.warn('Falling back to max approval; failed to compute needed approval amount:', e);
+        }
+      }
       
       // mark pending kind as approval
       setPendingTxKind('approval');
@@ -935,7 +979,7 @@ export default function Tip() {
         address: tokenAddress,
         abi: erc20ABI,
         functionName: 'approve',
-        args: ['0xD152f549545093347A162Dce210e7293f1452150', maxApproval],
+        args: ['0xD152f549545093347A162Dce210e7293f1452150', approvalAmount],
       });
       
       console.log('Token approval initiated:', result);
@@ -946,6 +990,11 @@ export default function Tip() {
       setDisperseStatus(`Approval failed: ${error.message}`);
       setIsDispersing(false);
     }
+    
+    // After approval, proactively re-check allowance (force), so Multi-Tip becomes available immediately
+    setTimeout(() => {
+      checkTokenApproval(true);
+    }, 1000);
   };
 
   // Disperse function using proper Wagmi hooks as per Farcaster documentation
@@ -1977,13 +2026,21 @@ export default function Tip() {
 
               <div style={{ padding: "0 20px 5px 20px" }}>
                 <WalletConnect onTipAmountChange={updateTipAmount} onTokenChange={updateSelectedToken} />
-                
-                {/* Disperse Button - Underneath the WalletConnect container */}
-                {isLogged && creatorResults.length > 0 && (
+
+                {/* Approval prompt shown immediately when approval is required (independent of creators list) */}
+                {isLogged && wagmiConnected && selectedToken && disperseStatus && disperseStatus.includes('Token approval required') && (
                   <div style={{ marginTop: "15px" }}>
-                    
-                    {/* Show approval button if token approval is needed */}
-                    {disperseStatus && disperseStatus.includes('Token approval required') && (
+                    <div style={{ marginBottom: "10px" }}>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
+                        <label style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "11px", color: "#9df" }}>
+                          <input
+                            type="checkbox"
+                            checked={approveOnlyAmount}
+                            onChange={(e) => setApproveOnlyAmount(e.target.checked)}
+                          />
+                          Approve only the amount to be dispersed
+                        </label>
+                      </div>
                       <button
                         onClick={approveToken}
                         disabled={isPending || isConfirming}
@@ -1996,13 +2053,18 @@ export default function Tip() {
                           color: "#fff",
                           fontSize: "12px",
                           fontWeight: "600",
-                          cursor: isPending || isConfirming ? "not-allowed" : "pointer",
-                          marginBottom: "10px"
+                          cursor: isPending || isConfirming ? "not-allowed" : "pointer"
                         }}
                       >
                         {isPending || isConfirming ? "Approving..." : `Approve ${selectedToken?.symbol || 'Token'} Multi-Tip`}
                       </button>
-                    )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Disperse Button - Underneath the WalletConnect container */}
+                {isLogged && creatorResults.length > 0 && (
+                  <div style={{ marginTop: "15px" }}>
                     {!(disperseStatus && disperseStatus.includes('Token approval required')) && (
                       <button
                         onClick={() => {
@@ -2042,35 +2104,44 @@ export default function Tip() {
                  {isLogged && disperseStatus && (
                    <div style={{ marginTop: "15px" }}>
                      <div style={{
-                       padding: "8px 12px",
-                       borderRadius: "4px",
-                       backgroundColor: disperseStatus.includes("Error") || disperseStatus.includes("⚠️") ? "#442222" : "#224422",
-                       color: disperseStatus.includes("Error") || disperseStatus.includes("⚠️") ? "#ffaaaa" : "#aaffaa",
-                       fontSize: "11px",
-                       textAlign: "center",
-                       position: "relative"
-                     }}>
-                       {disperseStatus}
-                       {(disperseStatus.includes("Error") || disperseStatus.includes("⚠️")) && (
-                         <button
-                           onClick={() => setDisperseStatus('')}
-                           style={{
-                             position: "absolute",
-                             top: "4px",
-                             right: "8px",
-                             background: "none",
-                             border: "none",
-                             color: "#ffaaaa",
-                             cursor: "pointer",
-                             fontSize: "14px",
-                             fontWeight: "bold"
-                           }}
-                           title="Clear status"
-                         >
-                           ×
-                         </button>
-                       )}
-                     </div>
+                        padding: "8px 12px",
+                        borderRadius: "4px",
+                        backgroundColor: (() => {
+                          if (disperseStatus.includes("Error")) return "#1b2a4a";
+                          if (disperseStatus.includes("Token approval required")) return "#0b2d5c";
+                          return "#0f3b6d";
+                        })(),
+                        color: (() => {
+                          if (disperseStatus.includes("Error")) return "#a8c7ff";
+                          if (disperseStatus.includes("Token approval required")) return "#b4d4ff";
+                          return "#cfe4ff";
+                        })(),
+                        fontSize: "11px",
+                        textAlign: "center",
+                        position: "relative",
+                        border: "1px solid #194a7a"
+                      }}>
+                        {disperseStatus}
+                        {(disperseStatus.includes("Error") || disperseStatus.includes("Token approval required")) && (
+                          <button
+                            onClick={() => setDisperseStatus('')}
+                            style={{
+                              position: "absolute",
+                              top: "4px",
+                              right: "8px",
+                              background: "none",
+                              border: "none",
+                              color: "#b4d4ff",
+                              cursor: "pointer",
+                              fontSize: "14px",
+                              fontWeight: "bold"
+                            }}
+                            title="Clear status"
+                          >
+                            ×
+                          </button>
+                        )}
+                      </div>
                    </div>
                  )}
 
