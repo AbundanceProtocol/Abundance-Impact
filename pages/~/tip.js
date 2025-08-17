@@ -5,6 +5,15 @@ import { parseUnits } from 'viem';
 import Link from "next/link";
 import axios from "axios";
 
+export async function getServerSideProps(context) {
+  try {
+    const ssrId = context?.query?.id || '';
+    return { props: { ssrId } };
+  } catch (_) {
+    return { props: { ssrId: '' } };
+  }
+}
+
 // Disperse contract ABI - defined at module level to avoid initialization issues
 const disperseABI = [
   {
@@ -179,9 +188,10 @@ function WalletDemo() {
   return null; // Don't show anything
 }
 
-export default function Tip() {
+export default function Tip({ ssrId }) {
   const router = useRouter();
   const { ecosystem, username, app, userFid, pass, id } = router.query;
+  const headId = ssrId || id || '';
   const {
     LoginPopup,
     isLogged,
@@ -1481,7 +1491,7 @@ export default function Tip() {
       <Head>
         <meta
           name="fc:frame"
-          content={`{"version":"next","imageUrl":"${baseURL}/api/frames/tip/onchain-tip-v1?id=${encodeURIComponent(id || '')}","button":{"title":"Onchain Multi-Tip","action":{"type":"launch_frame","name":"Impact 2.0","url":"https://impact.abundance.id/~/tip","splashImageUrl":"https://impact.abundance.id/images/icon.png","splashBackgroundColor":"#011222"}}}`}
+          content={`{"version":"next","imageUrl":"${baseURL}/api/frames/tip/onchain-tip-v1?id=${encodeURIComponent(headId)}","button":{"title":"Onchain Multi-Tip","action":{"type":"launch_frame","name":"Impact 2.0","url":"https://impact.abundance.id/~/tip","splashImageUrl":"https://impact.abundance.id/images/icon.png","splashBackgroundColor":"#011222"}}}`}
         />
 
         {/* Mini App specific metadata */}
