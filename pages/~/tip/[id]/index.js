@@ -179,9 +179,9 @@ function WalletDemo() {
   return null; // Don't show anything
 }
 
-export default function TipId() {
+export default function TipId({id}) {
   const router = useRouter();
-  const { ecosystem, username, app, userFid, pass, id } = router.query;
+  const { ecosystem, username, app, userFid, pass } = router.query;
   const {
     LoginPopup,
     isLogged,
