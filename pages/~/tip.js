@@ -109,6 +109,8 @@ import WalletActions from "../../components/WalletActions";
 
 const version = process.env.NEXT_PUBLIC_VERSION;
 
+const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
+
 // Wagmi Status Component
 function WagmiStatus() {
   const { wagmiStatus } = useContext(AccountContext);
@@ -179,7 +181,7 @@ function WalletDemo() {
 
 export default function Tip() {
   const router = useRouter();
-  const { ecosystem, username, app, userFid, pass } = router.query;
+  const { ecosystem, username, app, userFid, pass, id } = router.query;
   const {
     LoginPopup,
     isLogged,
@@ -237,6 +239,9 @@ export default function Tip() {
   const [claimsLoading, setClaimsLoading] = useState(true);
   const initChannels = [" ", "impact"];
   const [modal, setModal] = useState({ on: false, success: false, text: "" });
+  
+  // Custom Share Modal state
+  const [shareModal, setShareModal] = useState({ on: false, id: null, amount: 0, token: '', receivers: 0 });
   
   // Filter state variables
   const [timeframe, setTimeframe] = useState('7d');
@@ -324,6 +329,13 @@ export default function Tip() {
     }
   }, [selectedToken, wagmiConnected, wagmiAddress]);
 
+  // Amount format helper for share text
+  const formatShareAmount = (n) => {
+    if (n > 10) return Math.round(n).toString();
+    if (n >= 1) return Number(n).toFixed(2);
+    return Number(n).toFixed(4);
+  };
+
   // Monitor transaction status using Wagmi hooks
   useEffect(() => {
     if (isConfirming) {
@@ -336,12 +348,7 @@ export default function Tip() {
       }
       setDisperseStatus(`Transaction confirmed! Hash: ${hash}`);
       setIsDispersing(false);
-      // Show success modal
-      setModal({ on: true, success: true, text: `${pendingTxTokenSymbol || selectedToken?.symbol || 'Token'} multi-tipped successfully` });
-      // Auto-close modal after 2.5 seconds using existing Modal logic
-      setTimeout(() => {
-        setModal(prev => ({ ...prev, on: false }));
-      }, 2500);
+      
       // Refresh token balances/prices after success
       try {
         if (walletConnected && walletAddress) {
@@ -350,7 +357,8 @@ export default function Tip() {
       } catch (e) {
         console.warn('Failed to refresh tokens after disperse:', e);
       }
-      // Create OnchainTip document via API (non-blocking)
+
+      // Create OnchainTip document via API, then show share modal
       (async () => {
         try {
           const tipPayload = {
@@ -370,17 +378,26 @@ export default function Tip() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(tipPayload),
           });
-          if (!res.ok) {
-            const txt = await res.text();
-            console.warn('OnchainTip API returned non-200:', res.status, txt);
+          let created = null;
+          if (res.ok) {
+            created = await res.json().catch(() => ({}));
           } else {
-            const data = await res.json().catch(() => ({}));
-            console.log('OnchainTip persisted:', data);
+            console.warn('OnchainTip API returned non-200:', res.status, await res.text());
           }
+          const createdId = created?._id.toString() || created?.data?._id.toString() || null;
+          const receiversCount = (pendingTxReceivers || []).length;
+          setShareModal({
+            on: true,
+            id: createdId,
+            amount: Number(pendingTxTotalAmountDecimal || 0),
+            token: pendingTxTokenSymbol || selectedToken?.symbol || 'Token',
+            receivers: receiversCount
+          });
         } catch (e) {
           console.warn('Failed to persist OnchainTip:', e);
         }
       })();
+
       // Remember last success hash to prevent duplicate modal
       setLastSuccessHash(hash);
       // clear pending kind
@@ -663,6 +680,27 @@ export default function Tip() {
     }
   }
 
+  // Share handler for OnchainTip
+  const shareOnchainTip = async () => {
+    try {
+      const url = `https://impact.abundance.id/~/tip?id=${shareModal?.id}`;
+      const text = `I multi-tipped ${formatShareAmount(shareModal?.amount)} $${shareModal?.token} to ${shareModal?.receivers} creators with Impact!`;
+      const encodedText = encodeURIComponent(text);
+      const encodedUrl = encodeURIComponent(url);
+      const shareLink = `https://farcaster.xyz/~/compose?text=${encodedText}&embeds[]=${[encodedUrl]}`;
+
+      const { sdk } = await import('@farcaster/miniapp-sdk');
+      const inMiniApp = await sdk.isInMiniApp();
+      if (!inMiniApp) {
+        window.open(shareLink, '_blank');
+        return;
+      }
+      await sdk.actions.composeCast({ text, embeds: [url], close: false });
+    } catch (e) {
+      console.warn('Share failed:', e);
+    }
+  };
+
   useEffect(() => {
     if (screenWidth) {
       if (screenWidth > 680) {
@@ -862,9 +900,11 @@ export default function Tip() {
   }
   
   
-
-
-
+  
+  
+  
+  
+  
   // Function to check if token approval is needed
   const checkTokenApproval = async (force = false) => {
     if (!selectedToken || !wagmiConnected || !wagmiAddress || selectedToken?.isNative) {
@@ -1369,12 +1409,6 @@ export default function Tip() {
     }
   };
 
-
-
-
-
-
-
   // Trigger search when userQuery changes
   useEffect(() => {
     // Always trigger search when filters change, regardless of ecosystem
@@ -1425,7 +1459,9 @@ export default function Tip() {
       <Head>
         <meta
           name="fc:frame"
-          content='{"version":"next","imageUrl":"https://impact.abundance.id/images/icon-02.png","button":{"title":"Onchain Multi-Tip","action":{"type":"launch_frame","name":"Impact 2.0","url":"https://impact.abundance.id/~/tip","splashImageUrl":"https://impact.abundance.id/images/icon.png","splashBackgroundColor":"#011222"}}}'
+          content={`{"version":"next","imageUrl":"${baseURL}/api/frames/tip/onchain-tip-v1?${qs.stringify({
+            id
+          })}","button":{"title":"Onchain Multi-Tip","action":{"type":"launch_frame","name":"Impact 2.0","url":"https://impact.abundance.id/~/tip","splashImageUrl":"https://impact.abundance.id/images/icon.png","splashBackgroundColor":"#011222"}}}`}
         />
 
         {/* Mini App specific metadata */}
@@ -1435,6 +1471,26 @@ export default function Tip() {
         <meta name="fc:miniapp:icon" content="https://impact.abundance.id/images/icon-02.png" />
         <meta name="fc:miniapp:url" content="https://impact.abundance.id/~/tip" />
       </Head>
+
+      {/* Custom Share Modal */}
+      {shareModal.on && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+          <div style={{ background: '#021326', border: '1px solid #11447799', borderRadius: '14px', width: 'min(680px, 96vw)', maxWidth: '96vw', color: '#cde', boxShadow: '0 8px 28px rgba(0,0,0,0.45)' }}>
+            <div style={{ padding: '14px 16px', borderBottom: '1px solid #11447755', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ fontSize: '18px', fontWeight: 700, color: '#9df', textAlign: 'center' }}>Congrats! You multi-tipped {shareModal.receivers} creators & curators!</div>
+              <button onClick={() => setShareModal({ on: false, id: null, amount: 0, token: '', receivers: 0 })} style={{ background: 'transparent', border: 'none', color: '#9df', cursor: 'pointer', fontSize: '20px' }}>×</button>
+            </div>
+            <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+              {shareModal.id && (
+                <img src={`${baseURL}/api/frames/tip/onchain-tip-v1?${qs.stringify({ id: shareModal.id })}`} alt="Onchain Tip" style={{ width: '100%', height: 'auto', maxWidth: '600px', borderRadius: '10px', border: '2px solid #abc' }} />
+              )}
+              <div style={{ display: 'flex', gap: '10px', marginTop: '6px' }}>
+                <button onClick={shareOnchainTip} style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #abc', background: '#113355', color: '#cde', cursor: 'pointer', fontSize: '14px', fontWeight: 600 }}>Share</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* <div className="" style={{padding: '58px 0 0 0'}}>
       </div> */}
@@ -1920,14 +1976,6 @@ export default function Tip() {
         )}
       </div>)}
 
-
-
-
-
-
-
-
-
       {/* Wallet Integration Section */}
       {(version == '1.0' || version == '2.0' || adminTest) && (<div style={{ padding: "20px 4px 0px 4px", width: feedMax }}>
         <div className="flex-col" style={{ backgroundColor: "" }}>
@@ -2010,6 +2058,8 @@ export default function Tip() {
                   </div>
                 </div>
               </div>
+
+              {/* <ToggleSwitch target={'autoFund'} /> */}
             </div>
 
             <div
@@ -2150,8 +2200,6 @@ export default function Tip() {
 
             </div>
           </div>
-
-
 
 
 
