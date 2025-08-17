@@ -2419,3 +2419,17 @@ export default function Tip({ id: ssrId }) {
     </div>
   );
 }
+
+export async function getServerSideProps(context) {
+  try {
+    const { query } = context || {};
+    const { id } = query || {};
+    return {
+      props: {
+        id: id || null,
+      },
+    };
+  } catch (_) {
+    return { props: { id: null } };
+  }
+}

@@ -2875,3 +2875,17 @@ export default function TipId({ id: ssrId }) {
     </div>
   );
 }
+
+export async function getServerSideProps(context) {
+  try {
+    const { params } = context || {};
+    const { id } = params || {};
+    return {
+      props: {
+        id: id || null,
+      },
+    };
+  } catch (_) {
+    return { props: { id: null } };
+  }
+}

@@ -937,77 +937,15 @@ export default function CuratorFid({fid}) {
 
 
 export async function getServerSideProps(context) {
-  const { query, params } = context;
-  // const { id } = query;
-  const { fid } = params;
-  // console.log('id1: ', id)
-  // async function getCircle(id) {
-  //   if (id) {
-  //     try {
-  //       const objectId = new mongoose.Types.ObjectId(id)
-  //       console.log(id)
-  //       await connectToDatabase();
-  //       let circle = await Circle.findOne({ _id: objectId }).exec();
-  //       if (circle) {
-  //         let eco = ''
-  //         if (circle.points) {
-  //           eco = circle?.points?.substring(1)
-  //         }
-  //         return { time: circle?.time, curators: circle?.curators, channels: circle?.channels, eco, username: circle?.username, tipperFid: circle?.fid }
-  //       } else {
-  //         return { time: 'all', curators: [], channels: [], eco: null, username: '', tipperFid: 9326 }
-  //       }
-  //     } catch (error) {
-  //       console.error("Error while fetching casts:", error);
-  //       return { time: 'all', curators: [], channels: [], eco: null, username: '', tipperFid: 9326 }
-  //     }  
-  //   } else {
-  //     return { time: 'all', curators: [], channels: [], eco: null, username: '', tipperFid: 9326 }
-  //   }
-  // }
-  
-  // const { time, curators, channels, eco, username, tipperFid } = await getCircle(id)
-  
-  // let setId = ''
-  // if (id) {
-  //   setId = id
-  // }
-  // let setUsername = ''
-  // if (username) {
-  //   setUsername = username
-  // }
-  // let setEco = null
-  // if (eco) {
-  //   setEco = eco
-  // }
-  // let setTime = 'all'
-  // if (time) {
-  //   setTime = time
-  // }
-  // let setCurators = []
-  // if (curators) {
-  //   setCurators = Array.isArray(curators) ? parseInt(curators) : [parseInt(curators)]
-  // }  
-  // let setChannels = []
-  // if (channels) {
-  //   setChannels = Array.isArray(channels) ? channels : [channels]
-  // }
-  // let setTipperFid = 9326
-  // if (tipperFid) {
-  //   setTipperFid = tipperFid
-  // }
-
-  return {
-    props: {
-      // time: setTime,
-      // curators: setCurators,
-      // channels: setChannels,
-      // eco: setEco,
-      // ecosystem: ecosystem,
-      // username: setUsername,
-      // id: setId,
-      fid
-      // tipperFid: setTipperFid
-    },
-  };
+  try {
+    const { params } = context || {};
+    const { fid } = params || {};
+    return {
+      props: {
+        fid: fid || null,
+      },
+    };
+  } catch (_) {
+    return { props: { fid: null } };
+  }
 }
