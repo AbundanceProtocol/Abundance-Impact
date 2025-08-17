@@ -170,6 +170,7 @@ export default function Home() {
     (async () => {
       try {
         console.log('Attempting to detect Mini App environment...');
+        if (typeof window === 'undefined') return;
         const { sdk } = await import('@farcaster/miniapp-sdk');
         console.log('SDK imported successfully in main page');
         

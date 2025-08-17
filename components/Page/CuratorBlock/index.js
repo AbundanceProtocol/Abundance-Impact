@@ -108,6 +108,7 @@ const CuratorBlock = ({ user, textMax, show, type, feedMax }) => {
     //   pathname: `/~/ecosystems/abundance/curators/${user?.username}/multi-tip`,
     //   query: { userFid: user?.fid, name: user?.username }
     // });
+    if (typeof window === 'undefined') return;
     const { sdk } = await import("@farcaster/miniapp-sdk");
     const isApp = await sdk.isInMiniApp();
 
