@@ -179,9 +179,9 @@ function WalletDemo() {
   return null; // Don't show anything
 }
 
-export default function TipId() {
+export default function TipId({ id: ssrId }) {
   const router = useRouter();
-  const { ecosystem, username, app, userFid, pass, id } = router.query;
+  const { ecosystem, username, app, userFid, pass } = router.query;
   const {
     LoginPopup,
     isLogged,
@@ -1481,7 +1481,7 @@ export default function TipId() {
       <Head>
         <meta
           name="fc:frame"
-          content={`{"version":"1","imageUrl":"${baseURL}/api/frames/tip/onchain-tip-v1?${qs.stringify({ id: id || null })}","button":{"title":"Onchain Multi-Tip","action":{"type":"launch_frame","name":"Impact 2.0","url":"https://impact.abundance.id/~/tip","splashImageUrl":"https://impact.abundance.id/images/icon.png","splashBackgroundColor":"#011222"}}}`}
+          content={`{"version":"next","imageUrl":"${baseURL}/api/frames/tip/onchain-tip-v1?${qs.stringify({ id: ssrId || null })}","button":{"title":"Onchain Multi-Tip","action":{"type":"launch_frame","name":"Impact 2.0","url":"https://impact.abundance.id/~/tip","splashImageUrl":"https://impact.abundance.id/images/icon.png","splashBackgroundColor":"#011222"}}}`}
         />
 
         {/* Mini App specific metadata */}

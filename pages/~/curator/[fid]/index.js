@@ -682,7 +682,7 @@ export default function CuratorFid({fid}) {
       <Head>
         <meta
           name="fc:frame"
-          content={`{"version":"1","imageUrl":"${baseURL}/api/frames/tip/circle-v5?${qs.stringify({
+          content={`{"version":"next","imageUrl":"${baseURL}/api/frames/tip/circle-v5?${qs.stringify({
             fid: fid || null
           })}","button":{"title":"Impact Curation","action":{"type":"launch_frame","name":"Impact 2.0","url":"https://impact.abundance.id/~/curator/${fid}","splashImageUrl":"https://impact.abundance.id/images/icon.png","splashBackgroundColor":"#011222"}}}`}
         />
@@ -691,7 +691,7 @@ export default function CuratorFid({fid}) {
         <meta name="fc:miniapp" content="true" />
         <meta name="fc:miniapp:name" content="Impact 2.0" />
         <meta name="fc:miniapp:description" content="Get boosted and rewarded for your impact on Farcaster" />
-        <meta name="fc:miniapp:icon" content={`{"version":"next","imageUrl":"${baseURL}/api/frames/tip/circle-v5?${qs.stringify({ fid })}`} />
+        <meta name="fc:miniapp:icon" content="https://impact.abundance.id/images/icon-02.png" />
         <meta name="fc:miniapp:url" content={`https://impact.abundance.id/~/curator/${fid}`} />
       </Head>
       {/* <div className="" style={{padding: '58px 0 0 0'}}>

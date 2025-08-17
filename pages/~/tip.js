@@ -179,9 +179,9 @@ function WalletDemo() {
   return null; // Don't show anything
 }
 
-export default function Tip() {
+export default function Tip({ id: ssrId }) {
   const router = useRouter();
-  const { ecosystem, username, app, userFid, pass, id } = router.query;
+  const { ecosystem, username, app, userFid, pass } = router.query;
   const {
     LoginPopup,
     isLogged,
@@ -922,8 +922,8 @@ export default function Tip() {
   }
   
   
-  
-  
+
+
   
   
   
@@ -1259,8 +1259,8 @@ export default function Tip() {
       
       // Handle native tokens (ETH, CELO) - they use zero address in the disperse contract
       const isNativeToken = selectedToken?.isNative || 
-        tokenAddress === '0x0000000000000000000000000000000000000000' ||
-        ['ETH', 'CELO'].includes(selectedToken?.symbol);
+                           tokenAddress === '0x0000000000000000000000000000000000000000' ||
+                           ['ETH', 'CELO'].includes(selectedToken?.symbol);
       
       if (isNativeToken) {
         tokenAddress = '0x0000000000000000000000000000000000000000';
@@ -1384,7 +1384,7 @@ export default function Tip() {
       // Capture disperse metadata at the moment we send the tx
       setPendingTxKind('disperse');
       setPendingTxTokenSymbol(selectedToken?.symbol || 'Token');
-
+      
       const result = await writeContract({
         address: '0xD152f549545093347A162Dce210e7293f1452150', // Disperse contract
         abi: disperseABI,
@@ -1481,7 +1481,7 @@ export default function Tip() {
       <Head>
         <meta
           name="fc:frame"
-          content={`{"version":"next","imageUrl":"${baseURL}/api/frames/tip/onchain-tip-v1?${qs.stringify({ id: id || null })}","button":{"title":"Onchain Multi-Tip","action":{"type":"launch_frame","name":"Impact 2.0","url":"https://impact.abundance.id/~/tip","splashImageUrl":"https://impact.abundance.id/images/icon.png","splashBackgroundColor":"#011222"}}}`}
+          content={`{"version":"next","imageUrl":"${baseURL}/api/frames/tip/onchain-tip-v1?${qs.stringify({ id: ssrId || null })}","button":{"title":"Onchain Multi-Tip","action":{"type":"launch_frame","name":"Impact 2.0","url":"https://impact.abundance.id/~/tip","splashImageUrl":"https://impact.abundance.id/images/icon.png","splashBackgroundColor":"#011222"}}}`}
         />
 
         {/* Mini App specific metadata */}
@@ -1499,14 +1499,14 @@ export default function Tip() {
             <div style={{ padding: '14px 16px', borderBottom: '1px solid #11447755', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ fontSize: '18px', fontWeight: 700, color: '#9df', textAlign: 'center' }}>Congrats! You multi-tipped {shareModal.receivers} creators & curators!</div>
               <button onClick={() => { setShareModal({ on: false, id: null, amount: 0, token: '', receivers: 0 }); setShareImageLoaded(false); setShareImageError(false); }} style={{ background: 'transparent', border: 'none', color: '#9df', cursor: 'pointer', fontSize: '20px' }}>×</button>
-            </div>
+        </div>
             <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
               <div style={{ position: 'relative', width: '100%', maxWidth: '305px', height: '205px', borderRadius: '10px', border: '2px solid #abc', background: '#082039' }}>
                 {!shareImageLoaded && (
                   <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <Spinner size={28} color={'#9df'} />
-                  </div>
-                )}
+                      </div>
+                    )}
                 {shareModal.id && !shareImageError && (
                   <img
                     src={`${baseURL}/api/frames/tip/onchain-tip-v1?${qs.stringify({ id: shareModal.id })}`}
@@ -1516,14 +1516,14 @@ export default function Tip() {
                     style={{ width: '300px', height: '200px', objectFit: 'cover', borderRadius: '8px' }}
                   />
                 )}
-              </div>
+                    </div>
               <div style={{ display: 'flex', gap: '10px', marginTop: '6px' }}>
                 <button onClick={shareOnchainTip} style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #abc', background: '#113355', color: '#cde', cursor: 'pointer', fontSize: '14px', fontWeight: 600 }}>Share</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+                  </div>
+                    </div>
+                        </div>
+                      </div>
+                    )}
 
       {/* <div className="" style={{padding: '58px 0 0 0'}}>
       </div> */}
@@ -1531,15 +1531,15 @@ export default function Tip() {
       {(!isLogged || (version == "1.0" && !adminTest) || version == "2.0" || adminTest) && (
         <div
           id="log in"
-          style={{
+                    style={{
             padding: isMobile ? (version == "1.0" && !adminTest ? "58px 0 20px 0" : "48px 0 20px 0") : "58px 0 60px 0",
             width: feedMax,
             fontSize: "0px"
           }}
         >
           &nnsp;
-        </div>
-      )}
+          </div>
+        )}
 
       {/* <img
         src={`${baseURL}/api/frames/tip/onchain-tip-v1?${qs.stringify({ id: '68a13ca236c2006e443623bd' })}`}
@@ -1683,51 +1683,51 @@ export default function Tip() {
                     </div>
                   </div>
                 )}
-
+                
                 {/* Disperse Button - Underneath the WalletConnect container */}
                 {isLogged && creatorResults.length > 0 && (
                   <div style={{ marginTop: "15px" }}>
                     {!(disperseStatus && disperseStatus.includes('Token approval required')) && (
-                      <button
-                        onClick={() => {
+                    <button
+                      onClick={() => {
                           console.log('🔍 Multi-Tip button clicked!');
-                          console.log('🔍 disperseTokens function:', typeof disperseTokens);
-                          console.log('🔍 About to call disperseTokens...');
-                          disperseTokens();
-                        }}
-                        disabled={isPending || isConfirming || !wagmiConnected || !tipAmount || wagmiChainId !== 8453}
-                        style={{
-                          width: "100%",
-                          padding: "10px 16px",
-                          borderRadius: "8px",
-                          border: "none",
+                        console.log('🔍 disperseTokens function:', typeof disperseTokens);
+                        console.log('🔍 About to call disperseTokens...');
+                        disperseTokens();
+                      }}
+                      disabled={isPending || isConfirming || !wagmiConnected || !tipAmount || wagmiChainId !== 8453}
+                      style={{
+                        width: "100%",
+                        padding: "10px 16px",
+                        borderRadius: "8px",
+                        border: "none",
                           backgroundColor: isPending || isConfirming || !wagmiConnected || !tipAmount || wagmiChainId !== 8453 ? "#555" : "#007bff",
-                          color: "#fff",
-                          fontSize: "12px",
-                          fontWeight: "600",
-                          cursor: isPending || isConfirming || !wagmiConnected || !tipAmount || wagmiChainId !== 8453 ? "not-allowed" : "pointer"
-                        }}
-                      >
-                        {isPending 
-                         ? "Preparing..." 
-                         : isConfirming 
-                         ? "Confirming..." 
-                         : wagmiChainId !== 8453
+                        color: "#fff",
+                        fontSize: "12px",
+                        fontWeight: "600",
+                        cursor: isPending || isConfirming || !wagmiConnected || !tipAmount || wagmiChainId !== 8453 ? "not-allowed" : "pointer"
+                      }}
+                    >
+                      {isPending 
+                       ? "Preparing..." 
+                       : isConfirming 
+                       ? "Confirming..." 
+                       : wagmiChainId !== 8453
                          ? "Multi-Tip (Base Only)"
                          : `Multi-Tip ${selectedToken?.symbol || 'Token'}`}
-                      </button>
+                    </button>
                     )}
               </div>
                 )}
                 
 
                 
-                {/* Disperse Status */}
+                                 {/* Disperse Status */}
                  {isLogged && disperseStatus && (
                    <div style={{ marginTop: "15px" }}>
                      <div style={{
-                        padding: "8px 12px",
-                        borderRadius: "4px",
+                       padding: "8px 12px",
+                       borderRadius: "4px",
                         backgroundColor: (() => {
                           if (disperseStatus.includes("Error")) return "#1b2a4a";
                           if (disperseStatus.includes("Token approval required")) return "#0b2d5c";
@@ -1738,32 +1738,32 @@ export default function Tip() {
                           if (disperseStatus.includes("Token approval required")) return "#b4d4ff";
                           return "#cfe4ff";
                         })(),
-                        fontSize: "11px",
-                        textAlign: "center",
+                       fontSize: "11px",
+                       textAlign: "center",
                         position: "relative",
                         border: "1px solid #194a7a"
-                      }}>
-                        {disperseStatus}
+                     }}>
+                       {disperseStatus}
                         {(disperseStatus.includes("Error") || disperseStatus.includes("Token approval required")) && (
-                          <button
-                            onClick={() => setDisperseStatus('')}
-                            style={{
-                              position: "absolute",
-                              top: "4px",
-                              right: "8px",
-                              background: "none",
-                              border: "none",
+                         <button
+                           onClick={() => setDisperseStatus('')}
+                           style={{
+                             position: "absolute",
+                             top: "4px",
+                             right: "8px",
+                             background: "none",
+                             border: "none",
                               color: "#b4d4ff",
-                              cursor: "pointer",
-                              fontSize: "14px",
-                              fontWeight: "bold"
-                            }}
-                            title="Clear status"
-                          >
-                            ×
-                          </button>
-                        )}
-                      </div>
+                             cursor: "pointer",
+                             fontSize: "14px",
+                             fontWeight: "bold"
+                           }}
+                           title="Clear status"
+                         >
+                           ×
+                         </button>
+                       )}
+                     </div>
                    </div>
                  )}
 
