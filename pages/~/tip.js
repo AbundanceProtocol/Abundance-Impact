@@ -1554,17 +1554,17 @@ export default function Tip() {
           <div
             className="shadow flex-col"
             style={{
-              backgroundColor: isLogged ? "#002244" : "#333",
+              backgroundColor: "#002244",
               borderRadius: "15px",
-              border: isLogged ? "1px solid #11447799" : "1px solid #555",
+              border: "1px solid #11447799",
               width: isMiniApp || isMobile ? "340px" : "100%",
-              margin: isMiniApp || isMobile ? "0px auto 0 auto" : "0px auto 0 auto"
+              margin: "0px auto 0 auto"
             }}
           >
             <div
               className="shadow flex-row"
               style={{
-                backgroundColor: isLogged ? "#11448888" : "#444",
+                backgroundColor: "#11448888",
                 width: "100%",
                 justifyContent: "space-between",
                 alignItems: "center",
@@ -1637,10 +1637,10 @@ export default function Tip() {
             <div
               className="flex-col"
               style={{
-                backgroundColor: isLogged ? "#002244ff" : "#333",
+                backgroundColor: "#002244ff",
                 padding: "10px 18px 12px 18px",
                 borderRadius: "0 0 15px 15px",
-                color: isLogged ? "#ace" : "#ddd",
+                color: "#ace",
                 fontSize: "12px",
                 gap: "0.75rem",
                 position: "relative"
@@ -1781,17 +1781,17 @@ export default function Tip() {
           <div
             className="shadow flex-col"
             style={{
-              backgroundColor: isLogged ? "#002244" : "#333",
+              backgroundColor: "#002244",
               borderRadius: "15px",
-              border: isLogged ? "1px solid #11447799" : "1px solid #555",
+              border: "1px solid #11447799",
               width: isMiniApp || isMobile ? "340px" : "100%",
-              margin: isMiniApp || isMobile ? "20px auto 0 auto" : "0px auto 0 auto"
+              margin: "20px auto 0 auto"
             }}
           >
             <div
               className="shadow flex-row"
               style={{
-                backgroundColor: isLogged ? "#11448888" : "#444",
+                backgroundColor: "#11448888",
                 width: "100%",
                 justifyContent: "space-between",
                 alignItems: "center",
@@ -1875,10 +1875,10 @@ export default function Tip() {
             {!isImpactFilterCollapsed && (<div
               className="flex-col"
               style={{
-                backgroundColor: isLogged ? "#002244ff" : "#333",
+                backgroundColor: "#002244ff",
                 padding: "10px 18px 12px 18px",
                 borderRadius: "0 0 15px 15px",
-                color: isLogged ? "#ace" : "#ddd",
+                color: "#ace",
                 fontSize: "12px",
                 gap: "0.75rem",
                 position: "relative"
@@ -1890,7 +1890,7 @@ export default function Tip() {
                     justifyContent: 'center', 
                     marginTop: '5px', 
                     marginBottom: '0px', 
-                    gap: isMobile ? '0.35rem' : '0.35rem', 
+                    gap: '0.35rem', 
                     flexWrap: 'wrap',
                     overflow: 'hidden',
                     transition: 'all 0.3s ease'
@@ -2153,17 +2153,17 @@ export default function Tip() {
           <div
             className="shadow flex-col"
             style={{
-              backgroundColor: isLogged ? "#002244" : "#333",
+              backgroundColor: "#002244",
               borderRadius: "15px",
-              border: isLogged ? "1px solid #11447799" : "1px solid #555",
+              border: "1px solid #11447799",
               width: isMiniApp || isMobile ? "340px" : "100%",
-              margin: isMiniApp || isMobile ? "20px auto 0 auto" : "0px auto 0 auto"
+              margin: "20px auto 0 auto"
             }}
           >
             <div
               className="shadow flex-row"
               style={{
-                backgroundColor: isLogged ? "#11448888" : "#444",
+                backgroundColor: "#11448888",
                 width: "100%",
                 justifyContent: "space-between",
                 alignItems: "center",
@@ -2229,10 +2229,10 @@ export default function Tip() {
             <div
               className="flex-col"
               style={{
-                backgroundColor: isLogged ? "#002244ff" : "#333",
+                backgroundColor: "#002244ff",
                 padding: "10px 8px 12px 8px",
                 borderRadius: "0 0 15px 15px",
-                color: isLogged ? "#ace" : "#ddd",
+                color: "#ace",
                 fontSize: "12px",
                 gap: "0.75rem",
                 position: "relative"

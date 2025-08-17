@@ -1481,7 +1481,7 @@ export default function TipId() {
       <Head>
         <meta
           name="fc:frame"
-          content={`{"version":"next","imageUrl":"${baseURL}/api/frames/tip/onchain-tip-v1?${qs.stringify({ id: id || null })}","button":{"title":"Onchain Multi-Tip","action":{"type":"launch_frame","name":"Impact 2.0","url":"https://impact.abundance.id/~/tip","splashImageUrl":"https://impact.abundance.id/images/icon.png","splashBackgroundColor":"#011222"}}}`}
+          content={`{"version":"1","imageUrl":"${baseURL}/api/frames/tip/onchain-tip-v1?${qs.stringify({ id: id || null })}","button":{"title":"Onchain Multi-Tip","action":{"type":"launch_frame","name":"Impact 2.0","url":"https://impact.abundance.id/~/tip","splashImageUrl":"https://impact.abundance.id/images/icon.png","splashBackgroundColor":"#011222"}}}`}
         />
 
         {/* Mini App specific metadata */}

@@ -1,8 +1,8 @@
 import create from 'zustand'
-// import { persist, createJSONStorage } from 'zustand/middleware';
+import { persist } from 'zustand/middleware';
 // import produce from 'immer';
 
-const useStore = create((set, get) => {
+const useStore = create(persist((set, get) => {
     return {
         router: null,
         deviceSize: {
@@ -128,6 +128,33 @@ const useStore = create((set, get) => {
         getIsAuth: () => get().isAuth,
         getSignerUuid: () => get().signer_uuid,
     }
-});
+    }), {
+        name: 'impact-app-persisted-store',
+        getStorage: () => localStorage,
+        partialize: (state) => ({
+
+        // Poperties to persist
+        fid: state.fid,
+        isAuth: state.isAuth,
+        signer_uuid: state.signer_uuid,
+        usernameFC: state.usernameFC,
+        srcUrlFC: state.srcUrlFC,
+        userDisplayNameFC: state.userDisplayNameFC,
+        userActiveFC: state.userActiveFC,
+        userBioFC: state.userBioFC,
+        userFollowersFC: state.userFollowersFC,
+        userFollowingFC: state.userFollowingFC,
+        userEthVerAddresses: state.userEthVerAddresses,
+        userSolVerAddresses: state.userSolVerAddresses,
+        userProfile: state.userProfile,
+        points: store.points,
+        }),
+        onRehydrate: (state) => {
+          // This callback is called when the store is rehydrated
+          set(state);
+          console.log('Data has been loaded from local storage.');
+        },
+    }
+);
 
 export default useStore

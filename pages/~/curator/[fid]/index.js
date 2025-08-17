@@ -682,8 +682,8 @@ export default function CuratorFid({fid}) {
       <Head>
         <meta
           name="fc:frame"
-          content={`{"version":"next","imageUrl":"${baseURL}/api/frames/tip/circle-v5?${qs.stringify({
-            fid
+          content={`{"version":"1","imageUrl":"${baseURL}/api/frames/tip/circle-v5?${qs.stringify({
+            fid: fid || null
           })}","button":{"title":"Impact Curation","action":{"type":"launch_frame","name":"Impact 2.0","url":"https://impact.abundance.id/~/curator/${fid}","splashImageUrl":"https://impact.abundance.id/images/icon.png","splashBackgroundColor":"#011222"}}}`}
         />
 
@@ -866,9 +866,14 @@ export default function CuratorFid({fid}) {
       {/* {user && (<CuratorData {...{ show: (isLogged && user), user, textMax, type: 'curator' }} />)} */}
 
 
-      {user && (<CuratorBlock {...{ show: (isLogged && user), user, textMax, feedMax, type: 'curator' }} />)}
+      {user && (<CuratorBlock {...{ show: (user), user, textMax, feedMax, type: 'curator' }} />)}
 
-
+      {/* IMAGE TESTING */}
+      {/* <img
+        src={`${baseURL}/api/frames/tip/circle-v5?fid=9326`}
+        alt="Onchain Tip"
+        style={{ width: '300px', height: '200px', objectFit: 'cover', borderRadius: '8px' }}
+      /> */}
 
 
       {searchSelect == 'Curation' && (

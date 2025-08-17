@@ -160,9 +160,9 @@ const CuratorBlock = ({ user, textMax, show, type, feedMax }) => {
             <div
               className="shadow flex-col"
               style={{
-                backgroundColor: isLogged ? "#002244" : "#333",
+                backgroundColor: "#002244",
                 borderRadius: "15px",
-                border: isLogged ? "1px solid #11447799" : "1px solid #555",
+                border: "1px solid #11447799",
                 width: isMiniApp || isMobile ? "340px" : "100%",
                 margin: isMiniApp || isMobile ? "0px auto 0 auto" : "0px auto 0 auto"
               }}
@@ -170,7 +170,7 @@ const CuratorBlock = ({ user, textMax, show, type, feedMax }) => {
               <div
                 className="shadow flex-row"
                 style={{
-                  backgroundColor: isLogged ? "#11448888" : "#444",
+                  backgroundColor: "#11448888",
                   width: "100%",
                   justifyContent: "space-between",
                   alignItems: "center",
@@ -250,10 +250,10 @@ const CuratorBlock = ({ user, textMax, show, type, feedMax }) => {
               <div
                 className="flex-col"
                 style={{
-                  backgroundColor: isLogged ? "#002244ff" : "#333",
+                  backgroundColor: "#002244ff",
                   padding: "0px 18px 18px 18px",
                   borderRadius: "0 0 15px 15px",
-                  color: isLogged ? "#ace" : "#ddd",
+                  color: "#ace",
                   fontSize: "12px",
                   gap: "0.75rem",
                   position: "relative"
