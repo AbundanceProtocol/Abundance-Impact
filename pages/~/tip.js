@@ -5,15 +5,6 @@ import { parseUnits } from 'viem';
 import Link from "next/link";
 import axios from "axios";
 
-export async function getServerSideProps(context) {
-  try {
-    const ssrId = context?.query?.id || '';
-    return { props: { ssrId } };
-  } catch (_) {
-    return { props: { ssrId: '' } };
-  }
-}
-
 // Disperse contract ABI - defined at module level to avoid initialization issues
 const disperseABI = [
   {
@@ -188,10 +179,10 @@ function WalletDemo() {
   return null; // Don't show anything
 }
 
-export default function Tip({ ssrId }) {
+export default function Tip() {
   const router = useRouter();
   const { ecosystem, username, app, userFid, pass, id } = router.query;
-  const headId = ssrId || id || '';
+  const headId = id || '';
   const {
     LoginPopup,
     isLogged,
