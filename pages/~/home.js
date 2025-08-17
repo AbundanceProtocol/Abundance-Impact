@@ -364,6 +364,7 @@ export default function Homepage({ test }) {
 
   const shareCuration = async () => {
     if (fid) {
+      if (typeof window === 'undefined') return;
       const { sdk } = await import("@farcaster/miniapp-sdk");
       const isApp = await sdk.isInMiniApp();
   
@@ -392,6 +393,7 @@ export default function Homepage({ test }) {
 
   async function notifsOn() {
     try {
+      if (typeof window === 'undefined') return;
       const { sdk } = await import("@farcaster/miniapp-sdk");
       console.log("isMiniApp", isMiniApp, notifStatus.app, notifStatus.notifs);
       if (isMiniApp) {
