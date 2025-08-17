@@ -730,6 +730,17 @@ export default function Tip({id}) {
     }
   }, [screenWidth]);
 
+  // Ensure Mini App SDK is ready regardless of other flows
+  useEffect(() => {
+    (async () => {
+      try {
+        const { sdk } = await import('@farcaster/miniapp-sdk');
+        // Best-effort ready; ignore errors if not in mini app
+        await sdk.actions.ready();
+      } catch (_) {}
+    })();
+  }, []);
+
   function closeImagePopup() {
     setShowPopup({ open: false, url: null });
   }
@@ -1470,9 +1481,7 @@ export default function Tip({id}) {
       <Head>
         <meta
           name="fc:frame"
-          content={`{"version":"next","imageUrl":"${baseURL}/api/frames/tip/onchain-tip-v1?${qs.stringify({
-            id
-          })}","button":{"title":"Onchain Multi-Tip","action":{"type":"launch_frame","name":"Impact 2.0","url":"https://impact.abundance.id/~/tip","splashImageUrl":"https://impact.abundance.id/images/icon.png","splashBackgroundColor":"#011222"}}}`}
+          content={`{"version":"next","imageUrl":"${baseURL}/api/frames/tip/onchain-tip-v1?id=${encodeURIComponent(id || '')}","button":{"title":"Onchain Multi-Tip","action":{"type":"launch_frame","name":"Impact 2.0","url":"https://impact.abundance.id/~/tip","splashImageUrl":"https://impact.abundance.id/images/icon.png","splashBackgroundColor":"#011222"}}}`}
         />
 
         {/* Mini App specific metadata */}
