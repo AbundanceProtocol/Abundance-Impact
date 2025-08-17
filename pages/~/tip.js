@@ -179,9 +179,9 @@ function WalletDemo() {
   return null; // Don't show anything
 }
 
-export default function Tip() {
+export default function Tip({id}) {
   const router = useRouter();
-  const { ecosystem, username, app, userFid, pass, id } = router.query;
+  const { ecosystem, username, app, userFid, pass } = router.query;
   const {
     LoginPopup,
     isLogged,
@@ -242,6 +242,8 @@ export default function Tip() {
   
   // Custom Share Modal state
   const [shareModal, setShareModal] = useState({ on: false, id: null, amount: 0, token: '', receivers: 0 });
+  const [shareImageLoaded, setShareImageLoaded] = useState(false);
+  const [shareImageError, setShareImageError] = useState(false);
   
   // Filter state variables
   const [timeframe, setTimeframe] = useState('7d');
@@ -384,8 +386,17 @@ export default function Tip() {
           } else {
             console.warn('OnchainTip API returned non-200:', res.status, await res.text());
           }
-          const createdId = created?._id.toString() || created?.data?._id.toString() || null;
+          // Extract ID from response ({ success, id }) or fallback shapes
+          let createdId = null;
+          try {
+            const maybe = created?.id || created?._id || created?.data?._id || null;
+            createdId = maybe ? (typeof maybe === 'string' ? maybe : maybe.toString()) : null;
+          } catch (_) {
+            createdId = null;
+          }
           const receiversCount = (pendingTxReceivers || []).length;
+          setShareImageLoaded(false);
+          setShareImageError(false);
           setShareModal({
             on: true,
             id: createdId,
@@ -414,7 +425,7 @@ export default function Tip() {
       setDisperseStatus(errorMessage);
       setIsDispersing(false);
     }
-  }, [isConfirming, isConfirmed, hash, writeError, walletConnected, walletAddress, getAllTokens, lastSuccessHash, pendingTxTokenSymbol]);
+  }, [isConfirming, isConfirmed, hash, writeError, walletConnected, walletAddress, getAllTokens, lastSuccessHash, pendingTxTokenSymbol, pendingTxKind]);
 
   useEffect(() => {
     if (fid) {
@@ -684,7 +695,7 @@ export default function Tip() {
   const shareOnchainTip = async () => {
     try {
       const url = `https://impact.abundance.id/~/tip?id=${shareModal?.id}`;
-      const text = `I multi-tipped ${formatShareAmount(shareModal?.amount)} $${shareModal?.token} to ${shareModal?.receivers} creators with Impact!`;
+      const text = `I multi-tipped ${formatShareAmount(shareModal?.amount)} $${shareModal?.token} to ${shareModal?.receivers} creators with /impact!`;
       const encodedText = encodeURIComponent(text);
       const encodedUrl = encodeURIComponent(url);
       const shareLink = `https://farcaster.xyz/~/compose?text=${encodedText}&embeds[]=${[encodedUrl]}`;
@@ -1474,16 +1485,29 @@ export default function Tip() {
 
       {/* Custom Share Modal */}
       {shareModal.on && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', zIndex: 2147483647, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
           <div style={{ background: '#021326', border: '1px solid #11447799', borderRadius: '14px', width: 'min(680px, 96vw)', maxWidth: '96vw', color: '#cde', boxShadow: '0 8px 28px rgba(0,0,0,0.45)' }}>
             <div style={{ padding: '14px 16px', borderBottom: '1px solid #11447755', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ fontSize: '18px', fontWeight: 700, color: '#9df', textAlign: 'center' }}>Congrats! You multi-tipped {shareModal.receivers} creators & curators!</div>
-              <button onClick={() => setShareModal({ on: false, id: null, amount: 0, token: '', receivers: 0 })} style={{ background: 'transparent', border: 'none', color: '#9df', cursor: 'pointer', fontSize: '20px' }}>×</button>
+              <button onClick={() => { setShareModal({ on: false, id: null, amount: 0, token: '', receivers: 0 }); setShareImageLoaded(false); setShareImageError(false); }} style={{ background: 'transparent', border: 'none', color: '#9df', cursor: 'pointer', fontSize: '20px' }}>×</button>
             </div>
             <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
-              {shareModal.id && (
-                <img src={`${baseURL}/api/frames/tip/onchain-tip-v1?${qs.stringify({ id: shareModal.id })}`} alt="Onchain Tip" style={{ width: '100%', height: 'auto', maxWidth: '600px', borderRadius: '10px', border: '2px solid #abc' }} />
-              )}
+              <div style={{ position: 'relative', width: '100%', maxWidth: '305px', height: '205px', borderRadius: '10px', border: '2px solid #abc', background: '#082039' }}>
+                {!shareImageLoaded && (
+                  <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Spinner size={28} color={'#9df'} />
+                  </div>
+                )}
+                {shareModal.id && !shareImageError && (
+                  <img
+                    src={`${baseURL}/api/frames/tip/onchain-tip-v1?${qs.stringify({ id: shareModal.id })}`}
+                    alt="Onchain Tip"
+                    onLoad={() => setShareImageLoaded(true)}
+                    onError={() => { setShareImageError(true); setShareImageLoaded(true); }}
+                    style={{ width: '300px', height: '200px', objectFit: 'cover', borderRadius: '8px' }}
+                  />
+                )}
+              </div>
               <div style={{ display: 'flex', gap: '10px', marginTop: '6px' }}>
                 <button onClick={shareOnchainTip} style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #abc', background: '#113355', color: '#cde', cursor: 'pointer', fontSize: '14px', fontWeight: 600 }}>Share</button>
               </div>
@@ -2841,4 +2865,18 @@ export default function Tip() {
       <Modal modal={modal} />
     </div>
   );
+}
+
+
+
+export async function getServerSideProps(context) {
+  // Fetch dynamic parameters from the context object
+  const { query } = context;
+  const { id } = query;
+
+  return {
+    props: {
+      id: id || null,
+    },
+  };
 }
