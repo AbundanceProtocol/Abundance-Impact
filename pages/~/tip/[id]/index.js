@@ -179,9 +179,9 @@ function WalletDemo() {
   return null; // Don't show anything
 }
 
-export default function TipId({id}) {
+export default function TipId() {
   const router = useRouter();
-  const { ecosystem, username, app, userFid, pass } = router.query;
+  const { ecosystem, username, app, userFid, pass, id } = router.query;
   const {
     LoginPopup,
     isLogged,
@@ -2874,19 +2874,4 @@ export default function TipId({id}) {
       <Modal modal={modal} />
     </div>
   );
-}
-
-
-export async function getServerSideProps(context) {
-  const { query, params } = context;
-  const { id } = params;
-  let setId = null
-  if (id) {
-    setId = id
-  }
-  return {
-    props: {
-      id: setId
-    },
-  };
 }
