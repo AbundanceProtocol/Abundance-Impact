@@ -2237,7 +2237,12 @@ export default function Tip() {
                 gap: "0.75rem",
                 position: "relative"
               }}>
-
+              {/* Loading Spinner for Tip Distribution */}
+              {searchLoading && (
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "12px" }}>
+                  <Spinner size={24} color={'#9df'} />
+                </div>
+              )}
                              {/* Filter Components */}
 
 
