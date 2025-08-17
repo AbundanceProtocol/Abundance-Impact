@@ -148,6 +148,7 @@ export default function Homepage({ test }) {
 
   useEffect(() => {
     (async () => {
+      if (typeof window === 'undefined') return;
       const { sdk } = await import("@farcaster/miniapp-sdk");
       const isApp = await sdk.isInMiniApp();
       setIsMiniApp(isApp);
@@ -214,6 +215,7 @@ export default function Homepage({ test }) {
 
   useEffect(() => {
     (async () => {
+      if (typeof window === 'undefined') return;
       const { sdk } = await import("@farcaster/miniapp-sdk");
       const isApp = await sdk.isInMiniApp();
       setIsMiniApp(isApp);
