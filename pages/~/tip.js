@@ -179,7 +179,7 @@ function WalletDemo() {
   return null; // Don't show anything
 }
 
-export default function Tip() {
+export default function Tip({id}) {
   const router = useRouter();
   const { ecosystem, username, app, userFid, pass } = router.query;
   const {
@@ -1481,7 +1481,7 @@ export default function Tip() {
       <Head>
         <meta
           name="fc:frame"
-          content={`{"version":"next","imageUrl":"${baseURL}/api/frames/tip/onchain-tip-v1","button":{"title":"Onchain Multi-Tip","action":{"type":"launch_frame","name":"Impact 2.0","url":"https://impact.abundance.id/~/tip","splashImageUrl":"https://impact.abundance.id/images/icon.png","splashBackgroundColor":"#011222"}}}`}
+          content={`{"version":"next","imageUrl":"${baseURL}/api/frames/tip/onchain-tip-v1?id=${id}","button":{"title":"Onchain Multi-Tip","action":{"type":"launch_frame","name":"Impact 2.0","url":"https://impact.abundance.id/~/tip","splashImageUrl":"https://impact.abundance.id/images/icon.png","splashBackgroundColor":"#011222"}}}`}
         />
 
         {/* Mini App specific metadata */}
@@ -2413,4 +2413,23 @@ export default function Tip() {
       <Modal modal={modal} />
     </div>
   );
+}
+
+
+
+
+export async function getServerSideProps(context) {
+  const { query, params } = context;
+  const { id } = query;
+  
+  let setId = null
+  if (id) {
+    setId = id
+  }
+
+  return {
+    props: {
+      id: setId,
+    },
+  };
 }

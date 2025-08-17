@@ -2880,10 +2880,13 @@ export default function TipId({id}) {
 export async function getServerSideProps(context) {
   const { query, params } = context;
   const { id } = params;
-
+  let setId = null
+  if (id) {
+    setId = id
+  }
   return {
     props: {
-      id
+      id: setId
     },
   };
 }
