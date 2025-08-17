@@ -96,16 +96,16 @@ import { BiSortDown, BiSortUp } from "react-icons/bi";
 import { IoShuffleOutline as ShuffleIcon } from "react-icons/io5";
 import { PiClockClockwiseBold as ClockForward, PiClockCounterClockwiseBold as ClockBack } from "react-icons/pi";
 import { FaAngleDown } from "react-icons/fa";
-import { confirmUser, timePassed, getTimeRange } from "../../utils/utils";
-import Spinner from "../../components/Common/Spinner";
-import ExpandImg from "../../components/Cast/ExpandImg";
-import useMatchBreakpoints from "../../hooks/useMatchBreakpoints";
-import { useWallet } from "../../hooks/useWallet";
-import { AccountContext } from "../../context";
+import { confirmUser, timePassed, getTimeRange } from "../../../utils/utils";
+import Spinner from "../../../components/Common/Spinner";
+import ExpandImg from "../../../components/Cast/ExpandImg";
+import useMatchBreakpoints from "../../../hooks/useMatchBreakpoints";
+import { useWallet } from "../../../hooks/useWallet";
+import { AccountContext } from "../../../context";
 import qs from "querystring";
-import Modal from "../../components/Layout/Modals/Modal";
-import WalletConnect from "../../components/WalletConnect";
-import WalletActions from "../../components/WalletActions";
+import Modal from "../../../components/Layout/Modals/Modal";
+import WalletConnect from "../../../components/WalletConnect";
+import WalletActions from "../../../components/WalletActions";
 
 const version = process.env.NEXT_PUBLIC_VERSION;
 
@@ -179,7 +179,7 @@ function WalletDemo() {
   return null; // Don't show anything
 }
 
-export default function Tip() {
+export default function TipId({id}) {
   const router = useRouter();
   const { ecosystem, username, app, userFid, pass } = router.query;
   const {
@@ -1481,7 +1481,7 @@ export default function Tip() {
       <Head>
         <meta
           name="fc:frame"
-          content={`{"version":"next","imageUrl":"${baseURL}/api/frames/tip/onchain-tip-v1","button":{"title":"Onchain Multi-Tip","action":{"type":"launch_frame","name":"Impact 2.0","url":"https://impact.abundance.id/~/tip","splashImageUrl":"https://impact.abundance.id/images/icon.png","splashBackgroundColor":"#011222"}}}`}
+          content={`{"version":"next","imageUrl":"${baseURL}/api/frames/tip/onchain-tip-v1?id=${id}","button":{"title":"Onchain Multi-Tip","action":{"type":"launch_frame","name":"Impact 2.0","url":"https://impact.abundance.id/~/tip","splashImageUrl":"https://impact.abundance.id/images/icon.png","splashBackgroundColor":"#011222"}}}`}
         />
 
         {/* Mini App specific metadata */}
@@ -2874,4 +2874,16 @@ export default function Tip() {
       <Modal modal={modal} />
     </div>
   );
+}
+
+
+export async function getServerSideProps(context) {
+  const { query, params } = context;
+  const { id } = params;
+
+  return {
+    props: {
+      id
+    },
+  };
 }
