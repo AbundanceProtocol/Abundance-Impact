@@ -1262,8 +1262,8 @@ export default function Tip() {
       
       // Handle native tokens (ETH, CELO) - they use zero address in the disperse contract
       const isNativeToken = selectedToken?.isNative || 
-                           tokenAddress === '0x0000000000000000000000000000000000000000' ||
-                           ['ETH', 'CELO'].includes(selectedToken?.symbol);
+        tokenAddress === '0x0000000000000000000000000000000000000000' ||
+        ['ETH', 'CELO'].includes(selectedToken?.symbol);
       
       if (isNativeToken) {
         tokenAddress = '0x0000000000000000000000000000000000000000';
