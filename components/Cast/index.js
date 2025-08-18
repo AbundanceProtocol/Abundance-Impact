@@ -49,6 +49,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
   
   async function viewCast(castHash) {
     try {
+      if (typeof window === 'undefined') return;
       const { sdk } = await import('@farcaster/miniapp-sdk');
       await sdk.haptics.impactOccurred('light')
       await sdk.actions.viewCast({ 

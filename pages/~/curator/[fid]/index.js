@@ -683,7 +683,7 @@ export default function CuratorFid({fid}) {
         <meta
           name="fc:frame"
           content={`{"version":"next","imageUrl":"${baseURL}/api/frames/tip/circle-v5?${qs.stringify({
-            fid
+            fid: fid || null
           })}","button":{"title":"Impact Curation","action":{"type":"launch_frame","name":"Impact 2.0","url":"https://impact.abundance.id/~/curator/${fid}","splashImageUrl":"https://impact.abundance.id/images/icon.png","splashBackgroundColor":"#011222"}}}`}
         />
 
@@ -691,7 +691,7 @@ export default function CuratorFid({fid}) {
         <meta name="fc:miniapp" content="true" />
         <meta name="fc:miniapp:name" content="Impact 2.0" />
         <meta name="fc:miniapp:description" content="Get boosted and rewarded for your impact on Farcaster" />
-        <meta name="fc:miniapp:icon" content={`{"version":"next","imageUrl":"${baseURL}/api/frames/tip/circle-v5?${qs.stringify({ fid })}`} />
+        <meta name="fc:miniapp:icon" content="https://impact.abundance.id/images/icon-02.png" />
         <meta name="fc:miniapp:url" content={`https://impact.abundance.id/~/curator/${fid}`} />
       </Head>
       {/* <div className="" style={{padding: '58px 0 0 0'}}>
@@ -866,9 +866,14 @@ export default function CuratorFid({fid}) {
       {/* {user && (<CuratorData {...{ show: (isLogged && user), user, textMax, type: 'curator' }} />)} */}
 
 
-      {user && (<CuratorBlock {...{ show: (isLogged && user), user, textMax, feedMax, type: 'curator' }} />)}
+      {user && (<CuratorBlock {...{ show: (user), user, textMax, feedMax, type: 'curator' }} />)}
 
-
+      {/* IMAGE TESTING */}
+      {/* <img
+        src={`${baseURL}/api/frames/tip/circle-v5?fid=9326`}
+        alt="Onchain Tip"
+        style={{ width: '300px', height: '200px', objectFit: 'cover', borderRadius: '8px' }}
+      /> */}
 
 
       {searchSelect == 'Curation' && (
@@ -932,77 +937,15 @@ export default function CuratorFid({fid}) {
 
 
 export async function getServerSideProps(context) {
-  const { query, params } = context;
-  // const { id } = query;
-  const { fid } = params;
-  // console.log('id1: ', id)
-  // async function getCircle(id) {
-  //   if (id) {
-  //     try {
-  //       const objectId = new mongoose.Types.ObjectId(id)
-  //       console.log(id)
-  //       await connectToDatabase();
-  //       let circle = await Circle.findOne({ _id: objectId }).exec();
-  //       if (circle) {
-  //         let eco = ''
-  //         if (circle.points) {
-  //           eco = circle?.points?.substring(1)
-  //         }
-  //         return { time: circle?.time, curators: circle?.curators, channels: circle?.channels, eco, username: circle?.username, tipperFid: circle?.fid }
-  //       } else {
-  //         return { time: 'all', curators: [], channels: [], eco: null, username: '', tipperFid: 9326 }
-  //       }
-  //     } catch (error) {
-  //       console.error("Error while fetching casts:", error);
-  //       return { time: 'all', curators: [], channels: [], eco: null, username: '', tipperFid: 9326 }
-  //     }  
-  //   } else {
-  //     return { time: 'all', curators: [], channels: [], eco: null, username: '', tipperFid: 9326 }
-  //   }
-  // }
-  
-  // const { time, curators, channels, eco, username, tipperFid } = await getCircle(id)
-  
-  // let setId = ''
-  // if (id) {
-  //   setId = id
-  // }
-  // let setUsername = ''
-  // if (username) {
-  //   setUsername = username
-  // }
-  // let setEco = null
-  // if (eco) {
-  //   setEco = eco
-  // }
-  // let setTime = 'all'
-  // if (time) {
-  //   setTime = time
-  // }
-  // let setCurators = []
-  // if (curators) {
-  //   setCurators = Array.isArray(curators) ? parseInt(curators) : [parseInt(curators)]
-  // }  
-  // let setChannels = []
-  // if (channels) {
-  //   setChannels = Array.isArray(channels) ? channels : [channels]
-  // }
-  // let setTipperFid = 9326
-  // if (tipperFid) {
-  //   setTipperFid = tipperFid
-  // }
-
-  return {
-    props: {
-      // time: setTime,
-      // curators: setCurators,
-      // channels: setChannels,
-      // eco: setEco,
-      // ecosystem: ecosystem,
-      // username: setUsername,
-      // id: setId,
-      fid
-      // tipperFid: setTipperFid
-    },
-  };
+  try {
+    const { params } = context || {};
+    const { fid } = params || {};
+    return {
+      props: {
+        fid: fid || null,
+      },
+    };
+  } catch (_) {
+    return { props: { fid: null } };
+  }
 }

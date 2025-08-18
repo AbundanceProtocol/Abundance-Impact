@@ -170,6 +170,7 @@ export default function Home() {
     (async () => {
       try {
         console.log('Attempting to detect Mini App environment...');
+        if (typeof window === 'undefined') return;
         const { sdk } = await import('@farcaster/miniapp-sdk');
         console.log('SDK imported successfully in main page');
         
@@ -260,6 +261,7 @@ export default function Home() {
     (async () => {
       try {
         console.log('Re-checking Mini App environment after login...');
+        if (typeof window === 'undefined') return;
         const { sdk } = await import('@farcaster/miniapp-sdk');
         const isApp = await sdk.isInMiniApp();
         console.log('Re-check isInMiniApp result:', isApp);
@@ -413,6 +415,7 @@ export default function Home() {
 
   async function notifsOn() {
     try {
+      if (typeof window === 'undefined') return;
       const { sdk } = await import('@farcaster/miniapp-sdk');
       console.log('isMiniApp', isMiniApp, notifStatus.app, notifStatus.notifs)
       if (isMiniApp) {

@@ -17,6 +17,7 @@ const onchainTipSchema = new mongoose.Schema({
     amount: Number
   }],
   transaction_hash: { type: String },
+  image: { type: Object, default: null },
   createdAt: { type: Date, default: () => new Date() }
 });
 

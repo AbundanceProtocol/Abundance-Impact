@@ -49,6 +49,7 @@ const UserMenu = () => {
 
   async function getUserInfo() {
     try {
+      if (typeof window === 'undefined') return;
       const { sdk } = await import("@farcaster/miniapp-sdk");
 
       const isMiniApp = await sdk.isInMiniApp();

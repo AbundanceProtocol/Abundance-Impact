@@ -70,7 +70,7 @@
     "viem": "^2.21.37",
     "wagmi": "^2.12.25",
     "web3modal": "^1.9.12",
-    "zustand": "^4.0.0-rc.1"
+    "zustand": "^5.0.7"
   },
   "devDependencies": {
     "@netlify/plugin-nextjs": "4.41.1",

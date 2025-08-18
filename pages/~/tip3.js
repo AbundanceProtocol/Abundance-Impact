@@ -180,7 +180,7 @@ function WalletDemo() {
   return null; // Don't show anything
 }
 
-export default function Tip() {
+export default function Tip({id: ssrId}) {
   const router = useRouter();
   const { ecosystem, username, app, userFid, pass } = router.query;
   const {
@@ -1484,7 +1484,7 @@ export default function Tip() {
       <Head>
         <meta
           name="fc:frame"
-          content='{"version":"next","imageUrl":"https://impact.abundance.id/images/icon-02.png","button":{"title":"Impact Multi-Tip","action":{"type":"launch_frame","name":"Impact 2.0","url":"https://impact.abundance.id/~/tip","splashImageUrl":"https://impact.abundance.id/images/icon.png","splashBackgroundColor":"#011222"}}}'
+          content={`{"version":"next","imageUrl":"https://impact.abundance.id/api/frames/tip/onchain-tip-v1","button":{"title":"Impact Multi-Tip","action":{"type":"launch_frame","name":"Impact 2.0","url":"https://impact.abundance.id/~/tip","splashImageUrl":"https://impact.abundance.id/images/icon.png","splashBackgroundColor":"#011222"}}}`}
         />
 
         {/* Mini App specific metadata */}
@@ -2440,16 +2440,16 @@ export default function Tip() {
   );
 }
 
-// export async function getServerSideProps(context) {
-//   try {
-//     const { query } = context || {};
-//     const { id } = query || {};
-//     return {
-//       props: {
-//         id: id || null,
-//       },
-//     };
-//   } catch (_) {
-//     return { props: { id: null } };
-//   }
-// }
+export async function getServerSideProps(context) {
+  try {
+    const { query } = context || {};
+    const { id } = query || {};
+    return {
+      props: {
+        id: id || null,
+      },
+    };
+  } catch (_) {
+    return { props: { id: null } };
+  }
+}

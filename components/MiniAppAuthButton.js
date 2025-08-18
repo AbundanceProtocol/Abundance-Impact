@@ -13,6 +13,7 @@ export default function MiniAppAuthButton({ onSuccess, onError, points = '$IMPAC
       const { nonce } = await nonceRes.json();
 
       // 2. Use Mini App SDK to sign the nonce
+      if (typeof window === 'undefined') throw new Error('Not in browser');
       const { sdk } = await import('@farcaster/miniapp-sdk');
       const { message, signature } = await sdk.actions.signIn({ nonce });
 

@@ -148,6 +148,7 @@ export default function Homepage({ test }) {
 
   useEffect(() => {
     (async () => {
+      if (typeof window === 'undefined') return;
       const { sdk } = await import("@farcaster/miniapp-sdk");
       const isApp = await sdk.isInMiniApp();
       setIsMiniApp(isApp);
@@ -214,6 +215,7 @@ export default function Homepage({ test }) {
 
   useEffect(() => {
     (async () => {
+      if (typeof window === 'undefined') return;
       const { sdk } = await import("@farcaster/miniapp-sdk");
       const isApp = await sdk.isInMiniApp();
       setIsMiniApp(isApp);
@@ -362,6 +364,7 @@ export default function Homepage({ test }) {
 
   const shareCuration = async () => {
     if (fid) {
+      if (typeof window === 'undefined') return;
       const { sdk } = await import("@farcaster/miniapp-sdk");
       const isApp = await sdk.isInMiniApp();
   
@@ -390,6 +393,7 @@ export default function Homepage({ test }) {
 
   async function notifsOn() {
     try {
+      if (typeof window === 'undefined') return;
       const { sdk } = await import("@farcaster/miniapp-sdk");
       console.log("isMiniApp", isMiniApp, notifStatus.app, notifStatus.notifs);
       if (isMiniApp) {
@@ -648,7 +652,6 @@ export default function Homepage({ test }) {
       )}
 
       <div
-        onClick={shareCuration}
         className="flex-row"
         style={{
           justifyContent: "center",
@@ -659,6 +662,7 @@ export default function Homepage({ test }) {
         }}
       >
         <div
+          onClick={shareCuration}
           className="flex-col"
           style={{
             // width: "100%",
@@ -707,7 +711,8 @@ export default function Homepage({ test }) {
           </div>
         </div>
 
-        <div
+        <Link
+          href={"/~/tip"}
           className="flex-col"
           style={{
             // width: "100%",
@@ -736,7 +741,7 @@ export default function Homepage({ test }) {
                   gap: "0.25rem",
                   height: "50px",
                   width: "110px",
-                  backgroundColor: "#aaa"
+                  // backgroundColor: "#aaa"
                 }}
               >
                 {(!isMobile || isMobile) && <BsCurrencyExchange size={20} style={{ width: "21px" }} />}
@@ -754,7 +759,7 @@ export default function Homepage({ test }) {
               </div>
             </div>
           </div>
-        </div>
+        </Link>
       </div>
 
       <div
@@ -764,7 +769,7 @@ export default function Homepage({ test }) {
           alignItems: "center",
           padding: "20px 10px 0 10px",
           flexWrap: "wrap",
-          gap: "1rem"
+          gap: "0.8rem"
         }}
       >
         <Link
