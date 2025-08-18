@@ -139,7 +139,7 @@ function WalletDemo() {
     const testSDK = async () => {
       try {
         if (typeof window === 'undefined') return;
-        const { getMiniAppSdk } = await import('../../../utils/getMiniAppSdk');
+        const { getMiniAppSdk } = await import('../../../../utils/getMiniAppSdk');
         const sdk = await getMiniAppSdk();
         const inMiniApp = await sdk.isInMiniApp();
         
@@ -441,7 +441,7 @@ export default function TipId({ id: ssrId }) {
     if (userBalances.impact == 0) {
       (async () => {
         if (typeof window === 'undefined') return;
-        const { getMiniAppSdk } = await import("../../../utils/getMiniAppSdk");
+        const { getMiniAppSdk } = await import("../../../../utils/getMiniAppSdk");
         const sdk = await getMiniAppSdk();
 
         const isMiniApp = await sdk.isInMiniApp();
@@ -704,7 +704,7 @@ export default function TipId({ id: ssrId }) {
       const encodedUrl = encodeURIComponent(url);
       const shareLink = `https://farcaster.xyz/~/compose?text=${encodedText}&embeds[]=${[encodedUrl]}`;
       if (typeof window === 'undefined') return;
-      const { getMiniAppSdk } = await import('../../../utils/getMiniAppSdk');
+      const { getMiniAppSdk } = await import('../../../../utils/getMiniAppSdk');
       const sdk = await getMiniAppSdk();
       const inMiniApp = await sdk.isInMiniApp();
       if (!inMiniApp) {

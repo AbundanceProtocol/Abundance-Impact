@@ -94,7 +94,7 @@ export default function SharedCast() {
 
     async function init() {
       if (typeof window === 'undefined') return;
-      const { getMiniAppSdk } = await import('../../utils/getMiniAppSdk');
+      const { getMiniAppSdk } = await import('../../../utils/getMiniAppSdk');
       const sdk = await getMiniAppSdk();
       const isMiniApp = await sdk.isInMiniApp()
       setIsMiniApp(isMiniApp)
