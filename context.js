@@ -340,7 +340,7 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
           setUserProfile(null)
         }
 
-        if (router.route !== '/' && router.route !== '/~/curator/[fid]') {
+        if (router.route !== '/' && router.route !== '/~/curator/[fid]' && router.route !== '/~/tip') {
           console.log('c13-1')
           LoginPopup()
         }
