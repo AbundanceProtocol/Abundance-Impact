@@ -181,9 +181,9 @@ function WalletDemo() {
   return null; // Don't show anything
 }
 
-export default function TipId({ id: ssrId }) {
+export default function Tip() {
   const router = useRouter();
-  const { ecosystem, username, app, userFid, pass } = router.query;
+  const { ecosystem, username, app, userFid, pass, id } = router.query;
   const {
     LoginPopup,
     isLogged,
@@ -932,8 +932,6 @@ export default function TipId({ id: ssrId }) {
   
   
   
-  
-  
   // Function to check if token approval is needed
   const checkTokenApproval = async (force = false) => {
     if (!selectedToken || !wagmiConnected || !wagmiAddress || selectedToken?.isNative) {
@@ -1391,7 +1389,7 @@ export default function TipId({ id: ssrId }) {
       // Capture disperse metadata at the moment we send the tx
       setPendingTxKind('disperse');
       setPendingTxTokenSymbol(selectedToken?.symbol || 'Token');
-
+      
       const result = await writeContract({
         address: '0xD152f549545093347A162Dce210e7293f1452150', // Disperse contract
         abi: disperseABI,
@@ -1488,7 +1486,7 @@ export default function TipId({ id: ssrId }) {
       <Head>
         <meta
           name="fc:frame"
-          content={`{"version":"next","imageUrl":"${baseURL}/api/frames/tip/onchain-tip-v1?${qs.stringify({ id: ssrId || null })}","button":{"title":"Onchain Multi-Tip","action":{"type":"launch_frame","name":"Impact 2.0","url":"https://impact.abundance.id/~/tip","splashImageUrl":"https://impact.abundance.id/images/icon.png","splashBackgroundColor":"#011222"}}}`}
+          content={`{"version":"next","imageUrl":"https://impact.abundance.id/api/frames/tip/onchain-tip-v1?${qs.stringify({ id: id || null })}","button":{"title":"Impact Multi-Tip","action":{"type":"launch_frame","name":"Impact 2.0","url":"https://impact.abundance.id/~/tip","splashImageUrl":"https://impact.abundance.id/images/icon.png","splashBackgroundColor":"#011222"}}}`}
         />
 
         {/* Mini App specific metadata */}
@@ -1498,6 +1496,23 @@ export default function TipId({ id: ssrId }) {
         <meta name="fc:miniapp:icon" content="https://impact.abundance.id/images/icon-02.png" />
         <meta name="fc:miniapp:url" content="https://impact.abundance.id/~/tip" />
       </Head>
+
+
+
+
+
+      {/* <Head>
+        <meta
+          name="fc:frame"
+          content={`{"version":"next","imageUrl":"${baseURL}/api/frames/tip/onchain-tip-v1","button":{"title":"Onchain Multi-Tip","action":{"type":"launch_frame","name":"Impact 2.0","url":"https://impact.abundance.id/~/tip","splashImageUrl":"https://impact.abundance.id/images/icon.png","splashBackgroundColor":"#011222"}}}`}
+        />
+
+        <meta name="fc:miniapp" content="true" />
+        <meta name="fc:miniapp:name" content="Impact 2.0" />
+        <meta name="fc:miniapp:description" content="Get boosted and rewarded for your impact on Farcaster" />
+        <meta name="fc:miniapp:icon" content="https://impact.abundance.id/images/icon-02.png" />
+        <meta name="fc:miniapp:url" content="https://impact.abundance.id/~/tip" />
+      </Head> */}
 
       {/* Custom Share Modal */}
       {shareModal.on && (
@@ -1512,8 +1527,8 @@ export default function TipId({ id: ssrId }) {
                 {!shareImageLoaded && (
                   <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <Spinner size={28} color={'#9df'} />
-                  </div>
-                )}
+                      </div>
+                    )}
                 {shareModal.id && !shareImageError && (
                   <img
                     src={`${baseURL}/api/frames/tip/onchain-tip-v1?${qs.stringify({ id: shareModal.id })}`}
@@ -1538,7 +1553,7 @@ export default function TipId({ id: ssrId }) {
       {(!isLogged || (version == "1.0" && !adminTest) || version == "2.0" || adminTest) && (
         <div
           id="log in"
-          style={{
+                    style={{
             padding: isMobile ? (version == "1.0" && !adminTest ? "58px 0 20px 0" : "48px 0 20px 0") : "58px 0 60px 0",
             width: feedMax,
             fontSize: "0px"
@@ -1548,473 +1563,12 @@ export default function TipId({ id: ssrId }) {
         </div>
       )}
 
-      {/* AUTO FUND */}
+      {/* <img
+        src={`${baseURL}/api/frames/tip/onchain-tip-v1?${qs.stringify({ id: '68a13ca236c2006e443623bd' })}`}
+        alt="Onchain Tip"
+        style={{ width: '300px', height: '200px', objectFit: 'cover', borderRadius: '8px' }}
+      /> */}
 
-      {1 == 2 && (<div style={{ padding: "0px 4px 0px 4px", width: feedMax }}>
-        {((version == "1.0" && !adminTest) || version == "2.0" || adminTest) && (
-          <div className="flex-col" style={{ backgroundColor: "" }}>
-            <div
-              className="shadow flex-col"
-              style={{
-                backgroundColor: isLogged ? "#002244" : "#333",
-                borderRadius: "15px",
-                border: isLogged ? "1px solid #11447799" : "1px solid #555",
-                width: isMiniApp || isMobile ? "340px" : "100%",
-                margin: isMiniApp || isMobile ? "0px auto 0 auto" : "0px auto 0 auto"
-              }}
-            >
-              <div
-                className="shadow flex-row"
-                style={{
-                  backgroundColor: isLogged ? "#11448888" : "#444",
-                  width: "100%",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  padding: "8px",
-                  borderRadius: "15px",
-                  margin: "0 0 10px 0",
-                  gap: "1rem"
-                }}
-              >
-                <div
-                  className="flex-row"
-                  style={{
-                    width: "100%",
-                    justifyContent: "flex-start",
-                    alignItems: "center",
-                    padding: "0px 0 0 4px",
-                    margin: "0 0 0px 0"
-                  }}
-                >
-                  <BsCurrencyExchange style={{ fill: "#cde" }} size={20} />
-                  <div>
-                    <div
-                      style={{
-                        border: "0px solid #777",
-                        padding: "2px",
-                        borderRadius: "10px",
-                        backgroundColor: "",
-                        maxWidth: "fit-content",
-                        cursor: "pointer",
-                        color: "#cde"
-                      }}
-                    >
-                      <div className="top-layer flex-row">
-                        <div
-                          className="flex-row"
-                          style={{
-                            padding: "4px 0 4px 10px",
-                            marginBottom: "0px",
-                            flexWrap: "wrap",
-                            justifyContent: "flex-start",
-                            gap: "0.00rem",
-                            width: "",
-                            alignItems: "center"
-                          }}
-                        >
-                          <div
-                            style={{
-                              fontSize: isMobile ? "18px" : "22px",
-                              fontWeight: "600",
-                              color: "",
-                              padding: "0px 3px"
-                            }}
-                          >
-                            Tip
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div
-                    className="flex-row"
-                    style={{
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      cursor: "pointer"
-                    }}
-                  ></div>
-                </div>
-
-                {/* <ToggleSwitch target={'autoFund'} /> */}
-              </div>
-
-              <div
-                className="flex-col"
-                style={{
-                  backgroundColor: isLogged ? "#002244ff" : "#333",
-                  padding: "0px 18px 12px 18px",
-                  borderRadius: "0 0 15px 15px",
-                  color: isLogged ? "#ace" : "#ddd",
-                  fontSize: "12px",
-                  gap: "0.75rem",
-                  position: "relative"
-                }}
-              >
-                <div
-                  className="flex-row"
-                  style={{
-                    color: "#9df",
-                    width: "100%",
-                    fontSize: isMobile ? "15px" : "17px",
-                    padding: "10px 10px 15px 10px",
-                    justifyContent: "center",
-                    userSelect: "none"
-                  }}
-                >
-                  Check your Impact Rewards
-                </div>
-
-                <div
-                  className="flex-col"
-                  style={{
-                    fontSize: "13px",
-                    justifyContent: isMobile ? "center" : "center",
-                    alignItems: "center",
-                    gap: "1.75rem",
-                    margin: "0px 0 20px 0",
-                    flexWrap: "wrap",
-                    width: "100%",
-                    padding: "0 18px 10px 18px"
-                  }}
-                >
-                  {/* DAILY REWARDS */}
-
-                  <div
-                    className={`flex-col btn-select blu-drk shadow`}
-                    style={{
-                      minWidth: isMobile ? "135px" : "130px",
-                      color: "#cde",
-                      height: "120px",
-                      width: "100%",
-                      cursor: "default"
-                    }}
-                  >
-                    <div
-                      className="flex-row"
-                      style={{ justifyContent: "center", alignItems: "center", gap: "0.75rem" }}
-                    >
-                      <div style={{ fontSize: "15px", fontWeight: "700", margin: "0 0 5px 0", color: "#44aaff" }}>
-                        Daily Rewards
-                      </div>
-                    </div>
-
-                    {dailyLoading ? (
-                      <div
-                        className="flex-col"
-                        style={{
-                          height: "100%",
-                          alignItems: "center",
-                          width: "100%",
-                          justifyContent: "center",
-                          padding: "0 20px"
-                        }}
-                      >
-                        <Spinner size={28} color={"#468"} />
-                      </div>
-                    ) : (
-                      <div
-                        className="flex-col"
-                        style={{ justifyContent: "center", alignItems: "center", gap: "0.25rem", padding: "8px" }}
-                      >
-                        <div
-                          className="flex-row"
-                          style={{ justifyContent: "center", alignItems: "center", gap: "0.5rem" }}
-                        >
-                          <div style={{ fontSize: "21px", fontWeight: "700" }}>
-                            {dailyRewards?.degen_total > 0 ? Math.floor(dailyRewards?.degen_total || 0) : "--"}
-                          </div>
-                          <div style={{ fontSize: "14px", fontWeight: "400", color: "#8cf" }}>$DEGEN</div>
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="flex-row" style={{ alignContent: "center", alignItems: "center", gap: "0.25rem" }}>
-                      <div
-                        className={`flex-row ${
-                          dailyLoading
-                            ? "btn-off"
-                            : dailyRewards?.degen_total > 0 && dailyRewards?.claimed == false
-                            ? "btn-act"
-                            : dailyRewards?.degen_total > 0 && dailyRewards?.claimed == true
-                            ? "btn-on"
-                            : "btn-off"
-                        }`}
-                        style={{
-                          borderRadius: "8px",
-                          padding: "2px 5px",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          gap: "0.25rem",
-                          margin: "5px 0 2px 0",
-                          cursor:
-                            dailyRewards?.degen_total > 0 && dailyRewards?.claimed == false ? "pointer" : "default"
-                        }}
-                        onClick={event => {
-                          if (dailyRewards?.degen_total > 0 && dailyRewards?.claimed == false) {
-                            claimReward(event, dailyRewards);
-                          } else if (!isLogged) {
-                            LoginPopup();
-                          }
-                        }}
-                      >
-                        <p
-                          style={{
-                            padding: "0 2px",
-                            fontSize: "15px",
-                            fontWeight: "500",
-                            textWrap: "nowrap"
-                          }}
-                        >
-                          {dailyLoading
-                            ? "Loading..."
-                            : dailyRewards?.degen_total > 0 && dailyRewards?.claimed == false
-                            ? "Claim"
-                            : dailyRewards?.degen_total > 0 && dailyRewards?.claimed == true
-                            ? "Claimed"
-                            : "Check Score"}
-                        </p>
-                      </div>
-                      <div
-                        style={{
-                          padding: "0px 5px",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          margin: "4px 0 -2px 0",
-                          cursor: "pointer"
-                        }}
-                        onClick={() => {
-                          getDailyRewards(fid);
-                          getTotalClaims(fid);
-                        }}
-                      >
-                        <Refresh className="" color={"#0077bf"} size={20} />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* CREATOR FUND */}
-
-                  <div
-                    className={`flex-col btn-select blu-drk shadow`}
-                    style={{
-                      minWidth: isMobile ? "135px" : "130px",
-                      color: "#cde",
-                      height: "120px",
-                      width: "100%",
-                      cursor: "default"
-                    }}
-                  >
-                    <div
-                      className="flex-row"
-                      style={{ justifyContent: "center", alignItems: "center", gap: "0.75rem" }}
-                    >
-                      <div style={{ fontSize: "15px", fontWeight: "700", margin: "0 0 5px 0", color: "#44aaff" }}>
-                        Creator Fund
-                      </div>
-                    </div>
-                    {creatorLoading ? (
-                      <div
-                        className="flex-row"
-                        style={{
-                          height: "100%",
-                          alignItems: "center",
-                          width: "100%",
-                          justifyContent: "center",
-                          padding: "0 20px"
-                        }}
-                      >
-                        <Spinner size={28} color={"#468"} />
-                      </div>
-                    ) : (
-                      <div
-                        className="flex-col"
-                        style={{ justifyContent: "center", alignItems: "center", gap: "0.25rem" }}
-                      >
-                        {/* <Impact size={15} color={userFunding?.active_cron && userFunding?.creator_fund == 100 ? '#147' : '#5af'} /> */}
-                        <div
-                          className="flex-row"
-                          style={{ justifyContent: "center", alignItems: "center", gap: "0.5rem" }}
-                        >
-                          <div style={{ fontSize: "16px", fontWeight: "700" }}>
-                            {creatorRewards?.degen > 0 ? Math.floor(creatorRewards?.degen).toLocaleString() || 0 : "--"}
-                          </div>
-                          <div style={{ fontSize: "9px", fontWeight: "400", color: "#8cf" }}>$DEGEN</div>
-                        </div>
-
-                        <div
-                          className="flex-row"
-                          style={{ justifyContent: "center", alignItems: "center", gap: "0.5rem" }}
-                        ></div>
-                      </div>
-                    )}
-                    <div
-                      className={`flex-row ${
-                        creatorLoading
-                          ? "btn-off"
-                          : (creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet
-                          ? "btn-on"
-                          : "btn-off"
-                      }`}
-                      style={{
-                        borderRadius: "8px",
-                        padding: "2px 5px",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: "0.25rem",
-                        margin: "5px 0 2px 0",
-                        cursor: "default"
-                      }}
-                    >
-                      <p
-                        style={{
-                          padding: "0 2px",
-                          fontSize: "15px",
-                          fontWeight: "500",
-                          textWrap: "nowrap"
-                        }}
-                      >
-                        {creatorLoading
-                          ? "Loading..."
-                          : (creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet
-                          ? "S7 Airdropped"
-                          : (creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet == null
-                          ? "Missing wallet"
-                          : "No rewards"}
-                      </p>{" "}
-                      {/* update season 5/15 */}
-                    </div>
-                  </div>
-
-                  {/* CLAIMED (S7) */}
-
-                  <div
-                    className={`flex-col btn-select blu-drk shadow`}
-                    style={{
-                      minWidth: isMobile ? "135px" : "130px",
-                      color: "#cde",
-                      height: "120px",
-                      width: "100%",
-                      cursor: "default"
-                    }}
-                  >
-                    <div
-                      className="flex-row"
-                      style={{ justifyContent: "center", alignItems: "center", gap: "0.75rem" }}
-                    >
-                      <div style={{ fontSize: "15px", fontWeight: "700", margin: "0 0 5px 0", color: "#44aaff" }}>
-                        Claimed (S8)
-                      </div>{" "}
-                      {/* update season 5/15 */}
-                    </div>
-                    {claimsLoading ? (
-                      <div
-                        className="flex-row"
-                        style={{
-                          height: "100%",
-                          alignItems: "center",
-                          width: "100%",
-                          justifyContent: "center",
-                          padding: "0 20px"
-                        }}
-                      >
-                        <Spinner size={28} color={"#468"} />
-                      </div>
-                    ) : (
-                      <div
-                        className="flex-col"
-                        style={{ justifyContent: "center", alignItems: "center", gap: "0.25rem", padding: "0px" }}
-                      >
-                        <div
-                          className="flex-row"
-                          style={{ justifyContent: "center", alignItems: "center", gap: "0.5rem" }}
-                        >
-                          <div style={{ fontSize: "21px", fontWeight: "700" }}>
-                            {totalClaims > 0 ? Math.floor(totalClaims || 0) : "--"}
-                          </div>
-                          <div style={{ fontSize: "14px", fontWeight: "400", color: "#8cf" }}>$DEGEN</div>
-                        </div>
-                      </div>
-                    )}
-                    <div className="flex-row" style={{ alignContent: "center", alignItems: "center", gap: "0.25rem" }}>
-                      <div
-                        className={`flex-row ${claimsLoading ? "btn-off" : totalClaims > 0 ? "btn-on" : "btn-off"}`}
-                        style={{
-                          borderRadius: "8px",
-                          padding: "2px 5px",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          gap: "0.25rem",
-                          margin: "5px 0 2px 0",
-                          cursor: "default"
-                        }}
-                      >
-                        <p
-                          style={{
-                            padding: "0 2px",
-                            fontSize: "15px",
-                            fontWeight: "500",
-                            textWrap: "nowrap"
-                          }}
-                        >
-                          {claimsLoading ? "Loading..." : totalClaims > 0 ? "Claimed" : "Check Score"}
-                        </p>
-                      </div>
-                      <div
-                        style={{
-                          padding: "0px 5px",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          margin: "4px 0 -2px 0",
-                          cursor: "pointer"
-                        }}
-                        onClick={() => {
-                          getDailyRewards(fid);
-                          getTotalClaims(fid);
-                        }}
-                      >
-                        <Refresh className="" color={"#0077bf"} size={20} />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* </div> */}
-
-                  <div
-                    className="flex-row"
-                    style={{
-                      color: "#9df",
-                      width: "100%",
-                      textAlign: "center",
-                      fontSize: isMobile ? "12px" : "14px",
-                      padding: "10px 10px 0px 10px",
-                      justifyContent: "center"
-                    }}
-                  >
-                    Note: Daily Rewards accumulate for up to 4 days. Rewards expire after 4 days if unclaimed - they are
-                    then moved to the Creator Fund
-                  </div>
-                  <div
-                    className="flex-row"
-                    style={{
-                      color: "#9df",
-                      width: "100%",
-                      textAlign: "center",
-                      fontSize: isMobile ? "12px" : "14px",
-                      padding: "0px 10px 0px 10px",
-                      justifyContent: "center"
-                    }}
-                  >
-                    Daily Rewards are accumulated throughout the Season. They are then airdropped to your wallet after
-                    Claim Day.
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>)}
 
       {/* Wallet Integration Section */}
       {(version == '1.0' || version == '2.0' || adminTest) && (<div style={{ padding: "20px 4px 0px 4px", width: feedMax }}>
@@ -2022,17 +1576,17 @@ export default function TipId({ id: ssrId }) {
           <div
             className="shadow flex-col"
             style={{
-              backgroundColor: isLogged ? "#002244" : "#333",
+              backgroundColor: "#002244",
               borderRadius: "15px",
-              border: isLogged ? "1px solid #11447799" : "1px solid #555",
+              border: "1px solid #11447799",
               width: isMiniApp || isMobile ? "340px" : "100%",
-              margin: isMiniApp || isMobile ? "0px auto 0 auto" : "0px auto 0 auto"
+              margin: "0px auto 0 auto"
             }}
           >
             <div
               className="shadow flex-row"
               style={{
-                backgroundColor: isLogged ? "#11448888" : "#444",
+                backgroundColor: "#11448888",
                 width: "100%",
                 justifyContent: "space-between",
                 alignItems: "center",
@@ -2105,10 +1659,10 @@ export default function TipId({ id: ssrId }) {
             <div
               className="flex-col"
               style={{
-                backgroundColor: isLogged ? "#002244ff" : "#333",
+                backgroundColor: "#002244ff",
                 padding: "10px 18px 12px 18px",
                 borderRadius: "0 0 15px 15px",
-                color: isLogged ? "#ace" : "#ddd",
+                color: "#ace",
                 fontSize: "12px",
                 gap: "0.75rem",
                 position: "relative"
@@ -2151,51 +1705,51 @@ export default function TipId({ id: ssrId }) {
                     </div>
                   </div>
                 )}
-
+                
                 {/* Disperse Button - Underneath the WalletConnect container */}
                 {isLogged && creatorResults.length > 0 && (
                   <div style={{ marginTop: "15px" }}>
                     {!(disperseStatus && disperseStatus.includes('Token approval required')) && (
-                      <button
-                        onClick={() => {
+                    <button
+                      onClick={() => {
                           console.log('🔍 Multi-Tip button clicked!');
-                          console.log('🔍 disperseTokens function:', typeof disperseTokens);
-                          console.log('🔍 About to call disperseTokens...');
-                          disperseTokens();
-                        }}
-                        disabled={isPending || isConfirming || !wagmiConnected || !tipAmount || wagmiChainId !== 8453}
-                        style={{
-                          width: "100%",
-                          padding: "10px 16px",
-                          borderRadius: "8px",
-                          border: "none",
+                        console.log('🔍 disperseTokens function:', typeof disperseTokens);
+                        console.log('🔍 About to call disperseTokens...');
+                        disperseTokens();
+                      }}
+                      disabled={isPending || isConfirming || !wagmiConnected || !tipAmount || wagmiChainId !== 8453}
+                      style={{
+                        width: "100%",
+                        padding: "10px 16px",
+                        borderRadius: "8px",
+                        border: "none",
                           backgroundColor: isPending || isConfirming || !wagmiConnected || !tipAmount || wagmiChainId !== 8453 ? "#555" : "#007bff",
-                          color: "#fff",
-                          fontSize: "12px",
-                          fontWeight: "600",
-                          cursor: isPending || isConfirming || !wagmiConnected || !tipAmount || wagmiChainId !== 8453 ? "not-allowed" : "pointer"
-                        }}
-                      >
-                        {isPending 
-                         ? "Preparing..." 
-                         : isConfirming 
-                         ? "Confirming..." 
-                         : wagmiChainId !== 8453
+                        color: "#fff",
+                        fontSize: "12px",
+                        fontWeight: "600",
+                        cursor: isPending || isConfirming || !wagmiConnected || !tipAmount || wagmiChainId !== 8453 ? "not-allowed" : "pointer"
+                      }}
+                    >
+                      {isPending 
+                       ? "Preparing..." 
+                       : isConfirming 
+                       ? "Confirming..." 
+                       : wagmiChainId !== 8453
                          ? "Multi-Tip (Base Only)"
                          : `Multi-Tip ${selectedToken?.symbol || 'Token'}`}
-                      </button>
+                    </button>
                     )}
               </div>
                 )}
                 
 
                 
-                {/* Disperse Status */}
+                                 {/* Disperse Status */}
                  {isLogged && disperseStatus && (
                    <div style={{ marginTop: "15px" }}>
                      <div style={{
-                        padding: "8px 12px",
-                        borderRadius: "4px",
+                       padding: "8px 12px",
+                       borderRadius: "4px",
                         backgroundColor: (() => {
                           if (disperseStatus.includes("Error")) return "#1b2a4a";
                           if (disperseStatus.includes("Token approval required")) return "#0b2d5c";
@@ -2206,32 +1760,32 @@ export default function TipId({ id: ssrId }) {
                           if (disperseStatus.includes("Token approval required")) return "#b4d4ff";
                           return "#cfe4ff";
                         })(),
-                        fontSize: "11px",
-                        textAlign: "center",
+                       fontSize: "11px",
+                       textAlign: "center",
                         position: "relative",
                         border: "1px solid #194a7a"
-                      }}>
-                        {disperseStatus}
+                     }}>
+                       {disperseStatus}
                         {(disperseStatus.includes("Error") || disperseStatus.includes("Token approval required")) && (
-                          <button
-                            onClick={() => setDisperseStatus('')}
-                            style={{
-                              position: "absolute",
-                              top: "4px",
-                              right: "8px",
-                              background: "none",
-                              border: "none",
+                         <button
+                           onClick={() => setDisperseStatus('')}
+                           style={{
+                             position: "absolute",
+                             top: "4px",
+                             right: "8px",
+                             background: "none",
+                             border: "none",
                               color: "#b4d4ff",
-                              cursor: "pointer",
-                              fontSize: "14px",
-                              fontWeight: "bold"
-                            }}
-                            title="Clear status"
-                          >
-                            ×
-                          </button>
-                        )}
-                      </div>
+                             cursor: "pointer",
+                             fontSize: "14px",
+                             fontWeight: "bold"
+                           }}
+                           title="Clear status"
+                         >
+                           ×
+                         </button>
+                       )}
+                     </div>
                    </div>
                  )}
 
@@ -2249,17 +1803,17 @@ export default function TipId({ id: ssrId }) {
           <div
             className="shadow flex-col"
             style={{
-              backgroundColor: isLogged ? "#002244" : "#333",
+              backgroundColor: "#002244",
               borderRadius: "15px",
-              border: isLogged ? "1px solid #11447799" : "1px solid #555",
+              border: "1px solid #11447799",
               width: isMiniApp || isMobile ? "340px" : "100%",
-              margin: isMiniApp || isMobile ? "20px auto 0 auto" : "0px auto 0 auto"
+              margin: "20px auto 0 auto"
             }}
           >
             <div
               className="shadow flex-row"
               style={{
-                backgroundColor: isLogged ? "#11448888" : "#444",
+                backgroundColor: "#11448888",
                 width: "100%",
                 justifyContent: "space-between",
                 alignItems: "center",
@@ -2343,10 +1897,10 @@ export default function TipId({ id: ssrId }) {
             {!isImpactFilterCollapsed && (<div
               className="flex-col"
               style={{
-                backgroundColor: isLogged ? "#002244ff" : "#333",
+                backgroundColor: "#002244ff",
                 padding: "10px 18px 12px 18px",
                 borderRadius: "0 0 15px 15px",
-                color: isLogged ? "#ace" : "#ddd",
+                color: "#ace",
                 fontSize: "12px",
                 gap: "0.75rem",
                 position: "relative"
@@ -2358,7 +1912,7 @@ export default function TipId({ id: ssrId }) {
                     justifyContent: 'center', 
                     marginTop: '5px', 
                     marginBottom: '0px', 
-                    gap: isMobile ? '0.35rem' : '0.35rem', 
+                    gap: '0.35rem', 
                     flexWrap: 'wrap',
                     overflow: 'hidden',
                     transition: 'all 0.3s ease'
@@ -2621,17 +2175,17 @@ export default function TipId({ id: ssrId }) {
           <div
             className="shadow flex-col"
             style={{
-              backgroundColor: isLogged ? "#002244" : "#333",
+              backgroundColor: "#002244",
               borderRadius: "15px",
-              border: isLogged ? "1px solid #11447799" : "1px solid #555",
+              border: "1px solid #11447799",
               width: isMiniApp || isMobile ? "340px" : "100%",
-              margin: isMiniApp || isMobile ? "20px auto 0 auto" : "0px auto 0 auto"
+              margin: "20px auto 0 auto"
             }}
           >
             <div
               className="shadow flex-row"
               style={{
-                backgroundColor: isLogged ? "#11448888" : "#444",
+                backgroundColor: "#11448888",
                 width: "100%",
                 justifyContent: "space-between",
                 alignItems: "center",
@@ -2697,15 +2251,20 @@ export default function TipId({ id: ssrId }) {
             <div
               className="flex-col"
               style={{
-                backgroundColor: isLogged ? "#002244ff" : "#333",
+                backgroundColor: "#002244ff",
                 padding: "10px 8px 12px 8px",
                 borderRadius: "0 0 15px 15px",
-                color: isLogged ? "#ace" : "#ddd",
+                color: "#ace",
                 fontSize: "12px",
                 gap: "0.75rem",
                 position: "relative"
               }}>
-
+              {/* Loading Spinner for Tip Distribution */}
+              {searchLoading && (
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "12px" }}>
+                  <Spinner size={24} color={'#9df'} />
+                </div>
+              )}
                              {/* Filter Components */}
 
 
@@ -2883,16 +2442,16 @@ export default function TipId({ id: ssrId }) {
   );
 }
 
-export async function getServerSideProps(context) {
-  try {
-    const { params } = context || {};
-    const { id } = params || {};
-    return {
-      props: {
-        id: id || null,
-      },
-    };
-  } catch (_) {
-    return { props: { id: null } };
-  }
-}
+// export async function getServerSideProps(context) {
+//   try {
+//     const { query } = context || {};
+//     const { id } = query || {};
+//     return {
+//       props: {
+//         id: id || null,
+//       },
+//     };
+//   } catch (_) {
+//     return { props: { id: null } };
+//   }
+// }
