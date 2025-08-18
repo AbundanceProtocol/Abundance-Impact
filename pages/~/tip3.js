@@ -181,9 +181,9 @@ function WalletDemo() {
   return null; // Don't show anything
 }
 
-export default function Tip({id: ssrId}) {
+export default function Tip() {
   const router = useRouter();
-  const { ecosystem, username, app, userFid, pass } = router.query;
+  const { ecosystem, username, app, userFid, pass, id } = router.query;
   const {
     LoginPopup,
     isLogged,
@@ -1266,8 +1266,8 @@ export default function Tip({id: ssrId}) {
       
       // Handle native tokens (ETH, CELO) - they use zero address in the disperse contract
       const isNativeToken = selectedToken?.isNative || 
-                           tokenAddress === '0x0000000000000000000000000000000000000000' ||
-                           ['ETH', 'CELO'].includes(selectedToken?.symbol);
+        tokenAddress === '0x0000000000000000000000000000000000000000' ||
+        ['ETH', 'CELO'].includes(selectedToken?.symbol);
       
       if (isNativeToken) {
         tokenAddress = '0x0000000000000000000000000000000000000000';
@@ -1488,7 +1488,7 @@ export default function Tip({id: ssrId}) {
       <Head>
         <meta
           name="fc:frame"
-          content={`{"version":"next","imageUrl":"https://impact.abundance.id/api/frames/tip/onchain-tip-v1?${qs.stringify({ id: ssrId })}","button":{"title":"Impact Multi-Tip","action":{"type":"launch_frame","name":"Impact 2.0","url":"https://impact.abundance.id/~/tip","splashImageUrl":"https://impact.abundance.id/images/icon.png","splashBackgroundColor":"#011222"}}}`}
+          content={`{"version":"next","imageUrl":"https://impact.abundance.id/api/frames/tip/onchain-tip-v1?${qs.stringify({ id: id || null })}","button":{"title":"Impact Multi-Tip","action":{"type":"launch_frame","name":"Impact 2.0","url":"https://impact.abundance.id/~/tip","splashImageUrl":"https://impact.abundance.id/images/icon.png","splashBackgroundColor":"#011222"}}}`}
         />
 
         {/* Mini App specific metadata */}
@@ -2444,16 +2444,16 @@ export default function Tip({id: ssrId}) {
   );
 }
 
-export async function getServerSideProps(context) {
-  try {
-    const { query } = context || {};
-    const { id } = query || {};
-    return {
-      props: {
-        id: id || null,
-      },
-    };
-  } catch (_) {
-    return { props: { id: null } };
-  }
-}
+// export async function getServerSideProps(context) {
+//   try {
+//     const { query } = context || {};
+//     const { id } = query || {};
+//     return {
+//       props: {
+//         id: id || null,
+//       },
+//     };
+//   } catch (_) {
+//     return { props: { id: null } };
+//   }
+// }
