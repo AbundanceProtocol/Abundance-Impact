@@ -696,7 +696,7 @@ export default function Tip() {
   // Share handler for OnchainTip
   const shareOnchainTip = async () => {
     try {
-      const url = `https://impact.abundance.id/~/tip/${shareModal?.id}`;
+      const url = `https://impact.abundance.id/~/tip3?id=${shareModal?.id || null}`;
       const text = `I multi-tipped ${formatShareAmount(shareModal?.amount)} $${shareModal?.token} to ${shareModal?.receivers} creators with /impact!`;
       const encodedText = encodeURIComponent(text);
       const encodedUrl = encodeURIComponent(url);
@@ -1262,8 +1262,8 @@ export default function Tip() {
       
       // Handle native tokens (ETH, CELO) - they use zero address in the disperse contract
       const isNativeToken = selectedToken?.isNative || 
-                           tokenAddress === '0x0000000000000000000000000000000000000000' ||
-                           ['ETH', 'CELO'].includes(selectedToken?.symbol);
+        tokenAddress === '0x0000000000000000000000000000000000000000' ||
+        ['ETH', 'CELO'].includes(selectedToken?.symbol);
       
       if (isNativeToken) {
         tokenAddress = '0x0000000000000000000000000000000000000000';
