@@ -109,7 +109,8 @@ const CuratorBlock = ({ user, textMax, show, type, feedMax }) => {
     //   query: { userFid: user?.fid, name: user?.username }
     // });
     if (typeof window === 'undefined') return;
-    const { sdk } = await import("@farcaster/miniapp-sdk");
+    const { getMiniAppSdk } = await import("../../../utils/getMiniAppSdk");
+    const sdk = await getMiniAppSdk();
     const isApp = await sdk.isInMiniApp();
 
     let shareUrl = `https://impact.abundance.id/~/curator/${user?.fid}`
