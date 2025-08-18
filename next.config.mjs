@@ -12,8 +12,9 @@ export default {
   },
   experimental: {
     serverActions: true,
-    esmExternals: true,
+    esmExternals: "loose",
   },
+  transpilePackages: ["@farcaster/miniapp-sdk"],
   compiler: {
     emotion: true,
   },
