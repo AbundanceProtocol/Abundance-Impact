@@ -3,6 +3,7 @@
 import Dotenv from 'dotenv-webpack';
 import dotenv from 'dotenv';
 import path from 'path';
+import webpack from 'webpack';
 dotenv.config();
 
 export default {
@@ -14,7 +15,6 @@ export default {
     serverActions: true,
     esmExternals: "loose",
   },
-  transpilePackages: ["@farcaster/miniapp-sdk"],
   compiler: {
     emotion: true,
   },
@@ -24,7 +24,11 @@ export default {
 
     // Prevent SSR from trying to load the browser-only Mini App SDK
     if (isServer) {
-      config.resolve.alias["@farcaster/miniapp-sdk"] = path.resolve(process.cwd(), "utils/miniapp-sdk-server-stub.js");
+      const stubPath = path.resolve(process.cwd(), "utils/miniapp-sdk-server-stub.js");
+      config.resolve.alias["@farcaster/miniapp-sdk"] = stubPath;
+      config.resolve.alias["@farcaster/miniapp-sdk/dist/index.js"] = stubPath;
+      config.resolve.alias["@farcaster/miniapp-sdk/dist/sdk.js"] = stubPath;
+      config.plugins.push(new webpack.IgnorePlugin({ resourceRegExp: /^@farcaster\/miniapp-sdk(\/.*)?$/ }));
     }
     return config;
   },
