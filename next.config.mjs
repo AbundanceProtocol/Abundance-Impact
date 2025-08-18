@@ -3,7 +3,6 @@
 import Dotenv from 'dotenv-webpack';
 import dotenv from 'dotenv';
 import path from 'path';
-import webpack from 'webpack';
 dotenv.config();
 
 export default {
@@ -11,10 +10,7 @@ export default {
   env: {
     ENVIRONMENT: process.env.ENVIRONMENT,
   },
-  experimental: {
-    serverActions: true,
-    esmExternals: "loose",
-  },
+  // experimental features disabled to avoid Netlify build issues
   compiler: {
     emotion: true,
   },
@@ -28,7 +24,6 @@ export default {
       config.resolve.alias["@farcaster/miniapp-sdk"] = stubPath;
       config.resolve.alias["@farcaster/miniapp-sdk/dist/index.js"] = stubPath;
       config.resolve.alias["@farcaster/miniapp-sdk/dist/sdk.js"] = stubPath;
-      config.plugins.push(new webpack.IgnorePlugin({ resourceRegExp: /^@farcaster\/miniapp-sdk(\/.*)?$/ }));
     }
     return config;
   },
