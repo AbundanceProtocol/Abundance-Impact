@@ -1,7 +1,6 @@
 import { useState } from 'react';
 // import { Warp } from '../pages/assets';
 import { SiFarcaster } from "react-icons/si";
-import { getMiniAppSdk } from '../utils/getMiniAppSdk';
 
 export default function MiniAppAuthButton({ onSuccess, onError, points = '$IMPACT', referrer = null }) {
   const [loading, setLoading] = useState(false);
@@ -15,6 +14,7 @@ export default function MiniAppAuthButton({ onSuccess, onError, points = '$IMPAC
 
       // 2. Use Mini App SDK to sign the nonce
       if (typeof window === 'undefined') throw new Error('Not in browser');
+      const { getMiniAppSdk } = await import('../utils/getMiniAppSdk');
       const sdk = await getMiniAppSdk();
       const { message, signature } = await sdk.actions.signIn({ nonce });
 

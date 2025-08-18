@@ -13,7 +13,6 @@ import useMatchBreakpoints from "../../hooks/useMatchBreakpoints";
 import { AccountContext } from "../../context";
 import qs from "querystring";
 import Modal from "../../components/Layout/Modals/Modal";
-import { getMiniAppSdk } from "../../utils/getMiniAppSdk";
 
 const version = process.env.NEXT_PUBLIC_VERSION;
 
@@ -68,6 +67,7 @@ export default function Rewards() {
     if (userBalances.impact == 0) {
       (async () => {
         if (typeof window === 'undefined') return;
+        const { getMiniAppSdk } = await import('../../utils/getMiniAppSdk');
         const sdk = await getMiniAppSdk();
 
         const isMiniApp = await sdk.isInMiniApp();

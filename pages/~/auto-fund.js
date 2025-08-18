@@ -59,7 +59,6 @@ import { Logo, Degen } from "../assets";
 import qs from "querystring";
 // import ScoreDashboard from '../../components/Common/ScoreDashboard';
 import Modal from "../../components/Layout/Modals/Modal";
-import { getMiniAppSdk } from "../../utils/getMiniAppSdk";
 
 const version = process.env.NEXT_PUBLIC_VERSION;
 
@@ -414,6 +413,7 @@ export default function Autofund() {
     if (userBalances.impact == 0) {
       (async () => {
         if (typeof window === 'undefined') return;
+        const { getMiniAppSdk } = await import('../../utils/getMiniAppSdk');
         const sdk = await getMiniAppSdk();
 
         const isMiniApp = await sdk.isInMiniApp();

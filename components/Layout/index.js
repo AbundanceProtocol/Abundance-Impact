@@ -3,7 +3,6 @@ import Mobile from './Mobile';
 import LeftMenu from './LeftMenu';
 import CenterMenu from './CenterMenu';
 import RightMenu from './RightMenu';
-import { getMiniAppSdk } from '../../utils/getMiniAppSdk';
 import ShowActionNav from './ShowActionNav';
 import BottomMenu from './BottomMenu';
 import BottomBar from './BottomBar';
@@ -37,6 +36,7 @@ const Layout = ({ children }) => {
   useEffect(() => {
     (async () => {
       if (typeof window === 'undefined') return;
+      const { getMiniAppSdk } = await import('../../utils/getMiniAppSdk');
       const sdk = await getMiniAppSdk();
   
       const isMiniApp = await sdk.isInMiniApp()
@@ -86,6 +86,7 @@ const Layout = ({ children }) => {
     (async () => {
       if (adminTest) {
         if (typeof window === 'undefined') return;
+        const { getMiniAppSdk } = await import('../../utils/getMiniAppSdk');
         const sdk = await getMiniAppSdk();
     
         const isMiniApp = await sdk.isInMiniApp()

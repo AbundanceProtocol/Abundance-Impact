@@ -32,7 +32,6 @@ import Spinner from '../components/Common/Spinner';
 import NeynarSigninButton from '../components/Layout/Modals/Signin';
 import { formatNum } from '../utils/utils';
 import Homepage from './~/home';
-import { getMiniAppSdk } from '../utils/getMiniAppSdk';
 
 
 const version = process.env.NEXT_PUBLIC_VERSION
@@ -172,6 +171,7 @@ export default function Home() {
       try {
         console.log('Attempting to detect Mini App environment...');
         if (typeof window === 'undefined') return;
+        const { getMiniAppSdk } = await import('../utils/getMiniAppSdk');
         const sdk = await getMiniAppSdk();
         console.log('SDK imported successfully in main page');
         
@@ -263,6 +263,7 @@ export default function Home() {
       try {
         console.log('Re-checking Mini App environment after login...');
         if (typeof window === 'undefined') return;
+        const { getMiniAppSdk } = await import('../utils/getMiniAppSdk');
         const sdk = await getMiniAppSdk();
         const isApp = await sdk.isInMiniApp();
         console.log('Re-check isInMiniApp result:', isApp);
@@ -417,6 +418,7 @@ export default function Home() {
   async function notifsOn() {
     try {
       if (typeof window === 'undefined') return;
+      const { getMiniAppSdk } = await import('../utils/getMiniAppSdk');
       const sdk = await getMiniAppSdk();
       console.log('isMiniApp', isMiniApp, notifStatus.app, notifStatus.notifs)
       if (isMiniApp) {
