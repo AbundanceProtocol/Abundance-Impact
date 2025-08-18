@@ -740,7 +740,7 @@ export default function TipId({ id: ssrId }) {
     (async () => {
       try {
         if (typeof window === 'undefined') return;
-        const { getMiniAppSdk } = await import('../../../utils/getMiniAppSdk');
+        const { getMiniAppSdk } = await import('../../../../utils/getMiniAppSdk');
         const sdk = await getMiniAppSdk();
         // Best-effort ready; ignore errors if not in mini app
         await sdk.actions.ready();
