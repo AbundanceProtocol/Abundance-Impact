@@ -10,6 +10,15 @@ export default {
   env: {
     ENVIRONMENT: process.env.ENVIRONMENT,
   },
+  // Ensure ESM deps in node_modules can be consumed by the server
+  experimental: {
+    esmExternals: 'loose',
+  },
+  // Force bundling of the ESM SDK so Node doesn't try to require it as CJS
+  transpilePackages: [
+    '@farcaster/miniapp-sdk',
+    '@farcaster/miniapp-wagmi-connector',
+  ],
   // experimental features disabled to avoid Netlify build issues
   compiler: {
     emotion: false,
@@ -30,10 +39,13 @@ export default {
 
     // Prevent SSR from trying to load the browser-only Mini App SDK
     if (isServer) {
-      const stubPath = path.resolve(process.cwd(), "utils/miniapp-sdk-server-stub.js");
-      config.resolve.alias["@farcaster/miniapp-sdk"] = stubPath;
-      config.resolve.alias["@farcaster/miniapp-sdk/dist/index.js"] = stubPath;
-      config.resolve.alias["@farcaster/miniapp-sdk/dist/sdk.js"] = stubPath;
+      const sdkStubPath = path.resolve(process.cwd(), "utils/miniapp-sdk-server-stub.js");
+      config.resolve.alias["@farcaster/miniapp-sdk"] = sdkStubPath;
+      config.resolve.alias["@farcaster/miniapp-sdk/dist/index.js"] = sdkStubPath;
+      config.resolve.alias["@farcaster/miniapp-sdk/dist/sdk.js"] = sdkStubPath;
+
+      const wagmiConnectorStubPath = path.resolve(process.cwd(), "utils/miniapp-wagmi-connector-server-stub.js");
+      config.resolve.alias["@farcaster/miniapp-wagmi-connector"] = wagmiConnectorStubPath;
     }
     return config;
   },
