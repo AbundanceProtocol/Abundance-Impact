@@ -1,9 +1,6 @@
 [build]
   command = "next build"
   publish = ".next"
-  [build.environment]
-    NODE_VERSION = "18"
-    NETLIFY_NEXT_PLUGIN_NO_ESBUILD = "1"
 
 [functions]
   directory = "netlify/functions"
@@ -28,11 +25,6 @@
   to = "/.netlify/functions/webhook"
   status = 200
   force = true
-
-[[headers]]
-  for = "/~/multi-tip"
-  [headers.values]
-    Cache-Control = "public, max-age=3600"
 
 [functions."autofund-background"]
   schedule = "0 23 * * *"
