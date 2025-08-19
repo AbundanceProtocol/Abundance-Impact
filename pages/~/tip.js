@@ -2444,11 +2444,6 @@ export default function Tip() {
   );
 }
 
-// Force SSR to avoid SSG rendering hooks without provider context
-export async function getServerSideProps() {
-  return { props: {} };
-}
-
 // export async function getServerSideProps(context) {
 //   try {
 //     const { query } = context || {};
