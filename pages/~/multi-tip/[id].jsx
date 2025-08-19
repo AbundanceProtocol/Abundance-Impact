@@ -2,7 +2,7 @@ import qs from "querystring";
 import Head from "next/head";
 import { useRouter } from "next/router";
 
-export default function MultiTip({ id }) {
+export default function MultiTip() {
   const router = useRouter();
   const { id } = router.query || {};
 
