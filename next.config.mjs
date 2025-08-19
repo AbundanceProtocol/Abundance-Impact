@@ -10,9 +10,9 @@ export default {
   env: {
     ENVIRONMENT: process.env.ENVIRONMENT,
   },
-  // experimental features disabled to avoid Netlify build issues
+  // Disable Emotion compiler on server; we stub Emotion during SSR
   compiler: {
-    emotion: true,
+    emotion: false,
   },
   webpack: (config, { isServer }) => {
     // Add dotenv-webpack plugin to the webpack configuration
@@ -24,6 +24,12 @@ export default {
       config.resolve.alias["@farcaster/miniapp-sdk"] = stubPath;
       config.resolve.alias["@farcaster/miniapp-sdk/dist/index.js"] = stubPath;
       config.resolve.alias["@farcaster/miniapp-sdk/dist/sdk.js"] = stubPath;
+
+      // Stub Emotion on server to avoid react_shared_subset hooks
+      const emotionStub = path.resolve(process.cwd(), "utils/emotion-server-stub.js");
+      config.resolve.alias["@emotion/react"] = emotionStub;
+      config.resolve.alias["@emotion/react/jsx-runtime"] = emotionStub;
+      config.resolve.alias["@emotion/use-insertion-effect-with-fallbacks"] = emotionStub;
     }
     return config;
   },
