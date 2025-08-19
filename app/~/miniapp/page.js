@@ -1,5 +1,4 @@
 import qs from "querystring";
-import ClientPage from "./ClientPage";
 
 export const revalidate = 3600;
 export const dynamic = 'force-static';
@@ -41,5 +40,10 @@ export async function generateMetadata({ searchParams }) {
 }
 
 export default function MiniappPage({ searchParams }) {
-  return <ClientPage searchParams={searchParams} />;
+  return (
+    <div>
+      <h1>Impact 2.0 Miniapp</h1>
+      <p>id param: {searchParams.id}</p>
+    </div>
+  );
 }
