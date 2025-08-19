@@ -12,17 +12,7 @@ export default {
   },
   // experimental features disabled to avoid Netlify build issues
   compiler: {
-    emotion: false,
-  },
-  async headers() {
-    return [
-      {
-        source: '/~/multi-tip',
-        headers: [
-          { key: 'Cache-Control', value: 'public, max-age=3600' },
-        ],
-      },
-    ];
+    emotion: true,
   },
   webpack: (config, { isServer }) => {
     // Add dotenv-webpack plugin to the webpack configuration
