@@ -2442,6 +2442,10 @@ export default function Tip() {
   );
 }
 
+export async function getServerSideProps() {
+  return { props: {} };
+}
+
 // export async function getServerSideProps(context) {
 //   try {
 //     const { query } = context || {};
