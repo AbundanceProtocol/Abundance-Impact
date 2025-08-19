@@ -4,7 +4,7 @@ import Head from "next/head";
 export async function getServerSideProps(context) {
   const { id } = context.query || {};
   const frameContent = {
-    version: "1",
+    version: "next",
     imageUrl: `https://impact.abundance.id/api/frames/tip/onchain-tip-v1?${qs.stringify({ id })}`,
     button: {
       title: "Impact Multi-Tip",
