@@ -1263,11 +1263,11 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
 
   return (
     <AccountContext.Provider value={contextValue}>
-      <QueryClientProvider client={queryClient}>
-        <WagmiProvider config={wagmiConfig} initialState={initialState}>
+      <WagmiProvider config={wagmiConfig} initialState={initialState}>
+        <QueryClientProvider client={queryClient}>
           {children}
-        </WagmiProvider>
-      </QueryClientProvider>
+        </QueryClientProvider>
+      </WagmiProvider>
     </AccountContext.Provider>
   );
 };
