@@ -3,6 +3,7 @@
 import Dotenv from 'dotenv-webpack';
 import dotenv from 'dotenv';
 import path from 'path';
+import webpack from 'webpack';
 dotenv.config();
 
 export default {
@@ -34,6 +35,13 @@ export default {
       config.resolve.alias["@farcaster/miniapp-sdk"] = stubPath;
       config.resolve.alias["@farcaster/miniapp-sdk/dist/index.js"] = stubPath;
       config.resolve.alias["@farcaster/miniapp-sdk/dist/sdk.js"] = stubPath;
+      // Hard swap the SDK with the stub at module resolution time on the server
+      config.plugins.push(
+        new webpack.NormalModuleReplacementPlugin(
+          /^@farcaster\/miniapp-sdk(\/.*)?$/,
+          stubPath
+        )
+      );
     }
     return config;
   },
