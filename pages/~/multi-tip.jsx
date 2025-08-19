@@ -1,11 +1,7 @@
 import qs from "querystring";
 import Head from "next/head";
-import { useRouter } from "next/router";
 
-export default function MultiTip() {
-  const router = useRouter();
-  const { id } = router.query || {};
-
+export default function MultiTip({ id }) {
   const frameContent = {
     version: "next",
     imageUrl: `https://impact.abundance.id/api/frames/tip/onchain-tip-v1?${qs.stringify(id ? { id } : {})}`,
@@ -38,4 +34,13 @@ export default function MultiTip() {
       </div>
     </>
   );
+}
+
+export async function getServerSideProps(context) {
+  const { id } = context.query || {};
+  return {
+    props: {
+      id: id || null,
+    },
+  };
 }
