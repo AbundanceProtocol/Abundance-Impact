@@ -29,6 +29,11 @@ export default function App({ Component, pageProps }) {
   }
 
 
+  // Allow meta-only pages to opt-out of global providers for SSR safety
+  if (Component && Component.disableProviders) {
+    return <Component {...pageProps} />
+  }
+
   return (
     <AccountProvider initialAccount={initialAccount} ref1={ref1} >
       <Layout>
