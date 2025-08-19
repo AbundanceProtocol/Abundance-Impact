@@ -139,7 +139,8 @@ function WalletDemo() {
     const testSDK = async () => {
       try {
         if (typeof window === 'undefined') return;
-        const { sdk } = await import('@farcaster/miniapp-sdk');
+        const { getMiniAppSdk } = await import('../../utils/getMiniAppSdk');
+        const sdk = await getMiniAppSdk();
         const inMiniApp = await sdk.isInMiniApp();
         
         if (inMiniApp) {
@@ -440,7 +441,8 @@ export default function Tip() {
     if (userBalances.impact == 0) {
       (async () => {
         if (typeof window === 'undefined') return;
-        const { sdk } = await import("@farcaster/miniapp-sdk");
+        const { getMiniAppSdk } = await import("../../utils/getMiniAppSdk");
+        const sdk = await getMiniAppSdk();
 
         const isMiniApp = await sdk.isInMiniApp();
         setIsMiniApp(isMiniApp);
@@ -696,13 +698,14 @@ export default function Tip() {
   // Share handler for OnchainTip
   const shareOnchainTip = async () => {
     try {
-      const url = `https://impact.abundance.id/~/tip3?id=${shareModal?.id || null}`;
+      const url = `https://impact.abundance.id/~/tip/${shareModal?.id || null}`;
       const text = `I multi-tipped ${formatShareAmount(shareModal?.amount)} $${shareModal?.token} to ${shareModal?.receivers} creators with /impact!`;
       const encodedText = encodeURIComponent(text);
       const encodedUrl = encodeURIComponent(url);
       const shareLink = `https://farcaster.xyz/~/compose?text=${encodedText}&embeds[]=${[encodedUrl]}`;
       if (typeof window === 'undefined') return;
-      const { sdk } = await import('@farcaster/miniapp-sdk');
+      const { getMiniAppSdk } = await import('../../utils/getMiniAppSdk');
+      const sdk = await getMiniAppSdk();
       const inMiniApp = await sdk.isInMiniApp();
       if (!inMiniApp) {
         window.open(shareLink, '_blank');
@@ -737,7 +740,8 @@ export default function Tip() {
     (async () => {
       try {
         if (typeof window === 'undefined') return;
-        const { sdk } = await import('@farcaster/miniapp-sdk');
+        const { getMiniAppSdk } = await import('../../utils/getMiniAppSdk');
+        const sdk = await getMiniAppSdk();
         // Best-effort ready; ignore errors if not in mini app
         await sdk.actions.ready();
       } catch (_) {}

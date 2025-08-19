@@ -36,7 +36,8 @@ const Layout = ({ children }) => {
   useEffect(() => {
     (async () => {
       if (typeof window === 'undefined') return;
-      const { sdk } = await import('@farcaster/miniapp-sdk');
+      const { getMiniAppSdk } = await import('../../utils/getMiniAppSdk');
+      const sdk = await getMiniAppSdk();
   
       const isMiniApp = await sdk.isInMiniApp()
       setIsMiniApp(isMiniApp)
@@ -85,7 +86,8 @@ const Layout = ({ children }) => {
     (async () => {
       if (adminTest) {
         if (typeof window === 'undefined') return;
-        const { sdk } = await import('@farcaster/miniapp-sdk');
+        const { getMiniAppSdk } = await import('../../utils/getMiniAppSdk');
+        const sdk = await getMiniAppSdk();
     
         const isMiniApp = await sdk.isInMiniApp()
         setIsMiniApp(isMiniApp)

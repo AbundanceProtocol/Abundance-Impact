@@ -25,10 +25,10 @@ const version = process.env.NEXT_PUBLIC_VERSION;
 
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 
-export default function CuratorFid({fid}) {
+export default function CuratorFid() {
   const router = useRouter();
   const [ref, inView] = useInView()
-  const { username, app, userFid, pass } = router.query
+  const { username, app, userFid, pass, fid } = router.query
   const [user, setUser] = useState(null)
   const { LoginPopup, LogoutPopup, isLogged, setPoints, setIsLogged, setFid, miniApp, setMiniApp, autotipping, setAutotipping, adminTest, isMiniApp } = useContext(AccountContext)
   const ref1 = useRef(null)
@@ -936,16 +936,16 @@ export default function CuratorFid({fid}) {
 
 
 
-export async function getServerSideProps(context) {
-  try {
-    const { params } = context || {};
-    const { fid } = params || {};
-    return {
-      props: {
-        fid: fid || null,
-      },
-    };
-  } catch (_) {
-    return { props: { fid: null } };
-  }
-}
+// export async function getServerSideProps(context) {
+//   try {
+//     const { params } = context || {};
+//     const { fid } = params || {};
+//     return {
+//       props: {
+//         fid: fid || null,
+//       },
+//     };
+//   } catch (_) {
+//     return { props: { fid: null } };
+//   }
+// }
