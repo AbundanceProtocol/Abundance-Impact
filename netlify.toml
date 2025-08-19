@@ -2,7 +2,7 @@
   command = "next build"
   publish = ".next"
   [build.environment]
-    NODE_VERSION = "20.18.0"
+    NODE_VERSION = "18"
     NETLIFY_NEXT_PLUGIN_NO_ESBUILD = "1"
 
 [functions]
