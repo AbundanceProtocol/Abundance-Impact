@@ -1,5 +1,7 @@
 import '../styles/index.css'
 import React, { useEffect, useState, useRef } from 'react'
+import { AccountProvider } from '../context'
+import Layout from '../components/Layout'
 
 export default function App({ Component, pageProps }) {
   const initialAccount = { points: '$IMPACT', qdau: 0, impact: 0 }
@@ -29,10 +31,6 @@ export default function App({ Component, pageProps }) {
   if (Component?.disableProviders) {
     return <Component {...pageProps} />
   }
-
-  // Lazy-load providers after the opt-out check
-  const { AccountProvider } = require('../context')
-  const Layout = require('../components/Layout').default
 
   return (
     <AccountProvider initialAccount={initialAccount} ref1={ref1}>
