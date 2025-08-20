@@ -6,14 +6,13 @@ import Soon from './Soon';
 import Working from './Working';
 import Locked from './Locked';
 import useMatchBreakpoints from '../../../../hooks/useMatchBreakpoints';
-import { FaPen } from 'react-icons/fa';
 
 const LeftNav = ({buttonName}) => {
   const { isLogged, showActions } = useContext(AccountContext);
   const { isMobile, isTablet } = useMatchBreakpoints();
   const router = useRouter()
   let { account, icon, link, working } = button[buttonName]
-  const TopIcon = icon || FaPen
+  const TopIcon = icon
   let menuState = "nav-link"
   let accountState = !account || (isLogged && account)
   if ((router.route === link) && accountState || (buttonName == 'Cast Actions' && showActions)) {
