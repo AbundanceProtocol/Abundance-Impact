@@ -1,21 +1,6 @@
 import { http, createConfig } from 'wagmi'
 import { base, celo, optimism, arbitrum } from 'wagmi/chains'
-
-// Load real connector on client, stub on server
-let farcasterMiniAppFactory = null
-try {
-  if (typeof window !== 'undefined') {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { farcasterMiniApp } = require('@farcaster/miniapp-wagmi-connector')
-    farcasterMiniAppFactory = farcasterMiniApp
-  } else {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { farcasterMiniApp } = require('../utils/miniapp-wagmi-connector-server-stub.js')
-    farcasterMiniAppFactory = farcasterMiniApp
-  }
-} catch (_) {
-  farcasterMiniAppFactory = null
-}
+import { farcasterMiniApp } from '@farcaster/miniapp-wagmi-connector'
 
 // Note: This config is for Wagmi v2
 // Make sure you have the correct version of @farcaster/miniapp-wagmi-connector
@@ -29,5 +14,7 @@ export const config = createConfig({
     [optimism.id]: http(),
     [arbitrum.id]: http(),
   },
-  connectors: farcasterMiniAppFactory ? [farcasterMiniAppFactory()] : []
+  connectors: [
+    farcasterMiniApp()
+  ]
 })
