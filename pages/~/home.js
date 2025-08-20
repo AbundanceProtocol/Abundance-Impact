@@ -148,9 +148,7 @@ export default function Homepage({ test }) {
 
   useEffect(() => {
     (async () => {
-      if (typeof window === 'undefined') return;
-      const { getMiniAppSdk } = await import("../../utils/getMiniAppSdk");
-      const sdk = await getMiniAppSdk();
+      const { sdk } = await import('@farcaster/miniapp-sdk')
       const isApp = await sdk.isInMiniApp();
       setIsMiniApp(isApp);
 
@@ -216,9 +214,7 @@ export default function Homepage({ test }) {
 
   useEffect(() => {
     (async () => {
-      if (typeof window === 'undefined') return;
-      const { getMiniAppSdk } = await import("../../utils/getMiniAppSdk");
-      const sdk = await getMiniAppSdk();
+      const { sdk } = await import('@farcaster/miniapp-sdk')
       const isApp = await sdk.isInMiniApp();
       setIsMiniApp(isApp);
     })();
@@ -366,9 +362,7 @@ export default function Homepage({ test }) {
 
   const shareCuration = async () => {
     if (fid) {
-      if (typeof window === 'undefined') return;
-      const { getMiniAppSdk } = await import("../../utils/getMiniAppSdk");
-      const sdk = await getMiniAppSdk();
+      const { sdk } = await import('@farcaster/miniapp-sdk')
       const isApp = await sdk.isInMiniApp();
   
       let shareUrl = `https://impact.abundance.id/~/curator/${fid}`
@@ -396,9 +390,7 @@ export default function Homepage({ test }) {
 
   async function notifsOn() {
     try {
-      if (typeof window === 'undefined') return;
-      const { getMiniAppSdk } = await import("../../utils/getMiniAppSdk");
-      const sdk = await getMiniAppSdk();
+      const { sdk } = await import('@farcaster/miniapp-sdk')
       console.log("isMiniApp", isMiniApp, notifStatus.app, notifStatus.notifs);
       if (isMiniApp) {
         if (notifStatus.app && !notifStatus.notifs) {

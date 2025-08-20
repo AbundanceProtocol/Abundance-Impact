@@ -412,9 +412,7 @@ export default function Autofund() {
   useEffect(() => {
     if (userBalances.impact == 0) {
       (async () => {
-        if (typeof window === 'undefined') return;
-        const { getMiniAppSdk } = await import('../../utils/getMiniAppSdk');
-        const sdk = await getMiniAppSdk();
+        const { sdk } = await import('@farcaster/miniapp-sdk')
 
         const isMiniApp = await sdk.isInMiniApp();
         setIsMiniApp(isMiniApp);

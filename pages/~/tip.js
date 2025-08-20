@@ -138,9 +138,7 @@ function WalletDemo() {
   useEffect(() => {
     const testSDK = async () => {
       try {
-        if (typeof window === 'undefined') return;
-        const { getMiniAppSdk } = await import('../../utils/getMiniAppSdk');
-        const sdk = await getMiniAppSdk();
+        const { sdk } = await import('@farcaster/miniapp-sdk')
         const inMiniApp = await sdk.isInMiniApp();
         
         if (inMiniApp) {
@@ -440,9 +438,7 @@ export default function Tip() {
   useEffect(() => {
     if (userBalances.impact == 0) {
       (async () => {
-        if (typeof window === 'undefined') return;
-        const { getMiniAppSdk } = await import("../../utils/getMiniAppSdk");
-        const sdk = await getMiniAppSdk();
+        const { sdk } = await import('@farcaster/miniapp-sdk')
 
         const isMiniApp = await sdk.isInMiniApp();
         setIsMiniApp(isMiniApp);
@@ -703,9 +699,7 @@ export default function Tip() {
       const encodedText = encodeURIComponent(text);
       const encodedUrl = encodeURIComponent(url);
       const shareLink = `https://farcaster.xyz/~/compose?text=${encodedText}&embeds[]=${[encodedUrl]}`;
-      if (typeof window === 'undefined') return;
-      const { getMiniAppSdk } = await import('../../utils/getMiniAppSdk');
-      const sdk = await getMiniAppSdk();
+      const { sdk } = await import('@farcaster/miniapp-sdk')
       const inMiniApp = await sdk.isInMiniApp();
       if (!inMiniApp) {
         window.open(shareLink, '_blank');
@@ -739,9 +733,7 @@ export default function Tip() {
   useEffect(() => {
     (async () => {
       try {
-        if (typeof window === 'undefined') return;
-        const { getMiniAppSdk } = await import('../../utils/getMiniAppSdk');
-        const sdk = await getMiniAppSdk();
+        const { sdk } = await import('@farcaster/miniapp-sdk')
         // Best-effort ready; ignore errors if not in mini app
         await sdk.actions.ready();
       } catch (_) {}
