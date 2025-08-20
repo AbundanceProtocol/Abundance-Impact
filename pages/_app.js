@@ -1,5 +1,6 @@
 import '../styles/index.css'
 import React, { useEffect, useState, useRef } from 'react'
+import NextApp from 'next/app'
 
 export default function App({ Component, pageProps }) {
   const initialAccount = { points: '$IMPACT', qdau: 0, impact: 0 }
@@ -41,4 +42,10 @@ export default function App({ Component, pageProps }) {
       </Layout>
     </AccountProvider>
   )
+}
+
+// Force SSR for all pages to avoid static prerender of client-only components
+App.getInitialProps = async (appContext) => {
+  const appProps = await NextApp.getInitialProps(appContext)
+  return { ...appProps }
 }
