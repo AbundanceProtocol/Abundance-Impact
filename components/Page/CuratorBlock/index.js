@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { ActiveUser } from '../../../pages/assets'
+import { ActiveUser } from '../../assets'
 import { formatNum } from "../../../utils/utils";
 import { AccountContext } from "../../../context";
 import { useRouter } from 'next/router';
@@ -108,9 +108,7 @@ const CuratorBlock = ({ user, textMax, show, type, feedMax }) => {
     //   pathname: `/~/ecosystems/abundance/curators/${user?.username}/multi-tip`,
     //   query: { userFid: user?.fid, name: user?.username }
     // });
-    if (typeof window === 'undefined') return;
-    const { getMiniAppSdk } = await import("../../../utils/getMiniAppSdk");
-    const sdk = await getMiniAppSdk();
+    const { sdk } = await import('@farcaster/miniapp-sdk')
     const isApp = await sdk.isInMiniApp();
 
     let shareUrl = `https://impact.abundance.id/~/curator/${user?.fid}`

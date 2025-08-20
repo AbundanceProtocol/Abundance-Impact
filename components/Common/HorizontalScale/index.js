@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { GiMeat, GiTwoCoins } from "react-icons/gi";
-import { Degen } from '../../../pages/assets';
+import { Degen } from '../../assets';
 import { formatNum } from '../../../utils/utils';
 
 const HorizontalScale = ({ initValue, setTipPercent, tokenData, setTokenData, availableTokens, tokensSelected, setInitValue, type }) => {

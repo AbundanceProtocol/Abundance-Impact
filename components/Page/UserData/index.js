@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import useStore from "../../../utils/store";
 import { AccountContext } from "../../../context";
-import { ActiveUser, Degen } from '../../../pages/assets'
+import { ActiveUser, Degen } from '../../assets'
 import { FaPowerOff, FaRegStar } from "react-icons/fa";
 import { HiRefresh } from "react-icons/hi";
 import { IoDiamondOutline as Diamond } from "react-icons/io5";

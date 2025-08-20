@@ -91,9 +91,7 @@ export default function Settings({test}) {
 
   useEffect(() => {
     (async () => {
-      if (typeof window === 'undefined') return;
-      const { getMiniAppSdk } = await import('../../utils/getMiniAppSdk');
-      const sdk = await getMiniAppSdk();
+      const { sdk } = await import('@farcaster/miniapp-sdk')
       const isApp = await sdk.isInMiniApp()
       setIsMiniApp(isApp)
 
@@ -162,9 +160,7 @@ export default function Settings({test}) {
 
   useEffect(() => {
     (async () => {
-      if (typeof window === 'undefined') return;
-      const { getMiniAppSdk } = await import('../../utils/getMiniAppSdk');
-      const sdk = await getMiniAppSdk();
+      const { sdk } = await import('@farcaster/miniapp-sdk')
       const isApp = await sdk.isInMiniApp()
       setIsMiniApp(isApp)
     })();
@@ -419,9 +415,7 @@ export default function Settings({test}) {
   async function notifsOn() {
     try {
       if (isMiniApp) {
-        if (typeof window === 'undefined') return;
-        const { getMiniAppSdk } = await import('../../utils/getMiniAppSdk');
-        const sdk = await getMiniAppSdk();
+        const { sdk } = await import('@farcaster/miniapp-sdk')
         const userProfile = await sdk.context
 
         console.log('isMiniApp', isMiniApp, notifStatus.app, notifStatus.notifs, userProfile.client.added, userProfile.client.notificationDetails)

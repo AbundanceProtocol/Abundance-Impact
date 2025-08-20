@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import useStore from '../../../../../utils/store';
-import { button } from '../../../../../pages/assets/button';
+import { button } from '../../../../assets/button';
 import useMatchBreakpoints from '../../../../../hooks/useMatchBreakpoints';
 
 const TopNav = ({ buttonName }) => {

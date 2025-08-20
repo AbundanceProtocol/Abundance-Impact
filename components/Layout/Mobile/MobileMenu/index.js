@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 // import NavItem from './NavItem';
 import TopNav from './TopNav';
 import Box from '@mui/material/Box';
-import { button } from '../../../../pages/assets/button';
+import { button } from '../../../assets/button';
 import styled from '@emotion/styled'
 
 // const SubCat = ({ navMenu, menuHover, setMobileMenuOpen, linkTarget, setLinkTarget }) => {

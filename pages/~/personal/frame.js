@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import { useRef, useEffect, useState, useContext } from 'react';
 import axios from 'axios';
 import { FaStar, FaExternalLinkAlt } from "react-icons/fa"
-import { Like, LikeOn, Recast, Message, Kebab, ActiveUser } from '../../assets'
+import { Like, LikeOn, Recast, Message, Kebab, ActiveUser } from '../../../components/assets'
 import { timePassed } from '../../../utils/utils';
 import { IoDiamondOutline as Diamond } from "react-icons/io5";
 import { ImArrowUp, ImArrowDown  } from "react-icons/im";

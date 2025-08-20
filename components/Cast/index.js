@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/router';
 import useStore from '../../utils/store';
 import { AccountContext } from '../../context';
-import { Like, LikeOn, Recast, Message, Kebab, ActiveUser } from '../../pages/assets'
+import { Like, LikeOn, Recast, Message, Kebab, ActiveUser } from '../assets'
 import { FaSearch, FaLock, FaRegStar, FaStar, FaArrowUp, FaArrowDown } from "react-icons/fa"
 import { BiSolidDownArrow as ArrowDown } from "react-icons/bi";
 import axios from 'axios';
@@ -49,9 +49,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
   
   async function viewCast(castHash) {
     try {
-      if (typeof window === 'undefined') return;
-      const { getMiniAppSdk } = await import('../../utils/getMiniAppSdk');
-      const sdk = await getMiniAppSdk();
+      const { sdk } = await import('@farcaster/miniapp-sdk')
       await sdk.haptics.impactOccurred('light')
       await sdk.actions.viewCast({ 
         hash: castHash,

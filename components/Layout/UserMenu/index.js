@@ -4,7 +4,7 @@ import useMatchBreakpoints from "../../../hooks/useMatchBreakpoints";
 import { useRouter } from "next/router";
 import { AccountContext } from "../../../context";
 import { FaStar } from "react-icons/fa";
-import { Logo } from "../../../pages/assets";
+import { Logo } from "../../assets";
 import {
   BsTrophy,
   BsGear,
@@ -49,9 +49,7 @@ const UserMenu = () => {
 
   async function getUserInfo() {
     try {
-      if (typeof window === 'undefined') return;
-      const { getMiniAppSdk } = await import("../../../utils/getMiniAppSdk");
-      const sdk = await getMiniAppSdk();
+      const { sdk } = await import('@farcaster/miniapp-sdk')
 
       const isMiniApp = await sdk.isInMiniApp();
       console.log("isMiniApp", isMiniApp);

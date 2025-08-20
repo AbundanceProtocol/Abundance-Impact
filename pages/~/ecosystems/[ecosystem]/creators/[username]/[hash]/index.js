@@ -119,9 +119,7 @@ export default function ProfilePage() {
 
   async function viewCast(castHash) {
     try {
-      if (typeof window === 'undefined') return;
-      const { getMiniAppSdk } = await import('../../../../../../../utils/getMiniAppSdk');
-      const sdk = await getMiniAppSdk();
+      const { sdk } = await import('@farcaster/miniapp-sdk')
 
       await sdk.haptics.impactOccurred('light')
       await sdk.actions.viewCast({ 

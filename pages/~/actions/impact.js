@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import { useRef, useEffect, useState } from 'react';
 import axios from 'axios';
 import useStore from '../../../utils/store';
-import { Like, Recast, Message, Kebab, ActiveUser } from '../../assets'
+import { Like, Recast, Message, Kebab, ActiveUser } from '../../../components/assets'
 import { FaLock, FaRegStar } from "react-icons/fa"
 import { BsPatchCheckFill as Verified } from "react-icons/bs";
 import { MdError as Rejected } from "react-icons/md";
