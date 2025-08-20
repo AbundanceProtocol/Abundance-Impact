@@ -2,39 +2,6 @@ import { createContext, useState, useEffect } from "react";
 import axios from "axios";
 import useStore from "./utils/store";
 import { useRouter } from 'next/router';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-
-import { cookieToInitialState, WagmiProvider } from 'wagmi';
-import { cookieStorage, createStorage } from '@wagmi/core'
-import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
-import { mainnet, arbitrum, base } from '@reown/appkit/networks'
-import { config as wagmiConfig } from './config/wagmi'
-
-const queryClient = new QueryClient();
-const projectId = process.env.NEXT_PUBLIC_WAGMI_KEY || 'default-project-id'
-
-// Only warn in development
-if (!process.env.NEXT_PUBLIC_WAGMI_KEY) {
-  console.warn('NEXT_PUBLIC_WAGMI_KEY is not defined. Using default project ID.');
-}
-
-const networks = [mainnet, arbitrum, base]
-
-let wagmiAdapter;
-try {
-  wagmiAdapter = new WagmiAdapter({
-    storage: createStorage({
-      storage: cookieStorage
-    }),
-    ssr: true,
-    projectId,
-    networks,
-  })
-} catch (error) {
-  console.warn('Failed to initialize WagmiAdapter:', error.message);
-  // Create a minimal fallback adapter
-  wagmiAdapter = null;
-}
 
 
 
@@ -1212,8 +1179,6 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
     }
   };
 
-  const initialState = cookieToInitialState(wagmiConfig, cookies);
-
   const contextValue = {
     ...initialAccount,
     ref1,
@@ -1263,11 +1228,7 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
 
   return (
     <AccountContext.Provider value={contextValue}>
-      <WagmiProvider config={wagmiConfig} initialState={initialState}>
-        <QueryClientProvider client={queryClient}>
-          {children}
-        </QueryClientProvider>
-      </WagmiProvider>
+      {children}
     </AccountContext.Provider>
   );
 };
