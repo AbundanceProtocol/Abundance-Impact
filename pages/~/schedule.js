@@ -6,7 +6,7 @@ import useMatchBreakpoints from '../../hooks/useMatchBreakpoints'
 import useStore from '../../utils/store'
 import axios from 'axios';
 import { FaSearch, FaLock, FaRegStar, FaRegClock, FaRegTrashAlt, FaPen, FaPause } from "react-icons/fa"
-import { useRouter } from 'next/router';
+import { useAppRouter } from '../../hooks/useAppRouter';
 import { formatNum } from '../../utils/utils';
 import { IoShuffleOutline as Shuffle, IoPeople, IoPeopleOutline } from "react-icons/io5";
 import { BsClock } from "react-icons/bs";
@@ -35,7 +35,7 @@ export default function Schedule() {
   const [userQuery, setUserQuery] = useState(initialQuery)
   // const [oldQuery, setOldQuery] = useState(null)
   const [showPopup, setShowPopup] = useState({open: false, url: null})
-  const router = useRouter()
+  const router = useAppRouter()
   const queryOptions = {
     tags: [
       {

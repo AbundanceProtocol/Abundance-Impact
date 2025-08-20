@@ -3,7 +3,7 @@ import Link from "next/link";
 import { button } from "../../assets/button";
 import BottomNav from "./BottomNav";
 import useMatchBreakpoints from "../../../hooks/useMatchBreakpoints";
-import { useRouter } from "next/router";
+import { useAppRouter } from "../../../hooks/useAppRouter";
 import { AccountContext } from "../../../context";
 import {
   BsShieldCheck,
@@ -29,13 +29,18 @@ const version = process.env.NEXT_PUBLIC_VERSION;
 const BottomBar = () => {
   const ref1 = useRef(null);
   const { isMobile } = useMatchBreakpoints();
-  const router = useRouter();
+  const router = useAppRouter();
   const { isLogged, setPanelTarget, setPanelOpen, adminTest } = useContext(AccountContext);
 
   const openSwipeable = target => {
     setPanelTarget(target);
     setPanelOpen(true);
   };
+
+  // Safety check for router.route
+  if (!router.route) {
+    return null;
+  }
 
   return isMobile && !(version == "1.0" && !adminTest && !isLogged && router.route == "/") ? (
     <>

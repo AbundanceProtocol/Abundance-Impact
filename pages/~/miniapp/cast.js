@@ -1,4 +1,4 @@
-import { useRouter } from 'next/router';
+import { useAppRouter } from '../../../hooks/useAppRouter';
 import { useRef, useContext, useEffect, useState } from 'react';
 import { useInView } from 'react-intersection-observer'
 import { AccountContext } from '../../../context';
@@ -15,7 +15,7 @@ import ImpactScale from '../../../components/Common/ImpactScale';
 export default function SharedCast() {
   const searchParams = useSearchParams();
   
-  const router = useRouter();
+  const router = useAppRouter();
   const [ref, inView] = useInView()
   // const { castHash, castFid, viewerFid } = router.query
   // const [user, setUser] = useState(null)

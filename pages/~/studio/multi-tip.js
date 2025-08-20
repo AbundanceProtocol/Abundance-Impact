@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { AccountContext } from '../../../context'
 import useMatchBreakpoints from '../../../hooks/useMatchBreakpoints'
 import axios from 'axios';
-import { useRouter } from 'next/router';
+import { useAppRouter } from '../../../hooks/useAppRouter';
 import Button from '../../../components/Ecosystem/Button';
 import Description from '../../../components/Ecosystem/Description';
 import Dropdown from '../../../components/Ecosystem/Dropdown';
@@ -23,7 +23,7 @@ export default function MultiTip() {
   const [screenHeight, setScreenHeight] = useState(undefined)
   const [textMax, setTextMax] = useState('562px')
   const [feedMax, setFeedMax ] = useState('620px')
-  const router = useRouter()
+  const router = useAppRouter()
   const [modal, setModal] = useState({on: false, success: false, text: ''})
   const initialSubmit = {pass: false, target: null}
   const [submitCheck, setSubmitCheck] = useState(initialSubmit)

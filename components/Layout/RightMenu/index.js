@@ -1,10 +1,10 @@
 import React from 'react';
 import Leaderboard from './Leaderboard';
 import Ecoboard from './Ecoboard';
-import { useRouter } from 'next/router';
+import { useAppRouter } from '../../../hooks/useAppRouter';
 
 const RightMenu = () => {
-  const router = useRouter()
+  const router = useAppRouter()
 
   return (
     router.route !== '/~/studio/multi-tip-compose' && (<div className='right-nav-text' style={{width: '400px'}}>

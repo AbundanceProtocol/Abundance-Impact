@@ -4,12 +4,12 @@ import HomeButton from '../HomeButton';
 import LeftNav from './LeftNav';
 import CastActionNav from '../CastActionNav'
 import { AccountContext } from '../../../context';
-import { useRouter } from 'next/router';
+import { useAppRouter } from '../../../hooks/useAppRouter';
 import useMatchBreakpoints from '../../../hooks/useMatchBreakpoints';
 
 const LeftMenu = () => {
   const { isLogged } = useContext(AccountContext)
-  const router = useRouter()
+  const router = useAppRouter()
   const { isMobile } = useMatchBreakpoints();
 
   return (

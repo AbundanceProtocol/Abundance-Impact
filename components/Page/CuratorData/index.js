@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { ActiveUser } from '../../assets'
 import { formatNum } from "../../../utils/utils";
 import { AccountContext } from "../../../context";
-import { useRouter } from 'next/router';
+import { useAppRouter } from '../../../hooks/useAppRouter';
 import { FaPowerOff, FaRegStar } from "react-icons/fa";
 import useMatchBreakpoints from "../../../hooks/useMatchBreakpoints";
 import axios from "axios";
@@ -11,7 +11,7 @@ const CuratorData = ({ user, textMax, show, type }) => {
   const { points, fid, autotipping, setAutotipping, isLogged, LoginPopup, LogoutPopup } = useContext(AccountContext)
   const [sched, setSched] = useState({autotip: false})
   const [curators, setCurators] = useState(null)
-  const router = useRouter()
+  const router = useAppRouter()
   const { isMobile } = useMatchBreakpoints();
 
   useEffect(() => {

@@ -2,11 +2,16 @@ import React from 'react';
 import { PiSquaresFourLight as Actions } from "react-icons/pi";
 import CastActions from './CastActions';
 import useMatchBreakpoints from '../../../hooks/useMatchBreakpoints';
-import { useRouter } from 'next/router';
+import { useAppRouter } from '../../../hooks/useAppRouter';
 
 const CastActionNav = () => {
   const { isMobile, isTablet } = useMatchBreakpoints();
-  const router = useRouter()
+  const router = useAppRouter()
+
+  // Safety check for router.route
+  if (!router.route) {
+    return null;
+  }
 
   return (
     (router.route == '/~/ecosystems/[ecosystem]') && (<div className='left-container' style={{margin: '20px 23px 0 0', maxWidth: '237px'}}>

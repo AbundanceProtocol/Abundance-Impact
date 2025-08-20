@@ -2,7 +2,7 @@ import React, { useState, useContext, useEffect } from 'react';
 import Curators from '../../RightMenu/Leaderboard/Curators';
 import axios from 'axios';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
+import { useAppRouter } from '../../../../hooks/useAppRouter';
 import { AccountContext } from '../../../../context';
 import useMatchBreakpoints from '../../../../hooks/useMatchBreakpoints';
 
@@ -10,7 +10,7 @@ const CuratorNav = () => {
   const { fid, points, ecoData, autotipping, setAutotipping, isLogged, LoginPopup } = useContext(AccountContext);
   const [topCurators, setTopCurators] = useState([])
   const [sched, setSched] = useState({points: false, autotip: false})
-  const router = useRouter()
+  const router = useAppRouter()
   const { isMobile } = useMatchBreakpoints();
 
 

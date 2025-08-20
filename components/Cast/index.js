@@ -1,6 +1,6 @@
 import React, { useContext, useRef, useEffect, useState } from 'react';
 import Link from 'next/link'
-import { useRouter } from 'next/router';
+import { useAppRouter } from '../../hooks/useAppRouter';
 import useStore from '../../utils/store';
 import { AccountContext } from '../../context';
 import { Like, LikeOn, Recast, Message, Kebab, ActiveUser } from '../assets'
@@ -19,7 +19,7 @@ import useMatchBreakpoints from '../../hooks/useMatchBreakpoints';
 
 export default function Cast({ cast, index, updateCast, openImagePopup, ecosystem, handle, self, app }) {
   const store = useStore()
-  const router = useRouter();
+  const router = useAppRouter();
   const { isMobile } = useMatchBreakpoints();
   const [screenWidth, setScreenWidth] = useState(undefined)
   const { LoginPopup, fid, userBalances, setUserBalances, isLogged, isMiniApp } = useContext(AccountContext)

@@ -1,10 +1,10 @@
 import React, { useContext } from 'react';
-import { useRouter } from 'next/router';
+import { useAppRouter } from '../../../../hooks/useAppRouter';
 import { AccountContext } from '../../../../context';
 import useStore from '../../../../utils/store';
 
 const LogoutModal = () => {
-  const router = useRouter();
+  const router = useAppRouter();
   const store = useStore()
 
   const { showLogout, setShowLogout, setFid, setIsLogged, setUserInfo } = useContext(AccountContext);

@@ -1,4 +1,4 @@
-import { useRouter } from 'next/router';
+import { useAppRouter } from '../../../hooks/useAppRouter';
 import { useEffect, useState, useRef, useContext } from 'react';
 import { AccountContext } from '../../../context';
 import projectData from '../../../data/dummyProject.json'
@@ -14,7 +14,7 @@ import { shortenAddress, timePassed, formatNum } from '../../../utils/utils';
 import TopPanelBtn from '../../../components/Panels/TopPanelBtn'
 
 export default function ProjectPage() {
-  const router = useRouter();
+  const router = useAppRouter();
   const ref = useRef(null)
   const [textMax, setTextMax] = useState('495px')
   const store = useStore()

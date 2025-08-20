@@ -9,12 +9,12 @@ import EcosystemNav from '../EcosystemNav'
 import HomeButton from '../HomeButton';
 import MobileMenu from './MobileMenu';
 import useMatchBreakpoints from '../../../hooks/useMatchBreakpoints';
-import { useRouter } from 'next/router';
+import { useAppRouter } from '../../../hooks/useAppRouter';
 
 const Mobile = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const { isMobile } = useMatchBreakpoints();
-  const router = useRouter()
+  const router = useAppRouter()
 
   const toggleDrawer = () => (e) => {
     if (

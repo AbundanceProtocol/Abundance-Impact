@@ -1,8 +1,9 @@
-import Head from 'next/head';
+'use client'
+
 import Link from 'next/link';
 import React, { useContext, useState, useRef, useEffect } from 'react'
 import { AccountContext } from '../context'
-import { useRouter } from 'next/router';
+import { useAppRouter } from '../hooks/useAppRouter';
 import { useInView } from 'react-intersection-observer'
 import Item from '../components/Ecosystem/ItemWrap/Item';
 import Description from '../components/Ecosystem/Description';
@@ -23,7 +24,7 @@ import { IoInformationCircleOutline as Info, IoLogIn } from "react-icons/io5";
 import { PiSquaresFourLight as Actions, PiBankFill } from "react-icons/pi";
 import { Logo } from '../components/assets';
 import useStore from '../utils/store';
-import ProfilePage from './~/studio';
+import ProfilePage from '../pages/~/studio';
 import axios from 'axios';
 import MiniAppAuthButton from '../components/MiniAppAuthButton';
 import { BsKey, BsLock, BsLockFill, BsXCircle, BsPerson, BsPersonFill, BsShieldCheck, BsShieldFillCheck, BsPiggyBank, BsPiggyBankFill, BsStar, BsStarFill, BsQuestionCircle, BsGift, BsGiftFill, BsPencilFill, BsInfoCircle, BsBellSlash, BsBell } from "react-icons/bs";
@@ -31,7 +32,7 @@ import { BsKey, BsLock, BsLockFill, BsXCircle, BsPerson, BsPersonFill, BsShieldC
 import Spinner from '../components/Common/Spinner';
 import NeynarSigninButton from '../components/Layout/Modals/Signin';
 import { formatNum } from '../utils/utils';
-import Homepage from './~/home';
+import Homepage from '../pages/~/home';
 
 
 const version = process.env.NEXT_PUBLIC_VERSION
@@ -45,7 +46,7 @@ export default function Home() {
   const [textMax, setTextMax] = useState('562px')
   const [feedMax, setFeedMax ] = useState('620px')
   const [showPopup, setShowPopup] = useState({open: false, url: null})
-  const router = useRouter()
+  const router = useAppRouter()
   const { eco, referrer, autoFund } = router.query
   const { isMobile } = useMatchBreakpoints();
   const [display, setDisplay] = useState({personal: false, ecosystem: false})
@@ -131,10 +132,7 @@ export default function Home() {
 
 
   const createEcosystem = () => {
-    router.push({
-      pathname: '/~/ecosystems',
-      query: { trigger: 'createEcosystem' }
-    });
+    router.push('/~/ecosystems?trigger=createEcosystem');
   };
 
   const lockedSelect = () => {
@@ -473,13 +471,7 @@ export default function Home() {
 
   return (
     <div name="feed" style={{ width: "auto", maxWidth: "620px" }} ref={ref2}>
-      <Head>
-        <title>Impact App | Abundance Protocol</title>
-        <meta
-          name="description"
-          content={`Building the global superalignment layer`}
-        />
-      </Head>
+      {/* Head component removed - metadata handled by App Router */}
 
     {/* {(!isLogged || (version == '2.0' || adminTest)) && (
       <div id="log in"

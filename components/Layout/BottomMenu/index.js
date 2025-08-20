@@ -2,13 +2,13 @@ import React, { useRef, useContext } from 'react';
 import { button } from '../../assets/button';
 import BottomNav from './BottomNav';
 import useMatchBreakpoints from '../../../hooks/useMatchBreakpoints';
-import { useRouter } from 'next/router';
+import { useAppRouter } from '../../../hooks/useAppRouter';
 import { AccountContext } from '../../../context';
 
 const BottomMenu = () => {
   const ref1 = useRef(null)
   const { isMobile } = useMatchBreakpoints();
-  const router = useRouter()
+  const router = useAppRouter()
   const { isLogged } = useContext(AccountContext)
 
   return (

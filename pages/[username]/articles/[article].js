@@ -1,5 +1,5 @@
 import Head from 'next/head';
-import { useRouter } from 'next/router';
+import { useAppRouter } from '../../../hooks/useAppRouter';
 import { useRef, useEffect, useState } from 'react';
 import axios from 'axios';
 import useStore from '../../../utils/store';
@@ -12,7 +12,7 @@ import { shortenAddress, timePassed } from '../../../utils/utils';
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 
 export default function ArticlePage({articleData, username, articleHash, totalPages}) {
-  const router = useRouter();
+  const router = useAppRouter();
   const ref = useRef(null)
   const [cast, setCast] = useState(null)
   const [authorData, setAuthorData] = useState(null)

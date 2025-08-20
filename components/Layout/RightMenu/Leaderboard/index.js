@@ -4,14 +4,14 @@ import Creators from './Creators';
 import Curators from './Curators';
 import Link from 'next/link';
 import axios from 'axios';
-import { useRouter } from 'next/router';
+import { useAppRouter } from '../../../../hooks/useAppRouter';
 
 const Leaderboard = () => {
   const { points, ecoData } = useContext(AccountContext);
   const [topCreators, setTopCreators] = useState([])
   const [topCurators, setTopCurators] = useState([])
   const [sched, setSched] = useState({points: false})
-  const router = useRouter()
+  const router = useAppRouter()
   const { ecosystem } = router.query
 
   async function getTopCreators() {

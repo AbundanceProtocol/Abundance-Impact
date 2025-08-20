@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { AccountContext } from '../../../../context';
-import { useRouter } from 'next/router';
+import { useAppRouter } from '../../../../hooks/useAppRouter';
 import { button } from '../../../assets/button';
 import Soon from './Soon';
 import Working from './Working';
@@ -10,7 +10,7 @@ import useMatchBreakpoints from '../../../../hooks/useMatchBreakpoints';
 const LeftNav = ({buttonName}) => {
   const { isLogged, showActions } = useContext(AccountContext);
   const { isMobile, isTablet } = useMatchBreakpoints();
-  const router = useRouter()
+  const router = useAppRouter()
   let { account, icon, link, working } = button[buttonName]
   const TopIcon = icon
   let menuState = "nav-link"

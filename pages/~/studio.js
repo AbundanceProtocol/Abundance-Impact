@@ -1,4 +1,4 @@
-import { useRouter } from "next/router";
+import { useAppRouter } from "../../hooks/useAppRouter";
 import { useRef, useContext, useEffect, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
@@ -59,7 +59,7 @@ import qs from "querystring";
 import Modal from "../../components/Layout/Modals/Modal";
 
 export default function ProfilePage() {
-  const router = useRouter();
+  const router = useAppRouter();
   const [ref, inView] = useInView();
   const { ecosystem, username, app, userFid, pass } = router.query;
   const [user, setUser] = useState(null);

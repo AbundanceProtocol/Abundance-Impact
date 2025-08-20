@@ -1,4 +1,4 @@
-import { useRouter } from 'next/router';
+import { useAppRouter } from '../../hooks/useAppRouter';
 import { useRef, useContext, useEffect, useState } from 'react';
 import useStore from '../../utils/store';
 import { AccountContext } from '../../context';
@@ -19,7 +19,7 @@ import Time from '../../components/Page/FilterMenu/Time';
 import TagsDropdown from '../../components/Page/FilterMenu/Tags/TagsDropdown';
 
 export default function ProfilePage() {
-  const router = useRouter();
+  const router = useAppRouter();
   const store = useStore()
   const [user, setUser] = useState(null)
   const { LoginPopup, isLogged } = useContext(AccountContext)

@@ -1,14 +1,16 @@
+'use client'
+
 import React, { useRef, useState, useEffect, useContext } from 'react';
 import Mobile from './Mobile';
 import LeftMenu from './LeftMenu';
 import CenterMenu from './CenterMenu';
 import RightMenu from './RightMenu';
 import ShowActionNav from './ShowActionNav';
-import BottomMenu from './BottomMenu';
+// import BottomMenu from './BottomMenu';
 import BottomBar from './BottomBar';
 import LoginModal from './Modals/LoginModal';
 import LogoutModal from './Modals/LogoutModal';
-import Head from 'next/head';
+// Head component is not compatible with App Router - use metadata API instead
 import { AccountContext } from '../../context';
 import useMatchBreakpoints from '../../hooks/useMatchBreakpoints';
 import UserMenu from './UserMenu';
@@ -35,60 +37,73 @@ const Layout = ({ children }) => {
 
   useEffect(() => {
     (async () => {
-      const { sdk } = await import('@farcaster/miniapp-sdk')
-  
-      const isMiniApp = await sdk.isInMiniApp()
-      setIsMiniApp(isMiniApp)
-      console.log('isMiniApp1', isMiniApp)
+      // Only run this on the client side
+      if (typeof window === 'undefined') return;
+      
+      try {
+        const { sdk } = await import('@farcaster/miniapp-sdk')
+    
+        const isMiniApp = await sdk.isInMiniApp()
+        setIsMiniApp(isMiniApp)
+        console.log('isMiniApp1', isMiniApp)
 
-      const userProfile = await sdk.context
+        const userProfile = await sdk.context
 
-      console.log(userProfile?.user?.fid)
+        console.log(userProfile?.user?.fid)
 
-      const checkUserProfile = async (fid) => {
-        try {
-          const res = await fetch(`/api/user/validateUser?fid=${fid}`);
-          const data = await res.json();
-          return data.valid;
-        } catch (error) {
-          return null
-        }
-      };
+        const checkUserProfile = async (fid) => {
+          try {
+            const res = await fetch(`/api/user/validateUser?fid=${fid}`);
+            const data = await res.json();
+            return data.valid;
+          } catch (error) {
+            return null
+          }
+        };
 
-      const isValidUser = await checkUserProfile(userProfile?.user?.fid);
-      console.log(`User is valid: ${isValidUser}`);
-      console.log(isValidUser)
-      if (isValidUser) {
-        setIsLogged(true)
-        setFid(Number(userProfile?.user?.fid))
-        setUserInfo({
-          pfp: userProfile?.user?.pfpUrl || null,
-          username: userProfile?.user?.username || null,
-          display: userProfile?.user?.displayName || null,
-        })
-      }    
+        const isValidUser = await checkUserProfile(userProfile?.user?.fid);
+        console.log(`User is valid: ${isValidUser}`);
+        console.log(isValidUser)
+        if (isValidUser) {
+          setIsLogged(true)
+          setFid(Number(userProfile?.user?.fid))
+          setUserInfo({
+            pfp: userProfile?.user?.pfpUrl || null,
+            username: userProfile?.user?.username || null,
+            display: userProfile?.user?.displayName || null,
+          })
+        }    
 
-      sdk.actions.ready()
+        sdk.actions.ready()
 
-      if (isValidUser && !(userBalances?.impact > 0) ) {
-        const {impact, qdau} = await getUserBalance(userProfile?.user?.fid)
-        console.log('userBalance', impact)
-        setUserBalances(prev => ({ ...prev, impact, qdau }))
-      }  
-
+        if (isValidUser && !(userBalances?.impact > 0) ) {
+          const {impact, qdau} = await getUserBalance(userProfile?.user?.fid)
+          console.log('userBalance', impact)
+          setUserBalances(prev => ({ ...prev, impact, qdau }))
+        }  
+      } catch (error) {
+        console.error('Error initializing miniapp-sdk:', error);
+      }
     })();
   }, []);
 
 
   useEffect(() => {
     (async () => {
+      // Only run this on the client side
+      if (typeof window === 'undefined') return;
+      
       if (adminTest) {
-        const { sdk } = await import('@farcaster/miniapp-sdk')
-    
-        const isMiniApp = await sdk.isInMiniApp()
-        setIsMiniApp(isMiniApp)
-        if (isMiniApp) {
-          sdk.actions.addMiniApp()
+        try {
+          const { sdk } = await import('@farcaster/miniapp-sdk')
+      
+          const isMiniApp = await sdk.isInMiniApp()
+          setIsMiniApp(isMiniApp)
+          if (isMiniApp) {
+            sdk.actions.addMiniApp()
+          }
+        } catch (error) {
+          console.error('Error initializing miniapp-sdk in admin test:', error);
         }
       }
     })();
@@ -98,25 +113,7 @@ const Layout = ({ children }) => {
   return (
     <div ref={ref} className='flex-col' style={{position: 'absolute', display: 'flex', minHeight: '100%', height: '100%', width: '100%', overflowX: 'hidden'}}>
 
-      <Head>
-        <meta
-          name="fc:frame"
-          content='{"version":"next","imageUrl":"https://impact.abundance.id/images/icon-02.png","button":{"title":"Impact 2.0","action":{"type":"launch_frame","name":"Impact 2.0","url":"https://impact.abundance.id","splashImageUrl":"https://impact.abundance.id/images/icon.png","splashBackgroundColor":"#011222"}}}'
-        />
-
-        {/* Mini App specific metadata */}
-        <meta name="fc:miniapp" content="true" />
-        <meta name="fc:miniapp:name" content="Impact 2.0" />
-        <meta
-          name="fc:miniapp:description"
-          content="Get boosted and rewarded for your impact on Farcaster"
-        />
-        <meta
-          name="fc:miniapp:icon"
-          content="https://impact.abundance.id/images/icon-02.png"
-        />
-        <meta name="fc:miniapp:url" content="https://impact.abundance.id" />
-      </Head>
+      {/* Metadata moved to app/layout.js for App Router compatibility */}
 
 
 

@@ -2,12 +2,17 @@ import React, { useContext } from 'react';
 import EcosystemMenu from './EcosystemMenu'
 import { AccountContext } from '../../../context';
 import useMatchBreakpoints from '../../../hooks/useMatchBreakpoints';
-import { useRouter } from 'next/router';
+import { useAppRouter } from '../../../hooks/useAppRouter';
 
 const EcosystemNav = () => {
   const { userBalances, ecoData } = useContext(AccountContext)
   const { isMobile } = useMatchBreakpoints();
-  const router = useRouter()
+  const router = useAppRouter()
+
+  // Safety check for router.route
+  if (!router.route) {
+    return null;
+  }
 
   return (
     ((router.route.startsWith('/~/ecosystems/') && router.route.split('/').length > 3) || (router.route.startsWith('/~/curator/') && router.route.split('/').length > 3)) && (<div className={`flex-row ${!isMobile && 'top-layer'}`} style={{gap: '0.3rem', justifyContent: 'center', alignItems: 'center', width: !isMobile ? '200px' : '200px', position: !isMobile ? 'fixed' : 'relative', backgroundColor: isMobile ? '' : '', padding: isMobile ? '0' : '4px 0', top: '8px', right: '80px'}}>

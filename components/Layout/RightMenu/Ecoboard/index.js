@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { AccountContext } from '../../../../context';
-import { useRouter } from 'next/router';
+import { useAppRouter } from '../../../../hooks/useAppRouter';
 import { FaStar } from 'react-icons/fa';
 import Rules from '../../EcoRules/Rules';
 import Criteria from '../../EcoRules/Criteria';
@@ -10,7 +10,7 @@ import useMatchBreakpoints from '../../../../hooks/useMatchBreakpoints';
 const Ecoboard = () => {
   const { eligibility, ecoData } = useContext(AccountContext);
   const { isMobile } = useMatchBreakpoints();
-  const router = useRouter()
+  const router = useAppRouter()
 
   return (
     (router.route == '/~/ecosystems/[ecosystem]') &&  (

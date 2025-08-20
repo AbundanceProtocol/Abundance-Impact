@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
+import { useAppRouter } from '../../../hooks/useAppRouter';
 import useStore from '../../../utils/store';
 import { ActiveUser } from '../../assets'
 import { timePassed } from '../../../utils/utils';
@@ -8,7 +8,7 @@ import axios from 'axios';
 
 export default function Subcast({ castHash, index }) {
   const store = useStore()
-  const router = useRouter();
+  const router = useAppRouter();
   const [screenWidth, setScreenWidth] = useState(undefined)
   const [textMax, setTextMax] = useState('462px')
   const [feedMax, setFeedMax ] = useState('620px')

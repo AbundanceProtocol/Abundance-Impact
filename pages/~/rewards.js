@@ -1,4 +1,4 @@
-import { useRouter } from "next/router";
+import { useAppRouter } from "../../hooks/useAppRouter";
 import { useRef, useContext, useEffect, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
@@ -17,7 +17,7 @@ import Modal from "../../components/Layout/Modals/Modal";
 const version = process.env.NEXT_PUBLIC_VERSION;
 
 export default function Rewards() {
-  const router = useRouter();
+  const router = useAppRouter();
   const { ecosystem, username, app, userFid, pass } = router.query;
   const {
     LoginPopup,

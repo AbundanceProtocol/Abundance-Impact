@@ -1,4 +1,4 @@
-import { useRouter } from 'next/router';
+import { useAppRouter } from '../../../../hooks/useAppRouter';
 import { useRef, useContext, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { AccountContext } from '../../../../context';
@@ -21,7 +21,7 @@ import { BiSortDown, BiSortUp } from "react-icons/bi";
 import { IoShuffleOutline as ShuffleIcon } from "react-icons/io5";
 
 export default function ProfilePage() {
-  const router = useRouter();
+  const router = useAppRouter();
   const [ref, inView] = useInView()
   const { fid, points, app, userFid, pass, id } = router.query
   const [user, setUser] = useState(null)

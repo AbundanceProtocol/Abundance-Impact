@@ -1,8 +1,8 @@
-import { useRouter } from 'next/router';
+import { useAppRouter } from '../../hooks/useAppRouter';
 import { useEffect } from 'react';
 
 export default function UserArticles() {
-  const router = useRouter();
+  const router = useAppRouter();
   const { username } = router.query;
 
   useEffect(() => {

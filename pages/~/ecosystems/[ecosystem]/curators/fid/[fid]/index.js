@@ -1,4 +1,4 @@
-import { useRouter } from 'next/router';
+import { useAppRouter } from '../../../../../../../hooks/useAppRouter';
 import { useRef, useContext, useEffect, useState } from 'react';
 import Link from 'next/link'
 import axios from 'axios';
@@ -25,7 +25,7 @@ import qs from "querystring";
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 
 export default function CuratorFid({id, fid}) {
-  const router = useRouter();
+  const router = useAppRouter();
   const [ref, inView] = useInView()
   const { ecosystem, username, app, userFid, pass } = router.query
   const [user, setUser] = useState(null)

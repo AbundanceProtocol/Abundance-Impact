@@ -1,9 +1,9 @@
 import qs from "querystring";
 import Head from "next/head";
-import { useRouter } from "next/router";
+import { useAppRouter } from "../../hooks/useAppRouter";
 
 export default function MultiTip() {
-  const router = useRouter();
+  const router = useAppRouter();
   const { id } = router.query || {};
 
   const frameContent = {

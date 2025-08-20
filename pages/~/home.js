@@ -2,8 +2,8 @@ import Head from "next/head";
 import Link from "next/link";
 import React, { useContext, useState, useRef, useEffect } from "react";
 import { AccountContext } from "../../context";
-import { useRouter } from "next/router";
 import { useInView } from "react-intersection-observer";
+import { useAppRouter } from "../../hooks/useAppRouter";
 // import Item from '../../components/Ecosystem/ItemWrap/Item';
 // import Description from '../../components/Ecosystem/Description';
 // import ItemWrap from '../../components/Ecosystem/ItemWrap';
@@ -96,7 +96,7 @@ export default function Homepage({ test }) {
   const [textMax, setTextMax] = useState("562px");
   const [feedMax, setFeedMax] = useState("620px");
   // const [showPopup, setShowPopup] = useState({open: false, url: null})
-  const router = useRouter();
+  const router = useAppRouter();
   const { eco, referrer, autoFund } = router.query;
   const { isMobile } = useMatchBreakpoints();
   // const [display, setDisplay] = useState({personal: false, ecosystem: false})

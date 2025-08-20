@@ -1,5 +1,5 @@
 import Head from 'next/head';
-import { useRouter } from 'next/router';
+import { useAppRouter } from '../../../hooks/useAppRouter';
 import { useContext, useRef, useEffect, useState } from 'react';
 import { AccountContext } from '../../../context';
 import axios from 'axios';
@@ -10,7 +10,7 @@ import ExpandImg from '../../../components/Cast/ExpandImg';
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 
 export default function CastPage({username, castHash}) {
-  const router = useRouter();
+  const router = useAppRouter();
   const ref = useRef(null)
   const { LoginPopup } = useContext(AccountContext)
   const [cast, setCast] = useState(null)

@@ -2,12 +2,12 @@ import React, { useEffect } from 'react';
 import Link from 'next/link';
 import { button } from '../../../../../pages/assets/button';
 import { FaPen } from 'react-icons/fa';
-import { useRouter } from 'next/router';
+import { useAppRouter } from '..\../../../../hooks/useAppRouter';
 import useMatchBreakpoints from '../../../../../hooks/useMatchBreakpoints';
 
 const NavItem = ({ menuHover, buttonName, setMobileMenuOpen, linkTarget }) => {
   const { isMobile, isTablet } = useMatchBreakpoints();
-  const router = useRouter()
+  const router = useAppRouter()
 
   // let btnHover = menuHover.in > menuHover.out
   let btn = button[buttonName]

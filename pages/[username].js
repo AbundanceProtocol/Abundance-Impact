@@ -1,5 +1,5 @@
 import Head from 'next/head';
-import { useRouter } from 'next/router';
+import { useAppRouter } from '../hooks/useAppRouter';
 import { useRef, useContext, useEffect, useState } from 'react';
 import useStore from '../utils/store';
 import { AccountContext } from '../context';
@@ -14,7 +14,7 @@ import Spinner from '../components/Common/Spinner';
 import ExpandImg from '../components/Cast/ExpandImg';
 
 export default function UserPage({username}) {
-  const router = useRouter();
+  const router = useAppRouter();
   // const { username } = router.query;
   const noUser = {
     username: 'none',

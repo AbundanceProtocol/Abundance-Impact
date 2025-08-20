@@ -5,7 +5,7 @@ import useMatchBreakpoints from '../../hooks/useMatchBreakpoints'
 import useStore from '../../utils/store'
 import axios from 'axios';
 import { FaPen, FaPlus } from "react-icons/fa"
-import { useRouter } from 'next/router';
+import { useAppRouter } from '../../hooks/useAppRouter';
 import { formatNum, isAlphanumeric, getToken, getChain } from '../../utils/utils';
 import Spinner from '../../components/Common/Spinner';
 import Button from '../../components/Ecosystem/Button';
@@ -27,7 +27,7 @@ export default function Ecosystem() {
   const [feedMax, setFeedMax ] = useState('620px')
   const initialQuery = {shuffle: true, time: null, tags: [], channels: [], curators: []}
   const [userQuery, setUserQuery] = useState(initialQuery)
-  const router = useRouter()
+  const router = useAppRouter()
   // const [isLogged, setIsLogged] = useState(false)
   const [channels, setChannels] = useState([])
   const [selectedChannels, setSelectedChannels] = useState([])

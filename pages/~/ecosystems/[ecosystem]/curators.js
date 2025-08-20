@@ -6,7 +6,7 @@ import useMatchBreakpoints from '../../../../hooks/useMatchBreakpoints'
 // import useStore from '../../utils/store'
 import axios from 'axios';
 // import { FaPen, FaPlus } from "react-icons/fa"
-import { useRouter } from 'next/router';
+import { useAppRouter } from '../../../../hooks/useAppRouter';
 // import { formatNum, isAlphanumeric, getToken, getChain } from '../../utils/utils';
 // import Spinner from '../../components/Common/Spinner';
 // import Button from '../../components/Ecosystem/Button';
@@ -30,7 +30,7 @@ export default function Curators() {
   const [textMax, setTextMax] = useState('562px')
   const [feedMax, setFeedMax ] = useState('620px')
   const [curators, setCurators] = useState(null)
-  const router = useRouter()
+  const router = useAppRouter()
   const [modal, setModal] = useState({on: false, success: false, text: ''})
   // const [jobScheduled, setJobScheduled] = useState(false);
   const [loaded, setLoaded] = useState(false);

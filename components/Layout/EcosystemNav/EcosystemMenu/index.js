@@ -1,12 +1,12 @@
 import React, { useContext } from 'react';
 import { AccountContext } from '../../../../context';
 import useMatchBreakpoints from '../../../../hooks/useMatchBreakpoints';
-import { useRouter } from 'next/router';
+import { useAppRouter } from '../../../../hooks/useAppRouter';
 
 const EcosystemNav = ({size}) => {
   const { ecosystemsData, ecoData, handleEcoChange } = useContext(AccountContext)
   const { isMobile } = useMatchBreakpoints();
-  const router = useRouter()
+  const router = useAppRouter()
 
   return (
     <div

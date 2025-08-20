@@ -10,7 +10,7 @@ export default {
   env: {
     ENVIRONMENT: process.env.ENVIRONMENT,
   },
-  // experimental features disabled to avoid Netlify build issues
+  // App Router is enabled by default in Next.js 14
   compiler: {
     emotion: true,
   },

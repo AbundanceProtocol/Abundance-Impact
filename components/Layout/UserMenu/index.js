@@ -1,7 +1,7 @@
 import React, { useRef, useContext, useEffect } from "react";
 import Link from "next/link";
 import useMatchBreakpoints from "../../../hooks/useMatchBreakpoints";
-import { useRouter } from "next/router";
+import { useAppRouter } from '../../../hooks/useAppRouter';
 import { AccountContext } from "../../../context";
 import { FaStar } from "react-icons/fa";
 import { Logo } from "../../assets";
@@ -23,7 +23,13 @@ const version = process.env.NEXT_PUBLIC_VERSION;
 const UserMenu = () => {
   const ref1 = useRef(null);
   const { isMobile } = useMatchBreakpoints();
-  const router = useRouter();
+  const router = useAppRouter();
+  
+  // Safety check for router.route
+  if (!router.route) {
+    return null;
+  }
+  
   const {
     userBalances,
     userInfo,

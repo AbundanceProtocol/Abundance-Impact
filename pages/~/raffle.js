@@ -1,4 +1,4 @@
-import { useRouter } from 'next/router';
+import { useAppRouter } from '../../hooks/useAppRouter';
 import { useRef, useContext, useEffect, useState } from 'react';
 import axios from 'axios';
 import { AccountContext } from '../../context';
@@ -7,7 +7,7 @@ import { PiSquaresFourLight as Actions } from "react-icons/pi";
 import useMatchBreakpoints from '../../hooks/useMatchBreakpoints';
 
 export default function ProfilePage() {
-  const router = useRouter();
+  const router = useAppRouter();
   const [data, setData] = useState([])
   const { LoginPopup, isLogged } = useContext(AccountContext)
   const { isMobile } = useMatchBreakpoints();

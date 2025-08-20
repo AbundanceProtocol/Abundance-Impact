@@ -1,4 +1,4 @@
-import { useRouter } from "next/router";
+import { useAppRouter } from "../../hooks/useAppRouter";
 import { useRef, useContext, useEffect, useState } from "react";
 import { useAccount, useWriteContract, usePublicClient, useWaitForTransactionReceipt } from 'wagmi';
 import { parseUnits } from 'viem';
@@ -180,7 +180,7 @@ function WalletDemo() {
 }
 
 export default function Tip() {
-  const router = useRouter();
+  const router = useAppRouter();
   const { ecosystem, username, app, userFid, pass } = router.query;
   const {
     LoginPopup,
@@ -694,7 +694,7 @@ export default function Tip() {
   // Share handler for OnchainTip
   const shareOnchainTip = async () => {
     try {
-      const url = `https://impact.abundance.id/~/multi-tip?${shareModal?.id || null}`;
+      const url = `https://impact.abundance.id/~/multi-tip/${shareModal?.id || null}`;
       const text = `I multi-tipped ${formatShareAmount(shareModal?.amount)} $${shareModal?.token} to ${shareModal?.receivers} creators with /impact!`;
       const encodedText = encodeURIComponent(text);
       const encodedUrl = encodeURIComponent(url);

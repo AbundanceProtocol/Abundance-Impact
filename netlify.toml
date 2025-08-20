@@ -1,6 +1,7 @@
 [build]
   command = "next build"
   publish = ".next"
+  environment = { NODE_VERSION = "20.18.0" }
 
 [functions]
   directory = "netlify/functions"
@@ -55,3 +56,23 @@
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+
+[build.environment]
+  NEXT_USE_NETLIFY_EDGE = "true"
+  NODE_VERSION = "20.18.0"
+
+# App Router specific redirects for dynamic routes
+[[redirects]]
+  from = "/:username"
+  to = "/:username"
+  status = 200
+
+[[redirects]]
+  from = "/~/ecosystems/:ecosystem"
+  to = "/~/ecosystems/:ecosystem"
+  status = 200
+
+[[redirects]]
+  from = "/~/tip/:id"
+  to = "/~/tip/:id"
+  status = 200

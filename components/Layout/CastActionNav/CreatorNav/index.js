@@ -1,14 +1,14 @@
 import React, { useState, useContext, useEffect } from 'react';
 import Creators from '../../RightMenu/Leaderboard/Creators';
 import axios from 'axios';
-import { useRouter } from 'next/router';
+import { useAppRouter } from '../../../../hooks/useAppRouter';
 import { AccountContext } from '../../../../context';
 
 const CreatorNav = () => {
   const { points } = useContext(AccountContext);
   const [topCreators, setTopCreators] = useState([])
   const [sched, setSched] = useState({points: false})
-  const router = useRouter()
+  const router = useAppRouter()
 
   async function getTopCreators() {
     try {

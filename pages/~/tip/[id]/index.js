@@ -1,4 +1,4 @@
-import { useRouter } from "next/router";
+import { useAppRouter } from "../../../../hooks/useAppRouter";
 import { useRef, useContext, useEffect, useState } from "react";
 import { useAccount, useWriteContract, usePublicClient, useWaitForTransactionReceipt } from 'wagmi';
 import { parseUnits } from 'viem';
@@ -180,7 +180,7 @@ function WalletDemo() {
 }
 
 export default function Tip() {
-  const router = useRouter();
+  const router = useAppRouter();
   const { ecosystem, username, app, userFid, pass, id } = router.query;
   const {
     LoginPopup,

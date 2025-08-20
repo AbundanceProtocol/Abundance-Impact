@@ -1,7 +1,9 @@
+'use client'
+
 import { createContext, useState, useEffect } from "react";
 import axios from "axios";
 import useStore from "./utils/store";
-import { useRouter } from 'next/router';
+import { useAppRouter } from './hooks/useAppRouter';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { cookieToInitialState, WagmiProvider } from 'wagmi';
@@ -129,7 +131,7 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
     }
   }, [walletConnected, setWalletLoading, setWalletError, setWalletAddress, setWalletChainId, setWalletProvider, setWalletConnected]);
   
-  const router = useRouter()
+  const router = useAppRouter()
   const initEcosystems = [{
     channels: [],
     condition_channels: false,

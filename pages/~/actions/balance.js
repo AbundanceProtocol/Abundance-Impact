@@ -1,12 +1,12 @@
 import Head from 'next/head';
-import { useRouter } from 'next/router';
+import { useAppRouter } from '../../../hooks/useAppRouter';
 import { useRef, useEffect, useState } from 'react';
 
 
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 
 export default function ArticlePage({params}) {
-  const router = useRouter();
+  const router = useAppRouter();
   const ref = useRef(null)
 
   const Article = () => {

@@ -9,7 +9,7 @@ import { FaSearch, FaLock } from 'react-icons/fa';
 import useStore from '../../utils/store'
 import axios from 'axios';
 import { AiOutlineLoading3Quarters as Loading } from "react-icons/ai";
-import { useRouter } from 'next/router';
+import { useAppRouter } from '../../hooks/useAppRouter';
 
 export default function Search() {
   const ref = useRef(null)
@@ -21,7 +21,7 @@ export default function Search() {
   const { isMobile } = useMatchBreakpoints();
   const account = useContext(AccountContext)
   const [ screenWidth, setScreenWidth ] = useState(undefined)
-  const router = useRouter()
+  const router = useAppRouter()
   const [textMax, setTextMax] = useState('430px')
   const [feedMax, setFeedMax ] = useState('620px')
   const store = useStore()

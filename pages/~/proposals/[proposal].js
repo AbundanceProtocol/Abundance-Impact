@@ -1,4 +1,4 @@
-import { useRouter } from 'next/router';
+import { useAppRouter } from '../../../hooks/useAppRouter';
 import { useEffect, useState, useRef } from 'react';
 import projectData from '../../../data/dummyProject.json'
 import onchainData from '../../../data/dummyOnchainData.json'
@@ -13,7 +13,7 @@ import { shortenAddress, timePassed, formatNum } from '../../../utils/utils';
 import Spinner from '../../../components/Common/Spinner';
 
 export default function ProposalPage() {
-  const router = useRouter();
+  const router = useAppRouter();
   const ref = useRef(null)
   const [textMax, setTextMax] = useState('495px')
   const store = useStore()

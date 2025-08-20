@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { ActiveUser } from '../../assets'
 import { formatNum } from "../../../utils/utils";
 import { AccountContext } from "../../../context";
-import { useRouter } from 'next/router';
+import { useAppRouter } from '../../../hooks/useAppRouter';
 import { FaPowerOff, FaRegStar } from "react-icons/fa";
 import { BsFillPersonFill, BsShareFill, BsPiggyBank, BsPiggyBankFill } from "react-icons/bs";
 import useMatchBreakpoints from "../../../hooks/useMatchBreakpoints";
@@ -14,7 +14,7 @@ const CuratorBlock = ({ user, textMax, show, type, feedMax }) => {
   const { points, fid, autotipping, setAutotipping, isLogged, LoginPopup, LogoutPopup, adminTest, isMiniApp } = useContext(AccountContext)
   const [sched, setSched] = useState({autotip: false})
   const [curators, setCurators] = useState(null)
-  const router = useRouter()
+  const router = useAppRouter()
   const { isMobile } = useMatchBreakpoints();
 
   useEffect(() => {

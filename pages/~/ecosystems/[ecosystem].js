@@ -1,4 +1,4 @@
-import { useRouter } from 'next/router';
+import { useAppRouter } from '../../../hooks/useAppRouter';
 import { useRef, useContext, useEffect, useState } from 'react';
 import Link from 'next/link'
 import axios from 'axios';
@@ -26,7 +26,7 @@ import useMatchBreakpoints from '../../../hooks/useMatchBreakpoints';
 
 
 export default function Eco() {
-  const router = useRouter();
+  const router = useAppRouter();
   // const { address, isConnected, chainId } = useAccount()
   const [ref, inView] = useInView()
   const { ecosystem, time, curators, channels, shuffle, app, userFid, pass, referrer } = router.query

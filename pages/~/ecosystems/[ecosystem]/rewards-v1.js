@@ -1,5 +1,5 @@
 import Head from 'next/head';
-import { useRouter } from 'next/router';
+import { useAppRouter } from '../../../../hooks/useAppRouter';
 import { useRef, useEffect, useState, useContext } from 'react';
 import axios from 'axios';
 import { FaStar, FaExternalLinkAlt } from "react-icons/fa"
@@ -21,7 +21,7 @@ const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_
 export default function Tips({fid, ecosystem}) {
   const { LoginPopup, userBalances, isLogged } = useContext(AccountContext)
   const index = 0
-  const router = useRouter();
+  const router = useAppRouter();
   const ref = useRef(null)
   const [screenWidth, setScreenWidth] = useState(undefined)
   const [screenHeight, setScreenHeight] = useState(undefined)
