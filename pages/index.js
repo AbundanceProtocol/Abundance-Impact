@@ -23,8 +23,7 @@ import { IoInformationCircleOutline as Info, IoLogIn } from "react-icons/io5";
 import { PiSquaresFourLight as Actions, PiBankFill } from "react-icons/pi";
 import { Logo } from '../components/assets';
 import useStore from '../utils/store';
-import dynamic from 'next/dynamic';
-const ProfilePage = dynamic(() => import('./~/studio'), { ssr: false });
+import ProfilePage from './~/studio';
 import axios from 'axios';
 import MiniAppAuthButton from '../components/MiniAppAuthButton';
 import { BsKey, BsLock, BsLockFill, BsXCircle, BsPerson, BsPersonFill, BsShieldCheck, BsShieldFillCheck, BsPiggyBank, BsPiggyBankFill, BsStar, BsStarFill, BsQuestionCircle, BsGift, BsGiftFill, BsPencilFill, BsInfoCircle, BsBellSlash, BsBell } from "react-icons/bs";
@@ -32,7 +31,7 @@ import { BsKey, BsLock, BsLockFill, BsXCircle, BsPerson, BsPersonFill, BsShieldC
 import Spinner from '../components/Common/Spinner';
 import NeynarSigninButton from '../components/Layout/Modals/Signin';
 import { formatNum } from '../utils/utils';
-const Homepage = dynamic(() => import('./~/home'), { ssr: false });
+import Homepage from './~/home';
 
 
 const version = process.env.NEXT_PUBLIC_VERSION

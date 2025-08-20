@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import Link from 'next/link';
-import { button } from '../../../../assets/button';
+import { button } from '../../../../../pages/assets/button';
 import { FaPen } from 'react-icons/fa';
 import { useRouter } from 'next/router';
 import useMatchBreakpoints from '../../../../../hooks/useMatchBreakpoints';
