@@ -1,7 +1,5 @@
 import '../styles/index.css';
 import React, { useCallback, useState, useEffect, useRef } from 'react'
-import { AccountProvider } from '../context'
-import Layout from '../components/Layout';
 
 export default function App({ Component, pageProps }) {
   const initialAccount = {points: '$IMPACT', qdau: 0, impact: 0}
@@ -28,11 +26,16 @@ export default function App({ Component, pageProps }) {
     setBottomNavSize(ref?.current?.offsetWidth)
   }
 
+  console.log('Component', Component.disableProviders, Component)
 
   // Allow meta-only pages to opt-out of global providers for SSR safety
   if (Component && Component.disableProviders) {
     return <Component {...pageProps} />
   }
+
+  // Defer heavy provider imports so routes can opt-out cleanly during SSR
+  const { AccountProvider } = require('../context')
+  const Layout = require('../components/Layout').default
 
   return (
     <AccountProvider initialAccount={initialAccount} ref1={ref1} >
