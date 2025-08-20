@@ -5,13 +5,14 @@ import { button } from '../../../assets/button';
 import Soon from './Soon';
 import Working from './Working';
 import Locked from './Locked';
+import { FaPen } from 'react-icons/fa';
 
 const BottomNav = ({buttonName}) => {
   const { showActions, isLogged } = useContext(AccountContext);
   const router = useRouter()
 
   let { account, icon, link, working } = button[buttonName]
-  const TopIcon = icon
+  const TopIcon = icon || FaPen
   let menuState = "nav-link"
   let accountState = !account || (isLogged && account)
   if ((router.route === link) && accountState || (buttonName == 'Cast Actions' && showActions)) {
