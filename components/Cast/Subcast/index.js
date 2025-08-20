@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import useStore from '../../../utils/store';
-import { ActiveUser } from '../../../pages/assets'
+import { ActiveUser } from '../../assets'
 import { timePassed } from '../../../utils/utils';
 import CastText from '../Text';
 import axios from 'axios';

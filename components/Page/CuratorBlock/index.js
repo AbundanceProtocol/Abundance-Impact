@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { ActiveUser } from '../../../pages/assets'
+import { ActiveUser } from '../../assets'
 import { formatNum } from "../../../utils/utils";
 import { AccountContext } from "../../../context";
 import { useRouter } from 'next/router';

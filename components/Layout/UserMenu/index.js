@@ -4,7 +4,7 @@ import useMatchBreakpoints from "../../../hooks/useMatchBreakpoints";
 import { useRouter } from "next/router";
 import { AccountContext } from "../../../context";
 import { FaStar } from "react-icons/fa";
-import { Logo } from "../../../pages/assets";
+import { Logo } from "../../assets";
 import {
   BsTrophy,
   BsGear,

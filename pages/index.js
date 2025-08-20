@@ -21,7 +21,7 @@ import LoginButton from '../components/Layout/Modals/FrontSignin';
 import { IoMdTrophy } from "react-icons/io";
 import { IoInformationCircleOutline as Info, IoLogIn } from "react-icons/io5";
 import { PiSquaresFourLight as Actions, PiBankFill } from "react-icons/pi";
-import { Logo } from './assets';
+import { Logo } from '../components/assets';
 import useStore from '../utils/store';
 import ProfilePage from './~/studio';
 import axios from 'axios';

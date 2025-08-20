@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/router';
 import useStore from '../../utils/store';
 import { AccountContext } from '../../context';
-import { Like, LikeOn, Recast, Message, Kebab, ActiveUser } from '../../pages/assets'
+import { Like, LikeOn, Recast, Message, Kebab, ActiveUser } from '../assets'
 import { FaSearch, FaLock, FaRegStar, FaStar, FaArrowUp, FaArrowDown } from "react-icons/fa"
 import { BiSolidDownArrow as ArrowDown } from "react-icons/bi";
 import axios from 'axios';

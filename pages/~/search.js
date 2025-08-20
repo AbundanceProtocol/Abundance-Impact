@@ -1,6 +1,6 @@
 import { useContext, useState, useRef, useEffect } from 'react'
 // import { ethers } from 'ethers'
-import { ActiveUser } from '../assets'
+import { ActiveUser } from '../../components/assets'
 // import { Like, Recast, Message, Kebab, Warp } from './assets'
 // import Link from 'next/link'
 import { AccountContext } from '../../context'

@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { AccountContext } from '../../../../context';
 import { useRouter } from 'next/router';
-import { button } from '../../../../pages/assets/button';
+import { button } from '../../../assets/button';
 import Soon from './Soon';
 import Working from './Working';
 import Locked from './Locked';

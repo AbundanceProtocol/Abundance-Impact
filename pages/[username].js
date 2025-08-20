@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import { useRef, useContext, useEffect, useState } from 'react';
 import useStore from '../utils/store';
 import { AccountContext } from '../context';
-import { ActiveUser, Degen } from './assets';
+import { ActiveUser, Degen } from '../components/assets';
 import { AiOutlineLoading3Quarters as Loading } from "react-icons/ai";
 import useMatchBreakpoints from '../hooks/useMatchBreakpoints'; 
 import axios from 'axios';

@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { button } from '../../../pages/assets/button';
+import { button } from '../../assets/button';
 import HomeButton from '../HomeButton';
 import LeftNav from './LeftNav';
 import CastActionNav from '../CastActionNav'

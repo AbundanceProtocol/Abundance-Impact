@@ -1,5 +1,5 @@
 import React, { useRef, useContext } from 'react';
-import { button } from '../../../pages/assets/button';
+import { button } from '../../assets/button';
 import BottomNav from './BottomNav';
 import useMatchBreakpoints from '../../../hooks/useMatchBreakpoints';
 import { useRouter } from 'next/router';

@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { Logo } from '../../../pages/assets';
+import { Logo } from '../../assets';
 import useMatchBreakpoints from '../../../hooks/useMatchBreakpoints';
 
 const HomeButton = () => {

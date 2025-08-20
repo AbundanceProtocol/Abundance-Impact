@@ -2,7 +2,7 @@ import { useRouter } from 'next/router';
 import { useEffect, useState, useRef } from 'react';
 import projectData from '../../../data/dummyProject.json'
 import onchainData from '../../../data/dummyOnchainData.json'
-import { Swords, CoinBag, CoinStack, Waste, AbundanceStar, FeedbackLoop, Like, Recast, Message, Kebab, Warp, ActiveUser } from '../../assets'
+import { Swords, CoinBag, CoinStack, Waste, AbundanceStar, FeedbackLoop, Like, Recast, Message, Kebab, Warp, ActiveUser } from '../../../components/assets'
 import { FaRegStar } from "react-icons/fa"
 import useStore from '../../../utils/store';
 import useMatchBreakpoints from '../../../hooks/useMatchBreakpoints'; 

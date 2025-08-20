@@ -55,7 +55,7 @@ import LoginButton from "../../components/Layout/Modals/FrontSignin";
 import useMatchBreakpoints from "../../hooks/useMatchBreakpoints";
 import { AccountContext } from "../../context";
 import { FiShare } from "react-icons/fi";
-import { Logo, Degen } from "../assets";
+import { Logo, Degen } from "../../components/assets";
 import qs from "querystring";
 // import ScoreDashboard from '../../components/Common/ScoreDashboard';
 import Modal from "../../components/Layout/Modals/Modal";
