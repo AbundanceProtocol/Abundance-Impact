@@ -1,5 +1,6 @@
 import '../styles/index.css'
 import React, { useEffect, useState, useRef } from 'react'
+import NextApp from 'next/app'
 
 export default function App({ Component, pageProps }) {
   const initialAccount = { points: '$IMPACT', qdau: 0, impact: 0 }
@@ -30,38 +31,21 @@ export default function App({ Component, pageProps }) {
     return <Component {...pageProps} />
   }
 
-  // Lazy-load providers and dependencies only when needed
+  // Lazy-load providers after the opt-out check
   const { AccountProvider } = require('../context')
   const Layout = require('../components/Layout').default
-  const { QueryClient, QueryClientProvider } = require('@tanstack/react-query')
-  const { WagmiProvider } = require('wagmi')
-  const { config: wagmiConfig } = require('./config/wagmi')
-  const { cookieToInitialState } = require('@wagmi/core')
-
-  const queryClient = new QueryClient();
 
   return (
-    <AccountProvider initialAccount={initialAccount} ref1={ref1} cookies={pageProps.cookies}>
-      <WagmiProvider config={wagmiConfig} initialState={cookieToInitialState(wagmiConfig, pageProps.cookies)}>
-        <QueryClientProvider client={queryClient}>
-          <Layout>
-            <Component {...pageProps} />
-          </Layout>
-        </QueryClientProvider>
-      </WagmiProvider>
+    <AccountProvider initialAccount={initialAccount} ref1={ref1}>
+      <Layout>
+        <Component {...pageProps} />
+      </Layout>
     </AccountProvider>
   )
 }
 
-// Force SSR for all pages to prevent static generation issues with client-only code
-App.getInitialProps = async ({ Component, ctx }) => {
-  let pageProps = {};
-  if (Component.getInitialProps) {
-    pageProps = await Component.getInitialProps(ctx);
-  }
-  // Pass cookies to initial state for Wagmi
-  if (ctx.req && ctx.req.headers.cookie) {
-    pageProps.cookies = ctx.req.headers.cookie;
-  }
-  return { pageProps };
-};
+// Force SSR for all pages to avoid static prerender of client-only components
+App.getInitialProps = async (appContext) => {
+  const appProps = await NextApp.getInitialProps(appContext)
+  return { ...appProps }
+}
