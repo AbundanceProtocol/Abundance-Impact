@@ -207,10 +207,7 @@ export default function Tip() {
     userInfo,
     setUserInfo,
     getAllTokens,
-    topCoins,
-    setWalletAddress,
-    setWalletConnected,
-    setWalletProvider
+    topCoins
   } = useContext(AccountContext);
   
   // Use the existing wallet hook for transactions
@@ -487,37 +484,13 @@ export default function Tip() {
     }
   }, []);
 
-  // Load tokens when wallet is connected OR when in Farcaster miniapp
+  // Load tokens when wallet is connected
   useEffect(() => {
-    // Try to load tokens from connected wallet
     if (walletConnected && walletAddress) {
-      console.log('🔄 Loading tokens for connected wallet:', walletAddress);
+      console.log('🔄 Loading tokens for wallet:', walletAddress);
       getAllTokens(walletAddress, false);
     }
-    // Also try to load tokens from Farcaster miniapp wallet
-    else if (isMiniApp && !walletConnected) {
-      const loadFarcasterTokens = async () => {
-        try {
-          const { sdk } = await import('@farcaster/miniapp-sdk')
-          const userProfile = await sdk.context
-          const farcasterAddress = userProfile?.user?.custodyAddress
-          
-          if (farcasterAddress) {
-            console.log('🔄 Loading tokens for Farcaster wallet:', farcasterAddress);
-            getAllTokens(farcasterAddress, false);
-            // Also set the wallet state for consistency
-            setWalletAddress(farcasterAddress);
-            setWalletConnected(true);
-            setWalletProvider('farcaster');
-          }
-        } catch (error) {
-          console.warn('Failed to load Farcaster wallet tokens:', error);
-        }
-      };
-      
-      loadFarcasterTokens();
-    }
-  }, [walletConnected, walletAddress, isMiniApp]);
+  }, [walletConnected, walletAddress]);
 
   // Debug: Log when topCoins changes
   useEffect(() => {
@@ -528,35 +501,6 @@ export default function Tip() {
   useEffect(() => {
     console.log('🔄 Wallet status:', { walletConnected, walletAddress, wagmiConnected, wagmiAddress });
   }, [walletConnected, walletAddress, wagmiConnected, wagmiAddress]);
-
-  // Load tokens immediately if in Farcaster miniapp
-  useEffect(() => {
-    if (isMiniApp && !walletConnected) {
-      const loadInitialTokens = async () => {
-        try {
-          console.log('🔄 Loading initial tokens for Farcaster miniapp...');
-          const { sdk } = await import('@farcaster/miniapp-sdk')
-          const userProfile = await sdk.context
-          const farcasterAddress = userProfile?.user?.custodyAddress
-          
-          if (farcasterAddress) {
-            console.log('🔄 Found Farcaster wallet address:', farcasterAddress);
-            getAllTokens(farcasterAddress, false);
-            // Set wallet state
-            setWalletAddress(farcasterAddress);
-            setWalletConnected(true);
-            setWalletProvider('farcaster');
-          } else {
-            console.log('🔄 No Farcaster wallet address found');
-          }
-        } catch (error) {
-          console.warn('Failed to load initial Farcaster tokens:', error);
-        }
-      };
-      
-      loadInitialTokens();
-    }
-  }, [isMiniApp, walletConnected]);
 
   // Local function to get user balance
   const getUserBalance = async (fid) => {
@@ -783,7 +727,7 @@ export default function Tip() {
   // Share handler for OnchainTip
   const shareOnchainTip = async () => {
     try {
-      const url = `https://impact.abundance.id/~/multi-tip/${shareModal?.id || null}`;
+      const url = `https://impact.abundance.id/~/multi-tip?${shareModal?.id || null}`;
       const text = `I multi-tipped ${formatShareAmount(shareModal?.amount)} $${shareModal?.token} to ${shareModal?.receivers} creators with /impact!`;
       const encodedText = encodeURIComponent(text);
       const encodedUrl = encodeURIComponent(url);
