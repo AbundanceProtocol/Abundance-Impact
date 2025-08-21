@@ -1,11 +1,10 @@
 import Head from "next/head";
-import qs from "querystring";
 
 export async function getServerSideProps({ params }) {
   const { id } = params;
   const frameContent = {
     version: "next",
-    imageUrl: `https://impact.abundance.id/api/frames/tip/onchain-tip-v1?${qs.stringify(id)}`,
+    imageUrl: `https://impact.abundance.id/api/frames/tip/onchain-tip-v1?id=${encodeURIComponent(id)}`,
     button: {
       title: "Impact Multi-Tip",
       action: {
