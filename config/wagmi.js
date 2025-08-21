@@ -10,6 +10,7 @@ import { farcasterMiniApp as miniAppConnector } from '@farcaster/miniapp-wagmi-c
 console.log('Wagmi config loaded');
 
 export const config = createConfig({
+  autoConnect: true,
   chains: [base, celo, optimism, arbitrum],
   transports: {
     [base.id]: http(),

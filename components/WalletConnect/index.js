@@ -4,7 +4,6 @@ import React, { useState, useEffect, useContext, useRef } from 'react';
 import { AccountContext } from '../../context';
 import { useAccount, useDisconnect, useConnect } from 'wagmi';
 import Spinner from '../Common/Spinner';
-import { addFarcasterConnector } from '../../config/wagmi';
 
 export default function WalletConnect({ onTipAmountChange, onTokenChange }) {
   const {
@@ -219,32 +218,7 @@ export default function WalletConnect({ onTipAmountChange, onTokenChange }) {
   //   }
   // }, [isConnected, connect]);
 
-  const hasAttemptedConnectRef = useRef(false);
-  useEffect(() => {
-    // If already connected, do nothing
-    if (isConnected || hasAttemptedConnectRef.current) return;
-
-    const init = async () => {
-      try {
-        // Try Farcaster miniapp connector if available
-        if (typeof window !== 'undefined' && window.farcasterEthProvider) {
-          const connector = await addFarcasterConnector();
-          if (connector) {
-            await connect({ connector });
-            hasAttemptedConnectRef.current = true;
-            return;
-          }
-        }
-      } catch (e) {
-        console.warn('Farcaster miniapp connector failed:', e);
-      }
-
-      // Fallback: let Wagmi autoConnect restore any persisted session
-      hasAttemptedConnectRef.current = true;
-    };
-
-    init();
-  }, [isConnected, connect]);
+  // Rely on Wagmi autoConnect + registered miniapp connector per docs
 
 
   // Sync Wagmi state with local state
@@ -522,6 +496,27 @@ export default function WalletConnect({ onTipAmountChange, onTokenChange }) {
                     </button>
                   
                   {/* Tip Amount Slider - Show when tokens are loaded and not loading */}
+
+                  {/* Local/dev fallback connect button (per docs) when not connected */}
+                  {!isConnected && connectors && connectors.length > 0 && (
+                    <div style={{ marginTop: '10px' }}>
+                      <button
+                        type="button"
+                        onClick={() => connect({ connector: connectors[0] })}
+                        style={{
+                          padding: '8px 12px',
+                          borderRadius: '8px',
+                          border: '1px solid #114477',
+                          backgroundColor: '#001122',
+                          color: '#ace',
+                          cursor: 'pointer',
+                          fontSize: '12px'
+                        }}
+                      >
+                        Connect wallet
+                      </button>
+                    </div>
+                  )}
 
                   {/* Dropdown Options */}
                   {dropdownOpen && (
