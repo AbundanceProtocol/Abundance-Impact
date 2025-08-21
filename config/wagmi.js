@@ -8,6 +8,7 @@ import { base, celo, optimism, arbitrum } from 'wagmi/chains'
 console.log('Wagmi config loaded');
 
 export const config = createConfig({
+  autoConnect: true,
   chains: [base, celo, optimism, arbitrum],
   transports: {
     [base.id]: http(),

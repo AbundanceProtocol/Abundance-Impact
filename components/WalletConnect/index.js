@@ -221,21 +221,29 @@ export default function WalletConnect({ onTipAmountChange, onTokenChange }) {
 
   const hasAttemptedConnectRef = useRef(false);
   useEffect(() => {
-    const initConnector = async () => {
-      hasAttemptedConnectRef.current = true;
+    // If already connected, do nothing
+    if (isConnected || hasAttemptedConnectRef.current) return;
+
+    const init = async () => {
       try {
-        // Only attempt Farcaster miniapp connector if available in window
+        // Try Farcaster miniapp connector if available
         if (typeof window !== 'undefined' && window.farcasterEthProvider) {
           const connector = await addFarcasterConnector();
-          if (connector && !isConnected) {
+          if (connector) {
             await connect({ connector });
+            hasAttemptedConnectRef.current = true;
+            return;
           }
         }
-      } catch (err) {
-        console.warn('Farcaster connector error:', err);
+      } catch (e) {
+        console.warn('Farcaster miniapp connector failed:', e);
       }
+
+      // Fallback: let Wagmi autoConnect restore any persisted session
+      hasAttemptedConnectRef.current = true;
     };
-    initConnector();
+
+    init();
   }, [isConnected, connect]);
 
 
