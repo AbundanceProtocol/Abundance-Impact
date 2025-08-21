@@ -199,25 +199,40 @@ export default function WalletConnect({ onTipAmountChange, onTokenChange }) {
   console.log('🔍 Available connectors:', connectors);
 
   // Initialize Farcaster connector once (guard with ref to prevent loops)
-  const didInitRef = useRef(false);
+  // const didInitRef = useRef(false);
+  // useEffect(() => {
+  //   const initFarcasterConnector = async () => {
+  //     if (didInitRef.current) return;
+  //     didInitRef.current = true;
+  //     try {
+  //       const connector = await addFarcasterConnector();
+  //       if (connector && !isConnected) {
+  //         await connect({ connector });
+  //       }
+  //     } catch (error) {
+  //       console.warn('Failed to initialize Farcaster connector:', error);
+  //     }
+  //   };
+
+  //   if (typeof window !== 'undefined' && !isConnected) {
+  //     initFarcasterConnector();
+  //   }
+  // }, [isConnected, connect]);
+
   useEffect(() => {
-    const initFarcasterConnector = async () => {
-      if (didInitRef.current) return;
-      didInitRef.current = true;
+    const initConnector = async () => {
       try {
         const connector = await addFarcasterConnector();
         if (connector && !isConnected) {
           await connect({ connector });
         }
-      } catch (error) {
-        console.warn('Failed to initialize Farcaster connector:', error);
+      } catch (err) {
+        console.warn('Farcaster connector error:', err);
       }
     };
+    initConnector();
+  }, []);
 
-    if (typeof window !== 'undefined' && !isConnected) {
-      initFarcasterConnector();
-    }
-  }, [isConnected, connect]);
 
   // Sync Wagmi state with local state
   useEffect(() => {
@@ -237,55 +252,31 @@ export default function WalletConnect({ onTipAmountChange, onTokenChange }) {
       setWalletAddress(null);
       setWalletChainId(null);
       setWalletProvider(null);
-      // Do not clear tokens to avoid UI flicker; keep last known list
+      // Keep topCoins to avoid UI flicker
     }
-  }, [isConnected, address, chainId, topCoins.length]);
+  }, [isConnected, address, chainId]);
 
   // Click outside handler to close dropdown
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (dropdownOpen && !event.target.closest('.custom-dropdown')) {
-        setDropdownOpen(false);
-      }
+      setDropdownOpen((prev) => (prev && !event.target.closest('.custom-dropdown') ? false : prev));
     };
-
+  
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [dropdownOpen]);
+  }, []); 
 
   // Fetch all tokens when wallet is connected
   useEffect(() => {
-    console.log('🔄 Token fetch effect triggered:', { 
-      walletConnected, 
-      walletAddress, 
-      topCoinsLoading, 
-      topCoinsLength: topCoins.length 
-    });
-    
-    if (walletConnected && walletAddress && !topCoinsLoading) {
-      const shouldFetch = topCoins.length === 0;
-
-      if (shouldFetch) {
-        console.log('🚀 Will fetch tokens in 500ms for address:', walletAddress);
-        const timeoutId = setTimeout(() => {
-          console.log('⏰ Timeout fired, calling getAllTokens for:', walletAddress);
-          getAllTokens(walletAddress);
-        }, 500);
-
-        return () => clearTimeout(timeoutId);
-      } else {
-        console.log('📦 Tokens already loaded, skipping fetch');
-      }
-    } else {
-      console.log('⏸️ Not fetching tokens:', { 
-        walletConnected, 
-        walletAddress, 
-        topCoinsLoading 
-      });
+    if (walletConnected && walletAddress && !topCoinsLoading && topCoins.length === 0) {
+      const timeoutId = setTimeout(() => {
+        getAllTokens(walletAddress);
+      }, 500);
+      return () => clearTimeout(timeoutId);
     }
-  }, [walletConnected, walletAddress, walletChainId, getAllTokens, topCoinsLoading, topCoins.length]);
+  }, [walletConnected, walletAddress, topCoinsLoading, topCoins.length, getAllTokens]);
 
-  // Always render; handle loading/error visually inside the dropdown
+
 
   // Always show the component, but with different states
   return (
