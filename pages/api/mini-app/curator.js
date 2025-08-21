@@ -1,6 +1,7 @@
 import connectToDatabase from "../../../libs/mongodb";
 import User from "../../../models/User";
 import qs from "querystring";
+// import { init, validateFramesMessage } from "@airstack/frames";
 import { encryptPassword } from "../../../utils/utils";
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 const userSecret = process.env.USER_SECRET
