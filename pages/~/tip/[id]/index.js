@@ -1,3 +1,4 @@
+'use client'
 import { useRouter } from "next/router";
 import { useRef, useContext, useEffect, useState } from "react";
 import { useAccount, useWriteContract, usePublicClient, useWaitForTransactionReceipt } from 'wagmi';
