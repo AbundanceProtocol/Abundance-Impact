@@ -1,3 +1,4 @@
+'use client'
 import React, { useRef, useState, useEffect, useContext } from 'react';
 import Mobile from './Mobile';
 import LeftMenu from './LeftMenu';
