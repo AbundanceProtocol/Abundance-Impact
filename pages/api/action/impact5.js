@@ -8,7 +8,6 @@ import EcosystemRules from "../../../models/EcosystemRules";
 import Allowlist from '../../../models/Allowlist';
 import OptOut from "../../../models/OptOut";
 import { decryptPassword } from "../../../utils/utils"; 
-// import { init, validateFramesMessage } from "@airstack/frames";
 
 const HubURL = process.env.NEYNAR_HUB
 const client = HubURL ? getSSLHubRpcClient(HubURL) : undefined;
