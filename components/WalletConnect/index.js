@@ -318,13 +318,11 @@ export default function WalletConnect({ onTipAmountChange, onTokenChange }) {
     return null; // Don't show error states
   }
 
-  // If wallet is connected, show only the coin dropdown
-  if (walletConnected && walletAddress) {
-    return (
-      <div className="wallet-connected">
-        {/* Show all tokens from all networks */}
-        {walletConnected && walletAddress && (
-          <div className="all-tokens-section">
+  // Always show the component, but with different states
+  return (
+    <div className="wallet-connect">
+      {/* Token Selection Dropdown - Always visible */}
+      <div className="all-tokens-section">
 
             
             <div>
@@ -816,17 +814,8 @@ export default function WalletConnect({ onTipAmountChange, onTokenChange }) {
 
                   </div>
                 </div>
-                
-
-                
-
               </div>
-          </div>
-        )}
+        </div>
       </div>
     );
-  }
-
-  // If no wallet connected, show nothing
-  return null;
-} 
+  } 
