@@ -1,3 +1,4 @@
+'use client'
 import React, { useContext, useEffect, useState } from "react";
 import { ActiveUser } from '../../assets'
 import { formatNum } from "../../../utils/utils";
