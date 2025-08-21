@@ -7,7 +7,6 @@ import Impact from '../../../../models/Impact';
 import Quality from '../../../../models/Quality';
 import Cast from "../../../../models/Cast";
 import EcosystemRules from "../../../../models/EcosystemRules";
-// import { init, validateFramesMessage } from "@airstack/frames";
 
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 const HubURL = process.env.NEYNAR_HUB
