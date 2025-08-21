@@ -1,4 +1,3 @@
-'use client'
 import Head from "next/head";
 import Link from "next/link";
 import React, { useContext, useState, useRef, useEffect } from "react";
