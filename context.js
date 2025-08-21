@@ -3,38 +3,10 @@ import axios from "axios";
 import useStore from "./utils/store";
 import { useRouter } from 'next/router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-
-import { cookieToInitialState, WagmiProvider } from 'wagmi';
-import { cookieStorage, createStorage } from '@wagmi/core'
-import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
-import { mainnet, arbitrum, base } from '@reown/appkit/networks'
+import { WagmiProvider } from 'wagmi';
 import { config as wagmiConfig } from './config/wagmi'
 
 const queryClient = new QueryClient();
-const projectId = process.env.NEXT_PUBLIC_WAGMI_KEY || 'default-project-id'
-
-// Only warn in development
-if (!process.env.NEXT_PUBLIC_WAGMI_KEY) {
-  console.warn('NEXT_PUBLIC_WAGMI_KEY is not defined. Using default project ID.');
-}
-
-const networks = [mainnet, arbitrum, base]
-
-let wagmiAdapter;
-try {
-  wagmiAdapter = new WagmiAdapter({
-    storage: createStorage({
-      storage: cookieStorage
-    }),
-    ssr: true,
-    projectId,
-    networks,
-  })
-} catch (error) {
-  console.warn('Failed to initialize WagmiAdapter:', error.message);
-  // Create a minimal fallback adapter
-  wagmiAdapter = null;
-}
 
 
 
@@ -77,24 +49,27 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
   // Auto-detect Farcaster wallet when available
   useEffect(() => {
     const detectFarcasterWallet = async () => {
-      if (typeof window !== 'undefined' && window.farcasterEthProvider && !walletConnected) {
+      if (typeof window !== 'undefined' && !walletConnected) {
         console.log('🔄 Auto-detecting Farcaster wallet in context...');
         try {
           setWalletLoading(true);
           setWalletError(null);
           
-          // Request accounts from Farcaster wallet
-          const accounts = await window.farcasterEthProvider.request({ method: 'eth_requestAccounts' });
-          const address = accounts[0];
-          const chainId = await window.farcasterEthProvider.request({ method: 'eth_chainId' });
-          
-          if (address && chainId) {
-            console.log('✅ Farcaster wallet auto-connected in context:', { address, chainId });
-            setWalletAddress(address);
-            setWalletChainId(chainId);
-            setWalletProvider('farcaster');
-            setWalletConnected(true);
-            setWalletError(null);
+          // Try to detect if Farcaster wallet is available
+          if (window.farcasterEthProvider) {
+            // Request accounts from Farcaster wallet
+            const accounts = await window.farcasterEthProvider.request({ method: 'eth_requestAccounts' });
+            const address = accounts[0];
+            const chainId = await window.farcasterEthProvider.request({ method: 'eth_chainId' });
+            
+            if (address && chainId) {
+              console.log('✅ Farcaster wallet auto-connected in context:', { address, chainId });
+              setWalletAddress(address);
+              setWalletChainId(chainId);
+              setWalletProvider('farcaster');
+              setWalletConnected(true);
+              setWalletError(null);
+            }
           }
         } catch (error) {
           console.error('❌ Farcaster wallet auto-connection failed in context:', error);
@@ -849,7 +824,12 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
 
   // Get all tokens from all supported networks
   const getAllTokens = async (address, forceRefresh = false) => {
-    if (!address) return [];
+    console.log('🔍 getAllTokens called with:', { address, forceRefresh });
+    
+    if (!address) {
+      console.log('❌ No address provided to getAllTokens');
+      return [];
+    }
     
     // Check cache first (5 minute cache)
     const cacheKey = `all_${address.toLowerCase()}`;
@@ -878,7 +858,7 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
     try {
       setTopCoinsLoading(true);
       setLastRpcCall(now);
-      console.log('Fetching all tokens for address:', address);
+      console.log('🚀 Starting to fetch all tokens for address:', address);
       
       // Define all supported networks and their tokens
       const networkTokens = {
@@ -1212,8 +1192,6 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
     }
   };
 
-  const initialState = cookieToInitialState(wagmiConfig, cookies);
-
   const contextValue = {
     ...initialAccount,
     ref1,
@@ -1263,7 +1241,7 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
 
   return (
     <AccountContext.Provider value={contextValue}>
-      <WagmiProvider config={wagmiConfig} initialState={initialState}>
+      <WagmiProvider config={wagmiConfig}>
         <QueryClientProvider client={queryClient}>
           {children}
         </QueryClientProvider>

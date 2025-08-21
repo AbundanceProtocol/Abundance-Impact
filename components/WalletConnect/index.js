@@ -4,6 +4,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { AccountContext } from '../../context';
 import { useAccount, useDisconnect } from 'wagmi';
 import Spinner from '../Common/Spinner';
+import { addFarcasterConnector } from '../../config/wagmi';
 
 export default function WalletConnect({ onTipAmountChange, onTokenChange }) {
   const {
@@ -188,13 +189,34 @@ export default function WalletConnect({ onTipAmountChange, onTokenChange }) {
     getAllTokens(address, forceRefresh);
   };
 
+  // Initialize Farcaster connector
+  useEffect(() => {
+    const initFarcasterConnector = async () => {
+      try {
+        const connector = await addFarcasterConnector();
+        if (connector) {
+          console.log('✅ Farcaster connector initialized in WalletConnect');
+        }
+      } catch (error) {
+        console.warn('Failed to initialize Farcaster connector:', error);
+      }
+    };
+
+    if (typeof window !== 'undefined') {
+      initFarcasterConnector();
+    }
+  }, []);
+
   // Wagmi hooks for wallet management
   const { isConnected, address, chainId } = useAccount();
   const { disconnect } = useDisconnect();
 
   // Sync Wagmi state with local state
   useEffect(() => {
+    console.log('🔄 Wagmi state changed:', { isConnected, address, chainId });
+    
     if (isConnected && address && chainId) {
+      console.log('✅ Wallet connected via Wagmi:', { address, chainId });
       setWalletConnected(true);
       setWalletAddress(address);
       setWalletChainId(chainId.toString());
@@ -202,6 +224,7 @@ export default function WalletConnect({ onTipAmountChange, onTokenChange }) {
       setWalletError(null);
       setWalletLoading(false);
     } else if (!isConnected) {
+      console.log('❌ Wallet disconnected via Wagmi');
       setWalletConnected(false);
       setWalletAddress(null);
       setWalletChainId(null);
@@ -226,16 +249,33 @@ export default function WalletConnect({ onTipAmountChange, onTokenChange }) {
 
   // Fetch all tokens when wallet is connected
   useEffect(() => {
+    console.log('🔄 Token fetch effect triggered:', { 
+      walletConnected, 
+      walletAddress, 
+      topCoinsLoading, 
+      topCoinsLength: topCoins.length 
+    });
+    
     if (walletConnected && walletAddress && !topCoinsLoading) {
       const shouldFetch = topCoins.length === 0;
 
       if (shouldFetch) {
+        console.log('🚀 Will fetch tokens in 500ms for address:', walletAddress);
         const timeoutId = setTimeout(() => {
+          console.log('⏰ Timeout fired, calling getAllTokens for:', walletAddress);
           getAllTokens(walletAddress);
         }, 500);
 
         return () => clearTimeout(timeoutId);
+      } else {
+        console.log('📦 Tokens already loaded, skipping fetch');
       }
+    } else {
+      console.log('⏸️ Not fetching tokens:', { 
+        walletConnected, 
+        walletAddress, 
+        topCoinsLoading 
+      });
     }
   }, [walletConnected, walletAddress, walletChainId, getAllTokens, topCoinsLoading, topCoins.length]);
 

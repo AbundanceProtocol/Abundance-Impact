@@ -33,10 +33,23 @@ export default function App({ Component, pageProps }) {
   }
 
   return (
-    <AccountProvider initialAccount={initialAccount} ref1={ref1}>
+    <AccountProvider initialAccount={initialAccount} ref1={ref1} cookies={pageProps.cookies}>
       <Layout>
         <Component {...pageProps} />
       </Layout>
     </AccountProvider>
   )
+}
+
+// Force SSR for all pages to prevent static generation issues with client-only code
+App.getInitialProps = async ({ Component, ctx }) => {
+  let pageProps = {}
+  if (Component.getInitialProps) {
+    pageProps = await Component.getInitialProps(ctx)
+  }
+  // Pass cookies to initial state for Wagmi
+  if (ctx.req && ctx.req.headers.cookie) {
+    pageProps.cookies = ctx.req.headers.cookie
+  }
+  return { pageProps }
 }
