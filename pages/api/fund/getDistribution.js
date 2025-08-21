@@ -14,6 +14,7 @@ import Fund from '../../../models/Fund';
 // import EcosystemRules from '../../../models/EcosystemRules';
 // import { getTimeRange, processTips, populateCast } from '../../../utils/utils';
 // import { x1Testnet } from 'viem/chains';
+// import { init, fetchQuery } from "@airstack/node";
 // import { createObjectCsvWriter } from 'csv-writer';
 // import path from 'path'
 // import fs from 'fs';

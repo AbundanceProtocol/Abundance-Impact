@@ -7,6 +7,7 @@ import Impact from '../../../models/Impact';
 import Quality from '../../../models/Quality';
 import Cast from "../../../models/Cast";
 import EcosystemRules from "../../../models/EcosystemRules";
+// import { init, validateFramesMessage } from "@airstack/frames";
 
 const HubURL = process.env.NEYNAR_HUB
 const client = HubURL ? getSSLHubRpcClient(HubURL) : undefined;
