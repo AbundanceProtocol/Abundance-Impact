@@ -499,8 +499,42 @@ export default function Tip() {
       const loadFarcasterTokens = async () => {
         try {
           const { sdk } = await import('@farcaster/miniapp-sdk')
+          
+          // Wait for SDK to be ready
+          await sdk.actions.ready();
+          
+          // Get user context
           const userProfile = await sdk.context
-          const farcasterAddress = userProfile?.user?.custodyAddress
+          
+          // Try multiple possible locations for wallet address
+          let farcasterAddress = null;
+          
+          // Method 1: Try custodyAddress
+          if (userProfile?.user?.custodyAddress) {
+            farcasterAddress = userProfile.user.custodyAddress;
+          }
+          // Method 2: Try verifiedAccounts
+          else if (userProfile?.user?.verifiedAccounts?.length > 0) {
+            const ethAccount = userProfile.user.verifiedAccounts.find(acc => acc.type === 'Ethereum');
+            if (ethAccount?.address) {
+              farcasterAddress = ethAccount.address;
+            }
+          }
+          // Method 3: Try user object directly
+          else if (userProfile?.user?.address) {
+            farcasterAddress = userProfile.user.address;
+          }
+          // Method 4: Check if there's a global wallet provider
+          else if (typeof window !== 'undefined' && window.farcasterEthProvider) {
+            try {
+              const accounts = await window.farcasterEthProvider.request({ method: 'eth_accounts' });
+              if (accounts && accounts.length > 0) {
+                farcasterAddress = accounts[0];
+              }
+            } catch (error) {
+              console.log('🔄 farcasterEthProvider request failed:', error);
+            }
+          }
           
           if (farcasterAddress) {
             console.log('🔄 Loading tokens for Farcaster wallet:', farcasterAddress);
@@ -536,18 +570,64 @@ export default function Tip() {
         try {
           console.log('🔄 Loading initial tokens for Farcaster miniapp...');
           const { sdk } = await import('@farcaster/miniapp-sdk')
+          
+          // Wait for SDK to be ready
+          await sdk.actions.ready();
+          
+          // Get user context
           const userProfile = await sdk.context
-          const farcasterAddress = userProfile?.user?.custodyAddress
+          console.log('🔄 Full SDK context:', userProfile);
+          
+          // Try multiple possible locations for wallet address
+          let farcasterAddress = null;
+          
+          // Method 1: Try custodyAddress
+          if (userProfile?.user?.custodyAddress) {
+            farcasterAddress = userProfile.user.custodyAddress;
+            console.log('🔄 Found wallet address in custodyAddress:', farcasterAddress);
+          }
+          // Method 2: Try verifiedAccounts
+          else if (userProfile?.user?.verifiedAccounts?.length > 0) {
+            const ethAccount = userProfile.user.verifiedAccounts.find(acc => acc.type === 'Ethereum');
+            if (ethAccount?.address) {
+              farcasterAddress = ethAccount.address;
+              console.log('🔄 Found wallet address in verifiedAccounts:', farcasterAddress);
+            }
+          }
+          // Method 3: Try user object directly
+          else if (userProfile?.user?.address) {
+            farcasterAddress = userProfile.user.address;
+            console.log('🔄 Found wallet address in user.address:', farcasterAddress);
+          }
+          // Method 4: Check if there's a global wallet provider
+          else if (typeof window !== 'undefined' && window.farcasterEthProvider) {
+            try {
+              const accounts = await window.farcasterEthProvider.request({ method: 'eth_accounts' });
+              if (accounts && accounts.length > 0) {
+                farcasterAddress = accounts[0];
+                console.log('🔄 Found wallet address from farcasterEthProvider:', farcasterAddress);
+              }
+            } catch (error) {
+              console.log('🔄 farcasterEthProvider request failed:', error);
+            }
+          }
           
           if (farcasterAddress) {
-            console.log('🔄 Found Farcaster wallet address:', farcasterAddress);
+            console.log('🔄 Successfully found Farcaster wallet address:', farcasterAddress);
             getAllTokens(farcasterAddress, false);
             // Set wallet state
             setWalletAddress(farcasterAddress);
             setWalletConnected(true);
             setWalletProvider('farcaster');
           } else {
-            console.log('🔄 No Farcaster wallet address found');
+            console.log('🔄 No Farcaster wallet address found in any location');
+            console.log('🔄 Available user data:', {
+              hasUser: !!userProfile?.user,
+              userKeys: userProfile?.user ? Object.keys(userProfile.user) : [],
+              verifiedAccounts: userProfile?.user?.verifiedAccounts,
+              hasCustodyAddress: !!userProfile?.user?.custodyAddress,
+              hasAddress: !!userProfile?.user?.address
+            });
           }
         } catch (error) {
           console.warn('Failed to load initial Farcaster tokens:', error);
