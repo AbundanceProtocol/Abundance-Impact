@@ -1,3 +1,4 @@
+'use client'
 import { useState } from 'react';
 // import { Warp } from '../pages/assets';
 import { SiFarcaster } from "react-icons/si";
