@@ -47,7 +47,14 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
   const [lastRpcCall, setLastRpcCall] = useState(0) // Track last RPC call time
   
   // Auto-detect Farcaster wallet when available (legacy method - keeping for fallback)
+  // DISABLED: This was interfering with Wagmi connection stability
   useEffect(() => {
+    // Skip legacy detection if we're using Wagmi
+    if (typeof window !== 'undefined' && window.wagmi) {
+      console.log('🔄 Wagmi detected, skipping legacy wallet detection');
+      return;
+    }
+    
     const detectFarcasterWallet = async () => {
       if (typeof window !== 'undefined' && !walletConnected) {
         console.log('🔄 Auto-detecting Farcaster wallet in context (legacy method)...');

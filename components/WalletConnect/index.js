@@ -189,22 +189,43 @@ export default function WalletConnect({ onTipAmountChange, onTokenChange }) {
     getAllTokens(address, forceRefresh);
   };
 
-  // Initialize Farcaster connector and connect to wallet
+  // Wagmi hooks for wallet management
+  const { isConnected, address, chainId } = useAccount();
+  const { disconnect } = useDisconnect();
+  const { connect, connectors } = useConnect();
+  
+  // Debug: Log current Wagmi state
+  console.log('🔍 Current Wagmi state:', { isConnected, address, chainId });
+  console.log('🔍 Available connectors:', connectors);
+
+  // Initialize Farcaster connector and connect to wallet (only once)
   useEffect(() => {
+    let isInitialized = false;
+    
     const initFarcasterConnector = async () => {
+      if (isInitialized) {
+        console.log('🔄 Farcaster connector already initialized, skipping...');
+        return;
+      }
+      
       try {
         console.log('🔄 Initializing Farcaster connector...');
         const connector = await addFarcasterConnector();
         if (connector) {
           console.log('✅ Farcaster connector initialized in WalletConnect:', connector);
+          isInitialized = true;
           
-          // Try to connect to the Farcaster wallet
-          try {
-            console.log('🔄 Attempting to connect to Farcaster wallet...');
-            await connect({ connector });
-            console.log('✅ Successfully connected to Farcaster wallet');
-          } catch (connectError) {
-            console.warn('⚠️ Failed to connect to Farcaster wallet:', connectError);
+          // Only try to connect if not already connected
+          if (!isConnected) {
+            try {
+              console.log('🔄 Attempting to connect to Farcaster wallet...');
+              await connect({ connector });
+              console.log('✅ Successfully connected to Farcaster wallet');
+            } catch (connectError) {
+              console.warn('⚠️ Failed to connect to Farcaster wallet:', connectError);
+            }
+          } else {
+            console.log('✅ Already connected to wallet, skipping connection attempt');
           }
         } else {
           console.warn('⚠️ Farcaster connector returned null');
@@ -214,19 +235,10 @@ export default function WalletConnect({ onTipAmountChange, onTokenChange }) {
       }
     };
 
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && !isConnected) {
       initFarcasterConnector();
     }
-  }, []); // Remove connect from dependencies to avoid initialization issues
-
-  // Wagmi hooks for wallet management
-  const { isConnected, address, chainId } = useAccount();
-  const { disconnect } = useDisconnect();
-  const { connect, connectors } = useConnect();
-  
-  // Debug: Log current Wagmi state
-  console.log('🔍 Current Wagmi state:', { isConnected, address, chainId });
-  console.log('🔍 Available connectors:', connectors);
+  }, [isConnected, connect]); // Only re-run if connection state changes
 
   // Sync Wagmi state with local state
   useEffect(() => {
