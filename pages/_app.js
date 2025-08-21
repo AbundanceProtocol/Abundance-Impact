@@ -2,6 +2,12 @@ import '../styles/index.css'
 import React, { useEffect, useState, useRef } from 'react'
 import { AccountProvider } from '../context'
 import Layout from '../components/Layout'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { WagmiProvider } from 'wagmi'
+import { config as wagmiConfig } from '../config/wagmi'
+import { cookieToInitialState } from '@wagmi/core'
+
+const queryClient = new QueryClient()
 
 export default function App({ Component, pageProps }) {
   const initialAccount = { points: '$IMPACT', qdau: 0, impact: 0 }
@@ -33,10 +39,27 @@ export default function App({ Component, pageProps }) {
   }
 
   return (
-    <AccountProvider initialAccount={initialAccount} ref1={ref1}>
-      <Layout>
-        <Component {...pageProps} />
-      </Layout>
+    <AccountProvider initialAccount={initialAccount} ref1={ref1} cookies={pageProps.cookies}>
+      <WagmiProvider config={wagmiConfig} initialState={cookieToInitialState(wagmiConfig, pageProps.cookies)}>
+        <QueryClientProvider client={queryClient}>
+          <Layout>
+            <Component {...pageProps} />
+          </Layout>
+        </QueryClientProvider>
+      </WagmiProvider>
     </AccountProvider>
   )
 }
+
+// Force SSR for all pages to prevent static generation issues with client-only code
+App.getInitialProps = async ({ Component, ctx }) => {
+  let pageProps = {};
+  if (Component.getInitialProps) {
+    pageProps = await Component.getInitialProps(ctx);
+  }
+  // Pass cookies to initial state for Wagmi
+  if (ctx.req && ctx.req.headers.cookie) {
+    pageProps.cookies = ctx.req.headers.cookie;
+  }
+  return { pageProps };
+};
