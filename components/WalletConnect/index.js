@@ -219,19 +219,24 @@ export default function WalletConnect({ onTipAmountChange, onTokenChange }) {
   //   }
   // }, [isConnected, connect]);
 
+  const hasAttemptedConnectRef = useRef(false);
   useEffect(() => {
     const initConnector = async () => {
+      hasAttemptedConnectRef.current = true;
       try {
-        const connector = await addFarcasterConnector();
-        if (connector && !isConnected) {
-          await connect({ connector });
+        // Only attempt Farcaster miniapp connector if available in window
+        if (typeof window !== 'undefined' && window.farcasterEthProvider) {
+          const connector = await addFarcasterConnector();
+          if (connector && !isConnected) {
+            await connect({ connector });
+          }
         }
       } catch (err) {
         console.warn('Farcaster connector error:', err);
       }
     };
     initConnector();
-  }, []);
+  }, [isConnected, connect]);
 
 
   // Sync Wagmi state with local state
@@ -248,10 +253,13 @@ export default function WalletConnect({ onTipAmountChange, onTokenChange }) {
       setWalletLoading(false);
     } else if (!isConnected) {
       console.log('❌ Wallet disconnected via Wagmi');
-      setWalletConnected(false);
-      setWalletAddress(null);
-      setWalletChainId(null);
-      setWalletProvider(null);
+      // Avoid running disconnect sequence before we've attempted to connect
+      if (hasAttemptedConnectRef.current) {
+        setWalletConnected(false);
+        setWalletAddress(null);
+        setWalletChainId(null);
+        setWalletProvider(null);
+      }
       // Keep topCoins to avoid UI flicker
     }
   }, [isConnected, address, chainId]);
