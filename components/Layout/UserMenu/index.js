@@ -1,4 +1,3 @@
-'use client'
 import React, { useRef, useContext, useEffect } from "react";
 import Link from "next/link";
 import useMatchBreakpoints from "../../../hooks/useMatchBreakpoints";
