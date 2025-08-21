@@ -1,5 +1,6 @@
 import connectToDatabase from "../../libs/mongodb";
 import User from "../../models/User";
+// import { init, fetchQuery } from "@airstack/node";
 
 export default async function handler(req, res) {
   // init(process.env.AIRSTACK_API_KEY);

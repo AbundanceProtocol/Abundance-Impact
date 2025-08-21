@@ -13,6 +13,7 @@ import Claim from "../../../../models/Claim";
 // import { decryptPassword, getTimeRange, processTips, populateCast } from "../../../../utils/utils";
 import _ from "lodash";
 import qs from "querystring";
+// import { init, validateFramesMessage } from "@airstack/frames";
 
 const baseURL =
   process.env.NODE_ENV === "production" ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
