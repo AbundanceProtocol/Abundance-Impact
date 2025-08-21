@@ -11,7 +11,6 @@ import { decryptPassword, getTimeRange, processTips, populateCast } from "../../
 import _ from "lodash";
 import qs from "querystring";
 import { metaButton } from "../../../../utils/frames";
-// import { init, validateFramesMessage } from "@airstack/frames";
 
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 const HubURL = process.env.NEYNAR_HUB

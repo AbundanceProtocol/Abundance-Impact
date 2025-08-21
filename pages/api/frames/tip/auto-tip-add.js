@@ -10,7 +10,6 @@ import EcosystemRules from "../../../../models/EcosystemRules";
 import ScheduleTip from "../../../../models/ScheduleTip";
 import { encryptPassword, generateRandomString } from '../../../../utils/utils'
 import { metaButton } from '../../../../utils/frames'
-// import { init, validateFramesMessage } from "@airstack/frames";
 
 const easyCronKey = process.env.EASYCRON_API_KEY;
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;

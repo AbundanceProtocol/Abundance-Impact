@@ -1,9 +1,9 @@
 import connectToDatabase from '../../../libs/mongodb';
 import Cast from '../../../models/Cast';
-import { init, fetchQuery } from "@airstack/node";
+// import { init, fetchQuery } from "@airstack/node";
 
 export default async function handler(req, res) {
-  init(process.env.AIRSTACK_API_KEY);
+  // init(process.env.AIRSTACK_API_KEY);
 
   const { channel, more } = req.query
   if (req.method !== 'GET' || !channel) {
@@ -12,29 +12,29 @@ export default async function handler(req, res) {
 
     try {
 
-      let query = `
-          query GetChannelById {
-            FarcasterChannels(
-              input: {blockchain: ALL, filter: {channelId: {_regex_in: "${channel}"}}}
-            ) {
-              FarcasterChannel {
-                channelId
-                url
-                followerCount
-                imageUrl
-              }
-            }
-          }`;
+      // let query = `
+      //     query GetChannelById {
+      //       FarcasterChannels(
+      //         input: {blockchain: ALL, filter: {channelId: {_regex_in: "${channel}"}}}
+      //       ) {
+      //         FarcasterChannel {
+      //           channelId
+      //           url
+      //           followerCount
+      //           imageUrl
+      //         }
+      //       }
+      //     }`;
 
-      const main = async () => {
-        const { data, error } = await fetchQuery(query);
+      // const main = async () => {
+      //   const { data, error } = await fetchQuery(query);
       
-        if (error) {
-          throw new Error(error.message);
-        }
-        console.log('airstack data', data);
-        return data
-      };
+      //   if (error) {
+      //     throw new Error(error.message);
+      //   }
+      //   console.log('airstack data', data);
+      //   return data
+      // };
     
     
       const data = await main();
