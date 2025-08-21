@@ -206,7 +206,8 @@ export default function Tip() {
     walletProvider,
     userInfo,
     setUserInfo,
-    getAllTokens
+    getAllTokens,
+    topCoins
   } = useContext(AccountContext);
   
   // Use the existing wallet hook for transactions
@@ -482,6 +483,37 @@ export default function Tip() {
       })();
     }
   }, []);
+
+  // Load tokens when wallet is connected
+  useEffect(() => {
+    if (walletConnected && walletAddress) {
+      console.log('🔄 Loading tokens for wallet:', walletAddress);
+      getAllTokens(walletAddress, false);
+    }
+  }, [walletConnected, walletAddress]);
+
+  // Debug: Log when topCoins changes
+  useEffect(() => {
+    console.log('🔄 topCoins updated:', topCoins);
+  }, [topCoins]);
+
+  // Debug: Log wallet connection status
+  useEffect(() => {
+    console.log('🔄 Wallet status:', { walletConnected, walletAddress, wagmiConnected, wagmiAddress });
+  }, [walletConnected, walletAddress, wagmiConnected, wagmiAddress]);
+
+  // Local function to get user balance
+  const getUserBalance = async (fid) => {
+    try {
+      const res = await fetch(`/api/user/getUserBalance?fid=${fid}`);
+      const data = await res.json();
+      console.log('data', data)
+      return {impact: data?.impact || 0, qdau: data?.qdau || 0};
+    } catch (error) {
+      console.error('Error getting user balance:', error);
+      return {impact: 0, qdau: 0};
+    }
+  };
 
   async function getCreatorRewards(fid) {
     try {
