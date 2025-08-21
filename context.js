@@ -46,33 +46,38 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
   const [topCoinsCache, setTopCoinsCache] = useState({})
   const [lastRpcCall, setLastRpcCall] = useState(0) // Track last RPC call time
   
-  // Auto-detect Farcaster wallet when available
+  // Auto-detect Farcaster wallet when available (legacy method - keeping for fallback)
   useEffect(() => {
     const detectFarcasterWallet = async () => {
       if (typeof window !== 'undefined' && !walletConnected) {
-        console.log('🔄 Auto-detecting Farcaster wallet in context...');
+        console.log('🔄 Auto-detecting Farcaster wallet in context (legacy method)...');
         try {
           setWalletLoading(true);
           setWalletError(null);
           
           // Try to detect if Farcaster wallet is available
           if (window.farcasterEthProvider) {
+            console.log('✅ Farcaster wallet provider found in window (legacy)');
             // Request accounts from Farcaster wallet
             const accounts = await window.farcasterEthProvider.request({ method: 'eth_requestAccounts' });
             const address = accounts[0];
             const chainId = await window.farcasterEthProvider.request({ method: 'eth_chainId' });
             
             if (address && chainId) {
-              console.log('✅ Farcaster wallet auto-connected in context:', { address, chainId });
+              console.log('✅ Farcaster wallet auto-connected in context (legacy):', { address, chainId });
               setWalletAddress(address);
               setWalletChainId(chainId);
               setWalletProvider('farcaster');
               setWalletConnected(true);
               setWalletError(null);
+            } else {
+              console.log('❌ No address or chainId from Farcaster wallet (legacy)');
             }
+          } else {
+            console.log('❌ No Farcaster wallet provider in window (legacy)');
           }
         } catch (error) {
-          console.error('❌ Farcaster wallet auto-connection failed in context:', error);
+          console.error('❌ Farcaster wallet auto-connection failed in context (legacy):', error);
           setWalletError(error.message);
         } finally {
           setWalletLoading(false);

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useContext } from 'react';
 import { AccountContext } from '../../context';
-import { useAccount, useDisconnect } from 'wagmi';
+import { useAccount, useDisconnect, useConnect } from 'wagmi';
 import Spinner from '../Common/Spinner';
 import { addFarcasterConnector } from '../../config/wagmi';
 
@@ -189,13 +189,25 @@ export default function WalletConnect({ onTipAmountChange, onTokenChange }) {
     getAllTokens(address, forceRefresh);
   };
 
-  // Initialize Farcaster connector
+  // Initialize Farcaster connector and connect to wallet
   useEffect(() => {
     const initFarcasterConnector = async () => {
       try {
+        console.log('🔄 Initializing Farcaster connector...');
         const connector = await addFarcasterConnector();
         if (connector) {
-          console.log('✅ Farcaster connector initialized in WalletConnect');
+          console.log('✅ Farcaster connector initialized in WalletConnect:', connector);
+          
+          // Try to connect to the Farcaster wallet
+          try {
+            console.log('🔄 Attempting to connect to Farcaster wallet...');
+            await connect({ connector });
+            console.log('✅ Successfully connected to Farcaster wallet');
+          } catch (connectError) {
+            console.warn('⚠️ Failed to connect to Farcaster wallet:', connectError);
+          }
+        } else {
+          console.warn('⚠️ Farcaster connector returned null');
         }
       } catch (error) {
         console.warn('Failed to initialize Farcaster connector:', error);
@@ -205,11 +217,16 @@ export default function WalletConnect({ onTipAmountChange, onTokenChange }) {
     if (typeof window !== 'undefined') {
       initFarcasterConnector();
     }
-  }, []);
+  }, []); // Remove connect from dependencies to avoid initialization issues
 
   // Wagmi hooks for wallet management
   const { isConnected, address, chainId } = useAccount();
   const { disconnect } = useDisconnect();
+  const { connect, connectors } = useConnect();
+  
+  // Debug: Log current Wagmi state
+  console.log('🔍 Current Wagmi state:', { isConnected, address, chainId });
+  console.log('🔍 Available connectors:', connectors);
 
   // Sync Wagmi state with local state
   useEffect(() => {
