@@ -2,8 +2,6 @@
 
 import { http, createConfig } from 'wagmi'
 import { base, celo, optimism, arbitrum } from 'wagmi/chains'
-import { injected } from 'wagmi/connectors'
-import { farcasterMiniApp as miniAppConnector } from '@farcaster/miniapp-wagmi-connector'
 
 // Note: This config is for Wagmi v2
 // Farcaster connector will be added dynamically on client side
@@ -18,15 +16,10 @@ export const config = createConfig({
     [optimism.id]: http(),
     [arbitrum.id]: http(),
   },
-  // Per Farcaster Miniapps guide – register the mini app connector
-  connectors: [
-    miniAppConnector(),
-    injected()
-  ]
+  connectors: [] // Initialize with empty connectors
 })
 
 // Add Farcaster connector dynamically on client side
-// Kept for backwards-compat usage; not required when using connectors above
 export async function addFarcasterConnector() {
   try {
     const { farcasterMiniApp } = await import('@farcaster/miniapp-wagmi-connector')
