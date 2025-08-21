@@ -1,11 +1,10 @@
-'use client'
-
 import { http, createConfig } from 'wagmi'
 import { base, celo, optimism, arbitrum } from 'wagmi/chains'
+import { farcasterMiniApp } from '@farcaster/miniapp-wagmi-connector'
 
 // Note: This config is for Wagmi v2
-// Farcaster connector will be added dynamically on client side
-console.log('Wagmi config loaded');
+// Make sure you have the correct version of @farcaster/miniapp-wagmi-connector
+console.log('Wagmi config loaded with Farcaster connector');
 
 export const config = createConfig({
   chains: [base, celo, optimism, arbitrum],
@@ -15,16 +14,7 @@ export const config = createConfig({
     [optimism.id]: http(),
     [arbitrum.id]: http(),
   },
-  connectors: [] // Initialize with empty connectors
+  connectors: [
+    farcasterMiniApp()
+  ]
 })
-
-// Add Farcaster connector dynamically on client side
-export async function addFarcasterConnector() {
-  try {
-    const { farcasterMiniApp } = await import('@farcaster/miniapp-wagmi-connector')
-    return farcasterMiniApp()
-  } catch (error) {
-    console.warn('Farcaster connector not available:', error)
-    return null
-  }
-}
