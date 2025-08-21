@@ -1,22 +1,22 @@
 import connectToDatabase from "../../../libs/mongodb";
 import User from "../../../models/User";
 import qs from "querystring";
+import { init, validateFramesMessage } from "@airstack/frames";
 import { encryptPassword } from "../../../utils/utils";
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_BASE_URL_PROD : process.env.NEXT_PUBLIC_BASE_URL_DEV;
 const userSecret = process.env.USER_SECRET
 
 export default async function handler(req, res) {
-  // init(process.env.AIRSTACK_API_KEY ?? '')
-  // const body = await req.body;
-  // const {isValid, message} = await validateFramesMessage(body)
+  init(process.env.AIRSTACK_API_KEY ?? '')
+  const body = await req.body;
+  const {isValid, message} = await validateFramesMessage(body)
 
   const { username, ecosystem, points } = req.query;
 
   if (req.method === 'POST') {
-    const curatorFid = req.body.untrustedData?.fid
 
-    // const curatorFid = message?.data?.fid
-    // console.log('curatorFid', curatorFid)
+    const curatorFid = message?.data?.fid
+    console.log('curatorFid', curatorFid)
 
     async function getUser(curatorFid, points) {
       try {
