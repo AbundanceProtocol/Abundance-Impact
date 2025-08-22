@@ -290,6 +290,9 @@ export default function Tip() {
   const [approveOnlyAmount, setApproveOnlyAmount] = useState(false); // when true, approve only needed amount
   const [needsApproval, setNeedsApproval] = useState(false); // track if token approval is needed
   
+  // Local cache for token approvals to reduce external API calls
+  const [tokenApprovals, setTokenApprovals] = useState({}); // { [tokenAddress]: { approved: boolean, amount: string, lastChecked: number } }
+  
   // Collapsible state for Impact Filter
   const [isImpactFilterCollapsed, setIsImpactFilterCollapsed] = useState(true);
   
@@ -341,13 +344,43 @@ export default function Tip() {
                         selectedToken.networkKey !== token?.networkKey;
     
     if (tokenChanged) {
-      console.log('🔍 Token actually changed, resetting approval status');
+      console.log('🔍 Token actually changed, checking cached approval status');
+      
+      // Check cached approval status for the new token
+      if (token && !token.isNative && tipAmount > 0) {
+        const tokenAddress = token?.address || token?.contractAddress;
+        const approvalStatus = getCachedApprovalStatus(tokenAddress, tipAmount);
+        
+        if (approvalStatus.needsApproval) {
+          console.log('🔍 Cached check: New token needs approval');
+          setNeedsApproval(true);
+          
+          if (approvalStatus.cachedData) {
+            const currentAllowance = ethers.utils.formatUnits(approvalStatus.cachedData.amount, getTokenDecimals(token));
+            const shortfall = tipAmount - parseFloat(currentAllowance);
+            setDisperseStatus(`⚠️ Token approval required for ${token?.symbol}.`);
+          } else {
+            setDisperseStatus(`⚠️ Token approval required for ${token?.symbol}.`);
+          }
+        } else {
+          console.log('🔍 Cached check: New token is approved');
+          setNeedsApproval(false);
+          setDisperseStatus(`✅ ${token?.symbol} is approved for multi-tip!`);
+        }
+      } else if (token?.isNative) {
+        console.log('🔍 Native token selected, no approval needed');
+        setNeedsApproval(false);
+        setDisperseStatus(`✅ ${token?.symbol} is a native token. Ready to multi-tip!`);
+      } else {
+        console.log('🔍 No tip amount set, clearing approval status');
+        setNeedsApproval(false);
+        setDisperseStatus('');
+      }
+      
       // Only clear non-error status when token changes
       if (disperseStatus && disperseStatus !== '' && !disperseStatus.includes('Error') && !disperseStatus.includes('⚠️')) {
         setDisperseStatus('');
       }
-      // Reset approval status when token changes
-      setNeedsApproval(false);
     } else {
       console.log('🔍 Token unchanged, keeping current approval status');
     }
@@ -359,9 +392,27 @@ export default function Tip() {
   const updateTipAmount = (amount) => {
     setTipAmount(amount);
     
-    // Check if approval is needed when tip amount changes
+    // Check if approval is needed when tip amount changes using cached data
     if (selectedToken && !selectedToken.isNative && amount > 0) {
-      checkTokenApproval(); // Removed force: true to respect rate limiting
+      const tokenAddress = selectedToken?.address || selectedToken?.contractAddress;
+      const approvalStatus = getCachedApprovalStatus(tokenAddress, amount);
+      
+      if (approvalStatus.needsApproval) {
+        console.log('🔍 Cached check: Token needs approval for new tip amount');
+        setNeedsApproval(true);
+        
+        if (approvalStatus.cachedData) {
+          const currentAllowance = ethers.utils.formatUnits(approvalStatus.cachedData.amount, getTokenDecimals(selectedToken));
+          const shortfall = amount - parseFloat(currentAllowance);
+          setDisperseStatus(`⚠️ Token approval required for ${selectedToken?.symbol}.`);
+        } else {
+          setDisperseStatus(`⚠️ Token approval required for ${selectedToken?.symbol}.`);
+        }
+      } else {
+        console.log('🔍 Cached check: Token approved for new tip amount');
+        setNeedsApproval(false);
+        setDisperseStatus(`✅ ${selectedToken?.symbol} is approved for multi-tip!`);
+      }
     }
   };
 
@@ -379,6 +430,14 @@ export default function Tip() {
       checkTokenApproval(); // Removed force: true to respect rate limiting
     }
   }, [selectedToken, walletConnected]);
+
+  // Check all token approvals when wallet connects
+  useEffect(() => {
+    if (walletConnected && walletAddress) {
+      console.log('🔍 Wallet connected, checking all token approvals');
+      checkAllTokenApprovals();
+    }
+  }, [walletConnected, walletAddress]);
 
   // Amount format helper for share text
   const formatShareAmount = (n) => {
@@ -993,6 +1052,34 @@ export default function Tip() {
       return; // No approval needed for native tokens
     }
 
+    const tokenAddress = selectedToken?.address || selectedToken?.contractAddress;
+    
+    // First check local cache
+    const cachedApproval = tokenApprovals[tokenAddress];
+    if (cachedApproval && (Date.now() - cachedApproval.lastChecked) < 300000) { // 5 minute cache
+      console.log('🔍 Using cached approval data (avoiding external API call):', cachedApproval);
+      
+      // Convert tipAmount to the same format as allowance for comparison
+      const tipAmountInWei = parseUnits(tipAmount.toString(), selectedToken?.decimals || 18);
+      const isApprovedForAmount = cachedApproval.approved && 
+        BigInt(cachedApproval.amount) >= tipAmountInWei;
+      
+      if (isApprovedForAmount) {
+        console.log('🔍 Cached check: Token approved for this tip amount');
+        setDisperseStatus(`✅ ${selectedToken?.symbol} is approved for ${tipAmount} ${selectedToken?.symbol}. Ready to multi-tip!`);
+        setNeedsApproval(false);
+      } else {
+        const currentAllowance = ethers.utils.formatUnits(cachedApproval.amount, selectedToken?.decimals || 18);
+        const shortfall = tipAmount - parseFloat(currentAllowance);
+        console.log('🔍 Cached check: Token needs approval for this tip amount');
+        setDisperseStatus(`⚠️ Token approval required. Current allowance: ${currentAllowance} ${selectedToken?.symbol}, but you want to tip: ${tipAmount} ${selectedToken?.symbol}. You need to approve ${shortfall.toFixed(6)} more ${selectedToken?.symbol}.`);
+        setNeedsApproval(true);
+      }
+      return;
+    }
+
+    console.log('🔍 Cache miss or expired, making external API call to check approval');
+    
     try {
       // Rate limit: skip if last check was too recent or a check is in flight, unless forced
       const now = Date.now();
@@ -1001,8 +1088,6 @@ export default function Tip() {
       }
       approvalCheckInFlightRef.current = true;
       lastApprovalCheckRef.current = now;
-
-      const tokenAddress = selectedToken?.address || selectedToken?.contractAddress;
       
       console.log('🔍 About to check allowance for:', {
         tokenAddress,
@@ -1019,26 +1104,45 @@ export default function Tip() {
         args: [walletAddress, '0xD152f549545093347A162Dce210e7293f1452150'],
       });
       
-      console.log('🔍 Allowance result:', {
+      // Convert tipAmount to the same format as allowance for comparison
+      const tipAmountInWei = parseUnits(tipAmount.toString(), selectedToken?.decimals || 18);
+      
+      console.log('🔍 External API allowance check result:', {
         allowance: allowanceResult.toString(),
+        tipAmount: tipAmount,
+        tipAmountInWei: tipAmountInWei.toString(),
         decimals: selectedToken?.decimals || 18,
-        threshold: parseUnits('0.01', selectedToken?.decimals || 18).toString(),
-        needsApproval: allowanceResult < parseUnits('0.01', selectedToken?.decimals || 18)
+        needsApproval: allowanceResult < tipAmountInWei
       });
       
-      // If allowance is very low, show approval message
-      if (allowanceResult < parseUnits('0.01', selectedToken?.decimals || 18)) {
-        console.log('🔍 Setting needsApproval to TRUE');
-        setDisperseStatus(`⚠️ Token approval required. Please approve ${selectedToken?.symbol} spending first.`);
+      // Check if allowance covers the actual tip amount
+      if (allowanceResult < tipAmountInWei) {
+        const currentAllowance = ethers.utils.formatUnits(allowanceResult, selectedToken?.decimals || 18);
+        const shortfall = tipAmount - parseFloat(currentAllowance);
+        console.log('🔍 Setting needsApproval to TRUE - allowance insufficient for tip amount');
+        setDisperseStatus(`⚠️ Token approval required. Current allowance: ${currentAllowance} ${selectedToken?.symbol}, but you want to tip: ${tipAmount} ${selectedToken?.symbol}. You need to approve ${shortfall.toFixed(6)} more ${selectedToken?.symbol}.`);
         setNeedsApproval(true);
-        console.log('🔍 On-chain check: Token needs approval');
+        console.log('🔍 On-chain check: Token needs approval for this tip amount');
       } else {
-        // Token is approved
-        console.log('🔍 Setting needsApproval to FALSE');
-        setDisperseStatus(`✅ ${selectedToken?.symbol} is approved. Ready to multi-tip!`);
+        // Token is approved for this tip amount
+        console.log('🔍 Setting needsApproval to FALSE - allowance sufficient for tip amount');
+        setDisperseStatus(`✅ ${selectedToken?.symbol} is approved for ${tipAmount} ${selectedToken?.symbol}. Ready to multi-tip!`);
         setNeedsApproval(false);
-        console.log('🔍 On-chain check: Token is approved');
+        console.log('🔍 On-chain check: Token is approved for this tip amount');
       }
+
+      // Update local cache with fresh data
+      setTokenApprovals(prev => ({
+        ...prev,
+        [tokenAddress]: {
+          approved: allowanceResult >= tipAmountInWei,
+          amount: allowanceResult.toString(),
+          lastChecked: Date.now()
+        }
+      }));
+      
+      console.log('🔍 Updated local cache with fresh approval data');
+      
     } catch (error) {
       console.error('Error checking token approval:', error);
       // If RPC 429, extend cooldown to back off
@@ -1096,6 +1200,16 @@ export default function Tip() {
       
       // Update approval status
       setNeedsApproval(false);
+      
+      // Update local cache with the new approval data
+      setTokenApprovals(prev => ({
+        ...prev,
+        [tokenAddress]: {
+          approved: true,
+          amount: approvalAmount.toString(),
+          lastChecked: Date.now()
+        }
+      }));
       
       // Store approval in localStorage for future reference
       const approvalKey = `token_approved_${tokenAddress}_${walletAddress}`;
@@ -1891,6 +2005,17 @@ export default function Tip() {
         setDisperseStatus(`✅ ${selectedToken.symbol} approved! Ready to multi-tip.`);
         setNeedsApproval(false);
         
+        // Update local cache with the new approval data
+        const tokenAddress = selectedToken?.address || selectedToken?.contractAddress;
+        setTokenApprovals(prev => ({
+          ...prev,
+          [tokenAddress]: {
+            approved: true,
+            amount: approvalAmount.toString(),
+            lastChecked: Date.now()
+          }
+        }));
+        
         // Re-check approval status to update UI
         checkTokenApproval();
       }, 1000);
@@ -1951,7 +2076,213 @@ export default function Tip() {
     }
   }
 
+  // Function to check all token approvals and cache them locally
+  const checkAllTokenApprovals = async () => {
+    if (!walletConnected || !walletAddress) {
+      console.log('🔍 checkAllTokenApprovals: Wallet not connected');
+      return;
+    }
 
+    console.log('🔍 checkAllTokenApprovals: Checking all token approvals');
+    
+    try {
+      // Get all available tokens from context
+      const allTokens = getAllTokens ? await getAllTokens(walletAddress, false) : [];
+      
+      if (!allTokens || allTokens.length === 0) {
+        console.log('🔍 checkAllTokenApprovals: No tokens available');
+        return;
+      }
+
+      const newApprovals = {};
+      
+      // Check each non-native token
+      for (const token of allTokens) {
+        if (token.isNative) {
+          newApprovals[token.address] = { approved: true, amount: '0', lastChecked: Date.now() };
+          continue;
+        }
+
+        try {
+          console.log(`🔍 Checking approval for ${token.symbol} (${token.address})`);
+          
+          const allowanceResult = await publicClient.readContract({
+            address: token.address,
+            abi: erc20ABI,
+            functionName: 'allowance',
+            args: [walletAddress, '0xD152f549545093347A162Dce210e7293f1452150'],
+          });
+
+          const isApproved = allowanceResult > parseUnits('0.01', getTokenDecimals(token));
+          
+          newApprovals[token.address] = {
+            approved: isApproved,
+            amount: allowanceResult.toString(),
+            lastChecked: Date.now()
+          };
+
+          console.log(`🔍 ${token.symbol} approval status:`, {
+            approved: isApproved,
+            amount: allowanceResult.toString(),
+            decimals: getTokenDecimals(token)
+          });
+
+          // Small delay to avoid rate limiting
+          await new Promise(resolve => setTimeout(resolve, 100));
+          
+        } catch (error) {
+          console.warn(`🔍 Failed to check approval for ${token.symbol}:`, error);
+          // Mark as unknown status
+          newApprovals[token.address] = { approved: false, amount: '0', lastChecked: Date.now() };
+        }
+      }
+
+      setTokenApprovals(newApprovals);
+      console.log('🔍 All token approvals cached:', newApprovals);
+      
+    } catch (error) {
+      console.error('🔍 Error checking all token approvals:', error);
+    }
+  };
+
+  // Function to refresh approval cache for a specific token
+  const refreshTokenApproval = async (tokenAddress) => {
+    if (!walletConnected || !walletAddress || !tokenAddress) {
+      console.log('🔍 refreshTokenApproval: Missing required parameters');
+      return;
+    }
+
+    try {
+      console.log(`🔍 Refreshing approval for token: ${tokenAddress}`);
+      
+      const allowanceResult = await publicClient.readContract({
+        address: tokenAddress,
+        abi: erc20ABI,
+        functionName: 'allowance',
+        args: [walletAddress, '0xD152f549545093347A162Dce210e7293f1452150'],
+      });
+
+      // Update local cache with fresh data
+      setTokenApprovals(prev => ({
+        ...prev,
+        [tokenAddress]: {
+          approved: allowanceResult > parseUnits('0.01', 18), // Default to 18 decimals
+          amount: allowanceResult.toString(),
+          lastChecked: Date.now()
+        }
+      }));
+
+      console.log(`🔍 Token approval refreshed:`, {
+        address: tokenAddress,
+        allowance: allowanceResult.toString(),
+        approved: allowanceResult > parseUnits('0.01', 18)
+      });
+      
+    } catch (error) {
+      console.error(`🔍 Error refreshing token approval for ${tokenAddress}:`, error);
+    }
+  };
+
+  // Helper function to get cached approval status for a token and tip amount
+  const getCachedApprovalStatus = (tokenAddress, tipAmount) => {
+    if (!tokenAddress || !tipAmount || tipAmount <= 0) {
+      return { needsApproval: false, reason: 'Invalid parameters' };
+    }
+
+    const cachedApproval = tokenApprovals[tokenAddress];
+    if (!cachedApproval) {
+      return { needsApproval: true, reason: 'No cached data' };
+    }
+
+    // Check if cache is still valid (5 minutes)
+    if (Date.now() - cachedApproval.lastChecked > 300000) {
+      return { needsApproval: true, reason: 'Cache expired' };
+    }
+
+    // Convert tipAmount to wei for comparison
+    const token = selectedToken;
+    const decimals = getTokenDecimals(token);
+    const tipAmountInWei = parseUnits(tipAmount.toString(), decimals);
+    
+    const isApproved = cachedApproval.approved && 
+      BigInt(cachedApproval.amount) >= tipAmountInWei;
+
+    return {
+      needsApproval: !isApproved,
+      reason: isApproved ? 'Sufficient allowance' : 'Insufficient allowance',
+      cachedData: cachedApproval,
+      tipAmountInWei: tipAmountInWei.toString()
+    };
+  };
+
+  // Function to manually refresh approval for the currently selected token
+  const refreshCurrentTokenApproval = async () => {
+    if (!selectedToken || selectedToken.isNative) {
+      console.log('🔍 refreshCurrentTokenApproval: No token selected or native token');
+      return;
+    }
+
+    const tokenAddress = selectedToken?.address || selectedToken?.contractAddress;
+    console.log(`🔍 Manually refreshing approval for ${selectedToken.symbol}`);
+    
+    try {
+      setDisperseStatus('Refreshing approval status...');
+      
+      const allowanceResult = await publicClient.readContract({
+        address: tokenAddress,
+        abi: erc20ABI,
+        functionName: 'allowance',
+        args: [walletAddress, '0xD152f549545093347A162Dce210e7293f1452150'],
+      });
+
+      // Convert tipAmount to wei for comparison
+      const tipAmountInWei = parseUnits(tipAmount.toString(), getTokenDecimals(selectedToken));
+      const isApproved = allowanceResult >= tipAmountInWei;
+
+      // Update local cache with fresh data
+      setTokenApprovals(prev => ({
+        ...prev,
+        [tokenAddress]: {
+          approved: isApproved,
+          amount: allowanceResult.toString(),
+          lastChecked: Date.now()
+        }
+      }));
+
+      // Update UI state
+      setNeedsApproval(!isApproved);
+      
+      if (isApproved) {
+        setDisperseStatus(`✅ ${selectedToken.symbol} is approved for ${tipAmount} ${selectedToken.symbol}. Ready to multi-tip!`);
+      } else {
+        const currentAllowance = ethers.utils.formatUnits(allowanceResult, getTokenDecimals(selectedToken));
+        const shortfall = tipAmount - parseFloat(currentAllowance);
+        setDisperseStatus(`⚠️ Token approval required. Current allowance: ${currentAllowance} ${selectedToken.symbol}, but you want to tip: ${tipAmount} ${selectedToken.symbol}. You need to approve ${shortfall.toFixed(6)} more ${selectedToken.symbol}.`);
+      }
+
+      console.log(`🔍 Approval status refreshed for ${selectedToken.symbol}:`, {
+        approved: isApproved,
+        allowance: allowanceResult.toString(),
+        tipAmount: tipAmount,
+        tipAmountInWei: tipAmountInWei.toString()
+      });
+      
+    } catch (error) {
+      console.error(`🔍 Error refreshing approval for ${selectedToken.symbol}:`, error);
+      setDisperseStatus(`Error refreshing approval status: ${error.message}`);
+    }
+  };
+
+  // Function to clear the approval cache
+  const clearApprovalCache = () => {
+    console.log('🔍 Clearing approval cache');
+    setTokenApprovals({});
+    setDisperseStatus('Approval cache cleared. Please refresh to check current status.');
+    // Force re-check of approval status
+    if (selectedToken && !selectedToken.isNative && tipAmount > 0) {
+      setNeedsApproval(true);
+    }
+  };
 
   return (
     <div className="flex-col" style={{ width: "auto", position: "relative" }} ref={ref1}>
@@ -2146,6 +2477,47 @@ export default function Tip() {
                 {/* Token Action Buttons - Show either Approve OR Multi-Tip, never both */}
                 {isLogged && creatorResults.length > 0 && (
                   <div style={{ marginTop: "15px" }}>
+                    {/* Debug info for cached approval status */}
+                    {/* {selectedToken && !selectedToken.isNative && (
+                      <div style={{ 
+                        marginBottom: "10px", 
+                        padding: "8px", 
+                        backgroundColor: "#0f1a2a", 
+                        borderRadius: "6px", 
+                        fontSize: "10px",
+                        color: "#9df"
+                      }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                          <div><strong>Cache Status:</strong></div>
+                          <button
+                            onClick={clearApprovalCache}
+                            style={{
+                              padding: "2px 6px",
+                              borderRadius: "4px",
+                              border: "1px solid #ff6b6b",
+                              backgroundColor: "transparent",
+                              color: "#ff6b6b",
+                              fontSize: "8px",
+                              cursor: "pointer"
+                            }}
+                          >
+                            Clear Cache
+                          </button>
+                        </div>
+                        <div>Token: {selectedToken.symbol}</div>
+                        <div>Address: {selectedToken.address?.slice(0, 8)}...{selectedToken.address?.slice(-6)}</div>
+                        {tokenApprovals[selectedToken.address] ? (
+                          <>
+                            <div>Approved: {tokenApprovals[selectedToken.address].approved ? '✅ Yes' : '❌ No'}</div>
+                            <div>Allowance: {ethers.utils.formatUnits(tokenApprovals[selectedToken.address].amount, getTokenDecimals(selectedToken))} {selectedToken.symbol}</div>
+                            <div>Last Checked: {new Date(tokenApprovals[selectedToken.address].lastChecked).toLocaleTimeString()}</div>
+                          </>
+                        ) : (
+                          <div>No cached data</div>
+                        )}
+                      </div>
+                    )} */}
+                    
                     {console.log('🔍 Button rendering debug:', {
                       isLogged,
                       creatorResultsLength: creatorResults?.length,
@@ -2156,6 +2528,27 @@ export default function Tip() {
                     {/* Show Approve button ONLY when approval is needed */}
                     {needsApproval && (
                       <div style={{ marginBottom: "10px" }}>
+                        {/* Refresh button for approval status */}
+                        {/* <div style={{ marginBottom: "8px" }}>
+                          <button
+                            onClick={refreshCurrentTokenApproval}
+                            disabled={isDispersing}
+                            style={{
+                              width: "100%",
+                              padding: "6px 12px",
+                              borderRadius: "6px",
+                              border: "1px solid #007bff",
+                              backgroundColor: "transparent",
+                              color: "#007bff",
+                              fontSize: "10px",
+                              fontWeight: "500",
+                              cursor: isDispersing ? "not-allowed" : "pointer"
+                            }}
+                          >
+                            🔄 Refresh Approval Status
+                          </button>
+                        </div> */}
+                        
                         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
                           <label style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "11px", color: "#9df" }}>
                             <input
@@ -2163,7 +2556,7 @@ export default function Tip() {
                               checked={approveOnlyAmount}
                               onChange={(e) => setApproveOnlyAmount(e.target.checked)}
                             />
-                            Approve only the amount to be dispersed
+                            Approve only amount to be multi-tipped
                           </label>
                         </div>
                         <button
@@ -2188,43 +2581,66 @@ export default function Tip() {
                     
                     {/* Show Multi-Tip button ONLY when approval is NOT needed */}
                     {!needsApproval && (
-                      <button
-                        onClick={() => {
-                          console.log('🔍 Multi-Tip button clicked!');
-                          console.log('🔍 Button state debug:', {
-                            isDispersing,
-                            walletConnected,
-                            tipAmount,
-                            walletChainId,
-                            selectedToken: selectedToken?.symbol,
-                            chainCheck: walletChainId !== '0x2105',
-                            shouldBeDisabled: isDispersing || !walletConnected || !tipAmount || walletChainId !== '0x2105'
-                          });
-                          console.log('🔍 disperseTokens function:', typeof disperseTokens);
-                          console.log('🔍 About to call disperseTokens...');
-                          disperseTokensLegacy();
-                        }}
-                        disabled={isDispersing || !walletConnected || !tipAmount || walletChainId !== '0x2105'}
-                        style={{
-                          width: "100%",
-                          padding: "10px 16px",
-                          borderRadius: "8px",
-                          border: "none",
-                          backgroundColor: isPending || isConfirming || !walletConnected || !tipAmount || walletChainId !== '0x2105' ? "#555" : "#007bff",
-                          color: "#fff",
-                          fontSize: "12px",
-                          fontWeight: "600",
-                          cursor: isPending || isConfirming || !walletConnected || !tipAmount || walletChainId !== '0x2105' ? "not-allowed" : "pointer"
-                        }}
-                      >
-                        {isPending 
-                         ? "Preparing..." 
-                         : isConfirming 
-                         ? "Confirming..." 
-                         : walletChainId !== '0x2105'
-                           ? "Multi-Tip (Base Only)"
-                           : `Multi-Tip ${selectedToken?.symbol || 'Token'}`}
-                      </button>
+                      <div>
+                        {/* Refresh button for approval status */}
+                        {/* <div style={{ marginBottom: "8px" }}>
+                          <button
+                            onClick={refreshCurrentTokenApproval}
+                            disabled={isDispersing}
+                            style={{
+                              width: "100%",
+                              padding: "6px 12px",
+                              borderRadius: "6px",
+                              border: "1px solid #28a745",
+                              backgroundColor: "transparent",
+                              color: "#28a745",
+                              fontSize: "10px",
+                              fontWeight: "500",
+                              cursor: isDispersing ? "not-allowed" : "pointer"
+                            }}
+                          >
+                            🔄 Refresh Approval Status
+                          </button>
+                        </div> */}
+                        
+                        <button
+                          onClick={() => {
+                            console.log('🔍 Multi-Tip button clicked!');
+                            console.log('🔍 Button state debug:', {
+                              isDispersing,
+                              walletConnected,
+                              tipAmount,
+                              walletChainId,
+                              selectedToken: selectedToken?.symbol,
+                              chainCheck: walletChainId !== '0x2105',
+                              shouldBeDisabled: isDispersing || !walletConnected || !tipAmount || walletChainId !== '0x2105'
+                            });
+                            console.log('🔍 disperseTokens function:', typeof disperseTokens);
+                            console.log('🔍 About to call disperseTokens...');
+                            disperseTokensLegacy();
+                          }}
+                          disabled={isDispersing || !walletConnected || !tipAmount || walletChainId !== '0x2105'}
+                          style={{
+                            width: "100%",
+                            padding: "10px 16px",
+                            borderRadius: "8px",
+                            border: "none",
+                            backgroundColor: isPending || isConfirming || !walletConnected || !tipAmount || walletChainId !== '0x2105' ? "#555" : "#007bff",
+                            color: "#fff",
+                            fontSize: "12px",
+                            fontWeight: "600",
+                            cursor: isPending || isConfirming || !walletConnected || !tipAmount || walletChainId !== '0x2105' ? "not-allowed" : "pointer"
+                          }}
+                        >
+                          {isPending 
+                           ? "Preparing..." 
+                           : isConfirming 
+                           ? "Confirming..." 
+                           : walletChainId !== '0x2105'
+                             ? "Multi-Tip (Base Only)"
+                             : `Multi-Tip ${selectedToken?.symbol || 'Token'}`}
+                        </button>
+                      </div>
                     )}
                   </div>
                 )}
