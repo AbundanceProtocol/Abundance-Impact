@@ -60,7 +60,6 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
     // Only run wallet detection on pages that need it
     const walletPages = [
       '/~/tip',
-      '/~/tip3', 
       '/~/tip/',
       '/~/multi-tip',
       '/~/ecosystems'
