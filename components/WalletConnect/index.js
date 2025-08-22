@@ -652,9 +652,9 @@ export default function WalletConnect({ onTipAmountChange, onTokenChange }) {
                     </button>
 
                     {/* Connection Test Buttons */}
-                    {!isConnected && !walletConnected && (
-                      <div style={{ marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        <button
+                    {/* {!isConnected && !walletConnected && (
+                      <div style={{ marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px' }}> */}
+                        {/* <button
                           type="button"
                           onClick={async () => {
                             try {
@@ -683,9 +683,9 @@ export default function WalletConnect({ onTipAmountChange, onTokenChange }) {
                           }}
                         >
                           Connect via Wagmi
-                        </button>
+                        </button> */}
                         
-                        <button
+                        {/* <button
                           type="button"
                           onClick={async () => {
                             try {
@@ -750,9 +750,9 @@ export default function WalletConnect({ onTipAmountChange, onTokenChange }) {
                           }}
                         >
                           Connect via SDK
-                        </button>
+                        </button> */}
                         
-                        <button
+                        {/* <button
                           type="button"
                           onClick={async () => {
                             try {
@@ -794,9 +794,9 @@ export default function WalletConnect({ onTipAmountChange, onTokenChange }) {
                           }}
                         >
                           Connect via Legacy
-                        </button>
+                        </button> */}
                         
-                        <button
+                        {/* <button
                           type="button"
                           onClick={async () => {
                             try {
@@ -863,9 +863,9 @@ export default function WalletConnect({ onTipAmountChange, onTokenChange }) {
                           }}
                         >
                           Debug Providers
-                        </button>
-                      </div>
-                    )}
+                        </button> */}
+                      {/* </div>
+                    )} */}
                   
                   {/* Tip Amount Slider - Show when tokens are loaded and not loading */}
 
