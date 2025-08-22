@@ -3,38 +3,10 @@ import axios from "axios";
 import useStore from "./utils/store";
 import { useRouter } from 'next/router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-
-import { cookieToInitialState, WagmiProvider } from 'wagmi';
-import { cookieStorage, createStorage } from '@wagmi/core'
-import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
-import { mainnet, arbitrum, base } from '@reown/appkit/networks'
+import { WagmiProvider } from 'wagmi';
 import { config as wagmiConfig } from './config/wagmi'
 
 const queryClient = new QueryClient();
-const projectId = process.env.NEXT_PUBLIC_WAGMI_KEY || 'default-project-id'
-
-// Only warn in development
-if (!process.env.NEXT_PUBLIC_WAGMI_KEY) {
-  console.warn('NEXT_PUBLIC_WAGMI_KEY is not defined. Using default project ID.');
-}
-
-const networks = [mainnet, arbitrum, base]
-
-let wagmiAdapter;
-try {
-  wagmiAdapter = new WagmiAdapter({
-    storage: createStorage({
-      storage: cookieStorage
-    }),
-    ssr: true,
-    projectId,
-    networks,
-  })
-} catch (error) {
-  console.warn('Failed to initialize WagmiAdapter:', error.message);
-  // Create a minimal fallback adapter
-  wagmiAdapter = null;
-}
 
 
 
@@ -74,30 +46,222 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
   const [topCoinsCache, setTopCoinsCache] = useState({})
   const [lastRpcCall, setLastRpcCall] = useState(0) // Track last RPC call time
   
-  // Auto-detect Farcaster wallet when available
+  const router = useRouter()
+  
+  // Auto-detect Farcaster wallet when available (legacy method - keeping for fallback)
+  // Only run on specific pages that need wallet functionality
   useEffect(() => {
+    // Skip legacy detection if we're using Wagmi
+    if (typeof window !== 'undefined' && window.wagmi) {
+      console.log('🔄 Wagmi detected, skipping legacy wallet detection');
+      return;
+    }
+    
+    // Only run wallet detection on pages that need it
+    const walletPages = [
+      '/~/tip',
+      '/~/tip/',
+      '/~/multi-tip',
+      '/~/ecosystems'
+    ];
+    
+    const currentPath = router?.asPath || router?.pathname || '';
+    const needsWallet = walletPages.some(page => currentPath.includes(page));
+    
+    if (!needsWallet) {
+      console.log('🔄 Skipping wallet detection - not on a wallet-required page:', currentPath);
+      return;
+    }
+    
+    console.log('🔄 Running wallet detection for page:', currentPath);
+    
     const detectFarcasterWallet = async () => {
-      if (typeof window !== 'undefined' && window.farcasterEthProvider && !walletConnected) {
-        console.log('🔄 Auto-detecting Farcaster wallet in context...');
+      if (typeof window !== 'undefined' && !walletConnected) {
+        console.log('🔄 Auto-detecting Farcaster wallet in context (legacy method)...');
         try {
           setWalletLoading(true);
           setWalletError(null);
           
-          // Request accounts from Farcaster wallet
-          const accounts = await window.farcasterEthProvider.request({ method: 'eth_requestAccounts' });
-          const address = accounts[0];
-          const chainId = await window.farcasterEthProvider.request({ method: 'eth_chainId' });
+          // Try to detect if Farcaster wallet is available using proper SDK
+          try {
+            const { sdk } = await import('@farcaster/miniapp-sdk');
+            let provider = sdk.wallet.getEthereumProvider();
+            
+            console.log('🔍 Raw SDK provider:', provider, typeof provider);
+            
+            // Check if provider is a Promise and await it
+            if (provider && typeof provider.then === 'function') {
+              console.log('🔄 Provider is a Promise, awaiting...');
+              provider = await provider;
+              console.log('🔍 Awaited provider:', provider, typeof provider);
+            }
+            
+            if (provider) {
+              console.log('✅ Farcaster wallet provider found via SDK (recommended method)');
+              console.log('🔍 Provider details:', {
+                hasRequest: typeof provider.request === 'function',
+                hasEnable: typeof provider.enable === 'function',
+                hasSend: typeof provider.send === 'function',
+                constructor: provider.constructor.name
+              });
+              
+              // The SDK provider might not have a request method, but we can check if it's EIP-1193 compatible
+              if (typeof provider.request === 'function') {
+                // In real Mini App, try eth_accounts first (no permission popup)
+                const isFarcasterApp = navigator.userAgent.includes('Farcaster');
+                
+                let accounts;
+                if (isFarcasterApp) {
+                  try {
+                    // Try to get existing accounts first (real Mini App might already be connected)
+                    accounts = await provider.request({ method: 'eth_accounts' });
+                    console.log('🔍 Real Mini App - existing accounts:', accounts);
+                  } catch (accountsError) {
+                    console.log('🔄 No existing accounts, requesting permission...');
+                  }
+                }
+                
+                // If no existing accounts, request permission
+                if (!accounts || accounts.length === 0) {
+                  accounts = await provider.request({ method: 'eth_requestAccounts' });
+                }
+                
+                const address = accounts[0];
+                const chainId = await provider.request({ method: 'eth_chainId' });
+                
+                if (address && chainId) {
+                  console.log('✅ Farcaster wallet auto-connected via SDK:', { address, chainId, environment: isFarcasterApp ? 'Real Mini App' : 'Tunnel' });
+                  setWalletAddress(address);
+                  setWalletChainId(chainId);
+                  setWalletProvider('farcaster');
+                  setWalletConnected(true);
+                  setWalletError(null);
+                  return; // Exit early if SDK method worked
+                }
+              } else {
+                console.log('⚠️ SDK provider exists but lacks request method - will try alternative approaches');
+                
+                // Try window.ethereum carefully in Farcaster environments (including tunnel preview)
+                const isFarcasterEnv = navigator.userAgent.includes('Farcaster');
+                const isTunnel = window.location.href.includes('tunnel') || window.location.href.includes('trycloudflare');
+                const isFarcasterContext = isFarcasterEnv || isTunnel;
+                
+                if (isFarcasterContext && window.ethereum && typeof window.ethereum.request === 'function') {
+                  console.log('🔄 Trying window.ethereum as potential Farcaster provider in Farcaster context...');
+                  
+                  // First check if there are already connected accounts to avoid triggering wallet selection
+                  try {
+                    console.log('🔍 Checking window.ethereum for existing accounts...');
+                    console.log('🔍 window.ethereum details:', {
+                      exists: !!window.ethereum,
+                      isMetaMask: window.ethereum?.isMetaMask,
+                      isCoinbaseWallet: window.ethereum?.isCoinbaseWallet,
+                      chainId: window.ethereum?.chainId,
+                      selectedAddress: window.ethereum?.selectedAddress,
+                      providers: window.ethereum?.providers?.length || 0
+                    });
+                    
+                    const existingAccounts = await window.ethereum.request({ method: 'eth_accounts' });
+                    console.log('🔍 eth_accounts result:', existingAccounts);
+                    
+                    if (existingAccounts && existingAccounts.length > 0) {
+                      console.log('✅ Found existing connected accounts:', existingAccounts);
+                      const address = existingAccounts[0];
+                      const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+                      console.log('🔍 Chain ID from eth_chainId:', chainId);
+                      
+                      if (address && chainId) {
+                        console.log('✅ Farcaster wallet auto-connected via existing connection:', { address, chainId });
+                        setWalletAddress(address);
+                        setWalletChainId(chainId);
+                        setWalletProvider('farcaster');
+                        setWalletConnected(true);
+                        setWalletError(null);
+                        return; // Exit early if this method worked
+                      }
+                    } else {
+                      console.log('⚠️ No existing connected accounts found in Farcaster context');
+                      console.log('🔄 Attempting to request accounts in tunnel environment...');
+                      
+                      // In tunnel environment, it might be safe to request accounts
+                      try {
+                        const requestedAccounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                        console.log('🔍 eth_requestAccounts result:', requestedAccounts);
+                        
+                        if (requestedAccounts && requestedAccounts.length > 0) {
+                          const address = requestedAccounts[0];
+                          const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+                          
+                          console.log('✅ Farcaster wallet connected via eth_requestAccounts:', { address, chainId });
+                          setWalletAddress(address);
+                          setWalletChainId(chainId);
+                          setWalletProvider('farcaster');
+                          setWalletConnected(true);
+                          setWalletError(null);
+                          return;
+                        }
+                      } catch (requestError) {
+                        console.warn('⚠️ eth_requestAccounts failed:', requestError.message);
+                      }
+                    }
+                  } catch (ethError) {
+                    console.warn('⚠️ window.ethereum accounts check failed:', ethError.message);
+                  }
+                } else {
+                  console.log('⏸️ Skipping window.ethereum attempt:', {
+                    isTunnel,
+                    isFarcasterEnv,
+                    isFarcasterContext,
+                    hasEthereum: !!window.ethereum
+                  });
+                }
+              }
+            }
+          } catch (sdkError) {
+            console.warn('⚠️ SDK wallet method failed, trying legacy method:', sdkError.message);
+          }
           
-          if (address && chainId) {
-            console.log('✅ Farcaster wallet auto-connected in context:', { address, chainId });
-            setWalletAddress(address);
-            setWalletChainId(chainId);
-            setWalletProvider('farcaster');
-            setWalletConnected(true);
-            setWalletError(null);
+          // Check for window.farcasterEthProvider specifically
+          console.log('🔍 Checking for window.farcasterEthProvider...');
+          console.log('🔍 Farcaster provider details:', {
+            hasFarcasterEthProvider: !!window.farcasterEthProvider,
+            hasEthereumProvider: !!window.ethereum,
+            windowKeys: Object.keys(window).filter(k => k.includes('farcaster') || k.includes('ethereum')),
+            userAgent: navigator.userAgent,
+            currentUrl: window.location.href
+          });
+          
+          // Fallback to legacy method
+          if (window.farcasterEthProvider) {
+            console.log('✅ Farcaster wallet provider found in window (legacy fallback)');
+            // Request accounts from Farcaster wallet
+            const accounts = await window.farcasterEthProvider.request({ method: 'eth_requestAccounts' });
+            const address = accounts[0];
+            const chainId = await window.farcasterEthProvider.request({ method: 'eth_chainId' });
+            
+            if (address && chainId) {
+              console.log('✅ Farcaster wallet auto-connected in context (legacy):', { address, chainId });
+              setWalletAddress(address);
+              setWalletChainId(chainId);
+              setWalletProvider('farcaster');
+              setWalletConnected(true);
+              setWalletError(null);
+            } else {
+              console.log('❌ No address or chainId from Farcaster wallet (legacy)');
+            }
+          } else {
+            console.log('❌ No Farcaster wallet provider in window (legacy)');
+            console.log('⏳ Will retry in 2 seconds...');
+            // Retry after a delay - sometimes provider loads later
+            setTimeout(() => {
+              if (window.farcasterEthProvider && !walletConnected) {
+                console.log('🔄 Retrying legacy wallet detection after delay...');
+                detectFarcasterWallet();
+              }
+            }, 2000);
           }
         } catch (error) {
-          console.error('❌ Farcaster wallet auto-connection failed in context:', error);
+          console.error('❌ Farcaster wallet auto-connection failed in context (legacy):', error);
           setWalletError(error.message);
         } finally {
           setWalletLoading(false);
@@ -105,8 +269,38 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
       }
     };
 
+    const checkProviders = async () => {
+      // Check both SDK and legacy provider availability
+      let hasFarcasterProvider = false;
+      let hasSDKProvider = false;
+      
+      if (typeof window !== 'undefined') {
+        hasFarcasterProvider = !!window.farcasterEthProvider;
+        try {
+          const { sdk } = await import('@farcaster/miniapp-sdk');
+          const provider = sdk.wallet.getEthereumProvider();
+          hasSDKProvider = provider && typeof provider.request === 'function';
+        } catch (e) {
+          hasSDKProvider = false;
+        }
+      }
+      
+      console.log('🔍 LEGACY DETECTION CHECK:', {
+        windowExists: typeof window !== 'undefined',
+        hasWagmi: typeof window !== 'undefined' && !!window.wagmi,
+        hasFarcasterProvider,
+        hasSDKProvider,
+        currentWalletConnected: walletConnected,
+        userAgent: typeof window !== 'undefined' ? navigator.userAgent : 'N/A',
+        timing: new Date().toISOString()
+      });
+      
+      // Continue with detection
+      detectFarcasterWallet();
+    };
+
     // Check immediately
-    detectFarcasterWallet();
+    checkProviders();
     
     // Also check when window.farcasterEthProvider becomes available
     const checkFarcasterWallet = () => {
@@ -127,9 +321,7 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
         clearInterval(interval);
       };
     }
-  }, [walletConnected, setWalletLoading, setWalletError, setWalletAddress, setWalletChainId, setWalletProvider, setWalletConnected]);
-  
-  const router = useRouter()
+  }, [walletConnected, router?.asPath, router?.pathname, setWalletLoading, setWalletError, setWalletAddress, setWalletChainId, setWalletProvider, setWalletConnected]);
   const initEcosystems = [{
     channels: [],
     condition_channels: false,
@@ -849,7 +1041,13 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
 
   // Get all tokens from all supported networks
   const getAllTokens = async (address, forceRefresh = false) => {
-    if (!address) return [];
+    console.log('🔍 getAllTokens called with:', { address, forceRefresh });
+    console.log('🔍 Call stack:', new Error().stack.split('\n').slice(1, 4).join('\n'));
+    
+    if (!address) {
+      console.log('❌ No address provided to getAllTokens');
+      return [];
+    }
     
     // Check cache first (5 minute cache)
     const cacheKey = `all_${address.toLowerCase()}`;
@@ -878,7 +1076,7 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
     try {
       setTopCoinsLoading(true);
       setLastRpcCall(now);
-      console.log('Fetching all tokens for address:', address);
+      console.log('🚀 Starting to fetch all tokens for address:', address);
       
       // Define all supported networks and their tokens
       const networkTokens = {
@@ -1212,8 +1410,6 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
     }
   };
 
-  const initialState = cookieToInitialState(wagmiConfig, cookies);
-
   const contextValue = {
     ...initialAccount,
     ref1,
@@ -1263,7 +1459,7 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
 
   return (
     <AccountContext.Provider value={contextValue}>
-      <WagmiProvider config={wagmiConfig} initialState={initialState}>
+      <WagmiProvider config={wagmiConfig}>
         <QueryClientProvider client={queryClient}>
           {children}
         </QueryClientProvider>
