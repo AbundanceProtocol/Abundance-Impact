@@ -194,8 +194,9 @@ export default function WalletConnect({ onTipAmountChange, onTokenChange }) {
   const { disconnect } = useDisconnect();
   const { connect, connectors } = useConnect();
   
-  // Debug: Log current Wagmi state
-  console.log('🔍 Current Wagmi state:', { isConnected, address, chainId });
+  // Debug: Log current Wagmi state vs Legacy state
+  console.log('🔍 WAGMI state:', { isConnected, address, chainId });
+  console.log('🔍 LEGACY state:', { walletConnected, walletAddress, walletChainId });
   console.log('🔍 Available connectors:', connectors);
 
   // Initialize Farcaster connector once (guard with ref to prevent loops)
@@ -219,58 +220,143 @@ export default function WalletConnect({ onTipAmountChange, onTokenChange }) {
   //   }
   // }, [isConnected, connect]);
 
+  // Farcaster Mini App wallet connection following official docs pattern
   const hasAttemptedConnectRef = useRef(false);
   useEffect(() => {
-    // If already connected, do nothing
-    if (isConnected || hasAttemptedConnectRef.current) return;
-
-    const init = async () => {
-      try {
-        // Try Farcaster miniapp connector if available
-        if (typeof window !== 'undefined' && window.farcasterEthProvider) {
-          const connector = await addFarcasterConnector();
-          if (connector) {
-            await connect({ connector });
-            hasAttemptedConnectRef.current = true;
-            return;
-          }
-        }
-      } catch (e) {
-        console.warn('Farcaster miniapp connector failed:', e);
+    const connectFarcasterWallet = async () => {
+      // Only attempt connection once and when not already connected
+      if (isConnected || hasAttemptedConnectRef.current) return;
+      
+      // Only run on client side
+      if (typeof window === 'undefined') return;
+      
+      // Handle Farcaster environments (including tunnel preview)
+      const isTunnel = window.location.href.includes('tunnel') || window.location.href.includes('trycloudflare');
+      const isFarcasterEnv = navigator.userAgent.includes('Farcaster');
+      const isFarcasterContext = isFarcasterEnv || isTunnel;
+      
+      if (isFarcasterContext && !window.farcasterEthProvider) {
+        console.log('🔄 In Farcaster context but farcasterEthProvider not ready - letting legacy detection handle it');
+        console.log('🔍 Environment details:', {
+          isTunnel,
+          isFarcasterEnv,
+          hasFarcasterEthProvider: !!window.farcasterEthProvider,
+          hasEthereum: !!window.ethereum
+        });
+        return;
       }
-
-      // Fallback: let Wagmi autoConnect restore any persisted session
+      
       hasAttemptedConnectRef.current = true;
+      
+      try {
+        console.log('🔍 Attempting to connect Farcaster wallet...');
+        console.log('🔍 Window objects available:', {
+          farcasterEthProvider: !!window.farcasterEthProvider,
+          ethereum: !!window.ethereum,
+          location: window.location.href,
+          userAgent: navigator.userAgent,
+          timing: new Date().toISOString()
+        });
+        console.log('🔍 Current connectors:', connectors.map(c => ({ id: c.id, name: c.name, type: c.type })));
+        
+        // Wait a bit for Farcaster provider to be available if not ready
+        if (!window.farcasterEthProvider) {
+          console.log('⏳ Farcaster provider not ready, waiting...');
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          console.log('🔍 After waiting - farcasterEthProvider available:', !!window.farcasterEthProvider);
+        }
+        
+        // Check if Farcaster connector is already available in connectors
+        const existingFarcasterConnector = connectors.find(
+          connector => connector.id === 'com.farcaster.miniapp'
+        );
+        
+        if (existingFarcasterConnector) {
+          console.log('🔗 Found existing Farcaster connector, connecting...');
+          await connect({ connector: existingFarcasterConnector });
+          return;
+        }
+        
+        // Get Farcaster connector dynamically
+        console.log('🔄 Attempting to create Farcaster connector dynamically...');
+        const farcasterConnector = await addFarcasterConnector();
+        
+        if (farcasterConnector && farcasterConnector.id && typeof farcasterConnector.connect === 'function') {
+          console.log('🔗 Dynamically created Farcaster connector:', {
+            id: farcasterConnector.id,
+            name: farcasterConnector.name,
+            type: farcasterConnector.type
+          });
+          await connect({ connector: farcasterConnector });
+        } else {
+          console.log('❌ Farcaster connector invalid:', {
+            hasConnector: !!farcasterConnector,
+            hasId: !!farcasterConnector?.id,
+            hasConnect: typeof farcasterConnector?.connect === 'function',
+            connector: farcasterConnector
+          });
+          console.log('ℹ️ Farcaster connector not available');
+          console.log('🔄 Checking if already connected via existing connector...');
+          
+          // If Farcaster connector fails, fall back to legacy wallet detection
+          console.log('🔄 Farcaster connector failed, falling back to legacy detection...');
+          
+          // The legacy detection in context.js should handle this
+          // Don't try to connect with generic connectors as they may cause instability
+        }
+      } catch (error) {
+        console.error('❌ Failed to connect Farcaster wallet:', error);
+        console.error('Error details:', error.message, error.stack);
+      }
     };
 
-    init();
-  }, [isConnected, connect]);
+    connectFarcasterWallet();
+  }, [isConnected, connect, connectors]);
 
 
-  // Sync Wagmi state with local state
+  // Sync Wagmi state with local state (following docs pattern)
   useEffect(() => {
     console.log('🔄 Wagmi state changed:', { isConnected, address, chainId });
     
     if (isConnected && address && chainId) {
       console.log('✅ Wallet connected via Wagmi:', { address, chainId });
+      console.log('📋 Connection details:');
+      console.log('  - Address:', address);
+      console.log('  - Chain ID:', chainId);
+      console.log('  - Available connectors:', connectors.map(c => c.name));
+      
       setWalletConnected(true);
       setWalletAddress(address);
       setWalletChainId(chainId.toString());
-      setWalletProvider('farcaster');
+      setWalletProvider('wagmi'); // Set to wagmi to distinguish from legacy
       setWalletError(null);
       setWalletLoading(false);
     } else if (!isConnected) {
       console.log('❌ Wallet disconnected via Wagmi');
+      console.log('🔍 Disconnect context:', {
+        hasAttemptedConnect: hasAttemptedConnectRef.current,
+        previouslyConnected: walletConnected,
+        availableConnectors: connectors.length
+      });
+      
       // Avoid running disconnect sequence before we've attempted to connect
-      if (hasAttemptedConnectRef.current) {
+      // and don't disconnect legacy if it's working independently
+      if (hasAttemptedConnectRef.current && walletConnected && walletProvider === 'wagmi') {
+        console.log('🔄 Processing Wagmi disconnect...');
         setWalletConnected(false);
         setWalletAddress(null);
         setWalletChainId(null);
         setWalletProvider(null);
+      } else if (hasAttemptedConnectRef.current && walletConnected && walletProvider !== 'wagmi') {
+        console.log('⏸️ Skipping disconnect - legacy wallet still connected');
+      } else if (hasAttemptedConnectRef.current && !walletConnected) {
+        console.log('⏸️ Skipping disconnect - no wallet was connected');
+      } else {
+        console.log('⏸️ Skipping disconnect processing (not previously connected or no attempt made)');
       }
       // Keep topCoins to avoid UI flicker
     }
-  }, [isConnected, address, chainId]);
+  }, [isConnected, address, chainId, connectors]);
 
   // Click outside handler to close dropdown
   useEffect(() => {
@@ -284,11 +370,22 @@ export default function WalletConnect({ onTipAmountChange, onTokenChange }) {
 
   // Fetch all tokens when wallet is connected
   useEffect(() => {
+    console.log('🔄 Token fetch effect triggered:', { walletConnected, walletAddress, topCoinsLoading, topCoinsLength: topCoins.length });
+    
     if (walletConnected && walletAddress && !topCoinsLoading && topCoins.length === 0) {
+      console.log('🚀 Will fetch tokens in 500ms for address:', walletAddress);
       const timeoutId = setTimeout(() => {
+        console.log('🔄 Actually calling getAllTokens with address:', walletAddress);
         getAllTokens(walletAddress);
       }, 500);
       return () => clearTimeout(timeoutId);
+    } else {
+      console.log('⏸️ Skipping token fetch:', {
+        walletConnected,
+        hasWalletAddress: !!walletAddress,
+        topCoinsLoading,
+        topCoinsLength: topCoins.length
+      });
     }
   }, [walletConnected, walletAddress, topCoinsLoading, topCoins.length, getAllTokens]);
 
@@ -335,6 +432,9 @@ export default function WalletConnect({ onTipAmountChange, onTokenChange }) {
                         }
                         
                         // Show loading state while tokens are loading (regardless of wallet state)
+                        // Check if we're in tunnel environment
+                        const isTunnel = typeof window !== 'undefined' && (window.location.href.includes('tunnel') || window.location.href.includes('trycloudflare'));
+                        
                         if (topCoinsLoading) {
                           return (
                             <>
@@ -392,13 +492,43 @@ export default function WalletConnect({ onTipAmountChange, onTokenChange }) {
                                 </div>
                                 <div style={{ textAlign: 'left' }}>
                                   <div style={{ fontSize: '13px', fontWeight: 'bold', color: '#ace' }}>USDC</div>
-                                  <div style={{ fontSize: '11px', color: '#bdf' }}>Base</div>
+                                  <div style={{ fontSize: '11px', color: '#bdf' }}>
+                                    {isTunnel ? 'Farcaster Preview' : 'Base'}
+                                  </div>
                                 </div>
                               </div>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <span style={{ color: '#999' }}>--</span>
+                                <span style={{ color: '#999' }}>
+                                  {isTunnel ? 'N/A' : '--'}
+                                </span>
                               </div>
-                              <Spinner size={31} color={'#999'} />
+                              {!isTunnel && <Spinner size={31} color={'#999'} />}
+                            </>
+                          );
+                        }
+                        
+                        // Show tunnel mode message if no tokens and in tunnel
+                        if (!token && isTunnel) {
+                          return (
+                            <>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <div style={{
+                                  width: '30px',
+                                  height: '30px',
+                                  borderRadius: '50%',
+                                  backgroundColor: '#555',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center'
+                                }}>
+                                  <span style={{ color: 'white', fontSize: '14px' }}>💻</span>
+                                </div>
+                                <div style={{ textAlign: 'left' }}>
+                                  <div style={{ fontSize: '13px', fontWeight: 'bold', color: '#ace' }}>Farcaster Preview</div>
+                                  <div style={{ fontSize: '11px', color: '#bdf' }}>Mini App Tunnel</div>
+                                </div>
+                              </div>
+                              <span style={{ color: '#999', fontSize: '12px' }}>Preview mode</span>
                             </>
                           );
                         }
@@ -520,6 +650,222 @@ export default function WalletConnect({ onTipAmountChange, onTokenChange }) {
                       }
                     })()}
                     </button>
+
+                    {/* Connection Test Buttons */}
+                    {!isConnected && !walletConnected && (
+                      <div style={{ marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            try {
+                              console.log('🔄 Manual Wagmi connection attempt...');
+                              const farcasterConnector = await addFarcasterConnector();
+                              if (farcasterConnector && farcasterConnector.id) {
+                                await connect({ connector: farcasterConnector });
+                              } else if (connectors.length > 0) {
+                                console.log('🔄 Trying first available connector:', connectors[0].name);
+                                await connect({ connector: connectors[0] });
+                              }
+                            } catch (error) {
+                              console.error('Manual Wagmi connection failed:', error);
+                            }
+                          }}
+                          style={{
+                            padding: '8px 16px',
+                            borderRadius: '6px',
+                            border: '1px solid #007bff',
+                            backgroundColor: '#007bff',
+                            color: 'white',
+                            cursor: 'pointer',
+                            fontSize: '12px',
+                            fontWeight: 'bold',
+                            width: '100%'
+                          }}
+                        >
+                          Connect via Wagmi
+                        </button>
+                        
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            try {
+                              console.log('🔄 Manual SDK connection attempt...');
+                              
+                              const { sdk } = await import('@farcaster/miniapp-sdk');
+                              let provider = sdk.wallet.getEthereumProvider();
+                              
+                              console.log('🔍 Raw SDK provider:', provider, typeof provider);
+                              
+                              // Check if provider is a Promise and await it
+                              if (provider && typeof provider.then === 'function') {
+                                console.log('🔄 Provider is a Promise, awaiting...');
+                                provider = await provider;
+                                console.log('🔍 Awaited provider:', provider, typeof provider);
+                              }
+                              
+                              if (provider) {
+                                console.log('✅ SDK provider found:', {
+                                  hasRequest: typeof provider.request === 'function',
+                                  hasEnable: typeof provider.enable === 'function',
+                                  hasSend: typeof provider.send === 'function',
+                                  constructor: provider.constructor.name,
+                                  provider: provider
+                                });
+                                
+                                if (typeof provider.request === 'function') {
+                                  const accounts = await provider.request({ method: 'eth_requestAccounts' });
+                                  const chainId = await provider.request({ method: 'eth_chainId' });
+                                  
+                                  if (accounts.length > 0) {
+                                    console.log('✅ SDK connection successful:', { address: accounts[0], chainId });
+                                    setWalletAddress(accounts[0]);
+                                    setWalletChainId(chainId);
+                                    setWalletProvider('sdk');
+                                    setWalletConnected(true);
+                                    setWalletError(null);
+                                  } else {
+                                    console.log('❌ No accounts returned from SDK');
+                                  }
+                                } else {
+                                  console.log('❌ SDK provider lacks request method');
+                                }
+                              } else {
+                                console.log('❌ No SDK provider available');
+                              }
+                            } catch (error) {
+                              console.error('Manual SDK connection failed:', error);
+                              setWalletError(error.message);
+                            }
+                          }}
+                          style={{
+                            padding: '8px 16px',
+                            borderRadius: '6px',
+                            border: '1px solid #8e44ad',
+                            backgroundColor: '#8e44ad',
+                            color: 'white',
+                            cursor: 'pointer',
+                            fontSize: '12px',
+                            fontWeight: 'bold',
+                            width: '100%'
+                          }}
+                        >
+                          Connect via SDK
+                        </button>
+                        
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            try {
+                              console.log('🔄 Manual Legacy connection attempt...');
+                              
+                              if (window.ethereum) {
+                                console.log('🔍 Attempting direct window.ethereum connection...');
+                                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                                const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+                                
+                                if (accounts.length > 0) {
+                                  console.log('✅ Manual connection successful:', { address: accounts[0], chainId });
+                                  setWalletAddress(accounts[0]);
+                                  setWalletChainId(chainId);
+                                  setWalletProvider('manual');
+                                  setWalletConnected(true);
+                                  setWalletError(null);
+                                } else {
+                                  console.log('❌ No accounts returned');
+                                }
+                              } else {
+                                console.log('❌ No window.ethereum available');
+                              }
+                            } catch (error) {
+                              console.error('Manual Legacy connection failed:', error);
+                              setWalletError(error.message);
+                            }
+                          }}
+                          style={{
+                            padding: '8px 16px',
+                            borderRadius: '6px',
+                            border: '1px solid #28a745',
+                            backgroundColor: '#28a745',
+                            color: 'white',
+                            cursor: 'pointer',
+                            fontSize: '12px',
+                            fontWeight: 'bold',
+                            width: '100%'
+                          }}
+                        >
+                          Connect via Legacy
+                        </button>
+                        
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            try {
+                              console.log('🔍 Debug: Inspecting window providers...');
+                              
+                              const ethereumKeys = Object.keys(window).filter(k => 
+                                k.includes('ethereum') || k.includes('wallet') || k.includes('farcaster')
+                              );
+                              console.log('🔍 Ethereum/Wallet related window keys:', ethereumKeys);
+                              
+                              if (window.ethereum) {
+                                console.log('🔍 window.ethereum details:', {
+                                  isMetaMask: window.ethereum.isMetaMask,
+                                  isCoinbaseWallet: window.ethereum.isCoinbaseWallet,
+                                  providers: window.ethereum.providers,
+                                  selectedAddress: window.ethereum.selectedAddress,
+                                  chainId: window.ethereum.chainId,
+                                  networkVersion: window.ethereum.networkVersion,
+                                  _events: Object.keys(window.ethereum._events || {}),
+                                  _metamask: !!window.ethereum._metamask,
+                                  _state: window.ethereum._state
+                                });
+                                
+                                // Check if there are multiple providers
+                                if (window.ethereum.providers && window.ethereum.providers.length > 0) {
+                                  console.log('🔍 Multiple providers detected:', window.ethereum.providers.map(p => ({
+                                    isMetaMask: p.isMetaMask,
+                                    isCoinbaseWallet: p.isCoinbaseWallet,
+                                    selectedAddress: p.selectedAddress
+                                  })));
+                                }
+                              }
+                              
+                              // Try to trigger wallet selection
+                              console.log('🔄 Attempting wallet selection trigger...');
+                              if (window.ethereum && typeof window.ethereum.request === 'function') {
+                                try {
+                                  // This should trigger wallet selection popup
+                                  const accounts = await window.ethereum.request({ 
+                                    method: 'wallet_requestPermissions', 
+                                    params: [{ eth_accounts: {} }] 
+                                  });
+                                  console.log('✅ Wallet permissions:', accounts);
+                                } catch (permError) {
+                                  console.log('⚠️ Wallet permission request failed, trying direct connection:', permError.message);
+                                  const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                                  console.log('✅ Direct connection result:', accounts);
+                                }
+                              }
+                            } catch (error) {
+                              console.error('Debug inspection failed:', error);
+                            }
+                          }}
+                          style={{
+                            padding: '8px 16px',
+                            borderRadius: '6px',
+                            border: '1px solid #f39c12',
+                            backgroundColor: '#f39c12',
+                            color: 'white',
+                            cursor: 'pointer',
+                            fontSize: '12px',
+                            fontWeight: 'bold',
+                            width: '100%'
+                          }}
+                        >
+                          Debug Providers
+                        </button>
+                      </div>
+                    )}
                   
                   {/* Tip Amount Slider - Show when tokens are loaded and not loading */}
 
