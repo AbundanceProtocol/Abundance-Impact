@@ -5,6 +5,7 @@ import { AccountContext } from '../../context';
 import { useAccount, useDisconnect, useConnect } from 'wagmi';
 import Spinner from '../Common/Spinner';
 import { addFarcasterConnector } from '../../config/wagmi';
+import { MdOutlineRefresh } from "react-icons/md";
 
 export default function WalletConnect({ onTipAmountChange, onTokenChange }) {
   const {
@@ -78,6 +79,7 @@ export default function WalletConnect({ onTipAmountChange, onTokenChange }) {
       'ETH': '/images/tokens/ethereum.png',
       'WETH': '/images/tokens/ethereum.png',
       'USDC': '/images/tokens/usdc.png',
+      'USDT': '/images/tokens/usdt.jpeg',
       'CELO': '/images/tokens/celo.jpg',
       'DEGEN': '/images/tokens/degen.png',
       'BETR': '/images/tokens/ethereum.png', // Fallback to ethereum for now
@@ -105,6 +107,7 @@ export default function WalletConnect({ onTipAmountChange, onTokenChange }) {
       'ETH': '#627eea',
       'WETH': '#627eea',
       'USDC': '#2775ca',
+      'USDT': '#26a17b',
       'CELO': '#35d07f',
       'DEGEN': '#ff6b35',
       'BETR': '#e91e63',
@@ -401,26 +404,26 @@ export default function WalletConnect({ onTipAmountChange, onTokenChange }) {
             <div>
               {/* Token Selection Dropdown */}
                 <div style={{ marginBottom: '10px' }}>
-                  {/* Custom Dropdown */}
-                  <div style={{ position: 'relative' }} className="custom-dropdown">
-                    <button
-                      onClick={() => setDropdownOpen(!dropdownOpen)}
-                      style={{
-                        padding: '12px 12px',
-                        borderRadius: '10px',
-                        border: '1px solid #114477',
-                        fontSize: '12px',
-                        backgroundColor: '#001122',
-                        color: '#ace',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        minWidth: '260px', // 30% wider (was 200px)
-                        justifyContent: 'space-between',
-                        outline: 'none'
-                      }}
-                    >
+                                     {/* Custom Dropdown */}
+                   <div style={{ position: 'relative' }} className="custom-dropdown">
+                     <button
+                       onClick={() => setDropdownOpen(!dropdownOpen)}
+                       style={{
+                         padding: '12px 12px',
+                         borderRadius: '10px',
+                         border: '1px solid #114477',
+                         fontSize: '12px',
+                         backgroundColor: '#001122',
+                         color: '#ace',
+                         cursor: 'pointer',
+                         display: 'flex',
+                         alignItems: 'center',
+                         gap: '8px',
+                         minWidth: '260px', // 30% wider (was 200px)
+                         justifyContent: 'space-between',
+                         outline: 'none'
+                       }}
+                     >
                       {(() => {
                         let token;
                         if (selectedToken === 'default') {
@@ -650,6 +653,43 @@ export default function WalletConnect({ onTipAmountChange, onTokenChange }) {
                       }
                     })()}
                     </button>
+
+                                         {/* Refresh Button */}
+                     <button
+                       onClick={() => {
+                         if (walletAddress) {
+                           console.log('🔄 Manual refresh triggered for address:', walletAddress);
+                           getAllTokens(walletAddress, true);
+                         }
+                       }}
+                       disabled={topCoinsLoading || !walletAddress}
+                       style={{
+                         position: 'absolute',
+                         right: '-30px',
+                         top: '30px',
+                         transform: 'translateY(-50%)',
+                         padding: '6px',
+                         borderRadius: '8px',
+                         border: '1px solid #114477',
+                         backgroundColor: '#001122',
+                         color: '#ace',
+                         cursor: topCoinsLoading || !walletAddress ? 'not-allowed' : 'pointer',
+                         display: 'flex',
+                         alignItems: 'center',
+                         justifyContent: 'center',
+                         opacity: topCoinsLoading || !walletAddress ? 0.5 : 1,
+                         transition: 'all 0.2s ease',
+                         zIndex: 10
+                       }}
+                       title="Refresh token balances"
+                     >
+                       <MdOutlineRefresh 
+                         size={12} 
+                         style={{ 
+                           animation: topCoinsLoading ? 'spin 1s linear infinite' : 'none' 
+                         }} 
+                       />
+                     </button>
 
                     {/* Connection Test Buttons */}
                     {/* {!isConnected && !walletConnected && (

@@ -996,7 +996,7 @@ export default function Tip() {
           // Recompute EXACT total needed (sum of per-recipient minimum-adjusted amounts)
           const tokenDecimals = (() => {
             if (selectedToken?.decimals !== undefined) return selectedToken.decimals;
-            const tokenDecimalMap = { ETH: 18, USDC: 6, WETH: 18, DEGEN: 18, BETR: 18, NOICE: 18, TIPN: 18 };
+            const tokenDecimalMap = { ETH: 18, USDC: 6, USDT: 6, WETH: 18, DEGEN: 18, BETR: 18, NOICE: 18, TIPN: 18 };
             return tokenDecimalMap[selectedToken?.symbol] || 18;
           })();
 
@@ -1134,6 +1134,7 @@ export default function Tip() {
         const tokenDecimalMap = {
           'ETH': 18,
           'USDC': 6,
+          'USDT': 6,
           'WETH': 18,
           'DEGEN': 18,
           'BETR': 18,

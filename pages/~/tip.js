@@ -318,14 +318,17 @@ export default function Tip() {
     }
     
     // Use the same mapping as defined in context.js for Base network tokens
+    // Note: Only Base network tokens are currently supported for multi-tip functionality
     const tokenDecimalMap = {
-      'ETH': 18,
-      'USDC': 6,
-      'WETH': 18,
-      'DEGEN': 18,
-      'BETR': 18,
-      'NOICE': 18,
-      'TIPN': 18
+      'ETH': 18,           // Not on Base
+      'USDC': 6,           // Available on Base
+      'USDT': 6,           // Available on Base
+      'WETH': 18,          // Not on Base
+      'DEGEN': 18,         // Available on Base
+      'BETR': 18,          // Available on Base
+      'NOICE': 18,         // Available on Base
+      'TIPN': 18,          // Available on Base
+      'CELO': 18,          // Not on Base
     };
     
     const decimals = tokenDecimalMap[token?.symbol] || 18;
