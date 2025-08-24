@@ -699,6 +699,7 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
       // Common token addresses on Base
       const commonTokens = [
         { symbol: 'USDC', address: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', decimals: 6 },
+        { symbol: 'USDT', address: '0xfde4c96c8593536e31f229ea8f37b2ada2699bb2', decimals: 6 },
         { symbol: 'DEGEN', address: '0x4ed4E862860beD51a9570b96d89aF5E1B0Efefed', decimals: 18 },
         { symbol: 'BETR', address: '0x1F32b1c2345538c0c6f582fCB0223cA264d87105', decimals: 18 },
         { symbol: 'NOICE', address: '0x9cb41fd9dc6891bae8187029461bfaadf6cc0c69', decimals: 18 },
@@ -711,7 +712,7 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
         // Add delay to respect rate limits
         await new Promise(resolve => setTimeout(resolve, 100));
         
-        const priceResponse = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum,usd-coin,degen-token,betr,noice,tipn&vs_currencies=usd');
+        const priceResponse = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum,usd-coin,tether,degen-token,betr,noice,tipn&vs_currencies=usd');
         if (priceResponse.ok) {
           const priceData = await priceResponse.json();
           
@@ -725,6 +726,7 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
           tokenPrices = {
             'WETH': priceData.ethereum?.usd || 3000,
             'USDC': priceData['usd-coin']?.usd || 1,
+            'USDT': priceData.tether?.usd || 1,
             'DEGEN': degenPrice,
             'BETR': priceData.betr?.usd || 0.01,
             'NOICE': priceData.noice?.usd || 0.01,
@@ -738,7 +740,7 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
         console.warn('Failed to fetch token prices, using fallback prices:', error);
         // Fallback prices with more accurate DEGEN price
         tokenPrices = {
-          'WETH': 3000, 'USDC': 1, 'DEGEN': 0.004144, 'BETR': 0.01, 'NOICE': 0.01, 'TIPN': 0.01
+          'WETH': 3000, 'USDC': 1, 'USDT': 1, 'DEGEN': 0.004144, 'BETR': 0.01, 'NOICE': 0.01, 'TIPN': 0.01
         };
       }
 
@@ -1087,6 +1089,7 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
           tokens: [
             { symbol: 'ETH', address: '0x0000000000000000000000000000000000000000', decimals: 18, isNative: true },
             { symbol: 'USDC', address: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', decimals: 6 },
+            { symbol: 'USDT', address: '0xfde4c96c8593536e31f229ea8f37b2ada2699bb2', decimals: 6 },
             { symbol: 'WETH', address: '0x4200000000000000000000000000000000000006', decimals: 18 },
             { symbol: 'DEGEN', address: '0x4ed4E862860beD51a9570b96d89aF5E1B0Efefed', decimals: 18 },
             { symbol: 'BETR', address: '0x763F4B31C8c86C56C802eB0fB3edd4C9d19e0eA8', decimals: 18 },
@@ -1132,7 +1135,7 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
       try {
         await new Promise(resolve => setTimeout(resolve, 100));
         
-        const priceResponse = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum,usd-coin,degen-token,betr,noice,tipn,celo,optimism,arbitrum&vs_currencies=usd');
+        const priceResponse = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum,usd-coin,tether,degen-token,betr,noice,tipn,celo,optimism,arbitrum&vs_currencies=usd');
         if (priceResponse.ok) {
           const priceData = await priceResponse.json();
           
@@ -1161,6 +1164,7 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
             'ETH': priceData.ethereum?.usd || 3000,
             'WETH': priceData.ethereum?.usd || 3000,
             'USDC': priceData['usd-coin']?.usd || 1,
+            'USDT': priceData.tether?.usd || 1,
             'CELO': priceData.celo?.usd || 0.5,
             'DEGEN': degenPrice,
             'BETR': priceData.betr?.usd || 0.01,
@@ -1181,7 +1185,7 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
         console.warn('Failed to fetch token prices, using fallback prices:', error);
         // Fallback prices
         tokenPrices = {
-          'ETH': 3000, 'WETH': 3000, 'USDC': 1, 'CELO': 0.5, 'DEGEN': 0.004144, 
+          'ETH': 3000, 'WETH': 3000, 'USDC': 1, 'USDT': 1, 'CELO': 0.5, 'DEGEN': 0.004144, 
           'BETR': 0.01, 'NOICE': 0.01, 'TIPN': 0.01, 'OP': 2.5, 'ARB': 1.5
         };
       }
