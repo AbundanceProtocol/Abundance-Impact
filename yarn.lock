@@ -999,6 +999,11 @@
     gonzales-pe "^4.3.0"
     node-source-walk "^6.0.1"
 
+"@divvi/referral-sdk@^2.3.0":
+  version "2.3.0"
+  resolved "https://registry.npmjs.org/@divvi/referral-sdk/-/referral-sdk-2.3.0.tgz#9c6b04a05d3926e189622856b078f3e119c51b26"
+  integrity sha512-2Fc5rJ4L9Txr6tQ8CQmdM0Jp55YE8Wfd63a97AZtVh/leh2k8WzHsyABP/OHThXZBPTnsdw8V4BH85wYPZwJcQ==
+
 "@ecies/ciphers@^0.2.3":
   version "0.2.4"
   resolved "https://registry.yarnpkg.com/@ecies/ciphers/-/ciphers-0.2.4.tgz#20a4e51f61d521e5e311eb49385d93d91087de51"

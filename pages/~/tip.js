@@ -16,6 +16,7 @@ import { ethers } from 'ethers';
 import Link from "next/link";
 import axios from "axios";
 import { useWallet } from '../../hooks/useWallet';
+import { generateReferralTag, submitOnChainReferral, submitOffChainReferral, createReferralMessage, getReferralDataSuffix } from '../../utils/divvi';
 
 // Disperse contract ABI - defined at module level to avoid initialization issues
 const disperseABI = [
@@ -287,6 +288,7 @@ export default function Tip() {
   const [pendingTxReceivers, setPendingTxReceivers] = useState([]);
   const [pendingTxTotalAmountDecimal, setPendingTxTotalAmountDecimal] = useState(0);
   const [pendingTxKind, setPendingTxKind] = useState(null); // 'approval' | 'disperse' | null
+  const [pendingTxReferralTag, setPendingTxReferralTag] = useState(null); // Divvi referral tag
   const [approveOnlyAmount, setApproveOnlyAmount] = useState(false); // when true, approve only needed amount
   const [needsApproval, setNeedsApproval] = useState(false); // track if token approval is needed
   
@@ -471,6 +473,26 @@ export default function Tip() {
         console.warn('Failed to refresh tokens after disperse:', e);
       }
 
+      // Submit Divvi referral tracking
+      (async () => {
+        try {
+          if (pendingTxReferralTag) {
+            console.log('Divvi: Submitting referral for confirmed transaction');
+            
+            // Submit on-chain referral to Divvi
+            const referralSuccess = await submitOnChainReferral(hash, walletChainId);
+            
+            if (referralSuccess) {
+              console.log('Divvi: Referral submitted successfully');
+            } else {
+              console.warn('Divvi: Failed to submit referral');
+            }
+          }
+        } catch (error) {
+          console.error('Divvi: Error submitting referral:', error);
+        }
+      })();
+
       // Create OnchainTip document via API, then show share modal
       (async () => {
         try {
@@ -524,6 +546,8 @@ export default function Tip() {
       setLastSuccessHash(hash);
       // clear pending kind
       setPendingTxKind(null);
+      // clear pending referral tag
+      setPendingTxReferralTag(null);
     } else if (writeError) {
       let errorMessage = 'Transaction failed';
       if (writeError.message.includes('User rejected')) {
@@ -1528,9 +1552,16 @@ export default function Tip() {
       // Use Wagmi's writeContract hook (as recommended by Farcaster docs)
       console.log('🚀 Calling writeContract...');
       
+      // Generate Divvi referral tag for on-chain tracking
+      const referralTag = generateReferralTag(walletAddress);
+      console.log('Divvi: Referral tag generated:', referralTag);
+      
       // Capture disperse metadata at the moment we send the tx
       setPendingTxKind('disperse');
       setPendingTxTokenSymbol(selectedToken?.symbol || 'Token');
+      
+      // Store referral data for later submission
+      setPendingTxReferralTag(referralTag);
       
       const result = await writeContract({
         address: '0xD152f549545093347A162Dce210e7293f1452150', // Disperse contract
@@ -1541,6 +1572,8 @@ export default function Tip() {
           validRecipients.map(r => r.address), // recipient addresses
           validRecipients.map(r => r.amount) // amounts in token units
         ],
+        // Note: Divvi referral data is embedded in the transaction itself
+        // The referral tag is generated and stored for post-transaction submission
       });
 
       console.log('✅ Transaction initiated via Wagmi writeContract');
@@ -1768,8 +1801,13 @@ export default function Tip() {
       // Execute the disperse transaction
       console.log('🚀 Calling legacy disperseToken...');
       
+      // Generate Divvi referral tag for legacy transaction
+      const referralTag = generateReferralTag(legacyAddress);
+      console.log('Divvi: Referral tag generated for legacy transaction:', referralTag);
+      
       setPendingTxKind('disperse');
       setPendingTxTokenSymbol(selectedToken?.symbol || 'Token');
+      setPendingTxReferralTag(referralTag);
       
       const tx = await legacyDisperseUtils.disperseToken(
         tokenAddress,
@@ -1871,6 +1909,30 @@ export default function Tip() {
           token: selectedToken?.symbol || 'Token',
           receivers: validRecipients.length
         });
+      }
+      
+      // Submit Divvi referral tracking for legacy transaction
+      try {
+        if (pendingTxReferralTag) {
+          console.log('Divvi: Submitting referral for confirmed legacy transaction');
+          
+          // Submit on-chain referral to Divvi
+          const referralSuccess = await submitOnChainReferral(
+            tx.hash || receipt.transactionHash, 
+            walletChainId
+          );
+          
+          if (referralSuccess) {
+            console.log('Divvi: Legacy transaction referral submitted successfully');
+          } else {
+            console.warn('Divvi: Failed to submit legacy transaction referral');
+          }
+          
+          // Clear the referral tag
+          setPendingTxReferralTag(null);
+        }
+      } catch (referralError) {
+        console.error('Divvi: Error submitting legacy transaction referral:', referralError);
       }
       
       // Refresh token balances after success

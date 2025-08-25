@@ -5,6 +5,7 @@ import { useAccount, useWriteContract, usePublicClient, useWaitForTransactionRec
 import { parseUnits } from 'viem';
 import Link from "next/link";
 import axios from "axios";
+import { generateReferralTag, submitOnChainReferral, submitOffChainReferral, createReferralMessage, getReferralDataSuffix } from '../../../../utils/divvi';
 
 // Disperse contract ABI - defined at module level to avoid initialization issues
 const disperseABI = [
@@ -276,6 +277,7 @@ export default function Tip() {
   const [pendingTxReceivers, setPendingTxReceivers] = useState([]);
   const [pendingTxTotalAmountDecimal, setPendingTxTotalAmountDecimal] = useState(0);
   const [pendingTxKind, setPendingTxKind] = useState(null); // 'approval' | 'disperse' | null
+  const [pendingTxReferralTag, setPendingTxReferralTag] = useState(null); // Divvi referral tag
   const [approveOnlyAmount, setApproveOnlyAmount] = useState(false); // when true, approve only needed amount
   
   // Collapsible state for Impact Filter
@@ -410,10 +412,32 @@ export default function Tip() {
         }
       })();
 
+      // Submit Divvi referral tracking
+      (async () => {
+        try {
+          if (pendingTxReferralTag) {
+            console.log('Divvi: Submitting referral for confirmed transaction');
+            
+            // Submit on-chain referral to Divvi
+            const referralSuccess = await submitOnChainReferral(hash, wagmiChainId);
+            
+            if (referralSuccess) {
+              console.log('Divvi: Referral submitted successfully');
+            } else {
+              console.warn('Divvi: Failed to submit referral');
+            }
+          }
+        } catch (error) {
+          console.error('Divvi: Error submitting referral:', error);
+        }
+      })();
+
       // Remember last success hash to prevent duplicate modal
       setLastSuccessHash(hash);
       // clear pending kind
       setPendingTxKind(null);
+      // clear pending referral tag
+      setPendingTxReferralTag(null);
     } else if (writeError) {
       let errorMessage = 'Transaction failed';
       if (writeError.message.includes('User rejected')) {
@@ -1380,9 +1404,14 @@ export default function Tip() {
       // Use Wagmi's writeContract hook (as recommended by Farcaster docs)
       console.log('🚀 Calling writeContract...');
       
+      // Generate Divvi referral tag for on-chain tracking
+      const referralTag = generateReferralTag(wagmiAddress);
+      console.log('Divvi: Referral tag generated:', referralTag);
+      
       // Capture disperse metadata at the moment we send the tx
       setPendingTxKind('disperse');
       setPendingTxTokenSymbol(selectedToken?.symbol || 'Token');
+      setPendingTxReferralTag(referralTag);
       
       const result = await writeContract({
         address: '0xD152f549545093347A162Dce210e7293f1452150', // Disperse contract
