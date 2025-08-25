@@ -127,22 +127,22 @@ export default async function handler(req, res) {
     const {username, pfp} = await getUser(fid)
 
 
+    let showcase = null
 
 
+    // let {circles, text, showcase, userPfp, curator, timeframe, channels, image} = await getCircle(fid);
 
-    let {circles, text, showcase, userPfp, curator, timeframe, channels, image} = await getCircle(fid);
-
-    console.log('data', circles, text, showcase, userPfp, curator, timeframe, channels, image, username, pfp)
+    // console.log('data', circles, text, showcase, userPfp, curator, timeframe, channels, image, username, pfp)
 
     let threshold = true
 
-    if (text) {
-      const numbers = text.match(/\d+/g).map(Number);
-      const numTest = numbers.some(number => number >= 100);
-      if (!numTest) {
-        threshold = false
-      }
-    }
+    // if (text) {
+    //   const numbers = text.match(/\d+/g).map(Number);
+    //   const numTest = numbers.some(number => number >= 100);
+    //   if (!numTest) {
+    //     threshold = false
+    //   }
+    // }
 
     // if (image) {
     //   try {
@@ -158,18 +158,21 @@ export default async function handler(req, res) {
     //     return
     //   }
     // } else {
-      if (showcase?.length > 0 && showcase[0]?.impact) {
-        showcase.sort((a, b) => b.impact - a.impact);
 
-        for (let show of showcase) {
-          if (show?.cast?.startsWith('https://client.warpcast.com/v2/cast-image?castHash=')) {
-            const isUnavailable = await getImageFileSize(show?.cast)
-            if (isUnavailable) {
-              show.cast = show?.pfp
-            }
-          }
-        }
-      }
+
+
+      // if (showcase?.length > 0 && showcase[0]?.impact) {
+      //   showcase.sort((a, b) => b.impact - a.impact);
+
+      //   for (let show of showcase) {
+      //     if (show?.cast?.startsWith('https://client.warpcast.com/v2/cast-image?castHash=')) {
+      //       const isUnavailable = await getImageFileSize(show?.cast)
+      //       if (isUnavailable) {
+      //         show.cast = show?.pfp
+      //       }
+      //     }
+      //   }
+      // }
   
       let time = 'all time'
       if (timeframe == '24h') {
@@ -182,9 +185,9 @@ export default async function handler(req, res) {
         time = '30 days'
       }
   
-      if (circles?.length > 4) {
-        circles = circles.slice(0, 4)
-      }
+      // if (circles?.length > 4) {
+      //   circles = circles.slice(0, 4)
+      // }
   
       // const splitCircles = (arr) => {
       //   // Calculate the midpoint
@@ -199,9 +202,9 @@ export default async function handler(req, res) {
   
       // const [firstHalf, secondHalf] = splitCircles(circles);
   
-      if (showcase?.length > 5) {
-        showcase = showcase.slice(0, 5)
-      }
+      // if (showcase?.length > 5) {
+      //   showcase = showcase.slice(0, 5)
+      // }
 
       const backgroundImg = `${baseURL}/images/backgroundframe3.png`
   
@@ -253,7 +256,7 @@ export default async function handler(req, res) {
   
   
   
-          {showcase?.length >= 1 && (<div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '120px'}}>
+          {(showcase && showcase?.length >= 1) && (<div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '120px'}}>
   
   
   
