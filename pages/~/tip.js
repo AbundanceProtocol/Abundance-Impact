@@ -8,6 +8,7 @@ import {
   legacyTokenUtils, 
   legacyDisperseUtils, 
   getLegacyAddress, 
+  getLegacyProvider,
   isLegacyWalletConnected,
   waitForLegacyTransaction,
   parseTokenAmount
@@ -26,6 +27,16 @@ const disperseABI = [
     stateMutability: 'nonpayable',
     inputs: [
       { name: 'token', type: 'address' },
+      { name: 'recipients', type: 'address[]' },
+      { name: 'values', type: 'uint256[]' }
+    ],
+    outputs: []
+  },
+  {
+    name: 'disperseEther',
+    type: 'function',
+    stateMutability: 'payable',
+    inputs: [
       { name: 'recipients', type: 'address[]' },
       { name: 'values', type: 'uint256[]' }
     ],
@@ -1546,7 +1557,26 @@ export default function Tip() {
         
         setDisperseStatus(`✅ ${selectedToken?.symbol} approved and ready to disperse`);
       } else {
-        console.log('🔍 Native token detected - no approval needed');
+        console.log('🔍 Native token detected - checking ETH balance...');
+        
+        // For ETH, check native balance
+        if (selectedToken?.symbol === 'ETH') {
+          try {
+            const ethBalance = await publicClient.getBalance({ address: walletAddress });
+            if (ethBalance < totalAmount) {
+              throw new Error(`Insufficient ETH balance. You have ${(Number(ethBalance) / Math.pow(10, 18)).toFixed(6)} ETH but need ${(Number(totalAmount) / Math.pow(10, 18)).toFixed(6)} ETH`);
+            }
+            console.log(`✅ ETH balance sufficient: ${(Number(ethBalance) / Math.pow(10, 18)).toFixed(6)} ETH`);
+            setDisperseStatus(`✅ ETH balance sufficient and ready to disperse`);
+          } catch (balanceError) {
+            console.error('Error checking ETH balance:', balanceError);
+            setDisperseStatus(`Error checking ETH balance: ${balanceError.message}`);
+            setIsDispersing(false);
+            return;
+          }
+        } else {
+          console.log('🔍 Other native token detected - no approval needed');
+        }
       }
 
       // Use Wagmi's writeContract hook (as recommended by Farcaster docs)
@@ -1563,18 +1593,36 @@ export default function Tip() {
       // Store referral data for later submission
       setPendingTxReferralTag(referralTag);
       
-      const result = await writeContract({
-        address: '0xD152f549545093347A162Dce210e7293f1452150', // Disperse contract
-        abi: disperseABI,
-        functionName: 'disperseToken',
-        args: [
-          tokenAddress, // token address (zero address for native tokens)
-          validRecipients.map(r => r.address), // recipient addresses
-          validRecipients.map(r => r.amount) // amounts in token units
-        ],
-        // Note: Divvi referral data is embedded in the transaction itself
-        // The referral tag is generated and stored for post-transaction submission
-      });
+      // Use disperseEther for ETH, disperseToken for other tokens
+      if (isNativeToken && selectedToken?.symbol === 'ETH') {
+        console.log('🚀 Using disperseEther for ETH transaction');
+        const result = await writeContract({
+          address: '0xD152f549545093347A162Dce210e7293f1452150', // Disperse contract
+          abi: disperseABI,
+          functionName: 'disperseEther',
+          args: [
+            validRecipients.map(r => r.address), // recipient addresses
+            validRecipients.map(r => r.amount) // amounts in token units
+          ],
+          value: totalAmount, // ETH value to send
+        });
+        console.log('✅ ETH transaction initiated via disperseEther');
+        console.log('Transaction result:', result);
+      } else {
+        console.log('🚀 Using disperseToken for ERC-20 transaction');
+        const result = await writeContract({
+          address: '0xD152f549545093347A162Dce210e7293f1452150', // Disperse contract
+          abi: disperseABI,
+          functionName: 'disperseToken',
+          args: [
+            tokenAddress, // token address (zero address for native tokens)
+            validRecipients.map(r => r.address), // recipient addresses
+            validRecipients.map(r => r.amount) // amounts in token units
+          ],
+        });
+        console.log('✅ ERC-20 transaction initiated via disperseToken');
+        console.log('Transaction result:', result);
+      }
 
       console.log('✅ Transaction initiated via Wagmi writeContract');
       console.log('Transaction result:', result);
@@ -1761,18 +1809,24 @@ export default function Tip() {
       const totalAmount = validRecipients.reduce((sum, r) => sum.add(r.amount), ethers.BigNumber.from(0));
       const tokenAddress = selectedToken?.address || ethers.constants.AddressZero;
       
+      // Handle native tokens (ETH, CELO) - they use zero address in the disperse contract
+      const isNativeToken = selectedToken?.isNative || 
+        tokenAddress === ethers.constants.AddressZero ||
+        ['ETH', 'CELO'].includes(selectedToken?.symbol);
+      
       // Calculate total amount in decimal format (needed for OnchainTip and balance check)
       const totalAmountFloat = parseFloat(ethers.utils.formatUnits(totalAmount, tokenDecimals));
 
       console.log('🔍 Transaction details:');
       console.log('- Token address:', tokenAddress);
+      console.log('- Is native token:', isNativeToken);
       console.log('- Recipients:', validRecipients.length);
       console.log('- Total amount:', totalAmount.toString());
       console.log('- Total amount (decimal):', totalAmountFloat);
       console.log('- Wallet address:', legacyAddress);
 
       // For non-native tokens, check balance and allowance
-      if (!selectedToken?.isNative && tokenAddress !== ethers.constants.AddressZero) {
+      if (!isNativeToken) {
         console.log('🔍 Checking token balance...');
         
         // Use the balance we already have from selectedToken data instead of querying the contract
@@ -1795,7 +1849,27 @@ export default function Tip() {
         console.log('ℹ️ Skipping allowance check due to provider limitations');
         setDisperseStatus(`✅ ${selectedToken?.symbol} balance sufficient. Proceeding with transaction...`);
       } else {
-        console.log('🔍 Native token detected - no approval needed');
+        console.log('🔍 Native token detected - checking ETH balance...');
+        
+        // For ETH, check native balance
+        if (selectedToken?.symbol === 'ETH') {
+          try {
+            const legacyProvider = await getLegacyProvider();
+            const ethBalance = await legacyProvider.getBalance(legacyAddress);
+            if (ethBalance.lt(totalAmount)) {
+              throw new Error(`Insufficient ETH balance. You have ${ethers.utils.formatEther(ethBalance)} ETH but need ${ethers.utils.formatEther(totalAmount)} ETH`);
+            }
+            console.log(`✅ ETH balance sufficient: ${ethers.utils.formatEther(ethBalance)} ETH`);
+            setDisperseStatus(`✅ ETH balance sufficient and ready to disperse`);
+          } catch (balanceError) {
+            console.error('Error checking ETH balance:', balanceError);
+            setDisperseStatus(`Error checking ETH balance: ${balanceError.message}`);
+            setIsDispersing(false);
+            return;
+          }
+        } else {
+          console.log('🔍 Other native token detected - no approval needed');
+        }
       }
 
       // Execute the disperse transaction
@@ -1809,11 +1883,22 @@ export default function Tip() {
       setPendingTxTokenSymbol(selectedToken?.symbol || 'Token');
       setPendingTxReferralTag(referralTag);
       
-      const tx = await legacyDisperseUtils.disperseToken(
-        tokenAddress,
-        validRecipients.map(r => r.address),
-        validRecipients.map(r => r.amount)
-      );
+      // Use disperseEther for ETH, disperseToken for other tokens
+      let tx;
+      if (isNativeToken && selectedToken?.symbol === 'ETH') {
+        console.log('🚀 Using legacy disperseEther for ETH transaction');
+        tx = await legacyDisperseUtils.disperseEther(
+          validRecipients.map(r => r.address),
+          validRecipients.map(r => r.amount)
+        );
+      } else {
+        console.log('🚀 Using legacy disperseToken for ERC-20 transaction');
+        tx = await legacyDisperseUtils.disperseToken(
+          tokenAddress,
+          validRecipients.map(r => r.address),
+          validRecipients.map(r => r.amount)
+        );
+      }
 
       console.log('✅ Transaction initiated via legacy wallet');
       console.log('Transaction hash:', tx.hash);
