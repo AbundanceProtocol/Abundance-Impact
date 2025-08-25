@@ -174,16 +174,16 @@ export default async function handler(req, res) {
       //   }
       // }
   
-      let time = 'all time'
-      if (timeframe == '24h') {
-        time = '24 hr'
-      } else if (timeframe == '3d') {
-        time = '3 days'
-      } else if (timeframe == '7d') {
-        time = '7 days'
-      } else if (timeframe == '30d') {
-        time = '30 days'
-      }
+      // let time = 'all time'
+      // if (timeframe == '24h') {
+      //   time = '24 hr'
+      // } else if (timeframe == '3d') {
+      //   time = '3 days'
+      // } else if (timeframe == '7d') {
+      //   time = '7 days'
+      // } else if (timeframe == '30d') {
+      //   time = '30 days'
+      // }
   
       // if (circles?.length > 4) {
       //   circles = circles.slice(0, 4)
