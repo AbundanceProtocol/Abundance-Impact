@@ -8,7 +8,7 @@ import { getReferralTag, submitReferral } from '@divvi/referral-sdk';
  */
 
 // Consumer address for the tipping application
-const CONSUMER_ADDRESS = '0xD152f549545093347A162Dce210e7293f1452150'; // Disperse contract
+const CONSUMER_ADDRESS = '0xdca6F7CB3cF361C8dF8FDE119370F1b21b2fFf63'; 
 
 /**
  * Generate referral tag for on-chain transactions
