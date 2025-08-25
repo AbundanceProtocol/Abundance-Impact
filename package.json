@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@divvi/referral-sdk": "^2.3.0",
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.9.3",
     "@farcaster/auth-client": "^0.7.0",
