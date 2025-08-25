@@ -203,7 +203,7 @@ function WalletDemo() {
   return null; // Don't show anything
 }
 
-export default function Tip() {
+export default function Tip({ curatorId }) {
   const router = useRouter();
   const { ecosystem, username, app, userFid, pass } = router.query;
   const {
@@ -2190,7 +2190,12 @@ export default function Tip() {
 
   // Feed router to trigger searches when filters change
   function feedRouter() {
-    const { shuffle, time, tags, channels, curators, order, timeSort } = userQuery;
+    let { shuffle, time, tags, channels, curators, order, timeSort } = userQuery;
+
+    if (curatorId) {
+      curators = [Number(curatorId)];
+    }
+
     // Use a default ecosystem if none is provided, or you can modify this based on your needs
     const searchEcosystem = ecosystem || 'abundance'; // Default to 'abundance' ecosystem
     console.log('get user executed', shuffle, time, tags, channels, searchEcosystem, curators, order);
@@ -2503,7 +2508,7 @@ export default function Tip() {
       {/* <div className="" style={{padding: '58px 0 0 0'}}>
       </div> */}
 
-      {(!isLogged || (version == "1.0" && !adminTest) || version == "2.0" || adminTest) && (
+      {(!curatorId && (!isLogged || (version == "1.0" && !adminTest) || version == "2.0" || adminTest)) && (
         <div
           id="log in"
                     style={{
@@ -2999,7 +3004,7 @@ export default function Tip() {
                     </div>
 
                     {/* CHANNEL Filter */}
-                    <div className='flex-row' style={{height: '42px', alignItems: 'center', justifyContent: 'center', padding: '28px 0'}}>
+                    {!curatorId && (<div className='flex-row' style={{height: '42px', alignItems: 'center', justifyContent: 'center', padding: '28px 0'}}>
                       <div className='flex-row' style={{padding: '6px 11px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '28px', alignItems: 'center', gap: '0.35rem'}}>
                         <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '13px' : '14px'}}>CHANNEL</div>
 
@@ -3011,10 +3016,10 @@ export default function Tip() {
                           ))}
                         </select>
                       </div>
-                    </div>
+                    </div>)}
 
                     {/* CURATORS Filter */}
-                    <div className='flex-row' style={{height: '42px', alignItems: 'center', justifyContent: 'center', padding: '28px 0'}}>
+                    {!curatorId && (<div className='flex-row' style={{height: '42px', alignItems: 'center', justifyContent: 'center', padding: '28px 0'}}>
                       <div className='flex-row' style={{padding: '6px 11px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '28px', alignItems: 'center', gap: '0.35rem'}}>
                         <div className='filter-desc' style={{fontSize: isMobile ? '13px' : '14px'}}>CURATORS</div>
 
@@ -3034,7 +3039,7 @@ export default function Tip() {
                           placeholder="search curators"
                         />
                       </div>
-                    </div>
+                    </div>)}
                   </div>
                 )}
 
@@ -3494,17 +3499,3 @@ export default function Tip() {
     </div>
   );
 }
-
-// export async function getServerSideProps(context) {
-//   try {
-//     const { query } = context || {};
-//     const { id } = query || {};
-//     return {
-//       props: {
-//         id: id || null,
-//       },
-//     };
-//   } catch (_) {
-//     return { props: { id: null } };
-//   }
-// }

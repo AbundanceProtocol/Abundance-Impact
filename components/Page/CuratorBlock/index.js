@@ -5,13 +5,13 @@ import { formatNum } from "../../../utils/utils";
 import { AccountContext } from "../../../context";
 import { useRouter } from 'next/router';
 import { FaPowerOff, FaRegStar } from "react-icons/fa";
-import { BsFillPersonFill, BsShareFill, BsPiggyBank, BsPiggyBankFill } from "react-icons/bs";
+import { BsFillPersonFill, BsShareFill, BsPiggyBank, BsPiggyBankFill, BsGiftFill, BsCurrencyExchange } from "react-icons/bs";
 import useMatchBreakpoints from "../../../hooks/useMatchBreakpoints";
 import axios from "axios";
 
 const version = process.env.NEXT_PUBLIC_VERSION;
 
-const CuratorBlock = ({ user, textMax, show, type, feedMax }) => {
+const CuratorBlock = ({ user, textMax, show, type, feedMax, onTipToggle, showTip }) => {
   const { points, fid, autotipping, setAutotipping, isLogged, LoginPopup, LogoutPopup, adminTest, isMiniApp } = useContext(AccountContext)
   const [sched, setSched] = useState({autotip: false})
   const [curators, setCurators] = useState(null)
@@ -386,8 +386,8 @@ const CuratorBlock = ({ user, textMax, show, type, feedMax }) => {
                               alignItems: "center",
                               justifyContent: "center",
                               gap: "0.25rem",
-                              height: "50px",
-                              width: "110px",
+                              height: "40px",
+                              width: "80px",
                               backgroundColor: autotipping.includes(user?.fid) ? '#fff' : ''
                               // backgroundColor: "#aaa"
                             }}
@@ -404,6 +404,61 @@ const CuratorBlock = ({ user, textMax, show, type, feedMax }) => {
                               }}
                             >
                               {autotipping.includes(user?.fid) ? 'Funding' : 'Fund'}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+
+                    <div
+                      onClick={() => {
+                        if (onTipToggle) {
+                          onTipToggle();
+                        }
+                      }}
+                      className="flex-col"
+                      style={{
+                        justifyContent: "center",
+                        alignItems: "center"
+                      }}
+                    >
+                      <div
+                        className="flex-row"
+                        style={{
+                          gap: "0.75rem",
+                          margin: "0px",
+                          flexWrap: "wrap",
+                          justifyContent: "center",
+                          alignItems: "center"
+                        }}
+                      >
+                        <div>
+                          <div
+                            className="flex-row cast-act-lt"
+                            style={{
+                              borderRadius: "8px",
+                              padding: "8px 8px",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              gap: "0.25rem",
+                              height: "40px",
+                              width: "80px",
+                              backgroundColor: showTip ? '#fff' : ''
+                            }}
+                          >
+                            <BsCurrencyExchange color={'#000'} size={20} style={{ width: "30px" }} />
+                            <p
+                              style={{
+                                padding: "0px",
+                                fontSize: isMobile ? "15px" : "15px",
+                                fontWeight: "500",
+                                textWrap: "wrap",
+                                textAlign: "center",
+                                color: '#000'
+                              }}
+                            >
+                              Tip
                             </p>
                           </div>
                         </div>
@@ -441,8 +496,8 @@ const CuratorBlock = ({ user, textMax, show, type, feedMax }) => {
                               alignItems: "center",
                               justifyContent: "center",
                               gap: "0.25rem",
-                              height: "50px",
-                              width: "110px"
+                              height: "40px",
+                              width: "80px"
                               // backgroundColor: "#aaa"
                             }}
                           >
@@ -457,7 +512,7 @@ const CuratorBlock = ({ user, textMax, show, type, feedMax }) => {
                                 color: '#000'
                               }}
                             >
-                              Share Curation
+                              Share
                             </p>
                           </div>
                         </div>

@@ -20,6 +20,7 @@ import { formatNum, getCurrentDateUTC, getTimeRange, isYesterday, checkEmbedType
 import Cast from '../../../../components/Cast'
 import useMatchBreakpoints from '../../../../hooks/useMatchBreakpoints';
 import qs from "querystring";
+import Tip from '../../../../pages/~/tip'
 
 const version = process.env.NEXT_PUBLIC_VERSION;
 
@@ -40,8 +41,14 @@ export default function CuratorFid() {
   const [searchSelect, setSearchSelect ] = useState('Curation')
   const { isMobile } = useMatchBreakpoints();
   const [userFeed, setUserFeed] = useState(null)
+  
+  // Handle tip toggle from CuratorBlock
+  const handleTipToggle = () => {
+    setShowTip(prev => !prev);
+  };
   const [prevSearch, setPrevSearch] = useState({getTime: null, channel: null, username: null, text: null, shuffle: null, ecosystem: null, curators: [], page: 0, order: -1, timeSort: null})
   const [showPopup, setShowPopup] = useState({open: false, url: null})
+  const [showTip, setShowTip] = useState(false)
   const initialEco = {
     channels: [],
     condition_channels: false,
@@ -866,7 +873,14 @@ export default function CuratorFid() {
       {/* {user && (<CuratorData {...{ show: (isLogged && user), user, textMax, type: 'curator' }} />)} */}
 
 
-      {user && (<CuratorBlock {...{ show: (user), user, textMax, feedMax, type: 'curator' }} />)}
+      {user && (<CuratorBlock {...{ show: (user), user, textMax, feedMax, type: 'curator', onTipToggle: handleTipToggle, showTip }} />)}
+
+
+
+      {showTip && <Tip {...{ curatorId: fid }} />}
+
+
+
 
       {/* IMAGE TESTING */}
       {/* <img
