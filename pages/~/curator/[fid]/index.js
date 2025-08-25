@@ -689,7 +689,7 @@ export default function CuratorFid() {
       <Head>
         <meta
           name="fc:frame"
-          content={`{"version":"next","imageUrl":"${baseURL}/api/frames/tip/circle-v5?${qs.stringify({
+          content={`{"version":"next","imageUrl":"${baseURL}/api/frames/tip/circle-v6?${qs.stringify({
             fid: fid || null
           })}","button":{"title":"Impact Curation","action":{"type":"launch_frame","name":"Impact 2.0","url":"https://impact.abundance.id/~/curator/${fid}","splashImageUrl":"https://impact.abundance.id/images/icon.png","splashBackgroundColor":"#011222"}}}`}
         />
