@@ -62,7 +62,8 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
       '/~/tip',
       '/~/tip/',
       '/~/multi-tip',
-      '/~/ecosystems'
+      '/~/ecosystems',
+      '/~/curator'
     ];
     
     const currentPath = router?.asPath || router?.pathname || '';
