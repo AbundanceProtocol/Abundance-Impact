@@ -8,6 +8,7 @@ import {
   legacyTokenUtils, 
   legacyDisperseUtils, 
   getLegacyAddress, 
+  getLegacyProvider,
   isLegacyWalletConnected,
   waitForLegacyTransaction,
   parseTokenAmount
@@ -1808,18 +1809,24 @@ export default function Tip() {
       const totalAmount = validRecipients.reduce((sum, r) => sum.add(r.amount), ethers.BigNumber.from(0));
       const tokenAddress = selectedToken?.address || ethers.constants.AddressZero;
       
+      // Handle native tokens (ETH, CELO) - they use zero address in the disperse contract
+      const isNativeToken = selectedToken?.isNative || 
+        tokenAddress === ethers.constants.AddressZero ||
+        ['ETH', 'CELO'].includes(selectedToken?.symbol);
+      
       // Calculate total amount in decimal format (needed for OnchainTip and balance check)
       const totalAmountFloat = parseFloat(ethers.utils.formatUnits(totalAmount, tokenDecimals));
 
       console.log('🔍 Transaction details:');
       console.log('- Token address:', tokenAddress);
+      console.log('- Is native token:', isNativeToken);
       console.log('- Recipients:', validRecipients.length);
       console.log('- Total amount:', totalAmount.toString());
       console.log('- Total amount (decimal):', totalAmountFloat);
       console.log('- Wallet address:', legacyAddress);
 
       // For non-native tokens, check balance and allowance
-      if (!selectedToken?.isNative && tokenAddress !== ethers.constants.AddressZero) {
+      if (!isNativeToken) {
         console.log('🔍 Checking token balance...');
         
         // Use the balance we already have from selectedToken data instead of querying the contract
@@ -1842,7 +1849,27 @@ export default function Tip() {
         console.log('ℹ️ Skipping allowance check due to provider limitations');
         setDisperseStatus(`✅ ${selectedToken?.symbol} balance sufficient. Proceeding with transaction...`);
       } else {
-        console.log('🔍 Native token detected - no approval needed');
+        console.log('🔍 Native token detected - checking ETH balance...');
+        
+        // For ETH, check native balance
+        if (selectedToken?.symbol === 'ETH') {
+          try {
+            const legacyProvider = await getLegacyProvider();
+            const ethBalance = await legacyProvider.getBalance(legacyAddress);
+            if (ethBalance.lt(totalAmount)) {
+              throw new Error(`Insufficient ETH balance. You have ${ethers.utils.formatEther(ethBalance)} ETH but need ${ethers.utils.formatEther(totalAmount)} ETH`);
+            }
+            console.log(`✅ ETH balance sufficient: ${ethers.utils.formatEther(ethBalance)} ETH`);
+            setDisperseStatus(`✅ ETH balance sufficient and ready to disperse`);
+          } catch (balanceError) {
+            console.error('Error checking ETH balance:', balanceError);
+            setDisperseStatus(`Error checking ETH balance: ${balanceError.message}`);
+            setIsDispersing(false);
+            return;
+          }
+        } else {
+          console.log('🔍 Other native token detected - no approval needed');
+        }
       }
 
       // Execute the disperse transaction
