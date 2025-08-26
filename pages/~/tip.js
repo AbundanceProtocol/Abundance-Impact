@@ -2498,7 +2498,24 @@ export default function Tip({ curatorId }) {
                 )}
                     </div>
               <div style={{ display: 'flex', gap: '10px', marginTop: '6px' }}>
-                <button onClick={shareOnchainTip} style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #abc', background: '#113355', color: '#cde', cursor: 'pointer', fontSize: '14px', fontWeight: 600 }}>Share</button>
+                <button 
+                  onClick={shareOnchainTip} 
+                  disabled={!shareImageLoaded}
+                  style={{ 
+                    padding: '10px 14px', 
+                    borderRadius: '8px', 
+                    border: '1px solid #abc', 
+                    background: shareImageLoaded ? '#113355' : '#334455', 
+                    color: shareImageLoaded ? '#cde' : '#999', 
+                    cursor: shareImageLoaded ? 'pointer' : 'not-allowed', 
+                    fontSize: '14px', 
+                    fontWeight: 600,
+                    opacity: shareImageLoaded ? 1 : 0.6,
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  {shareImageLoaded ? 'Share' : 'Loading...'}
+                </button>
                   </div>
                     </div>
                         </div>
