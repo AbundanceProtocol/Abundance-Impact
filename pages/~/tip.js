@@ -1313,7 +1313,7 @@ export default function Tip({ curatorId }) {
       // Check if user is on a supported network (Base or Celo with disperse contract deployed)
       const supportedNetworks = {
         '0x2105': 'Base',
-        '0xa4b1': 'Celo'  // Celo chain ID in hex
+        '0xa4ec': 'Celo'  // Celo chain ID in hex (42220)
       };
       
       if (!supportedNetworks[walletChainId]) {
@@ -1321,7 +1321,7 @@ export default function Tip({ curatorId }) {
           '0x1': 'Ethereum Mainnet',
           '0xa': 'Optimism', 
           '0x2105': 'Base',
-          '0xa4b1': 'Celo',
+          '0xa4ec': 'Celo',
           '0xa4b1': 'Arbitrum'
         };
         const currentNetworkName = networkNames[walletChainId] || `Network ${walletChainId}`;
@@ -1718,7 +1718,7 @@ export default function Tip({ curatorId }) {
       // Check if user is on a supported network (Base or Celo with disperse contract deployed)
       const supportedNetworks = {
         '0x2105': 'Base',
-        '0xa4b1': 'Celo'  // Celo chain ID in hex
+        '0xa4ec': 'Celo'  // Celo chain ID in hex (42220)
       };
       
       if (!supportedNetworks[walletChainId]) {
@@ -2857,31 +2857,31 @@ export default function Tip({ curatorId }) {
                               tipAmount,
                               walletChainId,
                               selectedToken: selectedToken?.symbol,
-                                      chainCheck: !['0x2105', '0xa4b1'].includes(walletChainId), // Base or Celo
-        shouldBeDisabled: isDispersing || !walletConnected || !tipAmount || !['0x2105', '0xa4b1'].includes(walletChainId)
+                                      chainCheck: !['0x2105', '0xa4ec'].includes(walletChainId), // Base or Celo
+        shouldBeDisabled: isDispersing || !walletConnected || !tipAmount || !['0x2105', '0xa4ec'].includes(walletChainId)
                             });
                             console.log('🔍 disperseTokens function:', typeof disperseTokens);
                             console.log('🔍 About to call disperseTokens...');
                             disperseTokensLegacy();
                           }}
-                          disabled={isDispersing || !walletConnected || !tipAmount || !['0x2105', '0xa4b1'].includes(walletChainId)}
+                          disabled={isDispersing || !walletConnected || !tipAmount || !['0x2105', '0xa4ec'].includes(walletChainId)}
                           style={{
                             width: "100%",
                             padding: "10px 16px",
                             borderRadius: "8px",
                             border: "none",
-                            backgroundColor: isPending || isConfirming || !walletConnected || !tipAmount || !['0x2105', '0xa4b1'].includes(walletChainId) ? "#555" : "#007bff",
+                            backgroundColor: isPending || isConfirming || !walletConnected || !tipAmount || !['0x2105', '0xa4ec'].includes(walletChainId) ? "#555" : "#007bff",
                             color: "#fff",
                             fontSize: "12px",
                             fontWeight: "600",
-                            cursor: isPending || isConfirming || !walletConnected || !tipAmount || !['0x2105', '0xa4b1'].includes(walletChainId) ? "not-allowed" : "pointer"
+                            cursor: isPending || isConfirming || !walletConnected || !tipAmount || !['0x2105', '0xa4ec'].includes(walletChainId) ? "not-allowed" : "pointer"
                           }}
                         >
                           {isPending 
                            ? "Preparing..." 
                            : isConfirming 
                            ? "Confirming..." 
-                           : !['0x2105', '0xa4b1'].includes(walletChainId)
+                           : !['0x2105', '0xa4ec'].includes(walletChainId)
                              ? "Multi-Tip (Base/Celo Only)"
                              : `Multi-Tip ${selectedToken?.symbol || 'Token'}`}
                         </button>
