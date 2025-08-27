@@ -265,7 +265,7 @@ export default function Tip({ curatorId }) {
   const [modal, setModal] = useState({ on: false, success: false, text: "" });
   
   // Custom Share Modal state
-  const [shareModal, setShareModal] = useState({ on: false, id: null, amount: 0, token: '', receivers: 0 });
+  const [shareModal, setShareModal] = useState({ on: false, id: null, amount: 0, token: '', receivers: 0, fundPercent: 0 });
   const [shareImageLoaded, setShareImageLoaded] = useState(false);
   const [shareImageError, setShareImageError] = useState(false);
   
@@ -305,6 +305,7 @@ export default function Tip({ curatorId }) {
   
   // Local cache for token approvals to reduce external API calls
   const [tokenApprovals, setTokenApprovals] = useState({}); // { [tokenAddress]: { approved: boolean, amount: string, lastChecked: number } }
+  const [fundPercent, setFundPercent] = useState(10);
   
   // Collapsible state for Impact Filter
   const [isImpactFilterCollapsed, setIsImpactFilterCollapsed] = useState(true);
@@ -507,16 +508,23 @@ export default function Tip({ curatorId }) {
       // Create OnchainTip document via API, then show share modal
       (async () => {
         try {
+          // Filter out fund address from receivers for OnchainTip
+          const fundAddress = '0x5D7694C48E1de1f04aDd4E9Fdc9a48f9b8a6f51f';
+          const filteredReceivers = (pendingTxReceivers || []).filter(receiver => 
+            receiver.address !== fundAddress
+          );
+          
           const tipPayload = {
             tipper_fid: userInfo?.fid,
             tipper_pfp: userInfo?.pfp,
             tipper_username: userInfo?.username,
+            fund: fundPercent, // Add fund percentage to OnchainTip
             tip: [{
               currency: pendingTxTokenSymbol || selectedToken?.symbol || 'Token',
               amount: Number(pendingTxTotalAmountDecimal || 0),
               value: Number(pendingTxTotalAmountDecimal || 0) * Number(selectedToken?.price || 0)
             }],
-            receiver: pendingTxReceivers || [],
+            receiver: filteredReceivers,
             transaction_hash: hash,
           };
           const res = await fetch('/api/onchain-tip', {
@@ -538,7 +546,7 @@ export default function Tip({ curatorId }) {
           } catch (_) {
             createdId = null;
           }
-          const receiversCount = (pendingTxReceivers || []).length;
+          const receiversCount = filteredReceivers.length;
           setShareImageLoaded(false);
           setShareImageError(false);
           setShareModal({
@@ -546,7 +554,8 @@ export default function Tip({ curatorId }) {
             id: createdId.toString(),
             amount: Number(pendingTxTotalAmountDecimal || 0),
             token: pendingTxTokenSymbol || selectedToken?.symbol || 'Token',
-            receivers: receiversCount
+            receivers: receiversCount,
+            fundPercent: fundPercent
           });
         } catch (e) {
           console.warn('Failed to persist OnchainTip:', e);
@@ -911,6 +920,9 @@ export default function Tip({ curatorId }) {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+
+
 
   // Filter functions
   function updateTime(time) {
@@ -1774,6 +1786,14 @@ export default function Tip({ curatorId }) {
         return;
       }
       
+      // Calculate fund distribution based on fundPercent
+      const fundAddress = '0x5D7694C48E1de1f04aDd4E9Fdc9a48f9b8a6f51f';
+      const fundAmount = fundPercent > 0 ? parseTokenAmount((tipAmount * fundPercent / 100).toFixed(tokenDecimals), tokenDecimals) : ethers.BigNumber.from(0);
+      const remainingAmount = fundPercent > 0 ? tipAmount - (tipAmount * fundPercent / 100) : tipAmount;
+      
+      console.log(`💰 Fund distribution: ${fundPercent}% = ${ethers.utils.formatUnits(fundAmount, tokenDecimals)} ${selectedToken?.symbol || 'tokens'}`);
+      console.log(`💸 Remaining for creators: ${ethers.utils.formatUnits(parseTokenAmount(remainingAmount.toFixed(tokenDecimals), tokenDecimals), tokenDecimals)} ${selectedToken?.symbol || 'tokens'}`);
+      
       const validRecipients = filteredCreators
         .filter(creator => {
           const impact = Number(creator.impact_sum) || Number(creator.impact) || 0;
@@ -1783,7 +1803,8 @@ export default function Tip({ curatorId }) {
         .map(creator => {
           const impact = Number(creator.impact_sum) || Number(creator.impact) || 0;
           const percentage = impact / totalImpactSum;
-          const amount = parseTokenAmount((tipAmount * percentage).toFixed(tokenDecimals), tokenDecimals);
+          // Use remaining amount for creator distribution
+          const amount = parseTokenAmount((remainingAmount * percentage).toFixed(tokenDecimals), tokenDecimals);
           const address = creator.address || creator.wallet;
           return {
             address: address,
@@ -1793,6 +1814,17 @@ export default function Tip({ curatorId }) {
           };
         })
         .filter(r => r.amount.gt(0)); // Remove zero amounts
+      
+      // Add fund address to recipients if fundPercent > 0
+      if (fundPercent > 0 && fundAmount.gt(0)) {
+        validRecipients.push({
+          address: fundAddress,
+          amount: fundAmount,
+          impact: 0,
+          percentage: fundPercent / 100
+        });
+        console.log(`✅ Added fund address ${fundAddress} with amount ${ethers.utils.formatUnits(fundAmount, tokenDecimals)} ${selectedToken?.symbol || 'tokens'}`);
+      }
 
       if (validRecipients.length === 0) {
         setDisperseStatus('No valid recipients found');
@@ -1803,8 +1835,15 @@ export default function Tip({ curatorId }) {
       console.log(`📊 Distribution preview:`, validRecipients.map(r => ({
         address: r.address,
         amount: r.amount.toString(),
-        impact: r.impact
+        impact: r.impact,
+        isFund: r.address === fundAddress
       })));
+      
+      // Log fund allocation details
+      if (fundPercent > 0) {
+        console.log(`💰 Fund allocation: ${fundPercent}% (${ethers.utils.formatUnits(fundAmount, tokenDecimals)} ${selectedToken?.symbol || 'tokens'}) → ${fundAddress}`);
+        console.log(`💸 Creator allocation: ${100 - fundPercent}% (${ethers.utils.formatUnits(parseTokenAmount(remainingAmount.toFixed(tokenDecimals), tokenDecimals), tokenDecimals)} ${selectedToken?.symbol || 'tokens'})`);
+      }
 
       const totalAmount = validRecipients.reduce((sum, r) => sum.add(r.amount), ethers.BigNumber.from(0));
       const tokenAddress = selectedToken?.address || ethers.constants.AddressZero;
@@ -1821,7 +1860,9 @@ export default function Tip({ curatorId }) {
       console.log('- Token address:', tokenAddress);
       console.log('- Is native token:', isNativeToken);
       console.log('- Recipients:', validRecipients.length);
-      console.log('- Total amount:', totalAmount.toString());
+      console.log('- Fund percent:', fundPercent + '%');
+      console.log('- Fund amount:', fundAmount.toString());
+      console.log('- Creator total amount:', totalAmount.toString());
       console.log('- Total amount (decimal):', totalAmountFloat);
       console.log('- Wallet address:', legacyAddress);
 
@@ -1833,16 +1874,19 @@ export default function Tip({ curatorId }) {
         // This avoids the eth_call issue with Farcaster provider
         const tokenBalance = parseFloat(selectedToken.balance || 0);
         
-        console.log(`🔍 Balance check: have ${tokenBalance} ${selectedToken.symbol}, need ${totalAmountFloat}`);
+        // Calculate total amount needed including fund distribution
+        const totalAmountWithFund = fundPercent > 0 ? tipAmount : totalAmountFloat;
         
-        if (tokenBalance < totalAmountFloat) {
-          console.log(`⚠️ Insufficient balance: ${tokenBalance} < ${totalAmountFloat}`);
-          setDisperseStatus(`Insufficient ${selectedToken?.symbol} balance. You have ${tokenBalance} but need ${totalAmountFloat.toFixed(6)}`);
+        console.log(`🔍 Balance check: have ${tokenBalance} ${selectedToken.symbol}, need ${totalAmountWithFund} (including ${fundPercent}% fund)`);
+        
+        if (tokenBalance < totalAmountWithFund) {
+          console.log(`⚠️ Insufficient balance: ${tokenBalance} < ${totalAmountWithFund}`);
+          setDisperseStatus(`Insufficient ${selectedToken?.symbol} balance. You have ${tokenBalance} but need ${totalAmountWithFund.toFixed(6)} (including ${fundPercent}% fund)`);
           setIsDispersing(false);
           return;
         }
         
-        console.log(`✅ Token balance sufficient (${tokenBalance} >= ${totalAmountFloat})`);
+        console.log(`✅ Token balance sufficient (${tokenBalance} >= ${totalAmountWithFund})`);
         
         // Skip allowance check due to Farcaster provider limitations
         // If approval is needed, the transaction will fail with a clear error message
@@ -1856,8 +1900,12 @@ export default function Tip({ curatorId }) {
           try {
             const legacyProvider = await getLegacyProvider();
             const ethBalance = await legacyProvider.getBalance(legacyAddress);
-            if (ethBalance.lt(totalAmount)) {
-              throw new Error(`Insufficient ETH balance. You have ${ethers.utils.formatEther(ethBalance)} ETH but need ${ethers.utils.formatEther(totalAmount)} ETH`);
+            
+            // Calculate total amount needed including fund distribution
+            const totalAmountWithFund = fundPercent > 0 ? parseTokenAmount(tipAmount.toFixed(tokenDecimals), tokenDecimals) : totalAmount;
+            
+            if (ethBalance.lt(totalAmountWithFund)) {
+              throw new Error(`Insufficient ETH balance. You have ${ethers.utils.formatEther(ethBalance)} ETH but need ${ethers.utils.formatEther(totalAmountWithFund)} ETH (including ${fundPercent}% fund)`);
             }
             console.log(`✅ ETH balance sufficient: ${ethers.utils.formatEther(ethBalance)} ETH`);
             setDisperseStatus(`✅ ETH balance sufficient and ready to disperse`);
@@ -1919,25 +1967,29 @@ export default function Tip({ curatorId }) {
       try {
         console.log('📝 Creating OnchainTip document...');
         
-        // Prepare receiver data for OnchainTip document
-        const receivers = validRecipients.map(recipient => {
-          // Find the creator data to get fid, pfp, username
-          const creator = filteredCreators.find(c => 
-            (c.address || c.wallet) === recipient.address
-          );
-          
-          return {
-            fid: creator?.author_fid || null,
-            pfp: creator?.author_pfp || null,
-            username: creator?.author_username || 'Unknown',
-            amount: parseFloat(ethers.utils.formatUnits(recipient.amount, tokenDecimals))
-          };
-        });
+        // Prepare receiver data for OnchainTip document (exclude fund address)
+        const fundAddress = '0x5D7694C48E1de1f04aDd4E9Fdc9a48f9b8a6f51f';
+        const receivers = validRecipients
+          .filter(recipient => recipient.address !== fundAddress) // Exclude fund address from receivers
+          .map(recipient => {
+            // Find the creator data to get fid, pfp, username
+            const creator = filteredCreators.find(c => 
+              (c.address || c.wallet) === recipient.address
+            );
+            
+            return {
+              fid: creator?.author_fid || null,
+              pfp: creator?.author_pfp || null,
+              username: creator?.author_username || 'Unknown',
+              amount: parseFloat(ethers.utils.formatUnits(recipient.amount, tokenDecimals))
+            };
+          });
         
         const tipPayload = {
           tipper_fid: Number(fid) || Number(userInfo?.fid) || null,
           tipper_pfp: userInfo?.pfp || null,
           tipper_username: userInfo?.username || null,
+          fund: fundPercent, // Add fund percentage to OnchainTip
           tip: [{
             currency: selectedToken?.symbol || 'Token',
             amount: Number(totalAmountFloat) || 0,
@@ -1969,7 +2021,8 @@ export default function Tip({ curatorId }) {
             id: created.id,
             amount: totalAmountFloat,
             token: selectedToken?.symbol || 'Token',
-            receivers: receivers.length
+            receivers: receivers.length,
+            fundPercent: fundPercent
           });
         } else {
           console.warn('⚠️ OnchainTip API returned non-200:', res.status, await res.text());
@@ -1980,7 +2033,8 @@ export default function Tip({ curatorId }) {
             id: null,
             amount: totalAmountFloat,
             token: selectedToken?.symbol || 'Token',
-            receivers: receivers.length
+            receivers: receivers.length,
+            fundPercent: fundPercent
           });
         }
       } catch (onchainTipError) {
@@ -1992,7 +2046,8 @@ export default function Tip({ curatorId }) {
           id: null,
           amount: totalAmountFloat,
           token: selectedToken?.symbol || 'Token',
-          receivers: validRecipients.length
+          receivers: validRecipients.filter(r => r.address !== fundAddress).length,
+          fundPercent: fundPercent
         });
       }
       
@@ -2477,8 +2532,15 @@ export default function Tip({ curatorId }) {
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', zIndex: 2147483647, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
           <div style={{ background: '#021326', border: '1px solid #11447799', borderRadius: '14px', width: 'min(680px, 96vw)', maxWidth: '96vw', color: '#cde', boxShadow: '0 8px 28px rgba(0,0,0,0.45)' }}>
             <div style={{ padding: '14px 16px', borderBottom: '1px solid #11447755', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ fontSize: '18px', fontWeight: 700, color: '#9df', textAlign: 'center' }}>Congrats! You multi-tipped {shareModal.receivers} creators & curators!</div>
-              <button onClick={() => { setShareModal({ on: false, id: null, amount: 0, token: '', receivers: 0 }); setShareImageLoaded(false); setShareImageError(false); }} style={{ background: 'transparent', border: 'none', color: '#9df', cursor: 'pointer', fontSize: '20px' }}>×</button>
+                              <div style={{ fontSize: '18px', fontWeight: 700, color: '#9df', textAlign: 'center' }}>
+                  Congrats! You multi-tipped {shareModal.receivers} creators & curators!
+                  {shareModal.fundPercent > 0 && (
+                    <div style={{ fontSize: '14px', color: '#ff6b35', marginTop: '4px' }}>
+                      + {shareModal.fundPercent}% to fund
+                    </div>
+                  )}
+                </div>
+              <button onClick={() => { setShareModal({ on: false, id: null, amount: 0, token: '', receivers: 0, fundPercent: 0 }); setShareImageLoaded(false); setShareImageError(false); }} style={{ background: 'transparent', border: 'none', color: '#9df', cursor: 'pointer', fontSize: '20px' }}>×</button>
         </div>
             <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
               <div style={{ position: 'relative', width: '100%', maxWidth: '305px', height: '205px', borderRadius: '10px', border: '2px solid #abc', background: '#082039' }}>
@@ -3006,6 +3068,23 @@ export default function Tip({ curatorId }) {
                       </div>
                     </div> */}
 
+
+                    {/* FUND Filter */}
+                    <div className='flex-row' style={{height: '42px', alignItems: 'center', justifyContent: 'center', padding: '28px 0'}}>
+                      <div className='flex-row' style={{padding: '6px 11px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '28px', alignItems: 'center', gap: '0.35rem'}}>
+                        <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '13px' : '14px'}}>FUND</div>
+
+                        <div className={fundPercent == 0 ? 'filter-item-on' : 'filter-item'} onClick={() => {setFundPercent(0)}} style={{fontSize: isMobile ? '13px' : '14px'}}>0%</div>
+                        <div className={fundPercent == 10 ? 'filter-item-on' : 'filter-item'} onClick={() => {setFundPercent(10)}} style={{fontSize: isMobile ? '13px' : '14px'}}>10%</div>
+                        <div className={fundPercent == 20 ? 'filter-item-on' : 'filter-item'} onClick={() => {setFundPercent(20)}} style={{fontSize: isMobile ? '13px' : '14px'}}>20%</div>
+                        <div className={fundPercent == 30 ? 'filter-item-on' : 'filter-item'} onClick={() => {setFundPercent(30)}} style={{fontSize: isMobile ? '13px' : '14px'}}>30%</div>
+                      </div>
+                    </div>
+
+
+
+
+
                     {/* TIME Filter */}
                     <div className='flex-row' style={{height: '42px', alignItems: 'center', justifyContent: 'center', padding: '28px 0'}}>
                       <div className='flex-row' style={{padding: '6px 11px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '28px', alignItems: 'center', gap: '0.35rem'}}>
@@ -3365,8 +3444,15 @@ export default function Tip({ curatorId }) {
                          // Calculate total impact sum for normalization
                          const totalImpactSum = creatorResults.reduce((sum, creator) => sum + (creator.impact_sum || 0), 0);
                          
+                         // Calculate fund distribution
+                         const fundAmount = fundPercent > 0 ? parseFloat(tipAmount) * fundPercent / 100 : 0;
+                         const remainingAmount = tipAmount - fundAmount;
+                         
                          console.log('Distribution Preview Debug:', {
                            tipAmount,
+                           fundPercent,
+                           fundAmount,
+                           remainingAmount,
                            totalImpactSum,
                            creatorResults: creatorResults.length,
                            hasWallet: creatorResults.filter(c => c.wallet && c.wallet !== '').length
@@ -3387,29 +3473,85 @@ export default function Tip({ curatorId }) {
                            );
                          }
                          
-                         if (totalImpactSum <= 0) {
-                           return (
-                             <div style={{ 
-                               textAlign: 'center', 
-                               color: '#999', 
-                               fontSize: '12px',
-                               fontStyle: 'italic',
-                               padding: "20px"
-                             }}>
-                               No impact data available for distribution
-                             </div>
-                           );
-                         }
-                         
                          console.log('About to render creators with selectedToken:', selectedToken?.symbol || 'None');
                          
-                         return creatorResults
-                           .filter(creator => creator.wallet && creator.wallet !== '')
-                           .sort((a, b) => (b.impact_sum || 0) - (a.impact_sum || 0)) // Sort by impact_sum descending
-                           .map((creator, index) => {
-                             // Calculate proportional amount based on impact_sum
+                         // Show fund allocation if fundPercent > 0
+                         const fundDisplay = fundPercent > 0 ? (
+                           <>
+                             <div style={{
+                               display: "flex",
+                               justifyContent: "space-between",
+                               alignItems: "center",
+                               padding: "8px 12px",
+                               marginBottom: "8px",
+                               backgroundColor: "#001122",
+                               borderRadius: "12px",
+                               border: "1px solid #114477",
+                               borderColor: "#357"
+                             }}>
+                               <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                 {/* <div style={{
+                                   width: "20px",
+                                   height: "20px",
+                                   borderRadius: "3px",
+                                   backgroundColor: "#357",
+                                   color: "#fff",
+                                   fontSize: "10px",
+                                   fontWeight: "bold",
+                                   display: "flex",
+                                   alignItems: "center",
+                                   justifyContent: "center",
+                                   flexShrink: 0
+                                 }}>
+                                   🏦
+                                 </div> */}
+                                 <span style={{ 
+                                   color: "#9df", 
+                                   fontSize: "14px", 
+                                   fontWeight: "500" 
+                                 }}>
+                                   Fund Allocation ({fundPercent}%)
+                                 </span>
+                               </div>
+                               <div style={{ 
+                                 color: "#9df", 
+                                 fontSize: "14px", 
+                                 fontWeight: "600" 
+                               }}>
+                                 {fundAmount.toFixed(4)} {selectedToken?.symbol || 'Unknown'}
+                               </div>
+                             </div>
+                             
+                             {/* Fund allocation summary */}
+                             {/* <div style={{
+                               display: "flex",
+                               justifyContent: "space-between",
+                               alignItems: "center",
+                               padding: "6px 12px",
+                               marginBottom: "8px",
+                               backgroundColor: "#001122",
+                               borderRadius: "8px",
+                               border: "1px solid #334455",
+                               fontSize: "11px",
+                               color: "#999"
+                             }}>
+                               <span>Total: {tipAmount} {selectedToken?.symbol || 'Unknown'}</span>
+                               <span>Fund: {fundAmount.toFixed(4)} ({fundPercent}%)</span>
+                               <span>Creators: {remainingAmount.toFixed(4)} ({100 - fundPercent}%)</span>
+                             </div> */}
+                           </>
+                         ) : null;
+                         
+                         return (
+                           <>
+                             {fundDisplay}
+                             {creatorResults
+                               .filter(creator => creator.wallet && creator.wallet !== '')
+                               .sort((a, b) => (b.impact_sum || 0) - (a.impact_sum || 0)) // Sort by impact_sum descending
+                               .map((creator, index) => {
+                             // Calculate proportional amount based on impact_sum (using remaining amount after fund allocation)
                              const proportion = creator.impact_sum / totalImpactSum;
-                             const calculatedAmount = tipAmount > 0 ? parseFloat(tipAmount) * proportion : 0;
+                             const calculatedAmount = remainingAmount > 0 ? remainingAmount * proportion : 0;
                              
                              return (
                                <div key={index} style={{
@@ -3475,8 +3617,10 @@ export default function Tip({ curatorId }) {
                                  </div>
                                </div>
                              );
-                           });
-                       })()}
+                           })}
+                         </>
+                       );
+                     })()}
                        {creatorResults.filter(c => c.wallet && c.wallet !== '').length === 0 && (
                          <div style={{ 
                            textAlign: 'center', 
