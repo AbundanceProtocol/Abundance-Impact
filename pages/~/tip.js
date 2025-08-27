@@ -2533,12 +2533,7 @@ export default function Tip({ curatorId }) {
           <div style={{ background: '#021326', border: '1px solid #11447799', borderRadius: '14px', width: 'min(680px, 96vw)', maxWidth: '96vw', color: '#cde', boxShadow: '0 8px 28px rgba(0,0,0,0.45)' }}>
             <div style={{ padding: '14px 16px', borderBottom: '1px solid #11447755', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                               <div style={{ fontSize: '18px', fontWeight: 700, color: '#9df', textAlign: 'center' }}>
-                  Congrats! You multi-tipped {shareModal.receivers} creators & curators!
-                  {shareModal.fundPercent > 0 && (
-                    <div style={{ fontSize: '14px', color: '#ff6b35', marginTop: '4px' }}>
-                      + {shareModal.fundPercent}% to fund
-                    </div>
-                  )}
+                  Congrats! You multi-tipped {shareModal.receivers} creators on Farcaster!
                 </div>
               <button onClick={() => { setShareModal({ on: false, id: null, amount: 0, token: '', receivers: 0, fundPercent: 0 }); setShareImageLoaded(false); setShareImageError(false); }} style={{ background: 'transparent', border: 'none', color: '#9df', cursor: 'pointer', fontSize: '20px' }}>×</button>
         </div>
