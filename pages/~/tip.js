@@ -525,6 +525,16 @@ export default function Tip({ curatorId }) {
             receiver: filteredReceivers,
             transaction_hash: hash,
           };
+          
+          console.log('📝 First OnchainTip payload:', {
+            ...tipPayload,
+            receiver: `${filteredReceivers.length} recipients`
+          });
+          console.log('🔍 First fund field debug:', {
+            fundPercent: fundPercent,
+            fundType: typeof fundPercent,
+            fundValue: tipPayload.fund
+          });
           const res = await fetch('/api/onchain-tip', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -2018,6 +2028,11 @@ export default function Tip({ curatorId }) {
         console.log('📝 OnchainTip payload:', {
           ...tipPayload,
           receiver: `${receivers.length} recipients`
+        });
+        console.log('🔍 Fund field debug:', {
+          fundPercent: fundPercent,
+          fundType: typeof fundPercent,
+          fundValue: tipPayload.fund
         });
         
         const res = await fetch('/api/onchain-tip', {
