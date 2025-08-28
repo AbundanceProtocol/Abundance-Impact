@@ -19,6 +19,16 @@ const DISPERSE_ABI = [
   "function disperseEther(address[] recipients, uint256[] values) external payable"
 ];
 
+// Disperse contract addresses for different networks
+const DISPERSE_CONTRACTS = {
+  1: '0xD152f549545093347A162Dce210e7293f1452150',    // Ethereum Mainnet
+  10: '0xD152f549545093347A162Dce210e7293f1452150',   // Optimism
+  250: '0xD152f549545093347A162Dce210e7293f1452150',  // Fantom
+  42161: '0xD152f549545093347A162Dce210e7293f1452150', // Arbitrum
+  42220: '0xD152f549545093347A162Dce210e7293f1452150'  // Celo
+};
+
+// Default disperse contract address (fallback)
 const DISPERSE_CONTRACT_ADDRESS = '0xD152f549545093347A162Dce210e7293f1452150';
 
 // Get the legacy wallet provider using proper Farcaster SDK
@@ -68,6 +78,25 @@ export async function getLegacyAddress() {
   } catch (error) {
     console.error('Failed to get legacy wallet address:', error);
     throw error;
+  }
+}
+
+// Get disperse contract address for current network
+export async function getDisperseContractAddress() {
+  try {
+    const provider = await getLegacyProvider();
+    const network = await provider.getNetwork();
+    const chainId = network.chainId;
+    
+    console.log(`🌐 Current network chain ID: ${chainId}`);
+    
+    const disperseAddress = DISPERSE_CONTRACTS[chainId] || DISPERSE_CONTRACT_ADDRESS;
+    console.log(`📋 Using disperse contract: ${disperseAddress} for chain ${chainId}`);
+    
+    return disperseAddress;
+  } catch (error) {
+    console.warn('⚠️ Failed to get network, using default disperse contract:', error.message);
+    return DISPERSE_CONTRACT_ADDRESS;
   }
 }
 
@@ -200,19 +229,27 @@ export const legacyTokenUtils = {
 export const legacyDisperseUtils = {
   // Disperse tokens to multiple recipients
   async disperseToken(tokenAddress, recipients, amounts) {
+    const disperseAddress = await getDisperseContractAddress();
+    console.log(`🚀 Disperse token using contract: ${disperseAddress}`);
+    
     return await legacyWriteContract(
-      DISPERSE_CONTRACT_ADDRESS,
+      disperseAddress,
       DISPERSE_ABI,
       'disperseToken',
       [tokenAddress, recipients, amounts]
     );
   },
 
-  // Disperse ETH to multiple recipients
+  // Disperse ETH/CELO to multiple recipients
   async disperseEther(recipients, amounts) {
+    const disperseAddress = await getDisperseContractAddress();
     const totalValue = amounts.reduce((sum, amount) => sum.add(amount), ethers.BigNumber.from(0));
+    
+    console.log(`🚀 Disperse ETH/CELO using contract: ${disperseAddress}`);
+    console.log(`💰 Total value: ${ethers.utils.formatEther(totalValue)} ETH/CELO`);
+    
     return await legacyWriteContract(
-      DISPERSE_CONTRACT_ADDRESS,
+      disperseAddress,
       DISPERSE_ABI,
       'disperseEther',
       [recipients, amounts],
@@ -249,6 +286,7 @@ export default {
   getLegacyProvider,        // async
   getLegacySigner,         // async
   getLegacyAddress,        // async
+  getDisperseContractAddress, // async
   isLegacyWalletConnected, // async
   legacyReadContract,      // async
   legacyWriteContract,     // async

@@ -331,8 +331,6 @@ export default function Tip({ curatorId }) {
       return token.decimals;
     }
     
-    // Use the same mapping as defined in context.js for Base network tokens
-    // Note: Only Base network tokens are currently supported for multi-tip functionality
     const tokenDecimalMap = {
       'ETH': 18,           // Not on Base
       'USDC': 6,           // Available on Base
@@ -527,6 +525,16 @@ export default function Tip({ curatorId }) {
             receiver: filteredReceivers,
             transaction_hash: hash,
           };
+          
+          console.log('📝 First OnchainTip payload:', {
+            ...tipPayload,
+            receiver: `${filteredReceivers.length} recipients`
+          });
+          console.log('🔍 First fund field debug:', {
+            fundPercent: fundPercent,
+            fundType: typeof fundPercent,
+            fundValue: tipPayload.fund
+          });
           const res = await fetch('/api/onchain-tip', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1312,30 +1320,40 @@ export default function Tip({ curatorId }) {
         return;
       }
 
-      // Check if user is on Base network (only network with disperse contract deployed)
-      if (walletChainId !== '0x2105') { // Base network chain ID
+      // Check if user is on a supported network (Base or Celo with disperse contract deployed)
+      const supportedNetworks = {
+        '0x2105': 'Base',
+        '0xa4ec': 'Celo'  // Celo chain ID in hex (42220)
+      };
+      
+      if (!supportedNetworks[walletChainId]) {
         const networkNames = {
           '0x1': 'Ethereum Mainnet',
           '0xa': 'Optimism', 
+          '0x2105': 'Base',
+          '0xa4ec': 'Celo',
           '0xa4b1': 'Arbitrum'
         };
         const currentNetworkName = networkNames[walletChainId] || `Network ${walletChainId}`;
         
-        setDisperseStatus(`⚠️ Multi-Tip is only available on Base network. Please switch from ${currentNetworkName} to Base to use this feature.`);
+        setDisperseStatus(`⚠️ Multi-Tip is only available on Base or Celo networks. Please switch from ${currentNetworkName} to Base or Celo to use this feature.`);
         setIsDispersing(false);
         return;
       }
       
-      console.log('Operating on Base network - multi-tip functionality enabled');
+      const currentNetworkName = supportedNetworks[walletChainId];
+      console.log(`Operating on ${currentNetworkName} network - multi-tip functionality enabled`);
       
       // Now begin transaction preparation after passing network checks
       setIsDispersing(true);
       setDisperseStatus('Preparing transaction...');
       
-      // Validate that the selected token is available on Base
+      // Validate that the selected token is available on the current network
       const tokenNetworkKey = selectedToken?.networkKey;
-      if (tokenNetworkKey && tokenNetworkKey !== 'base') {
-        setDisperseStatus(`⚠️ Token ${selectedToken?.symbol} is not available on Base network. Please select a Base token to multi-tip.`);
+      const currentNetworkKey = currentNetworkName.toLowerCase();
+      
+      if (tokenNetworkKey && tokenNetworkKey !== currentNetworkKey) {
+        setDisperseStatus(`⚠️ Token ${selectedToken?.symbol} is not available on ${currentNetworkName} network. Please select a ${currentNetworkName} token to multi-tip.`);
         setIsDispersing(false);
         return;
       }
@@ -1707,22 +1725,30 @@ export default function Tip({ curatorId }) {
       const legacyAddress = await getLegacyAddress();
       console.log('🔍 Legacy wallet address:', legacyAddress);
 
-      // Check if user is on Base network (only network with disperse contract deployed)
-      if (walletChainId !== '0x2105') { // Base chain ID in hex
-        setDisperseStatus(`⚠️ Multi-Tip is only available on Base network. Please switch to Base to use this feature.`);
+      // Check if user is on a supported network (Base or Celo with disperse contract deployed)
+      const supportedNetworks = {
+        '0x2105': 'Base',
+        '0xa4ec': 'Celo'  // Celo chain ID in hex (42220)
+      };
+      
+      if (!supportedNetworks[walletChainId]) {
+        setDisperseStatus(`⚠️ Multi-Tip is only available on Base or Celo networks. Please switch to Base or Celo to use this feature.`);
         setIsDispersing(false);
         return;
       }
       
-      console.log('Operating on Base network - multi-tip functionality enabled');
+      const currentNetworkName = supportedNetworks[walletChainId];
+      console.log(`Operating on ${currentNetworkName} network - multi-tip functionality enabled`);
       
       setIsDispersing(true);
       setDisperseStatus('Preparing transaction...');
       
-      // Validate that the selected token is available on Base
+      // Validate that the selected token is available on the current network
       const tokenNetworkKey = selectedToken?.networkKey;
-      if (tokenNetworkKey && tokenNetworkKey !== 'base') {
-        setDisperseStatus(`⚠️ Token ${selectedToken?.symbol} is not available on Base network. Please select a Base token to multi-tip.`);
+      const currentNetworkKey = currentNetworkName.toLowerCase();
+      
+      if (tokenNetworkKey && tokenNetworkKey !== currentNetworkKey) {
+        setDisperseStatus(`⚠️ Token ${selectedToken?.symbol} is not available on ${currentNetworkName} network. Please select a ${currentNetworkName} token to multi-tip.`);
         setIsDispersing(false);
         return;
       }
@@ -2002,6 +2028,11 @@ export default function Tip({ curatorId }) {
         console.log('📝 OnchainTip payload:', {
           ...tipPayload,
           receiver: `${receivers.length} recipients`
+        });
+        console.log('🔍 Fund field debug:', {
+          fundPercent: fundPercent,
+          fundType: typeof fundPercent,
+          fundValue: tipPayload.fund
         });
         
         const res = await fetch('/api/onchain-tip', {
@@ -2841,32 +2872,32 @@ export default function Tip({ curatorId }) {
                               tipAmount,
                               walletChainId,
                               selectedToken: selectedToken?.symbol,
-                              chainCheck: walletChainId !== '0x2105',
-                              shouldBeDisabled: isDispersing || !walletConnected || !tipAmount || walletChainId !== '0x2105'
+                                      chainCheck: !['0x2105', '0xa4ec'].includes(walletChainId), // Base or Celo
+        shouldBeDisabled: isDispersing || !walletConnected || !tipAmount || !['0x2105', '0xa4ec'].includes(walletChainId)
                             });
                             console.log('🔍 disperseTokens function:', typeof disperseTokens);
                             console.log('🔍 About to call disperseTokens...');
                             disperseTokensLegacy();
                           }}
-                          disabled={isDispersing || !walletConnected || !tipAmount || walletChainId !== '0x2105'}
+                          disabled={isDispersing || !walletConnected || !tipAmount || !['0x2105', '0xa4ec'].includes(walletChainId)}
                           style={{
                             width: "100%",
                             padding: "10px 16px",
                             borderRadius: "8px",
                             border: "none",
-                            backgroundColor: isPending || isConfirming || !walletConnected || !tipAmount || walletChainId !== '0x2105' ? "#555" : "#007bff",
+                            backgroundColor: isPending || isConfirming || !walletConnected || !tipAmount || !['0x2105', '0xa4ec'].includes(walletChainId) ? "#555" : "#007bff",
                             color: "#fff",
                             fontSize: "12px",
                             fontWeight: "600",
-                            cursor: isPending || isConfirming || !walletConnected || !tipAmount || walletChainId !== '0x2105' ? "not-allowed" : "pointer"
+                            cursor: isPending || isConfirming || !walletConnected || !tipAmount || !['0x2105', '0xa4ec'].includes(walletChainId) ? "not-allowed" : "pointer"
                           }}
                         >
                           {isPending 
                            ? "Preparing..." 
                            : isConfirming 
                            ? "Confirming..." 
-                           : walletChainId !== '0x2105'
-                             ? "Multi-Tip (Base Only)"
+                           : !['0x2105', '0xa4ec'].includes(walletChainId)
+                             ? "Multi-Tip (Base/Celo Only)"
                              : `Multi-Tip ${selectedToken?.symbol || 'Token'}`}
                         </button>
                       </div>

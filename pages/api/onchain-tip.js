@@ -8,11 +8,19 @@ export default async function handler(req, res) {
 
   try {
     await connectToDatabase();
+    
+    console.log('📝 API received payload:', req.body);
+    console.log('🔍 Fund field in API:', {
+      fund: req.body.fund,
+      fundType: typeof req.body.fund,
+      fundPercent: req.body.fundPercent
+    });
 
     const {
       tipper_fid,
       tipper_pfp,
       tipper_username,
+      fund,
       tip,
       receiver,
       transaction_hash,
@@ -26,6 +34,7 @@ export default async function handler(req, res) {
       tipper_fid,
       tipper_pfp,
       tipper_username,
+      fund,
       tip,
       receiver,
       transaction_hash,
