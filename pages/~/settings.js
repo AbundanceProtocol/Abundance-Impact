@@ -44,7 +44,7 @@ export default function Settings({test, rewards}) {
   const store = useStore()
 
   const [fundLoading , setFundLoading ] = useState(true);
-  const [isOn, setIsOn] = useState({boost: false, validate: false, autoFund: false, notifs: false});
+  const [isOn, setIsOn] = useState({boost: false, validate: false, autoFund: false, notifs: false, impactBoost: false});
   // const [expand, setExpand] = useState({boost: false, validate: false, autoFund: false});
   const [loading, setLoading] = useState({boost: false, validate: false, autoFund: false, impactBoost: false})
 

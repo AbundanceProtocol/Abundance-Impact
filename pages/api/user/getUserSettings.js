@@ -15,7 +15,7 @@ export default async function handler(req, res) {
       try {
         await connectToDatabase();
 
-        const user = await User.findOne({ fid: fid.toString(), ecosystem_points: '$IMPACT' }).select('validator boost impact_boost').exec();
+        const user = await User.findOne({ fid: fid.toString(), ecosystem_points: '$IMPACT' }).select('validator boost impact_boost').lean().exec();
 
         const schedule = await ScheduleTip.findOne({ fid: Number(fid) }).select('active_cron creator_fund').exec();
 
@@ -60,7 +60,6 @@ export default async function handler(req, res) {
 
     try {
       const {validate, boost, autoFund, impactBoost, score, notifs} = await getUserSettings(fid)
-
       res.status(200).json({ validate, boost, autoFund, impactBoost, score, notifs });
     } catch (error) {
       console.error('Error submitting data:', error)
