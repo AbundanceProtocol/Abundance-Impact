@@ -6,7 +6,7 @@ import axios from "axios";
 import Head from "next/head";
 
 import { IoIosRocket, IoMdTrophy, IoMdRefresh as Refresh } from "react-icons/io";
-import { BsLightningChargeFill as Impact, BsPiggyBankFill, BsQuestionCircle, BsGiftFill } from "react-icons/bs";
+import { BsLightningChargeFill as Impact, BsPiggyBankFill, BsQuestionCircle, BsGiftFill, BsStar } from "react-icons/bs";
 import { confirmUser, timePassed } from "../../utils/utils";
 import Spinner from "../../components/Common/Spinner";
 import ExpandImg from "../../components/Cast/ExpandImg";
@@ -14,6 +14,7 @@ import useMatchBreakpoints from "../../hooks/useMatchBreakpoints";
 import { AccountContext } from "../../context";
 import qs from "querystring";
 import Modal from "../../components/Layout/Modals/Modal";
+import Settings from "./settings";
 
 const version = process.env.NEXT_PUBLIC_VERSION;
 
@@ -220,31 +221,6 @@ export default function Rewards() {
       setDailyLoading(false);
     }
 
-    // let shareUrl = `https://impact.abundance.id/~/ecosystems/abundance/daily-v1?${qs.stringify({
-    //   id: reward?._id
-    // })}`;
-    // let shareText = `I just claimed ${reward?.degen_total} $degen in Impact Rewards for contributing to /impact (frame by @abundance)\n\n/impact gives out daily rewards to those who curate, auto-fund or invite contributors to use Impact Alpha. Check your reward here 👇`;
-
-    // let encodedShareText = encodeURIComponent(shareText);
-    // let encodedShareUrl = encodeURIComponent(shareUrl);
-    // let shareLink = `https://farcaster.xyz/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`;
-
-    // if (!miniApp) {
-    //   window.open(shareLink, "_blank");
-    // } else if (miniApp) {
-    //   window.parent.postMessage(
-    //     {
-    //       type: "createCast",
-    //       data: {
-    //         cast: {
-    //           text: shareText,
-    //           embeds: [shareUrl]
-    //         }
-    //       }
-    //     },
-    //     "*"
-    //   );
-    // }
   }
 
   {
@@ -401,6 +377,170 @@ export default function Rewards() {
       <div style={{ padding: "0px 4px 0px 4px", width: feedMax }}>
         {((version == "1.0" && !adminTest) || version == "2.0" || adminTest) && (
           <div className="flex-col" style={{ backgroundColor: "" }}>
+
+
+
+
+
+            <div
+              className="flex-row"
+              style={{ backgroundColor: "", justifyContent: "center", gap: "1rem", margin: "20px 0 20px 0" }}
+            >
+              <div
+                className="flex-col"
+                style={{
+                  padding: "1px 5px 1px 5px",
+                  border: `1px solid ${isLogged ? "#0af" : "#aaa"}`,
+                  borderRadius: "18px",
+                  backgroundColor: "",
+                  alignItems: "center",
+                  gap: "0.0rem",
+                  height: "125px",
+                  width: "135px",
+                  justifyContent: "center"
+                }}
+              >
+                <div style={{ fontSize: "13px", padding: "5px 0 5px 0", fontWeight: "700", color: isLogged ? "#0af" : "#aaa" }}>
+                  Creator Fund
+                </div>
+                <div className="flex-row" style={{ gap: "0.5rem", alignItems: "center", padding: "0 10px" }}>
+                  {/* <BsStar color={isLogged ? "#0af" : "#aaa"} size={40} /> */}
+                  <div style={{ fontSize: "36px", fontWeight: "700", color: isLogged ? "#0af" : "#aaa", height: "45px" }}>
+                    {creatorRewards?.degen > 0 ? Math.floor(creatorRewards?.degen).toLocaleString() || 0 : "--"}
+                  </div>
+                </div>
+                <div style={{ fontSize: "10px", padding: "0 0 5px 0", fontWeight: "700", color: isLogged ? "#0af" : "#aaa" }}>
+                  $DEGEN
+                </div>
+
+                <div
+                  className={`flex-row ${
+                    creatorLoading
+                      ? "btn-off"
+                      : (creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet
+                      ? "btn-on"
+                      : "btn-off"
+                  }`}
+                  style={{
+                    borderRadius: "8px",
+                    padding: "2px 5px",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "0.25rem",
+                    margin: "5px 0 2px 0",
+                    cursor: "default"
+                  }}
+                >
+                  <p
+                    style={{
+                      padding: "0 2px",
+                      fontSize: "12px",
+                      fontWeight: "500",
+                      textWrap: "nowrap"
+                    }}
+                  >
+                    {creatorLoading
+                      ? "Loading..."
+                      : (creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet
+                      ? "S7 Airdropped"
+                      : (creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet == null
+                      ? "Missing wallet"
+                      : "No rewards"}
+                  </p>{" "}
+                  {/* update season 5/15 */}
+                </div>
+
+
+
+              </div>
+
+              <div
+                className="flex-col"
+                style={{
+                  padding: "1px 5px 1px 5px",
+                  border: `1px solid ${isLogged ? "#0af" : "#aaa"}`,
+                  borderRadius: "18px",
+                  backgroundColor: "",
+                  alignItems: "center",
+                  gap: "0.0rem",
+                  height: "125px",
+                  width: "135px",
+                  justifyContent: "center",
+                  width: "135px"
+                }}
+              >
+                <div style={{ fontSize: "13px", padding: "5px 0 5px 0", fontWeight: "700", color: isLogged ? "#0af" : "#aaa" }}>
+                  Total Claimed
+                </div>
+                <div className="flex-row" style={{ gap: "0.5rem", alignItems: "center", padding: "0 10px" }}>
+                  <div style={{ fontSize: "36px", fontWeight: "700", color: isLogged ? "#0af" : "#aaa", height: "45px" }}>
+                    {totalClaims > 0 ? Math.floor(totalClaims || 0) : "--"}
+                  </div>
+                </div>
+                <div style={{ fontSize: "10px", padding: "0 0 5px 0", fontWeight: "700", color: isLogged ? "#0af" : "#aaa" }}>
+                  $DEGEN
+                </div>
+
+
+                <div className="flex-row" style={{ alignContent: "center", alignItems: "center", gap: "0.25rem" }}>
+                  <div
+                    className={`flex-row ${claimsLoading ? "btn-off" : totalClaims > 0 ? "btn-on" : "btn-off"}`}
+                    style={{
+                      borderRadius: "8px",
+                      padding: "2px 5px",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "0.25rem",
+                      margin: "5px 0 2px 0",
+                      cursor: "default"
+                    }}
+                  >
+                    <p
+                      style={{
+                        padding: "0 2px",
+                        fontSize: "12px",
+                        fontWeight: "500",
+                        textWrap: "nowrap"
+                      }}
+                    >
+                      {claimsLoading ? "Loading..." : totalClaims > 0 ? "Claimed" : "Check Score"}
+                    </p>
+                  </div>
+                  <div
+                    style={{
+                      padding: "0px 0px",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      margin: "4px 0 -2px 0",
+                      cursor: "pointer"
+                    }}
+                    onClick={() => {
+                      getDailyRewards(fid);
+                      getTotalClaims(fid);
+                    }}
+                  >
+                    <Refresh className="" color={"#0077bf"} size={16} />
+                  </div>
+                </div>
+
+
+
+
+
+
+
+              </div>
+            </div>
+
+
+
+
+
+
+
+
+
+
             <div
               className="shadow flex-col"
               style={{
@@ -500,7 +640,7 @@ export default function Rewards() {
                   position: "relative"
                 }}
               >
-                <div
+                {/* <div
                   className="flex-row"
                   style={{
                     color: "#9df",
@@ -512,7 +652,7 @@ export default function Rewards() {
                   }}
                 >
                   Check your Impact Rewards
-                </div>
+                </div> */}
 
                 <div
                   className="flex-col"
@@ -521,7 +661,7 @@ export default function Rewards() {
                     justifyContent: isMobile ? "center" : "center",
                     alignItems: "center",
                     gap: "1.75rem",
-                    margin: "0px 0 20px 0",
+                    margin: "20px 0 0px 0",
                     flexWrap: "wrap",
                     width: "100%",
                     padding: "0 18px 10px 18px"
@@ -534,7 +674,7 @@ export default function Rewards() {
                     style={{
                       minWidth: isMobile ? "135px" : "130px",
                       color: "#cde",
-                      height: "120px",
+                      height: "140px",
                       width: "100%",
                       cursor: "default"
                     }}
@@ -543,7 +683,7 @@ export default function Rewards() {
                       className="flex-row"
                       style={{ justifyContent: "center", alignItems: "center", gap: "0.75rem" }}
                     >
-                      <div style={{ fontSize: "15px", fontWeight: "700", margin: "0 0 5px 0", color: "#44aaff" }}>
+                      <div style={{ fontSize: "18px", fontWeight: "700", margin: "0 0 5px 0", color: "#44aaff" }}>
                         Daily Rewards
                       </div>
                     </div>
@@ -644,7 +784,7 @@ export default function Rewards() {
 
                   {/* CREATOR FUND */}
 
-                  <div
+                  {/* <div
                     className={`flex-col btn-select blu-drk shadow`}
                     style={{
                       minWidth: isMobile ? "135px" : "130px",
@@ -680,7 +820,7 @@ export default function Rewards() {
                         className="flex-col"
                         style={{ justifyContent: "center", alignItems: "center", gap: "0.25rem" }}
                       >
-                        {/* <Impact size={15} color={userFunding?.active_cron && userFunding?.creator_fund == 100 ? '#147' : '#5af'} /> */}
+
                         <div
                           className="flex-row"
                           style={{ justifyContent: "center", alignItems: "center", gap: "0.5rem" }}
@@ -731,13 +871,12 @@ export default function Rewards() {
                           ? "Missing wallet"
                           : "No rewards"}
                       </p>{" "}
-                      {/* update season 5/15 */}
                     </div>
-                  </div>
+                  </div> */}
 
                   {/* CLAIMED (S7) */}
 
-                  <div
+                  {/* <div
                     className={`flex-col btn-select blu-drk shadow`}
                     style={{
                       minWidth: isMobile ? "135px" : "130px",
@@ -754,7 +893,6 @@ export default function Rewards() {
                       <div style={{ fontSize: "15px", fontWeight: "700", margin: "0 0 5px 0", color: "#44aaff" }}>
                         Claimed (S8)
                       </div>{" "}
-                      {/* update season 5/15 */}
                     </div>
                     {claimsLoading ? (
                       <div
@@ -825,11 +963,11 @@ export default function Rewards() {
                         <Refresh className="" color={"#0077bf"} size={20} />
                       </div>
                     </div>
-                  </div>
+                  </div> */}
 
                   {/* </div> */}
 
-                  <div
+                  {/* <div
                     className="flex-row"
                     style={{
                       color: "#9df",
@@ -842,7 +980,7 @@ export default function Rewards() {
                   >
                     Note: Daily Rewards accumulate for up to 4 days. Rewards expire after 4 days if unclaimed - they are
                     then moved to the Creator Fund
-                  </div>
+                  </div> */}
                   <div
                     className="flex-row"
                     style={{
@@ -863,6 +1001,13 @@ export default function Rewards() {
           </div>
         )}
       </div>
+
+      <div style={{ fontSize: "25px", fontWeight: "700", margin: "40px 0 -25px 0", color: "#44aaff", textAlign: "center", width: "100%" }}>
+        Earn with Impact:
+      </div>
+
+
+      <Settings {...{ rewards: true }} />
 
       <div style={{ padding: "0 0 80px 0" }}>&nbsp;</div>
 

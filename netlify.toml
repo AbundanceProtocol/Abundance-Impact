@@ -26,11 +26,11 @@
   status = 200
   force = true
 
-[functions."autofund-background"]
-  schedule = "0 23 * * *"
-
-[functions."autofund-rerun-background"]
-  schedule = "20 23 * * *"
+[[redirects]]
+  from = "/api/shared"
+  to = "/.netlify/functions/shared"
+  status = 200
+  force = true
 
 [functions."reset-background"]
   schedule = "1 5 * * *"
@@ -40,9 +40,6 @@
 
 [functions."score-background"]
   schedule = "57 4 * * *"
-
-[functions."daily-background"]
-  schedule = "5 5 * * *"
 
 [functions."raffle-background"]
   schedule = "40 4 * * *"

@@ -8,6 +8,7 @@ import BoostInfo from './BoostInfo';
 import ValidateInfo from './ValidateInfo';
 import AutoFundInfo from './AutoFundInfo';
 import WelcomeInfo from './WelcomeInfo';
+import ImpactInfo from './ImpactInfo';
 
 const version = process.env.NEXT_PUBLIC_VERSION
 
@@ -101,6 +102,7 @@ const SwipeablePanel = () => {
           {panelTarget == 'boost' && (<BoostInfo />)}
           {panelTarget == 'validate' && (<ValidateInfo />)}
           {panelTarget == 'autoFund' && (<AutoFundInfo />)}
+          {panelTarget == 'impactBoost' && (<ImpactInfo />)}
 
       </div>
 

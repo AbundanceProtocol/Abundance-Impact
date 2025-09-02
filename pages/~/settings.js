@@ -19,7 +19,7 @@ import useStore from '../../utils/store';
 import ProfilePage from './studio';
 import axios from 'axios';
 import MiniAppAuthButton from '../../components/MiniAppAuthButton';
-import { BsKey, BsLock, BsLockFill, BsXCircle, BsPerson, BsPersonFill, BsShieldCheck, BsShieldFillCheck, BsPiggyBank, BsPiggyBankFill, BsStar, BsStarFill, BsQuestionCircle, BsGift, BsGiftFill, BsPencilFill, BsInfoCircle, BsBellSlash, BsBell } from "react-icons/bs";
+import { BsKey, BsLock, BsLockFill, BsXCircle, BsPerson, BsPersonFill, BsShieldCheck, BsShieldFillCheck, BsPiggyBank, BsPiggyBankFill, BsStar, BsStarFill, BsQuestionCircle, BsGift, BsGiftFill, BsPencilFill, BsInfoCircle, BsBellSlash, BsBell, BsFillRocketTakeoffFill } from "react-icons/bs";
 import Modal from '../../components/Layout/Modals/Modal';
 import Spinner from '../../components/Common/Spinner';
 import NeynarSigninButton from '../../components/Layout/Modals/Signin';
@@ -28,7 +28,7 @@ import { formatNum } from '../../utils/utils';
 
 const version = process.env.NEXT_PUBLIC_VERSION
 
-export default function Settings({test}) {
+export default function Settings({test, rewards}) {
   const ref2 = useRef(null)
   const [ref, inView] = useInView()
   const { LoginPopup, checkEcoEligibility, ecoData, points, setPoints, isLogged, setShowLogin, setIsLogged, fid, setFid, getRemainingBalances, isMiniApp, userBalances, setIsMiniApp, LogoutPopup, userInfo, setUserInfo, setPanelOpen, setPanelTarget, adminTest, setAdminTest } = useContext(AccountContext)
@@ -44,9 +44,9 @@ export default function Settings({test}) {
   const store = useStore()
 
   const [fundLoading , setFundLoading ] = useState(true);
-  const [isOn, setIsOn] = useState({boost: false, validate: false, autoFund: false, notifs: false});
+  const [isOn, setIsOn] = useState({boost: false, validate: false, autoFund: false, notifs: false, impactBoost: false});
   // const [expand, setExpand] = useState({boost: false, validate: false, autoFund: false});
-  const [loading, setLoading] = useState({boost: false, validate: false, autoFund: false})
+  const [loading, setLoading] = useState({boost: false, validate: false, autoFund: false, impactBoost: false})
 
   const [showLoginNotice, setShowLoginNotice] = useState(!isLogged);
   const [notifStatus, setNotifStatus] = useState({app: false, notifs: false})
@@ -172,7 +172,8 @@ export default function Settings({test}) {
       setLoading({
         validate: true,
         boost: true,
-        autoFund: true
+        autoFund: true,
+        impactBoost: true
       })
       const response = await axios.get('/api/user/getUserSettings', {
         params: { fid } })
@@ -185,6 +186,7 @@ export default function Settings({test}) {
           boost: userSettings.boost || false,
           validate: userSettings.validate || false, 
           autoFund: userSettings.autoFund || false, 
+          impactBoost: userSettings.impactBoost || false,
           score: userSettings.score || 0,
           notifs: userSettings.notifs || false
         })
@@ -193,6 +195,7 @@ export default function Settings({test}) {
         validate: false,
         boost: false,
         autoFund: false,
+        impactBoost: false,
         score: 0
       })
     } catch (error) {
@@ -200,7 +203,8 @@ export default function Settings({test}) {
       setLoading({
         validate: false,
         boost: false,
-        autoFund: false
+        autoFund: false,
+        impactBoost: false,
       })
     }
   }
@@ -213,6 +217,7 @@ export default function Settings({test}) {
         boost: false,
         validate: false, 
         autoFund: false,
+        impactBoost: false,
         score: 0,
         notifs: false
       })
@@ -325,6 +330,26 @@ export default function Settings({test}) {
               setLoading(prev => ({...prev, [target]: true }))
                 try {
                   const response = await updateSettings("autoFund-off")
+                  console.log(response)
+                } catch (error) {
+                  console.error('Failed:', error)
+                }
+              setLoading(prev => ({...prev, [target]: false }))
+            }
+          } else if (target == 'impactBoost') {
+            if (isOn[target] == false) {
+              setLoading(prev => ({...prev, [target]: true }))
+                try {
+                  const response = await updateSettings("impactBoost-on")
+                  console.log(response)
+                } catch (error) {
+                  console.error('Failed:', error)
+                }
+              setLoading(prev => ({...prev, [target]: false }))
+            } else if (isOn[target] == true) {
+              setLoading(prev => ({...prev, [target]: true }))
+                try {
+                  const response = await updateSettings("impactBoost-off")
                   console.log(response)
                 } catch (error) {
                   console.error('Failed:', error)
@@ -496,7 +521,7 @@ export default function Settings({test}) {
           content={`Building the global superalignment layer`}
         />
       </Head>
-    {(!isLogged || (version == '2.0' || adminTest)) && (
+    {(!rewards && (!isLogged || (version == '2.0' || adminTest))) && (
       <div id="log in"
       style={{
         padding: isMobile ? ((version == '1.0' && !adminTest) ? "58px 0 20px 0" : "48px 0 20px 0") : "58px 0 60px 0",
@@ -523,7 +548,7 @@ export default function Settings({test}) {
 
           {/* LOGIN */}
 
-          {(version == '2.0' || adminTest) && (<div className='flex-col' style={{backgroundColor: ''}}>
+          {(!rewards && (version == '2.0' || adminTest)) && (<div className='flex-col' style={{backgroundColor: ''}}>
 
             <div className='shadow flex-col'
               style={{
@@ -638,17 +663,17 @@ export default function Settings({test}) {
           )}
 
 
-          {(version == '2.0' || adminTest) && isLogged && (<div className='flex-row' style={{backgroundColor: '', justifyContent: 'center', gap: '1rem', margin: '20px 0 -20px 0'}}>
+          {(!rewards && ((version == '2.0' || adminTest) && isLogged)) && (<div className='flex-row' style={{backgroundColor: '', justifyContent: 'center', gap: '1rem', margin: '20px 0 -20px 0'}}>
             <div className='flex-col' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(isLogged && isOn.boost) ? '#0af' : '#aaa'}`, borderRadius: '18px', backgroundColor: '', alignItems: 'center', gap: '0.0rem', height: '90px', justifyContent: 'center'}}>
               <div className='flex-row' style={{gap: '0.5rem', alignItems: 'center', padding: '0 10px'}}>
                 <BsStar color={(isLogged && isOn.boost) ? '#0af' : '#aaa'} size={40} />
                 <div style={{fontSize: '43px', fontWeight: '700', color: (isLogged && isOn.boost) ? '#0af' : '#aaa'}}>
-                  {test ? test : '69'}
+                  {userBalances.impact}
                 </div>
 
               </div>
               <div style={{fontSize: '13px', fontWeight: '700', color: (isLogged && isOn.boost) ? '#0af' : '#aaa'}}>
-                Weekly Points
+                Daily Points
               </div>
             </div>
 
@@ -752,7 +777,7 @@ export default function Settings({test}) {
                 </div>
 
                 <div>
-                  Nominate casts to be boosted and rewarded based on their impact on Farcaster - earn rewards
+                  Nominate impactful casts, become an Impact Booster to grow your Impact Score & earn rewards
                 </div>
                 <div className='flex-row' style={{position: 'absolute', bottom: '0', right: '0', padding: '5px 5px', gap: '.25rem', alignItems: 'center'}}>
                   <BsInfoCircle size={15} onClick={() => {
@@ -940,13 +965,13 @@ export default function Settings({test}) {
 
                 <div className='flex-row' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(isLogged && isOn.autoFund && isOn.boost) ? '#0af' : (isLogged && isOn.autoFund) ? '#ace' : '#aaa'}`, borderRadius: '8px', backgroundColor: '', alignItems: 'center', gap: '0.15rem', height: '30px'}}>
                   <div style={{fontSize: '13px', fontWeight: '700', color: (isLogged && isOn.autoFund && isOn.boost) ? '#0af' : (isLogged && isOn.autoFund) ? '#ace' : '#aaa'}}>
-                    +24
+                    +14
                   </div>
                   <BsStar color={(isLogged && isOn.autoFund && isOn.boost) ? '#0af' : (isLogged && isOn.autoFund) ? '#ace' : '#aaa'} size={13} />
                 </div>
 
                 <div>
-                  Support creators with your remaining $degen and $tipn allowances - earn rewards
+                  Support creators with your remaining $tipn allowances - earn rewards
                 </div>
 
                 <div className='flex-row' style={{position: 'absolute', bottom: '0', right: '0', padding: '5px 5px', gap: '.25rem', alignItems: 'center'}}>
@@ -959,22 +984,99 @@ export default function Settings({test}) {
           )}
 
 
-          {/* {fid && fid == 9326 && adminTest && (<div
-            className="flex-row"
-            style={{
-              color: "#9df",
-              width: "100%",
-              fontSize: isMobile ? "15px" : "17px",
-              padding: "10px 10px 15px 10px",
-              justifyContent: "center",
-              userSelect: 'none',
-              gap: '1rem'
-            }} >
-            <div style={{padding: '5px', border: '1px solid #777', backgroundColor: adminTest ? '#246' : '#ace', color: adminTest ? '#ace' : '#246', cursor: 'pointer'}} onClick={() => setAdminTest(false)}>Impact 1.0</div>
-            <div style={{padding: '5px', border: '1px solid #777', backgroundColor: adminTest ? '#ace' : '#246', color: adminTest ? '#246' : '#ace', cursor: 'pointer'}} onClick={() => setAdminTest(true)}>Impact 2.0</div>
 
-            <div style={{padding: '5px', border: '1px solid #777', backgroundColor: adminTest ? '#ace' : '#246', color: adminTest ? '#246' : '#ace', cursor: 'pointer'}}>{}</div>
-          </div>)} */}
+
+          {rewards && (<div className='flex-col' style={{backgroundColor: ''}}>
+
+          <div className='shadow flex-col'
+            style={{
+              backgroundColor: isLogged ? "#002244" : '#333',
+              borderRadius: "15px",
+              border: isLogged ? "1px solid #11447799" : "1px solid #555",
+              width: isMiniApp || isMobile ? '340px' : '100%',
+              margin: isMiniApp || isMobile ? '15px auto 0 auto' : '15px auto 0 auto',
+            }} >
+            <div
+              className="shadow flex-row"
+              style={{
+                backgroundColor: isLogged ? "#11448888" : "#444",
+                width: "100%",
+                justifyContent: "space-between",
+                alignItems: "center",
+                padding: "8px", 
+                borderRadius: "15px",
+                margin: '0 0 10px 0',
+                gap: '1rem'
+              }}
+            >
+              <div
+                className="flex-row"
+                style={{
+                  width: "100%",
+                  justifyContent: "flex-start",
+                  alignItems: "center",
+                  padding: "0px 0 0 4px",
+                  margin: '0 0 0px 0'
+                }} >
+
+
+              
+                <BsFillRocketTakeoffFill style={{ fill: "#cde" }} size={20} />
+                <div>
+
+
+                  <div style={{border: '0px solid #777', padding: '2px', borderRadius: '10px', backgroundColor: '', maxWidth: 'fit-content', cursor: 'pointer', color: '#cde'}}>
+                    <div className="top-layer flex-row">
+                      <div className="flex-row" style={{padding: "4px 0 4px 10px", marginBottom: '0px', flexWrap: 'wrap', justifyContent: 'flex-start', gap: '0.00rem', width: '', alignItems: 'center'}}>
+                        <div style={{fontSize: isMobile ? '18px' : '22px', fontWeight: '600', color: '', padding: '0px 3px'}}>
+                          Impact Boost
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+
+                <div
+                  className="flex-row"
+                  style={{
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    cursor: "pointer",
+                  }} >
+
+                </div>
+              </div>
+
+              <ToggleSwitch target={'impactBoost'} />
+            </div>
+
+
+            <div className='flex-row' style={{backgroundColor: isLogged ? "#002244ff" : '#333', padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: isLogged ? '#ace' : '#ddd', fontSize: '12px', gap: '0.75rem', position: 'relative'}}>
+
+              <div className='flex-row' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(isLogged && isOn.impactBoost && isOn.boost) ? '#0af' : (isLogged && isOn.impactBoost) ? '#ace' : '#aaa'}`, borderRadius: '8px', backgroundColor: '', alignItems: 'center', gap: '0.15rem', height: '30px'}}>
+                <div style={{fontSize: '13px', fontWeight: '700', color: (isLogged && isOn.impactBoost && isOn.boost) ? '#0af' : (isLogged && isOn.impactBoost) ? '#ace' : '#aaa'}}>
+                  +10
+                </div>
+                <BsStar color={(isLogged && isOn.impactBoost && isOn.boost) ? '#0af' : (isLogged && isOn.impactBoost) ? '#ace' : '#aaa'} size={13} />
+              </div>
+
+              <div>
+                Auto-boost Impact-centered casts from @abundance - earn rewards
+              </div>
+
+              <div className='flex-row' style={{position: 'absolute', bottom: '0', right: '0', padding: '5px 5px', gap: '.25rem', alignItems: 'center'}}>
+                <BsInfoCircle size={15} onClick={() => {
+                  openSwipeable("impactBoost"); }} />
+              </div>
+            </div>
+          </div>
+          </div>
+          )}
+
+
+
+
 
 
         {/* </div> */}

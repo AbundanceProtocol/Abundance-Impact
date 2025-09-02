@@ -240,42 +240,6 @@ export default function CuratorFid() {
 
 
 
-  // async function getUser(fid) {
-  //   try {
-  //     const response = await axios.get('/api/getUserByFid', {
-  //       params: { fid }
-  //     })
-  //     if (response?.data) {
-  //       setUser(response?.data)
-  //     } else {
-  //       setUser(null)
-  //     }
-  //   } catch (error) {
-  //     console.error('Error submitting data:', error)
-  //     setUser(null)
-  //   }
-  // }
-
-
-  // useEffect(() => {
-  //   if (sched.user) {
-  //     if (user && username && username !== '-') {
-  //       console.log('feed4')
-  //       feedRouter()
-  //     }
-  //     setSched(prev => ({...prev, user: false }))
-  //   } else {
-  //     const timeoutId = setTimeout(() => {
-  //       if (user && username && username !== '-') {
-  //         console.log('feed5')
-  //         feedRouter()
-  //       }
-  //       setSched(prev => ({...prev, user: false }))
-  //     }, 300);
-  
-  //     return () => clearTimeout(timeoutId);
-  //   }
-  // }, [user, sched.user]);
 
   useEffect(() => {
     console.log('userQuery', userQuery)
@@ -723,156 +687,6 @@ export default function CuratorFid() {
 
 
 
-
-
-
-
-      {/* <div style={{ padding: "0px 4px 0px 4px", width: feedMax }}>
-        {((version == "1.0" && !adminTest) || version == "2.0" || adminTest) && (
-          <div className="flex-col" style={{ backgroundColor: "" }}>
-            <div
-              className="shadow flex-col"
-              style={{
-                backgroundColor: isLogged ? "#002244" : "#333",
-                borderRadius: "15px",
-                border: isLogged ? "1px solid #11447799" : "1px solid #555",
-                width: isMiniApp || isMobile ? "340px" : "100%",
-                margin: isMiniApp || isMobile ? "0px auto 0 auto" : "0px auto 0 auto"
-              }}
-            >
-              <div
-                className="shadow flex-row"
-                style={{
-                  backgroundColor: isLogged ? "#11448888" : "#444",
-                  width: "100%",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  padding: "8px",
-                  borderRadius: "15px",
-                  margin: "0 0 10px 0",
-                  gap: "1rem"
-                }}
-              >
-                <div
-                  className="flex-row"
-                  style={{
-                    width: "100%",
-                    justifyContent: "flex-start",
-                    alignItems: "center",
-                    padding: "0px 0 0 4px",
-                    margin: "0 0 0px 0"
-                  }}
-                >
-                  {user ? (<BsFillPersonFill style={{ fill: "#cde" }} size={20} />): (<BsFillPersonFill style={{ fill: "#cde" }} size={20} />)}
-                  <div>
-                    <div
-                      style={{
-                        border: "0px solid #777",
-                        padding: "2px",
-                        borderRadius: "10px",
-                        backgroundColor: "",
-                        maxWidth: "fit-content",
-                        cursor: "pointer",
-                        color: "#cde"
-                      }}
-                    >
-                      <div className="top-layer flex-row">
-                        <div
-                          className="flex-row"
-                          style={{
-                            padding: "4px 0 4px 10px",
-                            marginBottom: "0px",
-                            flexWrap: "wrap",
-                            justifyContent: "flex-start",
-                            gap: "0.00rem",
-                            width: "",
-                            alignItems: "center"
-                          }}
-                        >
-                          <div
-                            style={{
-                              fontSize: isMobile ? "18px" : "22px",
-                              fontWeight: "600",
-                              color: "",
-                              padding: "0px 3px"
-                            }}
-                          >
-                            {user?.username ? `${'@' + user.username}` : 'Curator'}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div
-                    className="flex-row"
-                    style={{
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      cursor: "pointer"
-                    }}
-                  ></div>
-                </div>
-
-              </div>
-
-              <div
-                className="flex-col"
-                style={{
-                  backgroundColor: isLogged ? "#002244ff" : "#333",
-                  padding: "0px 18px 12px 18px",
-                  borderRadius: "0 0 15px 15px",
-                  color: isLogged ? "#ace" : "#ddd",
-                  fontSize: "12px",
-                  gap: "0.75rem",
-                  position: "relative"
-                }}
-              >
-                <div
-                  className="flex-row"
-                  style={{
-                    color: "#9df",
-                    width: "100%",
-                    fontSize: isMobile ? "15px" : "17px",
-                    padding: "10px 10px 15px 10px",
-                    justifyContent: "center",
-                    userSelect: "none"
-                  }}
-                >
-                  Check your Impact Rewards
-                </div>
-
-
-
-              </div>
-            </div>
-          </div>
-        )}
-      </div> */}
-
-
-
-
-
-
-
-
-      {/* <div className='flex-row' style={{height: '30px', alignItems: 'center', justifyContent: 'flex-start', padding: '20px 0 30px 0'}}>
-        <div className='flex-row' style={{padding: '4px 8px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '20px', alignItems: 'center', gap: '0.25rem'}}>
-
-
-
-          <Link href={`/~/ecosystems/abundance`}><div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>abundance</div></Link>
-          <div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px', padding: '0'}}>{'>'}</div>
-          <Link href={`/~/ecosystems/abundance/curators`}><div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>curators</div></Link>
-          <div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px', padding: '0'}}>{'>'}</div>
-          <div className='filter-item-on' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>@{username}</div>
-        </div>
-      </div> */}
-
-      {/* {user && (<CuratorData {...{ show: (isLogged && user), user, textMax, type: 'curator' }} />)} */}
-
-
       {user && (<CuratorBlock {...{ show: (user), user, textMax, feedMax, type: 'curator', onTipToggle: handleTipToggle, showTip }} />)}
 
 
@@ -880,14 +694,6 @@ export default function CuratorFid() {
       {showTip && <Tip {...{ curatorId: fid }} />}
 
 
-
-
-      {/* IMAGE TESTING */}
-      {/* <img
-        src={`${baseURL}/api/frames/tip/circle-v5?fid=9326`}
-        alt="Onchain Tip"
-        style={{ width: '300px', height: '200px', objectFit: 'cover', borderRadius: '8px' }}
-      /> */}
 
 
       {searchSelect == 'Curation' && (
@@ -945,21 +751,3 @@ export default function CuratorFid() {
   );
 }
 
-
-
-
-
-
-// export async function getServerSideProps(context) {
-//   try {
-//     const { params } = context || {};
-//     const { fid } = params || {};
-//     return {
-//       props: {
-//         fid: fid || null,
-//       },
-//     };
-//   } catch (_) {
-//     return { props: { fid: null } };
-//   }
-// }
