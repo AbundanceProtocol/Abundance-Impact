@@ -26,6 +26,12 @@
   status = 200
   force = true
 
+[[redirects]]
+  from = "/api/shared"
+  to = "/.netlify/functions/shared"
+  status = 200
+  force = true
+
 [functions."reset-background"]
   schedule = "1 5 * * *"
 

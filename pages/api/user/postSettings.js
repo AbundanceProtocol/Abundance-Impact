@@ -51,6 +51,10 @@ export default async function handler(req, res) {
             } else {
               message = 'Turn on notifications'
             }
+          } else if (setting == 'impactBoost-on') {
+            updated = await User.findOneAndUpdate({ fid: fid.toString(), ecosystem_points: '$IMPACT' }, { impact_boost: true }, { new: true, select: '-uuid' });
+          } else if (setting == 'impactBoost-off') {
+            updated = await User.findOneAndUpdate({ fid: fid.toString(), ecosystem_points: '$IMPACT' }, { impact_boost: false }, { new: true, select: '-uuid' });
           } else if (setting == 'autoFund-on') {
             const schedule = await ScheduleTip.findOne({fid})
             if (schedule) {

@@ -22,6 +22,8 @@ import {
   FaShareAlt as Share,
   FaStar
 } from "react-icons/fa";
+import { IoMdRefresh as Refresh } from "react-icons/io";
+
 // import { GiRibbonMedal as Medal } from "react-icons/gi";
 // import { IoMdTrophy } from "react-icons/io";
 // import { IoInformationCircleOutline as Info, IoLogIn } from "react-icons/io5";
@@ -111,6 +113,13 @@ export default function Homepage({ test }) {
   const [showLoginNotice, setShowLoginNotice] = useState(!isLogged);
   const [notifStatus, setNotifStatus] = useState({ app: false, notifs: false });
 
+  const [creatorRewards, setCreatorRewards] = useState(null);
+  const [creatorLoading, setCreatorLoading] = useState(true);
+  const [dailyRewards, setDailyRewards] = useState(null);
+  const [dailyLoading, setDailyLoading] = useState(true);
+  const [totalClaims, setTotalClaims] = useState(0);
+  const [claimsLoading, setClaimsLoading] = useState(true);
+
   useEffect(() => {
     if (!isLogged) {
       setShowLoginNotice(true);
@@ -130,6 +139,160 @@ export default function Homepage({ test }) {
     setIsLogged(true);
     setShowLogin(false);
   };
+
+  useEffect(() => {
+    if (fid) {
+      getCreatorRewards(fid);
+      getDailyRewards(fid);
+      getTotalClaims(fid);
+    }
+  }, [fid]);
+
+  useEffect(() => {
+    if (userBalances.impact == 0) {
+      (async () => {
+        const { sdk } = await import('@farcaster/miniapp-sdk')
+
+        const isMiniApp = await sdk.isInMiniApp();
+        setIsMiniApp(isMiniApp);
+        console.log("isMiniApp1", isMiniApp);
+
+        const userProfile = await sdk.context;
+
+        console.log(userProfile?.user?.fid);
+
+        const checkUserProfile = async fid => {
+          try {
+            const res = await fetch(`/api/user/validateUser?fid=${fid}`);
+            const data = await res.json();
+            return data.valid;
+          } catch (error) {
+            return null;
+          }
+        };
+
+        const isValidUser = await checkUserProfile(userProfile?.user?.fid);
+        console.log(`User is valid: ${isValidUser}`);
+        console.log(isValidUser);
+        if (isValidUser && isMiniApp) {
+          setIsLogged(true);
+          setFid(Number(userProfile?.user?.fid));
+          setUserInfo({
+            pfp: userProfile?.user?.pfpUrl || null,
+            username: userProfile?.user?.username || null,
+            display: userProfile?.user?.displayName || null
+          });
+        }
+
+        sdk.actions.ready();
+
+        if (isValidUser && !(userBalances?.impact > 0)) {
+          const { impact, qdau } = await getUserBalance(userProfile?.user?.fid);
+          console.log("userBalance", impact);
+          setUserBalances(prev => ({ ...prev, impact, qdau }));
+        }
+      })();
+    }
+  }, []);
+
+  async function getCreatorRewards(fid) {
+    try {
+      const response = await axios.get("/api/fund/getCreatorRewards", {
+        params: { fid }
+      });
+      if (response?.data?.data) {
+        setCreatorRewards(response?.data?.data);
+        console.log("getCreatorRewards", response?.data?.data);
+      } else {
+        setCreatorRewards(null);
+      }
+      setCreatorLoading(false);
+    } catch (error) {
+      console.error("Error submitting data:", error);
+      setCreatorLoading(false);
+    }
+  }
+
+  async function getTotalClaims(fid) {
+    try {
+      const response = await axios.get("/api/fund/getTotalClaims", {
+        params: { fid }
+      });
+      console.log("getTotalClaims1", response);
+      if (response?.data?.data) {
+        setTotalClaims(response?.data?.data);
+        console.log("getTotalClaims2", response?.data?.data);
+      } else {
+        setTotalClaims(0);
+      }
+      setClaimsLoading(false);
+    } catch (error) {
+      console.error("Error submitting data:", error);
+      setClaimsLoading(false);
+    }
+  }
+
+  async function getDailyRewards(fid) {
+    try {
+      const response = await axios.get("/api/fund/getDailyRewards", {
+        params: { fid }
+      });
+      if (response?.data?.data) {
+        setDailyRewards(response?.data?.data);
+        console.log("getDailyRewards", response?.data?.data);
+      } else {
+        setDailyRewards(null);
+      }
+      setDailyLoading(false);
+    } catch (error) {
+      console.error("Error submitting data:", error);
+      setDailyLoading(false);
+    }
+  }
+
+
+
+
+
+
+  async function claimReward(event, reward) {
+    event.preventDefault();
+    setDailyLoading(true);
+
+    try {
+      const response = await axios.post("/api/fund/postReward", { id: reward._id });
+
+      console.log("response", response);
+
+      if (response?.data) {
+        // setDailyRewards(response?.data?.claimed);
+        await getDailyRewards(reward.fid);
+        setClaimsLoading(true);
+        await getTotalClaims(reward.fid);
+        setClaimsLoading(false);
+      }
+      setDailyLoading(false);
+    } catch (error) {
+      console.error("Error claiming reward:", error);
+      setDailyLoading(false);
+    }
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   useEffect(() => {
     console.log("triggered");
@@ -387,7 +550,18 @@ export default function Homepage({ test }) {
   }
 
 
-
+  async function viewCast(castHash) {
+    try {
+      const { sdk } = await import('@farcaster/miniapp-sdk')
+      await sdk.haptics.impactOccurred('light')
+      await sdk.actions.viewCast({ 
+        hash: castHash,
+      });
+      console.log('Cast viewed successfully');
+    } catch (error) {
+      console.error('Error viewing cast:', error);
+    }
+  }
 
   async function notifsOn() {
     try {
@@ -593,11 +767,42 @@ export default function Homepage({ test }) {
           </div>
           )} */}
 
+      <div className='flex-row' style={{width: '100%', justifyContent: 'center', alignItems: 'center'}}>
+
+        <div
+          className="flex-col"
+          style={{
+            padding: "1px 5px 1px 5px",
+            border: `1px solid #f66`,
+            borderRadius: "18px",
+            backgroundColor: "",
+            alignItems: "center",
+            gap: "0.0rem",
+            height: "35px",
+            width: "245px",
+            justifyContent: "center"
+          }}
+        >
+          <div style={{ fontSize: "13px", padding: "5px 0 5px 0", fontWeight: "700", color: "#f66" }}>
+            Impact 2.0 is under construction
+          </div>
+        </div>
+
+      </div>
+
+
       {(version == "2.0" || adminTest) && isLogged && (
         <div
           className="flex-row"
           style={{ backgroundColor: "", justifyContent: "center", gap: "1rem", margin: "20px 0 -20px 0" }}
         >
+
+
+
+
+
+
+
           <div
             className="flex-col"
             style={{
@@ -608,17 +813,18 @@ export default function Homepage({ test }) {
               alignItems: "center",
               gap: "0.0rem",
               height: "90px",
+              width: "135px",
               justifyContent: "center"
             }}
           >
             <div className="flex-row" style={{ gap: "0.5rem", alignItems: "center", padding: "0 10px" }}>
               <BsStar color={isLogged && isOn.boost ? "#0af" : "#aaa"} size={40} />
               <div style={{ fontSize: "43px", fontWeight: "700", color: isLogged && isOn.boost ? "#0af" : "#aaa" }}>
-                {test ? test : "69"}
+                {userBalances.impact}
               </div>
             </div>
             <div style={{ fontSize: "13px", fontWeight: "700", color: isLogged && isOn.boost ? "#0af" : "#aaa" }}>
-              Weekly Points
+              Daily Points
             </div>
           </div>
 
@@ -647,6 +853,246 @@ export default function Homepage({ test }) {
           </div>
         </div>
       )}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <div
+              className="flex-row"
+              style={{ backgroundColor: "", justifyContent: "center", gap: "1rem", margin: "20px 0 0px 0", padding: "20px 0 0 0"}}
+            >
+              <div
+                className="flex-col"
+                style={{
+                  padding: "1px 5px 1px 5px",
+                  border: `1px solid ${isLogged ? "#0af" : "#aaa"}`,
+                  borderRadius: "18px",
+                  backgroundColor: "",
+                  alignItems: "center",
+                  gap: "0.0rem",
+                  height: "125px",
+                  width: "135px",
+                  justifyContent: "center"
+                }}
+              >
+                <div style={{ fontSize: "13px", padding: "5px 0 5px 0", fontWeight: "700", color: isLogged ? "#0af" : "#aaa" }}>
+                  Creator Fund
+                </div>
+                <div className="flex-row" style={{ gap: "0.5rem", alignItems: "center", padding: "0 10px" }}>
+                  {/* <BsStar color={isLogged ? "#0af" : "#aaa"} size={40} /> */}
+                  <div style={{ fontSize: "36px", fontWeight: "700", color: isLogged ? "#0af" : "#aaa", height: "45px" }}>
+                    {creatorRewards?.degen > 0 ? Math.floor(creatorRewards?.degen).toLocaleString() || 0 : "--"}
+                  </div>
+                </div>
+                <div style={{ fontSize: "10px", padding: "0 0 5px 0", fontWeight: "700", color: isLogged ? "#0af" : "#aaa" }}>
+                  $DEGEN
+                </div>
+
+                <div
+                  className={`flex-row ${
+                    creatorLoading
+                      ? "btn-off"
+                      : (creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet
+                      ? "btn-on"
+                      : "btn-off"
+                  }`}
+                  style={{
+                    borderRadius: "8px",
+                    padding: "2px 5px",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "0.25rem",
+                    margin: "5px 0 2px 0",
+                    cursor: "default"
+                  }}
+                >
+                  <p
+                    style={{
+                      padding: "0 2px",
+                      fontSize: "12px",
+                      fontWeight: "500",
+                      textWrap: "nowrap"
+                    }}
+                  >
+                    {creatorLoading
+                      ? "Loading..."
+                      : (creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet
+                      ? "S7 Airdropped"
+                      : (creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet == null
+                      ? "Missing wallet"
+                      : "No rewards"}
+                  </p>{" "}
+                  {/* update season 5/15 */}
+                </div>
+
+
+
+              </div>
+
+              <div
+                className="flex-col"
+                style={{
+                  padding: "1px 5px 1px 5px",
+                  border: `1px solid ${isLogged ? "#0af" : "#aaa"}`,
+                  borderRadius: "18px",
+                  backgroundColor: "",
+                  alignItems: "center",
+                  gap: "0.0rem",
+                  height: "125px",
+                  width: "135px",
+                  justifyContent: "center",
+                  width: "135px"
+                }}
+              >
+                <div style={{ fontSize: "13px", padding: "5px 0 5px 0", fontWeight: "700", color: isLogged ? "#0af" : "#aaa" }}>
+                  Daily Rewards
+                </div>
+                <div className="flex-row" style={{ gap: "0.5rem", alignItems: "center", padding: "0 10px" }}>
+                  <div style={{ fontSize: "36px", fontWeight: "700", color: isLogged ? "#0af" : "#aaa", height: "45px" }}>
+                    {dailyRewards?.degen_total > 0 ? Math.floor(dailyRewards?.degen_total || 0) : "--"}
+                  </div>
+                </div>
+                <div style={{ fontSize: "10px", padding: "0 0 5px 0", fontWeight: "700", color: isLogged ? "#0af" : "#aaa" }}>
+                  $DEGEN
+                </div>
+
+
+                <div className="flex-row" style={{ alignContent: "center", alignItems: "center", gap: "0.25rem" }}>
+                  <div
+                    className={`flex-row ${
+                      dailyLoading
+                        ? "btn-off"
+                        : dailyRewards?.degen_total > 0 && dailyRewards?.claimed == false
+                        ? "btn-act"
+                        : dailyRewards?.degen_total > 0 && dailyRewards?.claimed == true
+                        ? "btn-on"
+                        : "btn-off"
+                    }`}
+                    style={{
+                      borderRadius: "8px",
+                      padding: "2px 5px",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "0.25rem",
+                      margin: "5px 0 2px 0",
+                      cursor:
+                        dailyRewards?.degen_total > 0 && dailyRewards?.claimed == false ? "pointer" : "default"
+                    }}
+                    onClick={event => {
+                      if (dailyRewards?.degen_total > 0 && dailyRewards?.claimed == false) {
+                        claimReward(event, dailyRewards);
+                      } else if (!isLogged) {
+                        LoginPopup();
+                      }
+                    }}
+                  >
+                    <p
+                      style={{
+                        padding: "0 2px",
+                        fontSize: "12px",
+                        fontWeight: "500",
+                        textWrap: "nowrap"
+                      }}
+                    >
+                      {dailyLoading
+                        ? "Loading..."
+                        : dailyRewards?.degen_total > 0 && dailyRewards?.claimed == false
+                        ? "Claim"
+                        : dailyRewards?.degen_total > 0 && dailyRewards?.claimed == true
+                        ? "Claimed"
+                        : "Check Score"}
+                    </p>
+                  </div>
+                  <div
+                    style={{
+                      padding: "0px 0px",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      margin: "4px 0 -2px 0",
+                      cursor: "pointer"
+                    }}
+                    onClick={() => {
+                      getDailyRewards(fid);
+                      getTotalClaims(fid);
+                    }}
+                  >
+                    <Refresh className="" color={"#0077bf"} size={16} />
+                  </div>
+                </div>
+
+
+
+
+
+
+
+              </div>
+            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
       <div
         className="flex-row"
@@ -686,8 +1132,8 @@ export default function Homepage({ test }) {
                   alignItems: "center",
                   justifyContent: "center",
                   gap: "0.25rem",
-                  height: "50px",
-                  width: "110px",
+                  height: "40px",
+                  width: "100px",
                   // backgroundColor: "#aaa"
                 }}
               >
@@ -701,7 +1147,7 @@ export default function Homepage({ test }) {
                     textAlign: "center"
                   }}
                 >
-                  Share Curation
+                  Share
                 </p>
               </div>
             </div>
@@ -736,8 +1182,8 @@ export default function Homepage({ test }) {
                   alignItems: "center",
                   justifyContent: "center",
                   gap: "0.25rem",
-                  height: "50px",
-                  width: "110px",
+                  height: "40px",
+                  width: "100px",
                   // backgroundColor: "#aaa"
                 }}
               >
@@ -797,8 +1243,8 @@ export default function Homepage({ test }) {
                   alignItems: "center",
                   justifyContent: "center",
                   gap: "0.25rem",
-                  height: "50px",
-                  width: "110px"
+                  height: "40px",
+                  width: "100px"
                 }}
               >
                 {(!isMobile || isMobile) && <BsStarFill size={20} style={{ width: "21px" }} />}
@@ -845,8 +1291,8 @@ export default function Homepage({ test }) {
                   alignItems: "center",
                   justifyContent: "center",
                   gap: "0.25rem",
-                  height: "50px",
-                  width: "110px",
+                  height: "40px",
+                  width: "100px",
                   backgroundColor: "#aaa"
                 }}
               >
@@ -895,8 +1341,8 @@ export default function Homepage({ test }) {
                   alignItems: "center",
                   justifyContent: "center",
                   gap: "0.25rem",
-                  height: "50px",
-                  width: "110px"
+                  height: "40px",
+                  width: "100px"
                 }}
               >
                 {(!isMobile || isMobile) && <BsPiggyBankFill size={20} style={{ width: "21px" }} />}
@@ -944,8 +1390,8 @@ export default function Homepage({ test }) {
                   alignItems: "center",
                   justifyContent: "center",
                   gap: "0.25rem",
-                  height: "50px",
-                  width: "110px"
+                  height: "40px",
+                  width: "100px"
                   // backgroundColor: "#aaa"
                 }}
               >
@@ -993,8 +1439,8 @@ export default function Homepage({ test }) {
                   alignItems: "center",
                   justifyContent: "center",
                   gap: "0.25rem",
-                  height: "50px",
-                  width: "110px",
+                  height: "40px",
+                  width: "100px",
                   backgroundColor: "#aaa"
                 }}
               >
@@ -1103,8 +1549,8 @@ export default function Homepage({ test }) {
                   alignItems: "center",
                   justifyContent: "center",
                   gap: "0.25rem",
-                  height: "50px",
-                  width: "110px"
+                  height: "40px",
+                  width: "100px"
                 }}
               >
                 {(!isMobile || isMobile) && <BsGearFill size={20} style={{ width: "21px" }} />}
@@ -1135,21 +1581,23 @@ export default function Homepage({ test }) {
         }}
       >
         {(!isMobile || isMobile) && <BsInfoCircleFill size={20} color={"#ace"} style={{ width: "25px" }} />}
-        <div
+        <a
+          onClick={() => viewCast('0x384b7285d593b8db12a24060aa26652be40042a8')} title="Navigate to cast"
           style={{
             padding: "0px",
             fontSize: isMobile ? "18px" : "18px",
             fontWeight: "500",
             textWrap: "wrap",
             textAlign: "center",
-            color: "#ace"
+            color: "#ace",
+            cursor: "pointer"
           }}
         >
           How it works
-        </div>
+        </a>
       </div>
 
-      <div
+      {/* <div
         className="flex-row"
         style={{
           justifyContent: "center",
@@ -1187,11 +1635,10 @@ export default function Homepage({ test }) {
                   justifyContent: "center",
                   gap: "0.25rem",
                   height: "30px",
-                  width: "110px",
+                  width: "100px",
                   backgroundColor: "#aaa"
                 }}
               >
-                {/* {(!isMobile || isMobile) && <BsGiftFill size={20} style={{width: '21px'}} />} */}
                 <p
                   style={{
                     padding: "0px",
@@ -1236,11 +1683,10 @@ export default function Homepage({ test }) {
                   justifyContent: "center",
                   gap: "0.25rem",
                   height: "30px",
-                  width: "110px",
+                  width: "100px",
                   backgroundColor: "#aaa"
                 }}
               >
-                {/* {(!isMobile || isMobile) && <BsGiftFill size={20} style={{width: '21px'}} />} */}
                 <p
                   style={{
                     padding: "0px",
@@ -1285,11 +1731,10 @@ export default function Homepage({ test }) {
                   justifyContent: "center",
                   gap: "0.25rem",
                   height: "30px",
-                  width: "110px",
+                  width: "100px",
                   backgroundColor: "#aaa"
                 }}
               >
-                {/* {(!isMobile || isMobile) && <BsGiftFill size={20} style={{width: '21px'}} />} */}
                 <p
                   style={{
                     padding: "0px",
@@ -1305,294 +1750,9 @@ export default function Homepage({ test }) {
             </div>
           </div>
         </div>
-      </div>
-
-      {/* BOOST & NOMINATE */}
-
-      {/* {(version == '2.0' || adminTest) && (<div className='flex-col' style={{backgroundColor: ''}}>
-
-            <div className='shadow flex-col'
-              style={{
-                backgroundColor: isLogged ? "#002244" : '#333',
-                borderRadius: "15px",
-                border: isLogged ? "1px solid #11447799" : "1px solid #555",
-                width: isMiniApp || isMobile ? '340px' : '100%',
-                margin: isMiniApp || isMobile ? '40px auto 0 auto' : '40px auto 0 auto',
-              }} >
-              <div
-                className="shadow flex-row"
-                style={{
-                  backgroundColor: isLogged ? "#11448888" : "#444",
-                  width: "100%",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  padding: "8px", 
-                  borderRadius: "15px",
-                  margin: '0 0 10px 0'
-                }} >
+      </div> */}
 
 
-                <div
-                  className="flex-row"
-                  style={{
-                    width: "100%",
-                    justifyContent: "flex-start",
-                    alignItems: "center",
-                    padding: "0px 0 0 4px",
-                    margin: '0 0 0px 0'
-                  }} >
-
-                
-                  <BsStarFill style={{ fill: "#cde" }} size={20} />
-                  <div>
-
-
-                    <div style={{border: '0px solid #777', padding: '2px', borderRadius: '10px', backgroundColor: '', maxWidth: 'fit-content', cursor: 'pointer', color: '#cde'}}>
-                      <div className="top-layer flex-row">
-                        <div className="flex-row" style={{padding: "4px 0 4px 10px", marginBottom: '0px', flexWrap: 'wrap', justifyContent: 'flex-start', gap: '0.00rem', width: '', alignItems: 'center'}}>
-                          <div style={{fontSize: isMobile ? '18px' : '22px', fontWeight: '600', color: '', padding: '0px 3px'}}>
-                            Signal & Boost
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-
-                  </div>
-
-
-                  <div
-                    className="flex-row"
-                    style={{
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      cursor: "pointer",
-                    }} >
-
-                  </div>
-
-                </div>
-
-                <ToggleSwitch target={'boost'} />
-
-              </div>
-
-
-
-
-              <div className='flex-row' style={{backgroundColor: isLogged ? "#002244ff" : '#333', padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: isLogged ? '#ace' : '#ddd', fontSize: '12px', gap: '0.75rem', position: 'relative'}}>
-
-                <div className='flex-row' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(isLogged && isOn.boost) ? '#0af' : '#aaa'}`, borderRadius: '8px', backgroundColor: '', alignItems: 'center', gap: '0.15rem', height: '30px'}}>
-                  <div style={{fontSize: '13px', fontWeight: '700', color: (isLogged && isOn.boost) ? '#0af' : '#aaa'}}>
-                    +30
-                  </div>
-                  <BsStar color={(isLogged && isOn.boost) ? '#0af' : '#aaa'} size={13} />
-                </div>
-
-                <div>
-                  Nominate casts to be boosted and rewarded based on their impact on Farcaster - earn rewards
-                </div>
-                <div className='flex-row' style={{position: 'absolute', bottom: '0', right: '0', padding: '5px 5px', gap: '.25rem', alignItems: 'center'}}>
-                  <BsInfoCircle size={15} onClick={() => {
-                      openSwipeable("boost"); }} />
-                </div>
-              </div>
-            </div>
-          </div>
-          )} */}
-
-      {/* VALIDATE */}
-
-      {/* {(version == '2.0' || adminTest) && (<div className='flex-col' style={{backgroundColor: ''}}>
-
-            <div 
-              className='shadow flex-col'
-              style={{
-                backgroundColor: isLogged ? "#002244" : '#333',
-                borderRadius: "15px",
-                border: isLogged ? "1px solid #11447799" : "1px solid #555",
-                width: isMiniApp || isMobile ? '340px' : '100%',
-                margin: isMiniApp || isMobile ? '15px auto 0 auto' : '15px auto 0 auto',
-              }} >
-              <div
-                className="shadow flex-row"
-                style={{
-                  backgroundColor: isLogged ? "#11448888" : "#444",
-                  width: "100%",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  padding: "8px", 
-                  borderRadius: "15px",
-                  margin: '0 0 10px 0',
-                  gap: '1rem'
-                }} >
-
-
-                <div
-                  className="flex-row"
-                  style={{
-                    width: "100%",
-                    justifyContent: "flex-start",
-                    alignItems: "center",
-                    padding: "0px 0 0 4px",
-                    margin: '0 0 0px 0',
-                  }} >
-                
-                  <BsShieldFillCheck style={{ fill: "#cde" }} size={20} />
-                  <div>
-
-                    <div style={{border: '0px solid #777', padding: '2px', borderRadius: '10px', backgroundColor: '', maxWidth: 'fit-content', cursor: 'pointer', color: '#cde'}}>
-                      <div className="top-layer flex-row">
-                        <div className="flex-row" style={{padding: "4px 0 4px 10px", marginBottom: '0px', flexWrap: 'wrap', justifyContent: 'flex-start', gap: '0.00rem', width: '', alignItems: 'center'}}>
-                          <div style={{fontSize: isMobile ? '18px' : '22px', fontWeight: '600', color: '', padding: '0px 3px'}}>
-                            Validate
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-
-                  <div
-                    className="flex-row"
-                    style={{
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      cursor: "pointer",
-                    }} >
-
-                  </div>
-                </div>
-
-                {isOn.notifs ? (
-                  <div style={{padding: '4px 5px 1px 5px', border: '1px solid #ace', borderRadius: '8px', backgroundColor: '#22446666'}}>
-                    <BsBell color={'#ace'} size={16} />
-                  </div>
-                ) : (
-                  <div style={{padding: '4px 5px 1px 5px', border: '1px solid #ace', borderRadius: '8px', backgroundColor: '#22446666'}} onClick={notifsOn}>
-                    <BsBellSlash color={'#ace'} size={16} />
-                  </div>
-                )}
-
-                <ToggleSwitch target={'validate'} />
-
-              </div>
-
-              <div className='flex-row' style={{backgroundColor: isLogged ? "#002244ff" : '#333', padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: isLogged ? '#ace' : '#ddd', fontSize: '12px', gap: '0.75rem', position: 'relative'}}>
-
-                <div className='flex-row' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(isLogged && isOn.validate && isOn.boost) ? '#0af' : (isLogged && isOn.validate) ? '#ace' : '#aaa'}`, borderRadius: '8px', backgroundColor: '', alignItems: 'center', gap: '0.15rem', height: '30px'}}>
-                  <div style={{fontSize: '13px', fontWeight: '700', color: (isLogged && isOn.validate && isOn.boost) ? '#0af' : (isLogged && isOn.validate) ? '#ace' : '#aaa'}}>
-                    +15
-                  </div>
-                  <BsStar color={(isLogged && isOn.validate && isOn.boost && isOn.notifs) ? '#0af' : (isLogged && isOn.validate) ? '#ace' : '#aaa'} size={13} />
-                </div>
-
-                <div>
-                  Ensure the quality of nominations - earn rewards
-                </div>
-                <div className='flex-row' style={{position: 'absolute', bottom: '0', right: '0', padding: '5px 5px', gap: '.25rem', alignItems: 'center'}}>
-                  <BsInfoCircle size={15} onClick={() => {
-                    openSwipeable("validate"); }} />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          )} */}
-
-      {/* AUTO-FUND */}
-
-      {/* {(version == '2.0' || adminTest) && (<div className='flex-col' style={{backgroundColor: ''}}>
-
-            <div className='shadow flex-col'
-              style={{
-                backgroundColor: isLogged ? "#002244" : '#333',
-                borderRadius: "15px",
-                border: isLogged ? "1px solid #11447799" : "1px solid #555",
-                width: isMiniApp || isMobile ? '340px' : '100%',
-                margin: isMiniApp || isMobile ? '15px auto 0 auto' : '15px auto 0 auto',
-              }} >
-              <div
-                className="shadow flex-row"
-                style={{
-                  backgroundColor: isLogged ? "#11448888" : "#444",
-                  width: "100%",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  padding: "8px", 
-                  borderRadius: "15px",
-                  margin: '0 0 10px 0',
-                  gap: '1rem'
-                }}
-              >
-                <div
-                  className="flex-row"
-                  style={{
-                    width: "100%",
-                    justifyContent: "flex-start",
-                    alignItems: "center",
-                    padding: "0px 0 0 4px",
-                    margin: '0 0 0px 0'
-                  }} >
-
-
-                
-                  <BsPiggyBankFill style={{ fill: "#cde" }} size={20} />
-                  <div>
-
-
-                    <div style={{border: '0px solid #777', padding: '2px', borderRadius: '10px', backgroundColor: '', maxWidth: 'fit-content', cursor: 'pointer', color: '#cde'}}>
-                      <div className="top-layer flex-row">
-                        <div className="flex-row" style={{padding: "4px 0 4px 10px", marginBottom: '0px', flexWrap: 'wrap', justifyContent: 'flex-start', gap: '0.00rem', width: '', alignItems: 'center'}}>
-                          <div style={{fontSize: isMobile ? '18px' : '22px', fontWeight: '600', color: '', padding: '0px 3px'}}>
-                            Auto-fund
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-
-                  <div
-                    className="flex-row"
-                    style={{
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      cursor: "pointer",
-                    }} >
-
-                  </div>
-                </div>
-                <Link href={'/~/auto-fund'}>
-                  <div style={{padding: '4px 5px 1px 5px', border: '1px solid #ace', borderRadius: '8px', backgroundColor: '#22446666'}}>
-                    <BsPencilFill color={'#ace'} size={16} />
-                  </div>
-                </Link>
-                <ToggleSwitch target={'autoFund'} />
-              </div>
-
-
-              <div className='flex-row' style={{backgroundColor: isLogged ? "#002244ff" : '#333', padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: isLogged ? '#ace' : '#ddd', fontSize: '12px', gap: '0.75rem', position: 'relative'}}>
-
-                <div className='flex-row' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(isLogged && isOn.autoFund && isOn.boost) ? '#0af' : (isLogged && isOn.autoFund) ? '#ace' : '#aaa'}`, borderRadius: '8px', backgroundColor: '', alignItems: 'center', gap: '0.15rem', height: '30px'}}>
-                  <div style={{fontSize: '13px', fontWeight: '700', color: (isLogged && isOn.autoFund && isOn.boost) ? '#0af' : (isLogged && isOn.autoFund) ? '#ace' : '#aaa'}}>
-                    +24
-                  </div>
-                  <BsStar color={(isLogged && isOn.autoFund && isOn.boost) ? '#0af' : (isLogged && isOn.autoFund) ? '#ace' : '#aaa'} size={13} />
-                </div>
-
-                <div>
-                  Support creators with your remaining $degen and $tipn allowances - earn rewards
-                </div>
-
-                <div className='flex-row' style={{position: 'absolute', bottom: '0', right: '0', padding: '5px 5px', gap: '.25rem', alignItems: 'center'}}>
-                  <BsInfoCircle size={15} onClick={() => {
-                    openSwipeable("autoFund"); }} />
-                </div>
-              </div>
-            </div>
-          </div>
-          )} */}
 
       {version == "2.0" || adminTest || (version == "1.0" && !adminTest && isLogged && <ProfilePage />)}
     </div>

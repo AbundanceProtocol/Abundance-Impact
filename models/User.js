@@ -24,6 +24,7 @@ const userSchema = new mongoose.Schema({
   remaining_q_allowance: Number,
   invite_bonus: { type: Number, default: 0 },
   boost: { type: Boolean, default: false, index: true },
+  impact_boost: { type: Boolean, default: false, index: true },
   validator: { type: Boolean, default: false, index: true },
   spam_label: { type: Boolean, default: false, index: true },
   staking_bonus: { type: Number, default: 0 },
