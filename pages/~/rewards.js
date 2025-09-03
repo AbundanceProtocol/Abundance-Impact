@@ -474,7 +474,7 @@ export default function Rewards() {
                 </div>
                 <div className="flex-row" style={{ gap: "0.5rem", alignItems: "center", padding: "0 10px" }}>
                   <div style={{ fontSize: "36px", fontWeight: "700", color: isLogged ? "#0af" : "#aaa", height: "45px" }}>
-                    {totalClaims > 0 ? Math.floor(totalClaims || 0) : "--"}
+                    {totalClaims > 0 ? Math.floor(totalClaims || 0).toLocaleString() : "--"}
                   </div>
                 </div>
                 <div style={{ fontSize: "10px", padding: "0 0 5px 0", fontWeight: "700", color: isLogged ? "#0af" : "#aaa" }}>
@@ -1002,12 +1002,12 @@ export default function Rewards() {
         )}
       </div>
 
-      <div style={{ fontSize: "25px", fontWeight: "700", margin: "40px 0 -25px 0", color: "#44aaff", textAlign: "center", width: "100%" }}>
+      {/* <div style={{ fontSize: "25px", fontWeight: "700", margin: "40px 0 -25px 0", color: "#44aaff", textAlign: "center", width: "100%" }}>
         Earn with Impact:
-      </div>
+      </div> */}
 
 
-      <Settings {...{ rewards: true }} />
+      {/* <Settings {...{ rewards: true }} /> */}
 
       <div style={{ padding: "0 0 80px 0" }}>&nbsp;</div>
 
