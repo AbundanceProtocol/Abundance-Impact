@@ -56,6 +56,7 @@ export default function Rewards() {
   const [claimsLoading, setClaimsLoading] = useState(true);
   const initChannels = [" ", "impact"];
   const [modal, setModal] = useState({ on: false, success: false, text: "" });
+  const [settingsIsOn, setSettingsIsOn] = useState(null);
 
   useEffect(() => {
     if (fid) {
@@ -372,15 +373,49 @@ export default function Rewards() {
         </div>
       )}
 
-
-
+      <div className='flex-row' style={{width: '100%', justifyContent: 'center', alignItems: 'center'}}>
+        <div
+          className="flex-col"
+          style={{
+            padding: "1px 5px 1px 5px",
+            border: `1px solid ${isLogged ? "#0af" : "#aaa"}`,
+            borderRadius: "18px",
+            backgroundColor: "",
+            alignItems: "center",
+            gap: "0.0rem",
+            height: "90px",
+            width: "135px",
+            justifyContent: "center"
+          }}
+        >
+          <div className="flex-row" style={{ gap: "0.5rem", alignItems: "center", padding: "0 10px" }}>
+            <BsStar color={isLogged ? "#0af" : "#aaa"} size={40} />
+            <div style={{ fontSize: "43px", fontWeight: "700", color: isLogged ? "#0af" : "#aaa" }}>
+              {(() => {
+                if (!settingsIsOn) return 0; // Default if no settings passed
+                
+                let points = 0;
+                if (settingsIsOn.boost) points += 30;
+                if (settingsIsOn.boost && settingsIsOn.validate) points += 15;
+                if (settingsIsOn.boost && settingsIsOn.autoFund) points += 14;
+                if (settingsIsOn.boost && settingsIsOn.impactBoost) points += 10;
+                
+                return points;
+              })()}
+            </div>
+          </div>
+          <div style={{ fontSize: "13px", fontWeight: "700", color: isLogged ? "#0af" : "#aaa" }}>
+            Weekly Points
+          </div>
+        </div>
+      </div>
 
       <div style={{ fontSize: "25px", fontWeight: "700", margin: "10px 0 -25px 0", color: "#44aaff", textAlign: "center", width: "100%" }}>
         How to Earn with Impact:
       </div>
 
 
-      <Settings {...{ rewards: true }} />
+      <Settings {...{ rewards: true }} onSettingsChange={setSettingsIsOn} />
 
       <div style={{ padding: "0 0 80px 0" }}>&nbsp;</div>
 
