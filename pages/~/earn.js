@@ -6,7 +6,7 @@ import axios from "axios";
 import Head from "next/head";
 
 import { IoIosRocket, IoMdTrophy, IoMdRefresh as Refresh } from "react-icons/io";
-import { BsLightningChargeFill as Impact, BsPiggyBankFill, BsQuestionCircle, BsGiftFill, BsStar } from "react-icons/bs";
+import { BsLightningChargeFill as Impact, BsPiggyBankFill, BsQuestionCircle, BsGiftFill, BsStar, BsShareFill } from "react-icons/bs";
 import { confirmUser, timePassed } from "../../utils/utils";
 import Spinner from "../../components/Common/Spinner";
 import ExpandImg from "../../components/Cast/ExpandImg";
@@ -149,6 +149,81 @@ export default function Rewards() {
       setClaimsLoading(false);
     }
   }
+
+  const shareCuration = async () => {
+    if (fid) {
+      const { sdk } = await import('@farcaster/miniapp-sdk')
+      const isApp = await sdk.isInMiniApp();
+  
+      let impactLabel = ''
+
+      let counter = 0
+      if (settingsIsOn.boost) {
+        counter++
+      }
+      if (settingsIsOn.validate) {
+        counter++
+      }
+      if (settingsIsOn.impactBoost) {
+        counter++
+      }
+      if (settingsIsOn.autoFund) {
+        counter++
+      }
+  
+      if (counter == 1) {
+        if (settingsIsOn.boost) {
+          impactLabel = 'a Signal Booster'
+        } else if (settingsIsOn.validate) {
+          impactLabel = 'an Impact Defender'
+        } else if (settingsIsOn.impactBoost) {
+          impactLabel = 'an Impact Booster'
+        } else if (settingsIsOn.autoFund) {
+          impactLabel = 'an Impact Funder'
+        }
+      } else if (counter == 2) {
+        impactLabel = 'a Prime Impactor'
+      } else if (counter == 3) {
+        impactLabel = 'a Star Impactor'
+      } else if (counter == 4) {
+        impactLabel = 'a Super Impactor'
+      }
+
+      let shareUrl = `https://impact.abundance.id/~/earn/${fid}`
+  
+      let shareText = ''
+
+      const options = [
+        `/impact won't take us to the moon, but it will take us to the stars!\n\nWhat's your impact?`,
+        `I'm earning with /impact while boosting FC creators & builders\n\nWhat's your impact?`,
+        `I'm ${impactLabel}! What is your impact?`,
+        `This is not complicated\n\nFarcaster's growth depends on boosting and rewarding casters based on their impact\n\nThat's what Impact 2.0 is for...`,
+        `Impact 2.0 is Farcaster's 'Social Algorithm' - check it out here:`,
+        `What if we had an algo that was based on value creation instead of engagement - turn out we can! Check out Impact 2.0:`,
+        `Can we have a sufficiently decentralized network without sufficiently decentralized algos?`,
+        `What if we had an algo that valued our impact, instead of extracting value from our attention? Check out Impact 2.0:`
+      ];
+      shareText = options[Math.floor(Math.random() * options.length)];
+  
+      let encodedShareText = encodeURIComponent(shareText)
+      let encodedShareUrl = encodeURIComponent(shareUrl); 
+      let shareLink = `https://farcaster.xyz/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
+  
+      if (!isApp) {
+        window.open(shareLink, '_blank');
+      } else if (isApp) {
+        await sdk.actions.composeCast({
+          text: shareText,
+          embeds: [shareUrl],
+          close: false
+        })
+      }
+    }
+  }
+
+
+
+
 
   async function getDailyRewards(fid) {
     try {
@@ -409,6 +484,64 @@ export default function Rewards() {
           </div>
         </div>
       </div>
+
+
+
+      {(settingsIsOn.boost || settingsIsOn.validate || settingsIsOn.impactBoost || settingsIsOn.autoFund) && (<div
+        onClick={shareCuration}
+        className="flex-col"
+        style={{
+          // width: "100%",
+          justifyContent: "center",
+          alignItems: "center",
+          padding: "10px 0 10px 0"
+        }}
+      >
+        <div
+          className="flex-row"
+          style={{
+            gap: "0.75rem",
+            margin: "0px",
+            flexWrap: "wrap",
+            justifyContent: "center",
+            alignItems: "center"
+          }}
+        >
+          <div>
+            <div
+              className="flex-row cast-act-lt"
+              style={{
+                borderRadius: "8px",
+                padding: "8px 2px",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "0.25rem",
+                height: "28px",
+                width: "165px",
+                // backgroundColor: "#aaa"
+              }}
+            >
+              {(!isMobile || isMobile) && <BsShareFill size={14} style={{ width: "21px" }} />}
+              <p
+                style={{
+                  padding: "0px",
+                  fontSize: isMobile ? "13px" : "13px",
+                  fontWeight: "500",
+                  textWrap: "wrap",
+                  textAlign: "center"
+                }}
+              >
+                Share your Impact
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>)}
+
+
+
+
+
 
       <div style={{ fontSize: "25px", fontWeight: "700", margin: "10px 0 -25px 0", color: "#44aaff", textAlign: "center", width: "100%" }}>
         How to Earn with Impact:

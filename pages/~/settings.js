@@ -296,9 +296,55 @@ export default function Settings({test, rewards, onSettingsChange}) {
       const { sdk } = await import('@farcaster/miniapp-sdk')
       const isApp = await sdk.isInMiniApp();
   
-      let shareUrl = `https://impact.abundance.id/~/curator/${fid}`
+      let impactLabel = ''
+
+      let counter = 0
+      if (isOn.boost) {
+        counter++
+      }
+      if (isOn.validate) {
+        counter++
+      }
+      if (isOn.impactBoost) {
+        counter++
+      }
+      if (isOn.autoFund) {
+        counter++
+      }
   
-      let shareText = `I'm signal-boosting impactful creators & builders thru /impact\n\nCheck my curation:`
+      if (counter == 1) {
+        if (isOn.boost) {
+          impactLabel = 'a Signal Booster'
+        } else if (isOn.validate) {
+          impactLabel = 'an Impact Defender'
+        } else if (isOn.impactBoost) {
+          impactLabel = 'an Impact Booster'
+        } else if (isOn.autoFund) {
+          impactLabel = 'an Impact Funder'
+        }
+      } else if (counter == 2) {
+        impactLabel = 'a Prime Impactor'
+      } else if (counter == 3) {
+        impactLabel = 'a Star Impactor'
+      } else if (counter == 4) {
+        impactLabel = 'a Super Impactor'
+      }
+
+      let shareUrl = `https://impact.abundance.id/~/earn/${fid}`
+  
+      let shareText = ''
+
+      const options = [
+        `/impact won't take us to the moon, but it will take us to the stars!\n\nWhat's your impact?`,
+        `I'm earning with /impact while boosting FC creators & builders\n\nWhat's your impact?`,
+        `I'm ${impactLabel}! What is your impact?`,
+        `This is not complicated\n\nFarcaster's growth depends on boosting and rewarding casters based on their impact\n\nThat's what Impact 2.0 is for...`,
+        `Impact 2.0 is Farcaster's 'Social Algorithm' - check it out here:`,
+        `What if we had an algo that was based on value creation instead of engagement - turn out we can! Check out Impact 2.0:`,
+        `Can we have a sufficiently decentralized network without sufficiently decentralized algos?`,
+        `What if we had an algo that valued our impact, instead of extracting value from our attention? Check out Impact 2.0:`
+      ];
+      shareText = options[Math.floor(Math.random() * options.length)];
   
       let encodedShareText = encodeURIComponent(shareText)
       let encodedShareUrl = encodeURIComponent(shareUrl); 
