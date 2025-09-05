@@ -158,27 +158,27 @@ export default function Rewards() {
       let impactLabel = ''
 
       let counter = 0
-      if (settingsIsOn.boost) {
+      if (settingsIsOn?.boost) {
         counter++
       }
-      if (settingsIsOn.validate) {
+      if (settingsIsOn?.validate) {
         counter++
       }
-      if (settingsIsOn.impactBoost) {
+      if (settingsIsOn?.impactBoost) {
         counter++
       }
-      if (settingsIsOn.autoFund) {
+      if (settingsIsOn?.autoFund) {
         counter++
       }
   
       if (counter == 1) {
-        if (settingsIsOn.boost) {
+        if (settingsIsOn?.boost) {
           impactLabel = 'a Signal Booster'
-        } else if (settingsIsOn.validate) {
+        } else if (settingsIsOn?.validate) {
           impactLabel = 'an Impact Defender'
-        } else if (settingsIsOn.impactBoost) {
+        } else if (settingsIsOn?.impactBoost) {
           impactLabel = 'an Impact Booster'
-        } else if (settingsIsOn.autoFund) {
+        } else if (settingsIsOn?.autoFund) {
           impactLabel = 'an Impact Funder'
         }
       } else if (counter == 2) {
@@ -470,10 +470,10 @@ export default function Rewards() {
                 if (!settingsIsOn) return 0; // Default if no settings passed
                 
                 let points = 0;
-                if (settingsIsOn.boost) points += 30;
-                if (settingsIsOn.boost && settingsIsOn.validate) points += 15;
-                if (settingsIsOn.boost && settingsIsOn.autoFund) points += 14;
-                if (settingsIsOn.boost && settingsIsOn.impactBoost) points += 10;
+                if (settingsIsOn?.boost) points += 30;
+                if (settingsIsOn?.boost && settingsIsOn?.validate) points += 15;
+                if (settingsIsOn?.boost && settingsIsOn?.autoFund) points += 14;
+                if (settingsIsOn?.boost && settingsIsOn?.impactBoost) points += 10;
                 
                 return points;
               })()}
@@ -487,7 +487,7 @@ export default function Rewards() {
 
 
 
-      {(settingsIsOn.boost || settingsIsOn.validate || settingsIsOn.impactBoost || settingsIsOn.autoFund) && (<div
+      {(settingsIsOn?.boost || settingsIsOn?.validate || settingsIsOn?.impactBoost || settingsIsOn?.autoFund) && (<div
         onClick={shareCuration}
         className="flex-col"
         style={{
