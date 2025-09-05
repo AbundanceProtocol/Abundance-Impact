@@ -299,27 +299,27 @@ export default function Settings({test, rewards, onSettingsChange}) {
       let impactLabel = ''
 
       let counter = 0
-      if (isOn.boost) {
+      if (isOn?.boost) {
         counter++
       }
-      if (isOn.validate) {
+      if (isOn?.validate) {
         counter++
       }
-      if (isOn.impactBoost) {
+      if (isOn?.impactBoost) {
         counter++
       }
-      if (isOn.autoFund) {
+      if (isOn?.autoFund) {
         counter++
       }
   
       if (counter == 1) {
-        if (isOn.boost) {
+        if (isOn?.boost) {
           impactLabel = 'a Signal Booster'
-        } else if (isOn.validate) {
+        } else if (isOn?.validate) {
           impactLabel = 'an Impact Defender'
-        } else if (isOn.impactBoost) {
+        } else if (isOn?.impactBoost) {
           impactLabel = 'an Impact Booster'
-        } else if (isOn.autoFund) {
+        } else if (isOn?.autoFund) {
           impactLabel = 'an Impact Funder'
         }
       } else if (counter == 2) {
@@ -491,6 +491,8 @@ export default function Settings({test, rewards, onSettingsChange}) {
             setNeedNotif(false)
           }, 500)
         }
+      } else {
+        LoginPopup()
       }
     };
 
