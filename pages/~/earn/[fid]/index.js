@@ -10,7 +10,7 @@ export async function getServerSideProps({ params }) {
       action: {
         type: "launch_frame",
         name: "Impact 2.0",
-        url: "https://impact.abundance.id/~/tip",
+        url: "https://impact.abundance.id/~/earn",
         splashImageUrl: "https://impact.abundance.id/images/icon.png",
         splashBackgroundColor: "#011222",
       },
