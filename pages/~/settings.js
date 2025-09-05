@@ -19,7 +19,7 @@ import useStore from '../../utils/store';
 import ProfilePage from './studio';
 import axios from 'axios';
 import MiniAppAuthButton from '../../components/MiniAppAuthButton';
-import { BsKey, BsLock, BsLockFill, BsXCircle, BsPerson, BsPersonFill, BsShieldCheck, BsShieldFillCheck, BsPiggyBank, BsPiggyBankFill, BsStar, BsStarFill, BsQuestionCircle, BsGift, BsGiftFill, BsPencilFill, BsInfoCircle, BsBellSlash, BsBell, BsFillRocketTakeoffFill } from "react-icons/bs";
+import { BsKey, BsLock, BsLockFill, BsXCircle, BsPerson, BsPersonFill, BsShieldCheck, BsShieldFillCheck, BsPiggyBank, BsPiggyBankFill, BsStar, BsStarFill, BsQuestionCircle, BsGift, BsGiftFill, BsPencilFill, BsInfoCircle, BsBellSlash, BsBell, BsFillRocketTakeoffFill, BsShareFill } from "react-icons/bs";
 import Modal from '../../components/Layout/Modals/Modal';
 import Spinner from '../../components/Common/Spinner';
 import NeynarSigninButton from '../../components/Layout/Modals/Signin';
@@ -28,7 +28,7 @@ import { formatNum } from '../../utils/utils';
 
 const version = process.env.NEXT_PUBLIC_VERSION
 
-export default function Settings({test, rewards}) {
+export default function Settings({test, rewards, onSettingsChange}) {
   const ref2 = useRef(null)
   const [ref, inView] = useInView()
   const { LoginPopup, checkEcoEligibility, ecoData, points, setPoints, isLogged, setShowLogin, setIsLogged, fid, setFid, getRemainingBalances, isMiniApp, userBalances, setIsMiniApp, LogoutPopup, userInfo, setUserInfo, setPanelOpen, setPanelTarget, adminTest, setAdminTest } = useContext(AccountContext)
@@ -60,6 +60,13 @@ export default function Settings({test, rewards}) {
       setTimeout(() => setShowLoginNotice(false), 500);
     }
   }, [isLogged]);
+
+  // Notify parent component when isOn state changes
+  useEffect(() => {
+    if (onSettingsChange) {
+      onSettingsChange(isOn);
+    }
+  }, [isOn, onSettingsChange]);
 
   const openSwipeable = (target) => {
     setPanelTarget(target);
@@ -282,6 +289,79 @@ export default function Settings({test, rewards}) {
       }
     }
   }
+
+
+  const shareCuration = async () => {
+    if (fid) {
+      const { sdk } = await import('@farcaster/miniapp-sdk')
+      const isApp = await sdk.isInMiniApp();
+  
+      let impactLabel = ''
+
+      let counter = 0
+      if (isOn.boost) {
+        counter++
+      }
+      if (isOn.validate) {
+        counter++
+      }
+      if (isOn.impactBoost) {
+        counter++
+      }
+      if (isOn.autoFund) {
+        counter++
+      }
+  
+      if (counter == 1) {
+        if (isOn.boost) {
+          impactLabel = 'a Signal Booster'
+        } else if (isOn.validate) {
+          impactLabel = 'an Impact Defender'
+        } else if (isOn.impactBoost) {
+          impactLabel = 'an Impact Booster'
+        } else if (isOn.autoFund) {
+          impactLabel = 'an Impact Funder'
+        }
+      } else if (counter == 2) {
+        impactLabel = 'a Prime Impactor'
+      } else if (counter == 3) {
+        impactLabel = 'a Star Impactor'
+      } else if (counter == 4) {
+        impactLabel = 'a Super Impactor'
+      }
+
+      let shareUrl = `https://impact.abundance.id/~/earn/${fid}`
+  
+      let shareText = ''
+
+      const options = [
+        `/impact won't take us to the moon, but it will take us to the stars!\n\nWhat's your impact?`,
+        `I'm earning with /impact while boosting FC creators & builders\n\nWhat's your impact?`,
+        `I'm ${impactLabel}! What is your impact?`,
+        `This is not complicated\n\nFarcaster's growth depends on boosting and rewarding casters based on their impact\n\nThat's what Impact 2.0 is for...`,
+        `Impact 2.0 is Farcaster's 'Social Algorithm' - check it out here:`,
+        `What if we had an algo that was based on value creation instead of engagement - turn out we can! Check out Impact 2.0:`,
+        `Can we have a sufficiently decentralized network without sufficiently decentralized algos?`,
+        `What if we had an algo that valued our impact, instead of extracting value from our attention? Check out Impact 2.0:`
+      ];
+      shareText = options[Math.floor(Math.random() * options.length)];
+  
+      let encodedShareText = encodeURIComponent(shareText)
+      let encodedShareUrl = encodeURIComponent(shareUrl); 
+      let shareLink = `https://farcaster.xyz/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
+  
+      if (!isApp) {
+        window.open(shareLink, '_blank');
+      } else if (isApp) {
+        await sdk.actions.composeCast({
+          text: shareText,
+          embeds: [shareUrl],
+          close: false
+        })
+      }
+    }
+  }
+
 
 
   const ToggleSwitch = ({target}) => {
@@ -1077,6 +1157,152 @@ export default function Settings({test, rewards}) {
 
 
 
+
+
+
+          {rewards && (<div className='flex-col' style={{backgroundColor: ''}}>
+
+          <div className='shadow flex-col'
+            style={{
+              backgroundColor: isLogged ? "#002244" : '#333',
+              borderRadius: "15px",
+              border: isLogged ? "1px solid #11447799" : "1px solid #555",
+              width: isMiniApp || isMobile ? '340px' : '100%',
+              margin: isMiniApp || isMobile ? '15px auto 0 auto' : '15px auto 0 auto',
+            }} >
+            <div
+              className="shadow flex-row"
+              style={{
+                backgroundColor: isLogged ? "#11448888" : "#444",
+                width: "100%",
+                justifyContent: "space-between",
+                alignItems: "center",
+                padding: "8px", 
+                borderRadius: "15px",
+                margin: '0 0 10px 0',
+                gap: '1rem'
+              }}
+            >
+              <div
+                className="flex-row"
+                style={{
+                  width: "100%",
+                  justifyContent: "flex-start",
+                  alignItems: "center",
+                  padding: "0px 0 0 4px",
+                  margin: '0 0 0px 0'
+                }} >
+
+
+              
+                <BsShareFill style={{ fill: "#cde" }} size={20} />
+                <div>
+
+
+                  <div style={{border: '0px solid #777', padding: '2px', borderRadius: '10px', backgroundColor: '', maxWidth: 'fit-content', cursor: 'pointer', color: '#cde'}}>
+                    <div className="top-layer flex-row">
+                      <div className="flex-row" style={{padding: "4px 0 4px 10px", marginBottom: '0px', flexWrap: 'wrap', justifyContent: 'flex-start', gap: '0.00rem', width: '', alignItems: 'center'}}>
+                        <div style={{fontSize: isMobile ? '18px' : '22px', fontWeight: '600', color: '', padding: '0px 3px'}}>
+                          Share
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+
+                <div
+                  className="flex-row"
+                  style={{
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    cursor: "pointer",
+                  }} >
+
+                </div>
+              </div>
+
+
+
+              <div
+                onClick={shareCuration}
+                className="flex-col"
+                style={{
+                  // width: "100%",
+                  justifyContent: "center",
+                  alignItems: "center"
+                }}
+              >
+                <div
+                  className="flex-row"
+                  style={{
+                    gap: "0.75rem",
+                    margin: "0px",
+                    flexWrap: "wrap",
+                    justifyContent: "center",
+                    alignItems: "center"
+                  }}
+                >
+                  <div>
+                    <div
+                      className="flex-row cast-act-lt"
+                      style={{
+                        borderRadius: "8px",
+                        padding: "8px 8px",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "0.25rem",
+                        height: "30px",
+                        width: "75px",
+                        // backgroundColor: "#aaa"
+                      }}
+                    >
+                      {(!isMobile || isMobile) && <BsShareFill size={14} style={{ width: "21px" }} />}
+                      <p
+                        style={{
+                          padding: "0px",
+                          fontSize: isMobile ? "13px" : "13px",
+                          fontWeight: "500",
+                          textWrap: "wrap",
+                          textAlign: "center"
+                        }}
+                      >
+                        Share
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+
+
+
+
+              {/* <ToggleSwitch target={'impactBoost'} /> */}
+            </div>
+
+
+            <div className='flex-row' style={{backgroundColor: isLogged ? "#002244ff" : '#333', padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: isLogged ? '#ace' : '#ddd', fontSize: '12px', gap: '0.75rem', position: 'relative'}}>
+
+              <div className='flex-row' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(isLogged && isOn.impactBoost && isOn.boost) ? '#0af' : (isLogged && isOn.impactBoost) ? '#ace' : '#aaa'}`, borderRadius: '8px', backgroundColor: '', alignItems: 'center', gap: '0.15rem', height: '30px'}}>
+                <div style={{fontSize: '13px', fontWeight: '700', color: (isLogged && isOn.impactBoost && isOn.boost) ? '#0af' : (isLogged && isOn.impactBoost) ? '#ace' : '#aaa'}}>
+                  +2
+                </div>
+                <BsStar color={(isLogged && isOn.impactBoost && isOn.boost) ? '#0af' : (isLogged && isOn.impactBoost) ? '#ace' : '#aaa'} size={13} />
+              </div>
+
+              <div>
+                Share your impact to boost your score (up to 2 points per day)
+              </div>
+
+              {/* <div className='flex-row' style={{position: 'absolute', bottom: '0', right: '0', padding: '5px 5px', gap: '.25rem', alignItems: 'center'}}>
+                <BsInfoCircle size={15} onClick={() => {
+                  openSwipeable("impactBoost"); }} />
+              </div> */}
+            </div>
+          </div>
+          </div>
+          )}
 
 
         {/* </div> */}
