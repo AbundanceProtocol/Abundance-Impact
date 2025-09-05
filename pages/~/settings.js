@@ -491,6 +491,8 @@ export default function Settings({test, rewards, onSettingsChange}) {
             setNeedNotif(false)
           }, 500)
         }
+      } else {
+        LoginPopup()
       }
     };
 
