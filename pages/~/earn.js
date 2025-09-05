@@ -37,7 +37,8 @@ export default function Rewards() {
     setIsMiniApp,
     userBalances,
     setUserBalances,
-    adminTest
+    adminTest,
+    setUserInfo
   } = useContext(AccountContext);
   const ref1 = useRef(null);
   const [textMax, setTextMax] = useState("430px");
