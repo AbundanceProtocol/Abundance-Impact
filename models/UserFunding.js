@@ -11,6 +11,8 @@ const userFundingSchema = new mongoose.Schema({
     hash: { type: String },
   }],
   total: { type: Number, default: 0 },
+  wallet: [{ type: String }],
+  multitip_total: { type: Number },
   pfp: { type: String },
   createdAt: { type: Date, default: () => new Date(), index: true },
 });
