@@ -749,7 +749,7 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
         console.warn('Failed to fetch token prices, using fallback prices:', error);
         // Fallback prices with more accurate DEGEN price
         tokenPrices = {
-          'WETH': 3000, 'USDC': 1, 'USDT': 1, 'DEGEN': 0.004144, 'BETR': 0.01, 'NOICE': 0.01, 'TIPN': 0.01, 'EGGS': 0.01, 'USDGLO': 1.00, 'QR': 0.01
+          'WETH': 3000, 'USDC': 1, 'USDT': 1, 'DEGEN': 0.004144, 'BETR': 0.01, 'NOICE': 0.0003, 'TIPN': 0.0008, 'EGGS': 0.03, 'USDGLO': 1, 'QR': 0.00003
         };
       }
 
@@ -792,11 +792,15 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
         console.error('Error fetching ETH balance:', error);
       }
       
-      // Get token balances with rate limiting
-      for (const token of commonTokens) {
-        try {
-          // Add longer delay between requests to prevent overwhelming the RPC
-          await new Promise(resolve => setTimeout(resolve, 500)); // Increased from 200ms to 500ms
+      // Get token balances with rate limiting - process in smaller batches
+      const batchSize = 3; // Process 3 tokens at a time
+      for (let i = 0; i < commonTokens.length; i += batchSize) {
+        const batch = commonTokens.slice(i, i + batchSize);
+        
+        for (const token of batch) {
+          try {
+            // Add longer delay between requests to prevent overwhelming the RPC
+            await new Promise(resolve => setTimeout(resolve, 1000)); // Increased to 1 second
           
           const balanceResponse = await fetch(baseRpcUrl, {
             method: 'POST',
@@ -860,8 +864,8 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
                 console.warn(`Retry failed for ${token.symbol}:`, retryError);
               }
               
-              console.warn(`Rate limit persists for ${token.symbol}, skipping remaining tokens`);
-              break; // Stop processing more tokens if rate limit persists
+              console.warn(`Rate limit persists for ${token.symbol}, skipping remaining tokens in this batch`);
+              break; // Stop processing more tokens in this batch if rate limit persists
             }
             console.warn(`Failed to fetch ${token.symbol} balance: HTTP ${balanceResponse.status}`);
             continue;
@@ -897,6 +901,13 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
         } catch (error) {
           console.error(`Error fetching ${token.symbol} balance:`, error);
           // Continue with other tokens instead of failing completely
+        }
+        }
+        
+        // Add delay between batches to prevent rate limiting
+        if (i + batchSize < commonTokens.length) {
+          console.log(`Completed batch ${Math.floor(i/batchSize) + 1}, waiting 3 seconds before next batch...`);
+          await new Promise(resolve => setTimeout(resolve, 3000)); // 3 second delay between batches
         }
       }
       
