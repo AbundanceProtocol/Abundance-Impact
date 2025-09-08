@@ -99,611 +99,307 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
               console.log('🔍 Awaited provider:', provider, typeof provider);
             }
             
-            if (provider) {
-              console.log('✅ Farcaster wallet provider found via SDK (recommended method)');
-              console.log('🔍 Provider details:', {
-                hasRequest: typeof provider.request === 'function',
-                hasEnable: typeof provider.enable === 'function',
-                hasSend: typeof provider.send === 'function',
-                constructor: provider.constructor.name
-              });
+            if (provider && provider.request) {
+              console.log('✅ Farcaster wallet provider detected');
               
-              // The SDK provider might not have a request method, but we can check if it's EIP-1193 compatible
-              if (typeof provider.request === 'function') {
-                // In real Mini App, try eth_accounts first (no permission popup)
-                const isFarcasterApp = navigator.userAgent.includes('Farcaster');
+              // Test the provider by getting accounts
+              try {
+                const accounts = await provider.request({ method: 'eth_accounts' });
+                console.log('🔍 Provider accounts:', accounts);
                 
-                let accounts;
-                if (isFarcasterApp) {
-                  try {
-                    // Try to get existing accounts first (real Mini App might already be connected)
-                    accounts = await provider.request({ method: 'eth_accounts' });
-                    console.log('🔍 Real Mini App - existing accounts:', accounts);
-                  } catch (accountsError) {
-                    console.log('🔄 No existing accounts, requesting permission...');
-                  }
-                }
-                
-                // If no existing accounts, request permission
-                if (!accounts || accounts.length === 0) {
-                  accounts = await provider.request({ method: 'eth_requestAccounts' });
-                }
-                
-                const address = accounts[0];
-                const chainId = await provider.request({ method: 'eth_chainId' });
-                
-                if (address && chainId) {
-                  console.log('✅ Farcaster wallet auto-connected via SDK:', { address, chainId, environment: isFarcasterApp ? 'Real Mini App' : 'Tunnel' });
-                  setWalletAddress(address);
-                  setWalletChainId(chainId);
-                  setWalletProvider('farcaster');
-                  setWalletConnected(true);
-                  setWalletError(null);
-                  return; // Exit early if SDK method worked
-                }
-              } else {
-                console.log('⚠️ SDK provider exists but lacks request method - will try alternative approaches');
-                
-                // Try window.ethereum carefully in Farcaster environments (including tunnel preview)
-                const isFarcasterEnv = navigator.userAgent.includes('Farcaster');
-                const isTunnel = window.location.href.includes('tunnel') || window.location.href.includes('trycloudflare');
-                const isFarcasterContext = isFarcasterEnv || isTunnel;
-                
-                if (isFarcasterContext && window.ethereum && typeof window.ethereum.request === 'function') {
-                  console.log('🔄 Trying window.ethereum as potential Farcaster provider in Farcaster context...');
+                if (accounts && accounts.length > 0) {
+                  const address = accounts[0];
+                  console.log('✅ Wallet connected with address:', address);
                   
-                  // First check if there are already connected accounts to avoid triggering wallet selection
+                  setWalletConnected(true);
+                  setWalletAddress(address);
+                  setWalletProvider(provider);
+                  
+                  // Get chain ID
                   try {
-                    console.log('🔍 Checking window.ethereum for existing accounts...');
-                    console.log('🔍 window.ethereum details:', {
-                      exists: !!window.ethereum,
-                      isMetaMask: window.ethereum?.isMetaMask,
-                      isCoinbaseWallet: window.ethereum?.isCoinbaseWallet,
-                      chainId: window.ethereum?.chainId,
-                      selectedAddress: window.ethereum?.selectedAddress,
-                      providers: window.ethereum?.providers?.length || 0
-                    });
-                    
-                    const existingAccounts = await window.ethereum.request({ method: 'eth_accounts' });
-                    console.log('🔍 eth_accounts result:', existingAccounts);
-                    
-                    if (existingAccounts && existingAccounts.length > 0) {
-                      console.log('✅ Found existing connected accounts:', existingAccounts);
-                      const address = existingAccounts[0];
-                      const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-                      console.log('🔍 Chain ID from eth_chainId:', chainId);
-                      
-                      if (address && chainId) {
-                        console.log('✅ Farcaster wallet auto-connected via existing connection:', { address, chainId });
-                        setWalletAddress(address);
-                        setWalletChainId(chainId);
-                        setWalletProvider('farcaster');
-                        setWalletConnected(true);
-                        setWalletError(null);
-                        return; // Exit early if this method worked
-                      }
-                    } else {
-                      console.log('⚠️ No existing connected accounts found in Farcaster context');
-                      console.log('🔄 Attempting to request accounts in tunnel environment...');
-                      
-                      // In tunnel environment, it might be safe to request accounts
-                      try {
-                        const requestedAccounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                        console.log('🔍 eth_requestAccounts result:', requestedAccounts);
-                        
-                        if (requestedAccounts && requestedAccounts.length > 0) {
-                          const address = requestedAccounts[0];
-                          const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-                          
-                          console.log('✅ Farcaster wallet connected via eth_requestAccounts:', { address, chainId });
-                          setWalletAddress(address);
-                          setWalletChainId(chainId);
-                          setWalletProvider('farcaster');
-                          setWalletConnected(true);
-                          setWalletError(null);
-                          return;
-                        }
-                      } catch (requestError) {
-                        console.warn('⚠️ eth_requestAccounts failed:', requestError.message);
-                      }
-                    }
-                  } catch (ethError) {
-                    console.warn('⚠️ window.ethereum accounts check failed:', ethError.message);
+                    const chainId = await provider.request({ method: 'eth_chainId' });
+                    console.log('🔍 Chain ID:', chainId);
+                    setWalletChainId(chainId);
+                  } catch (chainError) {
+                    console.warn('Could not get chain ID:', chainError);
+                    setWalletChainId('0x2105'); // Default to Base
                   }
-                } else {
-                  console.log('⏸️ Skipping window.ethereum attempt:', {
-                    isTunnel,
-                    isFarcasterEnv,
-                    isFarcasterContext,
-                    hasEthereum: !!window.ethereum
+                  
+                  // Set up event listeners
+                  provider.on('accountsChanged', (accounts) => {
+                    console.log('🔄 Accounts changed:', accounts);
+                    if (accounts.length === 0) {
+                      setWalletConnected(false);
+                      setWalletAddress(null);
+                    } else {
+                      setWalletAddress(accounts[0]);
+                    }
                   });
+                  
+                  provider.on('chainChanged', (chainId) => {
+                    console.log('🔄 Chain changed:', chainId);
+                    setWalletChainId(chainId);
+                  });
+                  
+                  provider.on('disconnect', () => {
+                    console.log('🔄 Wallet disconnected');
+                    setWalletConnected(false);
+                    setWalletAddress(null);
+                    setWalletProvider(null);
+                    setWalletChainId(null);
+                  });
+                  
+                } else {
+                  console.log('ℹ️ No accounts found, wallet not connected');
                 }
+              } catch (accountsError) {
+                console.warn('Could not get accounts:', accountsError);
               }
+            } else {
+              console.log('ℹ️ No Farcaster wallet provider found');
             }
           } catch (sdkError) {
-            console.warn('⚠️ SDK wallet method failed, trying legacy method:', sdkError.message);
+            console.log('ℹ️ Farcaster SDK not available:', sdkError.message);
           }
           
-          // Check for window.farcasterEthProvider specifically
-          console.log('🔍 Checking for window.farcasterEthProvider...');
-          console.log('🔍 Farcaster provider details:', {
-            hasFarcasterEthProvider: !!window.farcasterEthProvider,
-            hasEthereumProvider: !!window.ethereum,
-            windowKeys: Object.keys(window).filter(k => k.includes('farcaster') || k.includes('ethereum')),
-            userAgent: navigator.userAgent,
-            currentUrl: window.location.href
-          });
-          
-          // Fallback to legacy method
-          if (window.farcasterEthProvider) {
-            console.log('✅ Farcaster wallet provider found in window (legacy fallback)');
-            // Request accounts from Farcaster wallet
-            const accounts = await window.farcasterEthProvider.request({ method: 'eth_requestAccounts' });
-            const address = accounts[0];
-            const chainId = await window.farcasterEthProvider.request({ method: 'eth_chainId' });
-            
-            if (address && chainId) {
-              console.log('✅ Farcaster wallet auto-connected in context (legacy):', { address, chainId });
-              setWalletAddress(address);
-              setWalletChainId(chainId);
-              setWalletProvider('farcaster');
-              setWalletConnected(true);
-              setWalletError(null);
-            } else {
-              console.log('❌ No address or chainId from Farcaster wallet (legacy)');
-            }
-          } else {
-            console.log('❌ No Farcaster wallet provider in window (legacy)');
-            console.log('⏳ Will retry in 2 seconds...');
-            // Retry after a delay - sometimes provider loads later
-            setTimeout(() => {
-              if (window.farcasterEthProvider && !walletConnected) {
-                console.log('🔄 Retrying legacy wallet detection after delay...');
-                detectFarcasterWallet();
-              }
-            }, 2000);
-          }
         } catch (error) {
-          console.error('❌ Farcaster wallet auto-connection failed in context (legacy):', error);
+          console.error('❌ Error detecting Farcaster wallet:', error);
           setWalletError(error.message);
         } finally {
           setWalletLoading(false);
         }
       }
     };
-
-    const checkProviders = async () => {
-      // Check both SDK and legacy provider availability
-      let hasFarcasterProvider = false;
-      let hasSDKProvider = false;
-      
-      if (typeof window !== 'undefined') {
-        hasFarcasterProvider = !!window.farcasterEthProvider;
-        try {
-          const { sdk } = await import('@farcaster/miniapp-sdk');
-          const provider = sdk.wallet.getEthereumProvider();
-          hasSDKProvider = provider && typeof provider.request === 'function';
-        } catch (e) {
-          hasSDKProvider = false;
-        }
-      }
-      
-      console.log('🔍 LEGACY DETECTION CHECK:', {
-        windowExists: typeof window !== 'undefined',
-        hasWagmi: typeof window !== 'undefined' && !!window.wagmi,
-        hasFarcasterProvider,
-        hasSDKProvider,
-        currentWalletConnected: walletConnected,
-        userAgent: typeof window !== 'undefined' ? navigator.userAgent : 'N/A',
-        timing: new Date().toISOString()
-      });
-      
-      // Continue with detection
-      detectFarcasterWallet();
-    };
-
-    // Check immediately
-    checkProviders();
     
-    // Also check when window.farcasterEthProvider becomes available
-    const checkFarcasterWallet = () => {
-      if (window.farcasterEthProvider) {
-        detectFarcasterWallet();
-      }
+    // Run detection after a short delay to ensure DOM is ready
+    const timeoutId = setTimeout(detectFarcasterWallet, 1000);
+    
+    return () => {
+      clearTimeout(timeoutId);
     };
-
-    // Listen for when Farcaster wallet becomes available
+  }, [router?.asPath, router?.pathname, walletConnected]);
+  
+  // Wagmi status tracking
+  const [wagmiStatus, setWagmiStatus] = useState(null);
+  
+  useEffect(() => {
     if (typeof window !== 'undefined') {
-      window.addEventListener('farcasterWalletReady', checkFarcasterWallet);
-      
-      // Also check periodically
-      const interval = setInterval(checkFarcasterWallet, 1000);
-      
-      return () => {
-        window.removeEventListener('farcasterWalletReady', checkFarcasterWallet);
-        clearInterval(interval);
-      };
+      setWagmiStatus(window.wagmi ? 'available' : 'unavailable');
     }
-  }, [walletConnected, router?.asPath, router?.pathname, setWalletLoading, setWalletError, setWalletAddress, setWalletChainId, setWalletProvider, setWalletConnected]);
-  const initEcosystems = [{
-    channels: [],
-    condition_channels: false,
-    condition_curators_threshold: 1,
-    condition_following_channel: false,
-    condition_following_owner: false,
-    condition_holding_erc20: false,
-    condition_holding_nft: false,
-    condition_points_threshold: 1,
-    condition_powerbadge: false,
-    createdAt: "2024-06-17T03:19:16.065Z",
-    downvote_value: 1,
-    ecosystem_moderators: [],
-    ecosystem_name: 'Abundance',
-    ecosystem_handle: 'abundance',
-    ecosystem_points_name: '$IMPACT',
-    ecosystem_rules: [`Can't do evil`],
-    erc20s: [],
-    fid: 3,
-    nfts: [],
-    owner_name: 'abundance',
-    percent_tipped: 10,
-    points_per_tip: 1,
-    upvote_value: 1,
-  }]
-  const [ecoData, setEcoData] = useState(null)
-  const [ecosystemsData, setEcosystemsData] = useState([])
-  const initialEligibility = {
-    badge: false,
-    badgeReq: false,
-    channelFollower: false,
-    channelFollowerReq: false,
-    ownerFollower: false,
-    ownerFollowerReq: false,
-    holdingNFT: false,
-    holdingNFTReq: false,
-    holdingERC20: false,
-    holdingERC20Req: false,
-    eligibility: false,
-    hasWallet: false,
-    hasWalletReq: false,
-    mod: false,
-    modReq: false,
-  }
-  const [eligibility, setEligibility] = useState(initialEligibility)
-  const [userInfo, setUserInfo] = useState({pfp: null, username: null, display: null})
-
-  const getUserProfile = async (fid) => {
-    try {
-      const response = await axios.get('/api/getUserProfile', {
-        params: {
-          fid: fid,
-        }
-      })
-      if (response?.data?.userProfile[0]) {
-        const user = response?.data?.userProfile[0]
-        setUserProfile(user)
-        store.setUserProfile(user)
-        store.setUsernameFC(user.username)
-        store.setSrcUrlFC(user.pfp_url)
-        store.setUserDisplayNameFC(user.display_name)
-        store.setUserActiveFC(user.active_status)
-        store.setUserBioFC(user.profile.bio.text)
-        store.setUserFollowersFC(user.follower_count)
-        store.setUserFollowingFC(user.following_count)
-        let verEthAddresses = []
-        for (const address of user.verified_addresses.eth_addresses) 
-          verEthAddresses.push(address)
-        store.setUserEthVerAddresses(verEthAddresses)
-        let verSolAddresses = []
-        for (const address of user.verified_addresses.sol_addresses) 
-          verSolAddresses.push(address)
-        store.setUserSolVerAddresses(verSolAddresses)
-      }
-    } catch (error) {
-      console.error('Error submitting data:', error)
-    }
-  }
-
-  const getEcosystems = async (points) => {
-    console.log('c1', points)
-    try {
-      const response = await axios.get('/api/ecosystem/getEcosystems')
-      // console.log(response)
-      if (response?.data?.ecosystems?.length > 0) {
-        const ecosystems = response?.data?.ecosystems
-        let ecoIndex = -1
-        if (router.route == '/~/ecosystems/[ecosystem]') {
-          ecoIndex = ecosystems.findIndex(eco => eco.ecosystem_handle == router.query?.ecosystem)
-        } else {
-          ecoIndex = ecosystems.findIndex(eco => eco.ecosystem_points_name == points)
-        }
-        
-        if (ecoIndex !== -1) { 
-          console.log('c2', ecosystems[ecoIndex], isLogged)
-          setEcoData(ecosystems[ecoIndex])
-          store.setPoints(ecosystems[ecoIndex].ecosystem_points_name)
-          setPoints(ecosystems[ecoIndex].ecosystem_points_name)
-        } else {
-          console.log('c3', ecosystems[0])
-          setEcoData(ecosystems[0])
-          store.setPoints(ecosystems[0].ecosystem_points_name)
-          setPoints(ecosystems[0].ecosystem_points_name)
-        }
-        setEcosystemsData(ecosystems)
-      } else {
-        console.log('c4', initEcosystems)
-        setEcosystemsData(initEcosystems)
-        setEcoData(initEcosystems[0])
-      }
-    } catch (error) {
-      console.error('Error submitting data:', error)
-      setEcosystemsData(initEcosystems)
-      setEcoData(initEcosystems[0])
-    }
-  }
-
-  useEffect(() => {
-    if (
-      router.route !== "/~/ecosystems/[ecosystem]/tip" &&
-      router.route !== "/~/ecosystems/[ecosystem]/[eco]/[curators]/tip" &&
-      router.route !== "/~/ecosystems/[ecosystem]/tip-basic" &&
-      router.route !== "/~/ecosystems/[ecosystem]/tip-share" &&
-      router.route !== "/~/ecosystems/[ecosystem]/tip-v3" &&
-      router.route !== "/~/ecosystems/[ecosystem]/tip-v6" &&
-      router.route !== "/~/ecosystems/[ecosystem]/tip-share-v2" &&
-      router.route !== "/~/ecosystems/[ecosystem]/tip-share-v3" &&
-      router.route !== "/~/ecosystems/[ecosystem]/tip-share-v4" &&
-      router.route !== "/~/ecosystems/[ecosystem]/rank-v1" &&
-      router.route !== "/~/ecosystems/[ecosystem]/fund-v1" &&
-      router.route !== "/~/ecosystems/[ecosystem]/fund-v2" &&
-      router.route !== "/~/ecosystems/[ecosystem]/fund-v3" &&
-      router.route !== "/~/ecosystems/[ecosystem]/rewards-v1" &&
-      router.route !== "/~/ecosystems/[ecosystem]/daily-v1" &&
-      router.route !== "/~/ecosystems/[ecosystem]/curation-v1" &&
-      router.route !== "/~/studio/multi-tip-compose"
-    ) {
-      console.log("c5 triggered []");
-      console.log("c6", store.points, points);
-      getEcosystems(store.points || points);
-      console.log("c7", router);
-    }
-  }, [])
-
-  useEffect(() => {
-    console.log('c8 triggered [ecoData]')
-    console.log('c9', isLogged, ecoData)
-    const updateEcoData = () => {
-      if (isLogged && ecoData) {
-        setPopulate(populate+1)
-        setPoints(ecoData?.ecosystem_points_name)
-        if (router.route !== '/' && userBalances.impact == 0) {
-          console.log('c10 points', store.fid, points)
-          getRemainingBalances(fid || store.fid, ecoData?.ecosystem_points_name, store.signer_uuid)
-        }
-      }
-    }
-
-    if (
-      router.route !== "/~/ecosystems/[ecosystem]/tip" &&
-      router.route !== "/~/ecosystems/[ecosystem]/[eco]/[curators]/tip" &&
-      router.route !== "/~/ecosystems/[ecosystem]/tip-basic" &&
-      router.route !== "/~/ecosystems/[ecosystem]/tip-share" &&
-      router.route !== "/~/ecosystems/[ecosystem]/tip-v3" &&
-      router.route !== "/~/ecosystems/[ecosystem]/tip-v6" &&
-      router.route !== "/~/ecosystems/[ecosystem]/tip-share-v2" &&
-      router.route !== "/~/ecosystems/[ecosystem]/tip-share-v3" &&
-      router.route !== "/~/ecosystems/[ecosystem]/tip-share-v4" &&
-      router.route !== "/~/ecosystems/[ecosystem]/rank-v1" &&
-      router.route !== "/~/ecosystems/[ecosystem]/fund-v1" &&
-      router.route !== "/~/ecosystems/[ecosystem]/fund-v2" &&
-      router.route !== "/~/ecosystems/[ecosystem]/fund-v3" &&
-      router.route !== "/~/ecosystems/[ecosystem]/rewards-v1" &&
-      router.route !== "/~/ecosystems/[ecosystem]/daily-v1" &&
-      router.route !== "/~/ecosystems/[ecosystem]/curation-v1" &&
-      router.route !== "/~/studio/multi-tip-compose"
-    ) {
-      if (sched.ecoData) {
-        updateEcoData();
-        setSched((prev) => ({ ...prev, ecoData: false }));
-      } else {
-        const timeoutId = setTimeout(() => {
-          updateEcoData();
-          setSched((prev) => ({ ...prev, ecoData: false }));
-        }, 300);
-        return () => clearTimeout(timeoutId);
-      }
-    }
-  }, [ecoData, isLogged, sched.ecoData])
-
-  useEffect(() => {
-    console.log('c11 triggered [store.isAuth]')
-
-    const updateLogin = () => {
-      console.log('c12 store triggered', store.isAuth, miniApp)
-      if (store.isAuth) {
-        console.log('c12-6')
-        setIsLogged(true);
-        setFid(fid || store.fid)
-        getUserProfile(fid || store.fid)
-        setShowLogin(false)
-      } else {
-        if (router.route !== '/~/curator/[fid]') {
-          console.log('c12-2', isLogged)
-          setIsLogged(false);
-          setFid(null)
-          setUserBalances({impact: 0, qdau: 0})
-          setUserProfile(null)
-        }
-
-        if (router.route !== '/' && router.route !== '/~/curator/[fid]' && router.route !== '/~/tip') {
-          console.log('c13-1')
-          LoginPopup()
-        }
-      }
-    }
-
-    console.log('c13-2', router.route, router.route !== "/~/ecosystems/[ecosystem]/tip-basic")
-    if (
-      router.route !== "/~/ecosystems/[ecosystem]/tip" &&
-      router.route !== "/~/ecosystems/[ecosystem]/[eco]/[curators]/tip" &&
-      router.route !== "/~/ecosystems/[ecosystem]/tip-basic" &&
-      router.route !== "/~/ecosystems/[ecosystem]/tip-share" &&
-      router.route !== "/~/ecosystems/[ecosystem]/tip-v3" &&
-      router.route !== "/~/ecosystems/[ecosystem]/tip-v6" &&
-      router.route !== "/~/ecosystems/[ecosystem]/tip-share-v2" &&
-      router.route !== "/~/ecosystems/[ecosystem]/tip-share-v3" &&
-      router.route !== "/~/ecosystems/[ecosystem]/tip-share-v4" &&
-      router.route !== "/~/ecosystems/[ecosystem]/rank-v1" &&
-      router.route !== "/~/ecosystems/[ecosystem]/fund-v1" &&
-      router.route !== "/~/ecosystems/[ecosystem]/fund-v2" &&
-      router.route !== "/~/ecosystems/[ecosystem]/fund-v3" &&
-      router.route !== "/~/ecosystems/[ecosystem]/rewards-v1" &&
-      router.route !== "/~/ecosystems/[ecosystem]/daily-v1" &&
-      router.route !== "/~/ecosystems/[ecosystem]/curation-v1" &&
-      router.route !== "/~/studio/multi-tip-compose" &&
-      !miniApp
-    ) {
-      if (sched.login) {
-        updateLogin();
-        setSched((prev) => ({ ...prev, login: false }));
-      } else {
-        const timeoutId = setTimeout(() => {
-          updateLogin();
-          setSched((prev) => ({ ...prev, login: false }));
-        }, 300);
-        return () => clearTimeout(timeoutId);
-      }
-    }
-
-  }, [store.isAuth, sched.login]);
-
-  const getRemainingBalances = async (fid, points, uuid, referrer) => {
-    try {
-      const response = await axios.get('/api/ecosystem/getBalances', {
-        params: { fid, points } })
-      if (response?.data?.user) {
-        console.log('c13', response?.data?.user)
-        const remainingImpact = response?.data?.user?.remaining_i_allowance || 0
-        const remainingQuality = response?.data?.user?.remaining_q_allowance || 0
-        setUserBalances(prev => ({
-          ...prev,
-          impact: remainingImpact,
-          qdau: remainingQuality
-        }))
-        setEligibility(initialEligibility)
-      } else {
-        console.log('c13-7')
-        setUserBalances(prev => ({ ...prev, impact: 0, qdau: 0 }))
-        checkEcoEligibility(fid, points, uuid, referrer)
-      }
-    } catch (error) {
-      console.error('Error, getRemainingBalances failed:', error)
-      checkEcoEligibility(fid, points, uuid, referrer)
-      setUserBalances(prev => ({ ...prev, impact: 0, qdau: 0 }))
-    }
-  }
-
-  const checkEcoEligibility = async (fid, points, uuid, referrer) => {
-    console.log('c14', fid, points, prevPoints)
-    if (!fid) {
-      LoginPopup()
-    } else if (points !== prevPoints) {
-      setPrevPoints(points)
-      try {
-        const response = await axios.get('/api/ecosystem/checkUserEligibility', {
-          params: { fid, points, uuid, referrer } })
-        // console.log(response)
-        if (response?.data?.eligibilityData) {
-          let eligibilityData = response?.data?.eligibilityData
-          setEligibility(eligibilityData)
-        } else {
-          setEligibility(initialEligibility)
-        }
-        if (response?.data?.createUser) {
-          let userData = response.data?.createUser
-          setUserBalances(prev => ({
-            ...prev,
-            impact: userData.remaining_i_allowance,
-            qdau: userData.remaining_q_allowance
-          }))
-          console.log('userBalance', userData.remaining_i_allowance)
-
-        } else {
-          setUserBalances(prev => ({ ...prev, impact: 0, qdau: 0 }))
-          console.log('userBalance 0')
-        }
-      } catch (error) {
-        console.error('Error, checkEcoEligibility failed:', error)
-        setEligibility(initialEligibility)
-        setUserBalances(prev => ({ ...prev, impact: 0, qdau: 0 }))
-        console.log('userBalance 1')
-      }
-    }
-  }
-
-  const LoginPopup = async () => { setShowLogin(true) }
-
-  const LogoutPopup = async () => { setShowLogout(true) }
-
-  const handleEcoChange = (event) => {
-    const system = ecosystemsData.find(eco => eco.ecosystem_points_name == event.target.value)
-    console.log('c15', event.target.value)
-    store.setEcosystemData(system)
-    setEcoData(system);
-    setPrevPoints(null)
-    // if (router.route == '/~/ecosystems/[ecosystem]' && router.asPath !== `/~/ecosystems/${system.ecosystem_handle}`) {
-      router.push(`/~/ecosystems/${system.ecosystem_handle}`)
-    // }
+  }, []);
+  
+  // Ecosystem data state
+  const [ecoData, setEcoData] = useState(null);
+  const [ecosystemsData, setEcosystemsData] = useState([]);
+  const [eligibility, setEligibility] = useState(null);
+  const [userInfo, setUserInfo] = useState(null);
+  
+  // Login popup component
+  const LoginPopup = () => {
+    if (!showLogin) return null;
+    
+    return (
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 9999
+      }}>
+        <div style={{
+          backgroundColor: '#021326',
+          border: '1px solid #11447799',
+          borderRadius: '15px',
+          padding: '20px',
+          maxWidth: '400px',
+          width: '90%',
+          textAlign: 'center'
+        }}>
+          <h3 style={{ color: '#cde', marginBottom: '20px' }}>Connect Wallet</h3>
+          <p style={{ color: '#9df', marginBottom: '20px' }}>
+            Please connect your Farcaster wallet to continue.
+          </p>
+          <button
+            onClick={() => setShowLogin(false)}
+            style={{
+              backgroundColor: '#007bff',
+              color: 'white',
+              border: 'none',
+              padding: '10px 20px',
+              borderRadius: '8px',
+              cursor: 'pointer'
+            }}
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    );
   };
-
-  const changeEco = (system) => {
-    console.log('c16 system', system)
-    store.setEcosystemData(system)
-    setEcoData(system);
+  
+  // Logout popup component
+  const LogoutPopup = () => {
+    if (!showLogout) return null;
+    
+    return (
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 9999
+      }}>
+        <div style={{
+          backgroundColor: '#021326',
+          border: '1px solid #11447799',
+          borderRadius: '15px',
+          padding: '20px',
+          maxWidth: '400px',
+          width: '90%',
+          textAlign: 'center'
+        }}>
+          <h3 style={{ color: '#cde', marginBottom: '20px' }}>Logout</h3>
+          <p style={{ color: '#9df', marginBottom: '20px' }}>
+            Are you sure you want to logout?
+          </p>
+          <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+            <button
+              onClick={() => {
+                setIsLogged(false);
+                setFid(null);
+                setUserInfo(null);
+                setUserBalances({impact: 0, qdau: 0});
+                setShowLogout(false);
+              }}
+              style={{
+                backgroundColor: '#dc3545',
+                color: 'white',
+                border: 'none',
+                padding: '10px 20px',
+                borderRadius: '8px',
+                cursor: 'pointer'
+              }}
+            >
+              Logout
+            </button>
+            <button
+              onClick={() => setShowLogout(false)}
+              style={{
+                backgroundColor: '#6c757d',
+                color: 'white',
+                border: 'none',
+                padding: '10px 20px',
+                borderRadius: '8px',
+                cursor: 'pointer'
+              }}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   };
-
-  // Get user's top coins by $ value from Base chain
+  
+  // Handle ecosystem change
+  const handleEcoChange = (newEco) => {
+    console.log('🔄 Ecosystem changed to:', newEco);
+    setEcoData(newEco);
+  };
+  
+  // Check ecosystem eligibility
+  const checkEcoEligibility = async (ecoId) => {
+    try {
+      const response = await axios.get(`/api/ecosystem/checkEligibility?ecoId=${ecoId}`);
+      setEligibility(response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error checking ecosystem eligibility:', error);
+      return null;
+    }
+  };
+  
+  // Change ecosystem
+  const changeEco = async (ecoId) => {
+    try {
+      const response = await axios.get(`/api/ecosystem/getEcoData?ecoId=${ecoId}`);
+      setEcoData(response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error changing ecosystem:', error);
+      return null;
+    }
+  };
+  
+  // Get ecosystems
+  const getEcosystems = async () => {
+    try {
+      const response = await axios.get('/api/ecosystem/getEcosystems');
+      setEcosystemsData(response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error getting ecosystems:', error);
+      return [];
+    }
+  };
+  
+  // Get remaining balances
+  const getRemainingBalances = async (ecoId) => {
+    try {
+      const response = await axios.get(`/api/ecosystem/getRemainingBalances?ecoId=${ecoId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error getting remaining balances:', error);
+      return null;
+    }
+  };
+  
+  // Get top coins for Base network
   const getTopCoins = async (address, forceRefresh = false) => {
-    if (!address) return;
+    console.log('🔍 getTopCoins called with:', { address, forceRefresh });
+    
+    if (!address) {
+      console.log('❌ No address provided to getTopCoins');
+      return [];
+    }
     
     // Check cache first (5 minute cache)
-    const cacheKey = address.toLowerCase();
+    const cacheKey = `base_${address.toLowerCase()}`;
     const now = Date.now();
     const cacheAge = now - (lastTopCoinsFetch || 0);
     const cacheValid = cacheAge < 5 * 60 * 1000; // 5 minutes
     
     if (!forceRefresh && cacheValid && topCoinsCache[cacheKey] && topCoinsCache[cacheKey].length > 0) {
-      console.log('📦 Using cached top coins data (age:', Math.round(cacheAge / 1000), 'seconds)');
-      setTopCoins(topCoinsCache[cacheKey]);
-      return;
+      console.log('📦 Using cached Base tokens data (age:', Math.round(cacheAge / 1000), 'seconds)');
+      return topCoinsCache[cacheKey];
     }
     
     // Prevent multiple simultaneous calls
     if (topCoinsLoading) {
-      console.log('⏳ Already loading top coins, skipping...');
-      return;
-    }
-    
-    // RPC rate limiting - prevent calls within 10 seconds of each other
-    const timeSinceLastRpc = now - (lastRpcCall || 0);
-    if (timeSinceLastRpc < 10000) { // 10 seconds
-      console.log('⏳ RPC rate limit active, please wait...', Math.ceil((10000 - timeSinceLastRpc) / 1000), 'seconds remaining');
-      return;
+      console.log('⏳ Already loading tokens, skipping...');
+      return topCoins || [];
     }
     
     try {
       setTopCoinsLoading(true);
-      setLastRpcCall(now); // Mark this as the last RPC call
-      console.log('Fetching top coins for address:', address);
+      console.log('🚀 Fetching Base tokens for address:', address);
       
-      // Base chain RPC URL
-      const baseRpcUrl = process.env.NEXT_PUBLIC_BASE_RPC_URL || 'https://mainnet.base.org';
-      const altRpcUrl = 'https://base-mainnet.g.alchemy.com/v2/demo'; // Alternative RPC endpoint
-      
-      // Common token addresses on Base
-      const commonTokens = [
+      // Define Base network tokens
+      const baseTokens = [
+        { symbol: 'ETH', address: '0x0000000000000000000000000000000000000000', decimals: 18, isNative: true },
         { symbol: 'USDC', address: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', decimals: 6 },
         { symbol: 'USDT', address: '0xfde4c96c8593536e31f229ea8f37b2ada2699bb2', decimals: 6 },
+        { symbol: 'WETH', address: '0x4200000000000000000000000000000000000006', decimals: 18 },
         { symbol: 'DEGEN', address: '0x4ed4E862860beD51a9570b96d89aF5E1B0Efefed', decimals: 18 },
         { symbol: 'BETR', address: '0xaD4Dc4712523B0180da5139Ad11C3FDDc6d7Cf06', decimals: 18 },
         { symbol: 'NOICE', address: '0x9cb41fd9dc6891bae8187029461bfaadf6cc0c69', decimals: 18 },
@@ -712,53 +408,52 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
         { symbol: 'USDGLO', address: '0x4f604735c1cf31399c6e711d5962b2b3e0225ad3', decimals: 18 },
         { symbol: 'QR', address: '0x2b5050f01d64fbb3e4ac44dc07f0732bfb5ecadf', decimals: 18 }
       ];
-
-      // Get token prices from CoinGecko API (free tier) first
+      
+      // Get token prices from CoinGecko API
       let tokenPrices = {};
       try {
-        // Add delay to respect rate limits
         await new Promise(resolve => setTimeout(resolve, 100));
         
-        const priceResponse = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum,usd-coin,tether,degen-token,betr,noice,tipn,eggs,usdglo,qr&vs_currencies=usd');
+        const priceResponse = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum,usd-coin,tether,degen-token,betr,noice,tipn,eggs,usdglo&vs_currencies=usd');
+        console.log('💰 CoinGecko API response status:', priceResponse.status);
         if (priceResponse.ok) {
           const priceData = await priceResponse.json();
-          
-          // Check if DEGEN price is valid, if not use current market price
-          let degenPrice = priceData['degen-token']?.usd;
-          if (!degenPrice || degenPrice < 0.001) {
-            console.warn('⚠️ DEGEN price from CoinGecko is invalid or too low, using current market price');
-            degenPrice = 0.004144; // Current DEGEN price as of now
-          }
+          console.log('💰 CoinGecko price data:', priceData);
+          console.log('💰 QR price from CoinGecko:', priceData.qr?.usd); // Will be undefined now
           
           tokenPrices = {
+            'ETH': priceData.ethereum?.usd || 3000,
             'WETH': priceData.ethereum?.usd || 3000,
             'USDC': priceData['usd-coin']?.usd || 1,
             'USDT': priceData.tether?.usd || 1,
-            'DEGEN': degenPrice,
+            'DEGEN': priceData['degen-token']?.usd || 0.004144,
             'BETR': priceData.betr?.usd || 0.01,
             'NOICE': priceData.noice?.usd || 0.0003,
             'TIPN': priceData.tipn?.usd || 0.0008,
             'EGGS': priceData.eggs?.usd || 0.03,
-            'USDGLO': priceData.usdglo?.usd || 1,
-            'QR': priceData.qr?.usd || 0.00003
+            'USDGLO': priceData.usdglo?.usd || 1.00,
+            'QR': priceData.qr?.usd || 0.000036 // Fallback price for QR
           };
+          console.log('💰 Final token prices:', tokenPrices);
         } else if (priceResponse.status === 429) {
           console.warn('CoinGecko rate limit hit, using fallback prices');
           throw new Error('Rate limit exceeded');
         }
       } catch (error) {
         console.warn('Failed to fetch token prices, using fallback prices:', error);
-        // Fallback prices with more accurate DEGEN price
+        // Fallback prices
         tokenPrices = {
-          'WETH': 3000, 'USDC': 1, 'USDT': 1, 'DEGEN': 0.004144, 'BETR': 0.01, 'NOICE': 0.0003, 'TIPN': 0.0008, 'EGGS': 0.03, 'USDGLO': 1, 'QR': 0.00003
+          'ETH': 3000, 'WETH': 3000, 'USDC': 1, 'USDT': 1, 'DEGEN': 0.004144, 
+          'BETR': 0.01, 'NOICE': 0.0003, 'TIPN': 0.0008, 'EGGS': 0.03, 'USDGLO': 1.00, 'QR': 0.000036
         };
       }
-
-      const tokenBalances = [];
       
-      // Get native ETH balance first
+      const allTokenBalances = [];
+      const rpcUrl = 'https://mainnet.base.org';
+      
+      // Get native ETH balance
       try {
-        const ethBalanceResponse = await fetch(baseRpcUrl, {
+        const balanceResponse = await fetch(rpcUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -769,19 +464,19 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
           })
         });
         
-        const ethBalanceData = await ethBalanceResponse.json();
-        if (ethBalanceData.result && ethBalanceData.result !== '0x') {
-          const ethBalance = parseInt(ethBalanceData.result, 16) / Math.pow(10, 18);
-          if (ethBalance > 0) { // Only show if > 0 ETH
-            const ethPrice = tokenPrices['WETH'] || 3000;
-            const ethValue = ethBalance * ethPrice;
+        const balanceData = await balanceResponse.json();
+        if (balanceData.result && balanceData.result !== '0x') {
+          const balance = parseInt(balanceData.result, 16) / Math.pow(10, 18);
+          if (balance > 0.000001) {
+            const price = tokenPrices['ETH'] || 3000;
+            const value = balance * price;
             
-            tokenBalances.push({
+            allTokenBalances.push({
               symbol: 'ETH',
               address: '0x0000000000000000000000000000000000000000',
-              balance: ethBalance.toFixed(4),
-              price: ethPrice,
-              value: ethValue.toFixed(2),
+              balance: balance.toFixed(4),
+              price: price,
+              value: value.toFixed(2),
               network: 'Base',
               networkKey: 'base',
               chainId: '0x2105',
@@ -793,16 +488,12 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
         console.error('Error fetching ETH balance:', error);
       }
       
-      // Get token balances with aggressive rate limiting - process one token at a time
-      for (let i = 0; i < commonTokens.length; i++) {
-        const token = commonTokens[i];
+      // Get ERC20 token balances
+      for (const token of baseTokens.filter(t => !t.isNative)) {
         try {
-          // Add exponential backoff delay - start with 2 seconds and increase
-          const delay = Math.min(2000 + (i * 500), 10000); // 2s to 10s max
-          console.log(`Processing ${token.symbol} (${i + 1}/${commonTokens.length}), waiting ${delay}ms...`);
-          await new Promise(resolve => setTimeout(resolve, delay));
+          await new Promise(resolve => setTimeout(resolve, 200)); // Rate limiting
           
-          let balanceResponse = await fetch(baseRpcUrl, {
+          const balanceResponse = await fetch(rpcUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -810,103 +501,22 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
               method: 'eth_call',
               params: [{
                 to: token.address,
-                data: `0x70a08231${address.slice(2).padStart(64, '0')}` // balanceOf(address)
+                data: `0x70a08231${address.slice(2).padStart(64, '0')}`
               }, 'latest'],
               id: 1
             })
           });
           
-          // If main RPC fails, try alternative RPC immediately
-          if (!balanceResponse.ok && balanceResponse.status === 429) {
-            console.log(`Main RPC rate limited for ${token.symbol}, trying alternative RPC...`);
-            await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
-            balanceResponse = await fetch(altRpcUrl, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                jsonrpc: '2.0',
-                method: 'eth_call',
-                params: [{
-                  to: token.address,
-                  data: `0x70a08231${address.slice(2).padStart(64, '0')}` // balanceOf(address)
-                }, 'latest'],
-                id: 1
-              })
-            });
-          }
-          
-          if (!balanceResponse.ok) {
-            if (balanceResponse.status === 429) {
-              console.warn(`Rate limit hit for ${token.symbol}, waiting 2 seconds before continuing...`);
-              await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds on rate limit
-              // Retry the request once with alternative RPC
-              try {
-                console.log(`Retrying ${token.symbol} with alternative RPC endpoint...`);
-                const retryResponse = await fetch(altRpcUrl, {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    jsonrpc: '2.0',
-                    method: 'eth_call',
-                    params: [{
-                      to: token.address,
-                      data: `0x70a08231${address.slice(2).padStart(64, '0')}` // balanceOf(address)
-                    }, 'latest'],
-                    id: 1
-                  })
-                });
-                
-                if (retryResponse.ok) {
-                  const retryData = await retryResponse.json();
-                  if (retryData.result && retryData.result !== '0x') {
-                    const balance = parseInt(retryData.result, 16) / Math.pow(10, token.decimals);
-                    if (balance > 0) {
-                      const price = tokenPrices[token.symbol] || 1;
-                      const value = balance * price;
-                      
-                      tokenBalances.push({
-                        symbol: token.symbol,
-                        address: token.address,
-                        balance: balance.toFixed(4),
-                        price: price,
-                        value: value.toFixed(2),
-                        network: 'Base',
-                        networkKey: 'base',
-                        chainId: '0x2105'
-                      });
-                    }
-                  }
-                  // Add extra delay after successful retry to prevent hitting rate limit again
-                  await new Promise(resolve => setTimeout(resolve, 1000));
-                  continue; // Success, move to next token
-                }
-              } catch (retryError) {
-                console.warn(`Retry failed for ${token.symbol}:`, retryError);
-              }
-              
-              console.warn(`Rate limit persists for ${token.symbol}, skipping remaining tokens`);
-              break; // Stop processing more tokens if rate limit persists
-            }
-            console.warn(`Failed to fetch ${token.symbol} balance: HTTP ${balanceResponse.status}`);
-            continue;
-          }
-          
           const balanceData = await balanceResponse.json();
-          
-          if (balanceData.error) {
-            console.warn(`RPC error fetching ${token.symbol} balance:`, balanceData.error);
-            continue;
-          }
+          if (balanceData.error) continue;
           
           if (balanceData.result && balanceData.result !== '0x') {
             const balance = parseInt(balanceData.result, 16) / Math.pow(10, token.decimals);
-            
-            // Only include tokens with balance > 0
-            if (balance > 0) {
+            if (balance > 0.000001) {
               const price = tokenPrices[token.symbol] || 1;
               const value = balance * price;
               
-              tokenBalances.push({
+              allTokenBalances.push({
                 symbol: token.symbol,
                 address: token.address,
                 balance: balance.toFixed(4),
@@ -914,40 +524,49 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
                 value: value.toFixed(2),
                 network: 'Base',
                 networkKey: 'base',
-                chainId: '0x2105'
+                chainId: '0x2105',
+                isNative: false
               });
             }
           }
         } catch (error) {
           console.error(`Error fetching ${token.symbol} balance:`, error);
-          // Continue with other tokens instead of failing completely
         }
       }
       
+      // Filter out tokens with value under $0.50
+      const filteredTokens = allTokenBalances.filter(token => {
+        const value = parseFloat(token.value);
+        return value >= 0.50;
+      });
+      
       // Sort by $ value (highest first)
-      const sortedTokens = tokenBalances.sort((a, b) => parseFloat(b.value) - parseFloat(a.value));
+      const sortedTokens = filteredTokens.sort((a, b) => parseFloat(b.value) - parseFloat(a.value));
       
-      console.log('Top coins by value:', sortedTokens);
+      console.log('Base tokens by value:', sortedTokens);
       
-      // Update state and cache
       setTopCoins(sortedTokens);
       setTopCoinsCache(prev => ({ ...prev, [cacheKey]: sortedTokens }));
       setLastTopCoinsFetch(now);
       
+      return sortedTokens;
+      
     } catch (error) {
-      console.error('Error fetching top coins:', error);
-      // Don't clear existing data on error to prevent flashing
-      if (topCoins.length === 0) {
-        setTopCoins([]);
-      }
+      console.error('Error fetching Base tokens:', error);
+      return topCoins || [];
     } finally {
       setTopCoinsLoading(false);
     }
   };
-
-  // Get user's top coins by $ value from Celo chain
+  
+  // Get top coins for Celo network
   const getTopCoinsCelo = async (address, forceRefresh = false) => {
-    if (!address) return;
+    console.log('🔍 getTopCoinsCelo called with:', { address, forceRefresh });
+    
+    if (!address) {
+      console.log('❌ No address provided to getTopCoinsCelo');
+      return [];
+    }
     
     // Check cache first (5 minute cache)
     const cacheKey = `celo_${address.toLowerCase()}`;
@@ -956,48 +575,36 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
     const cacheValid = cacheAge < 5 * 60 * 1000; // 5 minutes
     
     if (!forceRefresh && cacheValid && topCoinsCache[cacheKey] && topCoinsCache[cacheKey].length > 0) {
-      console.log('📦 Using cached Celo top coins data (age:', Math.round(cacheAge / 1000), 'seconds)');
-      setTopCoins(topCoinsCache[cacheKey]);
-      return;
+      console.log('📦 Using cached Celo tokens data (age:', Math.round(cacheAge / 1000), 'seconds)');
+      return topCoinsCache[cacheKey];
     }
     
     // Prevent multiple simultaneous calls
     if (topCoinsLoading) {
-      console.log('⏳ Already loading top coins, skipping...');
-      return;
-    }
-    
-    // RPC rate limiting - prevent calls within 10 seconds of each other
-    const timeSinceLastRpc = now - (lastRpcCall || 0);
-    if (timeSinceLastRpc < 10000) { // 10 seconds
-      console.log('⏳ RPC rate limit active, please wait...', Math.ceil((10000 - timeSinceLastRpc) / 1000), 'seconds remaining');
-      return;
+      console.log('⏳ Already loading tokens, skipping...');
+      return topCoins || [];
     }
     
     try {
       setTopCoinsLoading(true);
-      setLastRpcCall(now); // Mark this as the last RPC call
-      console.log('Fetching Celo top coins for address:', address);
+      console.log('🚀 Fetching Celo tokens for address:', address);
       
-      // Celo chain RPC URL
-      const celoRpcUrl = process.env.NEXT_PUBLIC_CELO_RPC_URL || 'https://forno.celo.org';
-      
-      // Common token addresses on Celo
+      // Define Celo network tokens
       const celoTokens = [
-        { symbol: 'CELO', address: '0x471EcE3750Da237f93B8E339c536989b8978a438', decimals: 18 },
+        { symbol: 'CELO', address: '0x0000000000000000000000000000000000000000', decimals: 18, isNative: true },
         { symbol: 'USDC', address: '0x765DE816845861e75A25fCA122bb6898B8B1282a', decimals: 6 },
         { symbol: 'WETH', address: '0x122013fd7dF1C6F636a5bb8f03108E876548b455', decimals: 18 }
       ];
-
-      // Get token prices from CoinGecko API (free tier) first
+      
+      // Get token prices from CoinGecko API
       let tokenPrices = {};
       try {
-        // Add delay to respect rate limits
         await new Promise(resolve => setTimeout(resolve, 100));
         
         const priceResponse = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=celo,usd-coin,ethereum&vs_currencies=usd');
         if (priceResponse.ok) {
           const priceData = await priceResponse.json();
+          
           tokenPrices = {
             'CELO': priceData.celo?.usd || 0.5,
             'USDC': priceData['usd-coin']?.usd || 1,
@@ -1014,12 +621,13 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
           'CELO': 0.5, 'USDC': 1, 'WETH': 3000
         };
       }
-
-      const tokenBalances = [];
+      
+      const allTokenBalances = [];
+      const rpcUrl = 'https://forno.celo.org';
       
       // Get native CELO balance
       try {
-        const celoBalanceResponse = await fetch(celoRpcUrl, {
+        const balanceResponse = await fetch(rpcUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -1030,19 +638,19 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
           })
         });
         
-        const celoBalanceData = await celoBalanceResponse.json();
-        if (celoBalanceData.result && celoBalanceData.result !== '0x') {
-          const celoBalance = parseInt(celoBalanceData.result, 16) / Math.pow(10, 18);
-          if (celoBalance > 0) { // Only show if > 0 CELO
-            const celoPrice = tokenPrices['CELO'] || 0.5;
-            const celoValue = celoBalance * celoPrice;
+        const balanceData = await balanceResponse.json();
+        if (balanceData.result && balanceData.result !== '0x') {
+          const balance = parseInt(balanceData.result, 16) / Math.pow(10, 18);
+          if (balance > 0.000001) {
+            const price = tokenPrices['CELO'] || 0.5;
+            const value = balance * price;
             
-            tokenBalances.push({
+            allTokenBalances.push({
               symbol: 'CELO',
               address: '0x0000000000000000000000000000000000000000',
-              balance: celoBalance.toFixed(4),
-              price: celoPrice,
-              value: celoValue.toFixed(2),
+              balance: balance.toFixed(4),
+              price: price,
+              value: value.toFixed(2),
               network: 'Celo',
               networkKey: 'celo',
               chainId: '0xa4ec',
@@ -1054,12 +662,12 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
         console.error('Error fetching CELO balance:', error);
       }
       
-      // Get Celo token balances
-      for (const token of celoTokens) {
+      // Get ERC20 token balances
+      for (const token of celoTokens.filter(t => !t.isNative)) {
         try {
-          await new Promise(resolve => setTimeout(resolve, 50));
+          await new Promise(resolve => setTimeout(resolve, 200)); // Rate limiting
           
-          const balanceResponse = await fetch(celoRpcUrl, {
+          const balanceResponse = await fetch(rpcUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -1073,20 +681,16 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
             })
           });
           
-          if (!balanceResponse.ok) continue;
-          
           const balanceData = await balanceResponse.json();
           if (balanceData.error) continue;
           
           if (balanceData.result && balanceData.result !== '0x') {
             const balance = parseInt(balanceData.result, 16) / Math.pow(10, token.decimals);
-            
-            // Only include tokens with balance > 0
-            if (balance > 0) {
+            if (balance > 0.000001) {
               const price = tokenPrices[token.symbol] || 1;
               const value = balance * price;
               
-              tokenBalances.push({
+              allTokenBalances.push({
                 symbol: token.symbol,
                 address: token.address,
                 balance: balance.toFixed(4),
@@ -1094,36 +698,183 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
                 value: value.toFixed(2),
                 network: 'Celo',
                 networkKey: 'celo',
-                chainId: '0xa4ec'
+                chainId: '0xa4ec',
+                isNative: false
               });
             }
           }
         } catch (error) {
-          console.error(`Error fetching Celo ${token.symbol} balance:`, error);
+          console.error(`Error fetching ${token.symbol} balance:`, error);
         }
       }
       
-      const sortedTokens = tokenBalances.sort((a, b) => parseFloat(b.value) - parseFloat(a.value));
-      console.log('Celo top coins by value:', sortedTokens);
+      // Filter out tokens with value under $0.50
+      const filteredTokens = allTokenBalances.filter(token => {
+        const value = parseFloat(token.value);
+        return value >= 0.50;
+      });
+      
+      // Sort by $ value (highest first)
+      const sortedTokens = filteredTokens.sort((a, b) => parseFloat(b.value) - parseFloat(a.value));
+      
+      console.log('Celo tokens by value:', sortedTokens);
       
       setTopCoins(sortedTokens);
       setTopCoinsCache(prev => ({ ...prev, [cacheKey]: sortedTokens }));
       setLastTopCoinsFetch(now);
       
+      return sortedTokens;
+      
     } catch (error) {
-      console.error('Error fetching Celo top coins:', error);
-      if (topCoins.length === 0) {
-        setTopCoins([]);
-      }
+      console.error('Error fetching Celo tokens:', error);
+      return topCoins || [];
     } finally {
       setTopCoinsLoading(false);
     }
   };
 
-  // Get all tokens from all supported networks
+  // Fetch additional important tokens that might not be in API
+  const fetchAdditionalTokens = async (address) => {
+    console.log('🔄 Fetching additional important tokens for address:', address);
+    
+    const additionalTokens = [];
+    
+    // Focus on Base network tokens first (most important)
+    const baseTokens = [
+      { symbol: 'ETH', address: '0x0000000000000000000000000000000000000000', decimals: 18, isNative: true, network: 'Base', networkKey: 'base', chainId: '0x2105' },
+      { symbol: 'USDC', address: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', decimals: 6, network: 'Base', networkKey: 'base', chainId: '0x2105' },
+      { symbol: 'USDT', address: '0xfde4c96c8593536e31f229ea8f37b2ada2699bb2', decimals: 6, network: 'Base', networkKey: 'base', chainId: '0x2105' },
+      { symbol: 'WETH', address: '0x4200000000000000000000000000000000000006', decimals: 18, network: 'Base', networkKey: 'base', chainId: '0x2105' }
+    ];
+    
+    // Celo network tokens 
+    const celoTokens = [
+      { symbol: 'CELO', address: '0x0000000000000000000000000000000000000000', decimals: 18, isNative: true, network: 'Celo', networkKey: 'celo', chainId: '0xa4ec' },
+      { symbol: 'USDC', address: '0xceba60280fb0ecd9a5a2348c5a3b8f397cc1b1d4', decimals: 6, network: 'Celo', networkKey: 'celo', chainId: '0xa4ec' },
+    ];
+    
+    // All tokens to check (focus on Base and Celo for now)
+    const allTokensToCheck = [...baseTokens, ...celoTokens];
+    
+    // RPC URLs for different networks
+    const rpcUrls = {
+      'base': 'https://mainnet.base.org',
+      'celo': 'https://forno.celo.org'
+    };
+    
+    // Process tokens by network
+    for (const token of allTokensToCheck) {
+      try {
+        const rpcUrl = rpcUrls[token.networkKey];
+        if (!rpcUrl) {
+          console.log(`⚠️ No RPC URL for network: ${token.networkKey}`);
+          continue;
+        }
+        
+        console.log(`🔄 Fetching ${token.symbol} on ${token.network} (${token.networkKey})...`);
+        
+        await new Promise(resolve => setTimeout(resolve, 200)); // Rate limiting
+        
+        if (token.isNative) {
+          // Get native token balance
+          const balanceResponse = await fetch(rpcUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              jsonrpc: '2.0',
+              method: 'eth_getBalance',
+              params: [address, 'latest'],
+              id: 1
+            })
+          });
+          
+          const balanceData = await balanceResponse.json();
+          if (balanceData.result && balanceData.result !== '0x') {
+            const balance = parseInt(balanceData.result, 16) / Math.pow(10, token.decimals);
+            if (balance > 0.000001) {
+              const price = token.symbol === 'CELO' ? 0.5 : 3000; // CELO vs ETH price
+              const value = balance * price;
+              
+              if (value >= 0.50) { // Only add if value >= $0.50
+                const newToken = {
+                  symbol: token.symbol,
+                  address: token.address,
+                  balance: balance.toFixed(4),
+                  price: price,
+                  value: value.toFixed(2),
+                  network: token.network,
+                  networkKey: token.networkKey,
+                  chainId: token.chainId,
+                  isNative: true,
+                  decimals: token.decimals,
+                  logo: token.symbol === 'CELO' ? '/images/tokens/celo.jpg' : '/images/tokens/ethereum.png'
+                };
+                additionalTokens.push(newToken);
+                console.log(`✅ Added native token: ${token.symbol} - Balance: ${balance.toFixed(4)}, Value: $${value.toFixed(2)}, Network: ${token.network}`);
+              } else {
+                console.log(`⚠️ ${token.symbol} value too low: $${value.toFixed(2)} (balance: ${balance.toFixed(4)})`);
+              }
+            }
+          }
+        } else {
+          // Get ERC20 token balance
+          const balanceResponse = await fetch(rpcUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              jsonrpc: '2.0',
+              method: 'eth_call',
+              params: [{
+                to: token.address,
+                data: `0x70a08231${address.slice(2).padStart(64, '0')}`
+              }, 'latest'],
+              id: 1
+            })
+          });
+          
+          const balanceData = await balanceResponse.json();
+          if (balanceData.result && balanceData.result !== '0x') {
+            const balance = parseInt(balanceData.result, 16) / Math.pow(10, token.decimals);
+            if (balance > 0.000001) {
+              const price = token.symbol === 'USDC' || token.symbol === 'USDT' ? 1 : 3000; // Default prices
+              const value = balance * price;
+              
+              if (value >= 0.50) { // Only add if value >= $0.50
+                const newToken = {
+                  symbol: token.symbol,
+                  address: token.address,
+                  balance: balance.toFixed(4),
+                  price: price,
+                  value: value.toFixed(2),
+                  network: token.network,
+                  networkKey: token.networkKey,
+                  chainId: token.chainId,
+                  isNative: false,
+                  decimals: token.decimals,
+                  logo: token.symbol === 'USDC' ? '/images/tokens/usdc.png' : 
+                        token.symbol === 'USDT' ? '/images/tokens/usdt.jpeg' :
+                        token.symbol === 'WETH' ? '/images/tokens/ethereum.png' : '/images/tokens/ethereum.png'
+                };
+                additionalTokens.push(newToken);
+                console.log(`✅ Added ERC20 token: ${token.symbol} - Balance: ${balance.toFixed(4)}, Value: $${value.toFixed(2)}, Network: ${token.network}`);
+              } else {
+                console.log(`⚠️ ${token.symbol} value too low: $${value.toFixed(2)} (balance: ${balance.toFixed(4)})`);
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.error(`Error fetching ${token.symbol} balance from ${token.network}:`, error);
+      }
+    }
+    
+    console.log('🔄 Additional tokens fetched:', additionalTokens);
+    console.log('🔄 Total additional tokens count:', additionalTokens.length);
+    return additionalTokens;
+  };
+
   const getAllTokens = async (address, forceRefresh = false) => {
     console.log('🔍 getAllTokens called with:', { address, forceRefresh });
-    console.log('🔍 Call stack:', new Error().stack.split('\n').slice(1, 4).join('\n'));
     
     if (!address) {
       console.log('❌ No address provided to getAllTokens');
@@ -1147,341 +898,132 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
       return topCoins || [];
     }
     
-    // RPC rate limiting - prevent calls within 10 seconds of each other
-    const timeSinceLastRpc = now - (lastRpcCall || 0);
-    if (timeSinceLastRpc < 10000) { // 10 seconds
-      console.log('⏳ RPC rate limit active, please wait...', Math.ceil((10000 - timeSinceLastRpc) / 1000), 'seconds remaining');
-      return topCoins || [];
-    }
-    
     try {
       setTopCoinsLoading(true);
-      setLastRpcCall(now);
-      console.log('🚀 Starting to fetch all tokens for address:', address);
+      console.log('🚀 Fetching tokens from API for address:', address);
       
-      // Define all supported networks and their tokens
-      const networkTokens = {
-        base: {
-          name: 'Base',
-          rpcUrl: process.env.NEXT_PUBLIC_BASE_RPC_URL || 'https://mainnet.base.org',
-          chainId: '0x2105',
-          tokens: [
-            { symbol: 'ETH', address: '0x0000000000000000000000000000000000000000', decimals: 18, isNative: true },
-            { symbol: 'USDC', address: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', decimals: 6 },
-            { symbol: 'USDT', address: '0xfde4c96c8593536e31f229ea8f37b2ada2699bb2', decimals: 6 },
-            { symbol: 'WETH', address: '0x4200000000000000000000000000000000000006', decimals: 18 },
-            { symbol: 'DEGEN', address: '0x4ed4E862860beD51a9570b96d89aF5E1B0Efefed', decimals: 18 },
-            { symbol: 'BETR', address: '0xaD4Dc4712523B0180da5139Ad11C3FDDc6d7Cf06', decimals: 18 },
-            { symbol: 'NOICE', address: '0x9cb41fd9dc6891bae8187029461bfaadf6cc0c69', decimals: 18 },
-            { symbol: 'TIPN', address: '0x5ba8d32579a4497c12d327289a103c3ad5b64eb1', decimals: 18 },
-            { symbol: 'EGGS', address: '0x712f43b21cf3e1b189c27678c0f551c08c01d150', decimals: 18 },
-            { symbol: 'USDGLO', address: '0x4f604735c1cf31399c6e711d5962b2b3e0225ad3', decimals: 18 },
-            { symbol: 'QR', address: '0x2b5050f01d64fbb3e4ac44dc07f0732bfb5ecadf', decimals: 18 }
-          ]
-        },
-        celo: {
-          name: 'Celo',
-          rpcUrl: process.env.NEXT_PUBLIC_CELO_RPC_URL || 'https://forno.celo.org',
-          chainId: '0xa4ec',
-          tokens: [
-            { symbol: 'CELO', address: '0x0000000000000000000000000000000000000000', decimals: 18, isNative: true },
-            { symbol: 'USDC', address: '0x765DE816845861e75A25fCA122bb6898B8B1282a', decimals: 6 },
-            { symbol: 'WETH', address: '0x122013fd7dF1C6F636a5bb8f03108E876548b455', decimals: 18 }
-          ]
-        },
-        optimism: {
-          name: 'Optimism',
-          rpcUrl: process.env.NEXT_PUBLIC_OPTIMISM_RPC_URL || 'https://mainnet.optimism.io',
-          chainId: '0xa',
-          tokens: [
-            { symbol: 'ETH', address: '0x0000000000000000000000000000000000000000', decimals: 18, isNative: true },
-            { symbol: 'WETH', address: '0x4200000000000000000000000000000000000006', decimals: 18 },
-            { symbol: 'USDC', address: '0x7F5c764cBc14f9669B88837ca1490cCa17c31607', decimals: 6 },
-            { symbol: 'OP', address: '0x4200000000000000000000000000000000000042', decimals: 18 }
-          ]
-        },
-        arbitrum: {
-          name: 'Arbitrum',
-          rpcUrl: process.env.NEXT_PUBLIC_ARBITRUM_RPC_URL || 'https://arb1.arbitrum.io/rpc',
-          chainId: '0xa4b1',
-          tokens: [
-            { symbol: 'ETH', address: '0x0000000000000000000000000000000000000000', decimals: 18, isNative: true },
-            { symbol: 'WETH', address: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1', decimals: 18 },
-            { symbol: 'ARB', address: '0x912CE59144191C1204E64559FE8253a0e49E6548', decimals: 18 }
-          ]
-        }
-      };
+      const response = await fetch(`/api/wallet/tokens?address=${address}`);
       
-      // Get token prices from CoinGecko API
-      let tokenPrices = {};
-      try {
-        await new Promise(resolve => setTimeout(resolve, 100));
+      if (!response.ok) {
+        throw new Error(`Proxy API error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log('✅ Proxy API response:', data);
+      
+      if (!data.success || !data.tokens) {
+        throw new Error('Invalid API response');
+      }
+      
+      // Transform data to app's format
+      const transformedTokens = data.tokens.map(token => {
+        // Calculate price per token (worth / balance)
+        const price = token.balance > 0 ? parseFloat(token.worth) / parseFloat(token.balance) : 0;
         
-        const priceResponse = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum,usd-coin,tether,degen-token,betr,noice,tipn,celo,optimism,arbitrum&vs_currencies=usd');
-        if (priceResponse.ok) {
-          const priceData = await priceResponse.json();
-          
-          // Debug logging for price data
-          console.log('🔍 CoinGecko Price Response:', priceData);
-          console.log('🔍 DEGEN Price Data:', {
-            raw: priceData['degen-token'],
-            usd: priceData['degen-token']?.usd,
-            fallback: 0.004144
-          });
-          
-          // Debug: Show all available price data
-          console.log('🔍 All Available Token Prices:', Object.keys(priceData).map(key => ({
-            key,
-            usd: priceData[key]?.usd
-          })));
-          
-          // Check if DEGEN price is valid, if not use current market price
-          let degenPrice = priceData['degen-token']?.usd;
-          if (!degenPrice || degenPrice < 0.001) {
-            console.warn('⚠️ DEGEN price from CoinGecko is invalid or too low, using current market price');
-            degenPrice = 0.004144; // Current DEGEN price as of now
-          }
-          
-          tokenPrices = {
-            'ETH': priceData.ethereum?.usd || 3000,
-            'WETH': priceData.ethereum?.usd || 3000,
-            'USDC': priceData['usd-coin']?.usd || 1,
-            'USDT': priceData.tether?.usd || 1,
-            'CELO': priceData.celo?.usd || 0.5,
-            'DEGEN': degenPrice,
-            'BETR': priceData.betr?.usd || 0.01,
-            'NOICE': priceData.noice?.usd || 0.01,
-            'TIPN': priceData.tipn?.usd || 0.01,
-            'OP': priceData.optimism?.usd || 2.5,
-            'ARB': priceData.arbitrum?.usd || 1.5
-          };
-          
-          // Debug: Show final tokenPrices object
-          console.log('🔍 Final Token Prices Object:', tokenPrices);
-          console.log('🔍 DEGEN Final Price:', tokenPrices.DEGEN);
-        } else if (priceResponse.status === 429) {
-          console.warn('CoinGecko rate limit hit, using fallback prices');
-          throw new Error('Rate limit exceeded');
+        // Determine if it's a native token (ETH)
+        const isNative = token.address === '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee' || 
+                        token.symbol === 'ETH';
+        
+        // Determine network key based on chainId - handle both string and number
+        let networkKey = 'base'; // default
+        const chainIdNum = parseInt(token.chainId);
+        console.log('🔍 Token chainId:', token.chainId, 'parsed:', chainIdNum);
+        
+        switch (chainIdNum) {
+          case 8453:
+            networkKey = 'base';
+            break;
+          case 1:
+            networkKey = 'ethereum';
+            break;
+          case 42220:
+            networkKey = 'celo';
+            break;
+          case 10:
+            networkKey = 'optimism';
+            break;
+          case 42161:
+            networkKey = 'arbitrum';
+            break;
+          case 137:
+            networkKey = 'polygon';
+            break;
+          default:
+            networkKey = 'base'; // fallback
         }
-      } catch (error) {
-        console.warn('Failed to fetch token prices, using fallback prices:', error);
-        // Fallback prices
-        tokenPrices = {
-          'ETH': 3000, 'WETH': 3000, 'USDC': 1, 'USDT': 1, 'CELO': 0.5, 'DEGEN': 0.004144, 
-          'BETR': 0.01, 'NOICE': 0.01, 'TIPN': 0.01, 'OP': 2.5, 'ARB': 1.5
+        
+        console.log('🔍 Mapped networkKey:', networkKey, 'for chainId:', token.chainId);
+        
+        return {
+          symbol: token.symbol.toUpperCase(),
+          address: token.address,
+          balance: token.balance.toString(),
+          price: price,
+          value: parseFloat(token.worth).toFixed(2),
+          network: token.chainName, // Use actual chain name from API
+          networkKey: networkKey,
+          chainId: token.chainId.toString(),
+          isNative: isNative,
+          decimals: token.decimals,
+          logo: token.logo,
+          safe: token.safe
         };
-      }
-      
-      const allTokenBalances = [];
-      
-      // Fetch balances for each network
-      for (const [networkKey, network] of Object.entries(networkTokens)) {
-        try {
-          console.log(`Fetching ${network.name} tokens...`);
-          console.log(`📋 ${network.name} token list:`, network.tokens.map(t => `${t.symbol} (${t.address})`));
-          
-          // Get native token balance
-          if (network.tokens.find(t => t.isNative)) {
-            try {
-              const nativeToken = network.tokens.find(t => t.isNative);
-              const balanceResponse = await fetch(network.rpcUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  jsonrpc: '2.0',
-                  method: 'eth_getBalance',
-                  params: [address, 'latest'],
-                  id: 1
-                })
-              });
-              
-              const balanceData = await balanceResponse.json();
-              if (balanceData.result && balanceData.result !== '0x') {
-                const balance = parseInt(balanceData.result, 16) / Math.pow(10, nativeToken.decimals);
-                if (balance > 0.000001) {
-                  const price = tokenPrices[nativeToken.symbol] || 1;
-                  const value = balance * price;
-                  
-                  // Debug logging for native tokens
-                  console.log(`✅ ${nativeToken.symbol} on ${network.name} (native):`, {
-                    balance: balance.toFixed(8),
-                    price: price,
-                    value: value.toFixed(6),
-                    finalValue: value.toFixed(2)
-                  });
-                  
-                  allTokenBalances.push({
-                    symbol: nativeToken.symbol,
-                    address: nativeToken.address,
-                    balance: balance.toFixed(4),
-                    price: price,
-                    value: value.toFixed(2),
-                    network: network.name,
-                    networkKey: networkKey,
-                    chainId: network.chainId,
-                    isNative: true
-                  });
-                } else {
-                  console.log(`❌ ${nativeToken.symbol} on ${network.name} (native) balance too low:`, balance);
-                }
-              }
-            } catch (error) {
-              console.error(`Error fetching ${network.name} native balance:`, error);
-            }
-          }
-          
-          // Get ERC20 token balances
-          for (const token of network.tokens.filter(t => !t.isNative)) {
-            try {
-              await new Promise(resolve => setTimeout(resolve, 200)); // Rate limiting
-              
-              const balanceResponse = await fetch(network.rpcUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  jsonrpc: '2.0',
-                  method: 'eth_call',
-                  params: [{
-                    to: token.address,
-                    data: `0x70a08231${address.slice(2).padStart(64, '0')}`
-                  }, 'latest'],
-                  id: 1
-                })
-              });
-              
-              if (!balanceResponse.ok) {
-                if (balanceResponse.status === 429) {
-                  console.warn(`Rate limit hit for ${network.name} ${token.symbol}, skipping remaining tokens`);
-                  break;
-                }
-                continue;
-              }
-              
-              const balanceData = await balanceResponse.json();
-              if (balanceData.error) continue;
-              
-              // Debug: Show RPC response for DEGEN
-              if (token.symbol === 'DEGEN') {
-                console.log('�� DEGEN RPC Response:', {
-                  response: balanceData,
-                  hasResult: !!balanceData.result,
-                  resultValue: balanceData.result,
-                  isZero: balanceData.result === '0x',
-                  network: network.name,
-                  address: token.address
-                });
-              }
-              
-              if (balanceData.result && balanceData.result !== '0x') {
-                const balance = parseInt(balanceData.result, 16) / Math.pow(10, token.decimals);
-                
-                // Debug logging for DEGEN
-                if (token.symbol === 'DEGEN') {
-                  console.log('🔍 DEGEN Debug:', {
-                    rawResult: balanceData.result,
-                    parsedBalance: balance,
-                    decimals: token.decimals,
-                    address: token.address,
-                    network: network.name
-                  });
-                }
-                
-                if (balance > 0.000001) {
-                  const price = tokenPrices[token.symbol] || 1;
-                  const value = balance * price;
-                  
-                  // Debug logging for DEGEN value calculation
-                  if (token.symbol === 'DEGEN') {
-                    console.log('💰 DEGEN Value Calculation:', {
-                      balance,
-                      price,
-                      calculatedValue: value,
-                      finalValue: value.toFixed(2),
-                      tokenPrices: tokenPrices,
-                      symbol: token.symbol,
-                      priceFromTokenPrices: tokenPrices[token.symbol]
-                    });
-                  }
-                  
-                  // Debug logging for all tokens
-                  console.log(`✅ ${token.symbol} on ${network.name}:`, {
-                    balance: balance.toFixed(8),
-                    price: price,
-                    value: value.toFixed(6),
-                    finalValue: value.toFixed(2)
-                  });
-                  
-                  allTokenBalances.push({
-                    symbol: token.symbol,
-                    address: token.address,
-                    balance: balance.toFixed(4),
-                    price: price,
-                    value: value.toFixed(2),
-                    network: network.name,
-                    networkKey: networkKey,
-                    chainId: network.chainId,
-                    isNative: false
-                  });
-                  
-                  // Debug: Show DEGEN token when added
-                  if (token.symbol === 'DEGEN') {
-                    console.log('✅ DEGEN Token Added to Balances:', {
-                      symbol: token.symbol,
-                      balance: balance.toFixed(4),
-                      price: price,
-                      value: value.toFixed(2),
-                      network: network.name,
-                      networkKey: networkKey,
-                      chainId: network.chainId
-                    });
-                  }
-                } else {
-                  console.log(`❌ ${token.symbol} on ${network.name} balance too low:`, balance);
-                }
-              } else if (token.symbol === 'DEGEN') {
-                console.log('❌ DEGEN balance result is invalid:', balanceData.result);
-              }
-            } catch (error) {
-              console.error(`Error fetching ${network.name} ${token.symbol} balance:`, error);
-            }
-          }
-          
-        } catch (error) {
-          console.error(`Error processing ${network.name}:`, error);
-        }
-      }
-      
-      // Sort by $ value (highest first)
-      const sortedTokens = allTokenBalances.sort((a, b) => parseFloat(b.value) - parseFloat(a.value));
-      
-      console.log('All tokens by value:', sortedTokens);
-      
-      // Debug: Check if DEGEN is in the results
-      const degenToken = sortedTokens.find(t => t.symbol === 'DEGEN');
-      if (degenToken) {
-        console.log('✅ DEGEN found in results:', degenToken);
-      } else {
-        console.log('❌ DEGEN NOT found in results. All tokens:', sortedTokens.map(t => `${t.symbol}: ${t.balance} @ $${t.price} = $${t.value}`));
-      }
-      
-      // Debug: Show all tokens processed
-      console.log('🔍 All tokens processed:', {
-        totalTokens: allTokenBalances.length,
-        tokensByNetwork: Object.fromEntries(
-          Object.entries(networkTokens).map(([key, network]) => [
-            key, 
-            network.tokens.map(t => t.symbol)
-          ])
-        ),
-        finalResults: sortedTokens.map(t => ({
-          symbol: t.symbol,
-          network: t.network,
-          balance: t.balance,
-          price: t.price,
-          value: t.value
-        }))
+      }).filter(token => {
+        // Filter out tokens with value under $0.50
+        const value = parseFloat(token.value);
+        return value >= 0.50;
       });
       
+      // Fetch additional important tokens that might not be in API
+      console.log('🔄 Fetching additional tokens...');
+      const additionalTokens = await fetchAdditionalTokens(address);
+      
+      // Combine fetched tokens with additional tokens
+      const allTokens = [...transformedTokens, ...additionalTokens];
+      console.log('🔍 Combined tokens count:', allTokens.length);
+      console.log('🔍 Fetched tokens:', transformedTokens.length, 'Additional tokens:', additionalTokens.length);
+      
+      // Remove duplicates based on address
+      const uniqueTokens = allTokens.reduce((acc, token) => {
+        const existing = acc.find(t => t.address.toLowerCase() === token.address.toLowerCase());
+        if (!existing) {
+          acc.push(token);
+        } else if (parseFloat(token.value) > parseFloat(existing.value)) {
+          // Keep the token with higher value
+          const index = acc.indexOf(existing);
+          acc[index] = token;
+        }
+        return acc;
+      }, []);
+      
+      console.log('🔍 Unique tokens after deduplication:', uniqueTokens.length);
+      
+      // Sort by $ value (highest first)
+      const sortedTokens = uniqueTokens.sort((a, b) => parseFloat(b.value) - parseFloat(a.value));
+      
+      console.log('🎯 All tokens:', sortedTokens);
+      
+      // Debug each token's network info
+      sortedTokens.forEach((token, index) => {
+        console.log(`🔍 Token ${index + 1}: ${token.symbol} - Network: ${token.network}, NetworkKey: ${token.networkKey}, ChainId: ${token.chainId}`);
+      });
+      
+      // Debug: Check for specific tokens
+      const qrToken = sortedTokens.find(t => t.symbol === 'QR');
+      const eggsToken = sortedTokens.find(t => t.symbol === 'EGGS');
+      const usdgloToken = sortedTokens.find(t => t.symbol === 'USDGLO');
+      
+      if (qrToken) {
+        console.log('✅ QR token found:', qrToken);
+      }
+      if (eggsToken) {
+        console.log('✅ EGGS token found:', eggsToken);
+      }
+      if (usdgloToken) {
+        console.log('✅ USDGLO token found:', usdgloToken);
+      }
+      
+      // Update state
       setTopCoins(sortedTokens);
       setTopCoinsCache(prev => ({ ...prev, [cacheKey]: sortedTokens }));
       setLastTopCoinsFetch(now);
@@ -1489,8 +1031,134 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
       return sortedTokens;
       
     } catch (error) {
-      console.error('Error fetching all tokens:', error);
-      return topCoins || [];
+      console.error('❌ Proxy API error:', error);
+      console.log('🔄 Falling back to RPC system...');
+      
+      // Fallback to RPC system if proxy API fails
+      return await getAllTokensRPC(address, forceRefresh);
+      
+    } finally {
+      setTopCoinsLoading(false);
+    }
+  };
+
+  // Fallback RPC-based token fetching (keep as backup)
+  const getAllTokensRPC = async (address, forceRefresh = false) => {
+    console.log('🔄 Using RPC fallback for address:', address);
+    
+    try {
+      setTopCoinsLoading(true);
+      
+      // Simplified RPC fetching for Base network only
+      const baseTokens = [
+        { symbol: 'ETH', address: '0x0000000000000000000000000000000000000000', decimals: 18, isNative: true },
+        { symbol: 'USDC', address: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', decimals: 6 },
+        { symbol: 'USDT', address: '0xfde4c96c8593536e31f229ea8f37b2ada2699bb2', decimals: 6 },
+        { symbol: 'WETH', address: '0x4200000000000000000000000000000000000006', decimals: 18 },
+        { symbol: 'DEGEN', address: '0x4ed4E862860beD51a9570b96d89aF5E1B0Efefed', decimals: 18 },
+        { symbol: 'BETR', address: '0xaD4Dc4712523B0180da5139Ad11C3FDDc6d7Cf06', decimals: 18 },
+        { symbol: 'NOICE', address: '0x9cb41fd9dc6891bae8187029461bfaadf6cc0c69', decimals: 18 },
+        { symbol: 'TIPN', address: '0x5ba8d32579a4497c12d327289a103c3ad5b64eb1', decimals: 18 },
+        { symbol: 'EGGS', address: '0x712f43b21cf3e1b189c27678c0f551c08c01d150', decimals: 18 },
+        { symbol: 'USDGLO', address: '0x4f604735c1cf31399c6e711d5962b2b3e0225ad3', decimals: 18 },
+        { symbol: 'QR', address: '0x2b5050f01d64fbb3e4ac44dc07f0732bfb5ecadf', decimals: 18 }
+      ];
+      
+      const rpcUrl = 'https://mainnet.base.org';
+      const allTokenBalances = [];
+      
+      // Get native ETH balance
+      try {
+        const balanceResponse = await fetch(rpcUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            method: 'eth_getBalance',
+            params: [address, 'latest'],
+            id: 1
+          })
+        });
+        
+        const balanceData = await balanceResponse.json();
+        if (balanceData.result && balanceData.result !== '0x') {
+          const balance = parseInt(balanceData.result, 16) / Math.pow(10, 18);
+          if (balance > 0.000001) {
+            allTokenBalances.push({
+              symbol: 'ETH',
+              address: '0x0000000000000000000000000000000000000000',
+              balance: balance.toFixed(4),
+              price: 3000, // Fallback price
+              value: (balance * 3000).toFixed(2),
+              network: 'Base',
+              networkKey: 'base',
+              chainId: '0x2105',
+              isNative: true
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching ETH balance:', error);
+      }
+      
+      // Get ERC20 token balances (simplified - just a few key tokens)
+      const keyTokens = baseTokens.filter(t => !t.isNative).slice(0, 5); // Limit to 5 tokens to avoid rate limits
+      
+      for (const token of keyTokens) {
+        try {
+          await new Promise(resolve => setTimeout(resolve, 500)); // Rate limiting
+          
+          const balanceResponse = await fetch(rpcUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              jsonrpc: '2.0',
+              method: 'eth_call',
+              params: [{
+                to: token.address,
+                data: `0x70a08231${address.slice(2).padStart(64, '0')}`
+              }, 'latest'],
+              id: 1
+            })
+          });
+          
+          const balanceData = await balanceResponse.json();
+          if (balanceData.result && balanceData.result !== '0x') {
+            const balance = parseInt(balanceData.result, 16) / Math.pow(10, token.decimals);
+            if (balance > 0.000001) {
+              const price = 1; // Fallback price
+              allTokenBalances.push({
+                symbol: token.symbol,
+                address: token.address,
+                balance: balance.toFixed(4),
+                price: price,
+                value: (balance * price).toFixed(2),
+                network: 'Base',
+                networkKey: 'base',
+                chainId: '0x2105',
+                isNative: false
+              });
+            }
+          }
+        } catch (error) {
+          console.error(`Error fetching ${token.symbol} balance:`, error);
+        }
+      }
+      
+      // Filter out tokens with value under $0.50
+      const filteredTokens = allTokenBalances.filter(token => {
+        const value = parseFloat(token.value);
+        return value >= 0.50;
+      });
+      
+      const sortedTokens = filteredTokens.sort((a, b) => parseFloat(b.value) - parseFloat(a.value));
+      console.log('🔄 RPC fallback results:', sortedTokens);
+      
+      return sortedTokens;
+      
+    } catch (error) {
+      console.error('Error in RPC fallback:', error);
+      return [];
     } finally {
       setTopCoinsLoading(false);
     }
@@ -1510,6 +1178,7 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
     getTopCoinsCelo,
     getAllTokens,
     miniApp, setMiniApp,
+    isMiniApp, setIsMiniApp,
     fid, setFid,
     points, setPoints,
     ecoData, setEcoData,
@@ -1520,16 +1189,16 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
     eligibility, setEligibility,
     showLogout, setShowLogout,
     showLogin, setShowLogin,
-    prevPoints, setPrevPoints,
     showActions, setShowActions,
-    userProfile, setUserProfile,
     populate, setPopulate,
-    isMiniApp, setIsMiniApp,
-    userInfo, setUserInfo,
+    userProfile, setUserProfile,
+    prevPoints, setPrevPoints,
+    sched, setSched,
     panelOpen, setPanelOpen,
     panelTarget, setPanelTarget,
     adminTest, setAdminTest,
     navMenu, setNavMenu,
+    // Wallet integration
     walletConnected, setWalletConnected,
     walletAddress, setWalletAddress,
     walletChainId, setWalletChainId,
@@ -1540,16 +1209,18 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
     topCoinsLoading, setTopCoinsLoading,
     lastTopCoinsFetch, setLastTopCoinsFetch,
     topCoinsCache, setTopCoinsCache,
-    lastRpcCall, setLastRpcCall
+    lastRpcCall, setLastRpcCall,
+    wagmiStatus, setWagmiStatus,
+    userInfo, setUserInfo
   };
 
   return (
-    <AccountContext.Provider value={contextValue}>
+    <QueryClientProvider client={queryClient}>
       <WagmiProvider config={wagmiConfig}>
-        <QueryClientProvider client={queryClient}>
+        <AccountContext.Provider value={contextValue}>
           {children}
-        </QueryClientProvider>
+        </AccountContext.Provider>
       </WagmiProvider>
-    </AccountContext.Provider>
+    </QueryClientProvider>
   );
 };

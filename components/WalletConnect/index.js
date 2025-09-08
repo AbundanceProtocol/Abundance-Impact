@@ -74,7 +74,14 @@ export default function WalletConnect({ onTipAmountChange, onTokenChange }) {
   };
 
   // Helper functions for token display
-  const getTokenImage = (symbol) => {
+  const getTokenImage = (token) => {
+    // Use logo from API if available
+    if (token.logo && token.logo !== null) {
+      console.log('🔍 Using API logo for', token.symbol, ':', token.logo);
+      return token.logo;
+    }
+    
+    // Fallback to local images
     const tokenImages = {
       'ETH': '/images/tokens/ethereum.png',
       'WETH': '/images/tokens/ethereum.png',
@@ -82,19 +89,28 @@ export default function WalletConnect({ onTipAmountChange, onTokenChange }) {
       'USDT': '/images/tokens/usdt.jpeg',
       'CELO': '/images/tokens/celo.jpg',
       'DEGEN': '/images/tokens/degen.png',
-      'BETR': '/images/tokens/betr.png', // Fallback to ethereum for now
+      'BETR': '/images/tokens/betr.png',
       'NOICE': '/images/tokens/noice.jpg',
       'TIPN': '/images/tokens/tipn.png',
       'EGGS': '/images/tokens/eggs.png',
       'USDGLO': '/images/tokens/usdglo.png',
       'QR': '/images/tokens/qr.png',
-      'OP': '/images/tokens/optimism.png', // Use optimism image for OP token
-      'ARB': '/images/tokens/ethereum.png' // Fallback to ethereum for now
+      'OP': '/images/tokens/optimism.png',
+      'ARB': '/images/tokens/ethereum.png'
     };
-    return tokenImages[symbol] || '/images/tokens/ethereum.png'; // Default fallback
+    
+    const fallbackImage = tokenImages[token.symbol] || '/images/tokens/ethereum.png';
+    console.log('🔍 Using fallback image for', token.symbol, ':', fallbackImage, '(logo was:', token.logo, ')');
+    return fallbackImage;
   };
 
   const getNetworkImage = (chainId) => {
+    // Convert chainId to hex format if it's in decimal
+    let hexChainId = chainId;
+    if (typeof chainId === 'number' || (typeof chainId === 'string' && !chainId.startsWith('0x'))) {
+      hexChainId = '0x' + parseInt(chainId).toString(16);
+    }
+    
     const networkImages = {
       '0x1': '/images/tokens/ethereum.png',      // Ethereum
       '0xa': '/images/tokens/optimism.png',      // Optimism
@@ -102,7 +118,9 @@ export default function WalletConnect({ onTipAmountChange, onTokenChange }) {
       '0x2105': '/images/tokens/base.png',      // Base
       '0xa4ec': '/images/tokens/celo.jpg'       // Celo
     };
-    return networkImages[chainId] || '/images/tokens/ethereum.png'; // Default fallback
+    
+    console.log('🔍 getNetworkImage:', { original: chainId, hex: hexChainId, result: networkImages[hexChainId] });
+    return networkImages[hexChainId] || '/images/tokens/ethereum.png'; // Default fallback
   };
 
   const getTokenColor = (symbol) => {
@@ -560,7 +578,7 @@ export default function WalletConnect({ onTipAmountChange, onTokenChange }) {
                                   boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
                                 }}>
                                   <img 
-                                    src={getTokenImage(token.symbol)} 
+                                    src={getTokenImage(token)} 
                                     alt={token.symbol} 
                                     style={{ 
                                       width: '100%', 
@@ -1007,7 +1025,7 @@ export default function WalletConnect({ onTipAmountChange, onTokenChange }) {
                                 boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
                               }}>
                                 <img 
-                                  src={getTokenImage(coin.symbol)} 
+                                  src={getTokenImage(coin)} 
                                   alt={coin.symbol} 
                                   style={{ 
                                     width: '100%', 
