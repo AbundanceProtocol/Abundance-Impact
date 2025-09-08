@@ -82,7 +82,7 @@ export default function WalletConnect({ onTipAmountChange, onTokenChange }) {
       'USDT': '/images/tokens/usdt.jpeg',
       'CELO': '/images/tokens/celo.jpg',
       'DEGEN': '/images/tokens/degen.png',
-      'BETR': '/images/tokens/ethereum.png', // Fallback to ethereum for now
+      'BETR': '/images/tokens/betr.png', // Fallback to ethereum for now
       'NOICE': '/images/tokens/noice.jpg',
       'TIPN': '/images/tokens/tipn.png',
       'EGGS': '/images/tokens/eggs.png',

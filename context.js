@@ -704,9 +704,12 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
         { symbol: 'USDC', address: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', decimals: 6 },
         { symbol: 'USDT', address: '0xfde4c96c8593536e31f229ea8f37b2ada2699bb2', decimals: 6 },
         { symbol: 'DEGEN', address: '0x4ed4E862860beD51a9570b96d89aF5E1B0Efefed', decimals: 18 },
-        { symbol: 'BETR', address: '0x1F32b1c2345538c0c6f582fCB0223cA264d87105', decimals: 18 },
+        { symbol: 'BETR', address: '0xaD4Dc4712523B0180da5139Ad11C3FDDc6d7Cf06', decimals: 18 },
         { symbol: 'NOICE', address: '0x9cb41fd9dc6891bae8187029461bfaadf6cc0c69', decimals: 18 },
-        { symbol: 'TIPN', address: '0x5ba8d32579a4497c12d327289a103c3ad5b64eb1', decimals: 18 }
+        { symbol: 'TIPN', address: '0x5ba8d32579a4497c12d327289a103c3ad5b64eb1', decimals: 18 },
+        { symbol: 'EGGS', address: '0x712f43b21cf3e1b189c27678c0f551c08c01d150', decimals: 18 },
+        { symbol: 'USDGLO', address: '0x4f604735c1cf31399c6e711d5962b2b3e0225ad3', decimals: 18 },
+        { symbol: 'QR', address: '0x2b5050f01d64fbb3e4ac44dc07f0732bfb5ecadf', decimals: 18 }
       ];
 
       // Get token prices from CoinGecko API (free tier) first
@@ -1095,7 +1098,7 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
             { symbol: 'USDT', address: '0xfde4c96c8593536e31f229ea8f37b2ada2699bb2', decimals: 6 },
             { symbol: 'WETH', address: '0x4200000000000000000000000000000000000006', decimals: 18 },
             { symbol: 'DEGEN', address: '0x4ed4E862860beD51a9570b96d89aF5E1B0Efefed', decimals: 18 },
-            { symbol: 'BETR', address: '0x763F4B31C8c86C56C802eB0fB3edd4C9d19e0eA8', decimals: 18 },
+            { symbol: 'BETR', address: '0xaD4Dc4712523B0180da5139Ad11C3FDDc6d7Cf06', decimals: 18 },
             { symbol: 'NOICE', address: '0x9cb41fd9dc6891bae8187029461bfaadf6cc0c69', decimals: 18 },
             { symbol: 'TIPN', address: '0x5ba8d32579a4497c12d327289a103c3ad5b64eb1', decimals: 18 },
             { symbol: 'EGGS', address: '0x712f43b21cf3e1b189c27678c0f551c08c01d150', decimals: 18 },
