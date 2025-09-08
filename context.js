@@ -735,11 +735,11 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
             'USDT': priceData.tether?.usd || 1,
             'DEGEN': degenPrice,
             'BETR': priceData.betr?.usd || 0.01,
-            'NOICE': priceData.noice?.usd || 0.01,
-            'TIPN': priceData.tipn?.usd || 0.01,
-            'EGGS': priceData.eggs?.usd || 0.01,
-            'USDGLO': priceData.usdglo?.usd || 0.01,
-            'QR': priceData.qr?.usd || 0.01
+            'NOICE': priceData.noice?.usd || 0.0003,
+            'TIPN': priceData.tipn?.usd || 0.0008,
+            'EGGS': priceData.eggs?.usd || 0.03,
+            'USDGLO': priceData.usdglo?.usd || 1,
+            'QR': priceData.qr?.usd || 0.00003
           };
         } else if (priceResponse.status === 429) {
           console.warn('CoinGecko rate limit hit, using fallback prices');
@@ -749,7 +749,7 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
         console.warn('Failed to fetch token prices, using fallback prices:', error);
         // Fallback prices with more accurate DEGEN price
         tokenPrices = {
-          'WETH': 3000, 'USDC': 1, 'USDT': 1, 'DEGEN': 0.004144, 'BETR': 0.01, 'NOICE': 0.01, 'TIPN': 0.01, 'EGGS': 0.01, 'USDGLO': 0.01, 'QR': 0.01
+          'WETH': 3000, 'USDC': 1, 'USDT': 1, 'DEGEN': 0.004144, 'BETR': 0.01, 'NOICE': 0.01, 'TIPN': 0.01, 'EGGS': 0.01, 'USDGLO': 1.00, 'QR': 0.01
         };
       }
 
@@ -796,7 +796,7 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
       for (const token of commonTokens) {
         try {
           // Add longer delay between requests to prevent overwhelming the RPC
-          await new Promise(resolve => setTimeout(resolve, 200)); // Increased from 50ms to 200ms
+          await new Promise(resolve => setTimeout(resolve, 500)); // Increased from 200ms to 500ms
           
           const balanceResponse = await fetch(baseRpcUrl, {
             method: 'POST',
@@ -814,8 +814,54 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
           
           if (!balanceResponse.ok) {
             if (balanceResponse.status === 429) {
-              console.warn(`Rate limit hit for ${token.symbol}, skipping remaining tokens`);
-              break; // Stop processing more tokens if we hit rate limit
+              console.warn(`Rate limit hit for ${token.symbol}, waiting 2 seconds before continuing...`);
+              await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds on rate limit
+              // Retry the request once
+              try {
+                const retryResponse = await fetch(baseRpcUrl, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    jsonrpc: '2.0',
+                    method: 'eth_call',
+                    params: [{
+                      to: token.address,
+                      data: `0x70a08231${address.slice(2).padStart(64, '0')}` // balanceOf(address)
+                    }, 'latest'],
+                    id: 1
+                  })
+                });
+                
+                if (retryResponse.ok) {
+                  const retryData = await retryResponse.json();
+                  if (retryData.result && retryData.result !== '0x') {
+                    const balance = parseInt(retryData.result, 16) / Math.pow(10, token.decimals);
+                    if (balance > 0) {
+                      const price = tokenPrices[token.symbol] || 1;
+                      const value = balance * price;
+                      
+                      tokenBalances.push({
+                        symbol: token.symbol,
+                        address: token.address,
+                        balance: balance.toFixed(4),
+                        price: price,
+                        value: value.toFixed(2),
+                        network: 'Base',
+                        networkKey: 'base',
+                        chainId: '0x2105'
+                      });
+                    }
+                  }
+                  // Add extra delay after successful retry to prevent hitting rate limit again
+                  await new Promise(resolve => setTimeout(resolve, 1000));
+                  continue; // Success, move to next token
+                }
+              } catch (retryError) {
+                console.warn(`Retry failed for ${token.symbol}:`, retryError);
+              }
+              
+              console.warn(`Rate limit persists for ${token.symbol}, skipping remaining tokens`);
+              break; // Stop processing more tokens if rate limit persists
             }
             console.warn(`Failed to fetch ${token.symbol} balance: HTTP ${balanceResponse.status}`);
             continue;
