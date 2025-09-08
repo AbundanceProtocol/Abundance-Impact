@@ -275,7 +275,7 @@ export default async function handler(req, res) {
                  {/* Show message if no icons */}
                  {!boost && !validator && !impact_boost && !autoFund && (
                    <div style={{display: 'flex', textAlign: 'center', color: '#ddeeffee', fontSize: '24px', margin: '0'}}>
-                     No badges yet
+                     Earn with Impact 2.0
                    </div>
                  )}
                </div>
