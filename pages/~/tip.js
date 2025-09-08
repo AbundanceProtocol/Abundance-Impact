@@ -340,6 +340,9 @@ export default function Tip({ curatorId }) {
       'BETR': 18,          // Available on Base
       'NOICE': 18,         // Available on Base
       'TIPN': 18,          // Available on Base
+      'EGGS': 18,          // Available on Base
+      'USDGLO': 18,        // Available on Base
+      'QR': 18,            // Available on Base
       'CELO': 18,          // Not on Base
     };
     
@@ -2872,8 +2875,8 @@ export default function Tip({ curatorId }) {
                               tipAmount,
                               walletChainId,
                               selectedToken: selectedToken?.symbol,
-                                      chainCheck: !['0x2105', '0xa4ec'].includes(walletChainId), // Base or Celo
-        shouldBeDisabled: isDispersing || !walletConnected || !tipAmount || !['0x2105', '0xa4ec'].includes(walletChainId)
+                                chainCheck: !['0x2105', '0xa4ec'].includes(walletChainId), // Base or Celo
+                            shouldBeDisabled: isDispersing || !walletConnected || !tipAmount || !['0x2105', '0xa4ec'].includes(walletChainId)
                             });
                             console.log('🔍 disperseTokens function:', typeof disperseTokens);
                             console.log('🔍 About to call disperseTokens...');
