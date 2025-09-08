@@ -114,6 +114,18 @@ export default function Rewards() {
     }
   }, []);
 
+  const getUserBalance = async (fid) => {
+    try {
+      const res = await fetch(`/api/user/getUserBalance?fid=${fid}`);
+      const data = await res.json();
+      console.log('data', data)
+      return {impact: data?.impact || 0, qdau: data?.qdau || 0};
+    } catch (error) {
+      console.error('Error getting user balance:', error);
+      return {impact: 0, qdau: 0};
+    }
+  };
+
   async function getCreatorRewards(fid) {
     try {
       const response = await axios.get("/api/fund/getCreatorRewards", {
