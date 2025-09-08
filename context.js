@@ -718,7 +718,7 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
         // Add delay to respect rate limits
         await new Promise(resolve => setTimeout(resolve, 100));
         
-        const priceResponse = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum,usd-coin,tether,degen-token,betr,noice,tipn&vs_currencies=usd');
+        const priceResponse = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum,usd-coin,tether,degen-token,betr,noice,tipn,eggs,usdglo,qr&vs_currencies=usd');
         if (priceResponse.ok) {
           const priceData = await priceResponse.json();
           
@@ -736,7 +736,10 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
             'DEGEN': degenPrice,
             'BETR': priceData.betr?.usd || 0.01,
             'NOICE': priceData.noice?.usd || 0.01,
-            'TIPN': priceData.tipn?.usd || 0.01
+            'TIPN': priceData.tipn?.usd || 0.01,
+            'EGGS': priceData.eggs?.usd || 0.01,
+            'USDGLO': priceData.usdglo?.usd || 0.01,
+            'QR': priceData.qr?.usd || 0.01
           };
         } else if (priceResponse.status === 429) {
           console.warn('CoinGecko rate limit hit, using fallback prices');
@@ -746,7 +749,7 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
         console.warn('Failed to fetch token prices, using fallback prices:', error);
         // Fallback prices with more accurate DEGEN price
         tokenPrices = {
-          'WETH': 3000, 'USDC': 1, 'USDT': 1, 'DEGEN': 0.004144, 'BETR': 0.01, 'NOICE': 0.01, 'TIPN': 0.01
+          'WETH': 3000, 'USDC': 1, 'USDT': 1, 'DEGEN': 0.004144, 'BETR': 0.01, 'NOICE': 0.01, 'TIPN': 0.01, 'EGGS': 0.01, 'USDGLO': 0.01, 'QR': 0.01
         };
       }
 
