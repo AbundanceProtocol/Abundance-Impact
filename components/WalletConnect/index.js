@@ -82,9 +82,12 @@ export default function WalletConnect({ onTipAmountChange, onTokenChange }) {
       'USDT': '/images/tokens/usdt.jpeg',
       'CELO': '/images/tokens/celo.jpg',
       'DEGEN': '/images/tokens/degen.png',
-      'BETR': '/images/tokens/ethereum.png', // Fallback to ethereum for now
+      'BETR': '/images/tokens/betr.png', // Fallback to ethereum for now
       'NOICE': '/images/tokens/noice.jpg',
       'TIPN': '/images/tokens/tipn.png',
+      'EGGS': '/images/tokens/eggs.png',
+      'USDGLO': '/images/tokens/usdglo.png',
+      'QR': '/images/tokens/qr.png',
       'OP': '/images/tokens/optimism.png', // Use optimism image for OP token
       'ARB': '/images/tokens/ethereum.png' // Fallback to ethereum for now
     };
@@ -113,6 +116,9 @@ export default function WalletConnect({ onTipAmountChange, onTokenChange }) {
       'BETR': '#e91e63',
       'NOICE': '#9c27b0',
       'TIPN': '#ff9800',
+      'EGGS': '#ccda6e',
+      'USDGLO': '#133d39',
+      'QR': '#ffffff',
       'OP': '#ff0420',
       'ARB': '#28a0f0'
     };

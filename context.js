@@ -704,9 +704,12 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
         { symbol: 'USDC', address: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', decimals: 6 },
         { symbol: 'USDT', address: '0xfde4c96c8593536e31f229ea8f37b2ada2699bb2', decimals: 6 },
         { symbol: 'DEGEN', address: '0x4ed4E862860beD51a9570b96d89aF5E1B0Efefed', decimals: 18 },
-        { symbol: 'BETR', address: '0x1F32b1c2345538c0c6f582fCB0223cA264d87105', decimals: 18 },
+        { symbol: 'BETR', address: '0xaD4Dc4712523B0180da5139Ad11C3FDDc6d7Cf06', decimals: 18 },
         { symbol: 'NOICE', address: '0x9cb41fd9dc6891bae8187029461bfaadf6cc0c69', decimals: 18 },
-        { symbol: 'TIPN', address: '0x5ba8d32579a4497c12d327289a103c3ad5b64eb1', decimals: 18 }
+        { symbol: 'TIPN', address: '0x5ba8d32579a4497c12d327289a103c3ad5b64eb1', decimals: 18 },
+        { symbol: 'EGGS', address: '0x712f43b21cf3e1b189c27678c0f551c08c01d150', decimals: 18 },
+        { symbol: 'USDGLO', address: '0x4f604735c1cf31399c6e711d5962b2b3e0225ad3', decimals: 18 },
+        { symbol: 'QR', address: '0x2b5050f01d64fbb3e4ac44dc07f0732bfb5ecadf', decimals: 18 }
       ];
 
       // Get token prices from CoinGecko API (free tier) first
@@ -715,7 +718,7 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
         // Add delay to respect rate limits
         await new Promise(resolve => setTimeout(resolve, 100));
         
-        const priceResponse = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum,usd-coin,tether,degen-token,betr,noice,tipn&vs_currencies=usd');
+        const priceResponse = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum,usd-coin,tether,degen-token,betr,noice,tipn,eggs,usdglo,qr&vs_currencies=usd');
         if (priceResponse.ok) {
           const priceData = await priceResponse.json();
           
@@ -732,8 +735,11 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
             'USDT': priceData.tether?.usd || 1,
             'DEGEN': degenPrice,
             'BETR': priceData.betr?.usd || 0.01,
-            'NOICE': priceData.noice?.usd || 0.01,
-            'TIPN': priceData.tipn?.usd || 0.01
+            'NOICE': priceData.noice?.usd || 0.0003,
+            'TIPN': priceData.tipn?.usd || 0.0008,
+            'EGGS': priceData.eggs?.usd || 0.03,
+            'USDGLO': priceData.usdglo?.usd || 1,
+            'QR': priceData.qr?.usd || 0.00003
           };
         } else if (priceResponse.status === 429) {
           console.warn('CoinGecko rate limit hit, using fallback prices');
@@ -743,7 +749,7 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
         console.warn('Failed to fetch token prices, using fallback prices:', error);
         // Fallback prices with more accurate DEGEN price
         tokenPrices = {
-          'WETH': 3000, 'USDC': 1, 'USDT': 1, 'DEGEN': 0.004144, 'BETR': 0.01, 'NOICE': 0.01, 'TIPN': 0.01
+          'WETH': 3000, 'USDC': 1, 'USDT': 1, 'DEGEN': 0.004144, 'BETR': 0.01, 'NOICE': 0.0003, 'TIPN': 0.0008, 'EGGS': 0.03, 'USDGLO': 1, 'QR': 0.00003
         };
       }
 
@@ -786,11 +792,15 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
         console.error('Error fetching ETH balance:', error);
       }
       
-      // Get token balances with rate limiting
-      for (const token of commonTokens) {
-        try {
-          // Add longer delay between requests to prevent overwhelming the RPC
-          await new Promise(resolve => setTimeout(resolve, 200)); // Increased from 50ms to 200ms
+      // Get token balances with rate limiting - process in smaller batches
+      const batchSize = 3; // Process 3 tokens at a time
+      for (let i = 0; i < commonTokens.length; i += batchSize) {
+        const batch = commonTokens.slice(i, i + batchSize);
+        
+        for (const token of batch) {
+          try {
+            // Add longer delay between requests to prevent overwhelming the RPC
+            await new Promise(resolve => setTimeout(resolve, 1000)); // Increased to 1 second
           
           const balanceResponse = await fetch(baseRpcUrl, {
             method: 'POST',
@@ -808,8 +818,54 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
           
           if (!balanceResponse.ok) {
             if (balanceResponse.status === 429) {
-              console.warn(`Rate limit hit for ${token.symbol}, skipping remaining tokens`);
-              break; // Stop processing more tokens if we hit rate limit
+              console.warn(`Rate limit hit for ${token.symbol}, waiting 2 seconds before continuing...`);
+              await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds on rate limit
+              // Retry the request once
+              try {
+                const retryResponse = await fetch(baseRpcUrl, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    jsonrpc: '2.0',
+                    method: 'eth_call',
+                    params: [{
+                      to: token.address,
+                      data: `0x70a08231${address.slice(2).padStart(64, '0')}` // balanceOf(address)
+                    }, 'latest'],
+                    id: 1
+                  })
+                });
+                
+                if (retryResponse.ok) {
+                  const retryData = await retryResponse.json();
+                  if (retryData.result && retryData.result !== '0x') {
+                    const balance = parseInt(retryData.result, 16) / Math.pow(10, token.decimals);
+                    if (balance > 0) {
+                      const price = tokenPrices[token.symbol] || 1;
+                      const value = balance * price;
+                      
+                      tokenBalances.push({
+                        symbol: token.symbol,
+                        address: token.address,
+                        balance: balance.toFixed(4),
+                        price: price,
+                        value: value.toFixed(2),
+                        network: 'Base',
+                        networkKey: 'base',
+                        chainId: '0x2105'
+                      });
+                    }
+                  }
+                  // Add extra delay after successful retry to prevent hitting rate limit again
+                  await new Promise(resolve => setTimeout(resolve, 1000));
+                  continue; // Success, move to next token
+                }
+              } catch (retryError) {
+                console.warn(`Retry failed for ${token.symbol}:`, retryError);
+              }
+              
+              console.warn(`Rate limit persists for ${token.symbol}, skipping remaining tokens in this batch`);
+              break; // Stop processing more tokens in this batch if rate limit persists
             }
             console.warn(`Failed to fetch ${token.symbol} balance: HTTP ${balanceResponse.status}`);
             continue;
@@ -845,6 +901,13 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
         } catch (error) {
           console.error(`Error fetching ${token.symbol} balance:`, error);
           // Continue with other tokens instead of failing completely
+        }
+        }
+        
+        // Add delay between batches to prevent rate limiting
+        if (i + batchSize < commonTokens.length) {
+          console.log(`Completed batch ${Math.floor(i/batchSize) + 1}, waiting 3 seconds before next batch...`);
+          await new Promise(resolve => setTimeout(resolve, 3000)); // 3 second delay between batches
         }
       }
       
@@ -1095,9 +1158,12 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
             { symbol: 'USDT', address: '0xfde4c96c8593536e31f229ea8f37b2ada2699bb2', decimals: 6 },
             { symbol: 'WETH', address: '0x4200000000000000000000000000000000000006', decimals: 18 },
             { symbol: 'DEGEN', address: '0x4ed4E862860beD51a9570b96d89aF5E1B0Efefed', decimals: 18 },
-            { symbol: 'BETR', address: '0x763F4B31C8c86C56C802eB0fB3edd4C9d19e0eA8', decimals: 18 },
+            { symbol: 'BETR', address: '0xaD4Dc4712523B0180da5139Ad11C3FDDc6d7Cf06', decimals: 18 },
             { symbol: 'NOICE', address: '0x9cb41fd9dc6891bae8187029461bfaadf6cc0c69', decimals: 18 },
-            { symbol: 'TIPN', address: '0x5ba8d32579a4497c12d327289a103c3ad5b64eb1', decimals: 18 }
+            { symbol: 'TIPN', address: '0x5ba8d32579a4497c12d327289a103c3ad5b64eb1', decimals: 18 },
+            { symbol: 'EGGS', address: '0x712f43b21cf3e1b189c27678c0f551c08c01d150', decimals: 18 },
+            { symbol: 'USDGLO', address: '0x4f604735c1cf31399c6e711d5962b2b3e0225ad3', decimals: 18 },
+            { symbol: 'QR', address: '0x2b5050f01d64fbb3e4ac44dc07f0732bfb5ecadf', decimals: 18 }
           ]
         },
         celo: {
