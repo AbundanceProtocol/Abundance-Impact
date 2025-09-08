@@ -15,6 +15,7 @@ const userFundingSchema = new mongoose.Schema({
   multitip_total: { type: Number },
   pfp: { type: String },
   createdAt: { type: Date, default: () => new Date(), index: true },
+  sum: { type: Number, default: 0 },
 });
 
 const UserFunding = mongoose.models.UserFunding || mongoose.model('UserFunding', userFundingSchema);
