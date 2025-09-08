@@ -698,6 +698,7 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
       
       // Base chain RPC URL
       const baseRpcUrl = process.env.NEXT_PUBLIC_BASE_RPC_URL || 'https://mainnet.base.org';
+      const altRpcUrl = 'https://base-mainnet.g.alchemy.com/v2/demo'; // Alternative RPC endpoint
       
       // Common token addresses on Base
       const commonTokens = [
@@ -792,17 +793,16 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
         console.error('Error fetching ETH balance:', error);
       }
       
-      // Get token balances with rate limiting - process in smaller batches
-      const batchSize = 3; // Process 3 tokens at a time
-      for (let i = 0; i < commonTokens.length; i += batchSize) {
-        const batch = commonTokens.slice(i, i + batchSize);
-        
-        for (const token of batch) {
-          try {
-            // Add longer delay between requests to prevent overwhelming the RPC
-            await new Promise(resolve => setTimeout(resolve, 1000)); // Increased to 1 second
+      // Get token balances with aggressive rate limiting - process one token at a time
+      for (let i = 0; i < commonTokens.length; i++) {
+        const token = commonTokens[i];
+        try {
+          // Add exponential backoff delay - start with 2 seconds and increase
+          const delay = Math.min(2000 + (i * 500), 10000); // 2s to 10s max
+          console.log(`Processing ${token.symbol} (${i + 1}/${commonTokens.length}), waiting ${delay}ms...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
           
-          const balanceResponse = await fetch(baseRpcUrl, {
+          let balanceResponse = await fetch(baseRpcUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -816,13 +816,33 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
             })
           });
           
+          // If main RPC fails, try alternative RPC immediately
+          if (!balanceResponse.ok && balanceResponse.status === 429) {
+            console.log(`Main RPC rate limited for ${token.symbol}, trying alternative RPC...`);
+            await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
+            balanceResponse = await fetch(altRpcUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                jsonrpc: '2.0',
+                method: 'eth_call',
+                params: [{
+                  to: token.address,
+                  data: `0x70a08231${address.slice(2).padStart(64, '0')}` // balanceOf(address)
+                }, 'latest'],
+                id: 1
+              })
+            });
+          }
+          
           if (!balanceResponse.ok) {
             if (balanceResponse.status === 429) {
               console.warn(`Rate limit hit for ${token.symbol}, waiting 2 seconds before continuing...`);
               await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds on rate limit
-              // Retry the request once
+              // Retry the request once with alternative RPC
               try {
-                const retryResponse = await fetch(baseRpcUrl, {
+                console.log(`Retrying ${token.symbol} with alternative RPC endpoint...`);
+                const retryResponse = await fetch(altRpcUrl, {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({
@@ -864,8 +884,8 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
                 console.warn(`Retry failed for ${token.symbol}:`, retryError);
               }
               
-              console.warn(`Rate limit persists for ${token.symbol}, skipping remaining tokens in this batch`);
-              break; // Stop processing more tokens in this batch if rate limit persists
+              console.warn(`Rate limit persists for ${token.symbol}, skipping remaining tokens`);
+              break; // Stop processing more tokens if rate limit persists
             }
             console.warn(`Failed to fetch ${token.symbol} balance: HTTP ${balanceResponse.status}`);
             continue;
@@ -901,13 +921,6 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
         } catch (error) {
           console.error(`Error fetching ${token.symbol} balance:`, error);
           // Continue with other tokens instead of failing completely
-        }
-        }
-        
-        // Add delay between batches to prevent rate limiting
-        if (i + batchSize < commonTokens.length) {
-          console.log(`Completed batch ${Math.floor(i/batchSize) + 1}, waiting 3 seconds before next batch...`);
-          await new Promise(resolve => setTimeout(resolve, 3000)); // 3 second delay between batches
         }
       }
       
