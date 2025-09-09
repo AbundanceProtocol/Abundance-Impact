@@ -6,8 +6,8 @@ import axios from "axios";
 import Head from "next/head";
 
 import { IoIosRocket, IoMdTrophy, IoMdRefresh as Refresh } from "react-icons/io";
-import { BsLightningChargeFill as Impact, BsPiggyBankFill, BsQuestionCircle, BsGiftFill, BsStar } from "react-icons/bs";
-import { confirmUser, timePassed } from "../../utils/utils";
+import { BsLightningChargeFill as Impact, BsPiggyBankFill, BsQuestionCircle, BsGiftFill, BsStar, BsShareFill } from "react-icons/bs";
+import { confirmUser, timePassed, formatNum } from "../../utils/utils";
 import Spinner from "../../components/Common/Spinner";
 import ExpandImg from "../../components/Cast/ExpandImg";
 import useMatchBreakpoints from "../../hooks/useMatchBreakpoints";
@@ -48,6 +48,8 @@ export default function Rewards() {
 
   const [showPopup, setShowPopup] = useState({ open: false, url: null });
 
+  const [totalRewards, setTotalRewards] = useState(null);
+  const [totalLoading, setTotalLoading] = useState(true);
   const [creatorRewards, setCreatorRewards] = useState(null);
   const [creatorLoading, setCreatorLoading] = useState(true);
   const [dailyRewards, setDailyRewards] = useState(null);
@@ -60,6 +62,7 @@ export default function Rewards() {
   useEffect(() => {
     if (fid) {
       getCreatorRewards(fid);
+      getTotalRewards(fid);
       getDailyRewards(fid);
       getTotalClaims(fid);
     }
@@ -111,6 +114,28 @@ export default function Rewards() {
       })();
     }
   }, []);
+
+
+
+  async function getTotalRewards(fid) {
+    try {
+      const response = await axios.get("/api/fund/getTotalRewards", {
+        params: { fid }
+      });
+      if (response?.data?.data) {
+        setTotalRewards(response?.data?.data);
+        console.log("getTotalRewards", response?.data?.data);
+      } else {
+        setTotalRewards(null);
+      }
+      setTotalLoading(false);
+    } catch (error) {
+      console.error("Error submitting data:", error);
+      setTotalLoading(false);
+    }
+  }
+
+
 
   async function getCreatorRewards(fid) {
     try {
@@ -234,6 +259,49 @@ export default function Rewards() {
     }
 
   }
+
+  const shareCuration = async () => {
+    if (fid) {
+      const { sdk } = await import('@farcaster/miniapp-sdk')
+      const isApp = await sdk.isInMiniApp();
+  
+      let shareUrl = `https://impact.abundance.id/~/rewards/${fid}`
+  
+      let shareText = ''
+
+      const options = [
+        `/impact won't take us to the moon, but it will take us to the stars!\n\nWhat's your impact?`,
+        `I'm earning with /impact while boosting FC creators & builders\n\nWhat's your impact?`,
+        `I earned ${totalRewards?.sum > 0 && formatNum(Math.floor(totalRewards?.sum)) || 0} $degen with /impact\n\nCheck your reward here 👇`,
+        `This is not complicated\n\nFarcaster's growth depends on boosting and rewarding casters based on their impact\n\nThat's what Impact 2.0 is for...`,
+        `Impact 2.0 is Farcaster's 'Social Algorithm' - check it out here:`,
+        `What if we had an algo that was based on value creation instead of engagement - turn out we can! Check out Impact 2.0:`,
+        `Can we have a sufficiently decentralized network without sufficiently decentralized algos?`,
+        `What if we had an algo that valued our impact, instead of extracting value from our attention? Check out Impact 2.0:`
+      ];
+      shareText = options[Math.floor(Math.random() * options.length)];
+  
+      let encodedShareText = encodeURIComponent(shareText)
+      let encodedShareUrl = encodeURIComponent(shareUrl); 
+      let shareLink = `https://farcaster.xyz/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
+  
+      if (!isApp) {
+        window.open(shareLink, '_blank');
+      } else if (isApp) {
+        await sdk.actions.composeCast({
+          text: shareText,
+          embeds: [shareUrl],
+          close: false
+        })
+      }
+    }
+  }
+
+
+
+
+
+
 
   {
     /* KEEP */
@@ -392,7 +460,132 @@ export default function Rewards() {
 
 
 
+            <div
+              className="flex-row"
+              style={{ backgroundColor: "", justifyContent: "center", gap: "1rem", margin: "20px 0 0px 0" }}
+            >
+              <div
+                className="flex-col"
+                style={{
+                  padding: "1px 5px 1px 5px",
+                  border: `1px solid ${isLogged ? "#0af" : "#aaa"}`,
+                  borderRadius: "18px",
+                  backgroundColor: "",
+                  alignItems: "center",
+                  gap: "0.0rem",
+                  height: "145px",
+                  width: "165px",
+                  justifyContent: "center"
+                }}
+              >
+                <div style={{ fontSize: "13px", padding: "5px 0 5px 0", fontWeight: "700", color: isLogged ? "#0af" : "#aaa" }}>
+                  Total Rewards
+                </div>
+                <div className="flex-row" style={{ gap: "0.5rem", alignItems: "center", padding: "0 10px" }}>
+                  {/* <BsStar color={isLogged ? "#0af" : "#aaa"} size={40} /> */}
+                  {totalLoading ? (
+                    <Spinner size={36} color={isLogged ? "#0af" : "#aaa"} />
+                  ) : (
+                    <div style={{ fontSize: "36px", fontWeight: "700", color: isLogged ? "#0af" : "#aaa", height: "45px" }}>
+                      {totalRewards?.sum > 0 ? formatNum(Math.floor(totalRewards?.sum)) || 0 : "--"}
+                    </div>
+                  )}
+                </div>
+                <div style={{ fontSize: "10px", padding: "0 0 5px 0", fontWeight: "700", color: isLogged ? "#0af" : "#aaa" }}>
+                  $DEGEN
+                </div>
 
+                {/* <div
+                  className={`flex-row ${
+                    totalLoading
+                      ? "btn-off"
+                      : (totalRewards?.sum > 0) && totalRewards?.sum
+                      ? "btn-on"
+                      : "btn-off"
+                  }`}
+                  style={{
+                    borderRadius: "8px",
+                    padding: "2px 5px",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "0.25rem",
+                    margin: "5px 0 2px 0",
+                    cursor: "default"
+                  }}
+                >
+                  <p
+                    style={{
+                      padding: "0 2px",
+                      fontSize: "12px",
+                      fontWeight: "500",
+                      textWrap: "nowrap"
+                    }}
+                  >
+                    {totalLoading
+                      ? "Loading..."
+                      : (totalRewards?.sum > 0) && totalRewards?.sum
+                      ? "S7 Airdropped"
+                      : (totalRewards?.sum > 0) && totalRewards?.sum == null
+                      ? "Missing wallet"
+                      : "No rewards"}
+                  </p>{" "}
+                </div> */}
+                {(totalRewards?.sum > 0) && (<div
+                  onClick={shareCuration}
+                  className="flex-col"
+                  style={{
+                    // width: "100%",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    padding: "10px 0 10px 0"
+                  }}
+                >
+                  <div
+                    className="flex-row"
+                    style={{
+                      gap: "0.75rem",
+                      margin: "0px",
+                      flexWrap: "wrap",
+                      justifyContent: "center",
+                      alignItems: "center"
+                    }}
+                  >
+                    <div>
+                      <div
+                        className="flex-row cast-act-lt"
+                        style={{
+                          borderRadius: "8px",
+                          padding: "8px 2px",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: "0.25rem",
+                          height: "28px",
+                          width: "90px",
+                          // backgroundColor: "#aaa"
+                        }}
+                      >
+                        {(!isMobile || isMobile) && <BsShareFill size={14} style={{ width: "21px" }} />}
+                        <p
+                          style={{
+                            padding: "0px",
+                            fontSize: isMobile ? "13px" : "13px",
+                            fontWeight: "500",
+                            textWrap: "wrap",
+                            textAlign: "center"
+                          }}
+                        >
+                          Share
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>)}
+
+
+              </div>
+
+
+            </div>
 
             <div
               className="flex-row"
@@ -417,9 +610,13 @@ export default function Rewards() {
                 </div>
                 <div className="flex-row" style={{ gap: "0.5rem", alignItems: "center", padding: "0 10px" }}>
                   {/* <BsStar color={isLogged ? "#0af" : "#aaa"} size={40} /> */}
-                  <div style={{ fontSize: "36px", fontWeight: "700", color: isLogged ? "#0af" : "#aaa", height: "45px" }}>
-                    {creatorRewards?.degen > 0 ? Math.floor(creatorRewards?.degen).toLocaleString() || 0 : "--"}
-                  </div>
+                  {creatorLoading ? (
+                    <Spinner size={36} color={isLogged ? "#0af" : "#aaa"} />
+                  ) : (
+                    <div style={{ fontSize: "36px", fontWeight: "700", color: isLogged ? "#0af" : "#aaa", height: "45px" }}>
+                      {creatorRewards?.degen > 0 ?formatNum(Math.floor(creatorRewards?.degen)) || 0 : "--"}
+                    </div>
+                  )}
                 </div>
                 <div style={{ fontSize: "10px", padding: "0 0 5px 0", fontWeight: "700", color: isLogged ? "#0af" : "#aaa" }}>
                   $DEGEN
