@@ -12,10 +12,11 @@ const userFundingSchema = new mongoose.Schema({
   }],
   total: { type: Number, default: 0 },
   wallet: [{ type: String }],
-  multitip_total: { type: Number },
+  multitip_total: { type: Number, default: 0 },
+  rewards_total: { type: Number, default: 0 },
+  sum: { type: Number, default: 0 },
   pfp: { type: String },
   createdAt: { type: Date, default: () => new Date(), index: true },
-  sum: { type: Number, default: 0 },
 });
 
 const UserFunding = mongoose.models.UserFunding || mongoose.model('UserFunding', userFundingSchema);
