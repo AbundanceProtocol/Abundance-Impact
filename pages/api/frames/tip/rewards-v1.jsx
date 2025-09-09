@@ -110,9 +110,19 @@ export default async function handler(req, res) {
             pfp: user?.pfp,
             sum: userFunding?.sum ? Math.floor(userFunding.sum) : 0
           }
+        } else {
+          const cast = await Cast.findOne({author_fid: Number(fid)}).select('author_username author_pfp').exec();
+          if (cast) {
+            return {
+              username: cast?.author_username || '', 
+              pfp: cast?.author_pfp,
+              sum: userFunding?.sum ? Math.floor(userFunding.sum) : 0
+            }
+          } else {
+            return {username: null, pfp: null, sum: 0}
+          }
         }
 
-        return {username: null, pfp: null, sum: 0}
       } catch (error) {
         console.error('Error handling GET request:', error);
         return {username: null, pfp: null, sum: 0}
