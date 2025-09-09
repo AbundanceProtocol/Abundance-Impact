@@ -272,7 +272,7 @@ export default function Rewards() {
       const options = [
         `/impact won't take us to the moon, but it will take us to the stars!\n\nWhat's your impact?`,
         `I'm earning with /impact while boosting FC creators & builders\n\nWhat's your impact?`,
-        `I earned ${totalRewards?.sum} $degen with /impact\n\nCheck your reward here 👇`,
+        `I earned ${totalRewards?.sum > 0 && formatNum(Math.floor(totalRewards?.sum)) || 0} $degen with /impact\n\nCheck your reward here 👇`,
         `This is not complicated\n\nFarcaster's growth depends on boosting and rewarding casters based on their impact\n\nThat's what Impact 2.0 is for...`,
         `Impact 2.0 is Farcaster's 'Social Algorithm' - check it out here:`,
         `What if we had an algo that was based on value creation instead of engagement - turn out we can! Check out Impact 2.0:`,
@@ -483,9 +483,13 @@ export default function Rewards() {
                 </div>
                 <div className="flex-row" style={{ gap: "0.5rem", alignItems: "center", padding: "0 10px" }}>
                   {/* <BsStar color={isLogged ? "#0af" : "#aaa"} size={40} /> */}
-                  <div style={{ fontSize: "36px", fontWeight: "700", color: isLogged ? "#0af" : "#aaa", height: "45px" }}>
-                    {totalRewards?.sum > 0 ?formatNum(Math.floor(totalRewards?.sum)) || 0 : "--"}
-                  </div>
+                  {totalLoading ? (
+                    <Spinner size={36} color={isLogged ? "#0af" : "#aaa"} />
+                  ) : (
+                    <div style={{ fontSize: "36px", fontWeight: "700", color: isLogged ? "#0af" : "#aaa", height: "45px" }}>
+                      {totalRewards?.sum > 0 ? formatNum(Math.floor(totalRewards?.sum)) || 0 : "--"}
+                    </div>
+                  )}
                 </div>
                 <div style={{ fontSize: "10px", padding: "0 0 5px 0", fontWeight: "700", color: isLogged ? "#0af" : "#aaa" }}>
                   $DEGEN
@@ -606,9 +610,13 @@ export default function Rewards() {
                 </div>
                 <div className="flex-row" style={{ gap: "0.5rem", alignItems: "center", padding: "0 10px" }}>
                   {/* <BsStar color={isLogged ? "#0af" : "#aaa"} size={40} /> */}
-                  <div style={{ fontSize: "36px", fontWeight: "700", color: isLogged ? "#0af" : "#aaa", height: "45px" }}>
-                    {creatorRewards?.degen > 0 ?formatNum(Math.floor(creatorRewards?.degen)) || 0 : "--"}
-                  </div>
+                  {creatorLoading ? (
+                    <Spinner size={36} color={isLogged ? "#0af" : "#aaa"} />
+                  ) : (
+                    <div style={{ fontSize: "36px", fontWeight: "700", color: isLogged ? "#0af" : "#aaa", height: "45px" }}>
+                      {creatorRewards?.degen > 0 ?formatNum(Math.floor(creatorRewards?.degen)) || 0 : "--"}
+                    </div>
+                  )}
                 </div>
                 <div style={{ fontSize: "10px", padding: "0 0 5px 0", fontWeight: "700", color: isLogged ? "#0af" : "#aaa" }}>
                   $DEGEN
