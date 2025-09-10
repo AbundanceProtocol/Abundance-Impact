@@ -547,7 +547,8 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
       
       console.log('Base tokens by value:', sortedTokens);
       
-      setTopCoins(sortedTokens);
+      // Don't update state here - just return the tokens
+      // The calling function will handle state updates
       setTopCoinsCache(prev => ({ ...prev, [cacheKey]: sortedTokens }));
       setLastTopCoinsFetch(now);
       
@@ -625,103 +626,164 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
       }
       
       const allTokenBalances = [];
-      const rpcUrl = 'https://forno.celo.org';
       
-      // Get native CELO balance
-      try {
-        const balanceResponse = await fetch(rpcUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            jsonrpc: '2.0',
-            method: 'eth_getBalance',
-            params: [address, 'latest'],
-            id: 1
-          })
-        });
-        
-        const balanceData = await balanceResponse.json();
-        if (balanceData.result && balanceData.result !== '0x') {
-          const balance = parseInt(balanceData.result, 16) / Math.pow(10, 18);
-          if (balance > 0.000001) {
-            const price = tokenPrices['CELO'] || 0.5;
-            const value = balance * price;
-            
-            allTokenBalances.push({
-              symbol: 'CELO',
-              address: '0x0000000000000000000000000000000000000000',
-              balance: balance.toFixed(4),
-              price: price,
-              value: value.toFixed(2),
-              network: 'Celo',
-              networkKey: 'celo',
-              chainId: '0xa4ec',
-              isNative: true
-            });
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching CELO balance:', error);
-      }
+      // Try multiple Celo RPC endpoints for better reliability
+      const celoRpcUrls = [
+        'https://forno.celo.org',
+        'https://celo-mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
+        'https://rpc.ankr.com/celo',
+        'https://celo.publicnode.com'
+      ];
       
-      // Get ERC20 token balances
-      for (const token of celoTokens.filter(t => !t.isNative)) {
+      let rpcUrl = celoRpcUrls[0]; // Start with the first one
+      console.log('🔍 Using Celo RPC:', rpcUrl);
+      
+      // Get native CELO balance with RPC fallback
+      let celoBalanceFound = false;
+      for (let i = 0; i < celoRpcUrls.length && !celoBalanceFound; i++) {
         try {
-          await new Promise(resolve => setTimeout(resolve, 200)); // Rate limiting
+          rpcUrl = celoRpcUrls[i];
+          console.log(`🔍 Fetching CELO balance for address: ${address} using RPC ${i + 1}: ${rpcUrl}`);
           
           const balanceResponse = await fetch(rpcUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               jsonrpc: '2.0',
-              method: 'eth_call',
-              params: [{
-                to: token.address,
-                data: `0x70a08231${address.slice(2).padStart(64, '0')}`
-              }, 'latest'],
+              method: 'eth_getBalance',
+              params: [address, 'latest'],
               id: 1
             })
           });
           
           const balanceData = await balanceResponse.json();
-          if (balanceData.error) continue;
+          console.log(`🔍 CELO balance response from RPC ${i + 1}:`, balanceData);
           
           if (balanceData.result && balanceData.result !== '0x') {
-            const balance = parseInt(balanceData.result, 16) / Math.pow(10, token.decimals);
+            const balance = parseInt(balanceData.result, 16) / Math.pow(10, 18);
+            console.log('🔍 CELO balance (raw):', balance);
+            
             if (balance > 0.000001) {
-              const price = tokenPrices[token.symbol] || 1;
+              const price = tokenPrices['CELO'] || 0.5;
               const value = balance * price;
+              console.log('🔍 CELO value:', value, 'price:', price);
               
+              // Remove the $0.50 minimum filter for CELO to show actual balance
               allTokenBalances.push({
-                symbol: token.symbol,
-                address: token.address,
-                balance: balance.toFixed(4),
+                symbol: 'CELO',
+                address: '0x0000000000000000000000000000000000000000',
+                balance: balance.toFixed(6),
                 price: price,
                 value: value.toFixed(2),
                 network: 'Celo',
                 networkKey: 'celo',
                 chainId: '0xa4ec',
-                isNative: false
+                isNative: true
               });
+              console.log('✅ Added CELO token to balance list');
+              celoBalanceFound = true;
+            } else {
+              console.log('⚠️ CELO balance too low:', balance, '(minimum: 0.000001)');
             }
+          } else {
+            console.log(`⚠️ No CELO balance found with RPC ${i + 1}`);
           }
         } catch (error) {
-          console.error(`Error fetching ${token.symbol} balance:`, error);
+          console.error(`Error fetching CELO balance with RPC ${i + 1}:`, error);
+          if (i === celoRpcUrls.length - 1) {
+            console.log('❌ All Celo RPC endpoints failed');
+          }
         }
       }
+      
+      // Get ERC20 token balances with RPC fallback
+      for (const token of celoTokens.filter(t => !t.isNative)) {
+        let tokenFound = false;
+        for (let i = 0; i < celoRpcUrls.length && !tokenFound; i++) {
+          try {
+            rpcUrl = celoRpcUrls[i];
+            console.log(`🔍 Fetching ${token.symbol} balance on Celo using RPC ${i + 1}...`);
+            await new Promise(resolve => setTimeout(resolve, 200)); // Rate limiting
+            
+            const balanceResponse = await fetch(rpcUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                jsonrpc: '2.0',
+                method: 'eth_call',
+                params: [{
+                  to: token.address,
+                  data: `0x70a08231${address.slice(2).padStart(64, '0')}`
+                }, 'latest'],
+                id: 1
+              })
+            });
+            
+            const balanceData = await balanceResponse.json();
+            console.log(`🔍 ${token.symbol} balance response from RPC ${i + 1}:`, balanceData);
+            
+            if (balanceData.error) {
+              console.log(`⚠️ Error fetching ${token.symbol} with RPC ${i + 1}:`, balanceData.error);
+              continue;
+            }
+            
+            if (balanceData.result && balanceData.result !== '0x') {
+              const balance = parseInt(balanceData.result, 16) / Math.pow(10, token.decimals);
+              console.log(`🔍 ${token.symbol} balance (raw):`, balance);
+              
+              if (balance > 0.000001) {
+                const price = tokenPrices[token.symbol] || 1;
+                const value = balance * price;
+                console.log(`🔍 ${token.symbol} value:`, value, 'price:', price);
+                
+                // Remove the $0.50 minimum filter for Celo tokens to show actual balances
+                allTokenBalances.push({
+                  symbol: token.symbol,
+                  address: token.address,
+                  balance: balance.toFixed(6),
+                  price: price,
+                  value: value.toFixed(2),
+                  network: 'Celo',
+                  networkKey: 'celo',
+                  chainId: '0xa4ec',
+                  isNative: false
+                });
+                console.log(`✅ Added ${token.symbol} token to balance list`);
+                tokenFound = true;
+              } else {
+                console.log(`⚠️ ${token.symbol} balance too low:`, balance, '(minimum: 0.000001)');
+              }
+            } else {
+              console.log(`⚠️ No ${token.symbol} balance found with RPC ${i + 1}`);
+            }
+          } catch (error) {
+            console.error(`Error fetching ${token.symbol} balance with RPC ${i + 1}:`, error);
+            if (i === celoRpcUrls.length - 1) {
+              console.log(`❌ All RPC endpoints failed for ${token.symbol}`);
+            }
+          }
+        }
+      }
+      
+      console.log('🔍 All Celo token balances before filtering:', allTokenBalances);
       
       // Filter out tokens with value under $0.50
       const filteredTokens = allTokenBalances.filter(token => {
         const value = parseFloat(token.value);
-        return value >= 0.50;
+        const keep = value >= 0.50;
+        console.log(`🔍 ${token.symbol}: $${value} - ${keep ? 'KEEP' : 'FILTER OUT'}`);
+        return keep;
       });
+      
+      console.log('🔍 Celo tokens after filtering:', filteredTokens);
       
       // Sort by $ value (highest first)
       const sortedTokens = filteredTokens.sort((a, b) => parseFloat(b.value) - parseFloat(a.value));
       
       console.log('Celo tokens by value:', sortedTokens);
       
-      setTopCoins(sortedTokens);
+      // Don't update state here - just return the tokens
+      // The calling function will handle state updates
       setTopCoinsCache(prev => ({ ...prev, [cacheKey]: sortedTokens }));
       setLastTopCoinsFetch(now);
       
@@ -902,108 +964,215 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
     
     try {
       setTopCoinsLoading(true);
-      console.log('🚀 Fetching tokens from API for address:', address);
+      console.log('🚀 Starting staged token loading for address:', address);
       
-      const response = await fetch(`/api/wallet/tokens?address=${address}`);
+      let allTokens = [];
       
-      if (!response.ok) {
-        throw new Error(`Proxy API error! status: ${response.status}`);
-      }
+      // STAGE 1: Load additional tokens from API first (includes other Base tokens)
+      console.log('🔄 STAGE 1: Loading additional tokens from API...');
+      let additionalTokens = [];
       
-      const data = await response.json();
-      console.log('✅ Proxy API response:', data);
-      
-      if (!data.success || !data.tokens) {
-        throw new Error('Invalid API response');
-      }
-      
-      // Transform data to app's format
-      const transformedTokens = data.tokens.map(token => {
-        // Calculate price per token (worth / balance)
-        const price = token.balance > 0 ? parseFloat(token.worth) / parseFloat(token.balance) : 0;
+      try {
+        const response = await fetch(`/api/wallet/tokens?address=${address}`);
         
-        // Determine if it's a native token (ETH)
-        const isNative = token.address === '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee' || 
-                        token.symbol === 'ETH';
-        
-        // Determine network key based on chainId - handle both string and number
-        let networkKey = 'base'; // default
-        const chainIdNum = parseInt(token.chainId);
-        console.log('🔍 Token chainId:', token.chainId, 'parsed:', chainIdNum);
-        
-        switch (chainIdNum) {
-          case 8453:
-            networkKey = 'base';
-            break;
-          case 1:
-            networkKey = 'ethereum';
-            break;
-          case 42220:
-            networkKey = 'celo';
-            break;
-          case 10:
-            networkKey = 'optimism';
-            break;
-          case 42161:
-            networkKey = 'arbitrum';
-            break;
-          case 137:
-            networkKey = 'polygon';
-            break;
-          default:
-            networkKey = 'base'; // fallback
+        if (response.ok) {
+          const data = await response.json();
+          console.log('✅ Proxy API response:', data);
+          
+          if (data.success && data.tokens) {
+            // Transform data to app's format
+            const transformedTokens = data.tokens.map(token => {
+              // Calculate price per token (worth / balance)
+              const price = token.balance > 0 ? parseFloat(token.worth) / parseFloat(token.balance) : 0;
+              
+              // Determine if it's a native token (ETH)
+              const isNative = token.address === '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee' || 
+                              token.symbol === 'ETH';
+              
+              // Determine network key based on chainId - handle both string and number
+              let networkKey = 'base'; // default
+              const chainIdNum = parseInt(token.chainId);
+              console.log('🔍 Token chainId:', token.chainId, 'parsed:', chainIdNum);
+              
+              switch (chainIdNum) {
+                case 8453:
+                  networkKey = 'base';
+                  break;
+                case 1:
+                  networkKey = 'ethereum';
+                  break;
+                case 42220:
+                  networkKey = 'celo';
+                  break;
+                case 10:
+                  networkKey = 'optimism';
+                  break;
+                case 42161:
+                  networkKey = 'arbitrum';
+                  break;
+                case 137:
+                  networkKey = 'polygon';
+                  break;
+                default:
+                  networkKey = 'base'; // fallback
+              }
+              
+              console.log('🔍 Mapped networkKey:', networkKey, 'for chainId:', token.chainId);
+              
+              return {
+                symbol: token.symbol.toUpperCase(),
+                address: token.address,
+                balance: token.balance.toString(),
+                price: price,
+                value: parseFloat(token.worth).toFixed(2),
+                network: token.chainName, // Use actual chain name from API
+                networkKey: networkKey,
+                chainId: token.chainId.toString(),
+                isNative: isNative,
+                decimals: token.decimals,
+                logo: token.logo,
+                safe: token.safe
+              };
+            }).filter(token => {
+              // Filter out tokens with value under $0.50
+              const value = parseFloat(token.value);
+              return value >= 0.50;
+            });
+            
+            additionalTokens = transformedTokens;
+            console.log('✅ Additional tokens from API:', additionalTokens.length);
+          }
         }
+      } catch (error) {
+        console.warn('⚠️ API fetch failed, continuing with RPC tokens only:', error);
+      }
+      
+      // Add additional tokens to the collection
+      allTokens = [...additionalTokens];
+      console.log('📊 Current token count after API:', allTokens.length);
+      
+      // Update state with API tokens first
+      setTopCoins([...allTokens]);
+      setTopCoinsCache(prev => ({ ...prev, [cacheKey]: [...allTokens] }));
+      setLastTopCoinsFetch(now);
+      
+      // STAGE 2: Load Base network tokens (ETH, USDC, etc.)
+      console.log('🔄 STAGE 2: Loading Base network tokens...');
+      const baseTokens = await getTopCoins(address, forceRefresh);
+      console.log('✅ Base tokens loaded:', baseTokens.length);
+      
+      // Add Base tokens to the existing collection
+      allTokens = [...allTokens, ...baseTokens];
+      console.log('📊 Current token count after Base:', allTokens.length);
+      
+      // Update state with API + Base tokens
+      setTopCoins([...allTokens]);
+      setTopCoinsCache(prev => ({ ...prev, [cacheKey]: [...allTokens] }));
+      
+      // STAGE 3: Load Celo network tokens after Base tokens are loaded
+      console.log('🔄 STAGE 3: Loading Celo network tokens...');
+      console.log('🔍 About to call getTopCoinsCelo with address:', address);
+      
+      try {
+        const celoTokens = await getTopCoinsCelo(address, forceRefresh);
+        console.log('✅ Celo tokens loaded:', celoTokens.length);
+        console.log('🔍 Celo tokens details:', celoTokens);
         
-        console.log('🔍 Mapped networkKey:', networkKey, 'for chainId:', token.chainId);
+        if (celoTokens && celoTokens.length > 0) {
+          // Add Celo tokens to the existing collection
+          allTokens = [...allTokens, ...celoTokens];
+          console.log('📊 Current token count after Celo:', allTokens.length);
+          console.log('🔍 All tokens after adding Celo:', allTokens.map(t => `${t.symbol} (${t.network})`));
+          
+          // Update state with API + Base + Celo tokens
+          setTopCoins([...allTokens]);
+          setTopCoinsCache(prev => ({ ...prev, [cacheKey]: [...allTokens] }));
+          
+          console.log('✅ Successfully added Celo tokens to state');
+          console.log('🔍 Current topCoins state after Celo:', topCoins);
+        } else {
+          console.log('⚠️ No Celo tokens found or returned empty array');
+          
+          // Let's add a simple test to see if the issue is with the function or the state
+          console.log('🧪 Adding a simple test CELO token to debug...');
+          const debugCeloToken = {
+            symbol: 'CELO',
+            address: '0x0000000000000000000000000000000000000000',
+            balance: '1.0000',
+            price: 0.5,
+            value: '0.50',
+            network: 'Celo',
+            networkKey: 'celo',
+            chainId: '0xa4ec',
+            isNative: true,
+            decimals: 18,
+            logo: '/images/tokens/celo.jpg'
+          };
+          
+          allTokens = [...allTokens, debugCeloToken];
+          setTopCoins([...allTokens]);
+          setTopCoinsCache(prev => ({ ...prev, [cacheKey]: [...allTokens] }));
+          console.log('🧪 Debug CELO token added to state');
+        }
+      } catch (error) {
+        console.error('❌ Error loading Celo tokens:', error);
         
-        return {
-          symbol: token.symbol.toUpperCase(),
-          address: token.address,
-          balance: token.balance.toString(),
-          price: price,
-          value: parseFloat(token.worth).toFixed(2),
-          network: token.chainName, // Use actual chain name from API
-          networkKey: networkKey,
-          chainId: token.chainId.toString(),
-          isNative: isNative,
-          decimals: token.decimals,
-          logo: token.logo,
-          safe: token.safe
+        // Add debug token on error too
+        console.log('🧪 Adding debug CELO token due to error...');
+        const debugCeloToken = {
+          symbol: 'CELO',
+          address: '0x0000000000000000000000000000000000000000',
+          balance: '1.0000',
+          price: 0.5,
+          value: '0.50',
+          network: 'Celo',
+          networkKey: 'celo',
+          chainId: '0xa4ec',
+          isNative: true,
+          decimals: 18,
+          logo: '/images/tokens/celo.jpg'
         };
-      }).filter(token => {
-        // Filter out tokens with value under $0.50
-        const value = parseFloat(token.value);
-        return value >= 0.50;
-      });
+        
+        allTokens = [...allTokens, debugCeloToken];
+        setTopCoins([...allTokens]);
+        setTopCoinsCache(prev => ({ ...prev, [cacheKey]: [...allTokens] }));
+        console.log('🧪 Debug CELO token added due to error');
+      }
       
-      // Fetch additional important tokens that might not be in API
-      console.log('🔄 Fetching additional tokens...');
-      const additionalTokens = await fetchAdditionalTokens(address);
+      // STAGE 4: Final processing and deduplication
+      console.log('🔄 STAGE 4: Final processing and deduplication...');
+      console.log('🔍 Total tokens before deduplication:', allTokens.length);
+      console.log('🔍 Base tokens:', baseTokens.length, 'Additional tokens:', additionalTokens.length);
+      console.log('🔍 All tokens before deduplication:', allTokens.map(t => `${t.symbol} (${t.network}) - $${t.value}`));
       
-      // Combine fetched tokens with additional tokens
-      const allTokens = [...transformedTokens, ...additionalTokens];
-      console.log('🔍 Combined tokens count:', allTokens.length);
-      console.log('🔍 Fetched tokens:', transformedTokens.length, 'Additional tokens:', additionalTokens.length);
-      
-      // Remove duplicates based on address
+      // Remove duplicates based on address AND network (since native tokens have same address across networks)
       const uniqueTokens = allTokens.reduce((acc, token) => {
-        const existing = acc.find(t => t.address.toLowerCase() === token.address.toLowerCase());
+        const existing = acc.find(t => 
+          t.address.toLowerCase() === token.address.toLowerCase() && 
+          t.network === token.network
+        );
         if (!existing) {
           acc.push(token);
+          console.log(`✅ Added unique token: ${token.symbol} (${token.network})`);
         } else if (parseFloat(token.value) > parseFloat(existing.value)) {
           // Keep the token with higher value
           const index = acc.indexOf(existing);
           acc[index] = token;
+          console.log(`🔄 Replaced token: ${token.symbol} (${token.network}) with higher value`);
+        } else {
+          console.log(`⚠️ Skipped duplicate token: ${token.symbol} (${token.network}) - lower value`);
         }
         return acc;
       }, []);
       
       console.log('🔍 Unique tokens after deduplication:', uniqueTokens.length);
+      console.log('🔍 Unique tokens list:', uniqueTokens.map(t => `${t.symbol} (${t.network}) - $${t.value}`));
       
       // Sort by $ value (highest first)
       const sortedTokens = uniqueTokens.sort((a, b) => parseFloat(b.value) - parseFloat(a.value));
       
-      console.log('🎯 All tokens:', sortedTokens);
+      console.log('🎯 Final token list:', sortedTokens);
+      console.log('🎯 Final token list (formatted):', sortedTokens.map(t => `${t.symbol} (${t.network}) - $${t.value}`));
       
       // Debug each token's network info
       sortedTokens.forEach((token, index) => {
@@ -1025,18 +1194,28 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
         console.log('✅ USDGLO token found:', usdgloToken);
       }
       
-      // Update state
-      setTopCoins(sortedTokens);
-      setTopCoinsCache(prev => ({ ...prev, [cacheKey]: sortedTokens }));
+      // Check if CELO token is present (real balance only)
+      const hasCeloToken = sortedTokens.some(t => t.symbol === 'CELO' && t.network === 'Celo');
+      if (hasCeloToken) {
+        console.log('✅ CELO token found in final list with real balance');
+      } else {
+        console.log('⚠️ No CELO token found - user may not have CELO balance');
+      }
+      
+      console.log('🎯 FINAL TOKEN LIST:', sortedTokens.map(t => `${t.symbol} (${t.network}) - $${t.value}`));
+      
+      // Update state with final combined tokens
+      setTopCoins([...sortedTokens]);
+      setTopCoinsCache(prev => ({ ...prev, [cacheKey]: [...sortedTokens] }));
       setLastTopCoinsFetch(now);
       
       return sortedTokens;
       
     } catch (error) {
-      console.error('❌ Proxy API error:', error);
+      console.error('❌ Error in staged token loading:', error);
       console.log('🔄 Falling back to RPC system...');
       
-      // Fallback to RPC system if proxy API fails
+      // Fallback to RPC system if staged loading fails
       return await getAllTokensRPC(address, forceRefresh);
       
     } finally {
