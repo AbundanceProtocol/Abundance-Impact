@@ -1294,8 +1294,8 @@ export default function Ecosystem() {
           filterModerators.map((moderator, index) => (
             <div key={`Ch2-${index}`} className='flex-row nav-link btn-hvr' style={{border: '1px solid #eee', padding: '4px 12px 4px 6px', gap: '0.5rem', borderRadius: '20px', margin: '0px 3px 3px 3px', alignItems: 'center'}} onClick={() => {addModerator(moderator)}}>
               <img loading="lazy" src={moderator.pfp_url} className="" alt={moderator.display_name} style={{width: '16pxC', height: '16px', maxWidth: '16px', maxHeight: '16px', borderRadius: '16px', border: '1px solid #000'}} />
-              <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>@{moderator.username}</div>
-              <div style={{fontWeight: '400', fontSize: '10px', color: '#ccc'}}>{formatNum(moderator.follower_count)}</div>
+              <div style={{fontWeight: '600', fontSize: '12px', color: '#eee'}}>@{moderator?.username}</div>
+              <div style={{fontWeight: '400', fontSize: '10px', color: '#ccc'}}>{formatNum(moderator?.follower_count)}</div>
             </div>
           )
         ))}

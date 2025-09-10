@@ -43,7 +43,7 @@ const UserMenu = () => {
       getUserBalance(fid);
     }
 
-    if (fid && !userInfo.username) {
+    if (fid && !userInfo?.username) {
       getUserInfo();
     }
   }, [fid]);
@@ -81,13 +81,13 @@ const UserMenu = () => {
         // setIsLogged(true)
         // setFid(Number(userProfile?.user?.fid))
         console.log("userInfo", userInfo, isMiniApp, userProfile);
-        if (isMiniApp && !userInfo.username) {
+        if (isMiniApp && !userInfo?.username) {
           setUserInfo({
             pfp: userProfile?.user?.pfpUrl || null,
             username: userProfile?.user?.username || null,
             display: userProfile?.user?.displayName || null
           });
-        } else if (!userInfo.username) {
+        } else if (!userInfo?.username) {
           getUserProfile(fid);
         }
       }

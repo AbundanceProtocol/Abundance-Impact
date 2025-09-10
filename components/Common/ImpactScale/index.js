@@ -43,7 +43,7 @@ const ImpactScale = ({ initValue, setTipPercent, setInitValue, type, cast, updat
     const castContext = {
       author_fid: cast.author.fid,
       author_pfp: cast.author.pfp_url,
-      author_username: cast.author.username,
+      author_username: cast?.author?.username,
       author_display_name: cast.author.display_name,
       cast_hash: cast.hash,
       cast_text: cast.text,
