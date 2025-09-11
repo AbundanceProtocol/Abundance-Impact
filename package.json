@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@apollo/client": "^4.0.4",
     "@divvi/referral-sdk": "^2.3.0",
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.9.3",
@@ -43,6 +44,7 @@
     "ejs": "^3.1.10",
     "ethers": "^5.0.0",
     "express": "^5.1.0",
+    "graphql": "^16.11.0",
     "hls.js": "^1.5.8",
     "immer": "^9.0.15",
     "isomorphic-unfetch": "^4.0.2",
