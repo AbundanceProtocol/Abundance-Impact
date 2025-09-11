@@ -40,7 +40,7 @@ exports.handler = async function(event, context) {
           fid: user.fid,
           pfp: user.pfp,
           impact: user.impact_score_3d,
-          username: user.username,
+          username: user?.username,
           adjusted
         }
         newData.push(updatedUser)
@@ -70,7 +70,7 @@ exports.handler = async function(event, context) {
           fid: user.fid,
           pfp: user.pfp,
           impact: user.impact,
-          username: user.username,
+          username: user?.username,
           adjusted: user.adjusted,
           degen: Math.floor(user.adjusted * multiplier),
           total: Math.floor(user.adjusted * multiplier)
@@ -127,7 +127,7 @@ exports.handler = async function(event, context) {
           const newUser = {
             fid: user._id,
             pfp: user.pfp,
-            username: user.username,
+            username: user?.username,
             degen: 0,
             total: user.sum,
             claimed: false
@@ -144,7 +144,7 @@ exports.handler = async function(event, context) {
         const newClaim = new Claim({
           fid: user.fid,
           pfp: user.pfp,
-          username: user.username,
+          username: user?.username,
           degen_amount: user.degen || 0,
           degen_total: user.total || 0,
           claimed: false
@@ -224,7 +224,7 @@ async function getCombinedData() {
 
     const usernames = await Promise.all(impactScoreData.map(async (item) => {
       const user = await User.findOne({ fid: item.fid.toString() }, { username: 1 }).lean();
-      return user ? user.username : 'Unknown User';
+      return user ? user?.username : 'Unknown User';
     }));
     impactScoreData.forEach((item, index) => {
       item.username = usernames[index];

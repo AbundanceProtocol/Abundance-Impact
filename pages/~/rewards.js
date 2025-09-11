@@ -20,7 +20,7 @@ const version = process.env.NEXT_PUBLIC_VERSION;
 
 export default function Rewards() {
   const router = useRouter();
-  const { ecosystem, username, app, userFid, pass } = router.query;
+  const { ecosystem, app, userFid, pass } = router.query;
   const {
     LoginPopup,
     isLogged,
@@ -37,7 +37,8 @@ export default function Rewards() {
     setIsMiniApp,
     userBalances,
     setUserBalances,
-    adminTest
+    adminTest,
+    setUserInfo
   } = useContext(AccountContext);
   const ref1 = useRef(null);
   const [textMax, setTextMax] = useState("430px");
@@ -303,78 +304,6 @@ export default function Rewards() {
 
 
 
-  {
-    /* KEEP */
-  }
-  function shareFrame(event, tip) {
-    let tippedCreators = "";
-    if (tip?.showcase?.length > 0) {
-      tippedCreators = tip.showcase.reduce((str, creator, index, arr) => {
-        if (!str.includes(creator.username)) {
-          if (str === "") {
-            return "@" + creator.username;
-          }
-          if (index === arr.length - 1 && index !== 0) {
-            return str + " & @" + creator.username + " ";
-          }
-          return str + ", @" + creator.username;
-        }
-        return str;
-      }, "");
-    }
-    event.preventDefault();
-    let shareUrl = `https://impact.abundance.id/~/ecosystems/${tip?.handle}/tip-share-${
-      tip?.showcase?.length > 0 ? "v3" : "v2"
-    }?${qs.stringify({
-      id: tip?._id
-    })}`;
-    let shareText = "";
-
-    if (tip?.curators && tip?.curators[0]?.fid == fid) {
-      shareText = `I multi-tipped ${
-        tippedCreators !== "" ? tippedCreators : "creators & builders "
-      } thru /impact by @abundance.\n\nSupport my nominees here:`;
-    } else if (tip?.curators?.length > 0) {
-      // const curatorName = await getCurator(curators, points)
-
-      if (tip?.curators[0]?.fid !== fid) {
-        shareText = `I multi-tipped ${
-          tippedCreators !== "" ? tippedCreators : "creators & builders "
-        }thru /impact by @abundance.\n\nThese creators were curated by @${
-          tip?.curators[0]?.username
-        }. Support their nominees here:`;
-      } else {
-        shareText = `I multi-tipped ${
-          tippedCreators !== "" ? tippedCreators : "creators & builders "
-        } thru /impact by @abundance. Try it out here:`;
-      }
-    } else {
-      shareText = `I multi-tipped ${
-        tippedCreators !== "" ? tippedCreators : "creators & builders "
-      } thru /impact by @abundance. Try it out here:`;
-    }
-
-    let encodedShareText = encodeURIComponent(shareText);
-    let encodedShareUrl = encodeURIComponent(shareUrl);
-    let shareLink = `https://farcaster.xyz/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`;
-
-    if (!miniApp) {
-      window.open(shareLink, "_blank");
-    } else if (miniApp) {
-      window.parent.postMessage(
-        {
-          type: "createCast",
-          data: {
-            cast: {
-              text: shareText,
-              embeds: [shareUrl]
-            }
-          }
-        },
-        "*"
-      );
-    }
-  }
 
   useEffect(() => {
     if (screenWidth) {
@@ -991,205 +920,7 @@ export default function Rewards() {
                     </div>
                   </div>
 
-                  {/* CREATOR FUND */}
 
-                  {/* <div
-                    className={`flex-col btn-select blu-drk shadow`}
-                    style={{
-                      minWidth: isMobile ? "135px" : "130px",
-                      color: "#cde",
-                      height: "120px",
-                      width: "100%",
-                      cursor: "default"
-                    }}
-                  >
-                    <div
-                      className="flex-row"
-                      style={{ justifyContent: "center", alignItems: "center", gap: "0.75rem" }}
-                    >
-                      <div style={{ fontSize: "15px", fontWeight: "700", margin: "0 0 5px 0", color: "#44aaff" }}>
-                        Creator Fund
-                      </div>
-                    </div>
-                    {creatorLoading ? (
-                      <div
-                        className="flex-row"
-                        style={{
-                          height: "100%",
-                          alignItems: "center",
-                          width: "100%",
-                          justifyContent: "center",
-                          padding: "0 20px"
-                        }}
-                      >
-                        <Spinner size={31} color={"#468"} />
-                      </div>
-                    ) : (
-                      <div
-                        className="flex-col"
-                        style={{ justifyContent: "center", alignItems: "center", gap: "0.25rem" }}
-                      >
-
-                        <div
-                          className="flex-row"
-                          style={{ justifyContent: "center", alignItems: "center", gap: "0.5rem" }}
-                        >
-                          <div style={{ fontSize: "16px", fontWeight: "700" }}>
-                            {creatorRewards?.degen > 0 ? Math.floor(creatorRewards?.degen).toLocaleString() || 0 : "--"}
-                          </div>
-                          <div style={{ fontSize: "9px", fontWeight: "400", color: "#8cf" }}>$DEGEN</div>
-                        </div>
-
-                        <div
-                          className="flex-row"
-                          style={{ justifyContent: "center", alignItems: "center", gap: "0.5rem" }}
-                        ></div>
-                      </div>
-                    )}
-                    <div
-                      className={`flex-row ${
-                        creatorLoading
-                          ? "btn-off"
-                          : (creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet
-                          ? "btn-on"
-                          : "btn-off"
-                      }`}
-                      style={{
-                        borderRadius: "8px",
-                        padding: "2px 5px",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: "0.25rem",
-                        margin: "5px 0 2px 0",
-                        cursor: "default"
-                      }}
-                    >
-                      <p
-                        style={{
-                          padding: "0 2px",
-                          fontSize: "15px",
-                          fontWeight: "500",
-                          textWrap: "nowrap"
-                        }}
-                      >
-                        {creatorLoading
-                          ? "Loading..."
-                          : (creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet
-                          ? "S7 Airdropped"
-                          : (creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet == null
-                          ? "Missing wallet"
-                          : "No rewards"}
-                      </p>{" "}
-                    </div>
-                  </div> */}
-
-                  {/* CLAIMED (S7) */}
-
-                  {/* <div
-                    className={`flex-col btn-select blu-drk shadow`}
-                    style={{
-                      minWidth: isMobile ? "135px" : "130px",
-                      color: "#cde",
-                      height: "120px",
-                      width: "100%",
-                      cursor: "default"
-                    }}
-                  >
-                    <div
-                      className="flex-row"
-                      style={{ justifyContent: "center", alignItems: "center", gap: "0.75rem" }}
-                    >
-                      <div style={{ fontSize: "15px", fontWeight: "700", margin: "0 0 5px 0", color: "#44aaff" }}>
-                        Claimed (S8)
-                      </div>{" "}
-                    </div>
-                    {claimsLoading ? (
-                      <div
-                        className="flex-row"
-                        style={{
-                          height: "100%",
-                          alignItems: "center",
-                          width: "100%",
-                          justifyContent: "center",
-                          padding: "0 20px"
-                        }}
-                      >
-                        <Spinner size={31} color={"#468"} />
-                      </div>
-                    ) : (
-                      <div
-                        className="flex-col"
-                        style={{ justifyContent: "center", alignItems: "center", gap: "0.25rem", padding: "0px" }}
-                      >
-                        <div
-                          className="flex-row"
-                          style={{ justifyContent: "center", alignItems: "center", gap: "0.5rem" }}
-                        >
-                          <div style={{ fontSize: "21px", fontWeight: "700" }}>
-                            {totalClaims > 0 ? Math.floor(totalClaims || 0) : "--"}
-                          </div>
-                          <div style={{ fontSize: "14px", fontWeight: "400", color: "#8cf" }}>$DEGEN</div>
-                        </div>
-                      </div>
-                    )}
-                    <div className="flex-row" style={{ alignContent: "center", alignItems: "center", gap: "0.25rem" }}>
-                      <div
-                        className={`flex-row ${claimsLoading ? "btn-off" : totalClaims > 0 ? "btn-on" : "btn-off"}`}
-                        style={{
-                          borderRadius: "8px",
-                          padding: "2px 5px",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          gap: "0.25rem",
-                          margin: "5px 0 2px 0",
-                          cursor: "default"
-                        }}
-                      >
-                        <p
-                          style={{
-                            padding: "0 2px",
-                            fontSize: "15px",
-                            fontWeight: "500",
-                            textWrap: "nowrap"
-                          }}
-                        >
-                          {claimsLoading ? "Loading..." : totalClaims > 0 ? "Claimed" : "Check Score"}
-                        </p>
-                      </div>
-                      <div
-                        style={{
-                          padding: "0px 5px",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          margin: "4px 0 -2px 0",
-                          cursor: "pointer"
-                        }}
-                        onClick={() => {
-                          getDailyRewards(fid);
-                          getTotalClaims(fid);
-                        }}
-                      >
-                        <Refresh className="" color={"#0077bf"} size={20} />
-                      </div>
-                    </div>
-                  </div> */}
-
-                  {/* </div> */}
-
-                  {/* <div
-                    className="flex-row"
-                    style={{
-                      color: "#9df",
-                      width: "100%",
-                      textAlign: "center",
-                      fontSize: isMobile ? "12px" : "14px",
-                      padding: "10px 10px 0px 10px",
-                      justifyContent: "center"
-                    }}
-                  >
-                    Note: Daily Rewards accumulate for up to 4 days. Rewards expire after 4 days if unclaimed - they are
-                    then moved to the Creator Fund
-                  </div> */}
                   <div
                     className="flex-row"
                     style={{
@@ -1211,12 +942,7 @@ export default function Rewards() {
         )}
       </div>
 
-      {/* <div style={{ fontSize: "25px", fontWeight: "700", margin: "40px 0 -25px 0", color: "#44aaff", textAlign: "center", width: "100%" }}>
-        Earn with Impact:
-      </div> */}
 
-
-      {/* <Settings {...{ rewards: true }} /> */}
 
       <div style={{ padding: "0 0 80px 0" }}>&nbsp;</div>
 

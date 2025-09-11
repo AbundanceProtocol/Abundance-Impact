@@ -135,8 +135,8 @@ export default function MultiTip() {
     let pfp = null;
     let username = null;
     if (curator) {
-      pfp = curator.pfp;
-      username = curator.username;
+      pfp = curator?.pfp;
+      username = curator?.username;
     }
     console.log("curator", curator, pfp, username);
     try {

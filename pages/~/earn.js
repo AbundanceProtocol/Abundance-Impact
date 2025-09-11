@@ -319,14 +319,15 @@ export default function Rewards() {
     let tippedCreators = "";
     if (tip?.showcase?.length > 0) {
       tippedCreators = tip.showcase.reduce((str, creator, index, arr) => {
-        if (!str.includes(creator.username)) {
+        // Add null check for creator and username
+        if (!creator || !creator.username || !str.includes(creator.username)) {
           if (str === "") {
-            return "@" + creator.username;
+            return "@" + (creator?.username || 'unknown');
           }
           if (index === arr.length - 1 && index !== 0) {
-            return str + " & @" + creator.username + " ";
+            return str + " & @" + (creator?.username || 'unknown') + " ";
           }
-          return str + ", @" + creator.username;
+          return str + ", @" + (creator?.username || 'unknown');
         }
         return str;
       }, "");
@@ -350,7 +351,7 @@ export default function Rewards() {
         shareText = `I multi-tipped ${
           tippedCreators !== "" ? tippedCreators : "creators & builders "
         }thru /impact by @abundance.\n\nThese creators were curated by @${
-          tip?.curators[0]?.username
+          tip?.curators?.[0]?.username || 'unknown'
         }. Support their nominees here:`;
       } else {
         shareText = `I multi-tipped ${

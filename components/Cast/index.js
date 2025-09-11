@@ -351,22 +351,24 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
           </div>)}
 
 
-          <div className={`impact-arrow ${fail ? 'flash-fail' : ''}`} onClick={
-             () => {
-                if (!isLogged) {
-                  console.log('ca2')
-                  if (!app) {
-                    LoginPopup()
-                  }
-                } else {
-                  if(userBalances.impact > 0) {
-                    boostImpact(cast, 1)
-                  } else { 
-                    clickFailed()
-                  }
-                }
-              }
-            } style={{margin: (isMiniApp || isMobile) ? '0 0 0 0' : `${shrinkMargin(cast.impact_balance)}px 0 ${shrinkMargin(cast.impact_balance)}px 0`}}>
+          <div className={`impact-arrow ${fail ? 'flash-fail' : ''}`} 
+            // onClick={
+            //  () => {
+            //     if (!isLogged) {
+            //       console.log('ca2')
+            //       if (!app) {
+            //         LoginPopup()
+            //       }
+            //     } else {
+            //       if(userBalances.impact > 0) {
+            //         boostImpact(cast, 1)
+            //       } else { 
+            //         clickFailed()
+            //       }
+            //     }
+            //   }
+            // } 
+            style={{margin: (isMiniApp || isMobile) ? '0 0 0 0' : `${shrinkMargin(cast.impact_balance)}px 0 ${shrinkMargin(cast.impact_balance)}px 0`}}>
               <FaStar size={growPoints(cast.impact_balance)} className='' style={{fontSize: '25px'}} />
           </div>
 

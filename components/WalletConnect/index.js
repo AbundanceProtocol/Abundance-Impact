@@ -526,7 +526,7 @@ export default function WalletConnect({ onTipAmountChange, onTokenChange }) {
                               </div>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <span style={{ color: '#999' }}>
-                                  {isTunnel ? 'N/A' : '--'}
+                                  {isTunnel ? '--' : '--'}
                                 </span>
                               </div>
                               {!isTunnel && <Spinner size={31} color={'#999'} />}

@@ -803,14 +803,15 @@ export default function Tip({ curatorId }) {
     let tippedCreators = "";
     if (tip?.showcase?.length > 0) {
       tippedCreators = tip.showcase.reduce((str, creator, index, arr) => {
-        if (!str.includes(creator.username)) {
+        // Add null check for creator and username
+        if (!creator || !creator.username || !str.includes(creator?.username)) {
           if (str === "") {
-            return "@" + creator.username;
+            return "@" + (creator?.username || 'unknown');
           }
           if (index === arr.length - 1 && index !== 0) {
-            return str + " & @" + creator.username + " ";
+            return str + " & @" + (creator?.username || 'unknown') + " ";
           }
-          return str + ", @" + creator.username;
+          return str + ", @" + (creator?.username || 'unknown');
         }
         return str;
       }, "");
@@ -834,7 +835,7 @@ export default function Tip({ curatorId }) {
         shareText = `I multi-tipped ${
           tippedCreators !== "" ? tippedCreators : "creators & builders "
         }thru /impact by @abundance.\n\nThese creators were curated by @${
-          tip?.curators[0]?.username
+          tip?.curators?.[0]?.username || 'unknown'
         }. Support their nominees here:`;
       } else {
         shareText = `I multi-tipped ${
@@ -1049,7 +1050,7 @@ export default function Tip({ curatorId }) {
         const response = await axios.get("/api/curation/getCurators", {
           params: { name: text, more }
         });
-        const sortedData = response?.data?.users.sort((a, b) => a.username.localeCompare(b.username));
+        const sortedData = response?.data?.users.sort((a, b) => (a?.username || '').localeCompare(b?.username || ''));
         setCuratorData(sortedData);
         setCuratorsLength(response?.data?.length);
         console.log("curator response", response?.data?.users);

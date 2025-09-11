@@ -225,7 +225,7 @@ const CuratorBlock = ({ user, textMax, show, type, feedMax, onTipToggle, showTip
                               padding: "0px 3px"
                             }}
                           >
-                            {user?.username ? `${'@' + user.username}` : 'Curator'}
+                            {user?.username ? `${'@' + user?.username}` : 'Curator'}
                           </div>
                         </div>
                       </div>

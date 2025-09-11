@@ -39,7 +39,9 @@ export default async function handler(req, res) {
             { $group: { _id: null, total: { $sum: "$degen_amount" } } }
           ]).exec();
           if (totalClaims.length > 0) {
-            return totalClaims[0].total;
+            // Make sure to handle undefined/null/NaN cases for .total
+            const total = totalClaims[0]?.total;
+            return typeof total === "number" && !isNaN(total) ? total : 0;
           } else {
             return 0;
           }
@@ -50,6 +52,11 @@ export default async function handler(req, res) {
       }
       
 
+      // Validate fid before converting to number
+      if (!fid || isNaN(Number(fid))) {
+        return res.status(400).json({ error: 'Invalid fid parameter' });
+      }
+      
       const reward = await getReward(Number(fid))
       // await new Promise(resolve => setTimeout(resolve, 10000));
 
