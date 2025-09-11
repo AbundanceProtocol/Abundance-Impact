@@ -1711,68 +1711,102 @@ export default function Tip({ curatorId }) {
     
     try {
       // Basic validation
+      console.log('🔍 Checking tipAmount validation...');
       if (!tipAmount || tipAmount <= 0) {
+        console.log('❌ Tip amount validation failed');
         setDisperseStatus('Please enter a valid tip amount');
         setIsDispersing(false);
         return;
       }
+      console.log('✅ Tip amount validation passed');
 
+      console.log('🔍 Checking selectedToken validation...');
       if (!selectedToken) {
+        console.log('❌ Selected token validation failed');
         setDisperseStatus('Please select a token');
         setIsDispersing(false);
         return;
       }
+      console.log('✅ Selected token validation passed');
 
+      console.log('🔍 Checking creatorResults validation...');
       if (!creatorResults || creatorResults.length === 0) {
+        console.log('❌ Creator results validation failed');
         setDisperseStatus('No creators found to tip');
         setIsDispersing(false);
         return;
       }
+      console.log('✅ Creator results validation passed');
 
       // Check legacy wallet connection
+      console.log('🔍 Checking legacy wallet connection...');
       const isConnected = await isLegacyWalletConnected();
+      console.log('🔍 Wallet connection result:', isConnected);
       if (!isConnected) {
+        console.log('❌ Wallet connection validation failed');
         setDisperseStatus('Wallet not connected. Please connect your wallet first.');
         setIsDispersing(false);
         return;
       }
+      console.log('✅ Wallet connection validation passed');
 
       // Get legacy wallet address
       const legacyAddress = await getLegacyAddress();
       console.log('🔍 Legacy wallet address:', legacyAddress);
 
       // Check if user is on a supported network (Base or Celo with disperse contract deployed)
+      console.log('🔍 Checking network support...');
       const supportedNetworks = {
         '0x2105': 'Base',
         '0xa4ec': 'Celo'  // Celo chain ID in hex (42220)
       };
       
+      console.log('🔍 Wallet chain ID:', walletChainId);
+      console.log('🔍 Supported networks:', supportedNetworks);
+      
       if (!supportedNetworks[walletChainId]) {
+        console.log('❌ Network validation failed - unsupported network');
         setDisperseStatus(`⚠️ Multi-Tip is only available on Base or Celo networks. Please switch to Base or Celo to use this feature.`);
         setIsDispersing(false);
         return;
       }
+      console.log('✅ Network validation passed');
       
       const currentNetworkName = supportedNetworks[walletChainId];
       console.log(`Operating on ${currentNetworkName} network - multi-tip functionality enabled`);
       
+      console.log('🔍 About to start validation checks...');
+      console.log('🔍 tipAmount:', tipAmount);
+      console.log('🔍 selectedToken:', selectedToken);
+      console.log('🔍 creatorResults length:', creatorResults?.length);
+      
       setIsDispersing(true);
       setDisperseStatus('Preparing transaction...');
       
+      console.log('🔍 Validation checks starting...');
+      
       // Validate that the selected token is available on the current network
+      console.log('🔍 About to check token network compatibility...');
       const tokenNetworkKey = selectedToken?.networkKey;
       const currentNetworkKey = currentNetworkName.toLowerCase();
+      console.log('🔍 Token network key:', tokenNetworkKey);
+      console.log('🔍 Current network key:', currentNetworkKey);
       
       if (tokenNetworkKey && tokenNetworkKey !== currentNetworkKey) {
+        console.log('❌ Token network validation failed - token not available on current network');
         setDisperseStatus(`⚠️ Token ${selectedToken?.symbol} is not available on ${currentNetworkName} network. Please select a ${currentNetworkName} token to multi-tip.`);
         setIsDispersing(false);
         return;
       }
+      console.log('✅ Token network validation passed');
 
+      console.log('🔍 About to get token decimals...');
       const tokenDecimals = getTokenDecimals(selectedToken);
       console.log(`🔍 Token decimals for ${selectedToken?.symbol}:`, tokenDecimals);
+      console.log('✅ Token decimals retrieved successfully');
 
       // Calculate distributions based on total impact sum
+      console.log('🔍 About to process creator results...');
       console.log('🔍 Creator results sample:', creatorResults.slice(0, 3).map(c => ({
         username: c.username,
         impact: c.impact,
@@ -1780,6 +1814,7 @@ export default function Tip({ curatorId }) {
         hasAddress: !!c.address,
         allKeys: Object.keys(c)
       })));
+      console.log('✅ Creator results sample processed');
       
       // Log full first creator to see structure
       console.log('🔍 First creator full object:', creatorResults[0]);
@@ -1911,6 +1946,7 @@ export default function Tip({ curatorId }) {
       // For non-native tokens, check balance and allowance
       if (!isNativeToken) {
         console.log('🔍 Checking token balance...');
+        console.log('🔍 About to check balance for non-native token:', selectedToken?.symbol);
         
         // Use the balance we already have from selectedToken data instead of querying the contract
         // This avoids the eth_call issue with Farcaster provider
@@ -1936,6 +1972,7 @@ export default function Tip({ curatorId }) {
         setDisperseStatus(`✅ ${selectedToken?.symbol} balance sufficient. Proceeding with transaction...`);
       } else {
         console.log('🔍 Native token detected - checking ETH balance...');
+        console.log('🔍 About to check balance for native token:', selectedToken?.symbol);
         
         // For ETH, check native balance
         if (selectedToken?.symbol === 'ETH') {
@@ -1964,6 +2001,22 @@ export default function Tip({ curatorId }) {
 
       // Execute the disperse transaction
       console.log('🚀 Calling legacy disperseToken...');
+      console.log('🔍 About to call legacyDisperseUtils.disperseToken with:', {
+        tokenAddress,
+        recipients: validRecipients.length,
+        isNativeToken,
+        selectedTokenSymbol: selectedToken?.symbol
+      });
+      
+      // Check if legacyDisperseUtils is available
+      if (!legacyDisperseUtils) {
+        console.error('❌ legacyDisperseUtils is not available');
+        setDisperseStatus('Disperse utilities not available');
+        setIsDispersing(false);
+        return;
+      }
+      
+      console.log('✅ legacyDisperseUtils is available');
       
       // Generate Divvi referral tag for legacy transaction
       const referralTag = generateReferralTag(legacyAddress);
@@ -1975,19 +2028,32 @@ export default function Tip({ curatorId }) {
       
       // Use disperseEther for ETH, disperseToken for other tokens
       let tx;
-      if (isNativeToken && selectedToken?.symbol === 'ETH') {
-        console.log('🚀 Using legacy disperseEther for ETH transaction');
-        tx = await legacyDisperseUtils.disperseEther(
-          validRecipients.map(r => r.address),
-          validRecipients.map(r => r.amount)
-        );
-      } else {
-        console.log('🚀 Using legacy disperseToken for ERC-20 transaction');
-        tx = await legacyDisperseUtils.disperseToken(
-          tokenAddress,
-          validRecipients.map(r => r.address),
-          validRecipients.map(r => r.amount)
-        );
+      try {
+        if (isNativeToken && selectedToken?.symbol === 'ETH') {
+          console.log('🚀 Using legacy disperseEther for ETH transaction');
+          console.log('🔍 ETH recipients:', validRecipients.map(r => ({ address: r.address, amount: r.amount.toString() })));
+          tx = await legacyDisperseUtils.disperseEther(
+            validRecipients.map(r => r.address),
+            validRecipients.map(r => r.amount)
+          );
+        } else {
+          console.log('🚀 Using legacy disperseToken for ERC-20 transaction');
+          console.log('🔍 ERC-20 details:', {
+            tokenAddress,
+            recipients: validRecipients.map(r => ({ address: r.address, amount: r.amount.toString() }))
+          });
+          tx = await legacyDisperseUtils.disperseToken(
+            tokenAddress,
+            validRecipients.map(r => r.address),
+            validRecipients.map(r => r.amount)
+          );
+        }
+        console.log('✅ Transaction call completed successfully');
+      } catch (txError) {
+        console.error('❌ Error calling disperse function:', txError);
+        setDisperseStatus(`Transaction failed: ${txError.message}`);
+        setIsDispersing(false);
+        return;
       }
 
       console.log('✅ Transaction initiated via legacy wallet');
