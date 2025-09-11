@@ -596,7 +596,9 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
       const celoTokens = [
         { symbol: 'CELO', address: '0x0000000000000000000000000000000000000000', decimals: 18, isNative: true },
         { symbol: 'USDC', address: '0x765DE816845861e75A25fCA122bb6898B8B1282a', decimals: 6 },
-        { symbol: 'WETH', address: '0x122013fd7dF1C6F636a5bb8f03108E876548b455', decimals: 18 }
+        { symbol: 'WETH', address: '0x122013fd7dF1C6F636a5bb8f03108E876548b455', decimals: 18 },
+        { symbol: 'USDC', address: '0xcebA9300f2b948710d2653dD7B07f33A8B32118C', decimals: 6 },
+        { symbol: 'USDGLO', address: '0x4f604735c1cf31399c6e711d5962b2b3e0225ad3', decimals: 18 }
       ];
       
       // Get token prices from CoinGecko API
@@ -604,14 +606,15 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
       try {
         await new Promise(resolve => setTimeout(resolve, 100));
         
-        const priceResponse = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=celo,usd-coin,ethereum&vs_currencies=usd');
+        const priceResponse = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=celo,usd-coin,ethereum,usdglo&vs_currencies=usd');
         if (priceResponse.ok) {
           const priceData = await priceResponse.json();
           
           tokenPrices = {
             'CELO': priceData.celo?.usd || 0.5,
             'USDC': priceData['usd-coin']?.usd || 1,
-            'WETH': priceData.ethereum?.usd || 3000
+            'WETH': priceData.ethereum?.usd || 3000,
+            'USDGLO': priceData.usdglo?.usd || 1.0
           };
         } else if (priceResponse.status === 429) {
           console.warn('CoinGecko rate limit hit, using fallback prices');
@@ -621,7 +624,7 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
         console.warn('Failed to fetch token prices, using fallback prices:', error);
         // Fallback prices
         tokenPrices = {
-          'CELO': 0.5, 'USDC': 1, 'WETH': 3000
+          'CELO': 0.5, 'USDC': 1, 'WETH': 3000, 'USDGLO': 1.0
         };
       }
       
@@ -815,6 +818,8 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
     const celoTokens = [
       { symbol: 'CELO', address: '0x0000000000000000000000000000000000000000', decimals: 18, isNative: true, network: 'Celo', networkKey: 'celo', chainId: '0xa4ec' },
       { symbol: 'USDC', address: '0xceba60280fb0ecd9a5a2348c5a3b8f397cc1b1d4', decimals: 6, network: 'Celo', networkKey: 'celo', chainId: '0xa4ec' },
+      { symbol: 'USDC', address: '0xcebA9300f2b948710d2653dD7B07f33A8B32118C', decimals: 6, network: 'Celo', networkKey: 'celo', chainId: '0xa4ec' },
+      { symbol: 'USDGLO', address: '0x4f604735c1cf31399c6e711d5962b2b3e0225ad3', decimals: 18, network: 'Celo', networkKey: 'celo', chainId: '0xa4ec' },
     ];
     
     // All tokens to check (focus on Base and Celo for now)
