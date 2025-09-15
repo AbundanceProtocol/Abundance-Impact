@@ -356,6 +356,22 @@ export default function Tip({ curatorId }) {
     return decimals;
   };
 
+  // Helper function to map walletChainId to network name for OnchainTip
+  const getNetworkName = (chainId) => {
+    const networkMap = {
+      '0x2105': 'base',     // Base
+      '0xa4ec': 'celo',     // Celo
+      '0x1': 'ethereum',    // Ethereum
+      '0xa': 'optimism',    // Optimism
+      '0xa4b1': 'arbitrum', // Arbitrum
+      '0x89': 'polygon'     // Polygon
+    };
+    
+    const networkName = networkMap[chainId] || 'unknown';
+    console.log(`Chain ID ${chainId} mapped to network: ${networkName}`);
+    return networkName;
+  };
+
   // Network mapping for token networks to chain IDs
   const getChainIdForNetwork = (networkKey) => {
     const networkMap = {
@@ -672,6 +688,7 @@ export default function Tip({ curatorId }) {
             tipper_pfp: userInfo?.pfp,
             tipper_username: userInfo?.username,
             fund: fundPercent, // Add fund percentage to OnchainTip
+            network: getNetworkName(walletChainId), // Add network field based on current chain
             tip: [{
               currency: pendingTxTokenSymbol || selectedToken?.symbol || 'Token',
               amount: Number(pendingTxTotalAmountDecimal || 0),
@@ -689,6 +706,11 @@ export default function Tip({ curatorId }) {
             fundPercent: fundPercent,
             fundType: typeof fundPercent,
             fundValue: tipPayload.fund
+          });
+          console.log('🌐 Network field debug:', {
+            walletChainId: walletChainId,
+            networkName: getNetworkName(walletChainId),
+            networkInPayload: tipPayload.network
           });
           const res = await fetch('/api/onchain-tip', {
             method: 'POST',
@@ -2250,6 +2272,7 @@ export default function Tip({ curatorId }) {
           tipper_pfp: userInfo?.pfp || null,
           tipper_username: userInfo?.username || null,
           fund: fundPercent, // Add fund percentage to OnchainTip
+          network: getNetworkName(walletChainId), // Add network field based on current chain
           tip: [{
             currency: selectedToken?.symbol || 'Token',
             amount: Number(totalAmountFloat) || 0,
@@ -2267,6 +2290,11 @@ export default function Tip({ curatorId }) {
           fundPercent: fundPercent,
           fundType: typeof fundPercent,
           fundValue: tipPayload.fund
+        });
+        console.log('🌐 Network field debug:', {
+          walletChainId: walletChainId,
+          networkName: getNetworkName(walletChainId),
+          networkInPayload: tipPayload.network
         });
         
         const res = await fetch('/api/onchain-tip', {
