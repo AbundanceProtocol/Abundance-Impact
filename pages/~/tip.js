@@ -229,7 +229,8 @@ export default function Tip({ curatorId }) {
     walletProvider,
     userInfo,
     setUserInfo,
-    getAllTokens
+    getAllTokens,
+    setWalletChainId
   } = useContext(AccountContext);
   
   // Use the existing wallet hook for transactions
@@ -310,6 +311,10 @@ export default function Tip({ curatorId }) {
   // Collapsible state for Impact Filter
   const [isImpactFilterCollapsed, setIsImpactFilterCollapsed] = useState(true);
   
+  // Network switching state
+  const [isSwitchingNetwork, setIsSwitchingNetwork] = useState(false);
+  const [networkSwitchError, setNetworkSwitchError] = useState(null);
+  
   // Token selection from WalletConnect - Set USDC as default
   const [selectedToken, setSelectedToken] = useState({
     symbol: 'USDC',
@@ -351,6 +356,148 @@ export default function Tip({ curatorId }) {
     return decimals;
   };
 
+  // Helper function to map walletChainId to network name for OnchainTip
+  const getNetworkName = (chainId) => {
+    const networkMap = {
+      '0x2105': 'base',     // Base
+      '0xa4ec': 'celo',     // Celo
+      '0x1': 'ethereum',    // Ethereum
+      '0xa': 'optimism',    // Optimism
+      '0xa4b1': 'arbitrum', // Arbitrum
+      '0x89': 'polygon'     // Polygon
+    };
+    
+    const networkName = networkMap[chainId] || 'unknown';
+    console.log(`Chain ID ${chainId} mapped to network: ${networkName}`);
+    return networkName;
+  };
+
+  // Network mapping for token networks to chain IDs
+  const getChainIdForNetwork = (networkKey) => {
+    const networkMap = {
+      'base': '0x2105',      // Base
+      'celo': '0xa4ec',      // Celo
+      'ethereum': '0x1',     // Ethereum
+      'optimism': '0xa',     // Optimism
+      'arbitrum': '0xa4b1',  // Arbitrum
+      'polygon': '0x89'      // Polygon
+    };
+    return networkMap[networkKey?.toLowerCase()];
+  };
+
+  // Function to check if network switching is needed and prompt user
+  const checkAndSwitchNetwork = async (token, autoSwitch = true) => {
+    if (!token || !walletConnected || !walletChainId) {
+      console.log('🔍 Network check skipped - missing prerequisites');
+      return false;
+    }
+
+    const requiredChainId = getChainIdForNetwork(token.networkKey);
+    
+    if (!requiredChainId) {
+      console.log('🔍 Unknown network for token:', token.networkKey);
+      return false;
+    }
+
+    console.log('🔍 Network check:', {
+      currentChain: walletChainId,
+      requiredChain: requiredChainId,
+      tokenNetwork: token.networkKey,
+      tokenSymbol: token.symbol
+    });
+
+    const networkNames = {
+      '0x1': 'Ethereum',
+      '0xa': 'Optimism', 
+      '0xa4b1': 'Arbitrum',
+      '0x2105': 'Base',
+      '0xa4ec': 'Celo',
+      '0x89': 'Polygon'
+    };
+
+    // Check if current network matches token's network
+    if (walletChainId !== requiredChainId) {
+      const currentNetworkName = networkNames[walletChainId] || `Chain ${walletChainId}`;
+      const requiredNetworkName = networkNames[requiredChainId] || `Chain ${requiredChainId}`;
+
+      console.log(`🔄 Network mismatch: Current=${currentNetworkName}, Required=${requiredNetworkName}`);
+      
+      // Clear any previous network switch errors
+      setNetworkSwitchError(null);
+      
+      if (!autoSwitch) {
+        // Just set status without attempting to switch
+        setDisperseStatus(`🔄 ${token.symbol} requires ${requiredNetworkName} network. Current: ${currentNetworkName}`);
+        return false;
+      }
+      
+      // Set status to inform user about network switching
+      setDisperseStatus(`🔄 Switching to ${requiredNetworkName} network for ${token.symbol}...`);
+      setIsSwitchingNetwork(true);
+      
+      // Try to switch network automatically
+      try {
+        console.log(`🔄 Attempting to switch to ${requiredNetworkName}...`);
+        
+        // Get the provider for network switching
+        const provider = walletProvider || (typeof window !== 'undefined' && window.ethereum);
+        
+        if (provider && provider.request) {
+          await provider.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: requiredChainId }],
+          });
+          
+          console.log(`✅ Successfully switched to ${requiredNetworkName}`);
+          setDisperseStatus(`✅ Switched to ${requiredNetworkName} network for ${token.symbol}`);
+          
+          // The wallet chain ID should be updated automatically via the chainChanged event listener
+          // But we'll also update it explicitly to ensure immediate UI update
+          setWalletChainId(requiredChainId);
+          
+          setIsSwitchingNetwork(false);
+          return true;
+          
+        } else {
+          console.log('❌ No provider available for network switching');
+          const errorMsg = `Please manually switch to ${requiredNetworkName} network to use ${token.symbol}`;
+          setDisperseStatus(`⚠️ ${errorMsg}`);
+          setNetworkSwitchError(errorMsg);
+          setIsSwitchingNetwork(false);
+          return false;
+        }
+        
+      } catch (error) {
+        console.error('Network switching failed:', error);
+        setIsSwitchingNetwork(false);
+        
+        // Handle specific error cases
+        let errorMsg;
+        if (error.code === 4902) {
+          // Network not added to wallet
+          errorMsg = `${requiredNetworkName} network not found in wallet. Please add it manually.`;
+        } else if (error.code === 4001) {
+          // User rejected the request
+          errorMsg = `Network switch cancelled. Please manually switch to ${requiredNetworkName} to use ${token.symbol}`;
+        } else {
+          errorMsg = `Failed to switch networks. Please manually switch to ${requiredNetworkName} to use ${token.symbol}`;
+        }
+        
+        setDisperseStatus(`⚠️ ${errorMsg}`);
+        setNetworkSwitchError(errorMsg);
+        return false;
+      }
+    } else {
+      console.log(`✅ Already on correct network (${networkNames[requiredChainId] || requiredChainId}) for ${token.symbol}`);
+      // Clear any network-related status messages if we're on the correct network
+      if (disperseStatus && disperseStatus.includes('network')) {
+        setDisperseStatus('');
+      }
+      setNetworkSwitchError(null);
+      return true;
+    }
+  };
+
   // Function to update selected token from WalletConnect
   const updateSelectedToken = (token) => {
     console.log('updateSelectedToken called with:', token);
@@ -362,7 +509,10 @@ export default function Tip({ curatorId }) {
                         selectedToken.networkKey !== token?.networkKey;
     
     if (tokenChanged) {
-      console.log('🔍 Token actually changed, checking cached approval status');
+      console.log('🔍 Token actually changed, checking network compatibility and approval status');
+      
+      // Check if token's network matches current wallet network
+      checkAndSwitchNetwork(token);
       
       // Check cached approval status for the new token
       if (token && !token.isNative && tipAmount > 0) {
@@ -449,11 +599,29 @@ export default function Tip({ curatorId }) {
     }
   }, [selectedToken, walletConnected]);
 
+  // Check network compatibility when wallet chain changes
+  useEffect(() => {
+    if (selectedToken && walletConnected && walletChainId) {
+      console.log('🔍 Wallet chain changed, checking network compatibility');
+      
+      // Check without auto-switching when chain changes
+      checkAndSwitchNetwork(selectedToken, false);
+    }
+  }, [walletChainId, selectedToken, walletConnected]);
+
   // Check all token approvals when wallet connects
   useEffect(() => {
     if (walletConnected && walletAddress) {
       console.log('🔍 Wallet connected, checking all token approvals');
       checkAllTokenApprovals();
+    } else if (!walletConnected) {
+      // Clear network-related states when wallet disconnects
+      console.log('🔍 Wallet disconnected, clearing network states');
+      setNetworkSwitchError(null);
+      setIsSwitchingNetwork(false);
+      if (disperseStatus && (disperseStatus.includes('network') || disperseStatus.includes('Network'))) {
+        setDisperseStatus('');
+      }
     }
   }, [walletConnected, walletAddress]);
 
@@ -520,6 +688,7 @@ export default function Tip({ curatorId }) {
             tipper_pfp: userInfo?.pfp,
             tipper_username: userInfo?.username,
             fund: fundPercent, // Add fund percentage to OnchainTip
+            network: getNetworkName(walletChainId), // Add network field based on current chain
             tip: [{
               currency: pendingTxTokenSymbol || selectedToken?.symbol || 'Token',
               amount: Number(pendingTxTotalAmountDecimal || 0),
@@ -537,6 +706,11 @@ export default function Tip({ curatorId }) {
             fundPercent: fundPercent,
             fundType: typeof fundPercent,
             fundValue: tipPayload.fund
+          });
+          console.log('🌐 Network field debug:', {
+            walletChainId: walletChainId,
+            networkName: getNetworkName(walletChainId),
+            networkInPayload: tipPayload.network
           });
           const res = await fetch('/api/onchain-tip', {
             method: 'POST',
@@ -2098,6 +2272,7 @@ export default function Tip({ curatorId }) {
           tipper_pfp: userInfo?.pfp || null,
           tipper_username: userInfo?.username || null,
           fund: fundPercent, // Add fund percentage to OnchainTip
+          network: getNetworkName(walletChainId), // Add network field based on current chain
           tip: [{
             currency: selectedToken?.symbol || 'Token',
             amount: Number(totalAmountFloat) || 0,
@@ -2115,6 +2290,11 @@ export default function Tip({ curatorId }) {
           fundPercent: fundPercent,
           fundType: typeof fundPercent,
           fundValue: tipPayload.fund
+        });
+        console.log('🌐 Network field debug:', {
+          walletChainId: walletChainId,
+          networkName: getNetworkName(walletChainId),
+          networkInPayload: tipPayload.network
         });
         
         const res = await fetch('/api/onchain-tip', {
@@ -2946,7 +3126,7 @@ export default function Tip({ curatorId }) {
                         </div> */}
                         
                         <button
-                          onClick={() => {
+                          onClick={async () => {
                             console.log('🔍 Multi-Tip button clicked!');
                             console.log('🔍 Button state debug:', {
                               isDispersing,
@@ -2957,29 +3137,45 @@ export default function Tip({ curatorId }) {
                                 chainCheck: !['0x2105', '0xa4ec'].includes(walletChainId), // Base or Celo
                             shouldBeDisabled: isDispersing || !walletConnected || !tipAmount || !['0x2105', '0xa4ec'].includes(walletChainId)
                             });
+                            
+                            // Check network compatibility before proceeding
+                            if (selectedToken) {
+                              const networkCompatible = await checkAndSwitchNetwork(selectedToken, true);
+                              if (!networkCompatible) {
+                                console.log('🔍 Network switch failed or cancelled, aborting multi-tip');
+                                return;
+                              }
+                            }
+                            
                             console.log('🔍 disperseTokens function:', typeof disperseTokens);
                             console.log('🔍 About to call disperseTokens...');
                             disperseTokensLegacy();
                           }}
-                          disabled={isDispersing || !walletConnected || !tipAmount || !['0x2105', '0xa4ec'].includes(walletChainId)}
+                          disabled={isDispersing || !walletConnected || !tipAmount || isSwitchingNetwork}
                           style={{
                             width: "100%",
                             padding: "10px 16px",
                             borderRadius: "8px",
                             border: "none",
-                            backgroundColor: isPending || isConfirming || !walletConnected || !tipAmount || !['0x2105', '0xa4ec'].includes(walletChainId) ? "#555" : "#007bff",
+                            backgroundColor: (() => {
+                              if (isPending || isConfirming || !walletConnected || !tipAmount || isSwitchingNetwork) return "#555";
+                              if (networkSwitchError) return "#ff9500"; // Orange for network mismatch
+                              return "#007bff"; // Blue for ready
+                            })(),
                             color: "#fff",
                             fontSize: "12px",
                             fontWeight: "600",
-                            cursor: isPending || isConfirming || !walletConnected || !tipAmount || !['0x2105', '0xa4ec'].includes(walletChainId) ? "not-allowed" : "pointer"
+                            cursor: isPending || isConfirming || !walletConnected || !tipAmount || isSwitchingNetwork ? "not-allowed" : "pointer"
                           }}
                         >
                           {isPending 
                            ? "Preparing..." 
                            : isConfirming 
                            ? "Confirming..." 
-                           : !['0x2105', '0xa4ec'].includes(walletChainId)
-                             ? "Multi-Tip (Base/Celo Only)"
+                           : isSwitchingNetwork
+                           ? "Switching Network..."
+                           : networkSwitchError
+                             ? `Switch Network & Multi-Tip`
                              : `Multi-Tip ${selectedToken?.symbol || 'Token'}`}
                         </button>
                       </div>
@@ -2989,7 +3185,55 @@ export default function Tip({ curatorId }) {
                 
 
                 
-                                 {/* Disperse Status */}
+                                 {/* Network Switch Button - Show when there's a network mismatch */}
+                 {isLogged && selectedToken && networkSwitchError && (
+                   <div style={{ marginTop: "15px" }}>
+                     <button
+                       onClick={() => {
+                         console.log('🔄 Manual network switch triggered');
+                         checkAndSwitchNetwork(selectedToken, true);
+                       }}
+                       disabled={isSwitchingNetwork}
+                       style={{
+                         width: "100%",
+                         padding: "10px 16px",
+                         borderRadius: "8px",
+                         border: "none",
+                         backgroundColor: isSwitchingNetwork ? "#555" : "#ff9500",
+                         color: "#fff",
+                         fontSize: "12px",
+                         fontWeight: "600",
+                         cursor: isSwitchingNetwork ? "not-allowed" : "pointer",
+                         display: "flex",
+                         alignItems: "center",
+                         justifyContent: "center",
+                         gap: "8px"
+                       }}
+                     >
+                       {isSwitchingNetwork ? (
+                         <>
+                           <Spinner size={16} color={'#fff'} />
+                           Switching Network...
+                         </>
+                       ) : (
+                         `🔄 Switch to ${(() => {
+                           const requiredChainId = getChainIdForNetwork(selectedToken.networkKey);
+                           const networkNames = {
+                             '0x1': 'Ethereum',
+                             '0xa': 'Optimism', 
+                             '0xa4b1': 'Arbitrum',
+                             '0x2105': 'Base',
+                             '0xa4ec': 'Celo',
+                             '0x89': 'Polygon'
+                           };
+                           return networkNames[requiredChainId] || selectedToken.networkKey;
+                         })()}`
+                       )}
+                     </button>
+                   </div>
+                 )}
+
+                 {/* Disperse Status */}
                  {isLogged && disperseStatus && (
                    <div style={{ marginTop: "15px" }}>
                      <div style={{
@@ -2998,11 +3242,13 @@ export default function Tip({ curatorId }) {
                         backgroundColor: (() => {
                           if (disperseStatus.includes("Error")) return "#1b2a4a";
                           if (disperseStatus.includes("⚠️") || disperseStatus.includes("Token approval required")) return "#0b2d5c";
+                          if (disperseStatus.includes("🔄") && disperseStatus.includes("network")) return "#0b2d5c";
                           return "#0f3b6d";
                         })(),
                         color: (() => {
                           if (disperseStatus.includes("Error")) return "#a8c7ff";
                           if (disperseStatus.includes("⚠️") || disperseStatus.includes("Token approval required")) return "#b4d4ff";
+                          if (disperseStatus.includes("🔄") && disperseStatus.includes("network")) return "#b4d4ff";
                           return "#cfe4ff";
                         })(),
                        fontSize: "11px",
@@ -3010,10 +3256,20 @@ export default function Tip({ curatorId }) {
                         position: "relative",
                         border: "1px solid #194a7a"
                      }}>
-                       {disperseStatus}
-                        {(disperseStatus.includes("Error") || disperseStatus.includes("⚠️") || disperseStatus.includes("Token approval required")) && (
+                       {isSwitchingNetwork && disperseStatus.includes("Switching") ? (
+                         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+                           <Spinner size={12} color={'#b4d4ff'} />
+                           {disperseStatus}
+                         </div>
+                       ) : (
+                         disperseStatus
+                       )}
+                        {(disperseStatus.includes("Error") || disperseStatus.includes("⚠️") || disperseStatus.includes("Token approval required") || (disperseStatus.includes("🔄") && disperseStatus.includes("network"))) && !isSwitchingNetwork && (
                          <button
-                           onClick={() => setDisperseStatus('')}
+                           onClick={() => {
+                             setDisperseStatus('');
+                             setNetworkSwitchError(null);
+                           }}
                            style={{
                              position: "absolute",
                              top: "4px",

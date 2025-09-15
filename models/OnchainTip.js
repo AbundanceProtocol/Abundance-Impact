@@ -6,6 +6,7 @@ const onchainTipSchema = new mongoose.Schema({
   tipper_username: { type: String },
   points: { type: String, default: '$IMPACT', index: true },
   fund: { type: Number, default: 0 },
+  network: { type: String, default: 'base' },
   tip: [{
     currency: String,
     amount: Number,

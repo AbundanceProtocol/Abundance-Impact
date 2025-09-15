@@ -15,12 +15,18 @@ export default async function handler(req, res) {
       fundType: typeof req.body.fund,
       fundPercent: req.body.fundPercent
     });
+    console.log('🌐 Network field in API:', {
+      network: req.body.network,
+      networkType: typeof req.body.network,
+      defaultNetwork: req.body.network || 'base'
+    });
 
     const {
       tipper_fid,
       tipper_pfp,
       tipper_username,
       fund,
+      network,
       tip,
       receiver,
       transaction_hash,
@@ -35,6 +41,7 @@ export default async function handler(req, res) {
       tipper_pfp,
       tipper_username,
       fund,
+      network: network || 'base', // Default to 'base' if network not provided
       tip,
       receiver,
       transaction_hash,
