@@ -1140,7 +1140,7 @@ export default function Homepage({ test }) {
 
 
 
-            {(version == '2.0' || adminTest) && (<div className='flex-col' style={{backgroundColor: '', margin: '20px 0 0 0'}}>
+            {(version == '2.0' || adminTest) && (<div className='flex-col' style={{backgroundColor: '', margin: '10px 0 0 0'}}>
 
               <div 
                 className='shadow flex-col'
