@@ -77,7 +77,7 @@ const StreakInfo = () => {
           Check you performance on various metrics (Curation, Multi-tipping, etc.)
         </div>
         <div>
-          Acheiving streaks can help you qualify for rewards or multiple your chances of winning raffles
+          Achieving streaks can help you qualify for rewards or multiply your chances of winning raffles
         </div>
       </div>
     </div>
