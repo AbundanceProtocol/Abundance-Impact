@@ -1221,7 +1221,7 @@ export default function Homepage({ test }) {
                     Tipping Streak
                   </div>
                   <div style={{fontSize: '11px', fontWeight: '400', color: '#ace', margin: '-6px 0 0px 0'}}>
-                    Tipping over $0.25 for last 7 days
+                    Tipped over $0.25 for last 7 days
                   </div>
                   <div className='flex-row' style={{gap: '1.2rem', alignItems: 'center', justifyContent: 'center', margin: '-12px 0 0px 0'}}>
                     {streaksLoading ? (
