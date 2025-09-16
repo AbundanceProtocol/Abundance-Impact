@@ -305,7 +305,7 @@ export default function Rewards() {
       const { sdk } = await import('@farcaster/miniapp-sdk')
       const isApp = await sdk.isInMiniApp();
   
-      let shareUrl = `https://impact.abundance.id/~/rewards/${fid}/season/${fid}`
+      let shareUrl = `https://impact.abundance.id/~/season/${fid}`
   
       let shareText = ''
 
