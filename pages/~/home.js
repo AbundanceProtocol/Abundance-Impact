@@ -1174,22 +1174,25 @@ export default function Homepage({ test }) {
                       padding: "0px 0 0 4px",
                       margin: '0 0 0px 0',
                     }} >
-                  
-                    <BsBarChartFill style={{ fill: "#cde" }} size={20} />
-                    <div>
-
-                      <div style={{border: '0px solid #777', padding: '2px', borderRadius: '10px', backgroundColor: '', maxWidth: 'fit-content', cursor: 'pointer', color: '#cde'}}>
-                        <div className="top-layer flex-row">
-                          <div className="flex-row" style={{padding: "4px 0 4px 10px", marginBottom: '0px', flexWrap: 'wrap', justifyContent: 'flex-start', gap: '0.00rem', width: '', alignItems: 'center'}}>
-                            <div style={{fontSize: isMobile ? '18px' : '22px', fontWeight: '600', color: '', padding: '0px 3px'}}>
-                              Impact Streaks
+                    <div className='flex-row' style={{width: '100%', justifyContent: 'flex-start', alignItems: 'center'}}>
+                      <BsBarChartFill style={{ fill: "#cde" }} size={20} />
+                      <div>
+                        <div style={{border: '0px solid #777', padding: '2px', borderRadius: '10px', backgroundColor: '', width: '100%', cursor: 'pointer', color: '#cde', position: 'relative'}}>
+                          <div className="top-layer flex-row" style={{width: '100%', justifyContent: 'space-between', alignItems: 'center'}}>
+                            <div className="flex-row" style={{padding: "4px 0 4px 10px", marginBottom: '0px', flexWrap: 'wrap', justifyContent: 'flex-start', gap: '0.00rem', alignItems: 'center', width: '100%'}}>
+                              <div style={{fontSize: isMobile ? '18px' : '22px', fontWeight: '600', color: '', padding: '0px 3px'}}>
+                                Impact Streaks
+                              </div>
                             </div>
                           </div>
                         </div>
                       </div>
                     </div>
-
-
+                    {streaksLoading && (
+                      <div style={{padding: '4px 10px 0px 0'}}>
+                        <Spinner size={16} />
+                      </div>
+                    )}
                     <div
                       className="flex-row"
                       style={{
@@ -1201,19 +1204,10 @@ export default function Homepage({ test }) {
                     </div>
                   </div>
 
-
-                  {/* <ToggleSwitch target={'validate'} /> */}
-
                 </div>
 
                 <div className='flex-col' style={{backgroundColor: isLogged ? "#002244ff" : '#333', padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: isLogged ? '#ace' : '#ddd', fontSize: '12px', gap: '0.75rem', position: 'relative'}}>
 
-                  {/* <div className='flex-row' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(isLogged && isOn.validate && isOn.boost && isOn.notifs) ? '#0af' : (isLogged && isOn.validate) ? '#ace' : '#aaa'}`, borderRadius: '8px', backgroundColor: '', alignItems: 'center', gap: '0.15rem', height: '30px'}}>
-                    <div style={{fontSize: '13px', fontWeight: '700', color: (isLogged && isOn.validate && isOn.boost && isOn.notifs) ? '#0af' : (isLogged && isOn.validate) ? '#ace' : '#aaa'}}>
-                      +15
-                    </div>
-                    <BsStar color={(isLogged && isOn.validate && isOn.boost && isOn.notifs) ? '#0af' : (isLogged && isOn.validate) ? '#ace' : '#aaa'} size={13} />
-                  </div> */}
 
 
 
@@ -1221,7 +1215,7 @@ export default function Homepage({ test }) {
                     Tipping Streak
                   </div>
                   <div style={{fontSize: '11px', fontWeight: '400', color: '#ace', margin: '-6px 0 0px 0'}}>
-                    Tipped over $0.25 for last 7 days
+                    Tipped over $0.25 in the last 7 days
                   </div>
                   <div className='flex-row' style={{gap: '1.2rem', alignItems: 'center', justifyContent: 'center', margin: '-12px 0 0px 0'}}>
                     {streaksLoading ? (
@@ -1245,7 +1239,7 @@ export default function Homepage({ test }) {
                     Curation Streak
                   </div>
                   <div style={{fontSize: '11px', fontWeight: '400', color: '#ace', margin: '-6px 0 0px 0'}}>
-                    Curated impactful casts for last 7 days
+                    Curated impactful casts in the last 7 days
                   </div>
                   <div className='flex-row' style={{gap: '1.2rem', alignItems: 'center', justifyContent: 'center', margin: '-12px 0 12px 0'}}>
                     {streaksLoading ? (
@@ -1262,31 +1256,6 @@ export default function Homepage({ test }) {
                       </div>
                     </div>
                   </div>
-
-
-
-
-
-                  {/* <div style={{fontSize: '15px', fontWeight: '600', color: '#ace', margin: '8px 0 0px 0'}}>
-                    Curation Streak
-                  </div>
-
-                  <div className='flex-row' style={{gap: '1.2rem', alignItems: 'center', justifyContent: 'center', margin: '-12px 0 12px 0'}}>
-                    <BsStarFill size={16} color="#0af" />
-                    <BsStar size={16} />
-                    <BsStarFill size={16} color="#0af" />
-                    <BsStarFill size={16} color="#0af" />
-                    <BsStarFill size={16} color="#0af" />
-                    <BsStar size={16} />
-                    <BsStarFill size={16} color="#0af" />
-
-                    <div className='flex-row' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(isLogged && isOn.validate && isOn.boost && isOn.notifs) ? '#0af' : (isLogged && isOn.validate) ? '#ace' : '#aaa'}`, borderRadius: '8px', backgroundColor: '', alignItems: 'center', gap: '0.15rem', height: '30px'}}>
-                      <div style={{fontSize: '13px', fontWeight: '700', color: (isLogged && isOn.validate && isOn.boost && isOn.notifs) ? '#0af' : (isLogged && isOn.validate) ? '#ace' : '#aaa'}}>
-                        5/7
-                      </div>
-                    </div>
-                  </div> */}
-
 
 
 
