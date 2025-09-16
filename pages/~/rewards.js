@@ -300,6 +300,37 @@ export default function Rewards() {
 
 
 
+  const shareAirdrop = async () => {
+    if (fid) {
+      const { sdk } = await import('@farcaster/miniapp-sdk')
+      const isApp = await sdk.isInMiniApp();
+  
+      let shareUrl = `https://impact.abundance.id/~/rewards/${fid}/season/${fid}`
+  
+      let shareText = ''
+
+      const options = [
+        `I got ${creatorRewards?.degen > 0 && Math.floor(creatorRewards?.degen) || 0} $degen from /impact for creating value on Farcaster\n\nCheck your reward here 👇`,
+        `Just got ${creatorRewards?.degen > 0 && Math.floor(creatorRewards?.degen) || 0} $degen from /impact for creating value on Farcaster\n\nCheck your reward here 👇`,
+      ];
+      shareText = options[Math.floor(Math.random() * options.length)];
+  
+      let encodedShareText = encodeURIComponent(shareText)
+      let encodedShareUrl = encodeURIComponent(shareUrl); 
+      let shareLink = `https://farcaster.xyz/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
+  
+      if (!isApp) {
+        window.open(shareLink, '_blank');
+      } else if (isApp) {
+        await sdk.actions.composeCast({
+          text: shareText,
+          embeds: [shareUrl],
+          close: false
+        })
+      }
+    }
+  }
+
 
 
 
@@ -403,7 +434,7 @@ export default function Rewards() {
                   alignItems: "center",
                   gap: "0.0rem",
                   height: "145px",
-                  width: "165px",
+                  width: "155px",
                   justifyContent: "center"
                 }}
               >
@@ -415,7 +446,7 @@ export default function Rewards() {
                   {totalLoading ? (
                     <Spinner size={36} color={isLogged ? "#0af" : "#aaa"} />
                   ) : (
-                    <div style={{ fontSize: "36px", fontWeight: "700", color: isLogged ? "#0af" : "#aaa", height: "45px" }}>
+                    <div style={{ fontSize: "32px", fontWeight: "700", color: isLogged ? "#0af" : "#aaa", height: "45px" }}>
                       {totalRewards?.sum > 0 ? formatNum(Math.floor(totalRewards?.sum)) || 0 : "--"}
                     </div>
                   )}
@@ -511,15 +542,12 @@ export default function Rewards() {
                 </div>)}
 
 
+
+
+
               </div>
 
 
-            </div>
-
-            <div
-              className="flex-row"
-              style={{ backgroundColor: "", justifyContent: "center", gap: "1rem", margin: "20px 0 20px 0" }}
-            >
               <div
                 className="flex-col"
                 style={{
@@ -529,20 +557,20 @@ export default function Rewards() {
                   backgroundColor: "",
                   alignItems: "center",
                   gap: "0.0rem",
-                  height: "125px",
-                  width: "135px",
+                  height: "145px",
+                  width: "155px",
                   justifyContent: "center"
                 }}
               >
                 <div style={{ fontSize: "13px", padding: "5px 0 5px 0", fontWeight: "700", color: isLogged ? "#0af" : "#aaa" }}>
-                  Creator Fund
+                  Season 8
                 </div>
                 <div className="flex-row" style={{ gap: "0.5rem", alignItems: "center", padding: "0 10px" }}>
                   {/* <BsStar color={isLogged ? "#0af" : "#aaa"} size={40} /> */}
                   {creatorLoading ? (
                     <Spinner size={36} color={isLogged ? "#0af" : "#aaa"} />
                   ) : (
-                    <div style={{ fontSize: "36px", fontWeight: "700", color: isLogged ? "#0af" : "#aaa", height: "45px" }}>
+                    <div style={{ fontSize: "32px", fontWeight: "700", color: isLogged ? "#0af" : "#aaa", height: "45px" }}>
                       {creatorRewards?.degen > 0 ?formatNum(Math.floor(creatorRewards?.degen)) || 0 : "--"}
                     </div>
                   )}
@@ -551,7 +579,7 @@ export default function Rewards() {
                   $DEGEN
                 </div>
 
-                <div
+                {/* <div
                   className={`flex-row ${
                     creatorLoading
                       ? "btn-off"
@@ -580,17 +608,73 @@ export default function Rewards() {
                     {creatorLoading
                       ? "Loading..."
                       : (creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet
-                      ? "S7 Airdropped"
+                      ? "S8 Airdropped"
                       : (creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet == null
                       ? "Missing wallet"
                       : "No rewards"}
                   </p>{" "}
-                  {/* update season 5/15 */}
-                </div>
+                </div> */}
 
-
+                {(creatorRewards?.degen > 0) && (<div
+                  onClick={shareAirdrop}
+                  className="flex-col"
+                  style={{
+                    // width: "100%",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    padding: "10px 0 10px 0"
+                  }}
+                >
+                  <div
+                    className="flex-row"
+                    style={{
+                      gap: "0.75rem",
+                      margin: "0px",
+                      flexWrap: "wrap",
+                      justifyContent: "center",
+                      alignItems: "center"
+                    }}
+                  >
+                    <div>
+                      <div
+                        className="flex-row cast-act-lt"
+                        style={{
+                          borderRadius: "8px",
+                          padding: "8px 2px",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: "0.25rem",
+                          height: "28px",
+                          width: "90px",
+                          // backgroundColor: "#aaa"
+                        }}
+                      >
+                        {(!isMobile || isMobile) && <BsShareFill size={14} style={{ width: "21px" }} />}
+                        <p
+                          style={{
+                            padding: "0px",
+                            fontSize: isMobile ? "13px" : "13px",
+                            fontWeight: "500",
+                            textWrap: "wrap",
+                            textAlign: "center"
+                          }}
+                        >
+                          Share
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>)}
 
               </div>
+
+            </div>
+
+            <div
+              className="flex-row"
+              style={{ backgroundColor: "", justifyContent: "center", gap: "1rem", margin: "20px 0 20px 0" }}
+            >
+
 
               <div
                 className="flex-col"

@@ -1018,7 +1018,7 @@ export default function Homepage({ test }) {
                     {creatorLoading
                       ? "Loading..."
                       : (creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet
-                      ? "S7 Airdropped"
+                      ? "S8 Airdropped"
                       : (creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet == null
                       ? "Missing wallet"
                       : "No rewards"}
