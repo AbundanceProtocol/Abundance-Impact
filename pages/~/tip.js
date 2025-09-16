@@ -1510,10 +1510,11 @@ export default function Tip({ curatorId }) {
         return;
       }
 
-      // Check if user is on a supported network (Base or Celo with disperse contract deployed)
+      // Check if user is on a supported network (Base, Celo, or Arbitrum with disperse contract deployed)
       const supportedNetworks = {
         '0x2105': 'Base',
-        '0xa4ec': 'Celo'  // Celo chain ID in hex (42220)
+        '0xa4ec': 'Celo',  // Celo chain ID in hex (42220)
+        '0xa4b1': 'Arbitrum'  // Arbitrum chain ID in hex (42161)
       };
       
       if (!supportedNetworks[walletChainId]) {
@@ -1526,7 +1527,7 @@ export default function Tip({ curatorId }) {
         };
         const currentNetworkName = networkNames[walletChainId] || `Network ${walletChainId}`;
         
-        setDisperseStatus(`⚠️ Multi-Tip is only available on Base or Celo networks. Please switch from ${currentNetworkName} to Base or Celo to use this feature.`);
+        setDisperseStatus(`⚠️ Multi-Tip is only available on Base, Celo, or Arbitrum networks. Please switch from ${currentNetworkName} to Base, Celo, or Arbitrum to use this feature.`);
         setIsDispersing(false);
         return;
       }
@@ -1928,11 +1929,12 @@ export default function Tip({ curatorId }) {
       const legacyAddress = await getLegacyAddress();
       console.log('🔍 Legacy wallet address:', legacyAddress);
 
-      // Check if user is on a supported network (Base or Celo with disperse contract deployed)
+      // Check if user is on a supported network (Base, Celo, or Arbitrum with disperse contract deployed)
       console.log('🔍 Checking network support...');
       const supportedNetworks = {
         '0x2105': 'Base',
-        '0xa4ec': 'Celo'  // Celo chain ID in hex (42220)
+        '0xa4ec': 'Celo',  // Celo chain ID in hex (42220)
+        '0xa4b1': 'Arbitrum'  // Arbitrum chain ID in hex (42161)
       };
       
       console.log('🔍 Wallet chain ID:', walletChainId);
@@ -1940,7 +1942,7 @@ export default function Tip({ curatorId }) {
       
       if (!supportedNetworks[walletChainId]) {
         console.log('❌ Network validation failed - unsupported network');
-        setDisperseStatus(`⚠️ Multi-Tip is only available on Base or Celo networks. Please switch to Base or Celo to use this feature.`);
+        setDisperseStatus(`⚠️ Multi-Tip is only available on Base, Celo, or Arbitrum networks. Please switch to Base, Celo, or Arbitrum to use this feature.`);
         setIsDispersing(false);
         return;
       }
@@ -3134,8 +3136,8 @@ export default function Tip({ curatorId }) {
                               tipAmount,
                               walletChainId,
                               selectedToken: selectedToken?.symbol,
-                                chainCheck: !['0x2105', '0xa4ec'].includes(walletChainId), // Base or Celo
-                            shouldBeDisabled: isDispersing || !walletConnected || !tipAmount || !['0x2105', '0xa4ec'].includes(walletChainId)
+                                chainCheck: !['0x2105', '0xa4ec', '0xa4b1'].includes(walletChainId), // Base, Celo, or Arbitrum
+                            shouldBeDisabled: isDispersing || !walletConnected || !tipAmount || !['0x2105', '0xa4ec', '0xa4b1'].includes(walletChainId)
                             });
                             
                             // Check network compatibility before proceeding
@@ -3151,7 +3153,7 @@ export default function Tip({ curatorId }) {
                             console.log('🔍 About to call disperseTokens...');
                             disperseTokensLegacy();
                           }}
-                          disabled={isDispersing || !walletConnected || !tipAmount || isSwitchingNetwork}
+                          disabled={isDispersing || !walletConnected || !tipAmount || isSwitchingNetwork || !['0x2105', '0xa4ec', '0xa4b1'].includes(walletChainId)}
                           style={{
                             width: "100%",
                             padding: "10px 16px",
