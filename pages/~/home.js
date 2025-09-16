@@ -58,7 +58,8 @@ import {
   BsCurrencyExchange,
   BsQuestionCircleFill,
   BsInfoCircleFill,
-  BsShareFill
+  BsShareFill,
+  BsBarChartFill
 } from "react-icons/bs";
 
 import Spinner from "../../components/Common/Spinner";
@@ -92,13 +93,17 @@ export default function Homepage({ test }) {
     setPanelOpen,
     setPanelTarget,
     adminTest,
-    setAdminTest
+    setAdminTest,
+    setUserBalances
   } = useContext(AccountContext);
   const [screenWidth, setScreenWidth] = useState(undefined);
   const [screenHeight, setScreenHeight] = useState(undefined);
   const [textMax, setTextMax] = useState("562px");
   const [feedMax, setFeedMax] = useState("620px");
   // const [showPopup, setShowPopup] = useState({open: false, url: null})
+  const [tippingStreak, setTippingStreak] = useState({ streakData: Array(7).fill({ hasTip: false }), currentStreak: 0 });
+  const [curationStreak, setCurationStreak] = useState({ streakData: Array(7).fill({ hasImpact: false }), currentStreak: 0 });
+  const [streaksLoading, setStreaksLoading] = useState(true);
   const router = useRouter();
   const { eco, referrer, autoFund } = router.query;
   const { isMobile } = useMatchBreakpoints();
@@ -141,12 +146,18 @@ export default function Homepage({ test }) {
   };
 
   useEffect(() => {
-    if (fid) {
+    if (fid && isLogged) {
       getCreatorRewards(fid);
       getDailyRewards(fid);
       getTotalClaims(fid);
+      getStreakData(fid);
+    } else if (!isLogged) {
+      // Reset streaks when user logs out
+      setTippingStreak({ streakData: Array(7).fill({ hasTip: false }), currentStreak: 0 });
+      setCurationStreak({ streakData: Array(7).fill({ hasImpact: false }), currentStreak: 0 });
+      setStreaksLoading(false);
     }
-  }, [fid]);
+  }, [fid, isLogged]);
 
   useEffect(() => {
     if (userBalances.impact == 0) {
@@ -395,6 +406,49 @@ export default function Homepage({ test }) {
       setIsMiniApp(isApp);
     })();
   }, [isLogged]);
+
+  async function getStreakData(fid) {
+    try {
+      setStreaksLoading(true);
+      
+      // Fetch both tipping and curation streaks in parallel
+      const [tippingResponse, curationResponse] = await Promise.all([
+        axios.get("/api/streaks/tipping", { params: { fid } }),
+        axios.get("/api/streaks/curation", { params: { fid } })
+      ]);
+
+      if (tippingResponse?.data?.success) {
+        setTippingStreak(tippingResponse.data);
+      }
+
+      if (curationResponse?.data?.success) {
+        setCurationStreak(curationResponse.data);
+      }
+
+      setStreaksLoading(false);
+    } catch (error) {
+      console.log("getStreakData error", error);
+      setStreaksLoading(false);
+    }
+  }
+
+  // Helper function to render streak stars
+  const renderStreakStars = (streakData) => {
+    return streakData.map((day, index) => {
+      const hasStar = day.hasTip || day.hasImpact;
+      const isCurrentDay = index === streakData.length - 1; // Last item is current day
+      
+      if (hasStar) {
+        // Current day (today) gets yellow color, other days get blue
+        const color = isCurrentDay ? "#ffd700" : "#0af"; // Yellow for today, blue for others
+        return <BsStarFill key={index} size={16} color={color} />;
+      } else {
+        // Empty stars: current day is yellow, other days are default
+        const color = isCurrentDay ? "#ffd700" : undefined;
+        return <BsStar key={index} size={16} color={color} />;
+      }
+    });
+  };
 
   async function getUserSettings(fid) {
     try {
@@ -1086,7 +1140,161 @@ export default function Homepage({ test }) {
 
 
 
+            {(version == '2.0' || adminTest) && (<div className='flex-col' style={{backgroundColor: '', margin: '20px 0 0 0'}}>
 
+              <div 
+                className='shadow flex-col'
+                style={{
+                  backgroundColor: isLogged ? "#002244" : '#333',
+                  borderRadius: "15px",
+                  border: isLogged ? "1px solid #11447799" : "1px solid #555",
+                  width: isMiniApp || isMobile ? '340px' : '100%',
+                  margin: isMiniApp || isMobile ? '15px auto 0 auto' : '15px auto 0 auto',
+                }} >
+                <div
+                  className="shadow flex-row"
+                  style={{
+                    backgroundColor: isLogged ? "#11448888" : "#444",
+                    width: "100%",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    padding: "8px", 
+                    borderRadius: "15px",
+                    margin: '0 0 10px 0',
+                    gap: '1rem'
+                  }} >
+
+
+                  <div
+                    className="flex-row"
+                    style={{
+                      width: "100%",
+                      justifyContent: "flex-start",
+                      alignItems: "center",
+                      padding: "0px 0 0 4px",
+                      margin: '0 0 0px 0',
+                    }} >
+                  
+                    <BsBarChartFill style={{ fill: "#cde" }} size={20} />
+                    <div>
+
+                      <div style={{border: '0px solid #777', padding: '2px', borderRadius: '10px', backgroundColor: '', maxWidth: 'fit-content', cursor: 'pointer', color: '#cde'}}>
+                        <div className="top-layer flex-row">
+                          <div className="flex-row" style={{padding: "4px 0 4px 10px", marginBottom: '0px', flexWrap: 'wrap', justifyContent: 'flex-start', gap: '0.00rem', width: '', alignItems: 'center'}}>
+                            <div style={{fontSize: isMobile ? '18px' : '22px', fontWeight: '600', color: '', padding: '0px 3px'}}>
+                              Impact Streaks
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+
+                    <div
+                      className="flex-row"
+                      style={{
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        cursor: "pointer",
+                      }} >
+
+                    </div>
+                  </div>
+
+
+                  {/* <ToggleSwitch target={'validate'} /> */}
+
+                </div>
+
+                <div className='flex-col' style={{backgroundColor: isLogged ? "#002244ff" : '#333', padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: isLogged ? '#ace' : '#ddd', fontSize: '12px', gap: '0.75rem', position: 'relative'}}>
+
+                  {/* <div className='flex-row' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(isLogged && isOn.validate && isOn.boost && isOn.notifs) ? '#0af' : (isLogged && isOn.validate) ? '#ace' : '#aaa'}`, borderRadius: '8px', backgroundColor: '', alignItems: 'center', gap: '0.15rem', height: '30px'}}>
+                    <div style={{fontSize: '13px', fontWeight: '700', color: (isLogged && isOn.validate && isOn.boost && isOn.notifs) ? '#0af' : (isLogged && isOn.validate) ? '#ace' : '#aaa'}}>
+                      +15
+                    </div>
+                    <BsStar color={(isLogged && isOn.validate && isOn.boost && isOn.notifs) ? '#0af' : (isLogged && isOn.validate) ? '#ace' : '#aaa'} size={13} />
+                  </div> */}
+
+
+
+                  <div style={{fontSize: '15px', fontWeight: '600', color: '#ace', margin: '8px 0 0px 0'}}>
+                    Tipping Streak
+                  </div>
+
+                  <div className='flex-row' style={{gap: '1.2rem', alignItems: 'center', justifyContent: 'center', margin: '-12px 0 0px 0'}}>
+                    {streaksLoading ? (
+                      Array(7).fill(0).map((_, index) => (
+                        <BsStar key={index} size={16} color="#444" />
+                      ))
+                    ) : (
+                      renderStreakStars(tippingStreak.streakData)
+                    )}
+
+                    <div className='flex-row' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(isLogged && isOn.validate && isOn.boost && isOn.notifs) ? '#0af' : (isLogged && isOn.validate) ? '#ace' : '#aaa'}`, borderRadius: '8px', backgroundColor: '', alignItems: 'center', gap: '0.15rem', height: '30px'}}>
+                      <div style={{fontSize: '13px', fontWeight: '700', color: (isLogged && isOn.validate && isOn.boost && isOn.notifs) ? '#0af' : (isLogged && isOn.validate) ? '#ace' : '#aaa'}}>
+                        {streaksLoading ? '0/7' : `${tippingStreak.totalDaysWithTips || 0}/7`}
+                      </div>
+                    </div>
+                  </div>
+
+
+
+                  <div style={{fontSize: '15px', fontWeight: '600', color: '#ace', margin: '8px 0 0px 0'}}>
+                    Curation Streak
+                  </div>
+
+                  <div className='flex-row' style={{gap: '1.2rem', alignItems: 'center', justifyContent: 'center', margin: '-12px 0 12px 0'}}>
+                    {streaksLoading ? (
+                      Array(7).fill(0).map((_, index) => (
+                        <BsStar key={index} size={16} color="#444" />
+                      ))
+                    ) : (
+                      renderStreakStars(curationStreak.streakData)
+                    )}
+
+                    <div className='flex-row' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(isLogged && isOn.validate && isOn.boost && isOn.notifs) ? '#0af' : (isLogged && isOn.validate) ? '#ace' : '#aaa'}`, borderRadius: '8px', backgroundColor: '', alignItems: 'center', gap: '0.15rem', height: '30px'}}>
+                      <div style={{fontSize: '13px', fontWeight: '700', color: (isLogged && isOn.validate && isOn.boost && isOn.notifs) ? '#0af' : (isLogged && isOn.validate) ? '#ace' : '#aaa'}}>
+                        {streaksLoading ? '0/7' : `${curationStreak.totalDaysWithImpacts || 0}/7`}
+                      </div>
+                    </div>
+                  </div>
+
+
+
+
+
+                  {/* <div style={{fontSize: '15px', fontWeight: '600', color: '#ace', margin: '8px 0 0px 0'}}>
+                    Curation Streak
+                  </div>
+
+                  <div className='flex-row' style={{gap: '1.2rem', alignItems: 'center', justifyContent: 'center', margin: '-12px 0 12px 0'}}>
+                    <BsStarFill size={16} color="#0af" />
+                    <BsStar size={16} />
+                    <BsStarFill size={16} color="#0af" />
+                    <BsStarFill size={16} color="#0af" />
+                    <BsStarFill size={16} color="#0af" />
+                    <BsStar size={16} />
+                    <BsStarFill size={16} color="#0af" />
+
+                    <div className='flex-row' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(isLogged && isOn.validate && isOn.boost && isOn.notifs) ? '#0af' : (isLogged && isOn.validate) ? '#ace' : '#aaa'}`, borderRadius: '8px', backgroundColor: '', alignItems: 'center', gap: '0.15rem', height: '30px'}}>
+                      <div style={{fontSize: '13px', fontWeight: '700', color: (isLogged && isOn.validate && isOn.boost && isOn.notifs) ? '#0af' : (isLogged && isOn.validate) ? '#ace' : '#aaa'}}>
+                        5/7
+                      </div>
+                    </div>
+                  </div> */}
+
+
+
+
+                  <div className='flex-row' style={{position: 'absolute', bottom: '0', right: '0', padding: '5px 5px', gap: '.25rem', alignItems: 'center'}}>
+                    <BsInfoCircle size={15} onClick={() => {
+                      openSwipeable("streak"); }} />
+                  </div>
+                </div>
+              </div>
+              </div>
+
+              )}
 
 
 
@@ -1587,7 +1795,7 @@ export default function Homepage({ test }) {
         style={{
           justifyContent: "center",
           alignItems: "center",
-          padding: "40px 10px 0 10px",
+          padding: "40px 10px 100px 10px",
           flexWrap: "wrap",
           gap: "0.5rem"
         }}
