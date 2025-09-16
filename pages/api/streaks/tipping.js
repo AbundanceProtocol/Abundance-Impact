@@ -43,7 +43,7 @@ export default async function handler(req, res) {
       });
     }
 
-    // Query for tips in the last 7 days where tip.value > 0.25
+    // Query for all tips in the last 7 days and check if daily total > 0.25
     const streakData = await Promise.all(
       last7Days.map(async ({ date, endDate, dayIndex }) => {
         const tips = await OnchainTip.find({
@@ -51,18 +51,20 @@ export default async function handler(req, res) {
           createdAt: {
             $gte: date,
             $lt: endDate
-          },
-          'tip.value': { $gt: 0.25 }
+          }
         }).lean();
+
+        // Calculate total value for the day
+        const totalValue = tips.reduce((sum, tip) => {
+          return sum + (tip.tip || []).reduce((tipSum, t) => tipSum + (t.value || 0), 0);
+        }, 0);
 
         return {
           date: date.toISOString().split('T')[0],
           dayIndex,
-          hasTip: tips.length > 0,
+          hasTip: totalValue > 0.25, // Check if daily total > 0.25
           tipCount: tips.length,
-          totalValue: tips.reduce((sum, tip) => {
-            return sum + (tip.tip || []).reduce((tipSum, t) => tipSum + (t.value || 0), 0);
-          }, 0)
+          totalValue
         };
       })
     );
