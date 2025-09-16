@@ -20,6 +20,7 @@ export default function WalletConnect({ onTipAmountChange, onTokenChange }) {
     lastTopCoinsFetch, setLastTopCoinsFetch,
     topCoinsCache, setTopCoinsCache,
     getAllTokens,
+    clearTokenCache,
     lastRpcCall, setLastRpcCall,
     isMiniApp
   } = useContext(AccountContext);
@@ -75,15 +76,23 @@ export default function WalletConnect({ onTipAmountChange, onTokenChange }) {
 
   // Helper functions for token display
   const getTokenImage = (token) => {
-    // Use logo from API if available
-    if (token.logo && token.logo !== null) {
-      console.log('🔍 Using API logo for', token.symbol, ':', token.logo);
-      return token.logo;
+    // Special handling for Arbitrum tokens - always use local Arbitrum logo for ARB and ETH on Arbitrum
+    if ((token.networkKey === 'arbitrum' || token.networkKey === '2' || token.network === 'Arbitrum') && 
+        (token.symbol === 'ARB' || token.symbol === 'ETH')) {
+      console.log('🔍 Forcing Arbitrum logo for', token.symbol, 'on Arbitrum network');
+      return '/images/tokens/arbitrum.png';
     }
     
-    // Fallback to local images
+    // Special handling for other Arbitrum network tokens
+    if ((token.networkKey === 'arbitrum' || token.networkKey === '2' || token.network === 'Arbitrum') && 
+        (!token.symbol || !['USDC', 'USDT', 'WETH', 'DEGEN', 'BETR', 'NOICE', 'TIPN', 'EGGS', 'USDGLO', 'QR'].includes(token.symbol))) {
+      console.log('🔍 Using Arbitrum network logo for unknown token:', token.symbol);
+      return '/images/tokens/arbitrum.png';
+    }
+    
+    // First check for specific token symbol mappings
     const tokenImages = {
-      'ETH': '/images/tokens/ethereum.png',
+      'ETH': (token.networkKey === 'arbitrum' || token.networkKey === '2' || token.network === 'Arbitrum') ? '/images/tokens/arbitrum.png' : '/images/tokens/ethereum.png',
       'WETH': '/images/tokens/ethereum.png',
       'USDC': '/images/tokens/usdc.png',
       'USDT': '/images/tokens/usdt.jpeg',
@@ -96,12 +105,41 @@ export default function WalletConnect({ onTipAmountChange, onTokenChange }) {
       'USDGLO': '/images/tokens/usdglo.png',
       'QR': '/images/tokens/qr.png',
       'OP': '/images/tokens/optimism.png',
-      'ARB': '/images/tokens/ethereum.png'
+      'ARB': '/images/tokens/arbitrum.png'  // Always use Arbitrum logo for ARB token
     };
     
-    const fallbackImage = tokenImages[token.symbol] || '/images/tokens/ethereum.png';
-    console.log('🔍 Using fallback image for', token.symbol, ':', fallbackImage, '(logo was:', token.logo, ')');
-    return fallbackImage;
+    // If we have a specific token image, use it
+    if (tokenImages[token.symbol]) {
+      console.log('🔍 Using specific token image for', token.symbol, ':', tokenImages[token.symbol]);
+      return tokenImages[token.symbol];
+    }
+    
+    // Use logo from API if available (for non-generic tokens)
+    if (token.logo && token.logo !== null) {
+      console.log('🔍 Using API logo for', token.symbol, ':', token.logo);
+      return token.logo;
+    }
+    
+    // Network-based fallback
+    const networkImages = {
+      'ethereum': '/images/tokens/ethereum.png',
+      'optimism': '/images/tokens/optimism.png',
+      'arbitrum': '/images/tokens/arbitrum.png',
+      'base': '/images/tokens/base.png',
+      'celo': '/images/tokens/celo.jpg',
+      '2': '/images/tokens/arbitrum.png'  // Handle Zapper's numeric networkKey for Arbitrum
+    };
+    
+    // Check multiple ways to identify Arbitrum
+    let networkFallback;
+    if (token.networkKey === 'arbitrum' || token.networkKey === '2' || token.network === 'Arbitrum') {
+      networkFallback = '/images/tokens/arbitrum.png';
+    } else {
+      networkFallback = networkImages[token.networkKey] || '/images/tokens/ethereum.png';
+    }
+    
+    console.log('🔍 Using network fallback for', token.symbol, 'on network', token.network, 'networkKey', token.networkKey, ':', networkFallback);
+    return networkFallback;
   };
 
   const getNetworkImage = (chainId) => {
@@ -114,7 +152,7 @@ export default function WalletConnect({ onTipAmountChange, onTokenChange }) {
     const networkImages = {
       '0x1': '/images/tokens/ethereum.png',      // Ethereum
       '0xa': '/images/tokens/optimism.png',      // Optimism
-      '0xa4b1': '/images/tokens/ethereum.png',  // Arbitrum (fallback to ethereum for now)
+      '0xa4b1': '/images/tokens/arbitrum.png',  // Arbitrum
       '0x2105': '/images/tokens/base.png',      // Base
       '0xa4ec': '/images/tokens/celo.jpg'       // Celo
     };

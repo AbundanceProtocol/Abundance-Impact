@@ -805,7 +805,7 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
     console.log('🔄 Fetching tokens from Zapper API for address:', address);
     
     try {
-      const response = await fetch(`/api/wallet/zapper-simple?address=${address}&networks=base,celo`);
+      const response = await fetch(`/api/wallet/zapper-simple?address=${address}&networks=base,celo,arbitrum`);
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -829,6 +829,32 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
       console.error('❌ Zapper API error:', error);
       return [];
     }
+  };
+
+  // Helper function to get network logo based on network key
+  const getNetworkLogo = (networkKey, tokenSymbol) => {
+    // First check for specific token logos
+    const tokenLogos = {
+      'USDC': '/images/tokens/usdc.png',
+      'USDT': '/images/tokens/usdt.jpeg',
+      'WETH': '/images/tokens/ethereum.png',
+      'CELO': '/images/tokens/celo.jpg'
+    };
+    
+    if (tokenLogos[tokenSymbol]) {
+      return tokenLogos[tokenSymbol];
+    }
+    
+    // Fall back to network-based logos
+    const networkLogos = {
+      'ethereum': '/images/tokens/ethereum.png',
+      'optimism': '/images/tokens/optimism.png',
+      'arbitrum': '/images/tokens/arbitrum.png',
+      'base': '/images/tokens/base.png',
+      'celo': '/images/tokens/celo.jpg'
+    };
+    
+    return networkLogos[networkKey?.toLowerCase()] || '/images/tokens/ethereum.png';
   };
 
   // Fetch additional important tokens that might not be in API
@@ -907,7 +933,7 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
                   chainId: token.chainId,
                   isNative: true,
                   decimals: token.decimals,
-                  logo: token.symbol === 'CELO' ? '/images/tokens/celo.jpg' : '/images/tokens/ethereum.png'
+                  logo: getNetworkLogo(token.networkKey, token.symbol)
                 };
                 additionalTokens.push(newToken);
                 console.log(`✅ Added native token: ${token.symbol} - Balance: ${balance.toFixed(4)}, Value: $${value.toFixed(2)}, Network: ${token.network}`);
@@ -951,9 +977,7 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
                   chainId: token.chainId,
                   isNative: false,
                   decimals: token.decimals,
-                  logo: token.symbol === 'USDC' ? '/images/tokens/usdc.png' : 
-                        token.symbol === 'USDT' ? '/images/tokens/usdt.jpeg' :
-                        token.symbol === 'WETH' ? '/images/tokens/ethereum.png' : '/images/tokens/ethereum.png'
+                  logo: getNetworkLogo(token.networkKey, token.symbol)
                 };
                 additionalTokens.push(newToken);
                 console.log(`✅ Added ERC20 token: ${token.symbol} - Balance: ${balance.toFixed(4)}, Value: $${value.toFixed(2)}, Network: ${token.network}`);
@@ -971,6 +995,16 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
     console.log('🔄 Additional tokens fetched:', additionalTokens);
     console.log('🔄 Total additional tokens count:', additionalTokens.length);
     return additionalTokens;
+  };
+
+  // Function to clear token cache for an address
+  const clearTokenCache = (address) => {
+    if (!address) return;
+    const cacheKey = `all_${address.toLowerCase()}`;
+    if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.removeItem(cacheKey);
+      console.log('🗑️ Cleared token cache for address:', address);
+    }
   };
 
   const getAllTokens = async (address, forceRefresh = false) => {
@@ -1252,6 +1286,7 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
     getTopCoins,
     getTopCoinsCelo,
     getAllTokens,
+    clearTokenCache,
     miniApp, setMiniApp,
     isMiniApp, setIsMiniApp,
     fid, setFid,

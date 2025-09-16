@@ -23,8 +23,8 @@ export default async function handler(req, res) {
     });
   }
 
-  // Default to Base and Celo if no networks specified
-  const defaultNetworks = ['BASE_MAINNET', 'CELO_MAINNET'];
+  // Default to Base, Celo, and Arbitrum if no networks specified
+  const defaultNetworks = ['BASE_MAINNET', 'CELO_MAINNET', 'ARBITRUM_MAINNET'];
   const requestedNetworks = networks ? networks.split(',') : defaultNetworks;
 
   // Map network names to Zapper format
@@ -163,6 +163,16 @@ export default async function handler(req, res) {
         networkKey: networkId.toLowerCase(), 
         chainId: '0x0' 
       };
+      
+      // Special handling for Arbitrum tokens - fix networkKey
+      if (token.network?.name === 'Arbitrum' || networkId === '42161' || networkId === '2') {
+        networkInfo = {
+          network: 'Arbitrum',
+          networkKey: 'arbitrum',
+          chainId: '0xa4b1'
+        };
+        console.log('🔍 Fixed Arbitrum network mapping for token:', token.symbol);
+      }
       
       // Special fallback for Celo tokens - ensure they get Celo network mapping
       if (token.symbol === 'CELO' || token.symbol === 'USDGLO' || 
