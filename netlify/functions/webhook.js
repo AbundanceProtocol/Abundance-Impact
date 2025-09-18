@@ -18,14 +18,14 @@ export const handler = async (event) => {
     console.log("✅ Received Farcaster event:", data);
     console.log("Event type:", data.event.event, "| Fid:", data.fid);
 
-    if (data.fid === 9326 && data.event.notificationDetails) {
+    if (data.event.notificationDetails) {
       await axios({
         method: "post",
         url: data.event.notificationDetails.url,
         data: {
           notificationId: `fid-${Date.now()}`,
-          title: "Welcome!",
-          body: "Thanks for enabling notifications!",
+          title: "Welcome to Impact 2.0",
+          body: "Let's build together the user-centric algo on Farcaster!",
           targetUrl: "https://impact.abundance.id",
           tokens: [data.event.notificationDetails.token],
         },

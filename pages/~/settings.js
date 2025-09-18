@@ -736,7 +736,7 @@ export default function Settings({test, rewards, onSettingsChange}) {
                   }}
                 >
                   <div>
-                    You need to login to enable Boosting, Auto-funding or Quests
+                    You need to login to enable Boosting & Auto-funding. Can't login? Try on <a style={{color: '#ace', textDecoration: 'underline'}} href="https://impact.abundance.id" target="_blank" rel="noopener noreferrer">web</a>
                   </div>
                 </div>
               )}
