@@ -7,7 +7,7 @@ export async function getServerSideProps({ params, query }) {
     version: "next",
     imageUrl: `https://impact.abundance.id/api/frames/tip/curation-v1?hash=${encodeURIComponent(hash)}`,
     button: {
-      title: "My Curation",
+      title: "Impact 2.0 Curation",
       action: {
         type: "launch_frame",
         name: "Impact 2.0",
