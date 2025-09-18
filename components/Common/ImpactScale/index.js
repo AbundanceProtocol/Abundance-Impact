@@ -5,13 +5,15 @@ import React, { useState, useContext } from 'react';
 import { AccountContext } from '../../../context';
 import { FaStar } from 'react-icons/fa';
 import { IoMdRefresh as Refresh} from "react-icons/io";
+import { BsShareFill} from "react-icons/bs";
 import axios from 'axios';
 import { PiMedal, PiCheckFat } from "react-icons/pi";
 
 const ImpactScale = ({ initValue, setTipPercent, setInitValue, type, cast, updateCast, index }) => {
-  const { isLogged, userBalances, setUserBalances, fid } = useContext(AccountContext)
+  const { isLogged, userBalances, setUserBalances, fid, LoginPopup } = useContext(AccountContext)
   const [fail, setFail] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [nominated, setNominated] = useState(false)
 
   const [value, setValue] = useState(5);
   const handleChange = (event) => {
@@ -34,8 +36,41 @@ const ImpactScale = ({ initValue, setTipPercent, setInitValue, type, cast, updat
     setSuccess(true);
     setTimeout(() => {
       setSuccess(false);
+      setNominated(true);
     }, 2000);
   }
+
+
+  const shareCuration = async () => {
+    if (fid) {
+      const { sdk } = await import('@farcaster/miniapp-sdk')
+      const isApp = await sdk.isInMiniApp();
+  
+      let shareUrl = `https://impact.abundance.id/~/curation/${cast?.hash}?fid=${fid}`
+  
+      let shareText = ''
+      let shareQC = `https://farcaster.xyz/${cast?.author?.username}/${cast?.hash?.slice(0, 10)}`
+      const options = [
+        `I just nominated ${cast?.author?.username ? '@' + cast?.author?.username + "'s" : 'a'} cast for its impact on Farcaster`,
+      ];
+      shareText = options[Math.floor(Math.random() * options.length)];
+  
+      let encodedShareText = encodeURIComponent(shareText)
+      let encodedShareUrl = encodeURIComponent(shareUrl); 
+      let shareLink = `https://farcaster.xyz/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
+  
+      if (!isApp) {
+        window.open(shareLink, '_blank');
+      } else if (isApp) {
+        await sdk.actions.composeCast({
+          text: shareText,
+          embeds: [shareUrl, shareQC],
+          close: false
+        })
+      }
+    }
+  }
+
 
 
   async function boostImpact(cast, impactAmount) {
@@ -69,6 +104,7 @@ const ImpactScale = ({ initValue, setTipPercent, setInitValue, type, cast, updat
         let impactBalance = impactResponse?.data?.balance
         let currentImpact = cast.impact_balance || 0
         let addedPoints = impactResponse.data.points
+        let castData = impactResponse?.data?.cast
         const updatedCast = {...cast, impact_balance: currentImpact + addedPoints}
         updateCast(index, updatedCast)
         setUserBalances(prev => ({
@@ -117,44 +153,81 @@ const ImpactScale = ({ initValue, setTipPercent, setInitValue, type, cast, updat
         </div>
       </div>
       <div>
-      <div className='flex-row' style={{alignContent: 'center', alignItems: 'center', gap: '0.25rem', margin: '10px'}}>
-        <div onClick={
-            () => {
-              if (isLogged) {
-                if(userBalances.impact >= value) {
-                  boostImpact(cast, value || 5)
-                } else { 
-                  clickFailed()
+        {!nominated ? (<div className='flex-row' style={{alignContent: 'center', alignItems: 'center', gap: '0.25rem', margin: '10px'}}>
+          <div onClick={
+              () => {
+                if (isLogged) {
+                  if (userBalances.impact >= value) {
+                    boostImpact(cast, value || 5)
+                  } else { 
+                    clickFailed()
+                  }
+                } else {
+                  LoginPopup()
                 }
               }
             }
-          }
-          className={`flex-row ${success ? 'btn-act' : (fail) ? 'btn-off' : 'btn-on'}`}
-          style={{
-            borderRadius: "16px",
-            padding: "4px 16px",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "0.25rem",
-            margin: '0px 0 0px 0',
-            cursor: 'pointer'
-          }}
-        >
-          {success ? (<PiCheckFat size={20} />): (<PiMedal size={20} />)}
-          <p
+            className={`flex-row ${success ? 'btn-act' : (fail) ? 'btn-off' : 'btn-on'}`}
             style={{
-              padding: "0px 10px 0px 2px",
-              fontSize: "18px",
-              fontWeight: "700",
-              textWrap: "nowrap",
+              borderRadius: "16px",
+              padding: "4px 16px",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "0.25rem",
+              margin: '0px 0 0px 0',
+              cursor: 'pointer'
             }}
           >
-            {success ? 'Nominated!' : 'Nominate'}
-          </p>
+            {success ? (<PiCheckFat size={20} />) : (<PiMedal size={20} />)}
+            <p
+              style={{
+                padding: "0px 10px 0px 2px",
+                fontSize: "18px",
+                fontWeight: "700",
+                textWrap: "nowrap",
+              }}
+            >
+              {success ? 'Nominated!' : 'Nominate'}
+            </p>
 
+          </div>
+
+        </div>) : (
+          <div className='flex-row' style={{alignContent: 'center', alignItems: 'center', gap: '0.25rem', margin: '10px'}}>
+          <div onClick={
+              () => {
+                if (isLogged) {
+                  shareCuration()
+                } else {
+                  LoginPopup()
+                }
+              }
+            }
+            className={`flex-row btn-on`}
+            style={{
+              borderRadius: "16px",
+              padding: "4px 16px",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "0.25rem",
+              margin: '0px 0 0px 0',
+              cursor: 'pointer'
+            }}
+          >
+            <BsShareFill size={20} />
+            <p
+              style={{
+                padding: "0px 10px 0px 2px",
+                fontSize: "18px",
+                fontWeight: "700",
+                textWrap: "nowrap",
+              }}
+            >
+              Share
+            </p>
+          </div>
         </div>
-
-      </div>
+        )}
       </div>
 
 

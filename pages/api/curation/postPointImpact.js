@@ -122,7 +122,7 @@ export default async function handler(req, res) {
                     let impactTotal = cast.impact_total
                     let curatorCount = cast.impact_points.length
                     const saveLists = await saveAll(user, impact, cast)
-                    return {saveLists, impactTotal, curatorCount}
+                    return {saveLists, impactTotal, curatorCount, cast}
                     
                   } else {
                     impact = createdImpact(fid, castContext, impactAmount, points)
@@ -132,7 +132,7 @@ export default async function handler(req, res) {
                     let impactTotal = cast.impact_total
                     let curatorCount = cast.impact_points.length
                     const saveLists = await saveAll(user, impact, cast)
-                    return {saveLists, impactTotal, curatorCount}
+                    return {saveLists, impactTotal, curatorCount, cast}
                   }
 
                 } else {
@@ -197,18 +197,18 @@ export default async function handler(req, res) {
                     nominationCast(castContext.author_username, user.username, ecosystem.ecosystem_name, castContext.cast_hash, signer)
                   }
 
-                  return {saveLists, impactTotal, curatorCount}
+                  return {saveLists, impactTotal, curatorCount, cast}
                 }
               } else {
-                return {saveLists: null, impactTotal: null , curatorCount: null}
+                return {saveLists: null, impactTotal: null , curatorCount: null, cast: null}
               }
             } catch (error) {
               console.error("Error while saving user, cast and impact objects:", error);
-              return {saveLists: null, impactTotal: null , curatorCount: null}
+              return {saveLists: null, impactTotal: null , curatorCount: null, cast: null}
             }
           }
 
-          const {saveLists, impactTotal, curatorCount} = await updateListings(fid, castContext, impactAmount, points)
+          const {saveLists, impactTotal, curatorCount, cast} = await updateListings(fid, castContext, impactAmount, points)
           console.log('7', saveLists, impactTotal, curatorCount)
 
           if (saveLists || saveLists == 0) {
@@ -244,7 +244,7 @@ export default async function handler(req, res) {
                 curatedCast = await curateCast(castContext.cast_hash)
               }
             }
-            res.status(201).json({ balance: saveLists, points: impactAmount, curated: curatedCast, message: 'User, cast and impact objects saved successfully' });
+            res.status(201).json({ balance: saveLists, points: impactAmount, curated: curatedCast, cast: cast, message: 'User, cast and impact objects saved successfully' });
           } else {
             res.status(500).json({ error: 'Internal Server Error' });
           }
