@@ -46,7 +46,7 @@ const ImpactScale = ({ initValue, setTipPercent, setInitValue, type, cast, updat
       const { sdk } = await import('@farcaster/miniapp-sdk')
       const isApp = await sdk.isInMiniApp();
   
-      let shareUrl = `https://impact.abundance.id/~/curation/${cast?.hash}`
+      let shareUrl = `https://impact.abundance.id/~/curation/${cast?.hash}?fid=${fid}`
   
       let shareText = ''
       let shareQC = `https://farcaster.xyz/${cast?.author?.username}/${cast?.hash?.slice(0, 10)}`
