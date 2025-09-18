@@ -49,7 +49,7 @@ const ImpactScale = ({ initValue, setTipPercent, setInitValue, type, cast, updat
       let shareUrl = `https://impact.abundance.id/~/curation/${cast?.hash}`
   
       let shareText = ''
-
+      let shareQC = `https://farcaster.xyz/${cast?.author?.username}/${cast?.hash?.slice(0, 10)}`
       const options = [
         `I just nominated ${cast?.author?.username ? '@' + cast?.author?.username + "'s" : 'a'} cast for its impact on Farcaster`,
       ];
@@ -64,7 +64,7 @@ const ImpactScale = ({ initValue, setTipPercent, setInitValue, type, cast, updat
       } else if (isApp) {
         await sdk.actions.composeCast({
           text: shareText,
-          embeds: [shareUrl],
+          embeds: [shareUrl, shareQC],
           close: false
         })
       }
