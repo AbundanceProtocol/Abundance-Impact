@@ -683,20 +683,79 @@ export default function Tip({ curatorId }) {
             receiver.address !== fundAddress
           );
           
-          const tipPayload = {
-            tipper_fid: userInfo?.fid,
-            tipper_pfp: userInfo?.pfp,
-            tipper_username: userInfo?.username,
-            fund: fundPercent, // Add fund percentage to OnchainTip
-            network: getNetworkName(walletChainId), // Add network field based on current chain
-            tip: [{
-              currency: pendingTxTokenSymbol || selectedToken?.symbol || 'Token',
-              amount: Number(pendingTxTotalAmountDecimal || 0),
-              value: Number(pendingTxTotalAmountDecimal || 0) * Number(selectedToken?.price || 0)
-            }],
-            receiver: filteredReceivers,
-            transaction_hash: hash,
-          };
+          let tipPayload
+          if (!userInfo?.fid) {
+            let userProfile
+            try {
+              const { sdk } = await import('@farcaster/miniapp-sdk')
+              const isApp = await sdk.isInMiniApp();
+                if (isApp) {
+                  userProfile = await sdk.context;
+        
+                  tipPayload = {
+                    tipper_fid: userProfile?.user?.fid || null,
+                    tipper_pfp: userProfile?.user?.pfpUrl || null,
+                    tipper_username: userProfile?.user?.username || null,
+                    fund: fundPercent, // Add fund percentage to OnchainTip
+                    network: getNetworkName(walletChainId), // Add network field based on current chain
+                    tip: [{
+                      currency: pendingTxTokenSymbol || selectedToken?.symbol || 'Token',
+                      amount: Number(pendingTxTotalAmountDecimal || 0),
+                      value: Number(pendingTxTotalAmountDecimal || 0) * Number(selectedToken?.price || 0)
+                    }],
+                    receiver: filteredReceivers,
+                    transaction_hash: hash,
+                  };
+                } else {
+                  tipPayload = {
+                    tipper_fid: userInfo?.fid || null,
+                    tipper_pfp: userInfo?.pfp || null,
+                    tipper_username: userInfo?.username || null,
+                    fund: fundPercent, // Add fund percentage to OnchainTip
+                    network: getNetworkName(walletChainId), // Add network field based on current chain
+                    tip: [{
+                      currency: pendingTxTokenSymbol || selectedToken?.symbol || 'Token',
+                      amount: Number(pendingTxTotalAmountDecimal || 0),
+                      value: Number(pendingTxTotalAmountDecimal || 0) * Number(selectedToken?.price || 0)
+                    }],
+                    receiver: filteredReceivers,
+                    transaction_hash: hash,
+                  };
+                }
+            } catch (error) {
+              console.error('Error getting user info:', error);
+              tipPayload = {
+                tipper_fid: userInfo?.fid || null,
+                tipper_pfp: userInfo?.pfp || null,
+                tipper_username: userInfo?.username || null,
+                fund: fundPercent, // Add fund percentage to OnchainTip
+                network: getNetworkName(walletChainId), // Add network field based on current chain
+                tip: [{
+                  currency: pendingTxTokenSymbol || selectedToken?.symbol || 'Token',
+                  amount: Number(pendingTxTotalAmountDecimal || 0),
+                  value: Number(pendingTxTotalAmountDecimal || 0) * Number(selectedToken?.price || 0)
+                }],
+                receiver: filteredReceivers,
+                transaction_hash: hash,
+              };
+            }
+          } else {            
+            tipPayload = {
+              tipper_fid: userInfo?.fid || null,
+              tipper_pfp: userInfo?.pfp || null,
+              tipper_username: userInfo?.username || null,
+              fund: fundPercent, // Add fund percentage to OnchainTip
+              network: getNetworkName(walletChainId), // Add network field based on current chain
+              tip: [{
+                currency: pendingTxTokenSymbol || selectedToken?.symbol || 'Token',
+                amount: Number(pendingTxTotalAmountDecimal || 0),
+                value: Number(pendingTxTotalAmountDecimal || 0) * Number(selectedToken?.price || 0)
+              }],
+              receiver: filteredReceivers,
+              transaction_hash: hash,
+            };
+          }
+          
           
           console.log('📝 First OnchainTip payload:', {
             ...tipPayload,
@@ -2999,7 +3058,7 @@ export default function Tip({ curatorId }) {
                 <WalletConnect onTipAmountChange={updateTipAmount} onTokenChange={updateSelectedToken} />
 
                 {/* Token Action Buttons - Show either Approve OR Multi-Tip, never both */}
-                {isLogged && creatorResults.length > 0 && (
+                {creatorResults.length > 0 && (
                   <div style={{ marginTop: "15px" }}>
                     {/* Debug info for cached approval status */}
                     {/* {selectedToken && !selectedToken.isNative && (
@@ -3188,7 +3247,7 @@ export default function Tip({ curatorId }) {
 
                 
                                  {/* Network Switch Button - Show when there's a network mismatch */}
-                 {isLogged && selectedToken && networkSwitchError && (
+                 {selectedToken && networkSwitchError && (
                    <div style={{ marginTop: "15px" }}>
                      <button
                        onClick={() => {
@@ -3236,7 +3295,7 @@ export default function Tip({ curatorId }) {
                  )}
 
                  {/* Disperse Status */}
-                 {isLogged && disperseStatus && (
+                 {disperseStatus && (
                    <div style={{ marginTop: "15px" }}>
                      <div style={{
                        padding: "8px 12px",
@@ -3789,7 +3848,7 @@ export default function Tip({ curatorId }) {
 
 
                  {/* Distribution Preview - Shows how much each author gets */}
-                 {isLogged && creatorResults.length > 0 && (() => {
+                 {creatorResults.length > 0 && (() => {
                    console.log('Distribution Preview Container - selectedToken:', selectedToken);
                    return (
                      <div style={{ 
