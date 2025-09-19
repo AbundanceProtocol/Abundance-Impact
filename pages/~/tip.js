@@ -2999,7 +2999,7 @@ export default function Tip({ curatorId }) {
                 <WalletConnect onTipAmountChange={updateTipAmount} onTokenChange={updateSelectedToken} />
 
                 {/* Token Action Buttons - Show either Approve OR Multi-Tip, never both */}
-                {isLogged && creatorResults.length > 0 && (
+                {creatorResults.length > 0 && (
                   <div style={{ marginTop: "15px" }}>
                     {/* Debug info for cached approval status */}
                     {/* {selectedToken && !selectedToken.isNative && (
@@ -3188,7 +3188,7 @@ export default function Tip({ curatorId }) {
 
                 
                                  {/* Network Switch Button - Show when there's a network mismatch */}
-                 {isLogged && selectedToken && networkSwitchError && (
+                 {selectedToken && networkSwitchError && (
                    <div style={{ marginTop: "15px" }}>
                      <button
                        onClick={() => {
@@ -3236,7 +3236,7 @@ export default function Tip({ curatorId }) {
                  )}
 
                  {/* Disperse Status */}
-                 {isLogged && disperseStatus && (
+                 {disperseStatus && (
                    <div style={{ marginTop: "15px" }}>
                      <div style={{
                        padding: "8px 12px",
@@ -3789,7 +3789,7 @@ export default function Tip({ curatorId }) {
 
 
                  {/* Distribution Preview - Shows how much each author gets */}
-                 {isLogged && creatorResults.length > 0 && (() => {
+                 {creatorResults.length > 0 && (() => {
                    console.log('Distribution Preview Container - selectedToken:', selectedToken);
                    return (
                      <div style={{ 
