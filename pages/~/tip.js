@@ -684,9 +684,9 @@ export default function Tip({ curatorId }) {
           );
           
           const tipPayload = {
-            tipper_fid: userInfo?.fid,
-            tipper_pfp: userInfo?.pfp,
-            tipper_username: userInfo?.username,
+            tipper_fid: userInfo?.fid || null,
+            tipper_pfp: userInfo?.pfp || null,
+            tipper_username: userInfo?.username || null,
             fund: fundPercent, // Add fund percentage to OnchainTip
             network: getNetworkName(walletChainId), // Add network field based on current chain
             tip: [{
