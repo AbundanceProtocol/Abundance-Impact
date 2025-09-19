@@ -89,7 +89,7 @@ export default async function handler(req, res) {
                   try {
                     // Get all unique user fids from User where validator: true
                     await connectToDatabase();
-                    const validatorUsers = await User.find({ validator: true }).distinct('fid');
+                    const validatorUsers = await User.find({ validator: true, fid: { $ne: fid } }).distinct('fid');
                     // Convert fids to numbers
                     const validatorFids = validatorUsers.map(fid => Number(fid));
                     // Get all Miniapp fids where active: true and fid in validatorFids
