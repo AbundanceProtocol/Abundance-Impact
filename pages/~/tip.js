@@ -2925,7 +2925,7 @@ export default function Tip({ curatorId }) {
                     transition: 'all 0.2s ease'
                   }}
                 >
-                  {shareImageLoaded ? 'Share' : 'Loading...'}
+                  {shareImageLoaded ? 'Share' : 'Share'}
                 </button>
                   </div>
                     </div>
