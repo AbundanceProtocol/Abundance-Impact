@@ -103,6 +103,8 @@ export default function Homepage({ test }) {
   // const [showPopup, setShowPopup] = useState({open: false, url: null})
   const [tippingStreak, setTippingStreak] = useState({ streakData: Array(7).fill({ hasTip: false }), currentStreak: 0 });
   const [curationStreak, setCurationStreak] = useState({ streakData: Array(7).fill({ hasImpact: false }), currentStreak: 0 });
+  const [tippingCeloStreak, setTippingCeloStreak] = useState({ streakData: Array(7).fill({ hasTip: false }), currentStreak: 0 });
+
   const [streaksLoading, setStreaksLoading] = useState(true);
   const router = useRouter();
   const { eco, referrer, autoFund } = router.query;
@@ -124,7 +126,6 @@ export default function Homepage({ test }) {
   const [dailyLoading, setDailyLoading] = useState(true);
   const [totalClaims, setTotalClaims] = useState(0);
   const [claimsLoading, setClaimsLoading] = useState(true);
-
   useEffect(() => {
     if (!isLogged) {
       setShowLoginNotice(true);
@@ -412,13 +413,18 @@ export default function Homepage({ test }) {
       setStreaksLoading(true);
       
       // Fetch both tipping and curation streaks in parallel
-      const [tippingResponse, curationResponse] = await Promise.all([
+      const [tippingResponse, tippingCeloResponse, curationResponse] = await Promise.all([
         axios.get("/api/streaks/tipping", { params: { fid } }),
+        axios.get("/api/streaks/tippingCelo", { params: { fid } }),
         axios.get("/api/streaks/curation", { params: { fid } })
       ]);
 
       if (tippingResponse?.data?.success) {
         setTippingStreak(tippingResponse.data);
+      }
+
+      if (tippingCeloResponse?.data?.success) {
+        setTippingCeloStreak(tippingCeloResponse.data);
       }
 
       if (curationResponse?.data?.success) {
@@ -1233,6 +1239,28 @@ export default function Homepage({ test }) {
                     </div>
                   </div>
 
+
+                  <div style={{fontSize: '15px', fontWeight: '600', color: '#ace', margin: '8px 0 0px 0'}}>
+                    Tipping Streak (Celo)
+                  </div>
+                  <div style={{fontSize: '11px', fontWeight: '400', color: '#ace', margin: '-6px 0 0px 0'}}>
+                    Tipped over $0.25 in the last 7 days on Celo
+                  </div>
+                  <div className='flex-row' style={{gap: '1.2rem', alignItems: 'center', justifyContent: 'center', margin: '-12px 0 0px 0'}}>
+                    {streaksLoading ? (
+                      Array(7).fill(0).map((_, index) => (
+                        <BsStar key={index} size={16} color="#444" />
+                      ))
+                    ) : (
+                      renderStreakStars(tippingCeloStreak.streakData)
+                    )}
+
+                    <div className='flex-row' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(isLogged && isOn.validate && isOn.boost && isOn.notifs) ? '#0af' : (isLogged && isOn.validate) ? '#ace' : '#aaa'}`, borderRadius: '8px', backgroundColor: '', alignItems: 'center', gap: '0.15rem', height: '30px'}}>
+                      <div style={{fontSize: '13px', fontWeight: '700', color: (isLogged && isOn.validate && isOn.boost && isOn.notifs) ? '#0af' : (isLogged && isOn.validate) ? '#ace' : '#aaa'}}>
+                        {streaksLoading ? '0/7' : `${tippingCeloStreak.totalDaysWithTips || 0}/7`}
+                      </div>
+                    </div>
+                  </div>
 
 
                   <div style={{fontSize: '15px', fontWeight: '600', color: '#ace', margin: '8px 0 0px 0'}}>
