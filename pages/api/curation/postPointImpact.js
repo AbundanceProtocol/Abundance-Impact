@@ -108,7 +108,7 @@ export default async function handler(req, res) {
                     // Create validators array
                     const validators = selectedFids.map(fid => ({
                       validator_fid: fid,
-                      vote: 1,
+                      vote: 0,
                       confirmed: false
                     }));
 
