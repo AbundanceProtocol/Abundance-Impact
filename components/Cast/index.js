@@ -143,7 +143,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
   }
 
 
-  async function boostImpact(cast, impactAmount) {
+  async function boostImpact(cast, impactAmount, selectedTag = null) {
     console.log('cast', cast)
 
     const castContext = {
@@ -153,7 +153,8 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
       author_display_name: cast.author.display_name,
       cast_hash: cast.hash,
       cast_text: cast.text,
-      cast_channel: cast.root_parent_url
+      cast_channel: cast.root_parent_url,
+      tag: selectedTag && selectedTag !== 'Tags' ? selectedTag : null
     }
     
     // console.log('112 ca1', fid, cast, impactAmount, ecosystem)
@@ -174,7 +175,17 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
         let impactBalance = impactResponse?.data?.balance
         let currentImpact = cast.impact_balance || 0
         let addedPoints = impactResponse.data.points
-        const updatedCast = {...cast, impact_balance: currentImpact + addedPoints}
+        
+        // Update cast with new tag if one was selected
+        let updatedCast = {...cast, impact_balance: currentImpact + addedPoints}
+        if (selectedTag && selectedTag !== 'Tags') {
+          const currentTags = cast.cast_tags || []
+          const tagExists = currentTags.some(tagObj => tagObj.tag === selectedTag && tagObj.fid === fid)
+          if (!tagExists) {
+            updatedCast.cast_tags = [...currentTags, { tag: selectedTag, fid: fid }]
+          }
+        }
+        
         updateCast(index, updatedCast)
         setUserBalances(prev => ({
           ...prev,
@@ -498,11 +509,11 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
           )}
           </div>
           <div className="flex-row" style={{width: '100%', justifyContent: 'space-evenly'}}>
-            <div className="flex-row" style={{flex: 1, padding: '3px'}}>
+            {/* <div className="flex-row" style={{flex: 1, padding: '3px'}}>
               <div className="">
                 <Message />
               </div>
-            </div>
+            </div> */}
             <div className="flex-row" style={{flex: 1}}>
               <div
                 ref={el => (recastRefs.current[index] = el)} 
@@ -524,6 +535,8 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
                 </div>
               </div>
             </div>
+
+
             <div className="flex-row" style={{flex: 4}}>
               <div 
                 ref={el => (likeRefs.current[index] = el)} 
@@ -544,6 +557,29 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
                 </div>
               </div>
             </div>
+
+            {cast?.cast_tags && Array.isArray(cast.cast_tags) && cast.cast_tags.length > 0 && (
+              <div className="flex-row" style={{gap: '0.3rem', margin: '0 0.5rem 0 0', justifyContent: 'center'}}>
+                {cast.cast_tags.map((tagObj, idx) => (
+                  <span
+                    key={tagObj.tag || idx}
+                    style={{
+                      display: 'inline-block',
+                      padding: '4px 10px',
+                      borderRadius: '12px',
+                      background: '#eef',
+                      color: '#246',
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      border: '1px solid #aac',
+                    }}
+                  >
+                    {tagObj.tag}
+                  </span>
+                ))}
+              </div>
+            )}
+
             <div className="flex-row" style={{flex: 1, padding: '3px', gap: '0.5rem'}}>
               <div className={`impact-arrow ${fail ? 'flash-fail' : ''}`} style={{padding: '0px 1px 0 0px'}} onClick={() => {
                 if (!isLogged) {

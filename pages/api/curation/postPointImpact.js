@@ -5,6 +5,8 @@ import Quality from '../../../models/Quality';
 import Cast from '../../../models/Cast';
 import Allowlist from '../../../models/Allowlist';
 import EcosystemRules from '../../../models/EcosystemRules';
+import Signal from '../../../models/Signal';
+import Miniapp from '../../../models/Miniapp';
 import axios from 'axios';
 import { decryptPassword } from '../../../utils/utils'; 
 const apiKey = process.env.NEYNAR_API_KEY
@@ -81,7 +83,58 @@ export default async function handler(req, res) {
                 user.remaining_i_allowance -= impactAmount
                 
                 let cast = await Cast.findOne({ cast_hash: castContext.cast_hash, points: points }).exec();
-                
+
+                async function createdSignal(fid, castContext, impactAmount, points) {
+
+                  try {
+                    // Get all unique user fids from User where validator: true
+                    await connectToDatabase();
+                    const validatorUsers = await User.find({ validator: true, fid: { $ne: fid } }).distinct('fid');
+                    // Convert fids to numbers
+                    const validatorFids = validatorUsers.map(fid => Number(fid));
+                    // Get all Miniapp fids where active: true and fid in validatorFids
+                    const miniappValidators = await Miniapp.find({ active: true, fid: { $in: validatorFids } }).distinct('fid');
+                    // For each 10 points in impactAmount, select one random fid from miniappValidators
+                    const numValidators = Math.ceil(impactAmount / 10);
+                    let selectedFids = [];
+                    if (miniappValidators.length > 0 && numValidators > 0) {
+                      // Shuffle miniappValidators and pick numValidators unique fids
+                      const shuffled = miniappValidators
+                        .map(value => ({ value, sort: Math.random() }))
+                        .sort((a, b) => a.sort - b.sort)
+                        .map(({ value }) => value);
+                      selectedFids = shuffled.slice(0, Math.min(numValidators, shuffled.length));
+                    }
+                    // Create validators array
+                    const validators = selectedFids.map(fid => ({
+                      validator_fid: fid,
+                      vote: 0,
+                      confirmed: false
+                    }));
+
+                    const newSignal = new Signal({
+                      author_fid: castContext.author_fid,
+                      curator_fid: fid,
+                      cast_hash: castContext.cast_hash,
+                      impact: impactAmount,
+                      validators: validators || [],
+                      boosts: [],
+                      stage: 'validation'
+                    });
+                    await newSignal.save()
+                    return newSignal
+                  } catch (error) {
+                    console.error('Error creating signal:', error);
+                    return null
+                  }
+
+
+
+
+                }
+
+                let signal = await createdSignal(fid, castContext, impactAmount, points)
+                console.log('signal', signal)
 
                 function createdImpact(fid, castContext, impactAmount, points) {
                   const newImpact = new Impact({
@@ -119,6 +172,13 @@ export default async function handler(req, res) {
                   if (impact && impact.curator_fid == fid) {
                     impact.impact_points += impactAmount
                     cast.impact_total += impactAmount
+                    // Add tag if provided and not already exists
+                    if (castContext.tag) {
+                      const tagExists = cast.cast_tags.some(tagObj => tagObj.tag === castContext.tag && tagObj.fid === fid);
+                      if (!tagExists) {
+                        cast.cast_tags.push({ tag: castContext.tag, fid: fid });
+                      }
+                    }
                     let impactTotal = cast.impact_total
                     let curatorCount = cast.impact_points.length
                     const saveLists = await saveAll(user, impact, cast)
@@ -129,6 +189,13 @@ export default async function handler(req, res) {
                     cast.impact_total += impactAmount
                     cast.impact_points.push(impact)
                     user.impact_reviews.push(impact)
+                    // Add tag if provided
+                    if (castContext.tag) {
+                      const tagExists = cast.cast_tags.some(tagObj => tagObj.tag === castContext.tag && tagObj.fid === fid);
+                      if (!tagExists) {
+                        cast.cast_tags.push({ tag: castContext.tag, fid: fid });
+                      }
+                    }
                     let impactTotal = cast.impact_total
                     let curatorCount = cast.impact_points.length
                     const saveLists = await saveAll(user, impact, cast)
@@ -152,6 +219,7 @@ export default async function handler(req, res) {
                     quality_absolute: 0,
                     impact_total: impactAmount,
                     impact_points: [impact],
+                    cast_tags: castContext.tag ? [{ tag: castContext.tag, fid: fid }] : [],
                   });
 
                   const saveLists = await saveAll(user, impact, cast)
