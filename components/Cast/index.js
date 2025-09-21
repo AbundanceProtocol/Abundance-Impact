@@ -498,11 +498,11 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
           )}
           </div>
           <div className="flex-row" style={{width: '100%', justifyContent: 'space-evenly'}}>
-            <div className="flex-row" style={{flex: 1, padding: '3px'}}>
+            {/* <div className="flex-row" style={{flex: 1, padding: '3px'}}>
               <div className="">
                 <Message />
               </div>
-            </div>
+            </div> */}
             <div className="flex-row" style={{flex: 1}}>
               <div
                 ref={el => (recastRefs.current[index] = el)} 
@@ -524,6 +524,8 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
                 </div>
               </div>
             </div>
+
+
             <div className="flex-row" style={{flex: 4}}>
               <div 
                 ref={el => (likeRefs.current[index] = el)} 
@@ -544,6 +546,29 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
                 </div>
               </div>
             </div>
+
+            {cast?.cast_tags && Array.isArray(cast.cast_tags) && cast.cast_tags.length > 0 && (
+              <div className="flex-row" style={{gap: '0.3rem', margin: '0 0.5rem 0 0', justifyContent: 'center'}}>
+                {cast.cast_tags.map((tagObj, idx) => (
+                  <span
+                    key={tagObj.tag || idx}
+                    style={{
+                      display: 'inline-block',
+                      padding: '4px 10px',
+                      borderRadius: '12px',
+                      background: '#eef',
+                      color: '#246',
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      border: '1px solid #aac',
+                    }}
+                  >
+                    {tagObj.tag}
+                  </span>
+                ))}
+              </div>
+            )}
+
             <div className="flex-row" style={{flex: 1, padding: '3px', gap: '0.5rem'}}>
               <div className={`impact-arrow ${fail ? 'flash-fail' : ''}`} style={{padding: '0px 1px 0 0px'}} onClick={() => {
                 if (!isLogged) {
