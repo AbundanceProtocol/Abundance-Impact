@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router';
-import { useRef, useContext, useEffect, useState } from 'react';
+import { useRef, useContext, useEffect, useState, useCallback } from 'react';
 import Link from 'next/link'
 import axios from 'axios';
 // import { AiOutlineBars } from "react-icons/ai";
@@ -127,6 +127,7 @@ export default function Eco() {
   const [delay, setDelay] = useState(true)
   const [timeframe, setTimeframe] = useState('3d')
   const [selectedTag, setSelectedTag] = useState('all')
+  const [textFilter, setTextFilter] = useState('')
   const [sortBy, setSortBy] = useState('down')
   const [shuffled, setShuffled] = useState(false)
   const initChannels = [
@@ -337,10 +338,10 @@ export default function Eco() {
   }, [searchSelect, userQuery, sched.feed])
 
   function feedRouter() {
-    const { shuffle, time, tags, channels, ecosystem, curators, order, timeSort } = userQuery
+    const { shuffle, time, tags, channels, ecosystem, curators, order, timeSort, text } = userQuery
     if (ecosystem) {
-      console.log('get user executed', shuffle, time, tags, channels, ecosystem, curators, order)
-      getUserSearch(time, tags, channels, curators, null, shuffle, order, ecosystem, timeSort )
+      console.log('get user executed', shuffle, time, tags, channels, ecosystem, curators, order, text)
+      getUserSearch(time, tags, channels, curators, text, shuffle, order, ecosystem, timeSort )
     }
   }
   
@@ -551,6 +552,29 @@ export default function Eco() {
       tags: tag === 'all' ? [] : [tag]
     })
   }
+
+  // Debounced text filter update
+  const debouncedUpdateText = useCallback((text) => {
+    setUserQuery(prev => ({
+      ...prev,
+      text: text
+    }))
+    setSched(prev => ({...prev, feed: true }))
+  }, [])
+
+  function updateTextFilter(text) {
+    setTextFilter(text)
+    console.log('text filter', text)
+  }
+
+  // Debounce effect for text filtering
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      debouncedUpdateText(textFilter)
+    }, 500) // 500ms delay
+
+    return () => clearTimeout(timeoutId)
+  }, [textFilter, debouncedUpdateText])
 
   function updateOrder(order) {
     setUserFeed([])
@@ -817,7 +841,7 @@ export default function Eco() {
                         <div className={timeframe == '7d' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('7d')}} style={{fontSize: isMobile ? '13px' : '14px'}}>7d</div>
                         <div className={timeframe == '14d' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('14d')}} style={{fontSize: isMobile ? '13px' : '14px'}}>14d</div>
                         <div className={timeframe == '30d' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('30d')}} style={{fontSize: isMobile ? '13px' : '14px'}}>30d</div>
-                        {/* <div className={timeframe == 'all' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('all')}} style={{fontSize: isMobile ? '13px' : '14px'}}>all</div> */}
+                        <div className={timeframe == 'all' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('all')}} style={{fontSize: isMobile ? '13px' : '14px'}}>all</div>
                       </div>
                     </div>
 
@@ -831,6 +855,56 @@ export default function Eco() {
                         <div className={selectedTag == 'image' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTag('image')}} style={{fontSize: isMobile ? '12px' : '13px'}}>image</div>
                         <div className={selectedTag == 'video' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTag('video')}} style={{fontSize: isMobile ? '12px' : '13px'}}>video</div>
                         <div className={selectedTag == 'app' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTag('app')}} style={{fontSize: isMobile ? '12px' : '13px'}}>app</div>
+                      </div>
+                    </div>
+
+                    {/* TEXT Filter */}
+                    <div className='flex-row' style={{height: '42px', alignItems: 'center', justifyContent: 'center', padding: '12px 0'}}>
+                      <div className='flex-row' style={{padding: '6px 11px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '28px', alignItems: 'center', gap: '0.35rem'}}>
+                        <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '13px' : '14px'}}>TEXT</div>
+
+                        <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                          <input
+                            type="text"
+                            value={textFilter}
+                            onChange={(e) => updateTextFilter(e.target.value)}
+                            placeholder="search text..."
+                            style={{
+                              backgroundColor: "#adf",
+                              borderRadius: "6px",
+                              padding: isMobile ? "2px 6px" : "2px 6px",
+                              fontSize: isMobile ? "14px" : "17px",
+                              width: "170px",
+                              fontWeight: "600",
+                              margin: "0 0 0 4px",
+                              paddingRight: textFilter ? "25px" : "6px"
+                            }}
+                          />
+                          {textFilter && (
+                            <button
+                              onClick={() => updateTextFilter('')}
+                              style={{
+                                position: 'absolute',
+                                right: '8px',
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                fontSize: '16px',
+                                fontWeight: 'bold',
+                                color: '#666',
+                                padding: '0',
+                                width: '16px',
+                                height: '16px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}
+                              title="Clear text"
+                            >
+                              ×
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
 
