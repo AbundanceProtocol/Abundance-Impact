@@ -4,7 +4,8 @@ import Link from 'next/link'
 import axios from 'axios';
 // import { AiOutlineBars } from "react-icons/ai";
 import { useInView } from 'react-intersection-observer'
-// import { BsClock } from "react-icons/bs";
+import { FaAngleDown } from "react-icons/fa";
+import { BsFillFunnelFill } from "react-icons/bs";
 import { BiSortDown, BiSortUp } from "react-icons/bi";
 import { IoShuffleOutline as ShuffleIcon } from "react-icons/io5";
 import { PiClockClockwiseBold as ClockForward, PiClockCounterClockwiseBold as ClockBack } from "react-icons/pi";
@@ -29,7 +30,7 @@ export default function Eco() {
   const router = useRouter();
   // const { address, isConnected, chainId } = useAccount()
   const [ref, inView] = useInView()
-  const { ecosystem, time, curators, channels, shuffle, app, userFid, pass, referrer } = router.query
+  const { ecosystem, time, tags, curators, channels, shuffle, app, userFid, pass, referrer } = router.query
   const [user, setUser] = useState(null)
   const { LoginPopup, isLogged, setPoints, setIsLogged, setFid, miniApp, setMiniApp, fid } = useContext(AccountContext)
   const ref1 = useRef(null)
@@ -125,6 +126,7 @@ export default function Eco() {
   const [sched, setSched] = useState({inView: false, user: false, feed: false, channels: false})
   const [delay, setDelay] = useState(true)
   const [timeframe, setTimeframe] = useState('3d')
+  const [selectedTag, setSelectedTag] = useState('all')
   const [sortBy, setSortBy] = useState('down')
   const [shuffled, setShuffled] = useState(false)
   const initChannels = [
@@ -134,6 +136,12 @@ export default function Eco() {
   const [channelOptions, setChannelOptions] = useState(initChannels)
   const [selectedChannel, setSelectedChannel] = useState('none')
 
+  const [isImpactFilterCollapsed, setIsImpactFilterCollapsed] = useState(true);
+  const [curatorSearchInput, setCuratorSearchInput] = useState("");
+  const [curatorData, setCuratorData] = useState([]);
+  const [curatorList, setCuratorList] = useState([]);
+  const [disperseStatus, setDisperseStatus] = useState("");
+  const [curatorsLength, setCuratorsLength] = useState(0);
 
   useEffect(() => {
     const inViewRouter = () => {
@@ -185,6 +193,10 @@ export default function Eco() {
       setTimeframe(time)
     }
 
+    if (tags && ['content', 'image', 'video', 'app'].includes(tags)) {
+      setSelectedTag(tags)
+    }
+
     if (shuffle && shuffle == 'true') {
       setSortBy('shuffle')
     } else {
@@ -192,15 +204,20 @@ export default function Eco() {
     }
 
 
-    console.log('query', ecosystem, time, curators, channels, shuffle)
+    console.log('query', ecosystem, time, tags, curators, channels, shuffle)
     let setCurators = []
     if (curators) {
       setCurators = Array.isArray(curators) ? curators : [Number(curators)]
     }
 
+    let setTags = []
+    if (tags && tags !== 'all') {
+      setTags = Array.isArray(tags) ? tags : [tags]
+    }
+
     setUserQuery({
       ...userQuery,
-      ecosystem, time: time || '3d', curators: setCurators || null, channels: channels || null, shuffle: shuffle || false
+      ecosystem, time: time || '3d', tags: setTags, curators: setCurators || null, channels: channels || null, shuffle: shuffle || false
     })
     // getUser(fid)
   }, [router.query]);
@@ -229,6 +246,71 @@ export default function Eco() {
 
 
 
+  async function updateCuratorSchedule(curator) {
+    setCuratorData([]);
+    setCuratorsLength(0);
+    setCuratorSearchInput("");
+    
+    // Update userQuery with selected curator
+    const curatorFid = curator?.fid;
+    if (curatorFid) {
+      // Check if curator is already selected
+      const isAlreadySelected = curatorList.some(existing => existing.fid === curatorFid);
+      
+      if (!isAlreadySelected) {
+        // Add new curator to the list
+        const updatedCuratorList = [...curatorList, curator];
+        setCuratorList(updatedCuratorList);
+        
+        // Update userQuery with array of curator FIDs
+        const curatorFids = updatedCuratorList.map(c => c.fid);
+        setUserQuery({
+          ...userQuery,
+          curators: curatorFids
+        });
+      }
+    }
+  }
+
+
+  async function updateCurators(text, more) {
+    // Only clear non-error status when curator search changes
+    if (disperseStatus && disperseStatus !== '' && !disperseStatus.includes('Error') && !disperseStatus.includes('⚠️')) {
+      setDisperseStatus('');
+    }
+    setCuratorData([]);
+    setCuratorsLength(0);
+    if (text?.length > 0) {
+      try {
+        const response = await axios.get("/api/curation/getCurators", {
+          params: { name: text, more }
+        });
+        const sortedData = response?.data?.users.sort((a, b) => (a?.username || '').localeCompare(b?.username || ''));
+        setCuratorData(sortedData);
+        setCuratorsLength(response?.data?.length);
+        console.log("curator response", response?.data?.users);
+      } catch (error) {
+        console.error("Error searching curators:", error);
+        setCuratorData([]);
+        setCuratorsLength(0);
+      }
+    } else {
+      setCuratorData([]);
+      setCuratorsLength(0);
+    }
+  }
+
+
+  async function getCuratorInput(text, more) {
+    console.log('curator search:', text);
+    setCuratorSearchInput(text);
+    if (text.length > 0) {
+      updateCurators(text, more);
+    } else {
+      setCuratorData([]);
+      setCuratorsLength(0);
+    }
+  }
 
   useEffect(() => {
     console.log('app02', isLogged)
@@ -278,13 +360,13 @@ export default function Eco() {
       console.log('opt1')
       page = 1
       setUserFeed([])
-      setPrevSearch(prev => ({...prev, getTime, channel, curators, text, shuffle, ecosystem, page, order, timeSort }))
-    } else if (prevSearch.getTime == getTime && prevSearch.channel == channel && prevSearch.curators == curators && prevSearch.text == text && prevSearch.ecosystem == ecosystem && prevSearch.order == order && prevSearch.timeSort == timeSort) {
+      setPrevSearch(prev => ({...prev, getTime, channel, curators, text, shuffle, ecosystem, page, order, timeSort, tags }))
+    } else if (prevSearch.getTime == getTime && prevSearch.channel == channel && prevSearch.curators == curators && prevSearch.text == text && prevSearch.ecosystem == ecosystem && prevSearch.order == order && prevSearch.timeSort == timeSort && prevSearch.tags == tags) {
       setShuffled(false)
       console.log('delay3')
       setDelay(true)
       console.log('opt2')
-      setPrevSearch(prev => ({...prev, getTime, channel, curators, text, shuffle, ecosystem, page, order, timeSort }))
+      setPrevSearch(prev => ({...prev, getTime, channel, curators, text, shuffle, ecosystem, page, order, timeSort, tags }))
     } else {
       setShuffled(false)
       console.log('delay4')
@@ -292,14 +374,32 @@ export default function Eco() {
       console.log('opt3')
       page = 1
       setUserFeed([])
-      setPrevSearch(prev => ({...prev, getTime, channel, curators, text, shuffle, ecosystem, page, order, timeSort })) 
+      setPrevSearch(prev => ({...prev, getTime, channel, curators, text, shuffle, ecosystem, page, order, timeSort, tags })) 
     }
 
     async function getSearch(time, tags, channel, curators, text, shuffle, ecosystem, page, order, timeSort) {
 
       try {
+        console.log('Frontend sending tags:', tags, 'Type:', typeof tags);
+        
+        // Prepare params object
+        const params = { time, channel, curators, text, shuffle, ecosystem, page, order, timeSort };
+        
+        // Handle tags array properly for axios
+        if (tags && Array.isArray(tags) && tags.length > 0) {
+          // Send each tag as a separate parameter
+          tags.forEach((tag, index) => {
+            params[`tags[${index}]`] = tag;
+          });
+        } else if (tags && typeof tags === 'string') {
+          params.tags = tags;
+        }
+        // Don't send tags parameter if array is empty (for 'all' selection)
+        
+        console.log('Axios params:', params);
+        
         const response = await axios.get('/api/curation/getImpactSearch', {
-          params: { time, tags, channel, curators, text, shuffle, ecosystem, page, order, timeSort }
+          params: params
         })
 
         const removeDelay = () => {
@@ -441,6 +541,17 @@ export default function Eco() {
     })
   }
 
+  function updateTag(tag) {
+    setUserFeed([])
+    console.log('tag', tag)
+
+    setSelectedTag(tag)
+    setUserQuery({
+      ...userQuery,
+      tags: tag === 'all' ? [] : [tag]
+    })
+  }
+
   function updateOrder(order) {
     setUserFeed([])
     // setTimeframe(time)
@@ -533,19 +644,433 @@ export default function Eco() {
       {/* <Connect /> */}
       {/* <Onchain /> */}
       {/* <Wallet /> */}
-      <div className='flex-row' style={{height: '30px', alignItems: 'center', justifyContent: 'flex-start', padding: '20px 0 30px 0'}}>
+
+
+      <div
+            className="shadow flex-col"
+            style={{
+              backgroundColor: "#002244",
+              borderRadius: "15px",
+              border: "1px solid #11447799",
+              width: miniApp || isMobile ? "340px" : "100%",
+              margin: "20px auto 0 auto"
+            }}
+          >
+            <div
+              className="shadow flex-row"
+              style={{
+                backgroundColor: "#11448888",
+                width: "100%",
+                justifyContent: "space-between",
+                alignItems: "center",
+                padding: "8px",
+                borderRadius: "15px",
+                margin: isImpactFilterCollapsed ? "0 0 0 0" : "0 0 10px 0",
+                gap: "1rem",
+                position: "relative"
+              }}
+            >
+              <div
+                className="flex-row"
+                style={{
+                  width: "100%",
+                  justifyContent: "flex-start",
+                  alignItems: "center",
+                  padding: "0px 0 0 4px",
+                  margin: "0 0 0px 0"
+                }}
+              >
+                <BsFillFunnelFill style={{ fill: "#cde" }} size={20} />
+                <div>
+                  <div
+                    style={{
+                      border: "0px solid #777",
+                      padding: "2px",
+                      borderRadius: "10px",
+                      backgroundColor: "",
+                      maxWidth: "fit-content",
+                      cursor: "pointer",
+                      color: "#cde"
+                    }}
+                  >
+                    <div className="top-layer flex-row">
+                      <div
+                        className="flex-row"
+                        style={{
+                          padding: "4px 0 4px 10px",
+                          marginBottom: "0px",
+                          flexWrap: "wrap",
+                          justifyContent: "flex-start",
+                          gap: "0.00rem",
+                          width: "",
+                          alignItems: "center"
+                        }}
+                      >
+                        <div
+                          style={{
+                            fontSize: isMobile ? "18px" : "22px",
+                            fontWeight: "600",
+                            color: "",
+                            padding: "0px 3px",
+                            display: "flex",
+                            alignItems: "center",
+                            cursor: "pointer"
+                          }}
+                          onClick={() => setIsImpactFilterCollapsed(!isImpactFilterCollapsed)}
+                        >
+                          <span>Filter</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Chevron positioned 10px from the right edge of the container */}
+              <FaAngleDown 
+                size={26} 
+                style={{
+                  transform: isImpactFilterCollapsed ? 'rotate(0deg)' : 'rotate(180deg)',
+                  transition: 'transform 0.2s ease',
+                  color: '#cde',
+                  cursor: "pointer",
+                  marginRight: "10px"
+                }}
+                onClick={() => setIsImpactFilterCollapsed(!isImpactFilterCollapsed)}
+              />
+            </div>
+
+            {!isImpactFilterCollapsed && (<div
+              className="flex-col"
+              style={{
+                backgroundColor: "#002244ff",
+                padding: "10px 18px 12px 18px",
+                borderRadius: "0 0 15px 15px",
+                color: "#ace",
+                fontSize: "12px",
+                gap: "0.75rem",
+                position: "relative"
+              }}>
+
+                {/* Filter Components */}
+                {!isImpactFilterCollapsed && (
+                  <div className={'flex-row'} style={{
+                    justifyContent: 'center', 
+                    marginTop: '5px', 
+                    marginBottom: '0px', 
+                    gap: '0.35rem', 
+                    flexWrap: 'wrap',
+                    overflow: 'hidden',
+                    transition: 'all 0.3s ease'
+                  }}>
+                    
+                    {/* SORT Filter */}
+                    {/* <div className='flex-row' style={{height: '42px', alignItems: 'center', justifyContent: 'center', padding: '28px 0'}}>
+                      <div className='flex-row' style={{padding: '6px 11px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '28px', alignItems: 'center', gap: '0.35rem'}}>
+                        <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '13px' : '14px'}}>SORT</div>
+
+                        <div className={sortBy == 'down' ? 'filter-item-on' : 'filter-item'} style={{padding: '3px 8px 0px 8px'}} onClick={() => {updateOrder('down')}}><BiSortDown size={17} /></div>
+                        <div className={sortBy == 'up' ? 'filter-item-on' : 'filter-item'} style={{padding: '3px 8px 0px 8px'}} onClick={() => {updateOrder('up')}}><BiSortUp size={17} /></div>
+                        <div className={sortBy == 'shuffle' ? 'filter-item-on' : 'filter-item'} style={{padding: '3px 8px 0px 8px'}} onClick={() => {updateOrder('shuffle')}}><ShuffleIcon size={17} /></div>
+                        <div className={sortBy == 'clock-forward' ? 'filter-item-on' : 'filter-item'} style={{padding: '3px 8px 0px 8px'}} onClick={() => {updateOrder('clock-forward')}}><ClockForward size={17} /></div>
+                        <div className={sortBy == 'clock-back' ? 'filter-item-on' : 'filter-item'} style={{padding: '3px 8px 0px 8px'}} onClick={() => {updateOrder('clock-back')}}><ClockBack size={17} /></div>
+                      </div>
+                    </div> */}
+
+
+                    {/* FUND Filter */}
+                    {/* <div className='flex-row' style={{height: '42px', alignItems: 'center', justifyContent: 'center', padding: '28px 0'}}>
+                      <div className='flex-row' style={{padding: '6px 11px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '28px', alignItems: 'center', gap: '0.35rem'}}>
+                        <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '13px' : '14px'}}>FUND</div>
+
+                        <div className={fundPercent == 0 ? 'filter-item-on' : 'filter-item'} onClick={() => {setFundPercent(0)}} style={{fontSize: isMobile ? '13px' : '14px'}}>0%</div>
+                        <div className={fundPercent == 10 ? 'filter-item-on' : 'filter-item'} onClick={() => {setFundPercent(10)}} style={{fontSize: isMobile ? '13px' : '14px'}}>10%</div>
+                        <div className={fundPercent == 20 ? 'filter-item-on' : 'filter-item'} onClick={() => {setFundPercent(20)}} style={{fontSize: isMobile ? '13px' : '14px'}}>20%</div>
+                        <div className={fundPercent == 30 ? 'filter-item-on' : 'filter-item'} onClick={() => {setFundPercent(30)}} style={{fontSize: isMobile ? '13px' : '14px'}}>30%</div>
+                      </div>
+                    </div> */}
+
+
+
+                    <div className='flex-row' style={{height: '42px', alignItems: 'center', justifyContent: 'center', padding: '12px 0'}}>
+                      <div className='flex-row' style={{padding: '4px 8px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '20px', alignItems: 'center', gap: '0.25rem'}}>
+                        <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '13px' : '14px'}}>SORT</div>
+
+                        <div className={sortBy == 'down' ? 'filter-item-on' : 'filter-item'} style={{padding: '2px 6px 0px 6px'}} onClick={() => {updateOrder('down')}}><BiSortDown size={14} /></div>
+                        <div className={sortBy == 'up' ? 'filter-item-on' : 'filter-item'} style={{padding: '2px 6px 0px 6px'}} onClick={() => {updateOrder('up')}}><BiSortUp size={14} /></div>
+                        <div className={sortBy == 'shuffle' ? 'filter-item-on' : 'filter-item'} style={{padding: '2px 6px 0px 6px'}} onClick={() => {updateOrder('shuffle')}}><ShuffleIcon size={14} /></div>
+                        <div className={sortBy == 'clock-forward' ? 'filter-item-on' : 'filter-item'} style={{padding: '2px 6px 0px 6px'}} onClick={() => {updateOrder('clock-forward')}}><ClockForward size={14} /></div>
+                        <div className={sortBy == 'clock-back' ? 'filter-item-on' : 'filter-item'} style={{padding: '2px 6px 0px 6px'}} onClick={() => {updateOrder('clock-back')}}><ClockBack size={14} /></div>
+                      </div>
+                    </div>
+
+
+
+
+                    {/* TIME Filter */}
+                    <div className='flex-row' style={{height: '42px', alignItems: 'center', justifyContent: 'center', padding: '12px 0'}}>
+                      <div className='flex-row' style={{padding: '6px 11px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '28px', alignItems: 'center', gap: '0.35rem'}}>
+                        <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '13px' : '14px'}}>TIME</div>
+
+                        <div className={timeframe == '24h' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('24h')}} style={{fontSize: isMobile ? '13px' : '14px'}}>24hr</div>
+                        <div className={timeframe == '3d' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('3d')}} style={{fontSize: isMobile ? '13px' : '14px'}}>3d</div>
+                        <div className={timeframe == '7d' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('7d')}} style={{fontSize: isMobile ? '13px' : '14px'}}>7d</div>
+                        <div className={timeframe == '14d' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('14d')}} style={{fontSize: isMobile ? '13px' : '14px'}}>14d</div>
+                        <div className={timeframe == '30d' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('30d')}} style={{fontSize: isMobile ? '13px' : '14px'}}>30d</div>
+                        {/* <div className={timeframe == 'all' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('all')}} style={{fontSize: isMobile ? '13px' : '14px'}}>all</div> */}
+                      </div>
+                    </div>
+
+                    {/* TAGS Filter */}
+                    <div className='flex-row' style={{height: '42px', alignItems: 'center', justifyContent: 'center', padding: '12px 0'}}>
+                      <div className='flex-row' style={{padding: '6px 11px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '28px', alignItems: 'center', gap: '0.35rem'}}>
+                        <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '13px' : '14px'}}>TAG</div>
+
+                        <div className={selectedTag == 'all' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTag('all')}} style={{fontSize: isMobile ? '12px' : '13px'}}>all</div>
+                        <div className={selectedTag == 'content' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTag('content')}} style={{fontSize: isMobile ? '12px' : '13px'}}>content</div>
+                        <div className={selectedTag == 'image' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTag('image')}} style={{fontSize: isMobile ? '12px' : '13px'}}>image</div>
+                        <div className={selectedTag == 'video' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTag('video')}} style={{fontSize: isMobile ? '12px' : '13px'}}>video</div>
+                        <div className={selectedTag == 'app' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTag('app')}} style={{fontSize: isMobile ? '12px' : '13px'}}>app</div>
+                      </div>
+                    </div>
+
+                    {/* CHANNEL Filter */}
+                    {(<div className='flex-row' style={{height: '42px', alignItems: 'center', justifyContent: 'center', padding: '12px 0'}}>
+                      <div className='flex-row' style={{padding: '6px 11px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '28px', alignItems: 'center', gap: '0.35rem'}}>
+                        <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '13px' : '14px'}}>CHANNEL</div>
+
+                        <select value={selectedChannel} onChange={updateChannel} style={{backgroundColor: '#adf', borderRadius: '6px', padding: isMobile ? '2px 6px' : '2px', fontSize: isMobile ? '14px' : '17px', width: '100%', fontWeight: '600'}}>
+                          {channelOptions.map((channel) => (
+                            <option key={channel} value={channel}>
+                              {(channel !== ' ') ? '/' + channel : channel}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>)}
+
+                    {/* CURATORS Filter */}
+                    {(<div className='flex-row' style={{height: '42px', alignItems: 'center', justifyContent: 'center', padding: '12px 0'}}>
+                      <div className='flex-row' style={{padding: '6px 11px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '28px', alignItems: 'center', gap: '0.35rem'}}>
+                        <div className='filter-desc' style={{fontSize: isMobile ? '13px' : '14px'}}>CURATORS</div>
+
+                        <input
+                          type="text"
+                          value={curatorSearchInput}
+                          onChange={e => getCuratorInput(e.target.value, null)}
+                          style={{
+                            backgroundColor: "#adf",
+                            borderRadius: "6px",
+                            padding: isMobile ? "2px 6px" : "2px 6px",
+                            fontSize: isMobile ? "14px" : "17px",
+                            width: "150px",
+                            fontWeight: "600",
+                            margin: "0 0 0 4px"
+                          }}
+                          placeholder="search curators"
+                        />
+                      </div>
+                    </div>)}
+                  </div>
+                )}
+
+
+                {/* Curators Search Results */}
+                {!isImpactFilterCollapsed && curatorData?.length > 0 && (
+                  <div style={{ padding: "0px 0 0 0" }}>
+                    <div style={{textAlign: 'center', color: '#ace', fontSize: '14px', fontWeight: '600', marginBottom: '5px'}}>
+                      Found {curatorsLength} curators
+                    </div>
+                    <div className="flex-row" style={{
+                      width: "100%",
+                      justifyContent: "center",
+                      flexWrap: "wrap",
+                      color: "#024",
+                      fontWeight: "600",
+                      fontSize: "12px"}}>
+                      {curatorData?.map((curator, index) => (
+                        <div
+                          key={index}
+                          style={{
+                            display: "flex",
+                            flexDirection: "row",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: "0.25rem",
+                            border: "0px solid #eeeeeeaa",
+                            width: "auto",
+                            margin: "7px 5px"
+                          }}
+                          onClick={() => updateCuratorSchedule(curator)}>
+                          <div
+                            className="cast-act-lt"
+                            style={{
+                              display: "flex",
+                              flexDirection: "row",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              gap: "0.25rem",
+                              borderRadius: "88px",
+                              padding: "3px 10px 3px 3px",
+                              width: "auto",
+                              margin: "0 5px 0 0"
+                            }}
+                          >
+                          {curator?.pfp && (
+                            <img
+                              src={curator?.pfp}
+                              width={24}
+                              height={24}
+                              style={{
+                                borderRadius: "80px",
+                                border: "1px solid #eee",
+                                backgroundColor: "#8363ca"
+                              }}
+                            />
+                          )}
+                          <div style={{ 
+                            display: "flex", 
+                            textAlign: "center", 
+                            fontSize: "15px", 
+                            margin: "0",
+                            color: "#024",
+                            fontWeight: "600"
+                          }}>
+                            {curator ? `@${curator?.username}` : " curator not found"}
+                          </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Selected Curators Display */}
+                 {!isImpactFilterCollapsed && curatorList?.length > 0 && (
+                   <div style={{ padding: "10px 0 0 0" }}>
+                     <div style={{textAlign: 'center', color: '#ace', fontSize: '14px', fontWeight: '600', marginBottom: '5px'}}>
+                       Selected Curators:
+                     </div>
+                     <div className="flex-row" style={{
+                      width: "100%",
+                      justifyContent: "center",
+                      flexWrap: "wrap",
+                      color: "#024",
+                      fontWeight: "600",
+                      fontSize: "12px"}}>
+                       {curatorList?.map((curator, index) => (
+                         <div
+                           key={index}
+                           style={{
+                            display: "flex",
+                            flexDirection: "row",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: "0.25rem",
+                            border: "0px solid #eeeeeeaa",
+                            width: "auto",
+                            margin: "7px 5px"
+                           }}
+                         >
+                          <div
+                            className="cast-act-lt"
+                            style={{
+                              display: "flex",
+                              flexDirection: "row",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              gap: "0.25rem",
+                              borderRadius: "88px",
+                              padding: "3px 10px 3px 3px",
+                              width: "auto",
+                              margin: "0 5px 0 0"
+                            }}
+                          >
+                            {curator?.pfp && (
+                              <img
+                                src={curator?.pfp}
+                                width={24}
+                                height={24}
+                                style={{
+                                  borderRadius: "80px",
+                                  border: "1px solid #eee",
+                                  backgroundColor: "#8363ca"
+                                }}
+                              />
+                            )}
+                            <div style={{ 
+                              display: "flex",
+                              textAlign: "center",
+                              fontSize: "15px",
+                              margin: "0",
+                              padding: curator?.pfp ? "0" : "0 0 0 5px"
+                            }}>
+                              {curator ? `@${curator?.username}` : " curator not found"}
+                            </div>
+
+                            <div
+                              style={{
+                                position: "relative",
+                                cursor: "pointer",
+                                backgroundColor: "#a00",
+                                borderRadius: "50%",
+                                padding: '1px 4px 2px 4px',
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                fontSize: "12px",
+                                color: "white",
+                                fontWeight: "bold"
+                              }}
+                              onClick={() => {
+                                // Remove specific curator from the list
+                                const updatedCuratorList = curatorList.filter(c => c.fid !== curator.fid);
+                                setCuratorList(updatedCuratorList);
+                                
+                                // Update userQuery with remaining curator FIDs
+                                if (updatedCuratorList.length > 0) {
+                                  const curatorFids = updatedCuratorList.map(c => c.fid);
+                                  setUserQuery({
+                                    ...userQuery,
+                                    curators: curatorFids
+                                  });
+                                } else {
+                                  setUserQuery({
+                                    ...userQuery,
+                                    curators: null
+                                  });
+                                }
+                              }}
+                            >
+                              ×
+                            </div>
+                           </div>
+                         </div>
+                       ))}
+                     </div>
+                   </div>
+                 )}
+
+
+            </div>)}
+          </div>
+
+
+
+
+
+
+
+      {/* <div className='flex-row' style={{height: '30px', alignItems: 'center', justifyContent: 'flex-start', padding: '20px 0 30px 0'}}>
         <div className='flex-row' style={{padding: '4px 8px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '20px', alignItems: 'center', gap: '0.25rem'}}>
-          {/* <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>TIME</div> */}
 
           <Link href={`/~/ecosystems/${ecosystem}`}><div className='filter-item-on' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>{ecosystem}</div></Link>
           <div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px', padding: '0'}}>{'>'}</div>
           <Link href={`/~/ecosystems/${ecosystem}/curators`}><div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>curators</div></Link>
           <Link href={`/~/ecosystems/${ecosystem}/creators`}><div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>creators</div></Link>
           <Link href={`/~/ecosystems/${ecosystem}/contributors`}><div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>contributors</div></Link>
-          {/* <div className='filter-item' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px', padding: '0'}}>{'>'}</div>
-          <div className='filter-item-on' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>@{username}</div> */}
         </div>
-      </div>
+      </div> */}
 
       {user && (<CuratorData {...{ show: (isLogged && user), user, textMax, type: 'curator' }} />)}
       {/* <div className="top-layer flex-row" style={{padding: '10px 0 10px 0', alignItems: 'center', justifyContent: 'space-evenly', margin: '0', borderBottom: '1px solid #888'}}>
@@ -565,7 +1090,7 @@ export default function Eco() {
 
 
 
-        <div className='flex-row' style={{height: '30px', alignItems: 'center', justifyContent: 'center', padding: '20px 0'}}>
+        {/* <div className='flex-row' style={{height: '30px', alignItems: 'center', justifyContent: 'center', padding: '20px 0'}}>
           <div className='flex-row' style={{padding: '4px 8px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '20px', alignItems: 'center', gap: '0.25rem'}}>
             <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>SORT</div>
 
@@ -575,12 +1100,12 @@ export default function Eco() {
             <div className={sortBy == 'clock-forward' ? 'filter-item-on' : 'filter-item'} style={{padding: '2px 6px 0px 6px'}} onClick={() => {updateOrder('clock-forward')}}><ClockForward size={12} /></div>
             <div className={sortBy == 'clock-back' ? 'filter-item-on' : 'filter-item'} style={{padding: '2px 6px 0px 6px'}} onClick={() => {updateOrder('clock-back')}}><ClockBack size={12} /></div>
           </div>
-        </div>
+        </div> */}
 
 
 
 
-        <div className='flex-row' style={{height: '30px', alignItems: 'center', justifyContent: 'center', padding: '20px 0'}}>
+        {/* <div className='flex-row' style={{height: '30px', alignItems: 'center', justifyContent: 'center', padding: '20px 0'}}>
           <div className='flex-row' style={{padding: '4px 8px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '20px', alignItems: 'center', gap: '0.25rem'}}>
             <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>TIME</div>
 
@@ -590,10 +1115,10 @@ export default function Eco() {
             <div className={timeframe == '30d' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('30d')}}>30d</div>
             <div className={timeframe == 'all' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('all')}}>all</div>
           </div>
-        </div>
+        </div> */}
 
 
-        <div className='flex-row' style={{height: '30px', alignItems: 'center', justifyContent: 'center', padding: '20px 0'}}>
+        {/* <div className='flex-row' style={{height: '30px', alignItems: 'center', justifyContent: 'center', padding: '20px 0'}}>
           <div className='flex-row' style={{padding: '4px 8px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '20px', alignItems: 'center', gap: '0.25rem'}}>
             <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '9px' : '10px'}}>CHANNEL</div>
 
@@ -605,7 +1130,7 @@ export default function Eco() {
               ))}
             </select>
           </div>
-        </div>
+        </div> */}
 
         </div>
       )}
