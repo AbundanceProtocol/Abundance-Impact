@@ -143,7 +143,7 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
   }
 
 
-  async function boostImpact(cast, impactAmount) {
+  async function boostImpact(cast, impactAmount, selectedTag = null) {
     console.log('cast', cast)
 
     const castContext = {
@@ -153,7 +153,8 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
       author_display_name: cast.author.display_name,
       cast_hash: cast.hash,
       cast_text: cast.text,
-      cast_channel: cast.root_parent_url
+      cast_channel: cast.root_parent_url,
+      tag: selectedTag && selectedTag !== 'Tags' ? selectedTag : null
     }
     
     // console.log('112 ca1', fid, cast, impactAmount, ecosystem)

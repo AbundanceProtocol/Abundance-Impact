@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect, useRef } from 'react';
 // import { GiMeat, GiTwoCoins } from "react-icons/gi";
 // import { Degen } from '../../../pages/assets';
 // import { formatNum } from '../../../utils/utils';
@@ -6,6 +6,7 @@ import { AccountContext } from '../../../context';
 import { FaStar } from 'react-icons/fa';
 import { IoMdRefresh as Refresh} from "react-icons/io";
 import { BsShareFill} from "react-icons/bs";
+import { BiChevronDown } from "react-icons/bi";
 import axios from 'axios';
 import { PiMedal, PiCheckFat } from "react-icons/pi";
 
@@ -14,8 +15,14 @@ const ImpactScale = ({ initValue, setTipPercent, setInitValue, type, cast, updat
   const [fail, setFail] = useState(false)
   const [success, setSuccess] = useState(false)
   const [nominated, setNominated] = useState(false)
+  const [selectedTag, setSelectedTag] = useState('Tags')
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const dropdownRef = useRef(null)
 
   const [value, setValue] = useState(5);
+  
+  const tagOptions = ['Tags', 'content', 'image', 'video', 'app'];
+  
   const handleChange = (event) => {
     setValue(parseInt(event.target.value));
   };
@@ -24,6 +31,29 @@ const ImpactScale = ({ initValue, setTipPercent, setInitValue, type, cast, updat
     // setTipPercent(value)
     setInitValue(value)
   };
+
+  const handleTagSelect = (tag) => {
+    setSelectedTag(tag);
+    setIsDropdownOpen(false);
+  };
+
+  const toggleDropdown = () => {
+    setIsDropdownOpen(!isDropdownOpen);
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   function clickFailed() {
     setFail(true);
@@ -82,7 +112,8 @@ const ImpactScale = ({ initValue, setTipPercent, setInitValue, type, cast, updat
       author_display_name: cast.author.display_name,
       cast_hash: cast.hash,
       cast_text: cast.text,
-      cast_channel: cast.root_parent_url
+      cast_channel: cast.root_parent_url,
+      tag: selectedTag !== 'Tags' ? selectedTag : null
     }
     
     console.log('cast, impactAmount', cast, impactAmount, fid, fid !== '-', impactAmount, userBalances?.impact > 0)
@@ -153,7 +184,74 @@ const ImpactScale = ({ initValue, setTipPercent, setInitValue, type, cast, updat
         </div>
       </div>
       <div>
-        {!nominated ? (<div className='flex-row' style={{alignContent: 'center', alignItems: 'center', gap: '0.25rem', margin: '10px'}}>
+        {!nominated ? (<div className='flex-row' style={{alignContent: 'center', alignItems: 'center', gap: '1.5rem', margin: '10px'}}>
+          {/* Tag Dropdown */}
+          <div ref={dropdownRef} style={{ position: 'relative' }}>
+            <div 
+              onClick={toggleDropdown}
+              className={`flex-row btn-on`}
+              style={{
+                borderRadius: "16px",
+                padding: "4px 12px",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "0.25rem",
+                cursor: 'pointer',
+                minWidth: '80px'
+              }}
+            >
+              <p
+                style={{
+                  fontSize: "18px",
+                  fontWeight: "600",
+                  textWrap: "nowrap",
+                }}
+              >
+                {selectedTag}
+              </p>
+              <BiChevronDown size={16} style={{ transform: isDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
+            </div>
+            
+            {isDropdownOpen && (
+              <div 
+                style={{
+                  position: 'absolute',
+                  bottom: '100%',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  backgroundColor: '#fff',
+                  border: '1px solid #ccc',
+                  borderRadius: '8px',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                  zIndex: 1000,
+                  minWidth: '90px',
+                  marginBottom: '4px'
+                }}
+              >
+                {tagOptions.map((tag) => (
+                  <div
+                    key={tag}
+                    onClick={() => handleTagSelect(tag)}
+                    style={{
+                      padding: '8px 12px',
+                      cursor: 'pointer',
+                      borderBottom: tag !== tagOptions[tagOptions.length - 1] ? '1px solid #eee' : 'none',
+                      backgroundColor: selectedTag === tag ? '#f0f0f0' : 'transparent',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      color: '#333'
+                    }}
+                    onMouseEnter={(e) => e.target.style.backgroundColor = '#f8f8f8'}
+                    onMouseLeave={(e) => e.target.style.backgroundColor = selectedTag === tag ? '#f0f0f0' : 'transparent'}
+                  >
+                    {tag}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Nominate Button */}
           <div onClick={
               () => {
                 if (isLogged) {

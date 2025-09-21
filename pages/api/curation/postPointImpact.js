@@ -172,6 +172,13 @@ export default async function handler(req, res) {
                   if (impact && impact.curator_fid == fid) {
                     impact.impact_points += impactAmount
                     cast.impact_total += impactAmount
+                    // Add tag if provided and not already exists
+                    if (castContext.tag) {
+                      const tagExists = cast.cast_tags.some(tagObj => tagObj.tag === castContext.tag && tagObj.fid === fid);
+                      if (!tagExists) {
+                        cast.cast_tags.push({ tag: castContext.tag, fid: fid });
+                      }
+                    }
                     let impactTotal = cast.impact_total
                     let curatorCount = cast.impact_points.length
                     const saveLists = await saveAll(user, impact, cast)
@@ -182,6 +189,13 @@ export default async function handler(req, res) {
                     cast.impact_total += impactAmount
                     cast.impact_points.push(impact)
                     user.impact_reviews.push(impact)
+                    // Add tag if provided
+                    if (castContext.tag) {
+                      const tagExists = cast.cast_tags.some(tagObj => tagObj.tag === castContext.tag && tagObj.fid === fid);
+                      if (!tagExists) {
+                        cast.cast_tags.push({ tag: castContext.tag, fid: fid });
+                      }
+                    }
                     let impactTotal = cast.impact_total
                     let curatorCount = cast.impact_points.length
                     const saveLists = await saveAll(user, impact, cast)
@@ -205,6 +219,7 @@ export default async function handler(req, res) {
                     quality_absolute: 0,
                     impact_total: impactAmount,
                     impact_points: [impact],
+                    cast_tags: castContext.tag ? [{ tag: castContext.tag, fid: fid }] : [],
                   });
 
                   const saveLists = await saveAll(user, impact, cast)
