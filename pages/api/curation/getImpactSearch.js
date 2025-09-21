@@ -183,9 +183,12 @@ export default async function handler(req, res) {
     //   // query.cast_channel = { $in: [req.query['channel[]']] };
     // }
 
-    // if (req.query.text) {
-    //   query.cast_text = { $regex: req.query.text, $options: 'i' }; // Case-insensitive search
-    // }
+    // Handle text search
+    if (req?.query?.text && req.query.text.trim() !== '') {
+      const searchText = req.query.text.trim();
+      console.log('Setting text search for:', searchText);
+      query.cast_text = { $regex: searchText, $options: 'i' }; // Case-insensitive search
+    }
 
     function shuffleArray(array) {
       for (let i = array.length - 1; i > 0; i--) {
