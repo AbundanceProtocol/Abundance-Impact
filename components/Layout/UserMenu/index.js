@@ -34,8 +34,48 @@ const UserMenu = () => {
     setIsMiniApp,
     setUserInfo,
     adminTest,
-    navMenu
+    navMenu,
+    isOn,
+    setIsOn
   } = useContext(AccountContext);
+
+  async function getUserSettings(fid) {
+    try {
+      // setLoading({
+      //   validate: true,
+      //   boost: true,
+      //   autoFund: true
+      // });
+      const response = await axios.get("/api/user/getUserSettings", {
+        params: { fid }
+      });
+
+      if (response?.data) {
+        const userSettings = response?.data || null;
+        setIsOn({
+          boost: userSettings.boost || false,
+          validate: userSettings.validate || false,
+          autoFund: userSettings.autoFund || false,
+          score: userSettings.score || 0,
+          notifs: userSettings.notifs || false
+        });
+      }
+      // setLoading({
+      //   validate: false,
+      //   boost: false,
+      //   autoFund: false,
+      //   score: 0
+      // });
+    } catch (error) {
+      console.error("Error setting invite:", error);
+      // setLoading({
+      //   validate: false,
+      //   boost: false,
+      //   autoFund: false
+      // });
+    }
+  }
+
 
   useEffect(() => {
     console.log("useEffect", fid, userBalances, userInfo);
@@ -45,6 +85,10 @@ const UserMenu = () => {
 
     if (fid && !userInfo?.username) {
       getUserInfo();
+    }
+
+    if (fid && isOn.score == 0) {
+      getUserSettings(fid);
     }
   }, [fid]);
 
