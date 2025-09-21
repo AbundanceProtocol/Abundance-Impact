@@ -7,6 +7,7 @@ import User from '../../../models/User';
 export default async function handler(req, res) {
   if (req.method === 'GET') {
     console.log('getUserSerach 7', req.query);
+    console.log('tags parameter:', req.query.tags, typeof req.query.tags);
     const page = parseInt(req.query.page) || 1;
     const limit = 10;
     const skip = (page - 1) * limit;
@@ -122,9 +123,35 @@ export default async function handler(req, res) {
     }
 
     query.impact_total = { $gte: 1 }
-    // if (req.query['tags[]'] && req.query['tags[]'].length > 0) {
-    //   query.cast_tags = { $in: [req.query['tags[]']] };
-    // }
+    
+    // Handle tags filtering
+    let tags = [];
+    
+    // Check for direct tags parameter
+    if (req?.query?.tags) {
+      if (typeof req.query.tags === 'string') {
+        tags = [req.query.tags];
+      } else if (Array.isArray(req.query.tags)) {
+        tags = req.query.tags;
+      }
+    }
+    
+    // Check for indexed tags parameters (tags[0], tags[1], etc.)
+    Object.keys(req.query).forEach(key => {
+      if (key.match(/^tags\[\d+\]$/)) {
+        tags.push(req.query[key]);
+      }
+    });
+    
+    console.log('Processed tags:', tags, 'Length:', tags.length);
+    
+    if (tags.length > 0) {
+      console.log('Setting tags query with:', tags);
+      // Use $elemMatch since cast_tags is an array of objects
+      query.cast_tags = { $elemMatch: { tag: { $in: tags } } };
+    }
+    
+    console.log('Final query:', JSON.stringify(query, null, 2));
 
     if (req?.query?.channels && req?.query?.channels !== ' ') {
       console.log('channels', req?.query?.channels)
