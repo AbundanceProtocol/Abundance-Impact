@@ -94,7 +94,9 @@ export default function Homepage({ test }) {
     setPanelTarget,
     adminTest,
     setAdminTest,
-    setUserBalances
+    setUserBalances,
+    isOn,
+    setIsOn
   } = useContext(AccountContext);
   const [screenWidth, setScreenWidth] = useState(undefined);
   const [screenHeight, setScreenHeight] = useState(undefined);
@@ -113,7 +115,7 @@ export default function Homepage({ test }) {
   const store = useStore();
 
   const [fundLoading, setFundLoading] = useState(true);
-  const [isOn, setIsOn] = useState({ boost: false, validate: false, autoFund: false, notifs: false });
+  // const [isOn, setIsOn] = useState({ boost: false, validate: false, autoFund: false, notifs: false });
   // const [expand, setExpand] = useState({boost: false, validate: false, autoFund: false});
   const [loading, setLoading] = useState({ boost: false, validate: false, autoFund: false });
 

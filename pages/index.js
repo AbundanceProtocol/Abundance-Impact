@@ -40,7 +40,7 @@ const version = process.env.NEXT_PUBLIC_VERSION
 export default function Home() {
   const ref2 = useRef(null)
   const [ref, inView] = useInView()
-  const { LoginPopup, checkEcoEligibility, ecoData, points, setPoints, isLogged, showLogin, setShowLogin, setIsLogged, fid, setFid, getRemainingBalances, isMiniApp, userBalances, setIsMiniApp, LogoutPopup, userInfo, setUserInfo, setPanelOpen, setPanelTarget, adminTest, setAdminTest } = useContext(AccountContext)
+  const { LoginPopup, checkEcoEligibility, ecoData, points, setPoints, isLogged, showLogin, setShowLogin, setIsLogged, fid, setFid, getRemainingBalances, isMiniApp, userBalances, setIsMiniApp, LogoutPopup, userInfo, setUserInfo, setPanelOpen, setPanelTarget, adminTest, setAdminTest, isOn, setIsOn } = useContext(AccountContext)
   const [screenWidth, setScreenWidth] = useState(undefined)
   const [screenHeight, setScreenHeight] = useState(undefined)
   const [textMax, setTextMax] = useState('562px')
@@ -53,7 +53,7 @@ export default function Home() {
   const store = useStore()
 
   const [fundLoading , setFundLoading ] = useState(true);
-  const [isOn, setIsOn] = useState({boost: false, validate: false, autoFund: false, notifs: false});
+  // const [isOn, setIsOn] = useState({boost: false, validate: false, autoFund: false, notifs: false});
   const [expand, setExpand] = useState({boost: false, validate: false, autoFund: false});
   const [loading, setLoading] = useState({boost: false, validate: false, autoFund: false})
 
@@ -80,49 +80,6 @@ export default function Home() {
       router.replace('/~/settings');
     }
   }, [version, adminTest, isLogged]);
-
-  // async function setFundingSchedule(schedule, data) {
-  //   setFundLoading(true)
-  //   try {
-  //     console.log(fid, schedule)
-  //     const response = await axios.post('/api/fund/postSchedule', { fid, schedule, data });
-  //     if (response?.data) {
-  //       console.log('response', response?.data)
-  //       setUserFunding(response?.data?.updatedSchedule)
-  //       setCuratorList(response?.data?.curators)
-  //       if (response?.data?.updatedSchedule?.active_cron) {
-  //         setIsOn(true)
-  //       } else {
-  //         setIsOn(false)
-  //       }
-  //       setModal({on: true, success: true, text: 'Auto-Fund updated successfully'});
-  //       setTimeout(() => {
-  //         setModal({on: false, success: false, text: ''});
-  //       }, 2500);
-  //     } else {
-  //       console.log('no auto-fund response')
-  //       setUserFunding(null)
-  //       setCuratorList([])
-  //       setModal({on: true, success: false, text: 'Auto-Fund failed to update'});
-  //       setTimeout(() => {
-  //         setModal({on: false, success: false, text: ''});
-  //       }, 2500);
-  //       setIsOn(false)
-  //     }
-  //     console.log('schedule-4', schedule)
-  //     setFundLoading(false)
-  //     return schedule
-  //   } catch (error) {
-  //     console.error('Error updating auto-fund:', error);
-  //     setFundLoading(false)
-  //     setModal({on: true, success: false, text: 'Auto-Fund failed to update'});
-  //     setTimeout(() => {
-  //       setModal({on: false, success: false, text: ''});
-  //     }, 2500);
-  //     setIsOn(false)
-  //     return null
-  //   }
-  // }
 
 
   const closeSwipeable = () => {
@@ -277,7 +234,8 @@ export default function Home() {
       setLoading({
         validate: true,
         boost: true,
-        autoFund: true
+        autoFund: true,
+        impactBoost: true
       })
       const response = await axios.get('/api/user/getUserSettings', {
         params: { fid } })
@@ -290,6 +248,7 @@ export default function Home() {
           boost: userSettings.boost || false,
           validate: userSettings.validate || false, 
           autoFund: userSettings.autoFund || false, 
+          impactBoost: userSettings.impactBoost || false,
           score: userSettings.score || 0,
           notifs: userSettings.notifs || false
         })
@@ -298,14 +257,15 @@ export default function Home() {
         validate: false,
         boost: false,
         autoFund: false,
-        score: 0
+        impactBoost: false,
       })
     } catch (error) {
       console.error('Error setting invite:', error)
       setLoading({
         validate: false,
         boost: false,
-        autoFund: false
+        autoFund: false,
+        impactBoost: false,
       })
     }
   }
@@ -372,106 +332,6 @@ export default function Home() {
   }
 
 
-  const ToggleSwitch = ({target}) => {
-    const handleToggle = () => {
-      console.log('isOn', isOn)
-      if (isOn) {
-        setFundingSchedule('off')
-      } else {
-        setFundingSchedule('on')
-      }
-
-      if (isLogged) {
-        setIsOn(prev => ({...prev, [target]: !isOn[target] }))
-      }
-    };
-
-
-
-
-    return (
-      <div className="flex-row" style={{justifyContent: 'center', alignItems: 'center', margin: '0 5px 0 0'}}>
-
-        {loading[target] && (<div className='flex-row' style={{height: '20px', alignItems: 'center', width: '20px', justifyContent: 'center', padding: '0px', position: 'relative', right: '10%', top: '0px'}}>
-          <Spinner size={20} color={'#468'} />
-        </div>)}
-
-
-        <div
-          className={`toggleSwitch ${isOn[target] ? "toggleSwitch-on" : ""}`}
-          onClick={handleToggle}
-        >
-          <span className='circle'></span>
-        </div>
-      </div>
-    );
-  }
-
-
-  function setFundingSchedule(data) {
-    console.log('data', data)
-  }
-
-  async function notifsOn() {
-    try {
-      const { sdk } = await import('@farcaster/miniapp-sdk')
-      console.log('isMiniApp', isMiniApp, notifStatus.app, notifStatus.notifs)
-      if (isMiniApp) {
-        if (notifStatus.app && !notifStatus.notifs) {
-          
-          const result = await sdk.actions.addMiniApp();
-          console.log('result1', result)
-          if (result.notificationDetails) {
-            console.log('test1')
-            setNotifStatus({
-              app: true,
-              notifs: true
-            })
-            setIsOn({...isOn, notifs: true})
-          } else {
-            console.log('test2')
-
-            setNotifStatus({
-              app: true,
-              notifs: false
-            })
-            setIsOn({...isOn, notifs: false})
-          }
-  
-        } else if (!notifStatus.app) {
-          console.log('test3')
-
-          const result = await sdk.actions.addFrame();
-          console.log('result2', result)
-
-          if (result.notificationDetails) {
-            setNotifStatus({
-              app: true,
-              notifs: true
-            })
-            setIsOn({...isOn, notifs: true})
-          } else {
-            console.log('test4')
-
-            setNotifStatus({
-              app: false,
-              notifs: false
-            })
-            setIsOn({...isOn, notifs: false})
-          }
-        }
-      } else {
-        console.log('not miniapp')
-      }
-
-    } catch(error) {
-      console.error('Notification setting failed', error)
-      setIsOn({...isOn, notifs: false})
-
-    }
-  }
-
-
   return (
     <div name="feed" style={{ width: "auto", maxWidth: "620px" }} ref={ref2}>
       <Head>
@@ -482,15 +342,6 @@ export default function Home() {
         />
       </Head>
 
-    {/* {(!isLogged || (version == '2.0' || adminTest)) && (
-      <div id="log in"
-      style={{
-        padding: isMobile ? ((version == '1.0' && !adminTest) ? "58px 0 20px 0" : "48px 0 20px 0") : "58px 0 60px 0",
-        width: feedMax, fontSize: '0px'
-      }} >&nnsp;
-
-      </div>
-    )} */}
 
       {/* {!isLogged && ( */}
       <div style={{ padding: (!isLogged || (version == '2.0' || adminTest)) ? "0px 4px 0px 4px" : '0', width: feedMax }}>
