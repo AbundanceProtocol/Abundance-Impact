@@ -136,7 +136,17 @@ const ImpactScale = ({ initValue, setTipPercent, setInitValue, type, cast, updat
         let currentImpact = cast.impact_balance || 0
         let addedPoints = impactResponse.data.points
         let castData = impactResponse?.data?.cast
-        const updatedCast = {...cast, impact_balance: currentImpact + addedPoints}
+        
+        // Update cast with new tag if one was selected
+        let updatedCast = {...cast, impact_balance: currentImpact + addedPoints}
+        if (selectedTag && selectedTag !== 'Tags') {
+          const currentTags = cast.cast_tags || []
+          const tagExists = currentTags.some(tagObj => tagObj.tag === selectedTag && tagObj.fid === fid)
+          if (!tagExists) {
+            updatedCast.cast_tags = [...currentTags, { tag: selectedTag, fid: fid }]
+          }
+        }
+        
         updateCast(index, updatedCast)
         setUserBalances(prev => ({
           ...prev,
