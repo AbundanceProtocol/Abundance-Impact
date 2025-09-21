@@ -6,7 +6,7 @@ import useStore from '../../utils/store';
 import { AccountContext } from '../../context';
 import { Like, LikeOn, Recast, Message, Kebab, ActiveUser } from '../assets'
 import { FaSearch, FaLock, FaRegStar, FaStar, FaArrowUp, FaArrowDown } from "react-icons/fa"
-import { BiSolidDownArrow as ArrowDown } from "react-icons/bi";
+import { BiSolidDownArrow as ArrowDown, BiChevronDown } from "react-icons/bi";
 import axios from 'axios';
 import { timePassed } from '../../utils/utils';
 import CastText from './Text'
@@ -23,16 +23,74 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
   const router = useRouter();
   const { isMobile } = useMatchBreakpoints();
   const [screenWidth, setScreenWidth] = useState(undefined)
-  const { LoginPopup, fid, userBalances, setUserBalances, isLogged, isMiniApp } = useContext(AccountContext)
+  const { LoginPopup, fid, userBalances, setUserBalances, isLogged, isMiniApp, isOn } = useContext(AccountContext)
   const [textMax, setTextMax] = useState('522px')
   const [feedMax, setFeedMax ] = useState('620px')
   const likeRefs = useRef([])
   const recastRefs = useRef([])
   const [userFid, setUserFid] = useState(null)
   const [fail, setFail] = useState(false)
+  const [selectedTag, setSelectedTag] = useState('')
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const dropdownRef = useRef(null)
+  
+  const tagOptions = ['content', 'image', 'video', 'app'];
+  
   const handleClick = (embed) => {
     openImagePopup(embed); 
   };
+
+  const handleTagSelect = (tag) => {
+    setSelectedTag(tag);
+    setIsDropdownOpen(false);
+    // Call API to update cast with tag
+    updateCastWithTag(cast.hash, tag);
+  };
+
+  async function updateCastWithTag(castHash, tag) {
+    try {
+      const response = await axios.post('/api/curation/updateCastTag', { 
+        castHash, 
+        tag, 
+        fid 
+      });
+      
+      if (response?.data && response.status === 200) {
+        // Update the cast in the local state
+        const updatedCast = {
+          ...cast,
+          cast_tags: [...(cast.cast_tags || []), { tag, fid }]
+        };
+        updateCast(index, updatedCast);
+        console.log('Cast updated with tag:', tag);
+      } else {
+        console.log('Failed to update cast with tag');
+        clickFailed();
+      }
+    } catch (error) {
+      console.error('Error updating cast with tag:', error);
+      clickFailed();
+    }
+  }
+
+  const toggleDropdown = () => {
+    setIsDropdownOpen(!isDropdownOpen);
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   const [hide, setHide] = useState(false)
   function clickFailed() {
     setFail(true);
@@ -558,7 +616,8 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
               </div>
             </div>
 
-            {cast?.cast_tags && Array.isArray(cast.cast_tags) && cast.cast_tags.length > 0 && (
+            {/* Tags Display and Dropdown */}
+            {cast?.cast_tags && Array.isArray(cast.cast_tags) && cast.cast_tags.length > 0 ? (
               <div className="flex-row" style={{gap: '0.3rem', margin: '0 0.5rem 0 0', justifyContent: 'center'}}>
                 {cast.cast_tags.map((tagObj, idx) => (
                   <span
@@ -578,6 +637,70 @@ export default function Cast({ cast, index, updateCast, openImagePopup, ecosyste
                   </span>
                 ))}
               </div>
+            ) : (
+              // Show dropdown if no tags and user score > 50
+              (!cast?.cast_tags || cast.cast_tags.length === 0) && isOn?.score > 50 && (
+                <div className="flex-row" style={{gap: '0.3rem', margin: '0 0.5rem 0 0', justifyContent: 'center'}}>
+                  <div ref={dropdownRef} style={{ position: 'relative' }}>
+                    <div 
+                      onClick={toggleDropdown}
+                      style={{
+                        padding: '4px 10px',
+                        borderRadius: '12px',
+                        background: '#ace',
+                        color: '#246',
+                        fontSize: '14px',
+                        fontWeight: 500,
+                        border: '1px solid #aac',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}
+                    >
+                      add tag
+                      <BiChevronDown size={14} style={{ transform: isDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
+                    </div>
+                    
+                    {isDropdownOpen && (
+                      <div 
+                        style={{
+                          position: 'absolute',
+                          bottom: '100%',
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          backgroundColor: '#fff',
+                          border: '1px solid #ccc',
+                          borderRadius: '8px',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                          zIndex: 1000,
+                          minWidth: '100px',
+                          marginBottom: '4px'
+                        }}
+                      >
+                        {tagOptions.map((tag) => (
+                          <div
+                            key={tag}
+                            onClick={() => handleTagSelect(tag)}
+                            style={{
+                              padding: '8px 12px',
+                              cursor: 'pointer',
+                              borderBottom: tag !== tagOptions[tagOptions.length - 1] ? '1px solid #eee' : 'none',
+                              fontSize: '14px',
+                              fontWeight: '500',
+                              color: '#333'
+                            }}
+                            onMouseEnter={(e) => e.target.style.backgroundColor = '#f8f8f8'}
+                            onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                          >
+                            {tag}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )
             )}
 
             <div className="flex-row" style={{flex: 1, padding: '3px', gap: '0.5rem'}}>

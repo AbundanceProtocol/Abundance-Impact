@@ -45,7 +45,8 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
   const [lastTopCoinsFetch, setLastTopCoinsFetch] = useState(0)
   const [topCoinsCache, setTopCoinsCache] = useState({})
   const [lastRpcCall, setLastRpcCall] = useState(0) // Track last RPC call time
-  
+  const [isOn, setIsOn] = useState({boost: false, validate: false, autoFund: false, notifs: false, impactBoost: false});
+
   const router = useRouter()
   
   // Auto-detect Farcaster wallet when available (legacy method - keeping for fallback)
@@ -1321,7 +1322,8 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
     topCoinsCache, setTopCoinsCache,
     lastRpcCall, setLastRpcCall,
     wagmiStatus, setWagmiStatus,
-    userInfo, setUserInfo
+    userInfo, setUserInfo,
+    isOn, setIsOn
   };
 
   return (
