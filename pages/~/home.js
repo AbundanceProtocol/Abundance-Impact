@@ -864,6 +864,121 @@ export default function Homepage({ test }) {
 
       </div>
 
+      {/* Status Icons Row */}
+      <div className='flex-row' style={{width: '100%', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', margin: '20px 0 0 0'}}>
+        <div className='flex-row' style={{gap: '0.4rem', border: `1px solid #0af`, padding: '0 8px', borderRadius: '10px'}}>
+
+        <Link 
+            href={"/~/settings"}
+            style={{
+              padding: '8px',
+              border: `0px solid ${isLogged ? "#0af" : "#aaa"}`,
+              borderRadius: '8px',
+              backgroundColor: 'transparent',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <BsGearFill 
+              size={16} 
+              color={"#ace"} 
+            />
+          </Link>
+
+          <Link 
+            href={"/~/settings"}
+            style={{
+              padding: '8px',
+              border: `0px solid ${isLogged ? "#0af" : "#aaa"}`,
+              borderRadius: '8px',
+              backgroundColor: 'transparent',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <BsPersonFill 
+              size={16} 
+              color={isLogged ? "#0af" : "#aaa"} 
+            />
+          </Link>
+
+
+          <Link 
+            href={"/~/earn"}
+            style={{
+              padding: '8px',
+              border: `0px solid ${isLogged && isOn.boost ? "#0af" : "#aaa"}`,
+              borderRadius: '8px',
+              backgroundColor: 'transparent',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <BsStarFill 
+              size={16} 
+              color={isLogged && isOn.boost ? "#0af" : "#aaa"} 
+            />
+          </Link>
+
+          <Link 
+            href={"/~/earn"}
+            style={{
+              padding: '8px',
+              border: `0px solid ${isLogged && isOn.validate ? "#0af" : "#aaa"}`,
+              borderRadius: '8px',
+              backgroundColor: 'transparent',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <BsShieldFillCheck 
+              size={16} 
+              color={isLogged && isOn.validate ? "#0af" : "#aaa"} 
+            />
+          </Link>
+
+          <Link 
+            href={"/~/earn"}
+            style={{
+              padding: '8px',
+              border: `0px solid ${isLogged && isOn.autoFund ? "#0af" : "#aaa"}`,
+              borderRadius: '8px',
+              backgroundColor: 'transparent',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <BsPiggyBankFill 
+              size={16} 
+              color={isLogged && isOn.autoFund ? "#0af" : "#aaa"} 
+            />
+          </Link>
+
+          <Link 
+            href={"/~/earn"}
+            style={{
+              padding: '8px',
+              border: `0px solid ${isLogged && isOn.impactBoost ? "#0af" : "#aaa"}`,
+              borderRadius: '8px',
+              backgroundColor: 'transparent',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <BsRocketTakeoffFill 
+              size={16} 
+              color={isLogged && isOn.impactBoost ? "#0af" : "#aaa"} 
+            />
+          </Link>
+        </div>
+      </div>
+
 
       {(version == "2.0" || adminTest) && isLogged && (
         <div

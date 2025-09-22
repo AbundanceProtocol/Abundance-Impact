@@ -31,7 +31,7 @@ const version = process.env.NEXT_PUBLIC_VERSION
 export default function Settings({test, rewards, onSettingsChange}) {
   const ref2 = useRef(null)
   const [ref, inView] = useInView()
-  const { LoginPopup, checkEcoEligibility, ecoData, points, setPoints, isLogged, setShowLogin, setIsLogged, fid, setFid, getRemainingBalances, isMiniApp, userBalances, setIsMiniApp, LogoutPopup, userInfo, setUserInfo, setPanelOpen, setPanelTarget, adminTest, setAdminTest } = useContext(AccountContext)
+  const { LoginPopup, checkEcoEligibility, ecoData, points, setPoints, isLogged, setShowLogin, setIsLogged, fid, setFid, getRemainingBalances, isMiniApp, userBalances, setIsMiniApp, LogoutPopup, userInfo, setUserInfo, setPanelOpen, setPanelTarget, adminTest, setAdminTest, isOn, setIsOn } = useContext(AccountContext)
   const [screenWidth, setScreenWidth] = useState(undefined)
   const [screenHeight, setScreenHeight] = useState(undefined)
   const [textMax, setTextMax] = useState('562px')
@@ -44,7 +44,6 @@ export default function Settings({test, rewards, onSettingsChange}) {
   const store = useStore()
 
   const [fundLoading , setFundLoading ] = useState(true);
-  const [isOn, setIsOn] = useState({boost: false, validate: false, autoFund: false, notifs: false, impactBoost: false});
   // const [expand, setExpand] = useState({boost: false, validate: false, autoFund: false});
   const [loading, setLoading] = useState({boost: false, validate: false, autoFund: false, impactBoost: false})
 
