@@ -82,6 +82,8 @@ const ImpactScale = ({ initValue, setTipPercent, setInitValue, type, cast, updat
       let shareQC = `https://farcaster.xyz/${cast?.author?.username}/${cast?.hash?.slice(0, 10)}`
       const options = [
         `I just nominated ${cast?.author?.username ? '@' + cast?.author?.username + "'s" : 'a'} cast for its impact on Farcaster`,
+        `I just nominated ${cast?.author?.username ? '@' + cast?.author?.username + "'s" : 'a'} cast for its impact on Farcaster\n\nHelp build the user-centric algo with /impact`,
+        `I just nominated ${cast?.author?.username ? '@' + cast?.author?.username + "'s" : 'a'} cast for its impact on Farcaster\n\nSupport impactful creators & builders 👇`,
       ];
       shareText = options[Math.floor(Math.random() * options.length)];
   
