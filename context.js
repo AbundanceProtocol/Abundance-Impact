@@ -45,7 +45,7 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
   const [lastTopCoinsFetch, setLastTopCoinsFetch] = useState(0)
   const [topCoinsCache, setTopCoinsCache] = useState({})
   const [lastRpcCall, setLastRpcCall] = useState(0) // Track last RPC call time
-  const [isOn, setIsOn] = useState({boost: false, validate: false, autoFund: false, notifs: false, impactBoost: false});
+  const [isOn, setIsOn] = useState({boost: false, validate: false, autoFund: false, notifs: false, impactBoost: false, score: 0});
 
   const router = useRouter()
   

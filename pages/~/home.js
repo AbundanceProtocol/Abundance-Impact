@@ -498,7 +498,7 @@ export default function Homepage({ test }) {
   }
 
   useEffect(() => {
-    if (isLogged && fid) {
+    if (isLogged && fid && isOn.score == 0) {
       getUserSettings(fid);
     } else if (!isLogged) {
       setIsOn({

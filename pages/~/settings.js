@@ -217,7 +217,7 @@ export default function Settings({test, rewards, onSettingsChange}) {
   }
 
   useEffect(() => {
-    if (isLogged && fid) {
+    if (isLogged && fid && isOn.score == 0) {
       getUserSettings(fid)
     } else if (!isLogged) {
       setIsOn({
