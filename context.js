@@ -801,7 +801,9 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
     }
   };
 
-  // Fetch tokens using Zapper API
+  // Fetch tokens using Zapper API (switched back from Moralis)
+  // NOTE: To switch to Moralis, change the endpoint from '/api/wallet/zapper-simple' to '/api/wallet/moralis'
+  // Zapper API provides comprehensive token data across multiple networks
   const fetchZapperTokens = async (address) => {
     console.log('🔄 Fetching tokens from Zapper API for address:', address);
     
