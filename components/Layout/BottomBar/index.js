@@ -30,7 +30,7 @@ const BottomBar = () => {
   const ref1 = useRef(null);
   const { isMobile } = useMatchBreakpoints();
   const router = useRouter();
-  const { isLogged, setPanelTarget, setPanelOpen, adminTest } = useContext(AccountContext);
+  const { isLogged, setPanelTarget, setPanelOpen, adminTest, fid } = useContext(AccountContext);
 
   const openSwipeable = target => {
     setPanelTarget(target);
@@ -105,7 +105,7 @@ const BottomBar = () => {
             </Link>
 
             {(version == "2.0" || adminTest) && (
-              <Link href={"/"}>
+              <Link href={(fid && fid == 9326) ? "/~/validate" : "/"}>
                 <div
                   className="flex-col"
                   style={{
