@@ -1107,7 +1107,16 @@ export default function Tip({ curatorId }) {
   const shareOnchainTip = async () => {
     try {
       const url = `https://impact.abundance.id/~/multi-tip/${shareModal?.id || null}`;
-      const text = `I multi-tipped ${formatShareAmount(shareModal?.amount)} $${shareModal?.token} to ${shareModal?.receivers} creators with /impact!`;
+      let text = `I multi-tipped ${formatShareAmount(shareModal?.amount)} $${shareModal?.token} to ${shareModal?.receivers} creators with /impact!`;
+
+      const options = [
+        `I multi-tipped ${formatShareAmount(shareModal?.amount)} $${shareModal?.token} to ${shareModal?.receivers} creators with /impact!`,
+        `I multi-tipped ${formatShareAmount(shareModal?.amount)} $${shareModal?.token} to ${shareModal?.receivers} creators with /impact!\n\nHelp build the user-centric algo with /impact`,
+        `I multi-tipped ${formatShareAmount(shareModal?.amount)} $${shareModal?.token} to ${shareModal?.receivers} creators with /impact!\n\nSupport impactful creators & builders 👇`,
+        `I multi-tipped ${formatShareAmount(shareModal?.amount)} $${shareModal?.token} to ${shareModal?.receivers} creators with /impact!\n\nSupport those who are making a difference on Farcaster 👇`,
+      ];
+      text = options[Math.floor(Math.random() * options.length)];
+
       const encodedText = encodeURIComponent(text);
       const encodedUrl = encodeURIComponent(url);
       const shareLink = `https://farcaster.xyz/~/compose?text=${encodedText}&embeds[]=${[encodedUrl]}`;
