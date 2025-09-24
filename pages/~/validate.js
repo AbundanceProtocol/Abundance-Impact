@@ -76,7 +76,7 @@ export default function Rewards() {
   // Countdown timer effect
   useEffect(() => {
     const updateTimer = () => {
-      setTimeRemaining(calculateTimeToNext4HourPeriod());
+      setTimeRemaining(calculateTimeToNext6HourPeriod());
     };
 
     // Update immediately
@@ -199,7 +199,7 @@ export default function Rewards() {
     }
   };
 
-  const calculateTimeToNext4HourPeriod = () => {
+  const calculateTimeToNext6HourPeriod = () => {
     // Get current time in EST/EDT
     const now = new Date();
     
@@ -213,18 +213,18 @@ export default function Rewards() {
     
     console.log(`Current EST time: ${currentHour}:${currentMinute}:${currentSecond}`);
     
-    // Define the 4-hour periods: 0, 4, 8, 12, 16, 20
-    const periods = [0, 4, 8, 12, 16, 20, 24]; // Include 24 for next day calculation
+    // Define the 6-hour periods: 0, 6, 12, 18
+    const periods = [0, 6, 12, 18, 24]; // Include 24 for next day calculation
     
     // Find the next period
     let nextPeriod = periods.find(period => period > currentHour);
     
-    // If no period found (after 20:xx), next period is 0:00 tomorrow
+    // If no period found (after 18:xx), next period is 0:00 tomorrow
     if (!nextPeriod) {
       nextPeriod = 24; // Will be treated as 0:00 next day
     }
     
-    console.log(`Next 4-hour period: ${nextPeriod === 24 ? '0 (tomorrow)' : nextPeriod}`);
+    console.log(`Next 6-hour period: ${nextPeriod === 24 ? '0 (tomorrow)' : nextPeriod}`);
     
     // Calculate total seconds until target time
     const currentTotalSeconds = currentHour * 3600 + currentMinute * 60 + currentSecond;
@@ -239,9 +239,9 @@ export default function Rewards() {
       secondsUntilTarget = targetTotalSeconds - currentTotalSeconds;
     }
     
-    // Handle the case where we're exactly at a 4-hour boundary
+    // Handle the case where we're exactly at a 6-hour boundary
     if (secondsUntilTarget <= 0) {
-      // If we're at exactly 0, 4, 8, 12, 16, or 20:00:00, start counting to next period
+      // If we're at exactly 0, 6, 12, or 18:00:00, start counting to next period
       const nextIndex = periods.indexOf(nextPeriod) + 1;
       if (nextIndex < periods.length) {
         nextPeriod = periods[nextIndex];
