@@ -6,7 +6,7 @@ const { Schema } = mongoose;
 const userSchema = new mongoose.Schema({
   invited_by: { type: Number, default: null },
   fid: { type: String, index: true },
-  uuid: String, //encrypted
+  uuid: { type: String, default: "" }, //encrypted
   token: String, //encrypted
   notified: { type: Boolean, default: false, index: true },
   ecosystem_points: { type: String, index: true },
@@ -18,10 +18,10 @@ const userSchema = new mongoose.Schema({
   set_cast_hash: String,
   need_cast_hash: { type: Boolean, default: true },
   power_badge: Boolean,
-  impact_allowance: Number,
-  remaining_i_allowance: Number,
-  quality_allowance: Number,
-  remaining_q_allowance: Number,
+  impact_allowance: { type: Number, default: 30 },
+  remaining_i_allowance: { type: Number, default: 30 },
+  quality_allowance: { type: Number, default: 30 },
+  remaining_q_allowance: { type: Number, default: 30 },
   invite_bonus: { type: Number, default: 0 },
   boost: { type: Boolean, default: false, index: true },
   impact_boost: { type: Boolean, default: false, index: true },

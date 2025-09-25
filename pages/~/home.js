@@ -841,7 +841,7 @@ export default function Homepage({ test }) {
           </div>
           )} */}
 
-      <div className='flex-row' style={{width: '100%', justifyContent: 'center', alignItems: 'center'}}>
+      {/* <div className='flex-row' style={{width: '100%', justifyContent: 'center', alignItems: 'center'}}>
 
         <div
           className="flex-col"
@@ -862,11 +862,11 @@ export default function Homepage({ test }) {
           </div>
         </div>
 
-      </div>
+      </div> */}
 
       {/* Status Icons Row */}
-      <div className='flex-row' style={{width: '100%', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', margin: '20px 0 0 0'}}>
-        <div className='flex-row' style={{gap: '0.4rem', border: `1px solid #0af`, padding: '0 8px', borderRadius: '10px'}}>
+      <div className='flex-row' style={{width: '100%', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', margin: '10px 0 0 0'}}>
+        <div className='flex-row' style={{gap: '0.4rem', border: `1px solid #0af`, padding: '0 8px 0 0', borderRadius: '8px'}}>
 
         <Link 
             href={"/~/settings"}
@@ -874,7 +874,7 @@ export default function Homepage({ test }) {
               padding: '8px',
               border: `0px solid ${isLogged ? "#0af" : "#aaa"}`,
               borderRadius: '8px',
-              backgroundColor: 'transparent',
+              backgroundColor: '#246',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center'
