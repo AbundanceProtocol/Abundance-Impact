@@ -197,23 +197,30 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
   const [eligibility, setEligibility] = useState(null);
   const [userInfo, setUserInfo] = useState(null);
   
-  // Login popup component
+  // Login popup trigger function
   const LoginPopup = () => {
+    setShowLogin(true);
+  };
+
+  // Login popup component
+  const LoginPopupComponent = () => {
     if (!showLogin) return null;
     
     return (
-      <div style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 9999
-      }}>
+      <div 
+        id="login-popup-overlay"
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999
+        }}>
         <div style={{
           backgroundColor: '#021326',
           border: '1px solid #11447799',
@@ -245,23 +252,30 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
     );
   };
   
-  // Logout popup component
+  // Logout popup trigger function
   const LogoutPopup = () => {
+    setShowLogout(true);
+  };
+
+  // Logout popup component
+  const LogoutPopupComponent = () => {
     if (!showLogout) return null;
     
     return (
-      <div style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 9999
-      }}>
+      <div 
+        id="logout-popup-overlay"
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999
+        }}>
         <div style={{
           backgroundColor: '#021326',
           border: '1px solid #11447799',
@@ -1329,11 +1343,11 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
   };
 
   return (
-        <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={queryClient}>
       <WagmiProvider config={wagmiConfig}>
         <AccountContext.Provider value={contextValue}>
           {children}
-    </AccountContext.Provider>
+        </AccountContext.Provider>
       </WagmiProvider>
     </QueryClientProvider>
   );

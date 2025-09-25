@@ -284,7 +284,7 @@ const UserMenu = () => {
             </div>
           </div>)} */}
 
-          {userInfo?.pfp && (version == "1.0" || version == "2.0" || adminTest) && (
+          {/* {userInfo?.pfp && (version == "1.0" || version == "2.0" || adminTest) && (
             <Link
               className={"flex-row items-center impact-arrow"}
               href={"/~/auto-fund"}
@@ -304,7 +304,7 @@ const UserMenu = () => {
                 <BsPiggyBank size={22} className="" style={{ fontSize: "25px", color: "#eee" }} />
               )}
             </Link>
-          )}
+          )} */}
 
           {/* {userInfo?.pfp && (version == '2.0' || adminTest) && (<div className={'flex-row items-center'} style={{border: '1px solid #999', padding: '5px 3px 0px 3px', borderRadius: '10px', backgroundColor: '#002244cc'}}>
             <div className={`impact-arrow`} style={{margin: '0 0 0 0' }}>

@@ -674,7 +674,7 @@ export default function Settings({test, rewards, onSettingsChange}) {
                       <div className="top-layer flex-row">
                         <div className="flex-row" style={{padding: "4px 0 4px 10px", marginBottom: '0px', flexWrap: 'wrap', justifyContent: 'flex-start', gap: '0.00rem', width: '', alignItems: 'center'}}>
                           <div style={{fontSize: isMobile ? '18px' : '22px', fontWeight: '600', color: '', padding: '0px 3px'}}>
-                            Login
+                            {isLogged ? 'Logged In' : 'Login'}
                           </div>
                         </div>
                       </div>
@@ -972,7 +972,7 @@ export default function Settings({test, rewards, onSettingsChange}) {
 
           {/* AUTO-FUND */}
 
-          {(version == '2.0' || adminTest) && (<div className='flex-col' style={{backgroundColor: ''}}>
+          {/* {(version == '2.0' || adminTest) && (<div className='flex-col' style={{backgroundColor: ''}}>
 
             <div className='shadow flex-col'
               style={{
@@ -1062,12 +1062,12 @@ export default function Settings({test, rewards, onSettingsChange}) {
               </div>
             </div>
           </div>
-          )}
+          )} */}
 
 
 
 
-          {rewards && (<div className='flex-col' style={{backgroundColor: ''}}>
+          {(<div className='flex-col' style={{backgroundColor: ''}}>
 
           <div className='shadow flex-col'
             style={{
