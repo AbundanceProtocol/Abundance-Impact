@@ -906,7 +906,7 @@ export default function Homepage({ test }) {
 
 
           <Link 
-            href={"/~/earn"}
+            href={"/~/settings"}
             style={{
               padding: '8px',
               border: `0px solid ${isLogged && isOn.boost ? "#0af" : "#aaa"}`,
@@ -924,7 +924,7 @@ export default function Homepage({ test }) {
           </Link>
 
           <Link 
-            href={"/~/earn"}
+            href={"/~/settings"}
             style={{
               padding: '8px',
               border: `0px solid ${isLogged && isOn.validate ? "#0af" : "#aaa"}`,
@@ -941,7 +941,7 @@ export default function Homepage({ test }) {
             />
           </Link>
 
-          <Link 
+          {/* <Link 
             href={"/~/earn"}
             style={{
               padding: '8px',
@@ -957,10 +957,10 @@ export default function Homepage({ test }) {
               size={16} 
               color={isLogged && isOn.autoFund ? "#0af" : "#aaa"} 
             />
-          </Link>
+          </Link> */}
 
           <Link 
-            href={"/~/earn"}
+            href={"/~/settings"}
             style={{
               padding: '8px',
               border: `0px solid ${isLogged && isOn.impactBoost ? "#0af" : "#aaa"}`,
