@@ -452,7 +452,7 @@ export default function Settings({test, rewards, onSettingsChange}) {
                     app: false,
                     notifs: false
                   })
-                  setIsOn({...isOn, notifs: false})
+                  setIsOn({...isOn, notifs: false, app: false})
                 }
               } catch (error) {
                 console.error('Failed:', error)
@@ -472,7 +472,7 @@ export default function Settings({test, rewards, onSettingsChange}) {
                     app: false,
                     notifs: false
                   })
-                  setIsOn({...isOn, notifs: false})
+                  setIsOn({...isOn, notifs: false, app: false})
                 }
               } catch (error) {
                 console.error('Failed:', error)
@@ -507,7 +507,7 @@ export default function Settings({test, rewards, onSettingsChange}) {
 
 
         <div
-          className={`toggleSwitch ${(isOn[target] && !(target == 'validate' && !isOn.notifs)) ? "toggleSwitch-on" : ""}`}
+          className={`toggleSwitch ${(isOn[target] && (!(target == 'validate' && !isOn.notifs) || !(target == 'signal' && !isOn.app ))) ? "toggleSwitch-on" : ""}`}
           onClick={handleToggle}>
           <span className='circle'></span>
         </div>
@@ -525,7 +525,7 @@ export default function Settings({test, rewards, onSettingsChange}) {
         const { sdk } = await import('@farcaster/miniapp-sdk')
         const userProfile = await sdk.context
 
-        console.log('isMiniApp', isMiniApp, notifStatus.app, notifStatus.notifs, userProfile.client.added, userProfile.client.notificationDetails)
+        console.log('isMiniApp', isMiniApp, notifStatus.app, notifStatus.notifs, userProfile.client.added, userProfile.client.notificationDetails, isOn)
 
         if (userProfile.client.added && !userProfile.client.notificationDetails) {
           console.log('notifs off')
@@ -629,7 +629,7 @@ export default function Settings({test, rewards, onSettingsChange}) {
 
           {/* LOGIN */}
 
-          {(!rewards && (version == '2.0' || adminTest)) && (<div className='flex-col' style={{backgroundColor: ''}}>
+          {/* {(!rewards && (version == '2.0' || adminTest)) && (<div className='flex-col' style={{backgroundColor: ''}}>
 
             <div className='shadow flex-col'
               style={{
@@ -741,7 +741,7 @@ export default function Settings({test, rewards, onSettingsChange}) {
               )}
             </div>
           </div>
-          )}
+          )} */}
 
 
           {(!rewards && ((version == '2.0' || adminTest) && isLogged)) && (<div className='flex-row' style={{backgroundColor: '', justifyContent: 'center', gap: '1rem', margin: '20px 0 -20px 0'}}>
@@ -819,7 +819,102 @@ export default function Settings({test, rewards, onSettingsChange}) {
                       <div className="top-layer flex-row">
                         <div className="flex-row" style={{padding: "4px 0 4px 10px", marginBottom: '0px', flexWrap: 'wrap', justifyContent: 'flex-start', gap: '0.00rem', width: '', alignItems: 'center'}}>
                           <div style={{fontSize: isMobile ? '18px' : '22px', fontWeight: '600', color: '', padding: '0px 3px'}}>
-                            Signal & Boost
+                            Signal
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+
+                  </div>
+
+
+                  <div
+                    className="flex-row"
+                    style={{
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      cursor: "pointer",
+                    }} >
+
+                  </div>
+
+                </div>
+
+                <ToggleSwitch target={'signal'} />
+
+              </div>
+
+
+
+
+              <div className='flex-row' style={{backgroundColor: isLogged ? "#002244ff" : '#333', padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: isLogged ? '#ace' : '#ddd', fontSize: '12px', gap: '0.75rem', position: 'relative'}}>
+
+                <div className='flex-row' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(isLogged && isOn.boost) ? '#0af' : '#aaa'}`, borderRadius: '8px', backgroundColor: '', alignItems: 'center', gap: '0.15rem', height: '30px'}}>
+                  <div style={{fontSize: '13px', fontWeight: '700', color: (isLogged && isOn.boost) ? '#0af' : '#aaa'}}>
+                    +30
+                  </div>
+                  <BsStar color={(isLogged && isOn.boost) ? '#0af' : '#aaa'} size={13} />
+                </div>
+
+                <div>
+                  Nominate impactful casts, become an Impact Booster to grow your Impact Score & earn rewards
+                </div>
+                <div className='flex-row' style={{position: 'absolute', bottom: '0', right: '0', padding: '5px 5px', gap: '.25rem', alignItems: 'center'}}>
+                  <BsInfoCircle size={15} onClick={() => {
+                      openSwipeable("boost"); }} />
+                </div>
+              </div>
+            </div>
+          </div>
+          )}
+
+
+          {/* BOOST & NOMINATE */}
+
+          {(version == '2.0' || adminTest) && (<div className='flex-col' style={{backgroundColor: ''}}>
+
+            <div className='shadow flex-col'
+              style={{
+                backgroundColor: isLogged ? "#002244" : '#333',
+                borderRadius: "15px",
+                border: isLogged ? "1px solid #11447799" : "1px solid #555",
+                width: isMiniApp || isMobile ? '340px' : '100%',
+                margin: isMiniApp || isMobile ? '15px auto 0 auto' : '15px auto 0 auto',
+              }} >
+              <div
+                className="shadow flex-row"
+                style={{
+                  backgroundColor: isLogged ? "#11448888" : "#444",
+                  width: "100%",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "8px", 
+                  borderRadius: "15px",
+                  margin: '0 0 10px 0'
+                }} >
+
+
+                <div
+                  className="flex-row"
+                  style={{
+                    width: "100%",
+                    justifyContent: "flex-start",
+                    alignItems: "center",
+                    padding: "0px 0 0 4px",
+                    margin: '0 0 0px 0'
+                  }} >
+
+                
+                  <BsStarFill style={{ fill: "#cde" }} size={20} />
+                  <div>
+
+
+                    <div style={{border: '0px solid #777', padding: '2px', borderRadius: '10px', backgroundColor: '', maxWidth: 'fit-content', cursor: 'pointer', color: '#cde'}}>
+                      <div className="top-layer flex-row">
+                        <div className="flex-row" style={{padding: "4px 0 4px 10px", marginBottom: '0px', flexWrap: 'wrap', justifyContent: 'flex-start', gap: '0.00rem', width: '', alignItems: 'center'}}>
+                          <div style={{fontSize: isMobile ? '18px' : '22px', fontWeight: '600', color: '', padding: '0px 3px'}}>
+                            Boost
                           </div>
                         </div>
                       </div>
@@ -866,8 +961,10 @@ export default function Settings({test, rewards, onSettingsChange}) {
                 </div>
               </div>
             </div>
-          </div>
-          )}
+            </div>
+            )}
+
+
 
 
           {/* VALIDATE */}
@@ -1075,7 +1172,7 @@ export default function Settings({test, rewards, onSettingsChange}) {
               borderRadius: "15px",
               border: isLogged ? "1px solid #11447799" : "1px solid #555",
               width: isMiniApp || isMobile ? '340px' : '100%',
-              margin: isMiniApp || isMobile ? '15px auto 0 auto' : '15px auto 0 auto',
+              margin: isMiniApp || isMobile ? '15px auto 90px auto' : '15px auto 90px auto',
             }} >
             <div
               className="shadow flex-row"
@@ -1161,7 +1258,7 @@ export default function Settings({test, rewards, onSettingsChange}) {
 
 
 
-          {rewards && (<div className='flex-col' style={{backgroundColor: ''}}>
+          {/* {rewards && (<div className='flex-col' style={{backgroundColor: ''}}>
 
           <div className='shadow flex-col'
             style={{
@@ -1276,10 +1373,6 @@ export default function Settings({test, rewards, onSettingsChange}) {
               </div>
 
 
-
-
-
-              {/* <ToggleSwitch target={'impactBoost'} /> */}
             </div>
 
 
@@ -1296,14 +1389,10 @@ export default function Settings({test, rewards, onSettingsChange}) {
                 Share your impact to boost your score (up to 2 points per day)
               </div>
 
-              {/* <div className='flex-row' style={{position: 'absolute', bottom: '0', right: '0', padding: '5px 5px', gap: '.25rem', alignItems: 'center'}}>
-                <BsInfoCircle size={15} onClick={() => {
-                  openSwipeable("impactBoost"); }} />
-              </div> */}
             </div>
           </div>
           </div>
-          )}
+          )} */}
 
 
         {/* </div> */}

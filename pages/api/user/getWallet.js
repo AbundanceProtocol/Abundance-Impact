@@ -15,11 +15,15 @@ export default async function handler(req, res) {
           const data = await response.json();
           const wallets = data?.result?.extras?.walletLabels
           
-          const warpcastWallet = wallets.find(wallet => wallet.address.startsWith('0x') && wallet.labels.includes('warpcast'));
+          let warpcastWallet = wallets.find(wallet => wallet.address.startsWith('0x') && wallet.labels.includes('warpcast'));
           if (warpcastWallet) {
             console.log('Warpcast Wallet:', warpcastWallet);
           } else {
             console.log('No Warpcast wallet found');
+          }
+
+          if (!warpcastWallet) {
+            warpcastWallet = wallets.find(wallet => wallet.address.startsWith('0x') && wallet.labels.includes('primary'));
           }
 
           return warpcastWallet?.address || '';

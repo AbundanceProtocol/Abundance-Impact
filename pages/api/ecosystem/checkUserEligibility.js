@@ -13,10 +13,13 @@ export default async function handler(req, res) {
   const ArbAlchemyKey = process.env.ALCHEMY_ARB_API_KEY
   const { fid, points, uuid, referrer } = req.query;
 
-  if (req.method !== 'GET' || !fid || !points || !uuid ) {
+  if (req.method !== 'GET' || !fid || !points ) {
     res.status(405).json({ error: 'Method Not Allowed' });
   } else {
-    const encryptedUuid = encryptPassword(uuid, secretKey);
+    let encryptedUuid = null
+    if (uuid) {
+      encryptedUuid = encryptPassword(uuid, secretKey);
+    }
 
     console.log('referrer', referrer)
     let setReferrer = null
@@ -384,7 +387,7 @@ export default async function handler(req, res) {
             }
           }
   
-          const { hash, needHash } = await getLatestCastHash(user.fid)
+          // const { hash, needHash } = await getLatestCastHash(user.fid)
 
           const currentDate = getCurrentDateUTC();
           let midnight = new Date(currentDate);
@@ -399,15 +402,15 @@ export default async function handler(req, res) {
           createUser = await User.create({
             invited_by: setReferrer,
             fid: user.fid,
-            uuid: encryptedUuid,
+            uuid: encryptedUuid || "",
             ecosystem_points: ecosystem.ecosystem_points_name,
             ecosystem_name: ecosystem.ecosystem_name,
             pfp: user.pfp_url,
             wallet: verification,
             username: user.username,
             display_name: user.display_name,
-            set_cast_hash: hash,
-            need_cast_hash: needHash,
+            set_cast_hash: "",
+            need_cast_hash: true,
             impact_allowance: balance,
             remaining_i_allowance: balance,
             quality_allowance: balance,
@@ -421,7 +424,7 @@ export default async function handler(req, res) {
           console.log('ce7 createUser', createUser)
         } else if (createUser) {
           console.log('ce8', typeof createUser?.uuid == 'undefined')
-          if (typeof createUser.uuid == 'undefined') {
+          if (typeof createUser.uuid == 'undefined' && encryptedUuid) {
             createUser.uuid = encryptedUuid
           }
           if (createUser?.impact_allowance == 0 && createUser?.quality_allowance == 0 && eligibility) {

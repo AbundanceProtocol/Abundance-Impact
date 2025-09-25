@@ -125,6 +125,12 @@ const UserMenu = () => {
         // setIsLogged(true)
         // setFid(Number(userProfile?.user?.fid))
         console.log("userInfo", userInfo, isMiniApp, userProfile);
+
+        // Check if miniapp is installed and set isOn.app to true if yes
+        if (isMiniApp && userProfile?.client?.added) {
+          setIsOn(prev => ({ ...prev, app: true }));
+        }
+
         if (isMiniApp && !userInfo?.username) {
           setUserInfo({
             pfp: userProfile?.user?.pfpUrl || null,
