@@ -1651,7 +1651,7 @@ export default function Homepage({ test }) {
           </div>
         </div>
 
-        <Link
+        {/* <Link
           href={"/~/auto-fund"}
           className="flex-col"
           style={{
@@ -1698,7 +1698,7 @@ export default function Homepage({ test }) {
               </div>
             </div>
           </div>
-        </Link>
+        </Link> */}
 
         <Link
           href={"/~/rewards"}
