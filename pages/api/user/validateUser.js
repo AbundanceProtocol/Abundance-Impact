@@ -14,7 +14,8 @@ export default async function handler(req, res) {
   let userExists = await User.findOne({ fid: fid.toString(), ecosystem_points: '$IMPACT' }).select('_id uuid');
 
   let signer = false
-  
+  let newUser = false
+
   if (!userExists) {
 
     async function getUser(fid, apiKey) {
@@ -105,6 +106,7 @@ export default async function handler(req, res) {
 
 
     await userExists.save()
+    newUser = true
   }
   
   if (userExists) {
@@ -115,5 +117,5 @@ export default async function handler(req, res) {
     }
   }
 
-  res.status(200).json({ valid: !!userExists, signer: signer });
+  res.status(200).json({ valid: !!userExists, signer: signer, newUser: newUser });
 }

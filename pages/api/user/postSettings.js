@@ -34,7 +34,12 @@ export default async function handler(req, res) {
           let updated = null
           let message = null
           if (setting == 'boost-on') {
+            let userSettings = await getUuid(fid, '$IMPACT')
+            if (userSettings) {
             updated = await User.findOneAndUpdate({ fid: fid.toString(), ecosystem_points: '$IMPACT' }, { boost: true }, { new: true, select: '-uuid' });
+            } else {
+              message = 'Need to login'
+            }
           } else if (setting == 'boost-off') {
             updated = await User.findOneAndUpdate({ fid: fid.toString(), ecosystem_points: '$IMPACT' }, { boost: false }, { new: true, select: '-uuid' });
           } else if (setting == 'validate-on') {
@@ -52,7 +57,12 @@ export default async function handler(req, res) {
               message = 'Turn on notifications'
             }
           } else if (setting == 'impactBoost-on') {
-            updated = await User.findOneAndUpdate({ fid: fid.toString(), ecosystem_points: '$IMPACT' }, { impact_boost: true }, { new: true, select: '-uuid' });
+            let userSettings = await getUuid(fid, '$IMPACT')
+            if (userSettings) {
+              updated = await User.findOneAndUpdate({ fid: fid.toString(), ecosystem_points: '$IMPACT' }, { impact_boost: true }, { new: true, select: '-uuid' });
+            } else {
+              message = 'Need to login'
+            }
           } else if (setting == 'impactBoost-off') {
             updated = await User.findOneAndUpdate({ fid: fid.toString(), ecosystem_points: '$IMPACT' }, { impact_boost: false }, { new: true, select: '-uuid' });
           } else if (setting == 'autoFund-on') {
@@ -110,27 +120,26 @@ export default async function handler(req, res) {
         }  
       }
 
-      let userSettings = await getUuid(fid, '$IMPACT')
 
-      if (userSettings) {
+      // if (userSettings) {
 
-        const {updated, message} = await updateSettings(fid, setting)
+      const {updated, message} = await updateSettings(fid, setting)
 
-        if (updated) {
+      if (updated) {
 
 
-          res.status(200).json({ updatedSettings: updated, message });
-          return
-        } else {
-          res.status(404).json({ message: 'Need to login' });
-          return
-        }
-        
+        res.status(200).json({ updatedSettings: updated, message });
+        return
       } else {
-
-        res.status(404).json({ message: 'Need to login' });
+        res.status(404).json({ message: 'Need to login1' });
         return
       }
+        
+      // } else {
+
+      //   res.status(404).json({ message: 'Need to login2' });
+      //   return
+      // }
 
     } catch(error) {
       console.error('Error handling POST request:', error);
