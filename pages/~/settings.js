@@ -503,7 +503,7 @@ export default function Settings({test, rewards, onSettingsChange}) {
 
 
         <div
-          className={`toggleSwitch ${((isOn[target] && (!(target == 'validate' && !isOn.notifs))) || (target == 'signal' && isOn.signal )) ? "toggleSwitch-on" : ""}`}
+          className={`toggleSwitch ${((isOn[target] && (!(target == 'validate' && !isOn.notifs)))) ? "toggleSwitch-on" : ""}`}
           onClick={handleToggle}>
           <span className='circle'></span>
         </div>
