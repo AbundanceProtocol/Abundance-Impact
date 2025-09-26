@@ -479,10 +479,6 @@ export default function Settings({test, rewards, onSettingsChange}) {
               }
             setLoading(prev => ({...prev, [target]: false }))
           }
-
-
-
-
           setIsOn(prev => ({...prev, [target]: !isOn[target] }))
         } else if (target == 'validate' && !isOn.notifs) {
           setNeedNotif(true)
@@ -495,7 +491,7 @@ export default function Settings({test, rewards, onSettingsChange}) {
       }
     };
 
-
+    console.log("isOn", target, isOn[target])
 
 
     return (
