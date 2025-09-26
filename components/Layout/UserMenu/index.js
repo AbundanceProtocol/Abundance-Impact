@@ -38,7 +38,9 @@ const UserMenu = () => {
     isOn,
     setIsOn,
     isSignedIn,
-    setIsSignedIn
+    setIsSignedIn,
+    setNewUser,
+    setPanelTarget
   } = useContext(AccountContext);
 
   async function getUserSettings(fid) {
@@ -133,7 +135,10 @@ const UserMenu = () => {
           const res = await fetch(`/api/user/validateUser?fid=${fid}`);
           const data = await res.json();
           console.log("test5", data?.valid);
-
+          setNewUser(data?.newUser ? true : false)
+          if (data?.newUser) {
+            setPanelTarget('welcome')
+          }
           setIsSignedIn(data?.signer ? true : false)
           return data?.valid;
         } catch (error) {
