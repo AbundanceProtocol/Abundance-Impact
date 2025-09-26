@@ -90,6 +90,10 @@ const UserMenu = () => {
   }
 
   useEffect(() => {
+    console.log("isOn", isOn);
+  }, [isOn]);
+
+  useEffect(() => {
     getAppStatus();
   }, []);
 
