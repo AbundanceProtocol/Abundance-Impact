@@ -52,13 +52,13 @@ const UserMenu = () => {
 
       if (response?.data) {
         const userSettings = response?.data || null;
-        setIsOn({
+        setIsOn(prev => ({ ...prev, 
           boost: userSettings.boost || false,
           validate: userSettings.validate || false,
           autoFund: userSettings.autoFund || false,
           score: userSettings.score || 0,
           notifs: userSettings.notifs || false
-        });
+        }));
       }
       // setLoading({
       //   validate: false,

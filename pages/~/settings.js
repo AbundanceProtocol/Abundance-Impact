@@ -188,14 +188,14 @@ export default function Settings({test, rewards, onSettingsChange}) {
 
       if (response?.data) {
         const userSettings = response?.data || null
-        setIsOn({
+        setIsOn(prev => ({ ...prev, 
           boost: userSettings.boost || false,
           validate: userSettings.validate || false, 
           autoFund: userSettings.autoFund || false, 
           impactBoost: userSettings.impactBoost || false,
           score: userSettings.score || 0,
           notifs: userSettings.notifs || false
-        })
+        }))
       }
       setLoading({
         validate: false,
@@ -219,14 +219,14 @@ export default function Settings({test, rewards, onSettingsChange}) {
     if (isLogged && fid && isOn.score == 0) {
       getUserSettings(fid)
     } else if (!isLogged) {
-      setIsOn({
+      setIsOn(prev => ({ ...prev, 
         boost: false,
         validate: false, 
         autoFund: false,
         impactBoost: false,
         score: 0,
         notifs: false
-      })
+      }))
     }
   }, [isLogged]);
 
