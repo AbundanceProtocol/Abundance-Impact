@@ -430,6 +430,7 @@ export default function Settings({test, rewards, onSettingsChange}) {
             }
           } else if (target == 'impactBoost') {
             if (isOn[target] == false) {
+              console.log('isSignedIn', isSignedIn)
               if (!isSignedIn) {
                 LoginPopup()
               } else {
@@ -477,7 +478,9 @@ export default function Settings({test, rewards, onSettingsChange}) {
                     app: false,
                     notifs: false
                   })
-                  setIsOn({...isOn, notifs: false, app: false})
+                  setIsOn(prev => ({ ...prev, 
+                    notifs: false
+                  }));
                 }
               } catch (error) {
                 console.error('Failed:', error)
@@ -497,7 +500,9 @@ export default function Settings({test, rewards, onSettingsChange}) {
                     app: false,
                     notifs: false
                   })
-                  setIsOn({...isOn, notifs: false, app: false})
+                  setIsOn(prev => ({ ...prev, 
+                    notifs: false
+                  }));
                 }
               } catch (error) {
                 console.error('Failed:', error)
@@ -565,7 +570,9 @@ export default function Settings({test, rewards, onSettingsChange}) {
                 app: true,
                 notifs: true
               })
-              setIsOn({...isOn, notifs: true})
+              setIsOn(prev => ({ ...prev, 
+                notifs: true
+              }));
             }
           }
 
@@ -583,8 +590,9 @@ export default function Settings({test, rewards, onSettingsChange}) {
                 app: true,
                 notifs: true
               })
-              setIsOn({...isOn, notifs: true})
-            }
+              setIsOn(prev => ({ ...prev, 
+                notifs: true
+              }));            }
           }
 
         } else if (userProfile.client.added && userProfile.client.notificationDetails) {
@@ -598,7 +606,9 @@ export default function Settings({test, rewards, onSettingsChange}) {
               app: true,
               notifs: true
             })
-            setIsOn({...isOn, notifs: true})
+            setIsOn(prev => ({ ...prev, 
+              notifs: true
+            }));
           }
         }
       
@@ -608,8 +618,9 @@ export default function Settings({test, rewards, onSettingsChange}) {
 
     } catch(error) {
       console.error('Notification setting failed', error)
-      setIsOn({...isOn, notifs: false})
-
+      setIsOn(prev => ({ ...prev, 
+        notifs: false
+      }));
     }
   }
   
