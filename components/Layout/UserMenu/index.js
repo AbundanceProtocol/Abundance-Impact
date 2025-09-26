@@ -36,7 +36,9 @@ const UserMenu = () => {
     adminTest,
     navMenu,
     isOn,
-    setIsOn
+    setIsOn,
+    isSignedIn,
+    setIsSignedIn
   } = useContext(AccountContext);
 
   async function getUserSettings(fid) {
@@ -130,9 +132,10 @@ const UserMenu = () => {
         try {
           const res = await fetch(`/api/user/validateUser?fid=${fid}`);
           const data = await res.json();
-          console.log("test5", data.valid);
+          console.log("test5", data?.valid);
 
-          return data.valid;
+          setIsSignedIn(data?.signer ? true : false)
+          return data?.valid;
         } catch (error) {
           return null;
         }

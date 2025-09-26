@@ -11,8 +11,9 @@ export default async function handler(req, res) {
   if (!fid) return res.status(400).json({ valid: false, error: 'Missing fid' });
 
   await connectToDatabase();
-  let userExists = await User.findOne({ fid: fid.toString(), ecosystem_points: '$IMPACT' }).select('_id');
+  let userExists = await User.findOne({ fid: fid.toString(), ecosystem_points: '$IMPACT' }).select('_id uuid');
 
+  let signer = false
   
   if (!userExists) {
 
@@ -105,6 +106,14 @@ export default async function handler(req, res) {
 
     await userExists.save()
   }
+  
+  if (userExists) {
+    if (userExists?.uuid == '' || userExists?.uuid == null) {
+      signer = false
+    } else {
+      signer = true
+    }
+  }
 
-  res.status(200).json({ valid: !!userExists });
+  res.status(200).json({ valid: !!userExists, signer: signer });
 }

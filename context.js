@@ -32,7 +32,8 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
   const [panelTarget, setPanelTarget] = useState(null);
   const [adminTest, setAdminTest] = useState(false)
   const [navMenu, setNavMenu] = useState(null)
-  
+  const [isSignedIn, setIsSignedIn] = useState(false)
+
   // Wallet integration state
   const [walletConnected, setWalletConnected] = useState(false)
   const [walletAddress, setWalletAddress] = useState(null)
@@ -1339,7 +1340,8 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
     lastRpcCall, setLastRpcCall,
     wagmiStatus, setWagmiStatus,
     userInfo, setUserInfo,
-    isOn, setIsOn
+    isOn, setIsOn,
+    isSignedIn, setIsSignedIn
   };
 
   return (

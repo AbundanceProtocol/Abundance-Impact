@@ -5,7 +5,7 @@ import MiniAppAuthButton from '../../../MiniAppAuthButton';
 import useStore from '../../../../utils/store';
 
 const LoginModal = () => {
-  const { showLogin, isLogged, setShowLogin, setIsLogged, setFid, isMiniApp, checkEcoEligibility } = useContext(AccountContext);
+  const { showLogin, isLogged, setShowLogin, setIsLogged, setFid, isMiniApp, checkEcoEligibility, isSignedIn } = useContext(AccountContext);
   const store = useStore()
 
   const handleSignIn = async (loginData) => {
@@ -21,7 +21,7 @@ const LoginModal = () => {
 
   return (
     <div>
-      {showLogin && !isLogged && (
+      {showLogin && !isSignedIn && (
         <>
           <div className="overlay" onClick={closeLogin}></div>
           <div id="notificationContainer" style={{borderRadius: '16px', backgroundColor: '#cdd'}}>
