@@ -31,7 +31,7 @@ const version = process.env.NEXT_PUBLIC_VERSION
 export default function Settings({test, rewards, onSettingsChange}) {
   const ref2 = useRef(null)
   const [ref, inView] = useInView()
-  const { LoginPopup, checkEcoEligibility, ecoData, points, setPoints, isLogged, setShowLogin, setIsLogged, fid, setFid, getRemainingBalances, isMiniApp, userBalances, setIsMiniApp, LogoutPopup, userInfo, setUserInfo, setPanelOpen, setPanelTarget, adminTest, setAdminTest, isOn, setIsOn } = useContext(AccountContext)
+  const { LoginPopup, checkEcoEligibility, ecoData, points, setPoints, isLogged, setShowLogin, setIsLogged, fid, setFid, getRemainingBalances, isMiniApp, userBalances, setIsMiniApp, LogoutPopup, userInfo, setUserInfo, setPanelOpen, setPanelTarget, adminTest, setAdminTest, isOn, setIsOn, isSignedIn, setIsSignedIn } = useContext(AccountContext)
   const [screenWidth, setScreenWidth] = useState(undefined)
   const [screenHeight, setScreenHeight] = useState(undefined)
   const [textMax, setTextMax] = useState('562px')
@@ -188,14 +188,14 @@ export default function Settings({test, rewards, onSettingsChange}) {
 
       if (response?.data) {
         const userSettings = response?.data || null
-        setIsOn({
+        setIsOn(prev => ({ ...prev, 
           boost: userSettings.boost || false,
           validate: userSettings.validate || false, 
           autoFund: userSettings.autoFund || false, 
           impactBoost: userSettings.impactBoost || false,
           score: userSettings.score || 0,
           notifs: userSettings.notifs || false
-        })
+        }))
       }
       setLoading({
         validate: false,
@@ -219,14 +219,14 @@ export default function Settings({test, rewards, onSettingsChange}) {
     if (isLogged && fid && isOn.score == 0) {
       getUserSettings(fid)
     } else if (!isLogged) {
-      setIsOn({
+      setIsOn(prev => ({ ...prev, 
         boost: false,
         validate: false, 
         autoFund: false,
         impactBoost: false,
         score: 0,
         notifs: false
-      })
+      }))
     }
   }, [isLogged]);
 
@@ -365,7 +365,7 @@ export default function Settings({test, rewards, onSettingsChange}) {
 
   const ToggleSwitch = ({target}) => {
     const handleToggle = async () => {
-      console.log('isOn', isOn)
+      console.log('isOn', isOn, isSignedIn, isLogged)
       if (isOn) {
         setFundingSchedule('off')
       } else {
@@ -376,20 +376,33 @@ export default function Settings({test, rewards, onSettingsChange}) {
         if (target !== 'validate') {
 
           if (target == 'boost') {
+            console.log('boost1')
             if (isOn[target] == false) {
-              setLoading(prev => ({...prev, [target]: true }))
+              if (!isSignedIn) {
+                console.log('boost2')
+                LoginPopup()
+              } else {
+                console.log('boost3')
+                setLoading(prev => ({...prev, [target]: true }))
                 try {
                   const response = await updateSettings("boost-on")
                   console.log(response)
+                  if (response) {
+                    setIsOn(prev => ({...prev, [target]: !isOn[target] }))
+                  }
                 } catch (error) {
                   console.error('Failed:', error)
                 }
+              }
               setLoading(prev => ({...prev, [target]: false }))
             } else if (isOn[target] == true) {
               setLoading(prev => ({...prev, [target]: true }))
                 try {
                   const response = await updateSettings("boost-off")
                   console.log(response)
+                  if (response) {
+                    setIsOn(prev => ({...prev, [target]: !isOn[target] }))
+                  }
                 } catch (error) {
                   console.error('Failed:', error)
                 }
@@ -417,26 +430,38 @@ export default function Settings({test, rewards, onSettingsChange}) {
             }
           } else if (target == 'impactBoost') {
             if (isOn[target] == false) {
-              setLoading(prev => ({...prev, [target]: true }))
+              if (!isSignedIn) {
+                LoginPopup()
+              } else {
+                setLoading(prev => ({...prev, [target]: true }))
                 try {
                   const response = await updateSettings("impactBoost-on")
                   console.log(response)
+                  if (response) {
+                    setIsOn(prev => ({...prev, [target]: !isOn[target] }))
+                  }
+
                 } catch (error) {
                   console.error('Failed:', error)
                 }
+              }
               setLoading(prev => ({...prev, [target]: false }))
             } else if (isOn[target] == true) {
               setLoading(prev => ({...prev, [target]: true }))
                 try {
                   const response = await updateSettings("impactBoost-off")
                   console.log(response)
+                  if (response) {
+                    setIsOn(prev => ({...prev, [target]: !isOn[target] }))
+                  }
                 } catch (error) {
                   console.error('Failed:', error)
                 }
               setLoading(prev => ({...prev, [target]: false }))
             }
           }
-          setIsOn(prev => ({...prev, [target]: !isOn[target] }))
+
+
         } else if (target == 'validate' && isOn.notifs) {
           if (isOn[target] == false) {
             setLoading(prev => ({...prev, [target]: true }))
@@ -479,10 +504,6 @@ export default function Settings({test, rewards, onSettingsChange}) {
               }
             setLoading(prev => ({...prev, [target]: false }))
           }
-
-
-
-
           setIsOn(prev => ({...prev, [target]: !isOn[target] }))
         } else if (target == 'validate' && !isOn.notifs) {
           setNeedNotif(true)
@@ -495,7 +516,7 @@ export default function Settings({test, rewards, onSettingsChange}) {
       }
     };
 
-
+    console.log("isOn", target, isOn[target])
 
 
     return (
@@ -507,7 +528,7 @@ export default function Settings({test, rewards, onSettingsChange}) {
 
 
         <div
-          className={`toggleSwitch ${((isOn[target] && (!(target == 'validate' && !isOn.notifs))) || (target == 'signal')) ? "toggleSwitch-on" : ""}`}
+          className={`toggleSwitch ${((isOn[target] && (!(target == 'validate' && !isOn.notifs)))) ? "toggleSwitch-on" : ""}`}
           onClick={handleToggle}>
           <span className='circle'></span>
         </div>
@@ -745,28 +766,28 @@ export default function Settings({test, rewards, onSettingsChange}) {
 
 
           {(!rewards && ((version == '2.0' || adminTest) && isLogged)) && (<div className='flex-row' style={{backgroundColor: '', justifyContent: 'center', gap: '1rem', margin: '20px 0 -20px 0'}}>
-            <div className='flex-col' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(isLogged && isOn.boost) ? '#0af' : '#aaa'}`, borderRadius: '18px', backgroundColor: '', alignItems: 'center', gap: '0.0rem', height: '90px', justifyContent: 'center'}}>
+            <div className='flex-col' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(isSignedIn && isOn.boost) ? '#0af' : '#aaa'}`, borderRadius: '18px', backgroundColor: '', alignItems: 'center', gap: '0.0rem', height: '90px', justifyContent: 'center'}}>
               <div className='flex-row' style={{gap: '0.5rem', alignItems: 'center', padding: '0 10px'}}>
-                <BsStar color={(isLogged && isOn.boost) ? '#0af' : '#aaa'} size={40} />
-                <div style={{fontSize: '43px', fontWeight: '700', color: (isLogged && isOn.boost) ? '#0af' : '#aaa'}}>
+                <BsStar color={(isSignedIn && isOn.boost) ? '#0af' : '#aaa'} size={40} />
+                <div style={{fontSize: '43px', fontWeight: '700', color: (isSignedIn && isOn.boost) ? '#0af' : '#aaa'}}>
                   {userBalances.impact}
                 </div>
 
               </div>
-              <div style={{fontSize: '13px', fontWeight: '700', color: (isLogged && isOn.boost) ? '#0af' : '#aaa'}}>
+              <div style={{fontSize: '13px', fontWeight: '700', color: (isSignedIn && isOn.boost) ? '#0af' : '#aaa'}}>
                 Daily Points
               </div>
             </div>
 
-            <div className='flex-col' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(isLogged && isOn.boost) ? '#0af' : '#aaa'}`, borderRadius: '18px', backgroundColor: '', alignItems: 'center', gap: '0.0rem', height: '90px', justifyContent: 'center', width: '135px'}}>
+            <div className='flex-col' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(isSignedIn && isOn.boost) ? '#0af' : '#aaa'}`, borderRadius: '18px', backgroundColor: '', alignItems: 'center', gap: '0.0rem', height: '90px', justifyContent: 'center', width: '135px'}}>
               <div className='flex-row' style={{gap: '0.5rem', alignItems: 'center', padding: '0 10px'}}>
                 {/* <BsStar color={(isLogged && isOn.boost) ? '#0af' : '#aaa'} size={40} /> */}
-                <div style={{fontSize: '43px', fontWeight: '700', color: (isLogged && isOn.boost) ? '#0af' : '#aaa'}}>
+                <div style={{fontSize: '43px', fontWeight: '700', color: (isSignedIn && isOn.boost) ? '#0af' : '#aaa'}}>
                   {formatNum(isOn?.score?.toFixed(0) || 0)}
                 </div>
 
               </div>
-              <div style={{fontSize: '13px', fontWeight: '700', color: (isLogged && isOn.boost) ? '#0af' : '#aaa'}}>
+              <div style={{fontSize: '13px', fontWeight: '700', color: (isSignedIn && isOn.boost) ? '#0af' : '#aaa'}}>
                 Impact Score
               </div>
             </div>

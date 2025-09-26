@@ -32,7 +32,8 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
   const [panelTarget, setPanelTarget] = useState(null);
   const [adminTest, setAdminTest] = useState(false)
   const [navMenu, setNavMenu] = useState(null)
-  
+  const [isSignedIn, setIsSignedIn] = useState(false)
+
   // Wallet integration state
   const [walletConnected, setWalletConnected] = useState(false)
   const [walletAddress, setWalletAddress] = useState(null)
@@ -45,7 +46,7 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
   const [lastTopCoinsFetch, setLastTopCoinsFetch] = useState(0)
   const [topCoinsCache, setTopCoinsCache] = useState({})
   const [lastRpcCall, setLastRpcCall] = useState(0) // Track last RPC call time
-  const [isOn, setIsOn] = useState({boost: false, validate: false, autoFund: false, notifs: false, impactBoost: false, score: 0, app: false});
+  const [isOn, setIsOn] = useState({boost: false, validate: false, autoFund: false, notifs: false, impactBoost: false, score: 0, signal: false});
 
   const router = useRouter()
   
@@ -1339,7 +1340,8 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
     lastRpcCall, setLastRpcCall,
     wagmiStatus, setWagmiStatus,
     userInfo, setUserInfo,
-    isOn, setIsOn
+    isOn, setIsOn,
+    isSignedIn, setIsSignedIn
   };
 
   return (

@@ -60,9 +60,11 @@ cache
 /pages/api/testing/
 /pages/api/testing/**
 distribution-s7*.csv
+daily-claims-08.csv
 contracts/
+disperse/
+.gitignore
 models/WeeklyClaim.js
 /pages/api/curation/postInvitedBy.js
 /pages/api/curation/getCuratorData.js
-pages/~/validate.js
 # pages/api/curation/

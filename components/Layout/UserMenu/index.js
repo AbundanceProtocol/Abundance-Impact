@@ -36,7 +36,9 @@ const UserMenu = () => {
     adminTest,
     navMenu,
     isOn,
-    setIsOn
+    setIsOn,
+    isSignedIn,
+    setIsSignedIn
   } = useContext(AccountContext);
 
   async function getUserSettings(fid) {
@@ -52,13 +54,13 @@ const UserMenu = () => {
 
       if (response?.data) {
         const userSettings = response?.data || null;
-        setIsOn({
+        setIsOn(prev => ({ ...prev, 
           boost: userSettings.boost || false,
           validate: userSettings.validate || false,
           autoFund: userSettings.autoFund || false,
           score: userSettings.score || 0,
           notifs: userSettings.notifs || false
-        });
+        }));
       }
       // setLoading({
       //   validate: false,
@@ -76,6 +78,26 @@ const UserMenu = () => {
     }
   }
 
+  async function getAppStatus() {
+    try {
+    const { sdk } = await import('@farcaster/miniapp-sdk')
+      const userProfile = await sdk.context;
+      console.log("add app", userProfile?.client?.added);
+      if (userProfile?.client?.added) {
+        setIsOn(prev => ({ ...prev, signal: true }));
+      }
+    } catch (error) {
+      console.error("Error fetching app status:", error);
+    }
+  }
+
+  useEffect(() => {
+    console.log("isOn", isOn);
+  }, [isOn]);
+
+  useEffect(() => {
+    getAppStatus();
+  }, []);
 
   useEffect(() => {
     console.log("useEffect", fid, userBalances, userInfo);
@@ -110,9 +132,10 @@ const UserMenu = () => {
         try {
           const res = await fetch(`/api/user/validateUser?fid=${fid}`);
           const data = await res.json();
-          console.log("test5", data.valid);
+          console.log("test5", data?.valid);
 
-          return data.valid;
+          setIsSignedIn(data?.signer ? true : false)
+          return data?.valid;
         } catch (error) {
           return null;
         }
@@ -121,15 +144,12 @@ const UserMenu = () => {
       const isValidUser = await checkUserProfile(fid || userProfile?.user?.fid);
       console.log(`User is valid: ${isValidUser}`);
       console.log(isValidUser);
+
       if (isValidUser) {
         // setIsLogged(true)
         // setFid(Number(userProfile?.user?.fid))
         console.log("userInfo", userInfo, isMiniApp, userProfile);
 
-        // Check if miniapp is installed and set isOn.app to true if yes
-        if (isMiniApp && userProfile?.client?.added) {
-          setIsOn(prev => ({ ...prev, app: true }));
-        }
 
         if (isMiniApp && !userInfo?.username) {
           setUserInfo({
