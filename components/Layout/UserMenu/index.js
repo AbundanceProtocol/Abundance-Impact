@@ -82,7 +82,7 @@ const UserMenu = () => {
       const userProfile = await sdk.context;
       console.log("add app", userProfile?.client?.added);
       if (userProfile?.client?.added) {
-        setIsOn(prev => ({ ...prev, app: true }));
+        setIsOn(prev => ({ ...prev, signal: true }));
       }
     } catch (error) {
       console.error("Error fetching app status:", error);
