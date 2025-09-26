@@ -76,6 +76,22 @@ const UserMenu = () => {
     }
   }
 
+  async function getAppStatus() {
+    try {
+    const { sdk } = await import('@farcaster/miniapp-sdk')
+      const userProfile = await sdk.context;
+      console.log("add app", userProfile?.client?.added);
+      if (userProfile?.client?.added) {
+        setIsOn(prev => ({ ...prev, app: true }));
+      }
+    } catch (error) {
+      console.error("Error fetching app status:", error);
+    }
+  }
+
+  useEffect(() => {
+    getAppStatus();
+  }, []);
 
   useEffect(() => {
     console.log("useEffect", fid, userBalances, userInfo);
@@ -121,11 +137,6 @@ const UserMenu = () => {
       const isValidUser = await checkUserProfile(fid || userProfile?.user?.fid);
       console.log(`User is valid: ${isValidUser}`);
       console.log(isValidUser);
-
-      console.log("add app", userProfile?.client?.added);
-      if (isMiniApp && userProfile?.client?.added) {
-        setIsOn(prev => ({ ...prev, app: true }));
-      }
 
       if (isValidUser) {
         // setIsLogged(true)
