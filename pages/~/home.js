@@ -519,7 +519,9 @@ export default function Homepage({ test }) {
         validate: false,
         autoFund: false,
         score: 0,
-        notifs: false
+        notifs: false,
+        impactBoost: false,
+        signal: isOn?.signal || false
       }));
     }
   }, [isLogged]);
