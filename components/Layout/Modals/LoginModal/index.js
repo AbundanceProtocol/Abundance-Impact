@@ -43,6 +43,7 @@ const LoginModal = () => {
                       if (uuid && uuid?.length > 0) {
                         setIsSignedIn(true)
                       }
+                      checkEcoEligibility(fid, '$IMPACT', uuid)
                     }}
                     onError={err => {
                       // Handle error (optional)
