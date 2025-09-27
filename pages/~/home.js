@@ -483,13 +483,16 @@ export default function Homepage({ test }) {
 
       if (response?.data) {
         const userSettings = response?.data || null;
-        setIsOn({
-          boost: userSettings.boost || false,
-          validate: userSettings.validate || false,
-          autoFund: userSettings.autoFund || false,
-          score: userSettings.score || 0,
-          notifs: userSettings.notifs || false
-        });
+        console.log("userSettings updated", userSettings);
+        setIsOn(prev => ({ ...prev, 
+          boost: userSettings?.boost || false,
+          validate: userSettings?.validate || false,
+          autoFund: userSettings?.autoFund || false,
+          score: userSettings?.score || 0,
+          notifs: userSettings?.notifs || false,
+          impactBoost: userSettings?.impactBoost || false,
+          signal: isOn?.signal
+        }));
       }
       setLoading({
         validate: false,
@@ -511,13 +514,15 @@ export default function Homepage({ test }) {
     if (isLogged && fid && isOn.score == 0) {
       getUserSettings(fid);
     } else if (!isLogged) {
-      setIsOn({
+      setIsOn(prev => ({ ...prev, 
         boost: false,
         validate: false,
         autoFund: false,
         score: 0,
-        notifs: false
-      });
+        notifs: false,
+        impactBoost: false,
+        signal: isOn?.signal || false
+      }));
     }
   }, [isLogged]);
 
@@ -661,7 +666,9 @@ export default function Homepage({ test }) {
               app: true,
               notifs: true
             });
-            setIsOn({ ...isOn, notifs: true });
+            setIsOn(prev => ({ ...prev, 
+              notifs: true
+            }));
           } else {
             console.log("test2");
 
@@ -669,8 +676,9 @@ export default function Homepage({ test }) {
               app: true,
               notifs: false
             });
-            setIsOn({ ...isOn, notifs: false });
-          }
+            setIsOn(prev => ({ ...prev, 
+              notifs: false
+            }));          }
         } else if (!notifStatus.app) {
           console.log("test3");
 
@@ -682,15 +690,18 @@ export default function Homepage({ test }) {
               app: true,
               notifs: true
             });
-            setIsOn({ ...isOn, notifs: true });
-          } else {
+            setIsOn(prev => ({ ...prev, 
+              notifs: true
+            }));          } else {
             console.log("test4");
 
             setNotifStatus({
               app: false,
               notifs: false
             });
-            setIsOn({ ...isOn, notifs: false });
+            setIsOn(prev => ({ ...prev, 
+              notifs: false
+            }));
           }
         }
       } else {
@@ -698,8 +709,9 @@ export default function Homepage({ test }) {
       }
     } catch (error) {
       console.error("Notification setting failed", error);
-      setIsOn({ ...isOn, notifs: false });
-    }
+      setIsOn(prev => ({ ...prev, 
+        notifs: false
+      }));    }
   }
 
   return (

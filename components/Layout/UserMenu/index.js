@@ -58,11 +58,13 @@ const UserMenu = () => {
       if (response?.data) {
         const userSettings = response?.data || null;
         setIsOn(prev => ({ ...prev, 
-          boost: userSettings.boost || false,
-          validate: userSettings.validate || false,
-          autoFund: userSettings.autoFund || false,
-          score: userSettings.score || 0,
-          notifs: userSettings.notifs || false
+          boost: userSettings?.boost || false,
+          validate: userSettings?.validate || false,
+          autoFund: userSettings?.autoFund || false,
+          score: userSettings?.score || 0,
+          notifs: userSettings?.notifs || false,
+          impactBoost: userSettings?.impactBoost || false,
+          signal: isOn?.signal || false
         }));
       }
       // setLoading({

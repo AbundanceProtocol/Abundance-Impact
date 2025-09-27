@@ -250,7 +250,8 @@ export default function Home() {
           autoFund: userSettings.autoFund || false, 
           impactBoost: userSettings.impactBoost || false,
           score: userSettings.score || 0,
-          notifs: userSettings.notifs || false
+          notifs: userSettings.notifs || false,
+          signal: isOn?.signal || false
         })
       }
       setLoading({
@@ -280,7 +281,9 @@ export default function Home() {
         validate: false, 
         autoFund: false,
         score: 0,
-        notifs: false
+        notifs: false,
+        impactBoost: false,
+        signal: isOn?.signal || false
       })
     }
   }, [isLogged]);

@@ -194,7 +194,8 @@ export default function Settings({test, rewards, onSettingsChange}) {
           autoFund: userSettings.autoFund || false, 
           impactBoost: userSettings.impactBoost || false,
           score: userSettings.score || 0,
-          notifs: userSettings.notifs || false
+          notifs: userSettings.notifs || false,
+          signal: isOn?.signal
         }))
       }
       setLoading({
@@ -225,7 +226,8 @@ export default function Settings({test, rewards, onSettingsChange}) {
         autoFund: false,
         impactBoost: false,
         score: 0,
-        notifs: false
+        notifs: false,
+        signal: isOn?.signal
       }))
     }
   }, [isLogged]);
@@ -460,6 +462,17 @@ export default function Settings({test, rewards, onSettingsChange}) {
                 }
               setLoading(prev => ({...prev, [target]: false }))
             }
+          } else if (target == 'signal') {
+            if (isOn[target] == false) {
+              setLoading(prev => ({...prev, [target]: true }))
+
+              const addApp = await installApp()
+              console.log('addApp', addApp)
+              if (addApp) {
+                setIsOn(prev => ({...prev, [target]: true }))
+              }
+              setLoading(prev => ({...prev, [target]: false }))
+            } 
           }
 
 
@@ -543,6 +556,19 @@ export default function Settings({test, rewards, onSettingsChange}) {
 
   function setFundingSchedule(data) {
     console.log('data', data)
+  }
+
+
+  async function installApp() {
+    try {
+      const { sdk } = await import('@farcaster/miniapp-sdk')
+      const addApp = await sdk?.actions?.addMiniApp()
+      console.log('addApp', addApp)
+      return addApp
+    } catch (error) {
+      console.error('Failed:', error)
+      return null
+    }
   }
 
   async function notifsOn() {
