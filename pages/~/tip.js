@@ -230,7 +230,11 @@ export default function Tip({ curatorId }) {
     userInfo,
     setUserInfo,
     getAllTokens,
-    setWalletChainId
+    setWalletChainId,
+    setNewUser,
+    setPanelTarget,
+    setPanelOpen,
+    setIsSignedIn
   } = useContext(AccountContext);
   
   // Use the existing wallet hook for transactions
@@ -850,7 +854,14 @@ export default function Tip({ curatorId }) {
         const checkUserProfile = async fid => {
           try {
             const res = await fetch(`/api/user/validateUser?fid=${fid}`);
-            const data = await res.json();
+            const data = await res.json();  
+            console.log('validate-tip', data)
+            setNewUser(data?.newUser ? true : false)
+            if (data?.newUser) {
+              setPanelTarget('welcome')
+              setPanelOpen(true)
+            }
+            setIsSignedIn(data?.signer ? true : false)
             return data.valid;
           } catch (error) {
             return null;

@@ -96,7 +96,9 @@ export default function Homepage({ test }) {
     setAdminTest,
     setUserBalances,
     isOn,
-    setIsOn
+    setIsOn,
+    setNewUser,
+    setIsSignedIn
   } = useContext(AccountContext);
   const [screenWidth, setScreenWidth] = useState(undefined);
   const [screenHeight, setScreenHeight] = useState(undefined);
@@ -179,6 +181,13 @@ export default function Homepage({ test }) {
           try {
             const res = await fetch(`/api/user/validateUser?fid=${fid}`);
             const data = await res.json();
+            console.log('validate-home', data)
+            setNewUser(data?.newUser ? true : false)
+            if (data?.newUser) {
+              setPanelTarget('welcome')
+              setPanelOpen(true)
+            }
+            setIsSignedIn(data?.signer ? true : false)
             return data.valid;
           } catch (error) {
             return null;
@@ -372,35 +381,35 @@ export default function Homepage({ test }) {
     })();
   }, []);
 
-  useEffect(() => {
-    console.log("version", version, userBalances.impact);
-    if (version == "2.0" || adminTest) {
-      if (userBalances.impact !== 0) {
-        console.log("off-1");
-        setPanelOpen(false);
-        setPanelTarget(null);
-      } else if (userBalances.impact == 0) {
-        console.log("on-1");
-        setPanelOpen(true);
-        setPanelTarget("welcome");
-      }
-    }
-  }, []);
+  // useEffect(() => {
+  //   console.log("version", version, userBalances.impact);
+  //   if (version == "2.0" || adminTest) {
+  //     if (userBalances.impact !== 0) {
+  //       console.log("off-1");
+  //       setPanelOpen(false);
+  //       setPanelTarget(null);
+  //     } else if (userBalances.impact == 0) {
+  //       console.log("on-1");
+  //       setPanelOpen(true);
+  //       setPanelTarget("welcome");
+  //     }
+  //   }
+  // }, []);
 
-  useEffect(() => {
-    console.log("version", version, userBalances.impact);
-    if (version == "2.0" || adminTest) {
-      if (userBalances.impact !== 0) {
-        console.log("off-2");
-        setPanelOpen(false);
-        setPanelTarget(null);
-      } else if (userBalances.impact == 0) {
-        console.log("on-2");
-        setPanelOpen(true);
-        setPanelTarget("welcome");
-      }
-    }
-  }, [userBalances]);
+  // useEffect(() => {
+  //   console.log("version", version, userBalances.impact);
+  //   if (version == "2.0" || adminTest) {
+  //     if (userBalances.impact !== 0) {
+  //       console.log("off-2");
+  //       setPanelOpen(false);
+  //       setPanelTarget(null);
+  //     } else if (userBalances.impact == 0) {
+  //       console.log("on-2");
+  //       setPanelOpen(true);
+  //       setPanelTarget("welcome");
+  //     }
+  //   }
+  // }, [userBalances]);
 
   useEffect(() => {
     (async () => {

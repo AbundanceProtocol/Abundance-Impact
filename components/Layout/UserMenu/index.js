@@ -40,7 +40,8 @@ const UserMenu = () => {
     isSignedIn,
     setIsSignedIn,
     setNewUser,
-    setPanelTarget
+    setPanelTarget,
+    setPanelOpen
   } = useContext(AccountContext);
 
   async function getUserSettings(fid) {
@@ -104,14 +105,17 @@ const UserMenu = () => {
   useEffect(() => {
     console.log("useEffect", fid, userBalances, userInfo);
     if (fid && userBalances.impact == 0) {
+      console.log('getUserBalance');
       getUserBalance(fid);
     }
 
     if (fid && !userInfo?.username) {
+      console.log('getUserInfo');
       getUserInfo();
     }
 
     if (fid && isOn.score == 0) {
+      console.log('getUserSettings');
       getUserSettings(fid);
     }
   }, [fid]);
@@ -134,10 +138,11 @@ const UserMenu = () => {
         try {
           const res = await fetch(`/api/user/validateUser?fid=${fid}`);
           const data = await res.json();
-          console.log("test5", data?.valid);
+          console.log('validate-usermenu', data)
           setNewUser(data?.newUser ? true : false)
           if (data?.newUser) {
             setPanelTarget('welcome')
+            setPanelOpen(true)
           }
           setIsSignedIn(data?.signer ? true : false)
           return data?.valid;

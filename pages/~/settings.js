@@ -135,35 +135,35 @@ export default function Settings({test, rewards, onSettingsChange}) {
     })();
   }, []);
 
-  useEffect(() => {
-    console.log('version', version, userBalances.impact)
-    if ((version == '2.0' || adminTest)) {
-      if (userBalances.impact !== 0) {
-        console.log('off-1')
-        setPanelOpen(false)
-        setPanelTarget(null)
-      } else if (userBalances.impact == 0) {
-        console.log('on-1')
-        setPanelOpen(true)
-        setPanelTarget('welcome')
-      }
-    }
-  }, []);
+  // useEffect(() => {
+  //   console.log('version', version, userBalances.impact)
+  //   if ((version == '2.0' || adminTest)) {
+  //     if (userBalances.impact !== 0) {
+  //       console.log('off-1')
+  //       setPanelOpen(false)
+  //       setPanelTarget(null)
+  //     } else if (userBalances.impact == 0) {
+  //       console.log('on-1')
+  //       setPanelOpen(true)
+  //       setPanelTarget('welcome')
+  //     }
+  //   }
+  // }, []);
 
-  useEffect(() => {
-    console.log('version', version, userBalances.impact)
-    if ((version == '2.0' || adminTest)) {
-      if (userBalances.impact !== 0) {
-        console.log('off-2')
-        setPanelOpen(false)
-        setPanelTarget(null)
-      } else if (userBalances.impact == 0) {
-        console.log('on-2')
-        setPanelOpen(true)
-        setPanelTarget('welcome')
-      }
-    }
-  }, [userBalances]);
+  // useEffect(() => {
+  //   console.log('version', version, userBalances.impact)
+  //   if ((version == '2.0' || adminTest)) {
+  //     if (userBalances.impact !== 0) {
+  //       console.log('off-2')
+  //       setPanelOpen(false)
+  //       setPanelTarget(null)
+  //     } else if (userBalances.impact == 0) {
+  //       console.log('on-2')
+  //       setPanelOpen(true)
+  //       setPanelTarget('welcome')
+  //     }
+  //   }
+  // }, [userBalances]);
 
   useEffect(() => {
     (async () => {

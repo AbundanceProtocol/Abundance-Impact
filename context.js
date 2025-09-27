@@ -193,6 +193,11 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
     }
   }, []);
   
+  useEffect(() => {
+    console.log('panelOpen', panelOpen);
+  }, [panelOpen]);
+  
+
   // Ecosystem data state
   const [ecoData, setEcoData] = useState(null);
   const [ecosystemsData, setEcosystemsData] = useState([]);

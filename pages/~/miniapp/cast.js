@@ -20,7 +20,7 @@ export default function SharedCast() {
   const [ref, inView] = useInView()
   // const { castHash, castFid, viewerFid } = router.query
   // const [user, setUser] = useState(null)
-  const { LoginPopup, isLogged, setPoints, setIsLogged, setFid, miniApp, setMiniApp, setIsMiniApp, userBalance, setUserInfo } = useContext(AccountContext)
+  const { LoginPopup, isLogged, setPoints, setIsLogged, setFid, miniApp, setMiniApp, setIsMiniApp, userBalance, setUserInfo, setNewUser, setPanelTarget, setPanelOpen, setIsSignedIn } = useContext(AccountContext)
   const ref1 = useRef(null)
   const [textMax, setTextMax] = useState('430px')
   const [screenWidth, setScreenWidth ] = useState(undefined)
@@ -179,6 +179,13 @@ export default function SharedCast() {
         try {
           const res = await fetch(`/api/user/validateUser?fid=${fid}`);
           const data = await res.json();
+          console.log('validate-cast', data)
+          setNewUser(data?.newUser ? true : false)
+          if (data?.newUser) {
+            setPanelTarget('welcome')
+            setPanelOpen(true)
+          }
+          setIsSignedIn(data?.signer ? true : false)
           return data.valid;
         } catch (error) {
           return null

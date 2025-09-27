@@ -19,7 +19,7 @@ const version = process.env.NEXT_PUBLIC_VERSION
 
 const Layout = ({ children }) => {
   const ref = useRef(null)
-  const { setIsLogged, setFid, setIsMiniApp, isMiniApp, userBalances, setUserBalances, setUserInfo, adminTest } = useContext(AccountContext)
+  const { setIsLogged, setFid, setIsMiniApp, isMiniApp, userBalances, setUserBalances, setUserInfo, adminTest, setNewUser, setPanelTarget, setPanelOpen, setIsSignedIn } = useContext(AccountContext)
   const { isMobile } = useMatchBreakpoints();
 
   const getUserBalance = async (fid) => {
@@ -50,6 +50,14 @@ const Layout = ({ children }) => {
         try {
           const res = await fetch(`/api/user/validateUser?fid=${fid}`);
           const data = await res.json();
+          console.log('validate-layout', data)
+          setNewUser(data?.newUser ? true : false)
+          if (data?.newUser) {
+            setPanelTarget('welcome')
+            setPanelOpen(true)
+          }
+          setIsSignedIn(data?.signer ? true : false)
+
           return data.valid;
         } catch (error) {
           return null
