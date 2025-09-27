@@ -35,6 +35,7 @@ const LoginModal = () => {
                       store.setFid(fid);
                       store.setSignerUuid(uuid);
                       store.setIsAuth(uuid?.length > 0);
+                      console.log('uuid-3', uuid?.length)
 
                       setFid(fid)
                       setIsLogged(true)

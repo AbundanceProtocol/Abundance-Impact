@@ -342,16 +342,43 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
   };
   
   // Check ecosystem eligibility
-  const checkEcoEligibility = async (ecoId) => {
-    try {
-      const response = await axios.get(`/api/ecosystem/checkEligibility?ecoId=${ecoId}`);
-      setEligibility(response.data);
-      return response.data;
-    } catch (error) {
-      console.error('Error checking ecosystem eligibility:', error);
-      return null;
+  const checkEcoEligibility = async (fid, points, uuid, referrer) => {
+    console.log('c14', fid, points, prevPoints)
+    if (!fid) {
+      LoginPopup()
+    } else if (points !== prevPoints) {
+      setPrevPoints(points)
+      try {
+        const response = await axios.get('/api/ecosystem/checkUserEligibility', {
+          params: { fid, points, uuid, referrer } })
+        // console.log(response)
+        if (response?.data?.eligibilityData) {
+          let eligibilityData = response?.data?.eligibilityData
+          setEligibility(eligibilityData)
+        } else {
+          setEligibility(initialEligibility)
+        }
+        if (response?.data?.createUser) {
+          let userData = response.data?.createUser
+          setUserBalances(prev => ({
+            ...prev,
+            impact: userData.remaining_i_allowance,
+            qdau: userData.remaining_q_allowance
+          }))
+          console.log('userBalance', userData.remaining_i_allowance)
+
+        } else {
+          setUserBalances(prev => ({ ...prev, impact: 0, qdau: 0 }))
+          console.log('userBalance 0')
+        }
+      } catch (error) {
+        console.error('Error, checkEcoEligibility failed:', error)
+        setEligibility(initialEligibility)
+        setUserBalances(prev => ({ ...prev, impact: 0, qdau: 0 }))
+        console.log('userBalance 1')
+      }
     }
-  };
+  }
   
   // Change ecosystem
   const changeEco = async (ecoId) => {
