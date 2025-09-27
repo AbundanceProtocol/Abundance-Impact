@@ -75,11 +75,11 @@ export default function Home() {
   //   setPanelOpen(true);
   // };
 
-  useEffect(() => {
-    if ((version === '2.0' || adminTest) && !isLogged) {
-      router.replace('/~/settings');
-    }
-  }, [version, adminTest, isLogged]);
+  // useEffect(() => {
+  //   if ((version === '2.0' || adminTest) && !isLogged) {
+  //     router.replace('/~/settings');
+  //   }
+  // }, [version, adminTest, isLogged]);
 
 
   // const closeSwipeable = () => {

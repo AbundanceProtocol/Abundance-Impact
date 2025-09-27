@@ -370,7 +370,7 @@ const UserMenu = () => {
             </Link>
           )}
 
-          {(version == "2.0" || adminTest) && (
+          {/* {(version == "2.0" || adminTest) && (
             <Link
               className={"flex-row items-center impact-arrow"}
               href={"/~/settings"}
@@ -390,7 +390,7 @@ const UserMenu = () => {
                 <BsGear size={22} className="" style={{ fontSize: "25px", color: "#eee" }} />
               )}
             </Link>
-          )}
+          )} */}
         </div>
       </div>
     </div>
