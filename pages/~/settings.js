@@ -135,35 +135,35 @@ export default function Settings({test, rewards, onSettingsChange}) {
     })();
   }, []);
 
-  useEffect(() => {
-    console.log('version', version, userBalances.impact)
-    if ((version == '2.0' || adminTest)) {
-      if (userBalances.impact !== 0) {
-        console.log('off-1')
-        setPanelOpen(false)
-        setPanelTarget(null)
-      } else if (userBalances.impact == 0) {
-        console.log('on-1')
-        setPanelOpen(true)
-        setPanelTarget('welcome')
-      }
-    }
-  }, []);
+  // useEffect(() => {
+  //   console.log('version', version, userBalances.impact)
+  //   if ((version == '2.0' || adminTest)) {
+  //     if (userBalances.impact !== 0) {
+  //       console.log('off-1')
+  //       setPanelOpen(false)
+  //       setPanelTarget(null)
+  //     } else if (userBalances.impact == 0) {
+  //       console.log('on-1')
+  //       setPanelOpen(true)
+  //       setPanelTarget('welcome')
+  //     }
+  //   }
+  // }, []);
 
-  useEffect(() => {
-    console.log('version', version, userBalances.impact)
-    if ((version == '2.0' || adminTest)) {
-      if (userBalances.impact !== 0) {
-        console.log('off-2')
-        setPanelOpen(false)
-        setPanelTarget(null)
-      } else if (userBalances.impact == 0) {
-        console.log('on-2')
-        setPanelOpen(true)
-        setPanelTarget('welcome')
-      }
-    }
-  }, [userBalances]);
+  // useEffect(() => {
+  //   console.log('version', version, userBalances.impact)
+  //   if ((version == '2.0' || adminTest)) {
+  //     if (userBalances.impact !== 0) {
+  //       console.log('off-2')
+  //       setPanelOpen(false)
+  //       setPanelTarget(null)
+  //     } else if (userBalances.impact == 0) {
+  //       console.log('on-2')
+  //       setPanelOpen(true)
+  //       setPanelTarget('welcome')
+  //     }
+  //   }
+  // }, [userBalances]);
 
   useEffect(() => {
     (async () => {
@@ -634,7 +634,7 @@ export default function Settings({test, rewards, onSettingsChange}) {
           content={`Building the global superalignment layer`}
         />
       </Head>
-    {(!rewards && (!isLogged || (version == '2.0' || adminTest))) && (
+    {router.route == '/~/settings' && (!rewards && (!isLogged || (version == '2.0' || adminTest))) && (
       <div id="log in"
       style={{
         padding: isMobile ? ((version == '1.0' && !adminTest) ? "58px 0 20px 0" : "48px 0 20px 0") : "58px 0 60px 0",
@@ -776,7 +776,7 @@ export default function Settings({test, rewards, onSettingsChange}) {
           )} */}
 
 
-          {(!rewards && ((version == '2.0' || adminTest) && isLogged)) && (<div className='flex-row' style={{backgroundColor: '', justifyContent: 'center', gap: '1rem', margin: '20px 0 -20px 0'}}>
+          {router.route == '/~/settings' && (!rewards && ((version == '2.0' || adminTest) && isLogged)) && (<div className='flex-row' style={{backgroundColor: '', justifyContent: 'center', gap: '1rem', margin: '20px 0 -20px 0'}}>
             <div className='flex-col' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(isSignedIn && isOn.boost) ? '#0af' : '#aaa'}`, borderRadius: '18px', backgroundColor: '', alignItems: 'center', gap: '0.0rem', height: '90px', justifyContent: 'center'}}>
               <div className='flex-row' style={{gap: '0.5rem', alignItems: 'center', padding: '0 10px'}}>
                 <BsStar color={(isSignedIn && isOn.boost) ? '#0af' : '#aaa'} size={40} />
@@ -807,7 +807,7 @@ export default function Settings({test, rewards, onSettingsChange}) {
           </div>)}
 
 
-          {/* BOOST & NOMINATE */}
+          {/* NOMINATE */}
 
           {(version == '2.0' || adminTest) && (<div className='flex-col' style={{backgroundColor: ''}}>
 
@@ -902,7 +902,7 @@ export default function Settings({test, rewards, onSettingsChange}) {
           )}
 
 
-          {/* BOOST & NOMINATE */}
+          {/* BOOST */}
 
           {(version == '2.0' || adminTest) && (<div className='flex-col' style={{backgroundColor: ''}}>
 

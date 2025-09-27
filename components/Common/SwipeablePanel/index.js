@@ -56,8 +56,6 @@ const SwipeablePanel = () => {
   return (
     <div onClick={closeSwipeable}>
 
-
-
       {panelOpen && (
         <div
           

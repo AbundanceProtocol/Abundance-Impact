@@ -35,7 +35,11 @@ export default function Rewards() {
     setIsMiniApp,
     userBalances,
     setUserBalances,
-    adminTest
+    adminTest,
+    setNewUser,
+    setPanelTarget,
+    setPanelOpen,
+    setIsSignedIn
   } = useContext(AccountContext);
   const ref1 = useRef(null);
   const [textMax, setTextMax] = useState("430px");
@@ -287,6 +291,13 @@ export default function Rewards() {
           try {
             const res = await fetch(`/api/user/validateUser?fid=${fid}`);
             const data = await res.json();
+            console.log('validate-validate', data)
+            setNewUser(data?.newUser ? true : false)
+            if (data?.newUser) {
+              setPanelTarget('welcome')
+              setPanelOpen(true)
+            }
+            setIsSignedIn(data?.signer ? true : false)
             return data.valid;
           } catch (error) {
             return null;

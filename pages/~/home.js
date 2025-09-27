@@ -64,6 +64,7 @@ import {
 
 import Spinner from "../../components/Common/Spinner";
 import NeynarSigninButton from "../../components/Layout/Modals/Signin";
+import Settings from "./settings";
 import { formatNum } from "../../utils/utils";
 // import LoginButton from '../../components/Layout/Modals/FrontSignin';
 
@@ -96,7 +97,9 @@ export default function Homepage({ test }) {
     setAdminTest,
     setUserBalances,
     isOn,
-    setIsOn
+    setIsOn,
+    setNewUser,
+    setIsSignedIn
   } = useContext(AccountContext);
   const [screenWidth, setScreenWidth] = useState(undefined);
   const [screenHeight, setScreenHeight] = useState(undefined);
@@ -179,6 +182,13 @@ export default function Homepage({ test }) {
           try {
             const res = await fetch(`/api/user/validateUser?fid=${fid}`);
             const data = await res.json();
+            console.log('validate-home', data)
+            setNewUser(data?.newUser ? true : false)
+            if (data?.newUser) {
+              setPanelTarget('welcome')
+              setPanelOpen(true)
+            }
+            setIsSignedIn(data?.signer ? true : false)
             return data.valid;
           } catch (error) {
             return null;
@@ -372,35 +382,35 @@ export default function Homepage({ test }) {
     })();
   }, []);
 
-  useEffect(() => {
-    console.log("version", version, userBalances.impact);
-    if (version == "2.0" || adminTest) {
-      if (userBalances.impact !== 0) {
-        console.log("off-1");
-        setPanelOpen(false);
-        setPanelTarget(null);
-      } else if (userBalances.impact == 0) {
-        console.log("on-1");
-        setPanelOpen(true);
-        setPanelTarget("welcome");
-      }
-    }
-  }, []);
+  // useEffect(() => {
+  //   console.log("version", version, userBalances.impact);
+  //   if (version == "2.0" || adminTest) {
+  //     if (userBalances.impact !== 0) {
+  //       console.log("off-1");
+  //       setPanelOpen(false);
+  //       setPanelTarget(null);
+  //     } else if (userBalances.impact == 0) {
+  //       console.log("on-1");
+  //       setPanelOpen(true);
+  //       setPanelTarget("welcome");
+  //     }
+  //   }
+  // }, []);
 
-  useEffect(() => {
-    console.log("version", version, userBalances.impact);
-    if (version == "2.0" || adminTest) {
-      if (userBalances.impact !== 0) {
-        console.log("off-2");
-        setPanelOpen(false);
-        setPanelTarget(null);
-      } else if (userBalances.impact == 0) {
-        console.log("on-2");
-        setPanelOpen(true);
-        setPanelTarget("welcome");
-      }
-    }
-  }, [userBalances]);
+  // useEffect(() => {
+  //   console.log("version", version, userBalances.impact);
+  //   if (version == "2.0" || adminTest) {
+  //     if (userBalances.impact !== 0) {
+  //       console.log("off-2");
+  //       setPanelOpen(false);
+  //       setPanelTarget(null);
+  //     } else if (userBalances.impact == 0) {
+  //       console.log("on-2");
+  //       setPanelOpen(true);
+  //       setPanelTarget("welcome");
+  //     }
+  //   }
+  // }, [userBalances]);
 
   useEffect(() => {
     (async () => {
@@ -698,6 +708,7 @@ export default function Homepage({ test }) {
         <title>Impact App | Abundance Protocol</title>
         <meta name="description" content={`Building the global superalignment layer`} />
       </Head>
+
       {(!isLogged || version == "2.0" || adminTest) && (
         <div
           id="log in"
@@ -869,7 +880,7 @@ export default function Homepage({ test }) {
         <div className='flex-row' style={{gap: '0.4rem', border: `1px solid #0af`, padding: '0 8px 0 0', borderRadius: '8px'}}>
 
         <Link 
-            href={"/~/settings"}
+            href={"/"}
             style={{
               padding: '8px',
               border: `0px solid ${isLogged ? "#0af" : "#aaa"}`,
@@ -887,7 +898,7 @@ export default function Homepage({ test }) {
           </Link>
 
           <Link 
-            href={"/~/settings"}
+            href={"/"}
             style={{
               padding: '8px',
               border: `0px solid ${isLogged ? "#0af" : "#aaa"}`,
@@ -906,7 +917,7 @@ export default function Homepage({ test }) {
 
 
           <Link 
-            href={"/~/settings"}
+            href={"/"}
             style={{
               padding: '8px',
               border: `0px solid ${isLogged && isOn.boost ? "#0af" : "#aaa"}`,
@@ -924,7 +935,7 @@ export default function Homepage({ test }) {
           </Link>
 
           <Link 
-            href={"/~/settings"}
+            href={"/"}
             style={{
               padding: '8px',
               border: `0px solid ${isLogged && isOn.validate ? "#0af" : "#aaa"}`,
@@ -960,7 +971,7 @@ export default function Homepage({ test }) {
           </Link> */}
 
           <Link 
-            href={"/~/settings"}
+            href={"/"}
             style={{
               padding: '8px',
               border: `0px solid ${isLogged && isOn.impactBoost ? "#0af" : "#aaa"}`,
@@ -978,7 +989,6 @@ export default function Homepage({ test }) {
           </Link>
         </div>
       </div>
-
 
       {(version == "2.0" || adminTest) && isLogged && (
         <div
@@ -1044,218 +1054,182 @@ export default function Homepage({ test }) {
       )}
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            <div
-              className="flex-row"
-              style={{ backgroundColor: "", justifyContent: "center", gap: "1rem", margin: "20px 0 0px 0", padding: "20px 0 0 0"}}
-            >
-              <div
-                className="flex-col"
-                style={{
-                  padding: "1px 5px 1px 5px",
-                  border: `1px solid ${isLogged ? "#0af" : "#aaa"}`,
-                  borderRadius: "18px",
-                  backgroundColor: "",
-                  alignItems: "center",
-                  gap: "0.0rem",
-                  height: "125px",
-                  width: "135px",
-                  justifyContent: "center"
-                }}
-              >
-                <div style={{ fontSize: "13px", padding: "5px 0 5px 0", fontWeight: "700", color: isLogged ? "#0af" : "#aaa" }}>
-                  Creator Fund
-                </div>
-                <div className="flex-row" style={{ gap: "0.5rem", alignItems: "center", padding: "0 10px" }}>
-                  {/* <BsStar color={isLogged ? "#0af" : "#aaa"} size={40} /> */}
-                  <div style={{ fontSize: "36px", fontWeight: "700", color: isLogged ? "#0af" : "#aaa", height: "45px" }}>
-                    {creatorRewards?.degen > 0 ? Math.floor(creatorRewards?.degen).toLocaleString() || 0 : "--"}
-                  </div>
-                </div>
-                <div style={{ fontSize: "10px", padding: "0 0 5px 0", fontWeight: "700", color: isLogged ? "#0af" : "#aaa" }}>
-                  $DEGEN
-                </div>
-
-                <div
-                  className={`flex-row ${
-                    creatorLoading
-                      ? "btn-off"
-                      : (creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet
-                      ? "btn-on"
-                      : "btn-off"
-                  }`}
-                  style={{
-                    borderRadius: "8px",
-                    padding: "2px 5px",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "0.25rem",
-                    margin: "5px 0 2px 0",
-                    cursor: "default"
-                  }}
-                >
-                  <p
-                    style={{
-                      padding: "0 2px",
-                      fontSize: "12px",
-                      fontWeight: "500",
-                      textWrap: "nowrap"
-                    }}
-                  >
-                    {creatorLoading
-                      ? "Loading..."
-                      : (creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet
-                      ? "S8 Airdropped"
-                      : (creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet == null
-                      ? "Missing wallet"
-                      : "No rewards"}
-                  </p>{" "}
-                  {/* update season 5/15 */}
-                </div>
-
-
-
-              </div>
-
-              <div
-                className="flex-col"
-                style={{
-                  padding: "1px 5px 1px 5px",
-                  border: `1px solid ${isLogged ? "#0af" : "#aaa"}`,
-                  borderRadius: "18px",
-                  backgroundColor: "",
-                  alignItems: "center",
-                  gap: "0.0rem",
-                  height: "125px",
-                  width: "135px",
-                  justifyContent: "center",
-                  width: "135px"
-                }}
-              >
-                <div style={{ fontSize: "13px", padding: "5px 0 5px 0", fontWeight: "700", color: isLogged ? "#0af" : "#aaa" }}>
-                  Daily Rewards
-                </div>
-                <div className="flex-row" style={{ gap: "0.5rem", alignItems: "center", padding: "0 10px" }}>
-                  <div style={{ fontSize: "36px", fontWeight: "700", color: isLogged ? "#0af" : "#aaa", height: "45px" }}>
-                    {dailyRewards?.degen_total > 0 ? Math.floor(dailyRewards?.degen_total || 0) : "--"}
-                  </div>
-                </div>
-                <div style={{ fontSize: "10px", padding: "0 0 5px 0", fontWeight: "700", color: isLogged ? "#0af" : "#aaa" }}>
-                  $DEGEN
-                </div>
-
-
-                <div className="flex-row" style={{ alignContent: "center", alignItems: "center", gap: "0.25rem" }}>
-                  <div
-                    className={`flex-row ${
-                      dailyLoading
-                        ? "btn-off"
-                        : dailyRewards?.degen_total > 0 && dailyRewards?.claimed == false
-                        ? "btn-act"
-                        : dailyRewards?.degen_total > 0 && dailyRewards?.claimed == true
-                        ? "btn-on"
-                        : "btn-off"
-                    }`}
-                    style={{
-                      borderRadius: "8px",
-                      padding: "2px 5px",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "0.25rem",
-                      margin: "5px 0 2px 0",
-                      cursor:
-                        dailyRewards?.degen_total > 0 && dailyRewards?.claimed == false ? "pointer" : "default"
-                    }}
-                    onClick={event => {
-                      if (dailyRewards?.degen_total > 0 && dailyRewards?.claimed == false) {
-                        claimReward(event, dailyRewards);
-                      } else if (!isLogged) {
-                        LoginPopup();
-                      }
-                    }}
-                  >
-                    <p
-                      style={{
-                        padding: "0 2px",
-                        fontSize: "12px",
-                        fontWeight: "500",
-                        textWrap: "nowrap"
-                      }}
-                    >
-                      {dailyLoading
-                        ? "Loading..."
-                        : dailyRewards?.degen_total > 0 && dailyRewards?.claimed == false
-                        ? "Claim"
-                        : dailyRewards?.degen_total > 0 && dailyRewards?.claimed == true
-                        ? "Claimed"
-                        : "Check Score"}
-                    </p>
-                  </div>
-                  <div
-                    style={{
-                      padding: "0px 0px",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      margin: "4px 0 -2px 0",
-                      cursor: "pointer"
-                    }}
-                    onClick={() => {
-                      getDailyRewards(fid);
-                      getTotalClaims(fid);
-                    }}
-                  >
-                    <Refresh className="" color={"#0077bf"} size={16} />
-                  </div>
-                </div>
-
-
-
-
-
-
-
-              </div>
+      <div
+        className="flex-row"
+        style={{ backgroundColor: "", justifyContent: "center", gap: "1rem", margin: "20px 0 0px 0", padding: "20px 0 0 0"}}
+      >
+        <div
+          className="flex-col"
+          style={{
+            padding: "1px 5px 1px 5px",
+            border: `1px solid ${isLogged ? "#0af" : "#aaa"}`,
+            borderRadius: "18px",
+            backgroundColor: "",
+            alignItems: "center",
+            gap: "0.0rem",
+            height: "125px",
+            width: "135px",
+            justifyContent: "center"
+          }}
+        >
+          <div style={{ fontSize: "13px", padding: "5px 0 5px 0", fontWeight: "700", color: isLogged ? "#0af" : "#aaa" }}>
+            Creator Fund
+          </div>
+          <div className="flex-row" style={{ gap: "0.5rem", alignItems: "center", padding: "0 10px" }}>
+            {/* <BsStar color={isLogged ? "#0af" : "#aaa"} size={40} /> */}
+            <div style={{ fontSize: "36px", fontWeight: "700", color: isLogged ? "#0af" : "#aaa", height: "45px" }}>
+              {creatorRewards?.degen > 0 ? Math.floor(creatorRewards?.degen).toLocaleString() || 0 : "--"}
             </div>
+          </div>
+          <div style={{ fontSize: "10px", padding: "0 0 5px 0", fontWeight: "700", color: isLogged ? "#0af" : "#aaa" }}>
+            $DEGEN
+          </div>
+
+          <div
+            className={`flex-row ${
+              creatorLoading
+                ? "btn-off"
+                : (creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet
+                ? "btn-on"
+                : "btn-off"
+            }`}
+            style={{
+              borderRadius: "8px",
+              padding: "2px 5px",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "0.25rem",
+              margin: "5px 0 2px 0",
+              cursor: "default"
+            }}
+          >
+            <p
+              style={{
+                padding: "0 2px",
+                fontSize: "12px",
+                fontWeight: "500",
+                textWrap: "nowrap"
+              }}
+            >
+              {creatorLoading
+                ? "Loading..."
+                : (creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet
+                ? "S8 Airdropped"
+                : (creatorRewards?.degen > 0 || creatorRewards?.ham > 0) && creatorRewards?.wallet == null
+                ? "Missing wallet"
+                : "No rewards"}
+            </p>{" "}
+            {/* update season 5/15 */}
+          </div>
+
+
+
+        </div>
+
+        <div
+          className="flex-col"
+          style={{
+            padding: "1px 5px 1px 5px",
+            border: `1px solid ${isLogged ? "#0af" : "#aaa"}`,
+            borderRadius: "18px",
+            backgroundColor: "",
+            alignItems: "center",
+            gap: "0.0rem",
+            height: "125px",
+            width: "135px",
+            justifyContent: "center",
+            width: "135px"
+          }}
+        >
+          <div style={{ fontSize: "13px", padding: "5px 0 5px 0", fontWeight: "700", color: isLogged ? "#0af" : "#aaa" }}>
+            Daily Rewards
+          </div>
+          <div className="flex-row" style={{ gap: "0.5rem", alignItems: "center", padding: "0 10px" }}>
+            <div style={{ fontSize: "36px", fontWeight: "700", color: isLogged ? "#0af" : "#aaa", height: "45px" }}>
+              {dailyRewards?.degen_total > 0 ? Math.floor(dailyRewards?.degen_total || 0) : "--"}
+            </div>
+          </div>
+          <div style={{ fontSize: "10px", padding: "0 0 5px 0", fontWeight: "700", color: isLogged ? "#0af" : "#aaa" }}>
+            $DEGEN
+          </div>
+
+
+          <div className="flex-row" style={{ alignContent: "center", alignItems: "center", gap: "0.25rem" }}>
+            <div
+              className={`flex-row ${
+                dailyLoading
+                  ? "btn-off"
+                  : dailyRewards?.degen_total > 0 && dailyRewards?.claimed == false
+                  ? "btn-act"
+                  : dailyRewards?.degen_total > 0 && dailyRewards?.claimed == true
+                  ? "btn-on"
+                  : "btn-off"
+              }`}
+              style={{
+                borderRadius: "8px",
+                padding: "2px 5px",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "0.25rem",
+                margin: "5px 0 2px 0",
+                cursor:
+                  dailyRewards?.degen_total > 0 && dailyRewards?.claimed == false ? "pointer" : "default"
+              }}
+              onClick={event => {
+                if (dailyRewards?.degen_total > 0 && dailyRewards?.claimed == false) {
+                  claimReward(event, dailyRewards);
+                } else if (!isLogged) {
+                  LoginPopup();
+                }
+              }}
+            >
+              <p
+                style={{
+                  padding: "0 2px",
+                  fontSize: "12px",
+                  fontWeight: "500",
+                  textWrap: "nowrap"
+                }}
+              >
+                {dailyLoading
+                  ? "Loading..."
+                  : dailyRewards?.degen_total > 0 && dailyRewards?.claimed == false
+                  ? "Claim"
+                  : dailyRewards?.degen_total > 0 && dailyRewards?.claimed == true
+                  ? "Claimed"
+                  : "Check Score"}
+              </p>
+            </div>
+            <div
+              style={{
+                padding: "0px 0px",
+                alignItems: "center",
+                justifyContent: "center",
+                margin: "4px 0 -2px 0",
+                cursor: "pointer"
+              }}
+              onClick={() => {
+                getDailyRewards(fid);
+                getTotalClaims(fid);
+              }}
+            >
+              <Refresh className="" color={"#0077bf"} size={16} />
+            </div>
+          </div>
 
 
 
 
+
+
+
+        </div>
+      </div>
+
+
+
+
+      <Settings />
 
 
 
@@ -1750,7 +1724,7 @@ export default function Homepage({ test }) {
           </div>
         </Link>
 
-        <div
+        {/* <div
           className="flex-col"
           style={{
             // width: "100%",
@@ -1796,7 +1770,7 @@ export default function Homepage({ test }) {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* <div
             className="flex-col"
@@ -1859,8 +1833,8 @@ export default function Homepage({ test }) {
 
             </div> */}
 
-        <Link
-          href={"/~/settings"}
+        {/* <Link
+          href={"/"}
           className="flex-col"
           style={{
             // width: "100%",
@@ -1905,7 +1879,7 @@ export default function Homepage({ test }) {
               </div>
             </div>
           </div>
-        </Link>
+        </Link> */}
       </div>
 
       <div
@@ -2089,7 +2063,6 @@ export default function Homepage({ test }) {
           </div>
         </div>
       </div> */}
-
 
 
       {version == "2.0" || adminTest || (version == "1.0" && !adminTest && isLogged && <ProfilePage />)}
