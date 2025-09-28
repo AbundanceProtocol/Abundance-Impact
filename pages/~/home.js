@@ -1036,16 +1036,16 @@ export default function Homepage({ test }) {
               <div 
                 className='shadow flex-col'
                 style={{
-                  backgroundColor: isLogged ? "#002244" : '#333',
+                  backgroundColor: tippingCeloStreak?.totalDaysWithTips > 0 ? "#002244" : '#333',
                   borderRadius: "15px",
-                  border: isLogged ? "1px solid #11447799" : "1px solid #555",
+                  border: tippingCeloStreak?.totalDaysWithTips > 0 ? "1px solid #11447799" : "1px solid #555",
                   width: isMiniApp || isMobile ? '340px' : '100%',
                   margin: isMiniApp || isMobile ? '15px auto 0 auto' : '15px auto 0 auto',
                 }} >
                 <div
                   className="shadow flex-row"
                   style={{
-                    backgroundColor: isLogged ? "#11448888" : "#444",
+                    backgroundColor: tippingCeloStreak?.totalDaysWithTips > 0 ? "#11448888" : "#444",
                     width: "100%",
                     justifyContent: "space-between",
                     alignItems: "center",

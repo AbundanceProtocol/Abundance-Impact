@@ -358,14 +358,14 @@ const UserMenu = () => {
                 border: "1px solid #999",
                 padding: "0 6px",
                 borderRadius: "10px",
-                backgroundColor: navMenu == "rewards" || router.route == "/~/rewards" ? "#224466aa" : "#002244cc",
+                backgroundColor: navMenu == "rewards" || router.route == "/~/rewards" ? "#bbddffaa" : "#002244ee",
                 margin: "0 0 0 0",
                 justifyContent: "center",
                 alignItems: "center"
               }}
             >
               {navMenu == "rewards" || router.route == "/~/rewards" ? (
-                <BsGiftFill size={22} className="" style={{ fontSize: "25px", color: "#99ddff" }} />
+                <BsGiftFill size={22} className="" style={{ fontSize: "25px", color: "#002244ee" }} />
               ) : (
                 <BsGift size={22} className="" style={{ fontSize: "25px", color: "#eee" }} />
               )}

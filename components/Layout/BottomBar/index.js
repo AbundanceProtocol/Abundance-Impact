@@ -79,22 +79,22 @@ const BottomBar = () => {
                   padding: "5px 10px",
                   borderRadius: "10px",
                   border: "1px solid #567",
-                  backgroundColor: router.route == "/" ? "#224466aa" : "#002244aa",
+                  backgroundColor: router.route == "/" ? "#bbddffaa" : "#002244ee",
                   backdropFilter: "blur(12px)"
                 }}
               >
                 <div className="flex-col" style={{ justifyContent: "center", alignItems: "center", height: "40px" }}>
                   {router.route == "/" ? (
-                    <BsHouseDoorFill size={20} color={"#99ddff"} />
+                    <BsHouseDoorFill size={20} color={"#002244ee"} />
                   ) : (
-                    <BsHouseDoor size={20} color={"#99ddff"} />
+                    <BsHouseDoor size={20} color={"#99ddffaa"} />
                   )}
                   <div
                     style={{
                       fontSize: "12px",
-                      fontWeight: "400",
+                      fontWeight: "600",
                       padding: "0 0 0 0",
-                      color: "#99ddff",
+                      color: router.route == "/" ? "#002244ee" : "#99ddffaa",
                       margin: "4px 0 0 0"
                     }}
                   >
@@ -116,7 +116,7 @@ const BottomBar = () => {
                     padding: "5px 10px",
                     borderRadius: "10px",
                     border: "1px solid #567",
-                    backgroundColor: "#002244aa",
+                    backgroundColor: "#002244ee",
                     backdropFilter: "blur(12px)"
                   }}
                 >
@@ -125,7 +125,7 @@ const BottomBar = () => {
                     <div
                       style={{
                         fontSize: "12px",
-                        fontWeight: "400",
+                        fontWeight: "600",
                         padding: "0 0 0 0",
                         color: "#99ddff",
                         margin: "4px 0 0 0"
@@ -149,18 +149,18 @@ const BottomBar = () => {
                   padding: "5px 10px",
                   borderRadius: "10px",
                   border: "1px solid #567",
-                  backgroundColor: router.route == "/~/tip" ? "#224466aa" : "#002244aa",
+                  backgroundColor: router.route == "/~/tip" ? "#bbddffaa" : "#002244ee",
                   backdropFilter: "blur(12px)"
                 }}
               >
                 <div className="flex-col" style={{ justifyContent: "center", alignItems: "center", height: "40px" }}>
-                  <BsCurrencyExchange size={20} color={"#99ddff"} />
+                  <BsCurrencyExchange size={20} color={router.route == "/~/tip" ? "#002244ee" : "#99ddffaa"} />
                   <div
                     style={{
                       fontSize: "12px",
-                      fontWeight: "400",
+                      fontWeight: "600",
                       padding: "0 0 0 0",
-                      color: "#99ddff",
+                      color: router.route == "/~/tip" ? "#002244ee" : "#99ddffaa",
                       margin: "4px 0 0 0"
                     }}
                   >
@@ -181,23 +181,23 @@ const BottomBar = () => {
                   padding: "5px 10px",
                   borderRadius: "10px",
                   border: "1px solid #567",
-                  backgroundColor: router.route == "/~/ecosystems/[ecosystem]" ? "#224466aa" : "#002244aa",
+                  backgroundColor: router.route == "/~/ecosystems/[ecosystem]" ? "#bbddffaa" : "#002244ee",
                   backdropFilter: "blur(12px)"
                 }}
               >
                 <div className="flex-col" style={{ justifyContent: "center", alignItems: "center", height: "40px" }}>
                   {router.route == "/~/ecosystems/[ecosystem]" ? (
-                    <BsStarFill size={20} color={"#99ddff"} />
+                    <BsStarFill size={20} color={"#002244ee"} />
                   ) : (
-                    <BsStar size={20} color={"#99ddff"} />
+                    <BsStar size={20} color={"#99ddffaa"} />
                   )}
                   {/* {(router.route !== '/~/ecosystems/abundance') ? (<BsStar size={20} color={'#99ddff'} />) : (<BsStarFill size={20} color={'#99ddff'} />)} */}
                   <div
                     style={{
                       fontSize: "12px",
-                      fontWeight: "400",
+                      fontWeight: "600",
                       padding: "0 0 0 0",
-                      color: "#99ddff",
+                      color: router.route == "/~/ecosystems/[ecosystem]" ? "#002244ee" : "#99ddffaa",
                       margin: "4px 0 0 0"
                     }}
                   >
@@ -228,13 +228,13 @@ const BottomBar = () => {
                   <div
                     style={{
                       fontSize: "12px",
-                      fontWeight: "400",
+                      fontWeight: "600",
                       padding: "0 0 0 0",
-                      color: "#99ddff",
+                      color: "#bbddffaa",
                       margin: "4px 0 0 0"
                     }}
                   >
-                    About
+                    Info
                   </div>
                 </div>
               </div>
