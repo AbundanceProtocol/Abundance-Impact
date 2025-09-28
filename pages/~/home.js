@@ -59,7 +59,8 @@ import {
   BsQuestionCircleFill,
   BsInfoCircleFill,
   BsShareFill,
-  BsBarChartFill
+  BsBarChartFill,
+  BsSuitHeartFill
 } from "react-icons/bs";
 
 import Spinner from "../../components/Common/Spinner";
@@ -895,7 +896,7 @@ export default function Homepage({ test }) {
             href={"/"}
             style={{
               padding: '8px',
-              border: `0px solid ${isLogged ? "#0af" : "#aaa"}`,
+              border: `0px solid ${isLogged ? "#aaa" : "#aaa"}`,
               borderRadius: '8px',
               backgroundColor: '#246',
               display: 'flex',
@@ -909,7 +910,7 @@ export default function Homepage({ test }) {
             />
           </Link>
 
-          <Link 
+          {/* <Link 
             href={"/"}
             style={{
               padding: '8px',
@@ -925,14 +926,14 @@ export default function Homepage({ test }) {
               size={16} 
               color={isLogged ? "#0af" : "#aaa"} 
             />
-          </Link>
+          </Link> */}
 
 
           <Link 
             href={"/"}
             style={{
               padding: '8px',
-              border: `0px solid ${isLogged && isOn.boost ? "#0af" : "#aaa"}`,
+              border: `0px solid ${isOn.signal ? "#0af" : "#aaa"}`,
               borderRadius: '8px',
               backgroundColor: 'transparent',
               display: 'flex',
@@ -942,7 +943,7 @@ export default function Homepage({ test }) {
           >
             <BsStarFill 
               size={16} 
-              color={isLogged && isOn.boost ? "#0af" : "#aaa"} 
+              color={isOn.signal ? "#0af" : "#aaa"} 
             />
           </Link>
 
@@ -950,7 +951,7 @@ export default function Homepage({ test }) {
             href={"/"}
             style={{
               padding: '8px',
-              border: `0px solid ${isLogged && isOn.validate ? "#0af" : "#aaa"}`,
+              border: `0px solid ${isOn.validate ? "#0af" : "#aaa"}`,
               borderRadius: '8px',
               backgroundColor: 'transparent',
               display: 'flex',
@@ -960,7 +961,7 @@ export default function Homepage({ test }) {
           >
             <BsShieldFillCheck 
               size={16} 
-              color={isLogged && isOn.validate ? "#0af" : "#aaa"} 
+              color={isOn.validate ? "#0af" : "#aaa"} 
             />
           </Link>
 
@@ -986,7 +987,26 @@ export default function Homepage({ test }) {
             href={"/"}
             style={{
               padding: '8px',
-              border: `0px solid ${isLogged && isOn.impactBoost ? "#0af" : "#aaa"}`,
+              border: `0px solid ${isOn.boost ? "#0af" : "#aaa"}`,
+              borderRadius: '8px',
+              backgroundColor: 'transparent',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <BsSuitHeartFill 
+              size={16} 
+              color={isOn.boost ? "#0af" : "#aaa"} 
+            />
+          </Link>
+
+
+          <Link 
+            href={"/"}
+            style={{
+              padding: '8px',
+              border: `0px solid ${isOn.impactBoost ? "#0af" : "#aaa"}`,
               borderRadius: '8px',
               backgroundColor: 'transparent',
               display: 'flex',
@@ -996,7 +1016,7 @@ export default function Homepage({ test }) {
           >
             <BsRocketTakeoffFill 
               size={16} 
-              color={isLogged && isOn.impactBoost ? "#0af" : "#aaa"} 
+              color={isOn.impactBoost ? "#0af" : "#aaa"} 
             />
           </Link>
         </div>
@@ -1249,7 +1269,7 @@ export default function Homepage({ test }) {
 
 
 
-            {(version == '2.0' || adminTest) && (<div className='flex-col' style={{backgroundColor: '', margin: '10px 0 0 0'}}>
+            {(version == '2.0' || adminTest) && (<div className='flex-col' style={{backgroundColor: '', margin: '50px 0 0 0'}}>
 
               <div 
                 className='shadow flex-col'
