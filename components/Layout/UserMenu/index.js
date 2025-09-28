@@ -367,7 +367,7 @@ const UserMenu = () => {
               {navMenu == "rewards" || router.route == "/~/rewards" ? (
                 <BsGiftFill size={22} className="" style={{ fontSize: "25px", color: "#002244ee" }} />
               ) : (
-                <BsGift size={22} className="" style={{ fontSize: "25px", color: "#99ddffaa" }} />
+                <BsGift size={22} className="" style={{ fontSize: "25px", color: "#eee" }} />
               )}
             </Link>
           )}
