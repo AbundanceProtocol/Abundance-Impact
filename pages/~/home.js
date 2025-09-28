@@ -1084,6 +1084,32 @@ export default function Homepage({ test }) {
                         <Spinner size={16} />
                       </div>
                     )}
+                    <Link
+                      href={"/~/tip"}
+                      style={{
+                        backgroundColor: "#bbddff",
+                        borderRadius: "10px",
+                        padding: "4px 0px",
+                        border: "1px solid #335577",
+                        minWidth: "40px",
+                        textAlign: "center",
+                        height: "36px",
+                        alignItems: "center",
+                        justifyContent: "center"
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontSize: "13px",
+                          fontWeight: "700",
+                          color: "#000",
+                          lineHeight: "1"
+                        }}
+                      >
+                        {`Onchain\nMulti-Tip`}
+                      </div>
+                    </Link>
+
                     <div
                       className="flex-row"
                       style={{

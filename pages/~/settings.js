@@ -1325,26 +1325,26 @@ export default function Settings({test, rewards, onSettingsChange}) {
 
                 {isSignedIn ? (
                   <div
-                  style={{
-                    backgroundColor: "#002244",
-                    borderRadius: "6px",
-                    padding: "2px 6px",
-                    border: "1px solid #00aaff",
-                    minWidth: "50px",
-                    textAlign: "center"
-                  }}
-                >
-                  <div
                     style={{
-                      fontSize: "12px",
-                      fontWeight: "400",
-                      color: "#00aaff",
-                      lineHeight: "1"
+                      backgroundColor: "#002244",
+                      borderRadius: "6px",
+                      padding: "2px 6px",
+                      border: "1px solid #00aaff",
+                      minWidth: "50px",
+                      textAlign: "center"
                     }}
                   >
-                    {`logged\nin`}
+                    <div
+                      style={{
+                        fontSize: "12px",
+                        fontWeight: "400",
+                        color: "#00aaff",
+                        lineHeight: "1"
+                      }}
+                    >
+                      {`logged\nin`}
+                    </div>
                   </div>
-                </div>
                 ) : (
                   <div
                     style={{
