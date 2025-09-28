@@ -1101,7 +1101,7 @@ export default function Homepage({ test }) {
                       <div
                         style={{
                           fontSize: "13px",
-                          fontWeight: "700",
+                          fontWeight: "500",
                           color: "#000",
                           lineHeight: "1"
                         }}
