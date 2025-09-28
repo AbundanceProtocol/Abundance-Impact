@@ -1,11 +1,11 @@
 import React, { useContext } from 'react';
-import { BsSuitHeartFill } from "react-icons/bs";
+import { BsStarFill } from "react-icons/bs";
 import { AccountContext } from '../../../../context';
 import useMatchBreakpoints from '../../../../hooks/useMatchBreakpoints';
 
 const version = process.env.NEXT_PUBLIC_VERSION
 
-const BoostInfo = () => {
+const CurateInfo = () => {
   const { isLogged, isMiniApp, adminTest } = useContext(AccountContext)
   const { isMobile } = useMatchBreakpoints();
 
@@ -44,14 +44,14 @@ const BoostInfo = () => {
             margin: '0 0 0px 0'
           }} >
 
-          <BsSuitHeartFill style={{ fill: "#cde" }} size={20} />
+          <BsStarFill style={{ fill: "#cde" }} size={20} />
 
           <div>
             <div style={{border: '0px solid #777', padding: '2px', borderRadius: '10px', backgroundColor: '', maxWidth: 'fit-content', cursor: 'pointer', color: '#cde'}}>
               <div className="top-layer flex-row">
                 <div className="flex-row" style={{padding: "4px 0 4px 10px", marginBottom: '0px', flexWrap: 'wrap', justifyContent: 'flex-start', gap: '0.00rem', width: '', alignItems: 'center'}}>
                   <div style={{fontSize: isMobile ? '18px' : '22px', fontWeight: '600', color: '', padding: '0px 3px'}}>
-                    Curation Booster
+                    Curator
                   </div>
                 </div>
               </div>
@@ -74,13 +74,13 @@ const BoostInfo = () => {
 
       <div className='flex-col' style={{backgroundColor: isLogged ? "#002244ff" : '#333', padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: isLogged ? '#ace' : '#ddd', fontSize: '14px', gap: '1.25rem', position: 'relative', fontWeight: '400'}}>
         <div>
-          Let Impact 2.0 auto-like validated casts with your 'likes.' 
+          Curators get a weekly allowance of nomination points. They can use these to nominate casts based on how impactful they are to the Farcaster network
         </div>
         <div>
-          Impact 2.0 would only auto-like validated casts, in proportion to their impact, and with randomly selected 'likes' from Boosters
+          Curators' allowance depends on the roles they choose (Curator, Validator, Booster) and their Impact Score
         </div>
         <div>
-          Boosters earn 7% of tips going to the (validated) casts they boosted
+          Curators earn 10% of tips going to the (validated) casts they nominated
         </div>
       </div>
     </div>
@@ -88,4 +88,4 @@ const BoostInfo = () => {
   );
 };
 
-export default BoostInfo;
+export default CurateInfo;

@@ -51,7 +51,7 @@ const ImpactInfo = () => {
               <div className="top-layer flex-row">
                 <div className="flex-row" style={{padding: "4px 0 4px 10px", marginBottom: '0px', flexWrap: 'wrap', justifyContent: 'flex-start', gap: '0.00rem', width: '', alignItems: 'center'}}>
                   <div style={{fontSize: isMobile ? '18px' : '22px', fontWeight: '600', color: '', padding: '0px 3px'}}>
-                    Impact Boost
+                    Impact Booster
                   </div>
                 </div>
               </div>
@@ -78,6 +78,9 @@ const ImpactInfo = () => {
         </div>
         <div>
           Auto-boosting will be used sparingly, for major announcements, important updates, and other relevant content
+        </div>
+        <div>
+          Boosters earn 7% of ecosystem tips
         </div>
       </div>
     </div>
