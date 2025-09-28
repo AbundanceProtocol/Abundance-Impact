@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { BsStarFill } from "react-icons/bs";
+import { BsSuitHeartFill } from "react-icons/bs";
 import { AccountContext } from '../../../../context';
 import useMatchBreakpoints from '../../../../hooks/useMatchBreakpoints';
 
@@ -44,14 +44,14 @@ const BoostInfo = () => {
             margin: '0 0 0px 0'
           }} >
 
-          <BsStarFill style={{ fill: "#cde" }} size={20} />
+          <BsSuitHeartFill style={{ fill: "#cde" }} size={20} />
 
           <div>
             <div style={{border: '0px solid #777', padding: '2px', borderRadius: '10px', backgroundColor: '', maxWidth: 'fit-content', cursor: 'pointer', color: '#cde'}}>
               <div className="top-layer flex-row">
                 <div className="flex-row" style={{padding: "4px 0 4px 10px", marginBottom: '0px', flexWrap: 'wrap', justifyContent: 'flex-start', gap: '0.00rem', width: '', alignItems: 'center'}}>
                   <div style={{fontSize: isMobile ? '18px' : '22px', fontWeight: '600', color: '', padding: '0px 3px'}}>
-                    Signal & Boost
+                    Curation Boost
                   </div>
                 </div>
               </div>
@@ -74,13 +74,13 @@ const BoostInfo = () => {
 
       <div className='flex-col' style={{backgroundColor: isLogged ? "#002244ff" : '#333', padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: isLogged ? '#ace' : '#ddd', fontSize: '14px', gap: '1.25rem', position: 'relative', fontWeight: '400'}}>
         <div>
-          Users start with a weekly allowance of 69 nomination points. They can use these to nominate casts based on how impactful they are to the Farcaster network
+          Let Impact 2.0 auto-like validated casts with your 'likes.' 
         </div>
         <div>
-          If validators determine that a cast is fairly valued, it becomes eligible for rewards and is boosted with 'likes' from randomly selected Boosters
+          Impact 2.0 would only auto-like validated casts, in proportion to their impact, and with randomly selected 'likes' from Boosters
         </div>
         <div>
-          Proposers and Boosters earn rewards based on their contribution to the network
+          Boosters earn 7% of tips going to the (validated) casts they boosted
         </div>
       </div>
     </div>

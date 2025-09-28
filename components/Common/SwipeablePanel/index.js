@@ -99,6 +99,7 @@ const SwipeablePanel = () => {
 
           {panelTarget == 'welcome' && (<WelcomeInfo />)}
           {panelTarget == 'boost' && (<BoostInfo />)}
+          {panelTarget == 'curate' && (<CurateInfo />)}
           {panelTarget == 'validate' && (<ValidateInfo />)}
           {panelTarget == 'autoFund' && (<AutoFundInfo />)}
           {panelTarget == 'impactBoost' && (<ImpactInfo />)}

@@ -1031,7 +1031,7 @@ export default function Settings({test, rewards, onSettingsChange}) {
                 </div>
                 <div className='flex-row' style={{position: 'absolute', bottom: '0', right: '0', padding: '5px 5px', gap: '.25rem', alignItems: 'center'}}>
                   <BsInfoCircle size={15} onClick={() => {
-                      openSwipeable("boost"); }} />
+                      openSwipeable("curate"); }} />
                 </div>
               </div>
             </div>
