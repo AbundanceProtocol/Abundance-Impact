@@ -708,7 +708,7 @@ export default function Homepage({ test }) {
       const { sdk } = await import('@farcaster/miniapp-sdk')
       const isApp = await sdk.isInMiniApp();
   
-      let shareUrl = `https://impact.abundance.id/~/rewards/${fid}`
+      let shareUrl = `https://impact.abundance.id/~/onchain/${fid}`
   
       let shareText = ''
 

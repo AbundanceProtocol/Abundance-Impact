@@ -4,7 +4,7 @@ export async function getServerSideProps({ params }) {
   const { fid } = params;
   const frameContent = {
     version: "next",
-    imageUrl: `https://impact.abundance.id/api/frames/tip/rewards-v1?fid=${encodeURIComponent(fid)}`,
+    imageUrl: `https://impact.abundance.id/api/frames/tip/onchain-v1?fid=${encodeURIComponent(fid)}`,
     button: {
       title: "Impact Rewards",
       action: {

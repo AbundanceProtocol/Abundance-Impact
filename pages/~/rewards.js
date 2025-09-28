@@ -466,41 +466,6 @@ export default function Rewards() {
                   $DEGEN
                 </div>
 
-                {/* <div
-                  className={`flex-row ${
-                    totalLoading
-                      ? "btn-off"
-                      : (totalRewards?.sum > 0) && totalRewards?.sum
-                      ? "btn-on"
-                      : "btn-off"
-                  }`}
-                  style={{
-                    borderRadius: "8px",
-                    padding: "2px 5px",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "0.25rem",
-                    margin: "5px 0 2px 0",
-                    cursor: "default"
-                  }}
-                >
-                  <p
-                    style={{
-                      padding: "0 2px",
-                      fontSize: "12px",
-                      fontWeight: "500",
-                      textWrap: "nowrap"
-                    }}
-                  >
-                    {totalLoading
-                      ? "Loading..."
-                      : (totalRewards?.sum > 0) && totalRewards?.sum
-                      ? "S7 Airdropped"
-                      : (totalRewards?.sum > 0) && totalRewards?.sum == null
-                      ? "Missing wallet"
-                      : "No rewards"}
-                  </p>{" "}
-                </div> */}
                 {(totalRewards?.sum > 0) && (<div
                   onClick={shareCuration}
                   className="flex-col"
@@ -557,6 +522,11 @@ export default function Rewards() {
 
 
               </div>
+
+
+
+
+
 
 
               <div
