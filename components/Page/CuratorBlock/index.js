@@ -347,7 +347,7 @@ const CuratorBlock = ({ user, textMax, show, type, feedMax, onTipToggle, showTip
 
                   <div className="flex-row" style={{gap: '1rem', margin: '10px 0 0 0'}}>
 
-                    <div
+                    {/* <div
                       onClick={(event) => {
                         if (isLogged) {
                           if (autotipping.includes(user?.fid)) {
@@ -408,7 +408,7 @@ const CuratorBlock = ({ user, textMax, show, type, feedMax, onTipToggle, showTip
                           </div>
                         </div>
                       </div>
-                    </div>
+                    </div> */}
 
 
                     <div

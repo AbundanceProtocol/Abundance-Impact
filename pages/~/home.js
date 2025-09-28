@@ -132,6 +132,12 @@ export default function Homepage({ test }) {
   const [dailyLoading, setDailyLoading] = useState(true);
   const [totalClaims, setTotalClaims] = useState(0);
   const [claimsLoading, setClaimsLoading] = useState(true);
+  const [totalRewards, setTotalRewards] = useState(null);
+  const [totalLoading, setTotalLoading] = useState(true);
+  const [onchainTips, setOnchainTips] = useState(null);
+  const [onchainTipsLoading, setOnchainTipsLoading] = useState(true);
+
+
   useEffect(() => {
     if (!isLogged) {
       setShowLoginNotice(true);
@@ -560,6 +566,14 @@ export default function Homepage({ test }) {
     }
   }, [eco, isLogged]);
 
+  useEffect(() => {
+    if (fid) {
+      getTotalRewards(fid);
+      getOnchainTips(fid)
+    }
+  }, [fid]);
+
+
   async function setAutoFundInvite(fid, referrer, uuid) {
     try {
       const response = await axios.post("/api/curation/postInvite", { fid, referrer, uuid });
@@ -613,6 +627,118 @@ export default function Homepage({ test }) {
     console.log("data", data);
   }
 
+  async function getTotalRewards(fid) {
+    try {
+      const response = await axios.get("/api/fund/getTotalRewards", {
+        params: { fid }
+      });
+      if (response?.data?.data) {
+        setTotalRewards(response?.data?.data);
+        console.log("getTotalRewards", response?.data?.data);
+      } else {
+        setTotalRewards(null);
+      }
+      setTotalLoading(false);
+    } catch (error) {
+      console.error("Error submitting data:", error);
+      setTotalLoading(false);
+    }
+  }
+
+
+  async function getOnchainTips(fid) {
+    try {
+      const response = await axios.get("/api/fund/getOnchaintips", {
+        params: { fid }
+      });
+      if (response?.data?.data) {
+        setOnchainTips(response?.data?.data);
+        console.log("getOnchaintips", response?.data?.data);
+      } else {
+        setOnchainTips(0);
+      }
+      setOnchainTipsLoading(false);
+    } catch (error) {
+      console.error("Error submitting data:", error);
+      setOnchainTipsLoading(false);
+    }
+  }
+
+
+  const shareRewards = async () => {
+    if (fid) {
+      const { sdk } = await import('@farcaster/miniapp-sdk')
+      const isApp = await sdk.isInMiniApp();
+  
+      let shareUrl = `https://impact.abundance.id/~/rewards/${fid}`
+  
+      let shareText = ''
+
+      const options = [
+        `/impact won't take us to the moon, but it will take us to the stars!\n\nWhat's your impact?`,
+        `I'm earning with /impact while boosting FC creators & builders\n\nWhat's your impact?`,
+        `I earned ${totalRewards?.sum > 0 && formatNum(Math.floor(totalRewards?.sum)) || 0} $degen with /impact\n\nCheck your reward here 👇`,
+        `This is not complicated\n\nFarcaster's growth depends on boosting and rewarding casters based on their impact\n\nThat's what Impact 2.0 is for...`,
+        `Impact 2.0 is Farcaster's 'Social Algorithm' - check it out here:`,
+        `What if we had an algo that was based on value creation instead of engagement - turn out we can! Check out Impact 2.0:`,
+        `Can we have a sufficiently decentralized network without sufficiently decentralized algos?`,
+        `What if we had an algo that valued our impact, instead of extracting value from our attention? Check out Impact 2.0:`
+      ];
+      shareText = options[Math.floor(Math.random() * options.length)];
+  
+      let encodedShareText = encodeURIComponent(shareText)
+      let encodedShareUrl = encodeURIComponent(shareUrl); 
+      let shareLink = `https://farcaster.xyz/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
+  
+      if (!isApp) {
+        window.open(shareLink, '_blank');
+      } else if (isApp) {
+        await sdk.actions.composeCast({
+          text: shareText,
+          embeds: [shareUrl],
+          close: false
+        })
+      }
+    }
+  }
+
+  
+  const shareMultiTip = async () => {
+    if (fid) {
+      const { sdk } = await import('@farcaster/miniapp-sdk')
+      const isApp = await sdk.isInMiniApp();
+  
+      let shareUrl = `https://impact.abundance.id/~/onchain/${fid}`
+  
+      let shareText = ''
+
+      const options = [
+        // `/impact won't take us to the moon, but it will take us to the stars!\n\nWhat's your impact?`,
+        // `I'm earning with /impact while boosting FC creators & builders\n\nWhat's your impact?`,
+        `I earned $${(onchainTips && onchainTips > 0) && onchainTips.toFixed(3) || 0} with /impact\n\nCheck your reward here 👇`,
+        // `This is not complicated\n\nFarcaster's growth depends on boosting and rewarding casters based on their impact\n\nThat's what Impact 2.0 is for...`,
+        // `Impact 2.0 is Farcaster's 'Social Algorithm' - check it out here:`,
+        // `What if we had an algo that was based on value creation instead of engagement - turn out we can! Check out Impact 2.0:`,
+        // `Can we have a sufficiently decentralized network without sufficiently decentralized algos?`,
+        // `What if we had an algo that valued our impact, instead of extracting value from our attention? Check out Impact 2.0:`
+      ];
+      shareText = options[Math.floor(Math.random() * options.length)];
+  
+      let encodedShareText = encodeURIComponent(shareText)
+      let encodedShareUrl = encodeURIComponent(shareUrl); 
+      let shareLink = `https://farcaster.xyz/~/compose?text=${encodedShareText}&embeds[]=${[encodedShareUrl]}`
+  
+      if (!isApp) {
+        window.open(shareLink, '_blank');
+      } else if (isApp) {
+        await sdk.actions.composeCast({
+          text: shareText,
+          embeds: [shareUrl],
+          close: false
+        })
+      }
+    }
+  }
 
   const shareCuration = async () => {
     if (fid) {
@@ -1230,13 +1356,20 @@ export default function Homepage({ test }) {
 
 
 
+            <div className='flex-row' style={{padding: '50px 18px 8px 18px', color: '#ace', fontSize: '20px', gap: '0.75rem', position: 'relative', fontWeight: '600', justifyContent: 'center'}}>
+              Maximize your Impact
+            </div>
+
+            <div className='flex-row' style={{padding: '0px 18px 18px 18px', color: '#8ac', fontSize: '18px', gap: '0.75rem', position: 'relative', fontWeight: '600', justifyContent: 'center'}}>
+              Maximize your Rewards
+            </div>
 
 
 
       {(version == "2.0" || adminTest) && isLogged && (
         <div
           className="flex-row"
-          style={{ backgroundColor: "", justifyContent: "center", gap: "1rem", margin: "80px 0 -20px 0" }}
+          style={{ backgroundColor: "", justifyContent: "center", gap: "1rem", margin: "0px 0 -20px 0" }}
         >
 
 
@@ -1297,7 +1430,7 @@ export default function Homepage({ test }) {
       )}
 
 
-      <div
+      {/* <div
         className="flex-row"
         style={{ backgroundColor: "", justifyContent: "center", gap: "1rem", margin: "20px 0 0px 0", padding: "20px 0 0 0"}}
       >
@@ -1319,7 +1452,6 @@ export default function Homepage({ test }) {
             Creator Fund
           </div>
           <div className="flex-row" style={{ gap: "0.5rem", alignItems: "center", padding: "0 10px" }}>
-            {/* <BsStar color={isLogged ? "#0af" : "#aaa"} size={40} /> */}
             <div style={{ fontSize: "36px", fontWeight: "700", color: isLogged ? "#0af" : "#aaa", height: "45px" }}>
               {creatorRewards?.degen > 0 ? Math.floor(creatorRewards?.degen).toLocaleString() || 0 : "--"}
             </div>
@@ -1362,7 +1494,6 @@ export default function Homepage({ test }) {
                 ? "Missing wallet"
                 : "No rewards"}
             </p>{" "}
-            {/* update season 5/15 */}
           </div>
 
 
@@ -1467,12 +1598,186 @@ export default function Homepage({ test }) {
 
 
         </div>
+      </div> */}
+
+
+
+
+      <div
+        className="flex-row"
+        style={{ backgroundColor: "", justifyContent: "center", gap: "1rem", margin: "35px 0 0px 0" }}
+      >
+        <div
+          className="flex-col"
+          style={{
+            padding: "1px 5px 1px 5px",
+            border: `1px solid ${isLogged ? "#0af" : "#aaa"}`,
+            borderRadius: "18px",
+            backgroundColor: "",
+            alignItems: "center",
+            gap: "0.0rem",
+            height: "145px",
+            width: "135px",
+            justifyContent: "center"
+          }}
+        >
+          <div style={{ fontSize: "13px", padding: "5px 0 5px 0", fontWeight: "700", color: isLogged ? "#0af" : "#aaa" }}>
+            Total Rewards
+          </div>
+          <div className="flex-row" style={{ gap: "0.5rem", alignItems: "center", padding: "0 10px" }}>
+            {/* <BsStar color={isLogged ? "#0af" : "#aaa"} size={40} /> */}
+            {totalLoading ? (
+              <Spinner size={36} color={isLogged ? "#0af" : "#aaa"} />
+            ) : (
+              <div style={{ fontSize: "28px", fontWeight: "700", color: isLogged ? "#0af" : "#aaa", height: "40px" }}>
+                {totalRewards?.sum > 0 ? formatNum(Math.floor(totalRewards?.sum)) || 0 : "--"}
+              </div>
+            )}
+          </div>
+          <div style={{ fontSize: "10px", padding: "0 0 5px 0", fontWeight: "700", color: isLogged ? "#0af" : "#aaa" }}>
+            $DEGEN
+          </div>
+
+          {(totalRewards?.sum > 0) && (<div
+            onClick={shareRewards}
+            className="flex-col"
+            style={{
+              // width: "100%",
+              justifyContent: "center",
+              alignItems: "center",
+              padding: "10px 0 10px 0"
+            }}
+          >
+            <div
+              className="flex-row"
+              style={{
+                gap: "0.75rem",
+                margin: "0px",
+                flexWrap: "wrap",
+                justifyContent: "center",
+                alignItems: "center"
+              }}
+            >
+              <div>
+                <div
+                  className="flex-row cast-act-lt"
+                  style={{
+                    borderRadius: "8px",
+                    padding: "8px 2px",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "0.25rem",
+                    height: "28px",
+                    width: "90px",
+                    // backgroundColor: "#aaa"
+                  }}
+                >
+                  {(!isMobile || isMobile) && <BsShareFill size={14} style={{ width: "21px" }} />}
+                  <p
+                    style={{
+                      padding: "0px",
+                      fontSize: isMobile ? "13px" : "13px",
+                      fontWeight: "500",
+                      textWrap: "wrap",
+                      textAlign: "center"
+                    }}
+                  >
+                    Share
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>)}
+
+        </div>
+
+
+        <div
+          className="flex-col"
+          style={{
+            padding: "1px 5px 1px 5px",
+            border: `1px solid ${isLogged ? "#0af" : "#aaa"}`,
+            borderRadius: "18px",
+            backgroundColor: "",
+            alignItems: "center",
+            gap: "0.0rem",
+            height: "145px",
+            width: "135px",
+            justifyContent: "center"
+          }}
+        >
+          <div style={{ fontSize: "13px", padding: "5px 0 5px 0", fontWeight: "700", color: isLogged ? "#0af" : "#aaa" }}>
+            Onchain Tips
+          </div>
+          <div className="flex-row" style={{ gap: "0.5rem", alignItems: "center", padding: "0 10px" }}>
+            {/* <BsStar color={isLogged ? "#0af" : "#aaa"} size={40} /> */}
+            {onchainTipsLoading ? (
+              <Spinner size={36} color={isLogged ? "#0af" : "#aaa"} />
+            ) : (
+              <div style={{ fontSize: "28px", fontWeight: "700", color: isLogged ? "#0af" : "#aaa", height: "40px" }}>
+                {onchainTips && onchainTips > 0 ? onchainTips > 1 ? '$' + onchainTips.toFixed(1) : '$' + onchainTips.toFixed(3) || 0 : "--"}
+              </div>
+            )}
+          </div>
+          <div style={{ fontSize: "10px", padding: "0 0 5px 0", fontWeight: "700", color: isLogged ? "#0af" : "#aaa" }}>
+            USD
+          </div>
+
+          {(onchainTips && onchainTips > 0) && (<div
+            onClick={shareMultiTip}
+            className="flex-col"
+            style={{
+              // width: "100%",
+              justifyContent: "center",
+              alignItems: "center",
+              padding: "10px 0 10px 0"
+            }}
+          >
+            <div
+              className="flex-row"
+              style={{
+                gap: "0.75rem",
+                margin: "0px",
+                flexWrap: "wrap",
+                justifyContent: "center",
+                alignItems: "center"
+              }}
+            >
+              <div>
+                <div
+                  className="flex-row cast-act-lt"
+                  style={{
+                    borderRadius: "8px",
+                    padding: "8px 2px",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "0.25rem",
+                    height: "28px",
+                    width: "90px",
+                    // backgroundColor: "#aaa"
+                  }}
+                >
+                  {(!isMobile || isMobile) && <BsShareFill size={14} style={{ width: "21px" }} />}
+                  <p
+                    style={{
+                      padding: "0px",
+                      fontSize: isMobile ? "13px" : "13px",
+                      fontWeight: "500",
+                      textWrap: "wrap",
+                      textAlign: "center"
+                    }}
+                  >
+                    Share
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>)}
+
+        </div>
+
+
       </div>
-
-
-
-
-
 
 
 
@@ -1484,7 +1789,7 @@ export default function Homepage({ test }) {
         style={{
           justifyContent: "center",
           alignItems: "center",
-          padding: "40px 10px 0 10px",
+          padding: "80px 10px 0 10px",
           flexWrap: "wrap",
           gap: "1rem"
         }}
