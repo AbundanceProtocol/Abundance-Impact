@@ -10,6 +10,7 @@ import AutoFundInfo from './AutoFundInfo';
 import WelcomeInfo from './WelcomeInfo';
 import ImpactInfo from './ImpactInfo';
 import StreakInfo from './StreakInfo';
+import CurateInfo from './CurateInfo';
 
 const version = process.env.NEXT_PUBLIC_VERSION
 

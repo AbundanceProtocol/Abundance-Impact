@@ -51,7 +51,7 @@ const ValidateInfo = () => {
                 <div className="top-layer flex-row">
                   <div className="flex-row" style={{padding: "4px 0 4px 10px", marginBottom: '0px', flexWrap: 'wrap', justifyContent: 'flex-start', gap: '0.00rem', width: '', alignItems: 'center'}}>
                     <div style={{fontSize: isMobile ? '18px' : '22px', fontWeight: '600', color: '', padding: '0px 3px'}}>
-                      Validate
+                      Validator
                     </div>
                   </div>
                 </div>

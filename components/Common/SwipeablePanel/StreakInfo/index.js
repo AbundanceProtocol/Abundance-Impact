@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { BsBarChartFill } from "react-icons/bs";
+import { BsCurrencyExchange } from "react-icons/bs";
 import { AccountContext } from '../../../../context';
 import useMatchBreakpoints from '../../../../hooks/useMatchBreakpoints';
 
@@ -44,14 +44,14 @@ const StreakInfo = () => {
             margin: '0 0 0px 0'
           }} >
 
-          <BsBarChartFill style={{ fill: "#cde" }} size={20} />
+          <BsCurrencyExchange style={{ fill: "#cde" }} size={20} />
 
           <div>
             <div style={{border: '0px solid #777', padding: '2px', borderRadius: '10px', backgroundColor: '', maxWidth: 'fit-content', cursor: 'pointer', color: '#cde'}}>
               <div className="top-layer flex-row">
                 <div className="flex-row" style={{padding: "4px 0 4px 10px", marginBottom: '0px', flexWrap: 'wrap', justifyContent: 'flex-start', gap: '0.00rem', width: '', alignItems: 'center'}}>
                   <div style={{fontSize: isMobile ? '18px' : '22px', fontWeight: '600', color: '', padding: '0px 3px'}}>
-                    Impact Streaks
+                    Supporter
                   </div>
                 </div>
               </div>
@@ -74,10 +74,13 @@ const StreakInfo = () => {
 
       <div className='flex-col' style={{backgroundColor: isLogged ? "#002244ff" : '#333', padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: isLogged ? '#ace' : '#ddd', fontSize: '14px', gap: '1.25rem', position: 'relative', fontWeight: '400'}}>
         <div>
-          Check you performance on various metrics (Curation, Multi-tipping, etc.)
+          Impact 2.0 lets supporters (onchain) multi-tip casters based on their impact.
         </div>
         <div>
-          Achieving streaks can help you qualify for rewards or multiply your chances of winning raffles
+          Supporters who multi-tip based on Tipping Streak are eligible to participate in weekly raffle rewards
+        </div>
+        <div>
+          Multi-tip 5/7 per week or greater increases your chances of winning (1.5X for 5/7, 1.75X for 6/7, 2X for 7/7)
         </div>
       </div>
     </div>

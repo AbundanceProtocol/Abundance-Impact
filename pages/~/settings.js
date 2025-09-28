@@ -837,13 +837,19 @@ export default function Settings({test, rewards, onSettingsChange}) {
 
           {(version == '2.0' || adminTest) && (<div className='flex-col' style={{backgroundColor: ''}}>
 
+
+            <div className='flex-row' style={{padding: '40px 18px 18px 18px', color: '#ace', fontSize: '20px', gap: '0.75rem', position: 'relative', fontWeight: '600', justifyContent: 'center'}}>
+              Choose Your Roles:
+            </div>
+
+
             <div className='shadow flex-col'
               style={{
                 backgroundColor: isOn.signal ? "#002244" : '#333',
                 borderRadius: "15px",
                 border: isOn.signal ? "1px solid #11447799" : "1px solid #555",
                 width: isMiniApp || isMobile ? '340px' : '100%',
-                margin: isMiniApp || isMobile ? '40px auto 0 auto' : '40px auto 0 auto',
+                margin: isMiniApp || isMobile ? '0px auto 0 auto' : '0px auto 0 auto',
               }} >
 
 
@@ -906,6 +912,9 @@ export default function Settings({test, rewards, onSettingsChange}) {
               </div> */}
 
 
+
+
+
               <div
                 className="shadow flex-row"
                 style={{
@@ -937,7 +946,7 @@ export default function Settings({test, rewards, onSettingsChange}) {
                       <div className="top-layer flex-row">
                         <div className="flex-row" style={{padding: "4px 0 4px 10px", marginBottom: '0px', flexWrap: 'wrap', justifyContent: 'flex-start', gap: '0.00rem', width: '', alignItems: 'center'}}>
                           <div style={{fontSize: isMobile ? '18px' : '22px', fontWeight: '600', color: '', padding: '0px 3px'}}>
-                            Curate
+                            Curator
                           </div>
                         </div>
                       </div>
@@ -1031,7 +1040,7 @@ export default function Settings({test, rewards, onSettingsChange}) {
                 </div>
                 <div className='flex-row' style={{position: 'absolute', bottom: '0', right: '0', padding: '5px 5px', gap: '.25rem', alignItems: 'center'}}>
                   <BsInfoCircle size={15} onClick={() => {
-                      openSwipeable("curate"); }} />
+                    openSwipeable("curate"); }} />
                 </div>
               </div>
             </div>
@@ -1086,7 +1095,7 @@ export default function Settings({test, rewards, onSettingsChange}) {
                       <div className="top-layer flex-row">
                         <div className="flex-row" style={{padding: "4px 0 4px 10px", marginBottom: '0px', flexWrap: 'wrap', justifyContent: 'flex-start', gap: '0.00rem', width: '', alignItems: 'center'}}>
                           <div style={{fontSize: isMobile ? '18px' : '22px', fontWeight: '600', color: '', padding: '0px 3px'}}>
-                            Validate
+                            Validator
                           </div>
                         </div>
                       </div>
@@ -1295,7 +1304,7 @@ export default function Settings({test, rewards, onSettingsChange}) {
                       <div className="top-layer flex-row">
                         <div className="flex-row" style={{padding: "4px 0 4px 10px", marginBottom: '0px', flexWrap: 'wrap', justifyContent: 'flex-start', gap: '0.00rem', width: '', alignItems: 'center'}}>
                           <div style={{fontSize: isMobile ? '18px' : '22px', fontWeight: '600', color: '', padding: '0px 3px'}}>
-                            Boost
+                            Booster
                           </div>
                         </div>
                       </div>
@@ -1376,7 +1385,7 @@ export default function Settings({test, rewards, onSettingsChange}) {
 
               <div className='flex-row' style={{backgroundColor: isOn.boost ? "#002244ff" : '#333', padding: '0px 18px 8px 18px', borderRadius: '0 0 15px 15px', color: isOn.boost ? '#ace' : '#ddd', fontSize: '14px', gap: '0.75rem', position: 'relative', fontWeight: '600'}}>
                 <div>
-                  Curation Boost
+                  Curation Booster
                 </div>
               </div>
 
@@ -1402,7 +1411,7 @@ export default function Settings({test, rewards, onSettingsChange}) {
 
               <div className='flex-row' style={{backgroundColor: isOn.boost ? "#002244ff" : '#333', padding: '10px 18px 8px 18px', borderRadius: '0 0 15px 15px', color: isOn.boost ? '#ace' : '#ddd', fontSize: '14px', gap: '0.75rem', position: 'relative', fontWeight: '600', justifyContent: 'space-between'}}>
                 <div>
-                  Impact Boost
+                  Impact Booster
                 </div>
                 <ToggleSwitch target={'impactBoost'} />
 
