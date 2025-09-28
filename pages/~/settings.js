@@ -19,7 +19,7 @@ import useStore from '../../utils/store';
 import ProfilePage from './studio';
 import axios from 'axios';
 import MiniAppAuthButton from '../../components/MiniAppAuthButton';
-import { BsKey, BsLock, BsLockFill, BsXCircle, BsPerson, BsPersonFill, BsShieldCheck, BsShieldFillCheck, BsPiggyBank, BsPiggyBankFill, BsStar, BsStarFill, BsQuestionCircle, BsGift, BsGiftFill, BsPencilFill, BsInfoCircle, BsBellSlash, BsBell, BsFillRocketTakeoffFill, BsShareFill } from "react-icons/bs";
+import { BsKey, BsLock, BsLockFill, BsXCircle, BsPerson, BsPersonFill, BsShieldCheck, BsShieldFillCheck, BsPiggyBank, BsPiggyBankFill, BsStar, BsStarFill, BsQuestionCircle, BsGift, BsGiftFill, BsPencilFill, BsInfoCircle, BsBellSlash, BsBell, BsFillRocketTakeoffFill, BsShareFill, BsSuitHeartFill } from "react-icons/bs";
 import Modal from '../../components/Layout/Modals/Modal';
 import Spinner from '../../components/Common/Spinner';
 import NeynarSigninButton from '../../components/Layout/Modals/Signin';
@@ -541,14 +541,14 @@ export default function Settings({test, rewards, onSettingsChange}) {
       <div className="flex-row" style={{justifyContent: 'center', alignItems: 'center', margin: '0 5px 0 0'}}>
 
         {loading[target] && (<div className='flex-row' style={{height: '20px', alignItems: 'center', width: '20px', justifyContent: 'center', padding: '0px', position: 'relative', right: '10%', top: '0px'}}>
-          <Spinner size={20} color={'#468'} />
+          <Spinner size={(target == 'impactBoost') ? 12 : 20} color={'#468'} />
         </div>)}
 
 
         <div
           className={`toggleSwitch ${((isOn[target] && (!(target == 'validate' && !isOn.notifs)))) ? "toggleSwitch-on" : ""}`}
-          onClick={handleToggle}>
-          <span className='circle'></span>
+          onClick={handleToggle} style={{height: (target == 'impactBoost') && '12px', width: (target == 'impactBoost') && '45px'}}>
+          <span className='circle' style={{height: (target == 'impactBoost') && '14px', width: (target == 'impactBoost') && '14px'}}></span>
         </div>
       </div>
     );
@@ -839,13 +839,15 @@ export default function Settings({test, rewards, onSettingsChange}) {
 
             <div className='shadow flex-col'
               style={{
-                backgroundColor: isLogged ? "#002244" : '#333',
+                backgroundColor: isOn.signal ? "#002244" : '#333',
                 borderRadius: "15px",
-                border: isLogged ? "1px solid #11447799" : "1px solid #555",
+                border: isOn.signal ? "1px solid #11447799" : "1px solid #555",
                 width: isMiniApp || isMobile ? '340px' : '100%',
                 margin: isMiniApp || isMobile ? '40px auto 0 auto' : '40px auto 0 auto',
               }} >
-              <div
+
+
+              {/* <div
                 className="shadow flex-row"
                 style={{
                   backgroundColor: isLogged ? "#11448888" : "#444",
@@ -901,55 +903,20 @@ export default function Settings({test, rewards, onSettingsChange}) {
 
                 <ToggleSwitch target={'signal'} />
 
-              </div>
+              </div> */}
 
 
-
-
-              <div className='flex-row' style={{backgroundColor: isLogged ? "#002244ff" : '#333', padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: isLogged ? '#ace' : '#ddd', fontSize: '12px', gap: '0.75rem', position: 'relative'}}>
-
-                <div className='flex-row' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(isLogged && isOn.boost) ? '#0af' : '#aaa'}`, borderRadius: '8px', backgroundColor: '', alignItems: 'center', gap: '0.15rem', height: '30px'}}>
-                  <div style={{fontSize: '13px', fontWeight: '700', color: (isLogged && isOn.boost) ? '#0af' : '#aaa'}}>
-                    +30
-                  </div>
-                  <BsStar color={(isLogged && isOn.boost) ? '#0af' : '#aaa'} size={13} />
-                </div>
-
-                <div>
-                  Nominate impactful casts, become an Impact Booster to grow your Impact Score & earn rewards
-                </div>
-                <div className='flex-row' style={{position: 'absolute', bottom: '0', right: '0', padding: '5px 5px', gap: '.25rem', alignItems: 'center'}}>
-                  <BsInfoCircle size={15} onClick={() => {
-                      openSwipeable("boost"); }} />
-                </div>
-              </div>
-            </div>
-          </div>
-          )}
-
-
-          {/* BOOST */}
-
-          {(version == '2.0' || adminTest) && (<div className='flex-col' style={{backgroundColor: ''}}>
-
-            <div className='shadow flex-col'
-              style={{
-                backgroundColor: isLogged ? "#002244" : '#333',
-                borderRadius: "15px",
-                border: isLogged ? "1px solid #11447799" : "1px solid #555",
-                width: isMiniApp || isMobile ? '340px' : '100%',
-                margin: isMiniApp || isMobile ? '15px auto 0 auto' : '15px auto 0 auto',
-              }} >
               <div
                 className="shadow flex-row"
                 style={{
-                  backgroundColor: isLogged ? "#11448888" : "#444",
+                  backgroundColor: isOn.signal ? "#11448888" : "#444",
                   width: "100%",
                   justifyContent: "space-between",
                   alignItems: "center",
                   padding: "8px", 
                   borderRadius: "15px",
-                  margin: '0 0 10px 0'
+                  margin: '0 0 10px 0',
+                  gap: '1rem'
                 }} >
 
 
@@ -960,25 +927,21 @@ export default function Settings({test, rewards, onSettingsChange}) {
                     justifyContent: "flex-start",
                     alignItems: "center",
                     padding: "0px 0 0 4px",
-                    margin: '0 0 0px 0'
+                    margin: '0 0 0px 0',
                   }} >
-
                 
                   <BsStarFill style={{ fill: "#cde" }} size={20} />
                   <div>
-
 
                     <div style={{border: '0px solid #777', padding: '2px', borderRadius: '10px', backgroundColor: '', maxWidth: 'fit-content', cursor: 'pointer', color: '#cde'}}>
                       <div className="top-layer flex-row">
                         <div className="flex-row" style={{padding: "4px 0 4px 10px", marginBottom: '0px', flexWrap: 'wrap', justifyContent: 'flex-start', gap: '0.00rem', width: '', alignItems: 'center'}}>
                           <div style={{fontSize: isMobile ? '18px' : '22px', fontWeight: '600', color: '', padding: '0px 3px'}}>
-                            Boost
+                            Curate
                           </div>
                         </div>
                       </div>
                     </div>
-
-
                   </div>
 
 
@@ -991,27 +954,80 @@ export default function Settings({test, rewards, onSettingsChange}) {
                     }} >
 
                   </div>
-
                 </div>
 
-                <ToggleSwitch target={'boost'} />
+                {isOn.signal ? (
+                  <div
+                  style={{
+                    backgroundColor: "#002244",
+                    borderRadius: "6px",
+                    padding: "2px 6px",
+                    border: "1px solid #00aaff",
+                    minWidth: "50px",
+                    textAlign: "center"
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: "12px",
+                      fontWeight: "400",
+                      color: "#00aaff",
+                      lineHeight: "1"
+                    }}
+                  >
+                    {`app\nadded`}
+                  </div>
+                </div>
+                ) : (
+                  <div
+                    style={{
+                      backgroundColor: "transparent",
+                      borderRadius: "6px",
+                      padding: "2px 6px",
+                      border: "1px solid #abc",
+                      minWidth: "50px",
+                      textAlign: "center"
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: "12px",
+                        fontWeight: "400",
+                        color: "#abc",
+                        lineHeight: "1"
+                      }}
+                    >
+                      {`add\napp`}
+                    </div>
+                  </div>
+                )}
+
+                {/* {isOn.notifs ? (
+                  <div style={{padding: '4px 5px 1px 5px', border: '1px solid #ace', borderRadius: '8px', backgroundColor: '#22446666'}}>
+                    <BsBell color={'#ace'} size={16} />
+                  </div>
+                ) : (
+                  <div style={{padding: '4px 5px 1px 5px', border: needNotif ? '1px solid #f00' :  '1px solid #ace', borderRadius: '8px', backgroundColor: needNotif ? '#fcc' : '#22446666'}} onClick={notifsOn}>
+                    <BsBellSlash color={needNotif ? '#f00' : '#ace'} size={16} />
+                  </div>
+                )} */}
+
+                <ToggleSwitch target={'signal'} />
 
               </div>
 
 
+              <div className='flex-row' style={{backgroundColor: isOn.signal ? "#002244ff" : '#333', padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: isOn.signal ? '#ace' : '#ddd', fontSize: '12px', gap: '0.75rem', position: 'relative'}}>
 
-
-              <div className='flex-row' style={{backgroundColor: isLogged ? "#002244ff" : '#333', padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: isLogged ? '#ace' : '#ddd', fontSize: '12px', gap: '0.75rem', position: 'relative'}}>
-
-                <div className='flex-row' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(isLogged && isOn.boost) ? '#0af' : '#aaa'}`, borderRadius: '8px', backgroundColor: '', alignItems: 'center', gap: '0.15rem', height: '30px'}}>
-                  <div style={{fontSize: '13px', fontWeight: '700', color: (isLogged && isOn.boost) ? '#0af' : '#aaa'}}>
+                <div className='flex-row' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(isOn.signal) ? '#0af' : '#aaa'}`, borderRadius: '8px', backgroundColor: '', alignItems: 'center', gap: '0.15rem', height: '30px'}}>
+                  <div style={{fontSize: '13px', fontWeight: '700', color: (isOn.signal) ? '#0af' : '#aaa'}}>
                     +30
                   </div>
-                  <BsStar color={(isLogged && isOn.boost) ? '#0af' : '#aaa'} size={13} />
+                  <BsStar color={(isOn.signal) ? '#0af' : '#aaa'} size={13} />
                 </div>
 
                 <div>
-                  Nominate impactful casts, become an Impact Booster to grow your Impact Score & earn rewards
+                  Nominate impactful casts on Farcaster. Earn 10% of tips
                 </div>
                 <div className='flex-row' style={{position: 'absolute', bottom: '0', right: '0', padding: '5px 5px', gap: '.25rem', alignItems: 'center'}}>
                   <BsInfoCircle size={15} onClick={() => {
@@ -1019,9 +1035,8 @@ export default function Settings({test, rewards, onSettingsChange}) {
                 </div>
               </div>
             </div>
-            </div>
-            )}
-
+          </div>
+          )}
 
 
 
@@ -1032,16 +1047,18 @@ export default function Settings({test, rewards, onSettingsChange}) {
             <div 
               className='shadow flex-col'
               style={{
-                backgroundColor: isLogged ? "#002244" : '#333',
+                backgroundColor: isOn.validate ? "#002244" : '#333',
                 borderRadius: "15px",
-                border: isLogged ? "1px solid #11447799" : "1px solid #555",
+                border: isOn.validate ? "1px solid #11447799" : "1px solid #555",
                 width: isMiniApp || isMobile ? '340px' : '100%',
                 margin: isMiniApp || isMobile ? '15px auto 0 auto' : '15px auto 0 auto',
               }} >
+
+
               <div
                 className="shadow flex-row"
                 style={{
-                  backgroundColor: isLogged ? "#11448888" : "#444",
+                  backgroundColor: isOn.validate ? "#11448888" : "#444",
                   width: "100%",
                   justifyContent: "space-between",
                   alignItems: "center",
@@ -1089,6 +1106,52 @@ export default function Settings({test, rewards, onSettingsChange}) {
                 </div>
 
                 {isOn.notifs ? (
+                  <div
+                  style={{
+                    backgroundColor: "#002244",
+                    borderRadius: "6px",
+                    padding: "2px 6px",
+                    border: "1px solid #00aaff",
+                    minWidth: "50px",
+                    textAlign: "center"
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: "12px",
+                      fontWeight: "400",
+                      color: "#00aaff",
+                      lineHeight: "1"
+                    }}
+                  >
+                    {`notifs\non`}
+                  </div>
+                </div>
+                ) : (
+                  <div
+                    style={{
+                      backgroundColor: "transparent",
+                      borderRadius: "6px",
+                      padding: "2px 6px",
+                      border: "1px solid #abc",
+                      minWidth: "50px",
+                      textAlign: "center"
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: "12px",
+                        fontWeight: "400",
+                        color: "#abc",
+                        lineHeight: "1"
+                      }}
+                    >
+                      {`notifs\noff`}
+                    </div>
+                  </div>
+                )}
+
+                {/* {isOn.notifs ? (
                   <div style={{padding: '4px 5px 1px 5px', border: '1px solid #ace', borderRadius: '8px', backgroundColor: '#22446666'}}>
                     <BsBell color={'#ace'} size={16} />
                   </div>
@@ -1096,23 +1159,23 @@ export default function Settings({test, rewards, onSettingsChange}) {
                   <div style={{padding: '4px 5px 1px 5px', border: needNotif ? '1px solid #f00' :  '1px solid #ace', borderRadius: '8px', backgroundColor: needNotif ? '#fcc' : '#22446666'}} onClick={notifsOn}>
                     <BsBellSlash color={needNotif ? '#f00' : '#ace'} size={16} />
                   </div>
-                )}
+                )} */}
 
                 <ToggleSwitch target={'validate'} />
 
               </div>
 
-              <div className='flex-row' style={{backgroundColor: isLogged ? "#002244ff" : '#333', padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: isLogged ? '#ace' : '#ddd', fontSize: '12px', gap: '0.75rem', position: 'relative'}}>
+              <div className='flex-row' style={{backgroundColor: isOn.validate ? "#002244ff" : '#333', padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: isOn.validate ? '#ace' : '#ddd', fontSize: '12px', gap: '0.75rem', position: 'relative'}}>
 
-                <div className='flex-row' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(isLogged && isOn.validate && isOn.boost && isOn.notifs) ? '#0af' : (isLogged && isOn.validate) ? '#ace' : '#aaa'}`, borderRadius: '8px', backgroundColor: '', alignItems: 'center', gap: '0.15rem', height: '30px'}}>
-                  <div style={{fontSize: '13px', fontWeight: '700', color: (isLogged && isOn.validate && isOn.boost && isOn.notifs) ? '#0af' : (isLogged && isOn.validate) ? '#ace' : '#aaa'}}>
+                <div className='flex-row' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(isOn.validate) ? '#0af' : (isOn.validate) ? '#ace' : '#aaa'}`, borderRadius: '8px', backgroundColor: '', alignItems: 'center', gap: '0.15rem', height: '30px'}}>
+                  <div style={{fontSize: '13px', fontWeight: '700', color: isOn.validate ? '#0af' : '#aaa'}}>
                     +15
                   </div>
-                  <BsStar color={(isLogged && isOn.validate && isOn.boost && isOn.notifs) ? '#0af' : (isLogged && isOn.validate) ? '#ace' : '#aaa'} size={13} />
+                  <BsStar color={isOn.validate ? '#0af' : '#aaa'} size={13} />
                 </div>
 
                 <div>
-                  Ensure the quality of nominations - earn rewards
+                  Ensure the quality of nominations. Earn 7% of tips
                 </div>
                 <div className='flex-row' style={{position: 'absolute', bottom: '0', right: '0', padding: '5px 5px', gap: '.25rem', alignItems: 'center'}}>
                   <BsInfoCircle size={15} onClick={() => {
@@ -1120,9 +1183,258 @@ export default function Settings({test, rewards, onSettingsChange}) {
                 </div>
               </div>
             </div>
-          </div>
+            </div>
 
-          )}
+            )}
+
+
+
+
+          {/* BOOST */}
+
+          {(version == '2.0' || adminTest) && (<div className='flex-col' style={{backgroundColor: ''}}>
+
+            <div className='shadow flex-col'
+              style={{
+                backgroundColor: isOn.boost ? "#002244" : '#333',
+                borderRadius: "15px",
+                border: isOn.boost ? "1px solid #11447799" : "1px solid #555",
+                width: isMiniApp || isMobile ? '340px' : '100%',
+                margin: isMiniApp || isMobile ? '15px auto 0 auto' : '15px auto 0 auto',
+              }} >
+
+
+
+              {/* <div
+                className="shadow flex-row"
+                style={{
+                  backgroundColor: isLogged ? "#11448888" : "#444",
+                  width: "100%",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "8px", 
+                  borderRadius: "15px",
+                  margin: '0 0 10px 0'
+                }} >
+
+
+                <div
+                  className="flex-row"
+                  style={{
+                    width: "100%",
+                    justifyContent: "flex-start",
+                    alignItems: "center",
+                    padding: "0px 0 0 4px",
+                    margin: '0 0 0px 0'
+                  }} >
+
+                
+                  <BsSuitHeartFill style={{ fill: "#cde" }} size={20} />
+                  <div>
+
+
+                    <div style={{border: '0px solid #777', padding: '2px', borderRadius: '10px', backgroundColor: '', maxWidth: 'fit-content', cursor: 'pointer', color: '#cde'}}>
+                      <div className="top-layer flex-row">
+                        <div className="flex-row" style={{padding: "4px 0 4px 10px", marginBottom: '0px', flexWrap: 'wrap', justifyContent: 'flex-start', gap: '0.00rem', width: '', alignItems: 'center'}}>
+                          <div style={{fontSize: isMobile ? '18px' : '22px', fontWeight: '600', color: '', padding: '0px 3px'}}>
+                            Boost
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+
+                  </div>
+
+
+                  <div
+                    className="flex-row"
+                    style={{
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      cursor: "pointer",
+                    }} >
+
+                  </div>
+
+                </div>
+
+                <ToggleSwitch target={'boost'} />
+
+              </div> */}
+
+
+              <div
+                className="shadow flex-row"
+                style={{
+                  backgroundColor: isOn.boost ? "#11448888" : "#444",
+                  width: "100%",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "8px", 
+                  borderRadius: "15px",
+                  margin: '0 0 10px 0',
+                  gap: '1rem'
+                }} >
+
+
+                <div
+                  className="flex-row"
+                  style={{
+                    width: "100%",
+                    justifyContent: "flex-start",
+                    alignItems: "center",
+                    padding: "0px 0 0 4px",
+                    margin: '0 0 0px 0',
+                  }} >
+                
+                  <BsSuitHeartFill style={{ fill: "#cde" }} size={20} />
+                  <div>
+
+                    <div style={{border: '0px solid #777', padding: '2px', borderRadius: '10px', backgroundColor: '', maxWidth: 'fit-content', cursor: 'pointer', color: '#cde'}}>
+                      <div className="top-layer flex-row">
+                        <div className="flex-row" style={{padding: "4px 0 4px 10px", marginBottom: '0px', flexWrap: 'wrap', justifyContent: 'flex-start', gap: '0.00rem', width: '', alignItems: 'center'}}>
+                          <div style={{fontSize: isMobile ? '18px' : '22px', fontWeight: '600', color: '', padding: '0px 3px'}}>
+                            Boost
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+
+                  <div
+                    className="flex-row"
+                    style={{
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      cursor: "pointer",
+                    }} >
+
+                  </div>
+                </div>
+
+                {isSignedIn ? (
+                  <div
+                  style={{
+                    backgroundColor: "#002244",
+                    borderRadius: "6px",
+                    padding: "2px 6px",
+                    border: "1px solid #00aaff",
+                    minWidth: "50px",
+                    textAlign: "center"
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: "12px",
+                      fontWeight: "400",
+                      color: "#00aaff",
+                      lineHeight: "1"
+                    }}
+                  >
+                    {`logged\nin`}
+                  </div>
+                </div>
+                ) : (
+                  <div
+                    style={{
+                      backgroundColor: "transparent",
+                      borderRadius: "6px",
+                      padding: "2px 6px",
+                      border: "1px solid #abc",
+                      minWidth: "50px",
+                      textAlign: "center"
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: "12px",
+                        fontWeight: "400",
+                        color: "#abc",
+                        lineHeight: "1"
+                      }}
+                    >
+                      {`need\nlogin`}
+                    </div>
+                  </div>
+                )}
+
+                {/* {isOn.notifs ? (
+                  <div style={{padding: '4px 5px 1px 5px', border: '1px solid #ace', borderRadius: '8px', backgroundColor: '#22446666'}}>
+                    <BsBell color={'#ace'} size={16} />
+                  </div>
+                ) : (
+                  <div style={{padding: '4px 5px 1px 5px', border: needNotif ? '1px solid #f00' :  '1px solid #ace', borderRadius: '8px', backgroundColor: needNotif ? '#fcc' : '#22446666'}} onClick={notifsOn}>
+                    <BsBellSlash color={needNotif ? '#f00' : '#ace'} size={16} />
+                  </div>
+                )} */}
+
+                <ToggleSwitch target={'boost'} />
+
+              </div>
+
+              <div className='flex-row' style={{backgroundColor: isOn.boost ? "#002244ff" : '#333', padding: '0px 18px 8px 18px', borderRadius: '0 0 15px 15px', color: isOn.boost ? '#ace' : '#ddd', fontSize: '14px', gap: '0.75rem', position: 'relative', fontWeight: '600'}}>
+                <div>
+                  Curation Boost
+                </div>
+              </div>
+
+
+              <div className='flex-row' style={{backgroundColor: isOn.boost ? "#002244ff" : '#333', padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: isOn.boost ? '#ace' : '#ddd', fontSize: '12px', gap: '0.75rem', position: 'relative'}}>
+
+                <div className='flex-row' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(isOn.boost) ? '#0af' : '#aaa'}`, borderRadius: '8px', backgroundColor: '', alignItems: 'center', gap: '0.15rem', height: '30px'}}>
+                  <div style={{fontSize: '13px', fontWeight: '700', color: (isOn.boost) ? '#0af' : '#aaa'}}>
+                    +20
+                  </div>
+                  <BsStar color={(isOn.boost) ? '#0af' : '#aaa'} size={13} />
+                </div>
+
+                <div>
+                  Let Impact boost validated casts with your 'likes.' Earn 7% of tips
+                </div>
+                <div className='flex-row' style={{position: 'absolute', bottom: '0', right: '0', padding: '5px 5px', gap: '.25rem', alignItems: 'center'}}>
+                  <BsInfoCircle size={15} onClick={() => {
+                    openSwipeable("boost"); }} />
+                </div>
+              </div>
+
+
+              <div className='flex-row' style={{backgroundColor: isOn.boost ? "#002244ff" : '#333', padding: '10px 18px 8px 18px', borderRadius: '0 0 15px 15px', color: isOn.boost ? '#ace' : '#ddd', fontSize: '14px', gap: '0.75rem', position: 'relative', fontWeight: '600', justifyContent: 'space-between'}}>
+                <div>
+                  Impact Boost
+                </div>
+                <ToggleSwitch target={'impactBoost'} />
+
+              </div>
+
+
+              <div className='flex-row' style={{backgroundColor: isOn.boost ? "#002244ff" : '#333', padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: isOn.impactBoost ? '#ace' : '#ddd', fontSize: '12px', gap: '0.75rem', position: 'relative'}}>
+
+                <div className='flex-row' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(isOn.impactBoost) ? '#0af' : '#aaa'}`, borderRadius: '8px', backgroundColor: '', alignItems: 'center', gap: '0.15rem', height: '30px'}}>
+                  <div style={{fontSize: '13px', fontWeight: '700', color: (isOn.impactBoost) ? '#0af' : '#aaa'}}>
+                    +10
+                  </div>
+                  <BsStar color={(isOn.impactBoost) ? '#0af' : '#aaa'} size={13} />
+                </div>
+
+                <div>
+                  Auto-boost Impact-centered casts from @abundance. Earn 7% of tips
+                </div>
+                <div className='flex-row' style={{position: 'absolute', bottom: '0', right: '0', padding: '5px 5px', gap: '.25rem', alignItems: 'center'}}>
+                  <BsInfoCircle size={15} onClick={() => {
+                    openSwipeable("impactBoost"); }} />
+                </div>
+              </div>
+
+            </div>
+            </div>
+            )}
+
+
+
+
+
 
 
           {/* AUTO-FUND */}
@@ -1222,7 +1534,7 @@ export default function Settings({test, rewards, onSettingsChange}) {
 
 
 
-          {(<div className='flex-col' style={{backgroundColor: ''}}>
+          {/* {(<div className='flex-col' style={{backgroundColor: ''}}>
 
           <div className='shadow flex-col'
             style={{
@@ -1308,7 +1620,7 @@ export default function Settings({test, rewards, onSettingsChange}) {
             </div>
           </div>
           </div>
-          )}
+          )} */}
 
 
 

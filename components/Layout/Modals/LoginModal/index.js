@@ -5,7 +5,7 @@ import MiniAppAuthButton from '../../../MiniAppAuthButton';
 import useStore from '../../../../utils/store';
 
 const LoginModal = () => {
-  const { showLogin, isLogged, setShowLogin, setIsLogged, setFid, isMiniApp, checkEcoEligibility, isSignedIn } = useContext(AccountContext);
+  const { showLogin, isLogged, setShowLogin, setIsLogged, setFid, isMiniApp, checkEcoEligibility, isSignedIn, setIsSignedIn } = useContext(AccountContext);
   const store = useStore()
 
   const handleSignIn = async (loginData) => {
@@ -35,10 +35,14 @@ const LoginModal = () => {
                       store.setFid(fid);
                       store.setSignerUuid(uuid);
                       store.setIsAuth(uuid?.length > 0);
+                      console.log('uuid-3', uuid?.length)
 
                       setFid(fid)
                       setIsLogged(true)
                       setShowLogin(false)
+                      if (uuid && uuid?.length > 0) {
+                        setIsSignedIn(true)
+                      }
                       checkEcoEligibility(fid, '$IMPACT', uuid)
                     }}
                     onError={err => {

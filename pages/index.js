@@ -40,7 +40,7 @@ const version = process.env.NEXT_PUBLIC_VERSION
 export default function Home() {
   const ref2 = useRef(null)
   const [ref, inView] = useInView()
-  const { LoginPopup, checkEcoEligibility, ecoData, points, setPoints, isLogged, showLogin, setShowLogin, setIsLogged, fid, setFid, getRemainingBalances, isMiniApp, userBalances, setIsMiniApp, LogoutPopup, userInfo, setUserInfo, setPanelOpen, setPanelTarget, adminTest, setAdminTest, isOn, setIsOn } = useContext(AccountContext)
+  const { LoginPopup, checkEcoEligibility, ecoData, points, setPoints, isLogged, showLogin, setShowLogin, setIsLogged, fid, setFid, getRemainingBalances, isMiniApp, userBalances, setIsMiniApp, LogoutPopup, userInfo, setUserInfo, setPanelOpen, setPanelTarget, adminTest, setAdminTest, isOn, setIsOn, setIsSignedIn } = useContext(AccountContext)
   const [screenWidth, setScreenWidth] = useState(undefined)
   const [screenHeight, setScreenHeight] = useState(undefined)
   const [textMax, setTextMax] = useState('562px')
@@ -561,7 +561,10 @@ export default function Home() {
                       store.setFid(fid);
                       store.setSignerUuid(uuid);
                       store.setIsAuth(uuid?.length > 0);
-
+                      console.log('uuid-3', uuid?.length)
+                      if (uuid && uuid?.length > 0) {
+                        setIsSignedIn(true)
+                      }
                       setFid(fid)
                       setIsLogged(true)
                       setShowLogin(false)
