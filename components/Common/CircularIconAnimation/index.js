@@ -2,6 +2,7 @@ import React, { useRef } from "react";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 import { BsPerson, BsPersonFill, BsStarFill, BsShieldFillCheck, BsSuitHeartFill, BsCurrencyExchange } from "react-icons/bs";
+import { TbArrowBigUp, TbArrowBigUpFilled } from "react-icons/tb";
 
 // Register GSAP plugin
 gsap.registerPlugin(useGSAP);
@@ -20,6 +21,18 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
       // Otherwise, select the new icon (deselecting any previous one)
       return index;
     });
+  };
+
+  // Function to get arrow transform based on icon position
+  const getArrowTransform = (iconIndex) => {
+    const transforms = [
+      "translate(0px, -70px) rotate(180deg)",    // Curator (top) - arrow points down
+      "translate(80px, -20px) rotate(252deg)",  // Validator (top-right) - arrow points down-left
+      "translate(50px, 70px) rotate(324deg)",  // Booster (bottom-right) - arrow points up-left
+      "translate(-50px, 70px) rotate(36deg)", // Supporter (bottom-left) - arrow points up-right
+      "translate(-80px, -20px) rotate(108deg)" // Caster (left) - arrow points right
+    ];
+    return transforms[iconIndex] || "";
   };
   
   useGSAP(() => {
@@ -107,7 +120,7 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
           position: "relative",
           width: "320px",
           height: "320px",
-          margin: "20px auto",
+          margin: "0px auto 10px auto",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -116,6 +129,78 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
           // backgroundColor: "rgba(0, 34, 68, 0.3)"
         }}
       >
+      {/* Abstract Social Media Post in the center */}
+      <div
+        style={{
+          position: "absolute",
+          left: "50%",
+          top: "50%",
+          transform: "translate(-50%, -50%)",
+          width: "108px",
+          height: "72px",
+          // backgroundColor: "rgba(255, 255, 255, 0.95)",
+          borderRadius: "8px",
+          border: "1px solid #ddd",
+          padding: "12px",
+          boxShadow: "0 2px 8px #000000",
+          zIndex: 5
+        }}
+      >
+        {/* User avatar circle */}
+        <div
+          style={{
+            width: "14px",
+            height: "14px",
+            backgroundColor: "#666",
+            borderRadius: "50%",
+            marginBottom: "8px"
+          }}
+        />
+        
+        {/* Text lines */}
+        <div
+          style={{
+            width: "100%",
+            height: "6px",
+            backgroundColor: "#333",
+            borderRadius: "3px",
+            marginBottom: "4px"
+          }}
+        />
+        <div
+          style={{
+            width: "85%",
+            height: "6px",
+            backgroundColor: "#333",
+            borderRadius: "3px",
+            marginBottom: "4px"
+          }}
+        />
+        <div
+          style={{
+            width: "70%",
+            height: "6px",
+            backgroundColor: "#333",
+            borderRadius: "3px"
+          }}
+        />
+      </div>
+
+      {/* Arrows for each selected icon pointing toward the center post */}
+      {selectedIcon !== null && (
+        <TbArrowBigUp
+          size={24}
+          style={{
+            position: "absolute",
+            left: "50%",
+            top: "50%",
+            transform: `translate(-50%, -50%) ${getArrowTransform(selectedIcon)}`,
+            color: "#999",
+            zIndex: 3
+          }}
+        />
+      )}
+
       {[...Array(5)].map((_, index) => {
         const SecondaryIcon = secondaryIcons[index];
         const settingKey = settingsMap[index];
