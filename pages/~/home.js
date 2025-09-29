@@ -879,8 +879,8 @@ export default function Homepage({ test }) {
       )}
 
 
-      {/* GSAP ANIMATION */}
-      {(fid && fid == 9326) && <CircularIconAnimation />}
+        {/* GSAP ANIMATION */}
+        <CircularIconAnimation isOn={isOn} fid={fid} show={fid && fid == 9326} />
 
 
 

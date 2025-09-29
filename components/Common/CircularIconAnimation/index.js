@@ -1,16 +1,17 @@
 import React, { useRef } from "react";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
-import { BsPerson, BsStarFill, BsShieldFillCheck, BsSuitHeartFill, BsCurrencyExchange } from "react-icons/bs";
+import { BsPerson, BsPersonFill, BsStarFill, BsShieldFillCheck, BsSuitHeartFill, BsCurrencyExchange } from "react-icons/bs";
 
 // Register GSAP plugin
 gsap.registerPlugin(useGSAP);
 
 // Circular Icon Animation Component
-const CircularIconAnimation = () => {
+const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
   const containerRef = useRef(null);
   
   useGSAP(() => {
+    if (!show) return;
     const iconWrappers = containerRef.current.querySelectorAll('.icon-wrapper');
     const labels = containerRef.current.querySelectorAll('.circle-label');
     const secondaryIcons = containerRef.current.querySelectorAll('.secondary-icon');
@@ -63,6 +64,10 @@ const CircularIconAnimation = () => {
     // Animate each icon sequentially - color only
     const icons = containerRef.current.querySelectorAll('.circle-icon');
     icons.forEach((icon, index) => {
+      const settingKey = settingsMap[index];
+      const isActive = settingKey ? isOn[settingKey] : false;
+      const baseColor = isActive ? "#0af" : "white";
+      
       tl.to(icon, {
         duration: 0.5,
         ease: "power2.inOut",
@@ -74,7 +79,7 @@ const CircularIconAnimation = () => {
         duration: 0.5,
         ease: "power2.inOut",
         onComplete: () => {
-          icon.style.color = "white";
+          icon.style.color = baseColor;
         }
       }, index * 0.4 + 0.5);
     });
@@ -82,7 +87,7 @@ const CircularIconAnimation = () => {
     console.log('GSAP Timeline created:', tl); // Debug log
     
     return tl;
-  }, { scope: containerRef, dependencies: [] });
+  }, { scope: containerRef, dependencies: [isOn, show] });
   
   const labels = ["Curator", "Validator", "Booster", "Supporter", "Caster"];
   const secondaryIcons = [
@@ -92,6 +97,13 @@ const CircularIconAnimation = () => {
     BsCurrencyExchange,   // Supporter
     null                  // Caster (no secondary icon specified)
   ];
+  
+  // Map labels to isOn properties
+  const settingsMap = ["boost", "validate", "impactBoost", "autoFund", null]; // Maps to isOn properties
+  
+  if (!show) {
+    return null;
+  }
   
   return (
     <div 
@@ -111,6 +123,10 @@ const CircularIconAnimation = () => {
     >
       {[...Array(5)].map((_, index) => {
         const SecondaryIcon = secondaryIcons[index];
+        const settingKey = settingsMap[index];
+        const isActive = settingKey ? isOn[settingKey] : false;
+        const iconColor = isActive ? "#0af" : "#ace";
+        
         return (
           <React.Fragment key={`icon-group-${index}`}>
             <div
@@ -134,7 +150,7 @@ const CircularIconAnimation = () => {
                    left: "50%",
                    top: "50%",
                    transform: "translate(-50%, -50%)",
-                   color: "white",
+                   color: isActive ? "#0af" : "white",
                    cursor: "pointer"
                  }}
                />
@@ -148,7 +164,7 @@ const CircularIconAnimation = () => {
                   left: "50%",
                   top: "50%",
                   transform: "translate(-50%, -50%)",
-                  color: "#ace",
+                  color: iconColor,
                   // backgroundColor: "#002244",
                   borderRadius: "50%",
                   padding: "3px",
