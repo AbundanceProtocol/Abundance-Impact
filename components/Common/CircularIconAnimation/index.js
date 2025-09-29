@@ -100,6 +100,24 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
   // Map labels to isOn properties
   const settingsMap = ["impactBoost", "validate", "boost", "autoFund", null]; // Maps to isOn properties
   
+  // Role color scheme based on isOn status
+  const getRoleColor = (index) => {
+    const settingKey = settingsMap[index];
+    const isActive = settingKey ? isOn[settingKey] : false;
+    
+    if (!isActive) return "white"; // White when isOn is false
+    
+    // Lighter shades when isOn is true
+    switch (index) {
+      case 0: return "#66ccff"; // Curator - lighter shade of #00aaff
+      case 1: return "#66ff66"; // Validator - lighter shade of bright green
+      case 2: return "#ff6666"; // Booster - lighter shade of red
+      case 3: return "#ffdd66"; // Supporter - lighter shade of gold
+      case 4: return "#66ccff"; // Caster - lighter shade of #00aaff
+      default: return "white";
+    }
+  };
+  
   // Text descriptions for each role
   const roleDescriptions = [
     "Curators mominate impactful casts on Farcaster. Earn 10% of tips",
@@ -267,7 +285,7 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
             />
             <span
               style={{
-                color: "#ffd700",
+                color: getRoleColor(3), // Supporter color
                 fontSize: "10px",
                 fontWeight: "600"
               }}
@@ -297,7 +315,7 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
             />
             <span
               style={{
-                color: "#ffd700",
+                color: getRoleColor(3), // Supporter color
                 fontSize: "10px",
                 fontWeight: "600"
               }}
@@ -327,7 +345,7 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
             />
             <span
               style={{
-                color: "#ffd700",
+                color: getRoleColor(3), // Supporter color
                 fontSize: "10px",
                 fontWeight: "600"
               }}
@@ -357,7 +375,7 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
             />
             <span
               style={{
-                color: "#ffd700",
+                color: getRoleColor(3), // Supporter color
                 fontSize: "10px",
                 fontWeight: "600"
               }}
@@ -377,11 +395,7 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
             left: "50%",
             top: "50%",
             transform: `translate(-50%, -50%) ${getArrowTransform(selectedIcon)}`,
-            color: (() => {
-              const settingKey = settingsMap[selectedIcon];
-              const isActive = settingKey ? isOn[settingKey] : false;
-              return isActive ? "#0af" : "white";
-            })(),
+            color: getRoleColor(selectedIcon),
             zIndex: 3
           }}
         />
@@ -476,7 +490,7 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
                    left: "50%",
                    top: "50%",
                    transform: "translate(-50%, -50%)",
-                   color: isActive ? "#0af" : "white",
+                   color: getRoleColor(index),
                    cursor: "pointer"
                  }}
                />
@@ -508,9 +522,7 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
         );
       })}
       {labels.map((label, index) => {
-        const settingKey = settingsMap[index];
-        const isActive = settingKey ? isOn[settingKey] : false;
-        const labelColor = isActive ? "#0af" : "#ace";
+        const labelColor = getRoleColor(index);
         
         return (
           <div
