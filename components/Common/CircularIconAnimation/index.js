@@ -3,6 +3,7 @@ import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 import { BsPerson, BsPersonFill, BsStarFill, BsShieldFillCheck, BsSuitHeartFill, BsCurrencyExchange } from "react-icons/bs";
 import { TbArrowBigUp, TbArrowBigUpFilled } from "react-icons/tb";
+import { PiArrowBendUpLeftThin, PiArrowBendUpRightThin } from "react-icons/pi";
 
 // Register GSAP plugin
 gsap.registerPlugin(useGSAP);
@@ -251,7 +252,7 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
               position: "absolute",
               left: "50%",
               top: "50%",
-              transform: "translate(-50%, -50%) translate(-95px, -60px)", // Position near Caster icon
+              transform: "translate(-50%, -50%) translate(-85px, -50px)", // Position near Caster icon
               display: "flex",
               alignItems: "center",
               gap: "5px",
@@ -281,7 +282,7 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
               position: "absolute",
               left: "50%",
               top: "50%",
-              transform: "translate(-50%, -50%) translate(35px, -150px)", // Position near Curator icon
+              transform: "translate(-50%, -50%) translate(25px, -75px)", // Position near Curator icon
               display: "flex",
               alignItems: "center",
               gap: "5px",
@@ -311,7 +312,7 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
               position: "absolute",
               left: "50%",
               top: "50%",
-              transform: "translate(-50%, -50%) translate(160px, -60px)", // Position near Validator icon
+              transform: "translate(-50%, -50%) translate(80px, -40px)", // Position near Validator icon
               display: "flex",
               alignItems: "center",
               gap: "5px",
@@ -341,7 +342,7 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
               position: "absolute",
               left: "50%",
               top: "50%",
-              transform: "translate(-50%, -50%) translate(110px, 85px)", // Position near Booster icon
+              transform: "translate(-50%, -50%) translate(90px, 65px)", // Position near Booster icon
               display: "flex",
               alignItems: "center",
               gap: "5px",
@@ -368,7 +369,7 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
       )}
 
       {/* Arrows for each selected icon pointing toward the center post */}
-      {selectedIcon !== null && (
+      {selectedIcon !== null && ( // Show arrow for all roles including Supporter
         <TbArrowBigUp
           size={24}
           style={{
@@ -384,6 +385,63 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
             zIndex: 3
           }}
         />
+      )}
+
+      {/* Supporter funding arrows (PiArrowBendUpLeftThin at each role position) */}
+      {selectedIcon === 3 && ( // Index 3 is Supporter
+        <>
+          {/* Arrow at Curator position */}
+          <PiArrowBendUpLeftThin
+            size={28}
+            style={{
+              position: "absolute",
+              left: "50%",
+              top: "50%",
+              transform: `translate(-20px, -85px) rotate(60deg)`, // Use Curator's arrow position
+              color: "#ffd700",
+              zIndex: 3
+            }}
+          />
+          
+          {/* Arrow at Validator position */}
+          <PiArrowBendUpRightThin
+            size={28}
+            style={{
+              position: "absolute",
+              left: "50%",
+              top: "50%",
+              transform: `translate(65px, -35px) rotate(10deg)`, // Use Validator's arrow position
+              color: "#ffd700",
+              zIndex: 3
+            }}
+          />
+          
+          {/* Arrow at Booster position */}
+          <PiArrowBendUpRightThin
+            size={28}
+            style={{
+              position: "absolute",
+              left: "50%",
+              top: "50%",
+              transform: `translate(45px, 55px) rotate(80deg)`, // Use Booster's arrow position
+              color: "#ffd700",
+              zIndex: 3
+            }}
+          />
+          
+          {/* Arrow at Caster position */}
+          <PiArrowBendUpLeftThin
+            size={28}
+            style={{
+              position: "absolute",
+              left: "50%",
+              top: "50%",
+              transform: `translate(-95px, -45px) rotate(-10deg)`, // Use Caster's arrow position
+              color: "#ffd700",
+              zIndex: 3
+            }}
+          />
+        </>
       )}
 
       {[...Array(5)].map((_, index) => {
