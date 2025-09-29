@@ -282,7 +282,7 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
               position: "absolute",
               left: "50%",
               top: "50%",
-              transform: "translate(-50%, -50%) translate(25px, -75px)", // Position near Curator icon
+              transform: "translate(-50%, -50%) translate(35px, -75px)", // Position near Curator icon
               display: "flex",
               alignItems: "center",
               gap: "5px",
@@ -397,7 +397,7 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
               position: "absolute",
               left: "50%",
               top: "50%",
-              transform: `translate(-20px, -85px) rotate(60deg)`, // Use Curator's arrow position
+              transform: `translate(-10px, -85px) rotate(60deg)`, // Use Curator's arrow position
               color: "#ffd700",
               zIndex: 3
             }}
