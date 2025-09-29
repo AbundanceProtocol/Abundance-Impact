@@ -140,7 +140,7 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
           height: "72px",
           // backgroundColor: "rgba(255, 255, 255, 0.95)",
           borderRadius: "8px",
-          border: "1px solid #ddd",
+          border: (selectedIcon === 1 || selectedIcon === 2) ? "1px solid #00ff00" : "1px solid #ddd", // Green border for Validator and Booster
           padding: "12px",
           boxShadow: "0 2px 8px #000000",
           zIndex: 5
@@ -186,6 +186,62 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
         />
       </div>
 
+      {/* Role-specific bonus indicator */}
+      {(selectedIcon === 0 || selectedIcon === 1 || selectedIcon === 2) && ( // Curator, Validator, or Booster
+        <div
+          style={{
+            position: "absolute",
+            left: "50%",
+            top: "50%",
+            transform: "translate(-50%, -50%) translate(24px, -20px)", // Position at top-right of post
+            display: "flex",
+            alignItems: "center",
+            gap: "4px",
+            zIndex: 6
+          }}
+        >
+          {selectedIcon === 0 ? ( // Curator
+            <BsStarFill
+              size={14}
+              style={{
+                color: "#0af"
+              }}
+            />
+          ) : ( // Validator or Booster - both use green shield
+            <BsShieldFillCheck
+              size={14}
+              style={{
+                color: "#00ff00"
+              }}
+            />
+          )}
+          <span
+            style={{
+              color: selectedIcon === 0 ? "#0af" : "#00ff00",
+              fontSize: "12px",
+              fontWeight: "600"
+            }}
+          >
+            +15
+          </span>
+        </div>
+      )}
+
+      {/* Booster heart icon (only when Booster is selected) */}
+      {selectedIcon === 2 && ( // Index 2 is Booster
+        <BsSuitHeartFill
+          size={15}
+          style={{
+            position: "absolute",
+            left: "50%",
+            top: "50%",
+            transform: "translate(-50%, -50%) translate(38px, 22px)", // Position at bottom-right of post
+            color: "#ff0000",
+            zIndex: 6
+          }}
+        />
+      )}
+
       {/* Arrows for each selected icon pointing toward the center post */}
       {selectedIcon !== null && (
         <TbArrowBigUp
@@ -195,7 +251,11 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
             left: "50%",
             top: "50%",
             transform: `translate(-50%, -50%) ${getArrowTransform(selectedIcon)}`,
-            color: "#999",
+            color: (() => {
+              const settingKey = settingsMap[selectedIcon];
+              const isActive = settingKey ? isOn[settingKey] : false;
+              return isActive ? "#0af" : "white";
+            })(),
             zIndex: 3
           }}
         />
@@ -259,29 +319,35 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
           </React.Fragment>
         );
       })}
-      {labels.map((label, index) => (
-        <div
-          key={`label-${index}`}
-          className="circle-label"
-          style={{
-            position: "absolute",
-            left: "50%",
-            top: "50%",
-            transform: "translate(-50%, -50%)",
-            color: "#ace",
-            fontSize: "14px",
-            fontWeight: "600",
-            textAlign: "center",
-            pointerEvents: "none",
-            whiteSpace: "nowrap",
-            width: "max-content",
-            // backgroundColor: "rgba(255, 0, 0, 0.2)", // Debug background
-            // border: "1px solid red" // Debug border
-          }}
-        >
-          {label}
-        </div>
-      ))}
+      {labels.map((label, index) => {
+        const settingKey = settingsMap[index];
+        const isActive = settingKey ? isOn[settingKey] : false;
+        const labelColor = isActive ? "#0af" : "#ace";
+        
+        return (
+          <div
+            key={`label-${index}`}
+            className="circle-label"
+            style={{
+              position: "absolute",
+              left: "50%",
+              top: "50%",
+              transform: "translate(-50%, -50%)",
+              color: labelColor,
+              fontSize: "14px",
+              fontWeight: "600",
+              textAlign: "center",
+              pointerEvents: "none",
+              whiteSpace: "nowrap",
+              width: "max-content",
+              // backgroundColor: "rgba(255, 0, 0, 0.2)", // Debug background
+              // border: "1px solid red" // Debug border
+            }}
+          >
+            {label}
+          </div>
+        );
+      })}
       </div>
       
       {/* Text box that changes based on selected icon */}
@@ -298,30 +364,30 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
           height: "110px"
         }}
       >
-        <h3
-          style={{
-            color: "#ace",
-            fontSize: "18px",
-            fontWeight: "600",
-            marginBottom: "10px",
-            marginTop: "0"
-          }}
-        >
-          {selectedIcon !== null ? labels[selectedIcon] : "Select a Role"}
-        </h3>
-        <p
-          style={{
-            color: "white",
-            fontSize: "14px",
-            lineHeight: "1.5",
-            margin: "0"
-          }}
-        >
-          {selectedIcon !== null 
-            ? roleDescriptions[selectedIcon] 
-            : "Click on any icon above to learn more about that role."
-          }
-        </p>
+          <h3
+            style={{
+              color: "#ace",
+              fontSize: "18px",
+              fontWeight: "600",
+              marginBottom: "10px",
+              marginTop: "0"
+            }}
+          >
+            {selectedIcon !== null ? labels[selectedIcon] : "Select a Role"}
+          </h3>
+          <p
+            style={{
+              color: "white",
+              fontSize: "14px",
+              lineHeight: "1.5",
+              margin: "0"
+            }}
+          >
+            {selectedIcon !== null 
+              ? roleDescriptions[selectedIcon] 
+              : "Click on any icon above to learn more about that role."
+            }
+          </p>
       </div>
     </div>
   );
