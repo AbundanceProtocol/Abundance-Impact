@@ -97,7 +97,7 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
   ];
   
   // Map labels to isOn properties
-  const settingsMap = ["boost", "validate", "impactBoost", "autoFund", null]; // Maps to isOn properties
+  const settingsMap = ["impactBoost", "validate", "boost", "autoFund", null]; // Maps to isOn properties
   
   // Text descriptions for each role
   const roleDescriptions = [
@@ -140,7 +140,7 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
           height: "72px",
           // backgroundColor: "rgba(255, 255, 255, 0.95)",
           borderRadius: "8px",
-          border: "1px solid #ddd",
+          border: (selectedIcon === 1 || selectedIcon === 2 || selectedIcon === 3) ? "1px solid #00ff00" : "1px solid #ddd", // Green border for Validator, Booster, and Supporter
           padding: "12px",
           boxShadow: "0 2px 8px #000000",
           zIndex: 5
@@ -186,6 +186,187 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
         />
       </div>
 
+      {/* Role-specific bonus indicator */}
+      {(selectedIcon === 0 || selectedIcon === 1 || selectedIcon === 2 || selectedIcon === 3) && ( // Curator, Validator, Booster, or Supporter
+        <div
+          style={{
+            position: "absolute",
+            left: "50%",
+            top: "50%",
+            transform: "translate(-50%, -50%) translate(24px, -20px)", // Position at top-right of post
+            display: "flex",
+            alignItems: "center",
+            gap: "4px",
+            zIndex: 6
+          }}
+        >
+          {selectedIcon === 0 ? ( // Curator
+            <BsStarFill
+              size={14}
+              style={{
+                color: "#0af"
+              }}
+            />
+          ) : ( // Validator or Booster - both use green shield
+            <BsShieldFillCheck
+              size={14}
+              style={{
+                color: "#00ff00"
+              }}
+            />
+          )}
+          <span
+            style={{
+              color: selectedIcon === 0 ? "#0af" : "#00ff00",
+              fontSize: "12px",
+              fontWeight: "600"
+            }}
+          >
+            +15
+          </span>
+        </div>
+      )}
+
+      {/* Booster heart icon (when Booster or Supporter is selected) */}
+      {(selectedIcon === 2 || selectedIcon === 3) && ( // Index 2 is Booster, Index 3 is Supporter
+        <BsSuitHeartFill
+          size={15}
+          style={{
+            position: "absolute",
+            left: "50%",
+            top: "50%",
+            transform: "translate(-50%, -50%) translate(38px, 22px)", // Position at bottom-right of post
+            color: "#ff0000",
+            zIndex: 6
+          }}
+        />
+      )}
+
+      {/* Supporter funding indicators (only when Supporter is selected) */}
+      {selectedIcon === 3 && ( // Index 3 is Supporter
+        <>
+          {/* Caster funding - 70% */}
+          <div
+            style={{
+              position: "absolute",
+              left: "50%",
+              top: "50%",
+              transform: "translate(-50%, -50%) translate(-95px, -60px)", // Position near Caster icon
+              display: "flex",
+              alignItems: "center",
+              gap: "5px",
+              zIndex: 6
+            }}
+          >
+            <BsCurrencyExchange
+              size={12}
+              style={{
+                color: "#ffd700"
+              }}
+            />
+            <span
+              style={{
+                color: "#ffd700",
+                fontSize: "10px",
+                fontWeight: "600"
+              }}
+            >
+              70%
+            </span>
+          </div>
+
+          {/* Curator funding - 10% */}
+          <div
+            style={{
+              position: "absolute",
+              left: "50%",
+              top: "50%",
+              transform: "translate(-50%, -50%) translate(35px, -150px)", // Position near Curator icon
+              display: "flex",
+              alignItems: "center",
+              gap: "5px",
+              zIndex: 6
+            }}
+          >
+            <BsCurrencyExchange
+              size={12}
+              style={{
+                color: "#ffd700"
+              }}
+            />
+            <span
+              style={{
+                color: "#ffd700",
+                fontSize: "10px",
+                fontWeight: "600"
+              }}
+            >
+              10%
+            </span>
+          </div>
+
+          {/* Validator funding - 10% */}
+          <div
+            style={{
+              position: "absolute",
+              left: "50%",
+              top: "50%",
+              transform: "translate(-50%, -50%) translate(160px, -60px)", // Position near Validator icon
+              display: "flex",
+              alignItems: "center",
+              gap: "5px",
+              zIndex: 6
+            }}
+          >
+            <BsCurrencyExchange
+              size={12}
+              style={{
+                color: "#ffd700"
+              }}
+            />
+            <span
+              style={{
+                color: "#ffd700",
+                fontSize: "10px",
+                fontWeight: "600"
+              }}
+            >
+              10%
+            </span>
+          </div>
+
+          {/* Booster funding - 10% */}
+          <div
+            style={{
+              position: "absolute",
+              left: "50%",
+              top: "50%",
+              transform: "translate(-50%, -50%) translate(110px, 85px)", // Position near Booster icon
+              display: "flex",
+              alignItems: "center",
+              gap: "5px",
+              zIndex: 6
+            }}
+          >
+            <BsCurrencyExchange
+              size={12}
+              style={{
+                color: "#ffd700"
+              }}
+            />
+            <span
+              style={{
+                color: "#ffd700",
+                fontSize: "10px",
+                fontWeight: "600"
+              }}
+            >
+              10%
+            </span>
+          </div>
+        </>
+      )}
+
       {/* Arrows for each selected icon pointing toward the center post */}
       {selectedIcon !== null && (
         <TbArrowBigUp
@@ -195,7 +376,11 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
             left: "50%",
             top: "50%",
             transform: `translate(-50%, -50%) ${getArrowTransform(selectedIcon)}`,
-            color: "#999",
+            color: (() => {
+              const settingKey = settingsMap[selectedIcon];
+              const isActive = settingKey ? isOn[settingKey] : false;
+              return isActive ? "#0af" : "white";
+            })(),
             zIndex: 3
           }}
         />
@@ -247,7 +432,12 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
                   left: "50%",
                   top: "50%",
                   transform: "translate(-50%, -50%)",
-                  color: iconColor,
+                  color: (() => {
+                    if (index === 1) return "#00ff00"; // Validator shield - always bright green
+                    if (index === 2) return "#ff0000"; // Booster heart - always red
+                    if (index === 3) return "#ffd700"; // Supporter currency - always gold
+                    return iconColor; // Default color for others
+                  })(),
                   backgroundColor: "#002244",
                   borderRadius: "50%",
                   padding: "3px",
@@ -259,29 +449,35 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
           </React.Fragment>
         );
       })}
-      {labels.map((label, index) => (
-        <div
-          key={`label-${index}`}
-          className="circle-label"
-          style={{
-            position: "absolute",
-            left: "50%",
-            top: "50%",
-            transform: "translate(-50%, -50%)",
-            color: "#ace",
-            fontSize: "14px",
-            fontWeight: "600",
-            textAlign: "center",
-            pointerEvents: "none",
-            whiteSpace: "nowrap",
-            width: "max-content",
-            // backgroundColor: "rgba(255, 0, 0, 0.2)", // Debug background
-            // border: "1px solid red" // Debug border
-          }}
-        >
-          {label}
-        </div>
-      ))}
+      {labels.map((label, index) => {
+        const settingKey = settingsMap[index];
+        const isActive = settingKey ? isOn[settingKey] : false;
+        const labelColor = isActive ? "#0af" : "#ace";
+        
+        return (
+          <div
+            key={`label-${index}`}
+            className="circle-label"
+            style={{
+              position: "absolute",
+              left: "50%",
+              top: "50%",
+              transform: "translate(-50%, -50%)",
+              color: labelColor,
+              fontSize: "14px",
+              fontWeight: "600",
+              textAlign: "center",
+              pointerEvents: "none",
+              whiteSpace: "nowrap",
+              width: "max-content",
+              // backgroundColor: "rgba(255, 0, 0, 0.2)", // Debug background
+              // border: "1px solid red" // Debug border
+            }}
+          >
+            {label}
+          </div>
+        );
+      })}
       </div>
       
       {/* Text box that changes based on selected icon */}
@@ -298,30 +494,30 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
           height: "110px"
         }}
       >
-        <h3
-          style={{
-            color: "#ace",
-            fontSize: "18px",
-            fontWeight: "600",
-            marginBottom: "10px",
-            marginTop: "0"
-          }}
-        >
-          {selectedIcon !== null ? labels[selectedIcon] : "Select a Role"}
-        </h3>
-        <p
-          style={{
-            color: "white",
-            fontSize: "14px",
-            lineHeight: "1.5",
-            margin: "0"
-          }}
-        >
-          {selectedIcon !== null 
-            ? roleDescriptions[selectedIcon] 
-            : "Click on any icon above to learn more about that role."
-          }
-        </p>
+          <h3
+            style={{
+              color: "#ace",
+              fontSize: "18px",
+              fontWeight: "600",
+              marginBottom: "10px",
+              marginTop: "0"
+            }}
+          >
+            {selectedIcon !== null ? labels[selectedIcon] : "Select a Role"}
+          </h3>
+          <p
+            style={{
+              color: "white",
+              fontSize: "14px",
+              lineHeight: "1.5",
+              margin: "0"
+            }}
+          >
+            {selectedIcon !== null 
+              ? roleDescriptions[selectedIcon] 
+              : "Click on any icon above to learn more about that role."
+            }
+          </p>
       </div>
     </div>
   );
