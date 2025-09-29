@@ -97,7 +97,7 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
   ];
   
   // Map labels to isOn properties
-  const settingsMap = ["boost", "validate", "impactBoost", "autoFund", null]; // Maps to isOn properties
+  const settingsMap = ["impactBoost", "validate", "boost", "autoFund", null]; // Maps to isOn properties
   
   // Text descriptions for each role
   const roleDescriptions = [
@@ -140,7 +140,7 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
           height: "72px",
           // backgroundColor: "rgba(255, 255, 255, 0.95)",
           borderRadius: "8px",
-          border: (selectedIcon === 1 || selectedIcon === 2) ? "1px solid #00ff00" : "1px solid #ddd", // Green border for Validator and Booster
+          border: (selectedIcon === 1 || selectedIcon === 2 || selectedIcon === 3) ? "1px solid #00ff00" : "1px solid #ddd", // Green border for Validator, Booster, and Supporter
           padding: "12px",
           boxShadow: "0 2px 8px #000000",
           zIndex: 5
@@ -187,7 +187,7 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
       </div>
 
       {/* Role-specific bonus indicator */}
-      {(selectedIcon === 0 || selectedIcon === 1 || selectedIcon === 2) && ( // Curator, Validator, or Booster
+      {(selectedIcon === 0 || selectedIcon === 1 || selectedIcon === 2 || selectedIcon === 3) && ( // Curator, Validator, Booster, or Supporter
         <div
           style={{
             position: "absolute",
@@ -227,8 +227,8 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
         </div>
       )}
 
-      {/* Booster heart icon (only when Booster is selected) */}
-      {selectedIcon === 2 && ( // Index 2 is Booster
+      {/* Booster heart icon (when Booster or Supporter is selected) */}
+      {(selectedIcon === 2 || selectedIcon === 3) && ( // Index 2 is Booster, Index 3 is Supporter
         <BsSuitHeartFill
           size={15}
           style={{
@@ -240,6 +240,131 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
             zIndex: 6
           }}
         />
+      )}
+
+      {/* Supporter funding indicators (only when Supporter is selected) */}
+      {selectedIcon === 3 && ( // Index 3 is Supporter
+        <>
+          {/* Caster funding - 70% */}
+          <div
+            style={{
+              position: "absolute",
+              left: "50%",
+              top: "50%",
+              transform: "translate(-50%, -50%) translate(-95px, -60px)", // Position near Caster icon
+              display: "flex",
+              alignItems: "center",
+              gap: "5px",
+              zIndex: 6
+            }}
+          >
+            <BsCurrencyExchange
+              size={12}
+              style={{
+                color: "#ffd700"
+              }}
+            />
+            <span
+              style={{
+                color: "#ffd700",
+                fontSize: "10px",
+                fontWeight: "600"
+              }}
+            >
+              70%
+            </span>
+          </div>
+
+          {/* Curator funding - 10% */}
+          <div
+            style={{
+              position: "absolute",
+              left: "50%",
+              top: "50%",
+              transform: "translate(-50%, -50%) translate(35px, -150px)", // Position near Curator icon
+              display: "flex",
+              alignItems: "center",
+              gap: "5px",
+              zIndex: 6
+            }}
+          >
+            <BsCurrencyExchange
+              size={12}
+              style={{
+                color: "#ffd700"
+              }}
+            />
+            <span
+              style={{
+                color: "#ffd700",
+                fontSize: "10px",
+                fontWeight: "600"
+              }}
+            >
+              10%
+            </span>
+          </div>
+
+          {/* Validator funding - 10% */}
+          <div
+            style={{
+              position: "absolute",
+              left: "50%",
+              top: "50%",
+              transform: "translate(-50%, -50%) translate(160px, -60px)", // Position near Validator icon
+              display: "flex",
+              alignItems: "center",
+              gap: "5px",
+              zIndex: 6
+            }}
+          >
+            <BsCurrencyExchange
+              size={12}
+              style={{
+                color: "#ffd700"
+              }}
+            />
+            <span
+              style={{
+                color: "#ffd700",
+                fontSize: "10px",
+                fontWeight: "600"
+              }}
+            >
+              10%
+            </span>
+          </div>
+
+          {/* Booster funding - 10% */}
+          <div
+            style={{
+              position: "absolute",
+              left: "50%",
+              top: "50%",
+              transform: "translate(-50%, -50%) translate(110px, 85px)", // Position near Booster icon
+              display: "flex",
+              alignItems: "center",
+              gap: "5px",
+              zIndex: 6
+            }}
+          >
+            <BsCurrencyExchange
+              size={12}
+              style={{
+                color: "#ffd700"
+              }}
+            />
+            <span
+              style={{
+                color: "#ffd700",
+                fontSize: "10px",
+                fontWeight: "600"
+              }}
+            >
+              10%
+            </span>
+          </div>
+        </>
       )}
 
       {/* Arrows for each selected icon pointing toward the center post */}
@@ -307,7 +432,12 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
                   left: "50%",
                   top: "50%",
                   transform: "translate(-50%, -50%)",
-                  color: iconColor,
+                  color: (() => {
+                    if (index === 1) return "#00ff00"; // Validator shield - always bright green
+                    if (index === 2) return "#ff0000"; // Booster heart - always red
+                    if (index === 3) return "#ffd700"; // Supporter currency - always gold
+                    return iconColor; // Default color for others
+                  })(),
                   backgroundColor: "#002244",
                   borderRadius: "50%",
                   padding: "3px",
