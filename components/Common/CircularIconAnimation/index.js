@@ -9,6 +9,18 @@ gsap.registerPlugin(useGSAP);
 // Circular Icon Animation Component
 const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
   const containerRef = useRef(null);
+  const [selectedIcon, setSelectedIcon] = React.useState(null);
+  
+  const handleIconClick = (index) => {
+    setSelectedIcon(prev => {
+      // If clicking the same icon, deselect it
+      if (prev === index) {
+        return null;
+      }
+      // Otherwise, select the new icon (deselecting any previous one)
+      return index;
+    });
+  };
   
   useGSAP(() => {
     if (!show) return;
@@ -58,35 +70,8 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
       }
     });
     
-    // Create the animation timeline
-    const tl = gsap.timeline({ repeat: -1 });
-    
-    // Animate each icon sequentially - color only
-    const icons = containerRef.current.querySelectorAll('.circle-icon');
-    icons.forEach((icon, index) => {
-      const settingKey = settingsMap[index];
-      const isActive = settingKey ? isOn[settingKey] : false;
-      const baseColor = isActive ? "#0af" : "white";
-      
-      tl.to(icon, {
-        duration: 0.5,
-        ease: "power2.inOut",
-        onStart: () => {
-          icon.style.color = "#ace";
-        }
-      }, index * 0.4)
-      .to(icon, {
-        duration: 0.5,
-        ease: "power2.inOut",
-        onComplete: () => {
-          icon.style.color = baseColor;
-        }
-      }, index * 0.4 + 0.5);
-    });
-    
-    console.log('GSAP Timeline created:', tl); // Debug log
-    
-    return tl;
+    // Static positioning only - no animation
+    console.log('Static circular layout created'); // Debug log
   }, { scope: containerRef, dependencies: [isOn, show] });
   
   const labels = ["Curator", "Validator", "Booster", "Supporter", "Caster"];
@@ -101,31 +86,43 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
   // Map labels to isOn properties
   const settingsMap = ["boost", "validate", "impactBoost", "autoFund", null]; // Maps to isOn properties
   
+  // Text descriptions for each role
+  const roleDescriptions = [
+    "Curators mominate impactful casts on Farcaster. Earn 10% of tips",
+    "Validators ensure the quality of nominations & earn 7% of tips",
+    "Boosters auto-like validated casts & earn 7% of tips",
+    "Supporters multi-tip impactful casters",
+    "Casters can focus on creating valuable content, art, code, etc."
+  ];
+  
   if (!show) {
     return null;
   }
   
   return (
-    <div 
-      ref={containerRef}
-      style={{
-        position: "relative",
-        width: "320px",
-        height: "320px",
-        margin: "20px auto",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        border: "0px solid #ace",
-        // borderRadius: "50%",
-        // backgroundColor: "rgba(0, 34, 68, 0.3)"
-      }}
-    >
+    <div>
+      <div 
+        ref={containerRef}
+        style={{
+          position: "relative",
+          width: "320px",
+          height: "320px",
+          margin: "20px auto",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          border: "0px solid #ace",
+          // borderRadius: "50%",
+          // backgroundColor: "rgba(0, 34, 68, 0.3)"
+        }}
+      >
       {[...Array(5)].map((_, index) => {
         const SecondaryIcon = secondaryIcons[index];
         const settingKey = settingsMap[index];
         const isActive = settingKey ? isOn[settingKey] : false;
         const iconColor = isActive ? "#0af" : "#ace";
+        const isSelected = selectedIcon === index;
+        const PersonIcon = isSelected ? BsPersonFill : BsPerson;
         
         return (
           <React.Fragment key={`icon-group-${index}`}>
@@ -142,9 +139,10 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
                 height: "40px"
               }}
             >
-               <BsPerson
+               <PersonIcon
                  className="circle-icon"
                  size={36}
+                 onClick={() => handleIconClick(index)}
                  style={{
                    position: "absolute",
                    left: "50%",
@@ -165,10 +163,10 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
                   top: "50%",
                   transform: "translate(-50%, -50%)",
                   color: iconColor,
-                  // backgroundColor: "#002244",
+                  backgroundColor: "#002244",
                   borderRadius: "50%",
                   padding: "3px",
-                  border: "0px solid #ace",
+                  border: "1px solid #ace",
                   zIndex: 10
                 }}
               />
@@ -199,6 +197,47 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
           {label}
         </div>
       ))}
+      </div>
+      
+      {/* Text box that changes based on selected icon */}
+      <div
+        style={{
+          marginTop: "30px",
+          padding: "10px 25px",
+          backgroundColor: "rgba(0, 34, 68, 0.8)",
+          border: "1px solid #ace",
+          borderRadius: "8px",
+          maxWidth: "400px",
+          margin: "10px 25px 50px 25px",
+          textAlign: "center",
+          height: "110px"
+        }}
+      >
+        <h3
+          style={{
+            color: "#ace",
+            fontSize: "18px",
+            fontWeight: "600",
+            marginBottom: "10px",
+            marginTop: "0"
+          }}
+        >
+          {selectedIcon !== null ? labels[selectedIcon] : "Select a Role"}
+        </h3>
+        <p
+          style={{
+            color: "white",
+            fontSize: "14px",
+            lineHeight: "1.5",
+            margin: "0"
+          }}
+        >
+          {selectedIcon !== null 
+            ? roleDescriptions[selectedIcon] 
+            : "Click on any icon above to learn more about that role."
+          }
+        </p>
+      </div>
     </div>
   );
 };
