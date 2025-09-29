@@ -67,9 +67,11 @@ import Spinner from "../../components/Common/Spinner";
 import NeynarSigninButton from "../../components/Layout/Modals/Signin";
 import Settings from "./settings";
 import { formatNum } from "../../utils/utils";
+import CircularIconAnimation from "../../components/Common/CircularIconAnimation";
 // import LoginButton from '../../components/Layout/Modals/FrontSignin';
 
 const version = process.env.NEXT_PUBLIC_VERSION;
+
 
 export default function Homepage({ test }) {
   const ref2 = useRef(null);
@@ -876,6 +878,13 @@ export default function Homepage({ test }) {
         ></div>
       )}
 
+
+        {/* GSAP ANIMATION */}
+        <CircularIconAnimation isOn={isOn} fid={fid} show={fid && fid == 9326} />
+
+
+
+
       {/* LOGIN */}
 
       {/* {(version == '2.0' || adminTest) && (<div className='flex-col' style={{backgroundColor: ''}}>
@@ -1015,6 +1024,7 @@ export default function Homepage({ test }) {
       </div> */}
 
       {/* Status Icons Row */}
+
       <div className='flex-row' style={{width: '100%', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', margin: '10px 0 0 0'}}>
         <div className='flex-row' style={{gap: '0.4rem', border: `1px solid #0af`, padding: '0 8px 0 0', borderRadius: '8px'}}>
 
