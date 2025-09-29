@@ -2,6 +2,7 @@ import React, { useRef } from "react";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 import { BsPerson, BsPersonFill, BsStarFill, BsShieldFillCheck, BsSuitHeartFill, BsCurrencyExchange } from "react-icons/bs";
+import { TbArrowBigUp, TbArrowBigUpFilled } from "react-icons/tb";
 
 // Register GSAP plugin
 gsap.registerPlugin(useGSAP);
@@ -9,6 +10,30 @@ gsap.registerPlugin(useGSAP);
 // Circular Icon Animation Component
 const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
   const containerRef = useRef(null);
+  const [selectedIcon, setSelectedIcon] = React.useState(null);
+  
+  const handleIconClick = (index) => {
+    setSelectedIcon(prev => {
+      // If clicking the same icon, deselect it
+      if (prev === index) {
+        return null;
+      }
+      // Otherwise, select the new icon (deselecting any previous one)
+      return index;
+    });
+  };
+
+  // Function to get arrow transform based on icon position
+  const getArrowTransform = (iconIndex) => {
+    const transforms = [
+      "translate(0px, -70px) rotate(180deg)",    // Curator (top) - arrow points down
+      "translate(80px, -20px) rotate(252deg)",  // Validator (top-right) - arrow points down-left
+      "translate(50px, 70px) rotate(324deg)",  // Booster (bottom-right) - arrow points up-left
+      "translate(-50px, 70px) rotate(36deg)", // Supporter (bottom-left) - arrow points up-right
+      "translate(-80px, -20px) rotate(108deg)" // Caster (left) - arrow points right
+    ];
+    return transforms[iconIndex] || "";
+  };
   
   useGSAP(() => {
     if (!show) return;
@@ -58,35 +83,8 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
       }
     });
     
-    // Create the animation timeline
-    const tl = gsap.timeline({ repeat: -1 });
-    
-    // Animate each icon sequentially - color only
-    const icons = containerRef.current.querySelectorAll('.circle-icon');
-    icons.forEach((icon, index) => {
-      const settingKey = settingsMap[index];
-      const isActive = settingKey ? isOn[settingKey] : false;
-      const baseColor = isActive ? "#0af" : "white";
-      
-      tl.to(icon, {
-        duration: 0.5,
-        ease: "power2.inOut",
-        onStart: () => {
-          icon.style.color = "#ace";
-        }
-      }, index * 0.4)
-      .to(icon, {
-        duration: 0.5,
-        ease: "power2.inOut",
-        onComplete: () => {
-          icon.style.color = baseColor;
-        }
-      }, index * 0.4 + 0.5);
-    });
-    
-    console.log('GSAP Timeline created:', tl); // Debug log
-    
-    return tl;
+    // Static positioning only - no animation
+    console.log('Static circular layout created'); // Debug log
   }, { scope: containerRef, dependencies: [isOn, show] });
   
   const labels = ["Curator", "Validator", "Booster", "Supporter", "Caster"];
@@ -101,31 +99,115 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
   // Map labels to isOn properties
   const settingsMap = ["boost", "validate", "impactBoost", "autoFund", null]; // Maps to isOn properties
   
+  // Text descriptions for each role
+  const roleDescriptions = [
+    "Curators mominate impactful casts on Farcaster. Earn 10% of tips",
+    "Validators ensure the quality of nominations & earn 7% of tips",
+    "Boosters auto-like validated casts & earn 7% of tips",
+    "Supporters multi-tip impactful casters",
+    "Casters can focus on creating valuable content, art, code, etc."
+  ];
+  
   if (!show) {
     return null;
   }
   
   return (
-    <div 
-      ref={containerRef}
-      style={{
-        position: "relative",
-        width: "320px",
-        height: "320px",
-        margin: "20px auto",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        border: "0px solid #ace",
-        // borderRadius: "50%",
-        // backgroundColor: "rgba(0, 34, 68, 0.3)"
-      }}
-    >
+    <div>
+      <div 
+        ref={containerRef}
+        style={{
+          position: "relative",
+          width: "320px",
+          height: "320px",
+          margin: "0px auto 10px auto",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          border: "0px solid #ace",
+          // borderRadius: "50%",
+          // backgroundColor: "rgba(0, 34, 68, 0.3)"
+        }}
+      >
+      {/* Abstract Social Media Post in the center */}
+      <div
+        style={{
+          position: "absolute",
+          left: "50%",
+          top: "50%",
+          transform: "translate(-50%, -50%)",
+          width: "108px",
+          height: "72px",
+          // backgroundColor: "rgba(255, 255, 255, 0.95)",
+          borderRadius: "8px",
+          border: "1px solid #ddd",
+          padding: "12px",
+          boxShadow: "0 2px 8px #000000",
+          zIndex: 5
+        }}
+      >
+        {/* User avatar circle */}
+        <div
+          style={{
+            width: "14px",
+            height: "14px",
+            backgroundColor: "#666",
+            borderRadius: "50%",
+            marginBottom: "8px"
+          }}
+        />
+        
+        {/* Text lines */}
+        <div
+          style={{
+            width: "100%",
+            height: "6px",
+            backgroundColor: "#333",
+            borderRadius: "3px",
+            marginBottom: "4px"
+          }}
+        />
+        <div
+          style={{
+            width: "85%",
+            height: "6px",
+            backgroundColor: "#333",
+            borderRadius: "3px",
+            marginBottom: "4px"
+          }}
+        />
+        <div
+          style={{
+            width: "70%",
+            height: "6px",
+            backgroundColor: "#333",
+            borderRadius: "3px"
+          }}
+        />
+      </div>
+
+      {/* Arrows for each selected icon pointing toward the center post */}
+      {selectedIcon !== null && (
+        <TbArrowBigUp
+          size={24}
+          style={{
+            position: "absolute",
+            left: "50%",
+            top: "50%",
+            transform: `translate(-50%, -50%) ${getArrowTransform(selectedIcon)}`,
+            color: "#999",
+            zIndex: 3
+          }}
+        />
+      )}
+
       {[...Array(5)].map((_, index) => {
         const SecondaryIcon = secondaryIcons[index];
         const settingKey = settingsMap[index];
         const isActive = settingKey ? isOn[settingKey] : false;
         const iconColor = isActive ? "#0af" : "#ace";
+        const isSelected = selectedIcon === index;
+        const PersonIcon = isSelected ? BsPersonFill : BsPerson;
         
         return (
           <React.Fragment key={`icon-group-${index}`}>
@@ -142,9 +224,10 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
                 height: "40px"
               }}
             >
-               <BsPerson
+               <PersonIcon
                  className="circle-icon"
                  size={36}
+                 onClick={() => handleIconClick(index)}
                  style={{
                    position: "absolute",
                    left: "50%",
@@ -165,10 +248,10 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
                   top: "50%",
                   transform: "translate(-50%, -50%)",
                   color: iconColor,
-                  // backgroundColor: "#002244",
+                  backgroundColor: "#002244",
                   borderRadius: "50%",
                   padding: "3px",
-                  border: "0px solid #ace",
+                  border: "1px solid #ace",
                   zIndex: 10
                 }}
               />
@@ -199,6 +282,47 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
           {label}
         </div>
       ))}
+      </div>
+      
+      {/* Text box that changes based on selected icon */}
+      <div
+        style={{
+          marginTop: "30px",
+          padding: "10px 25px",
+          backgroundColor: "rgba(0, 34, 68, 0.8)",
+          border: "1px solid #ace",
+          borderRadius: "8px",
+          maxWidth: "400px",
+          margin: "10px 25px 50px 25px",
+          textAlign: "center",
+          height: "110px"
+        }}
+      >
+        <h3
+          style={{
+            color: "#ace",
+            fontSize: "18px",
+            fontWeight: "600",
+            marginBottom: "10px",
+            marginTop: "0"
+          }}
+        >
+          {selectedIcon !== null ? labels[selectedIcon] : "Select a Role"}
+        </h3>
+        <p
+          style={{
+            color: "white",
+            fontSize: "14px",
+            lineHeight: "1.5",
+            margin: "0"
+          }}
+        >
+          {selectedIcon !== null 
+            ? roleDescriptions[selectedIcon] 
+            : "Click on any icon above to learn more about that role."
+          }
+        </p>
+      </div>
     </div>
   );
 };
