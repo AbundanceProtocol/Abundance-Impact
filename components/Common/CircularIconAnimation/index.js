@@ -103,7 +103,7 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
   ];
   
   // Map labels to isOn properties
-  const settingsMap = ["impactBoost", "validate", "boost", "autoFund", null]; // Maps to isOn properties
+  const settingsMap = ["signal", "validate", "boost", "autoFund", null]; // Maps to isOn properties
   
   // Role color scheme based on isOn status
   const getRoleColor = (index) => {
