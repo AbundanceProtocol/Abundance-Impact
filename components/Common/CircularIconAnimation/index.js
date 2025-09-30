@@ -12,7 +12,7 @@ gsap.registerPlugin(useGSAP);
 // Circular Icon Animation Component
 const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
   const containerRef = useRef(null);
-  const { selectedRole, setSelectedRole } = useContext(AccountContext);
+  const { selectedRole, setSelectedRole, autoRoleCycle, setAutoRoleCycle } = useContext(AccountContext);
   const [selectedIcon, setSelectedIcon] = React.useState(selectedRole);
   
   // Sync local state with context
@@ -21,6 +21,8 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
   }, [selectedRole]);
   
   const handleIconClick = (index) => {
+    // Stop auto-rotation on any user interaction
+    if (autoRoleCycle) setAutoRoleCycle(false);
     setSelectedIcon(prev => {
       const newSelection = prev === index ? null : index;
       // Update the context with the new selection
@@ -28,6 +30,34 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
       return newSelection;
     });
   };
+
+  // Auto-rotation: start with Caster (animation index 4) then clockwise every 2s
+  React.useEffect(() => {
+    if (!autoRoleCycle) return; // Do not start if disabled
+    // Clockwise order in animation indices: [4:Caster, 0:Curator, 1:Validator, 2:Booster, 3:Supporter]
+    const order = [4, 0, 1, 2, 3];
+    // current position in order based on selectedIcon if present
+    let idx = selectedIcon != null ? Math.max(0, order.indexOf(selectedIcon)) : 0;
+
+    // Immediately set first if nothing selected
+    if (selectedIcon == null) {
+      setSelectedRole(order[idx]);
+      setSelectedIcon(order[idx]);
+    }
+
+    const interval = setInterval(() => {
+      if (!autoRoleCycle) {
+        clearInterval(interval);
+        return;
+      }
+      idx = (idx + 1) % order.length;
+      const next = order[idx];
+      setSelectedRole(next);
+      setSelectedIcon(next);
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [autoRoleCycle]);
 
   // Function to get arrow transform based on icon position
   const getArrowTransform = (iconIndex) => {

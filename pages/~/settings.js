@@ -32,7 +32,7 @@ const version = process.env.NEXT_PUBLIC_VERSION
 export default function Settings({test, rewards, onSettingsChange}) {
   const ref2 = useRef(null)
   const [ref, inView] = useInView()
-  const { LoginPopup, checkEcoEligibility, ecoData, points, setPoints, isLogged, setShowLogin, setIsLogged, fid, setFid, getRemainingBalances, isMiniApp, userBalances, setIsMiniApp, LogoutPopup, userInfo, setUserInfo, setPanelOpen, setPanelTarget, adminTest, setAdminTest, isOn, setIsOn, isSignedIn, setIsSignedIn, selectedRole } = useContext(AccountContext)
+  const { LoginPopup, checkEcoEligibility, ecoData, points, setPoints, isLogged, setShowLogin, setIsLogged, fid, setFid, getRemainingBalances, isMiniApp, userBalances, setIsMiniApp, LogoutPopup, userInfo, setUserInfo, setPanelOpen, setPanelTarget, adminTest, setAdminTest, isOn, setIsOn, isSignedIn, setIsSignedIn, selectedRole, setAutoRoleCycle } = useContext(AccountContext)
   const [screenWidth, setScreenWidth] = useState(undefined)
   const [screenHeight, setScreenHeight] = useState(undefined)
   const [textMax, setTextMax] = useState('562px')
@@ -836,7 +836,10 @@ export default function Settings({test, rewards, onSettingsChange}) {
 
           {/* NOMINATE */}
 
-          {selectedRole === 0 && (<div className='flex-col' style={{backgroundColor: ''}}>
+          {selectedRole === 0 && (<div 
+            onClick={() => { setAutoRoleCycle(false) }}
+            className='flex-col' style={{backgroundColor: ''}}
+          >
 
 
             {/* <div className='flex-row' style={{padding: '40px 18px 18px 18px', color: '#ace', fontSize: '20px', gap: '0.75rem', position: 'relative', fontWeight: '600', justifyContent: 'center'}}>
@@ -1080,7 +1083,9 @@ export default function Settings({test, rewards, onSettingsChange}) {
 
           {/* VALIDATE */}
 
-          {selectedRole === 1 && (<div className='flex-col' style={{backgroundColor: ''}}>
+          {selectedRole === 1 && (<div 
+            onClick={() => { setAutoRoleCycle(false) }}
+            className='flex-col' style={{backgroundColor: ''}}>
 
             <div 
               className='shadow flex-col'
@@ -1263,7 +1268,9 @@ export default function Settings({test, rewards, onSettingsChange}) {
 
           {/* BOOST */}
 
-          {selectedRole === 2 && (<div className='flex-col' style={{backgroundColor: ''}}>
+          {selectedRole === 2 && (<div 
+            onClick={() => { setAutoRoleCycle(false) }}
+            className='flex-col' style={{backgroundColor: ''}}>
 
             <div className='shadow flex-col'
               style={{
@@ -1510,7 +1517,9 @@ export default function Settings({test, rewards, onSettingsChange}) {
 
           {/* CASTER */}
 
-          {selectedRole === 4 && (<div className='flex-col' style={{backgroundColor: ''}}>
+          {selectedRole === 4 && (<div 
+            onClick={() => { setAutoRoleCycle(false) }}
+            className='flex-col' style={{backgroundColor: ''}}>
 
             <div className='shadow flex-col'
               style={{

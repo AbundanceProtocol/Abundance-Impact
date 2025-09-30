@@ -111,6 +111,8 @@ export default function Homepage({ test }) {
     setTippingCeloStreak,
     streaksLoading, 
     setStreaksLoading,
+    autoRoleCycle,
+    setAutoRoleCycle,
   } = useContext(AccountContext);
   const [screenWidth, setScreenWidth] = useState(undefined);
   const [screenHeight, setScreenHeight] = useState(undefined);
@@ -179,6 +181,7 @@ export default function Homepage({ test }) {
   }, [fid, isLogged]);
 
   useEffect(() => {
+    setAutoRoleCycle(true);
     if (userBalances.impact == 0) {
       (async () => {
         const { sdk } = await import('@farcaster/miniapp-sdk')
@@ -1142,7 +1145,7 @@ export default function Homepage({ test }) {
       justifyContent: 'center'
     }}>
     <button
-      onClick={() => setSelectedRole(4)}
+      onClick={() => { setAutoRoleCycle(false); setSelectedRole(4); }}
       className="shadow"
       style={{
         fontSize: "11px",
@@ -1161,7 +1164,7 @@ export default function Homepage({ test }) {
     </button>
 
     <button
-      onClick={() => setSelectedRole(0)}
+      onClick={() => { setAutoRoleCycle(false); setSelectedRole(0); }}
       className="shadow"
       style={{
         fontSize: "11px",
@@ -1180,7 +1183,7 @@ export default function Homepage({ test }) {
     </button>
 
     <button
-      onClick={() => setSelectedRole(1)}
+      onClick={() => { setAutoRoleCycle(false); setSelectedRole(1); }}
       className="shadow"
       style={{
         fontSize: "11px",
@@ -1199,7 +1202,7 @@ export default function Homepage({ test }) {
     </button>
 
     <button
-      onClick={() => setSelectedRole(2)}
+      onClick={() => { setAutoRoleCycle(false); setSelectedRole(2); }}
       className="shadow"
       style={{
         fontSize: "11px",
@@ -1218,7 +1221,7 @@ export default function Homepage({ test }) {
     </button>
 
     <button
-      onClick={() => setSelectedRole(3)}
+      onClick={() => { setAutoRoleCycle(false); setSelectedRole(3); }}
       className="shadow"
       style={{
         fontSize: "11px",
@@ -1251,7 +1254,9 @@ export default function Homepage({ test }) {
     <Settings />
 
 
-    {selectedRole === 3 && (<div className='flex-col' style={{backgroundColor: '', margin: '0px 0 0 0'}}>
+    {selectedRole === 3 && (<div 
+      onClick={() => { setAutoRoleCycle(false) }}
+      className='flex-col' style={{backgroundColor: '', margin: '0px 0 0 0'}}>
 
       <div 
         className='shadow flex-col'
