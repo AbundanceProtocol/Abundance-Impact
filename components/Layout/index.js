@@ -132,7 +132,8 @@ const Layout = ({ children }) => {
       {/* <Mobile /> */}
       <div className='flex-row' style={{justifyContent: 'center', width: 'auto'}}>
         {/* <LeftMenu /> */}
-        <UserMenu />
+        {(isMiniApp || isMobile) && <UserMenu />}
+
         <CenterMenu>{children}</CenterMenu>
         {/* <RightMenu /> */}
       </div>

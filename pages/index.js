@@ -833,60 +833,6 @@ export default function Home() {
         </div>)}
 
 
-        {/* LOGIN SCREEN FOR NON-MINIAPP USERS */}
-        {isMiniApp !== null && !isMiniApp && !isLogged && (
-          <div className='flex-col' style={{
-            backgroundColor: '#002244',
-            borderRadius: '15px',
-            border: '1px solid #11447799',
-            width: isMobile ? '340px' : '100%',
-            margin: isMobile ? '80px auto' : '80px auto',
-            padding: '30px 20px',
-            textAlign: 'center'
-          }}>
-            <div style={{
-              fontSize: '24px',
-              fontWeight: '600',
-              color: '#ace',
-              marginBottom: '15px'
-            }}>
-              Welcome to Impact 2.0
-            </div>
-            <div style={{
-              fontSize: '16px',
-              color: '#9df',
-              marginBottom: '25px',
-              lineHeight: '1.5'
-            }}>
-              Impact 2.0 aims to create a user-centric algo, so that creators & devs on Farcaster can focus on value creation (instead of engagement)
-            </div>
-            <div style={{
-              fontSize: '14px',
-              color: '#aaa',
-              marginBottom: '20px'
-            }}>
-              This app works best in Farcaster miniapp environment
-            </div>
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '10px',
-              alignItems: 'center'
-            }}>
-              <NeynarSigninButton 
-                onSignInSuccess={handleSignIn}
-              />
-              <div style={{
-                fontSize: '12px',
-                color: '#666',
-                textAlign: 'center'
-              }}>
-                Connect with Neynar to start
-              </div>
-            </div>
-          </div>
-        )}
-
         {(version === '2.0' || adminTest) && isLogged && (
           <Homepage {...{test: 42}} />
         )}
