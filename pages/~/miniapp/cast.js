@@ -293,12 +293,12 @@ export default function SharedCast() {
         )}
       </div>
 
-      <div className='flex-row' style={{position: 'fixed', bottom: '65px', width: isMobile ? '340px' : 'auto', height: '', margin: '0', justifyContent: 'center', alignItems: 'center'}}>
+      <div className='flex-row' style={{position: 'fixed', bottom: '0px', width: isMobile ? '99%' : 'auto', height: '', margin: '0 1px', justifyContent: 'center', alignItems: 'center'}}>
         <div style={{width: '100%', position: 'relative'}}>
 
           {userFeed && (userFeed.map((cast, index) => (
             <div className='flex-col' key={index}>
-              <ImpactScale {...{setTipPercent, setInitValue, cast, updateCast, index}} style={{position: 'absolute', bottom: '66px'}} />
+              <ImpactScale {...{setTipPercent, setInitValue, cast, updateCast, index}} style={{position: 'absolute', bottom: '2px'}} />
             </div>
           )))}
 
