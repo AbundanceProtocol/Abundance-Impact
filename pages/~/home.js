@@ -895,116 +895,116 @@ export default function Homepage({ test }) {
 
       {/* {(version == '2.0' || adminTest) && (<div className='flex-col' style={{backgroundColor: ''}}>
 
-        <div className='shadow flex-col'
-          style={{
-            backgroundColor: "#002244",
-            borderRadius: "15px",
-            height: '100%',
-            border: "1px solid #11447799",
-            width: isMiniApp || isMobile ? '340px' : '100%',
-            margin: isMiniApp || isMobile ? '0px auto' : '',
-            transition: '2.3s ease-in-out height'
-          }}
-        >
-          <div
-            className={`flex-row ${isLogged ? '' : 'shadow'}`}
-            style={{
-              backgroundColor: "#11448888",
-              width: "100%",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: "8px", 
-              borderRadius: "15px",
-              margin: isLogged ? '0' : '0 0 10px 0'
-            }} >
-
-
-            <div
-              className="flex-row"
+            <div className='shadow flex-col'
               style={{
-                width: "100%",
-                justifyContent: "flex-start",
-                alignItems: "center",
-                padding: "0px 0 0 4px",
-                margin: '0 0 0px 0'
-              }} >
+                backgroundColor: "#002244",
+                borderRadius: "15px",
+                height: '100%',
+                border: "1px solid #11447799",
+                width: isMiniApp || isMobile ? '340px' : '100%',
+                margin: isMiniApp || isMobile ? '0px auto' : '',
+                transition: '2.3s ease-in-out height'
+              }}
+            >
+              <div
+                className={`flex-row ${isLogged ? '' : 'shadow'}`}
+                style={{
+                  backgroundColor: "#11448888",
+                  width: "100%",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "8px", 
+                  borderRadius: "15px",
+                  margin: isLogged ? '0' : '0 0 10px 0'
+                }} >
 
-            
-              <BsPersonFill style={{ fill: "#cde" }} size={20} />
-              <div>
+
+                <div
+                  className="flex-row"
+                  style={{
+                    width: "100%",
+                    justifyContent: "flex-start",
+                    alignItems: "center",
+                    padding: "0px 0 0 4px",
+                    margin: '0 0 0px 0'
+                  }} >
+
+                
+                  <BsPersonFill style={{ fill: "#cde" }} size={20} />
+                  <div>
 
 
-                <div style={{border: '0px solid #777', padding: '2px', borderRadius: '10px', backgroundColor: '', maxWidth: 'fit-content', cursor: 'pointer', color: '#cde'}}>
-                  <div className="top-layer flex-row">
-                    <div className="flex-row" style={{padding: "4px 0 4px 10px", marginBottom: '0px', flexWrap: 'wrap', justifyContent: 'flex-start', gap: '0.00rem', width: '', alignItems: 'center'}}>
-                      <div style={{fontSize: isMobile ? '18px' : '22px', fontWeight: '600', color: '', padding: '0px 3px'}}>
-                        Login
+                    <div style={{border: '0px solid #777', padding: '2px', borderRadius: '10px', backgroundColor: '', maxWidth: 'fit-content', cursor: 'pointer', color: '#cde'}}>
+                      <div className="top-layer flex-row">
+                        <div className="flex-row" style={{padding: "4px 0 4px 10px", marginBottom: '0px', flexWrap: 'wrap', justifyContent: 'flex-start', gap: '0.00rem', width: '', alignItems: 'center'}}>
+                          <div style={{fontSize: isMobile ? '18px' : '22px', fontWeight: '600', color: '', padding: '0px 3px'}}>
+                            Login
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
+
+
+                  <div
+                    className="flex-row"
+                    style={{
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      cursor: "pointer",
+                    }} >
+
+                  </div>
                 </div>
+
+
+                {isLogged ? (<div className='curator-button-red' style={{height: 'max-content', textAlign: 'center', width: '64px', padding: '5px 0 3px 0', alignItems: 'center', justifyContent: 'center'}} onClick={LogoutPopup}>
+                <FaPowerOff size={16} color='#fff' />
+                </div>) : isMiniApp ? 
+                  (<MiniAppAuthButton
+                    onSuccess={(fid, uuid, signers) => {
+                      console.log('isLogged-3', fid)
+                      store.setFid(fid);
+                      store.setSignerUuid(uuid);
+                      store.setIsAuth(uuid?.length > 0);
+
+                      setFid(fid)
+                      setIsLogged(true)
+                      setShowLogin(false)
+                      checkEcoEligibility(fid, '$IMPACT', uuid)
+                    }}
+                    onError={err => {
+                      alert('Login failed: ' + err.message);
+                    }}
+                  />) : (<div style={{width: '125px', height: '36px', transform: 'scale(0.85)', transformOrigin: 'center'}}><NeynarSigninButton onSignInSuccess={handleSignIn} /></div>)}
+
               </div>
 
-
-              <div
-                className="flex-row"
-                style={{
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  cursor: "pointer",
-                }} >
-
-              </div>
+              {(showLoginNotice || !isLogged) && (
+                <div
+                  className={`login-message-wrapper ${isLogged ? 'fade-out' : 'fade-in'}`}
+                  style={{
+                    overflow: 'hidden',
+                    backgroundColor: "#002244ff",
+                    padding: '0px 18px 12px 18px',
+                    borderRadius: '0 0 15px 15px',
+                    color: '#ace',
+                    fontSize: '12px',
+                    gap: '0.75rem',
+                    position: 'relative',
+                    transition: 'all 0.5s ease',
+                    maxHeight: isLogged ? 0 : '80px',
+                    opacity: isLogged ? 0 : 1,
+                  }}
+                >
+                  <div>
+                    You need to login to enable Boosting, Auto-funding or Quests
+                  </div>
+                </div>
+              )}
             </div>
-
-
-            {isLogged ? (<div className='curator-button-red' style={{height: 'max-content', textAlign: 'center', width: '64px', padding: '5px 0 3px 0', alignItems: 'center', justifyContent: 'center'}} onClick={LogoutPopup}>
-            <FaPowerOff size={16} color='#fff' />
-            </div>) : isMiniApp ? 
-              (<MiniAppAuthButton
-                onSuccess={(fid, uuid, signers) => {
-                  console.log('isLogged-3', fid)
-                  store.setFid(fid);
-                  store.setSignerUuid(uuid);
-                  store.setIsAuth(uuid?.length > 0);
-
-                  setFid(fid)
-                  setIsLogged(true)
-                  setShowLogin(false)
-                  checkEcoEligibility(fid, '$IMPACT', uuid)
-                }}
-                onError={err => {
-                  alert('Login failed: ' + err.message);
-                }}
-              />) : (<div style={{width: '125px', height: '36px', transform: 'scale(0.85)', transformOrigin: 'center'}}><NeynarSigninButton onSignInSuccess={handleSignIn} /></div>)}
-
           </div>
-
-          {(showLoginNotice || !isLogged) && (
-            <div
-              className={`login-message-wrapper ${isLogged ? 'fade-out' : 'fade-in'}`}
-              style={{
-                overflow: 'hidden',
-                backgroundColor: "#002244ff",
-                padding: '0px 18px 12px 18px',
-                borderRadius: '0 0 15px 15px',
-                color: '#ace',
-                fontSize: '12px',
-                gap: '0.75rem',
-                position: 'relative',
-                transition: 'all 0.5s ease',
-                maxHeight: isLogged ? 0 : '80px',
-                opacity: isLogged ? 0 : 1,
-              }}
-            >
-              <div>
-                You need to login to enable Boosting, Auto-funding or Quests
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-      )} */}
+          )} */}
 
       {/* <div className='flex-row' style={{width: '100%', justifyContent: 'center', alignItems: 'center'}}>
 
@@ -1035,103 +1035,104 @@ export default function Homepage({ test }) {
         <div className='flex-row' style={{gap: '0.4rem', border: `1px solid #0af`, padding: '0 8px 0 0', borderRadius: '8px'}}>
 
         <Link 
-          href={"/"}
-          style={{
-            padding: '8px',
-            border: `0px solid ${isLogged ? "#aaa" : "#aaa"}`,
-            borderRadius: '8px',
-            backgroundColor: '#246',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
-        >
-          <BsGearFill 
-            size={16} 
-            color={"#ace"} 
-          />
-        </Link>
+            href={"/"}
+            style={{
+              padding: '8px',
+              border: `0px solid ${isLogged ? "#aaa" : "#aaa"}`,
+              borderRadius: '8px',
+              backgroundColor: '#246',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <BsGearFill 
+              size={16} 
+              color={"#ace"} 
+            />
+          </Link>
 
-        <Link 
-          href={"/"}
-          style={{
-            padding: '8px',
-            border: `0px solid ${isOn.signal ? "#0af" : "#aaa"}`,
-            borderRadius: '8px',
-            backgroundColor: 'transparent',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
-        >
-          <BsStarFill 
-            size={16} 
-            color={isOn.signal ? "#0af" : "#aaa"} 
-          />
-        </Link>
+          <Link 
+            href={"/"}
+            style={{
+              padding: '8px',
+              border: `0px solid ${isOn.signal ? "#0af" : "#aaa"}`,
+              borderRadius: '8px',
+              backgroundColor: 'transparent',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <BsStarFill 
+              size={16} 
+              color={isOn.signal ? "#0af" : "#aaa"} 
+            />
+          </Link>
 
-        <Link 
-          href={"/"}
-          style={{
-            padding: '8px',
-            border: `0px solid ${isOn.validate ? "#0af" : "#aaa"}`,
-            borderRadius: '8px',
-            backgroundColor: 'transparent',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
-        >
-          <BsShieldFillCheck 
-            size={16} 
-            color={isOn.validate ? "#0af" : "#aaa"} 
-          />
-        </Link>
+          <Link 
+            href={"/"}
+            style={{
+              padding: '8px',
+              border: `0px solid ${isOn.validate ? "#0af" : "#aaa"}`,
+              borderRadius: '8px',
+              backgroundColor: 'transparent',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <BsShieldFillCheck 
+              size={16} 
+              color={isOn.validate ? "#0af" : "#aaa"} 
+            />
+          </Link>
 
-        <Link 
-          href={"/"}
-          style={{
-            padding: '8px',
-            border: `0px solid ${isOn.boost ? "#0af" : "#aaa"}`,
-            borderRadius: '8px',
-            backgroundColor: 'transparent',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
-        >
-          <BsSuitHeartFill 
-            size={16} 
-            color={isOn.boost ? "#0af" : "#aaa"} 
-          />
-        </Link>
+          <Link 
+            href={"/"}
+            style={{
+              padding: '8px',
+              border: `0px solid ${isOn.boost ? "#0af" : "#aaa"}`,
+              borderRadius: '8px',
+              backgroundColor: 'transparent',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <BsSuitHeartFill 
+              size={16} 
+              color={isOn.boost ? "#0af" : "#aaa"} 
+            />
+          </Link>
 
 
-        <Link 
-          href={"/"}
-          style={{
-            padding: '8px',
-            border: `0px solid ${isOn.impactBoost ? "#0af" : "#aaa"}`,
-            borderRadius: '8px',
-            backgroundColor: 'transparent',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
-        >
-          <BsRocketTakeoffFill 
-            size={16} 
-            color={isOn.impactBoost ? "#0af" : "#aaa"} 
-          />
-        </Link>
-      </div>
+          <Link 
+            href={"/"}
+            style={{
+              padding: '8px',
+              border: `0px solid ${isOn.impactBoost ? "#0af" : "#aaa"}`,
+              borderRadius: '8px',
+              backgroundColor: 'transparent',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <BsRocketTakeoffFill 
+              size={16} 
+              color={isOn.impactBoost ? "#0af" : "#aaa"} 
+            />
+          </Link>
+        </div>
     </div> */}
 
 
 
 
 
-{/* {selectedRole === 3 && ( */}
+{/* ROLE SELECTION BUTTONS - Only show in miniapp or when logged in */}
+{(isMiniApp || isLogged) && (
   <div className='flex-row' 
     style={{
       backgroundColor: '', 
@@ -1236,8 +1237,8 @@ export default function Homepage({ test }) {
       Supporter
     </button>
 
-  </div>
-{/* )} */}
+      </div>
+)}
 
 
 
@@ -1253,121 +1254,121 @@ export default function Homepage({ test }) {
 
     {selectedRole === 3 && (<div className='flex-col' style={{backgroundColor: '', margin: '0px 0 0 0'}}>
 
-      <div 
-        className='shadow flex-col'
-        style={{
-          backgroundColor: tippingCeloStreak?.totalDaysWithTips > 0 ? "#002244" : '#333',
-          borderRadius: "15px",
-          border: tippingCeloStreak?.totalDaysWithTips > 0 ? "1px solid #11447799" : "1px solid #555",
-          width: isMiniApp || isMobile ? '340px' : '100%',
-          margin: isMiniApp || isMobile ? '15px auto 0 auto' : '15px auto 0 auto',
-        }} >
-        <div
-          className="shadow flex-row"
-          style={{
-            backgroundColor: tippingCeloStreak?.totalDaysWithTips > 0 ? "#11448888" : "#444",
-            width: "100%",
-            justifyContent: "space-between",
-            alignItems: "center",
-            padding: "8px", 
-            borderRadius: "15px",
-            margin: '0 0 10px 0',
-            gap: '1rem'
-          }} >
+              <div 
+                className='shadow flex-col'
+                style={{
+                  backgroundColor: tippingCeloStreak?.totalDaysWithTips > 0 ? "#002244" : '#333',
+                  borderRadius: "15px",
+                  border: tippingCeloStreak?.totalDaysWithTips > 0 ? "1px solid #11447799" : "1px solid #555",
+                  width: isMiniApp || isMobile ? '340px' : '100%',
+                  margin: isMiniApp || isMobile ? '15px auto 0 auto' : '15px auto 0 auto',
+                }} >
+                <div
+                  className="shadow flex-row"
+                  style={{
+                    backgroundColor: tippingCeloStreak?.totalDaysWithTips > 0 ? "#11448888" : "#444",
+                    width: "100%",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    padding: "8px", 
+                    borderRadius: "15px",
+                    margin: '0 0 10px 0',
+                    gap: '1rem'
+                  }} >
 
 
-          <div
-            className="flex-row"
-            style={{
-              width: "100%",
-              justifyContent: "flex-start",
-              alignItems: "center",
-              padding: "0px 0 0 4px",
-              margin: '0 0 0px 0',
-            }} >
-            <div className='flex-row' style={{width: '100%', justifyContent: 'flex-start', alignItems: 'center'}}>
-              <BsCurrencyExchange style={{ fill: "#cde" }} size={20} />
-              <div>
-                <div style={{border: '0px solid #777', padding: '2px', borderRadius: '10px', backgroundColor: '', width: '100%', cursor: 'pointer', color: '#cde', position: 'relative'}}>
-                  <div className="top-layer flex-row" style={{width: '100%', justifyContent: 'space-between', alignItems: 'center'}}>
-                    <div className="flex-row" style={{padding: "4px 0 4px 10px", marginBottom: '0px', flexWrap: 'wrap', justifyContent: 'flex-start', gap: '0.00rem', alignItems: 'center', width: '100%'}}>
-                      <div style={{fontSize: isMobile ? '18px' : '22px', fontWeight: '600', color: '', padding: '0px 3px'}}>
-                        Supporter
+                  <div
+                    className="flex-row"
+                    style={{
+                      width: "100%",
+                      justifyContent: "flex-start",
+                      alignItems: "center",
+                      padding: "0px 0 0 4px",
+                      margin: '0 0 0px 0',
+                    }} >
+                    <div className='flex-row' style={{width: '100%', justifyContent: 'flex-start', alignItems: 'center'}}>
+                      <BsCurrencyExchange style={{ fill: "#cde" }} size={20} />
+                      <div>
+                        <div style={{border: '0px solid #777', padding: '2px', borderRadius: '10px', backgroundColor: '', width: '100%', cursor: 'pointer', color: '#cde', position: 'relative'}}>
+                          <div className="top-layer flex-row" style={{width: '100%', justifyContent: 'space-between', alignItems: 'center'}}>
+                            <div className="flex-row" style={{padding: "4px 0 4px 10px", marginBottom: '0px', flexWrap: 'wrap', justifyContent: 'flex-start', gap: '0.00rem', alignItems: 'center', width: '100%'}}>
+                              <div style={{fontSize: isMobile ? '18px' : '22px', fontWeight: '600', color: '', padding: '0px 3px'}}>
+                                Supporter
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            {streaksLoading && (
-              <div style={{padding: '4px 10px 0px 0'}}>
-                <Spinner size={16} />
-              </div>
-            )}
-            <Link
-              href={"/~/tip"}
-              style={{
-                backgroundColor: "#bbddff",
-                borderRadius: "10px",
+                    {streaksLoading && (
+                      <div style={{padding: '4px 10px 0px 0'}}>
+                        <Spinner size={16} />
+                      </div>
+                    )}
+                    <Link
+                      href={"/~/tip"}
+                      style={{
+                        backgroundColor: "#bbddff",
+                        borderRadius: "10px",
                 padding: "2px 0px 2px 8px",
-                border: "1px solid #335577",
-                minWidth: "40px",
-                textAlign: "center",
+                        border: "1px solid #335577",
+                        minWidth: "40px",
+                        textAlign: "center",
                 height: "30px",
-                alignItems: "center",
+                        alignItems: "center",
                 justifyContent: "center",
                 display: "flex",
                 gap: "0rem"
-              }}
-            >
+                      }}
+                    >
               <BsCurrencyExchange style={{ fill: "#000" }} size={24} />
-              <div
-                style={{
-                  fontSize: "13px",
-                  fontWeight: "500",
-                  color: "#000",
-                  lineHeight: "1"
-                }}
-              >
-                {`Onchain\nMulti-Tip`}
-              </div>
-            </Link>
+                      <div
+                        style={{
+                          fontSize: "13px",
+                          fontWeight: "500",
+                          color: "#000",
+                          lineHeight: "1"
+                        }}
+                      >
+                        {`Onchain\nMulti-Tip`}
+                      </div>
+                    </Link>
 
-            <div
-              className="flex-row"
-              style={{
-                justifyContent: "space-between",
-                alignItems: "center",
-                cursor: "pointer",
-              }} >
+                    <div
+                      className="flex-row"
+                      style={{
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        cursor: "pointer",
+                      }} >
 
-            </div>
-          </div>
+                    </div>
+                  </div>
 
-        </div>
+                </div>
 
-        <div className='flex-col' style={{backgroundColor: tippingCeloStreak?.totalDaysWithTips > 0 ? "#002244ff" : '#333', padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: tippingCeloStreak?.totalDaysWithTips > 0 ? '#ace' : '#ddd', fontSize: '12px', gap: '0.75rem', position: 'relative'}}>
-
-
-          <div className='flex-row' style={{backgroundColor: tippingCeloStreak?.totalDaysWithTips > 0 ? "#002244ff" : '#333', padding: '0px', borderRadius: '0 0 15px 15px', color: tippingCeloStreak?.totalDaysWithTips > 0 ? '#ace' : '#ddd', fontSize: '12px', gap: '0.75rem', position: 'relative', alignItems: 'center'}}>
+                <div className='flex-col' style={{backgroundColor: tippingCeloStreak?.totalDaysWithTips > 0 ? "#002244ff" : '#333', padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: tippingCeloStreak?.totalDaysWithTips > 0 ? '#ace' : '#ddd', fontSize: '12px', gap: '0.75rem', position: 'relative'}}>
 
 
+                  <div className='flex-row' style={{backgroundColor: tippingCeloStreak?.totalDaysWithTips > 0 ? "#002244ff" : '#333', padding: '0px', borderRadius: '0 0 15px 15px', color: tippingCeloStreak?.totalDaysWithTips > 0 ? '#ace' : '#ddd', fontSize: '12px', gap: '0.75rem', position: 'relative', alignItems: 'center'}}>
 
-            <div className='flex-row' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(tippingCeloStreak?.totalDaysWithTips > 0) ? '#0af' : (tippingCeloStreak?.totalDaysWithTips > 0) ? '#ace' : '#aaa'}`, borderRadius: '8px', backgroundColor: '', alignItems: 'center', gap: '0.15rem', height: '40px', width: '260px'}}>
-              <div style={{fontSize: '13px', fontWeight: '500', color: tippingCeloStreak?.totalDaysWithTips > 0 ? '#0af' : '#aaa', textAlign: 'center'}}>
-                {tippingCeloStreak?.totalDaysWithTips > 0 ? 'eligible for\nrewards' : `tip to be\neligible`}
-              </div>
-              {/* <BsStar color={isOn.validate ? '#0af' : '#aaa'} size={13} /> */}
-            </div>
 
-            <div>
-              Impact 2.0 lets supporters (onchain) multi-tip casters based on their impact. Supporters are eligible to participate in weekly raffle rewards
-            </div>
-            {/* <div className='flex-row' style={{position: 'absolute', bottom: '0', right: '0', padding: '5px 5px', gap: '.25rem', alignItems: 'center'}}>
-              <BsInfoCircle size={15} onClick={() => {
-                openSwipeable("validate"); }} />
-            </div> */}
-          </div>
+
+                    <div className='flex-row' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(tippingCeloStreak?.totalDaysWithTips > 0) ? '#0af' : (tippingCeloStreak?.totalDaysWithTips > 0) ? '#ace' : '#aaa'}`, borderRadius: '8px', backgroundColor: '', alignItems: 'center', gap: '0.15rem', height: '40px', width: '260px'}}>
+                      <div style={{fontSize: '13px', fontWeight: '500', color: tippingCeloStreak?.totalDaysWithTips > 0 ? '#0af' : '#aaa', textAlign: 'center'}}>
+                        {tippingCeloStreak?.totalDaysWithTips > 0 ? 'eligible for\nrewards' : `tip to be\neligible`}
+                      </div>
+                      {/* <BsStar color={isOn.validate ? '#0af' : '#aaa'} size={13} /> */}
+                    </div>
+
+                    <div>
+                      Impact 2.0 lets supporters (onchain) multi-tip casters based on their impact. Supporters are eligible to participate in weekly raffle rewards
+                    </div>
+                    {/* <div className='flex-row' style={{position: 'absolute', bottom: '0', right: '0', padding: '5px 5px', gap: '.25rem', alignItems: 'center'}}>
+                      <BsInfoCircle size={15} onClick={() => {
+                        openSwipeable("validate"); }} />
+                    </div> */}
+                  </div>
 
           <div className='flex-row' style={{gap: '0.5rem', alignItems: 'center', justifyContent: 'center', margin: '8px 0 0px 0'}}>
             <button
@@ -1389,42 +1390,42 @@ export default function Homepage({ test }) {
               <BsStarFill size={14} color="#000" />
               Check Tipping Streaks
             </button>
-          </div>
+                  </div>
 
 
-          {/* <div style={{fontSize: '15px', fontWeight: '600', color: '#ace', margin: '8px 0 0px 0'}}>
-            Curation Streak
-          </div>
-          <div style={{fontSize: '11px', fontWeight: '400', color: '#ace', margin: '-6px 0 0px 0'}}>
-            Curated impactful casts in the last 7 days
-          </div>
-          <div className='flex-row' style={{gap: '1.2rem', alignItems: 'center', justifyContent: 'center', margin: '-12px 0 12px 0'}}>
-            {streaksLoading ? (
-              Array(7).fill(0).map((_, index) => (
-                <BsStar key={index} size={16} color="#444" />
-              ))
-            ) : (
-              renderStreakStars(curationStreak.streakData)
-            )}
+                  {/* <div style={{fontSize: '15px', fontWeight: '600', color: '#ace', margin: '8px 0 0px 0'}}>
+                    Curation Streak
+                  </div>
+                  <div style={{fontSize: '11px', fontWeight: '400', color: '#ace', margin: '-6px 0 0px 0'}}>
+                    Curated impactful casts in the last 7 days
+                  </div>
+                  <div className='flex-row' style={{gap: '1.2rem', alignItems: 'center', justifyContent: 'center', margin: '-12px 0 12px 0'}}>
+                    {streaksLoading ? (
+                      Array(7).fill(0).map((_, index) => (
+                        <BsStar key={index} size={16} color="#444" />
+                      ))
+                    ) : (
+                      renderStreakStars(curationStreak.streakData)
+                    )}
 
-            <div className='flex-row' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(isLogged && isOn.validate && isOn.boost && isOn.notifs) ? '#0af' : (isLogged && isOn.validate) ? '#ace' : '#aaa'}`, borderRadius: '8px', backgroundColor: '', alignItems: 'center', gap: '0.15rem', height: '30px'}}>
-              <div style={{fontSize: '13px', fontWeight: '700', color: (isLogged && isOn.validate && isOn.boost && isOn.notifs) ? '#0af' : (isLogged && isOn.validate) ? '#ace' : '#aaa'}}>
-                {streaksLoading ? '0/7' : `${curationStreak.totalDaysWithImpacts || 0}/7`}
+                    <div className='flex-row' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(isLogged && isOn.validate && isOn.boost && isOn.notifs) ? '#0af' : (isLogged && isOn.validate) ? '#ace' : '#aaa'}`, borderRadius: '8px', backgroundColor: '', alignItems: 'center', gap: '0.15rem', height: '30px'}}>
+                      <div style={{fontSize: '13px', fontWeight: '700', color: (isLogged && isOn.validate && isOn.boost && isOn.notifs) ? '#0af' : (isLogged && isOn.validate) ? '#ace' : '#aaa'}}>
+                        {streaksLoading ? '0/7' : `${curationStreak.totalDaysWithImpacts || 0}/7`}
+                      </div>
+                    </div>
+                  </div> */}
+
+
+
+                  <div className='flex-row' style={{position: 'absolute', bottom: '0', right: '0', padding: '5px 5px', gap: '.25rem', alignItems: 'center'}}>
+                    <BsInfoCircle size={15} onClick={() => {
+                      openSwipeable("streak"); }} />
+                  </div>
+                </div>
               </div>
-            </div>
-          </div> */}
+              </div>
 
-
-
-          <div className='flex-row' style={{position: 'absolute', bottom: '0', right: '0', padding: '5px 5px', gap: '.25rem', alignItems: 'center'}}>
-            <BsInfoCircle size={15} onClick={() => {
-              openSwipeable("streak"); }} />
-          </div>
-        </div>
-      </div>
-      </div>
-
-    )}
+              )}
 
 
 
@@ -1597,9 +1598,9 @@ export default function Homepage({ test }) {
 
       {selectedRole === 4 && (<div
         className="flex-row"
-        style={{
-          justifyContent: "center",
-          alignItems: "center",
+          style={{
+              justifyContent: "center",
+              alignItems: "center",
           padding: "25px 10px 0px 10px",
           flexWrap: "wrap",
           gap: "0.5rem"
