@@ -128,8 +128,8 @@ const Layout = ({ children }) => {
       </Head>
 
 
-      <div className='flex-col' style={{justifyContent: 'center', width: 'auto'}}>
-        <UserMenu />
+      <div className='flex-row' style={{justifyContent: 'center', width: 'auto'}}>
+        {(isMiniApp || isMobile) && <UserMenu />}
         <CenterMenu>{children}</CenterMenu>
       </div>
       <ShowActionNav />

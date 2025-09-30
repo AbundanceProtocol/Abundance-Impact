@@ -293,17 +293,62 @@ export default function SharedCast() {
         )}
       </div>
 
-      <div className='flex-row' style={{position: 'fixed', bottom: '0px', width: isMobile ? '99%' : 'auto', height: '', margin: '0 1px', justifyContent: 'center', alignItems: 'center'}}>
-        <div style={{width: '100%', position: 'relative'}}>
 
-          {userFeed && (userFeed.map((cast, index) => (
-            <div className='flex-col' key={index}>
-              <ImpactScale {...{setTipPercent, setInitValue, cast, updateCast, index}} style={{position: 'absolute', bottom: '2px'}} />
-            </div>
-          )))}
-
+      <div
+        className="flex-row"
+        style={{
+          position: 'fixed',
+          bottom: '0px',
+          width: isMobile ? '99%' : 'auto',
+          margin: '0 1px',
+          justifyContent: 'center',
+          alignItems: 'center',
+          left: 0,
+          right: 0,
+          zIndex: 10,
+        }}
+      >
+        <div
+          style={{
+            width: '100%',
+            display: 'flex',
+            justifyContent: 'center',
+            position: 'relative',
+          }}
+        >
+          {userFeed &&
+            userFeed.map((cast, index) => (
+              <div
+                className="flex-col"
+                key={index}
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+                <ImpactScale
+                  {...{
+                    setTipPercent,
+                    setInitValue,
+                    cast,
+                    updateCast,
+                    index,
+                  }}
+                  style={{
+                    margin: '0 auto',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    position: 'relative',
+                    bottom: '2px',
+                  }}
+                />
+              </div>
+            ))}
         </div>
       </div>
+
 
       {!delay && (<div ref={ref}>&nbsp;</div>)}
       <ExpandImg  {...{show: showPopup.open, closeImagePopup, embed: {showPopup}, screenWidth, screenHeight }} />
