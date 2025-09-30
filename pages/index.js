@@ -834,6 +834,7 @@ export default function Home() {
 
 
         {/* LOGIN SCREEN FOR NON-MINIAPP USERS */}
+{/*
         {isMiniApp !== null && !isMiniApp && !isLogged && (
           <div className='flex-col' style={{
             backgroundColor: '#002244',
@@ -886,7 +887,7 @@ export default function Home() {
             </div>
           </div>
         )}
-
+*/}
         {(version === '2.0' || adminTest) && isLogged && (
           <Homepage {...{test: 42}} />
         )}
