@@ -480,7 +480,7 @@ export default function Rewards() {
       </div>
 
       {/* DAILY POINTS AND IMPACT SCORE */}
-      {(version == "2.0" || adminTest) && isLogged && (
+      {(version == "2.0" || adminTest) && (
         <div
           className="flex-row"
           style={{ backgroundColor: "", justifyContent: "center", gap: "1rem", margin: "0px 0 0px 0" }}
@@ -537,7 +537,7 @@ export default function Rewards() {
       )}
 
       {/* TOTAL REWARDS AND ONCHAIN TIPS */}
-      {(version == "2.0" || adminTest) && isLogged && (
+      {(version == "2.0" || adminTest) && (
         <div
           className="flex-row"
           style={{ backgroundColor: "", justifyContent: "center", gap: "1rem", margin: "16px 0 0px 0" }}
