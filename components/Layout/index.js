@@ -128,21 +128,14 @@ const Layout = ({ children }) => {
       </Head>
 
 
-
-      {/* <Mobile /> */}
       <div className='flex-row' style={{justifyContent: 'center', width: 'auto'}}>
-        {/* <LeftMenu /> */}
-        {(isMiniApp || isMobile) && <UserMenu />}
-
+        <UserMenu />
         <CenterMenu>{children}</CenterMenu>
-        {/* <RightMenu /> */}
       </div>
       <ShowActionNav />
-      {/* {((version == '1.0' && !adminTest) || (version == '2.0' || adminTest)) && <BottomBar />} */}
-      {/* {(version == '2.0' || adminTest) ? (<BottomBar />) : (<BottomMenu />)} */}
       <LoginModal />
       <LogoutModal />
-      {(version == '2.0' || adminTest) && (<SwipeablePanel />)}
+      <SwipeablePanel />
     </div>
   );
 };

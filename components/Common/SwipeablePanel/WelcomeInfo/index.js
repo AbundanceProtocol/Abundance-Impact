@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import ItemWrap from '../../../Ecosystem/ItemWrap';
 import Item from '../../../Ecosystem/ItemWrap/Item';
-import { BsShieldFillCheck, BsPiggyBankFill, BsStarFill } from "react-icons/bs";
+import { BsShieldFillCheck, BsPiggyBankFill, BsStarFill, BsCurrencyExchange } from "react-icons/bs";
 import { AccountContext } from '../../../../context';
 import useMatchBreakpoints from '../../../../hooks/useMatchBreakpoints';
 
@@ -85,7 +85,7 @@ const WelcomeInfo = () => {
             <Item
               {...{
                 icon: BsStarFill,
-                text: "Nominate & Boost",
+                text: "Curate & Boost",
                 description:
                   `proactively surface valuable content (text, code, art, etc.)`,
               }}
@@ -104,10 +104,10 @@ const WelcomeInfo = () => {
           <ItemWrap>
             <Item
               {...{
-                icon: BsPiggyBankFill,
-                text: "Fund",
+                icon: BsCurrencyExchange,
+                text: "Support",
                 description:
-                  `Contribute their ($degen & $tipn) allowances and tip (onchain) creators based on their impact thru the app`,
+                  `Contribute (onchain) to creators based on their impact thru the app`,
               }}
             />
           </ItemWrap>
