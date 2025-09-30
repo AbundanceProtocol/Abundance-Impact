@@ -129,13 +129,13 @@ const Layout = ({ children }) => {
 
 
       <div className='flex-row' style={{justifyContent: 'center', width: 'auto'}}>
-        <UserMenu />
+        {(isMiniApp || isMobile) && <UserMenu />}
         <CenterMenu>{children}</CenterMenu>
       </div>
       <ShowActionNav />
       <LoginModal />
       <LogoutModal />
-      <SwipeablePanel />
+      {(version == '2.0' || adminTest) && (<SwipeablePanel />)}
     </div>
   );
 };

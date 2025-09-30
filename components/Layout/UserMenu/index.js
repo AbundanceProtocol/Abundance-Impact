@@ -315,23 +315,25 @@ const UserMenu = () => {
             <Link href={"/~/ecosystems/abundance"}
               className={"flex-row items-center"}
               style={{
-                border: "1px solid #999",
+                border: "1px solid #88ccffee",
                 padding: "3px 3px 3px 3px",
                 borderRadius: "10px",
-                backgroundColor: router.route == "/~/ecosystems/[ecosystem]" ? "#eeeeeeee" : "#002244ee",
+                backgroundColor: router.route == "/~/ecosystems/[ecosystem]" ? "#88ccffee" : "#002244ee",
+                justifyContent: "center",
+                alignItems: "center"
               }}
             >
-              <div className={`impact-arrow`} style={{ margin: "2px 0 0 0" }}>
-                <FaStar size={22} className="" style={{ fontSize: "25px", color: router.route == "/~/ecosystems/[ecosystem]" ? "#002244ee" : "#eeeeeeee" }} />
+              <div className={`impact-arrow`} style={{ margin: "0px 0 0 0" }}>
+                <FaStar size={22} className="" style={{ fontSize: "25px", color: router.route == "/~/ecosystems/[ecosystem]" ? "#002244ee" : "#88ccffee" }} />
               </div>
 
               <div
                 style={{
                   textAlign: "center",
-                  fontSize: "16px",
+                  fontSize: "15px",
                   fontWeight: "600",
-                  color: router.route == "/~/ecosystems/[ecosystem]" ? "#002244ee" : "#eeeeeeee",
-                  margin: `2px 8px 0px 2px`,
+                  color: router.route == "/~/ecosystems/[ecosystem]" ? "#002244ee" : "#88ccffee",
+                  margin: `2px 8px 2px 2px`,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center"
@@ -386,10 +388,10 @@ const UserMenu = () => {
           className={"flex-row items-center impact-arrow"}
           href={"/~/tip"}
           style={{
-            border: "1px solid #999",
+            border: "1px solid #ffdd88ee",
             padding: "0 6px",
             borderRadius: "10px",
-            backgroundColor: navMenu == "tip" || router.route == "/~/tip" ? "#eeeeeeee" : "#002244ee",
+            backgroundColor: navMenu == "tip" || router.route == "/~/tip" ? "#ffdd88ee" : "#002244ee",
             margin: "0 0 0 0",
             justifyContent: "center",
             alignItems: "center"
@@ -398,7 +400,7 @@ const UserMenu = () => {
           {navMenu == "rewards" || router.route == "/~/tip" ? (
             <BsCurrencyExchange size={22} className="" style={{ fontSize: "25px", color: "#002244ee" }} />
           ) : (
-            <BsCurrencyExchange size={22} className="" style={{ fontSize: "25px", color: "#eeeeeeee" }} />
+            <BsCurrencyExchange size={22} className="" style={{ fontSize: "25px", color: "#ffdd88ee" }} />
           )}
         </Link>
 
