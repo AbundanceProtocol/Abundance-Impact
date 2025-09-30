@@ -1500,12 +1500,12 @@ export default function Homepage({ test }) {
 
 
 
-      <div
+      {selectedRole === 4 && (<div
         className="flex-row"
         style={{
           justifyContent: "center",
           alignItems: "center",
-          padding: "40px 10px 0px 10px",
+          padding: "25px 10px 0px 10px",
           flexWrap: "wrap",
           gap: "0.5rem"
         }}
@@ -1525,7 +1525,7 @@ export default function Homepage({ test }) {
         >
           How it works
         </a>
-      </div>
+      </div>)}
 
       {/* <div
         className="flex-row"
