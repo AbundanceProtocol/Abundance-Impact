@@ -34,6 +34,8 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
   const [navMenu, setNavMenu] = useState(null)
   const [isSignedIn, setIsSignedIn] = useState(false)
   const [selectedRole, setSelectedRole] = useState(4) // For CircularIconAnimation role selection - default to Caster
+  // Auto-rotation for role selection (stops on any user interaction)
+  const [autoRoleCycle, setAutoRoleCycle] = useState(true)
   const [tippingStreak, setTippingStreak] = useState({ streakData: [], totalDaysWithTips: 0 })
   const [tippingCeloStreak, setTippingCeloStreak] = useState({ streakData: [], totalDaysWithTips: 0 })
   const [streaksLoading, setStreaksLoading] = useState(false)
@@ -1381,6 +1383,7 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
     isSignedIn, setIsSignedIn,
     newUser, setNewUser,
     selectedRole, setSelectedRole,
+    autoRoleCycle, setAutoRoleCycle,
     tippingStreak, setTippingStreak,
     tippingCeloStreak, setTippingCeloStreak,
     streaksLoading, setStreaksLoading
