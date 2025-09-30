@@ -80,7 +80,7 @@ const BoostInfo = () => {
           Impact 2.0 would only auto-like validated casts, in proportion to their impact, and with randomly selected 'likes' from Boosters
         </div>
         <div>
-          Boosters earn 7% of tips going to the (validated) casts they boosted
+          Boosters earn 10% of tips going to the (validated) casts they boosted
         </div>
       </div>
     </div>

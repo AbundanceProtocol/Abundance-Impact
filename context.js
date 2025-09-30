@@ -13,7 +13,7 @@ const queryClient = new QueryClient();
 export const AccountContext = createContext(null)
 
 export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => {
-  const store = typeof window !== 'undefined' ? useStore() : null
+  const store = useStore()
   const [showActions, setShowActions] = useState(false)
   const [showLogin, setShowLogin] = useState(false)
   const [miniApp, setMiniApp] = useState(false)
@@ -33,6 +33,10 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
   const [adminTest, setAdminTest] = useState(false)
   const [navMenu, setNavMenu] = useState(null)
   const [isSignedIn, setIsSignedIn] = useState(false)
+  const [selectedRole, setSelectedRole] = useState(4) // For CircularIconAnimation role selection - default to Caster
+  const [tippingStreak, setTippingStreak] = useState({ streakData: [], totalDaysWithTips: 0 })
+  const [tippingCeloStreak, setTippingCeloStreak] = useState({ streakData: [], totalDaysWithTips: 0 })
+  const [streaksLoading, setStreaksLoading] = useState(false)
 
   // Wallet integration state
   const [walletConnected, setWalletConnected] = useState(false)
@@ -1375,7 +1379,11 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
     userInfo, setUserInfo,
     isOn, setIsOn,
     isSignedIn, setIsSignedIn,
-    newUser, setNewUser
+    newUser, setNewUser,
+    selectedRole, setSelectedRole,
+    tippingStreak, setTippingStreak,
+    tippingCeloStreak, setTippingCeloStreak,
+    streaksLoading, setStreaksLoading
   };
 
   return (

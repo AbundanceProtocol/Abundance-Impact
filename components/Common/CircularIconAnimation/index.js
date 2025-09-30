@@ -1,9 +1,10 @@
-import React, { useRef } from "react";
+import React, { useRef, useContext } from "react";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 import { BsPerson, BsPersonFill, BsStarFill, BsShieldFillCheck, BsSuitHeartFill, BsCurrencyExchange } from "react-icons/bs";
 import { TbArrowBigUp, TbArrowBigUpFilled } from "react-icons/tb";
 import { PiArrowBendUpLeftThin, PiArrowBendUpRightThin } from "react-icons/pi";
+import { AccountContext } from "../../../context";
 
 // Register GSAP plugin
 gsap.registerPlugin(useGSAP);
@@ -11,16 +12,20 @@ gsap.registerPlugin(useGSAP);
 // Circular Icon Animation Component
 const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
   const containerRef = useRef(null);
-  const [selectedIcon, setSelectedIcon] = React.useState(null);
+  const { selectedRole, setSelectedRole } = useContext(AccountContext);
+  const [selectedIcon, setSelectedIcon] = React.useState(selectedRole);
+  
+  // Sync local state with context
+  React.useEffect(() => {
+    setSelectedIcon(selectedRole);
+  }, [selectedRole]);
   
   const handleIconClick = (index) => {
     setSelectedIcon(prev => {
-      // If clicking the same icon, deselect it
-      if (prev === index) {
-        return null;
-      }
-      // Otherwise, select the new icon (deselecting any previous one)
-      return index;
+      const newSelection = prev === index ? null : index;
+      // Update the context with the new selection
+      setSelectedRole(newSelection);
+      return newSelection;
     });
   };
 
@@ -121,8 +126,8 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
   // Text descriptions for each role
   const roleDescriptions = [
     "Curators mominate impactful casts on Farcaster. Earn 10% of tips",
-    "Validators ensure the quality of nominations & earn 7% of tips",
-    "Boosters auto-like validated casts & earn 7% of tips",
+    "Validators ensure the quality of nominations & earn 10% of tips",
+    "Boosters auto-like validated casts & earn 10% of tips",
     "Supporters multi-tip impactful casters",
     "Casters can focus on creating valuable content, art, code, etc."
   ];
@@ -551,7 +556,7 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
       </div>
       
       {/* Text box that changes based on selected icon */}
-      <div
+      {/* <div
         style={{
           marginTop: "30px",
           padding: "10px 25px",
@@ -588,7 +593,7 @@ const CircularIconAnimation = ({ isOn = {}, fid = null, show = true }) => {
               : "Click on any icon above to learn more about that role."
             }
           </p>
-      </div>
+      </div> */}
     </div>
   );
 };
