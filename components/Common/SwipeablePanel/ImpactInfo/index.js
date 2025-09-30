@@ -80,7 +80,7 @@ const ImpactInfo = () => {
           Auto-boosting will be used sparingly, for major announcements, important updates, and other relevant content
         </div>
         <div>
-          Boosters earn 7% of ecosystem tips
+          Boosters earn 10% of ecosystem tips
         </div>
       </div>
     </div>

@@ -15,7 +15,10 @@ import {
   BsGift,
   BsGiftFill,
   BsPiggyBank,
-  BsPiggyBankFill
+  BsPiggyBankFill,
+  BsHouseDoor,
+  BsHouseDoorFill,
+  BsInfoCircle
 } from "react-icons/bs";
 import axios from "axios";
 
@@ -43,6 +46,11 @@ const UserMenu = () => {
     setPanelTarget,
     setPanelOpen
   } = useContext(AccountContext);
+
+  const openSwipeable = target => {
+    setPanelTarget(target);
+    setPanelOpen(true);
+  };
 
   async function getUserSettings(fid) {
     try {
@@ -264,7 +272,7 @@ const UserMenu = () => {
         )}
 
         <div className="flex-row" style={{ gap: "0.5rem" }}>
-          {userInfo?.pfp && (version == "2.0" || adminTest) && router.route !== "/" && (
+          {/* {userInfo?.pfp && (version == "2.0" || adminTest) && router.route !== "/" && (
             <div
               className={"flex-row items-center"}
               style={{
@@ -276,23 +284,45 @@ const UserMenu = () => {
               onClick={() => router.back()}
             >
               <div className={`impact-arrow`} style={{ margin: "0 0 0 0" }}>
-                <BsChevronDoubleLeft size={22} className="" style={{ fontSize: "25px", color: "#eee" }} />
+                <BsChevronDoubleLeft size={22} className="" style={{ fontSize: "25px", color: "#eeeeeeee" }} />
               </div>
             </div>
-          )}
+          )} */}
 
-          {userInfo?.pfp && (version == "1.0" || version == "2.0" || adminTest) && (
-            <div
+
+        <Link
+          className={"flex-row items-center impact-arrow"}
+          href={"/"}
+          style={{
+            border: "1px solid #999",
+            padding: "0 6px",
+            borderRadius: "10px",
+            backgroundColor: navMenu == "home" || router.route == "/" ? "#eeeeeeee" : "#002244ee",
+            margin: "0 0 0 0",
+            justifyContent: "center",
+            alignItems: "center"
+          }}
+        >
+          {navMenu == "home" || router.route == "/" ? (
+            <BsHouseDoorFill size={22} className="" style={{ fontSize: "25px", color: "#002244ee" }} />
+          ) : (
+            <BsHouseDoor size={22} className="" style={{ fontSize: "25px", color: "#eeeeeeee" }} />
+          )}
+        </Link>
+
+
+          {/* {userInfo?.pfp && (version == "1.0" || version == "2.0" || adminTest) && ( */}
+            <Link href={"/~/ecosystems/abundance"}
               className={"flex-row items-center"}
               style={{
                 border: "1px solid #999",
                 padding: "3px 3px 3px 3px",
                 borderRadius: "10px",
-                backgroundColor: "#002244cc"
+                backgroundColor: router.route == "/~/ecosystems/[ecosystem]" ? "#eeeeeeee" : "#002244ee",
               }}
             >
               <div className={`impact-arrow`} style={{ margin: "2px 0 0 0" }}>
-                <FaStar size={22} className="" style={{ fontSize: "25px", color: "#eee" }} />
+                <FaStar size={22} className="" style={{ fontSize: "25px", color: router.route == "/~/ecosystems/[ecosystem]" ? "#002244ee" : "#eeeeeeee" }} />
               </div>
 
               <div
@@ -300,7 +330,7 @@ const UserMenu = () => {
                   textAlign: "center",
                   fontSize: "16px",
                   fontWeight: "600",
-                  color: "#eee",
+                  color: router.route == "/~/ecosystems/[ecosystem]" ? "#002244ee" : "#eeeeeeee",
                   margin: `2px 8px 0px 2px`,
                   display: "flex",
                   alignItems: "center",
@@ -313,8 +343,8 @@ const UserMenu = () => {
               {/* <div style={{textAlign: 'center', fontSize: '13px', fontWeight: '400', color: '#eee', margin: `3px 8px 3px 5px`, width: '', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
               <div>$impact</div>
             </div> */}
-            </div>
-          )}
+            </Link>
+          {/* )} */}
 
           {/* {userInfo?.pfp && (version == '2.0' || adminTest) && (<div className={'flex-row items-center'} style={{border: '1px solid #999', padding: '5px 3px 0px 3px', borderRadius: '10px', backgroundColor: '#002244cc'}}>
             <div className={`impact-arrow`} style={{margin: '0 0 0 0' }}>
@@ -339,7 +369,7 @@ const UserMenu = () => {
               {navMenu == "auto-fund" || router.route == "/~/auto-fund" ? (
                 <BsPiggyBankFill size={22} className="" style={{ fontSize: "25px", color: "#99ddff" }} />
               ) : (
-                <BsPiggyBank size={22} className="" style={{ fontSize: "25px", color: "#eee" }} />
+                <BsPiggyBank size={22} className="" style={{ fontSize: "25px", color: "#eeeeeeee" }} />
               )}
             </Link>
           )} */}
@@ -350,27 +380,72 @@ const UserMenu = () => {
             </div>
           </div>)} */}
 
-          {userInfo?.pfp && (version == "1.0" || version == "2.0" || adminTest) && (
-            <Link
-              className={"flex-row items-center impact-arrow"}
-              href={"/~/rewards"}
-              style={{
-                border: "1px solid #999",
-                padding: "0 6px",
-                borderRadius: "10px",
-                backgroundColor: navMenu == "rewards" || router.route == "/~/rewards" ? "#bbddffaa" : "#002244ee",
-                margin: "0 0 0 0",
-                justifyContent: "center",
-                alignItems: "center"
-              }}
-            >
-              {navMenu == "rewards" || router.route == "/~/rewards" ? (
-                <BsGiftFill size={22} className="" style={{ fontSize: "25px", color: "#002244ee" }} />
-              ) : (
-                <BsGift size={22} className="" style={{ fontSize: "25px", color: "#eee" }} />
-              )}
-            </Link>
+
+
+        <Link
+          className={"flex-row items-center impact-arrow"}
+          href={"/~/tip"}
+          style={{
+            border: "1px solid #999",
+            padding: "0 6px",
+            borderRadius: "10px",
+            backgroundColor: navMenu == "tip" || router.route == "/~/tip" ? "#eeeeeeee" : "#002244ee",
+            margin: "0 0 0 0",
+            justifyContent: "center",
+            alignItems: "center"
+          }}
+        >
+          {navMenu == "rewards" || router.route == "/~/tip" ? (
+            <BsCurrencyExchange size={22} className="" style={{ fontSize: "25px", color: "#002244ee" }} />
+          ) : (
+            <BsCurrencyExchange size={22} className="" style={{ fontSize: "25px", color: "#eeeeeeee" }} />
           )}
+        </Link>
+
+
+        <Link
+          className={"flex-row items-center impact-arrow"}
+          href={"/~/rewards"}
+          style={{
+            border: "1px solid #999",
+            padding: "0 6px",
+            borderRadius: "10px",
+            backgroundColor: navMenu == "rewards" || router.route == "/~/rewards" ? "#eeeeeeee" : "#002244ee",
+            margin: "0 0 0 0",
+            justifyContent: "center",
+            alignItems: "center"
+          }}
+        >
+          {navMenu == "rewards" || router.route == "/~/rewards" ? (
+            <BsGiftFill size={22} className="" style={{ fontSize: "25px", color: "#002244ee" }} />
+          ) : (
+            <BsGift size={22} className="" style={{ fontSize: "25px", color: "#eeeeeeee" }} />
+          )}
+        </Link>
+
+        <div
+          className={"flex-row items-center impact-arrow"}
+          onClick={() => openSwipeable("welcome")}
+          // href={"/~/tip"}
+          style={{
+            border: "1px solid #999",
+            padding: "0 6px",
+            borderRadius: "10px",
+            backgroundColor: navMenu == "about" || router.route == "/~/about" ? "#eeeeeeee" : "#002244ee",
+            margin: "0 0 0 0",
+            justifyContent: "center",
+            alignItems: "center"
+          }}
+        >
+          {navMenu == "rewards" || router.route == "/~/about" ? (
+            <BsInfoCircle size={22} className="" style={{ fontSize: "25px", color: "#002244ee" }} />
+          ) : (
+            <BsInfoCircle size={22} className="" style={{ fontSize: "25px", color: "#eeeeeeee" }} />
+          )}
+        </div>
+
+
+
 
           {/* {(version == "2.0" || adminTest) && (
             <Link
@@ -389,7 +464,7 @@ const UserMenu = () => {
               {navMenu == "settings" || router.route == "/~/settings" ? (
                 <BsGearFill size={22} className="" style={{ fontSize: "25px", color: "#99ddff" }} />
               ) : (
-                <BsGear size={22} className="" style={{ fontSize: "25px", color: "#eee" }} />
+                <BsGear size={22} className="" style={{ fontSize: "25px", color: "#eeeeeeee" }} />
               )}
             </Link>
           )} */}

@@ -11,11 +11,18 @@ import WelcomeInfo from './WelcomeInfo';
 import ImpactInfo from './ImpactInfo';
 import StreakInfo from './StreakInfo';
 import CurateInfo from './CurateInfo';
+import TippingStreaksInfo from './TippingStreaksInfo';
 
-const version = process.env.NEXT_PUBLIC_VERSION
+const version = process.env.NEXT_PUBLIC_VERSION || '2.0'
 
 const SwipeablePanel = () => {
-  const { isLogged, isMiniApp, userBalances, panelOpen, setPanelOpen, panelTarget, setPanelTarget } = useContext(AccountContext)
+  const context = useContext(AccountContext);
+  
+  if (!context) {
+    return null; // Don't render if context is not available
+  }
+  
+  const { isLogged, isMiniApp, userBalances, panelOpen, setPanelOpen, panelTarget, setPanelTarget, tippingStreak = { streakData: [], totalDaysWithTips: 0 }, tippingCeloStreak = { streakData: [], totalDaysWithTips: 0 }, streaksLoading = false } = context;
   const panelRef = useRef(null);
   const { isMobile } = useMatchBreakpoints();
 
@@ -105,6 +112,7 @@ const SwipeablePanel = () => {
           {panelTarget == 'autoFund' && (<AutoFundInfo />)}
           {panelTarget == 'impactBoost' && (<ImpactInfo />)}
           {panelTarget == 'streak' && (<StreakInfo />)}
+          {panelTarget == 'tippingStreaks' && (<TippingStreaksInfo tippingStreak={tippingStreak} tippingCeloStreak={tippingCeloStreak} streaksLoading={streaksLoading} />)}
 
       </div>
 

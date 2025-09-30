@@ -138,7 +138,7 @@ const Layout = ({ children }) => {
         {/* <RightMenu /> */}
       </div>
       <ShowActionNav />
-      {((version == '1.0' && !adminTest) || (version == '2.0' || adminTest)) && <BottomBar />}
+      {/* {((version == '1.0' && !adminTest) || (version == '2.0' || adminTest)) && <BottomBar />} */}
       {/* {(version == '2.0' || adminTest) ? (<BottomBar />) : (<BottomMenu />)} */}
       <LoginModal />
       <LogoutModal />

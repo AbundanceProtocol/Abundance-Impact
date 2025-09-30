@@ -102,18 +102,18 @@ export default function Homepage({ test }) {
     isOn,
     setIsOn,
     setNewUser,
-    setIsSignedIn
+    setIsSignedIn,
+    selectedRole,
+    tippingStreak, setTippingStreak,
+    tippingCeloStreak, setTippingCeloStreak,
+    streaksLoading, setStreaksLoading
   } = useContext(AccountContext);
   const [screenWidth, setScreenWidth] = useState(undefined);
   const [screenHeight, setScreenHeight] = useState(undefined);
   const [textMax, setTextMax] = useState("562px");
   const [feedMax, setFeedMax] = useState("620px");
   // const [showPopup, setShowPopup] = useState({open: false, url: null})
-  const [tippingStreak, setTippingStreak] = useState({ streakData: Array(7).fill({ hasTip: false }), currentStreak: 0 });
   const [curationStreak, setCurationStreak] = useState({ streakData: Array(7).fill({ hasImpact: false }), currentStreak: 0 });
-  const [tippingCeloStreak, setTippingCeloStreak] = useState({ streakData: Array(7).fill({ hasTip: false }), currentStreak: 0 });
-
-  const [streaksLoading, setStreaksLoading] = useState(true);
   const router = useRouter();
   const { eco, referrer, autoFund } = router.query;
   const { isMobile } = useMatchBreakpoints();
@@ -880,7 +880,11 @@ export default function Homepage({ test }) {
 
 
         {/* GSAP ANIMATION */}
-        <CircularIconAnimation isOn={isOn} fid={fid} show={fid && fid == 9326} />
+        <CircularIconAnimation 
+          isOn={isOn} 
+          fid={fid} 
+          show={true} 
+        />
 
 
 
@@ -1025,7 +1029,7 @@ export default function Homepage({ test }) {
 
       {/* Status Icons Row */}
 
-      <div className='flex-row' style={{width: '100%', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', margin: '10px 0 0 0'}}>
+      {/* <div className='flex-row' style={{width: '100%', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', margin: '10px 0 0 0'}}>
         <div className='flex-row' style={{gap: '0.4rem', border: `1px solid #0af`, padding: '0 8px 0 0', borderRadius: '8px'}}>
 
         <Link 
@@ -1045,25 +1049,6 @@ export default function Homepage({ test }) {
               color={"#ace"} 
             />
           </Link>
-
-          {/* <Link 
-            href={"/"}
-            style={{
-              padding: '8px',
-              border: `0px solid ${isLogged ? "#0af" : "#aaa"}`,
-              borderRadius: '8px',
-              backgroundColor: 'transparent',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            <BsPersonFill 
-              size={16} 
-              color={isLogged ? "#0af" : "#aaa"} 
-            />
-          </Link> */}
-
 
           <Link 
             href={"/"}
@@ -1100,24 +1085,6 @@ export default function Homepage({ test }) {
               color={isOn.validate ? "#0af" : "#aaa"} 
             />
           </Link>
-
-          {/* <Link 
-            href={"/~/earn"}
-            style={{
-              padding: '8px',
-              border: `0px solid ${isLogged && isOn.autoFund ? "#0af" : "#aaa"}`,
-              borderRadius: '8px',
-              backgroundColor: 'transparent',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            <BsPiggyBankFill 
-              size={16} 
-              color={isLogged && isOn.autoFund ? "#0af" : "#aaa"} 
-            />
-          </Link> */}
 
           <Link 
             href={"/"}
@@ -1156,7 +1123,7 @@ export default function Homepage({ test }) {
             />
           </Link>
         </div>
-      </div>
+      </div> */}
 
 
       <Settings />
@@ -1167,7 +1134,7 @@ export default function Homepage({ test }) {
 
 
 
-            {(version == '2.0' || adminTest) && (<div className='flex-col' style={{backgroundColor: '', margin: '0px 0 0 0'}}>
+            {selectedRole === 3 && (<div className='flex-col' style={{backgroundColor: '', margin: '0px 0 0 0'}}>
 
               <div 
                 className='shadow flex-col'
@@ -1225,15 +1192,18 @@ export default function Homepage({ test }) {
                       style={{
                         backgroundColor: "#bbddff",
                         borderRadius: "10px",
-                        padding: "4px 0px",
+                        padding: "2px 0px 2px 8px",
                         border: "1px solid #335577",
                         minWidth: "40px",
                         textAlign: "center",
-                        height: "36px",
+                        height: "30px",
                         alignItems: "center",
-                        justifyContent: "center"
+                        justifyContent: "center",
+                        display: "flex",
+                        gap: "0rem"
                       }}
                     >
+                      <BsCurrencyExchange style={{ fill: "#000" }} size={24} />
                       <div
                         style={{
                           fontSize: "13px",
@@ -1282,49 +1252,26 @@ export default function Homepage({ test }) {
                     </div> */}
                   </div>
 
-                  <div style={{fontSize: '15px', fontWeight: '600', color: '#ace', margin: '8px 0 0px 0'}}>
-                    Tipping Streak
-                  </div>
-                  <div style={{fontSize: '11px', fontWeight: '400', color: '#ace', margin: '-6px 0 0px 0'}}>
-                    Tipped over $0.25 in the last 7 days
-                  </div>
-                  <div className='flex-row' style={{gap: '1.2rem', alignItems: 'center', justifyContent: 'center', margin: '-12px 0 0px 0'}}>
-                    {streaksLoading ? (
-                      Array(7).fill(0).map((_, index) => (
-                        <BsStar key={index} size={16} color="#444" />
-                      ))
-                    ) : (
-                      renderStreakStars(tippingStreak.streakData)
-                    )}
-
-                    <div className='flex-row' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(tippingCeloStreak?.totalDaysWithTips > 0) ? '#0af' : (tippingCeloStreak?.totalDaysWithTips > 0) ? '#ace' : '#aaa'}`, borderRadius: '8px', backgroundColor: '', alignItems: 'center', gap: '0.15rem', height: '30px'}}>
-                      <div style={{fontSize: '13px', fontWeight: '700', color: (tippingCeloStreak?.totalDaysWithTips > 0) ? '#0af' : '#aaa'}}>
-                        {streaksLoading ? '0/7' : `${tippingStreak.totalDaysWithTips || 0}/7`}
-                      </div>
-                    </div>
-                  </div>
-
-
-                  <div style={{fontSize: '15px', fontWeight: '600', color: '#ace', margin: '8px 0 0px 0'}}>
-                    Tipping Streak (Celo)
-                  </div>
-                  <div style={{fontSize: '11px', fontWeight: '400', color: '#ace', margin: '-6px 0 0px 0'}}>
-                    Tipped over $0.25 in the last 7 days on Celo
-                  </div>
-                  <div className='flex-row' style={{gap: '1.2rem', alignItems: 'center', justifyContent: 'center', margin: '-12px 0 0px 0'}}>
-                    {streaksLoading ? (
-                      Array(7).fill(0).map((_, index) => (
-                        <BsStar key={index} size={16} color="#444" />
-                      ))
-                    ) : (
-                      renderStreakStars(tippingCeloStreak.streakData)
-                    )}
-
-                    <div className='flex-row' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(tippingCeloStreak?.totalDaysWithTips > 0) ? '#0af' : '#aaa'}`, borderRadius: '8px', backgroundColor: '', alignItems: 'center', gap: '0.15rem', height: '30px'}}>
-                      <div style={{fontSize: '13px', fontWeight: '700', color: (tippingCeloStreak?.totalDaysWithTips > 0) ? '#0af' : '#aaa'}}>
-                        {streaksLoading ? '0/7' : `${tippingCeloStreak.totalDaysWithTips || 0}/7`}
-                      </div>
-                    </div>
+                  <div className='flex-row' style={{gap: '0.5rem', alignItems: 'center', justifyContent: 'center', margin: '8px 0 0px 0'}}>
+                    <button
+                      onClick={() => openSwipeable("tippingStreaks")}
+                      style={{
+                        backgroundColor: "#bbddff",
+                        borderRadius: "8px",
+                        padding: "6px 12px",
+                        border: "1px solid #335577",
+                        color: "#000",
+                        fontSize: "13px",
+                        fontWeight: "500",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.25rem"
+                      }}
+                    >
+                      <BsStarFill size={14} color="#000" />
+                      Check Tipping Streaks
+                    </button>
                   </div>
 
 
@@ -1366,21 +1313,6 @@ export default function Homepage({ test }) {
 
 
 
-            <div className='flex-row' style={{padding: '50px 18px 8px 18px', color: '#ace', fontSize: '20px', gap: '0.75rem', position: 'relative', fontWeight: '600', justifyContent: 'center'}}>
-              Maximize your Impact
-            </div>
-
-            <div className='flex-row' style={{padding: '0px 18px 18px 18px', color: '#8ac', fontSize: '18px', gap: '0.75rem', position: 'relative', fontWeight: '600', justifyContent: 'center'}}>
-              Maximize your Rewards
-            </div>
-
-
-
-      {(version == "2.0" || adminTest) && isLogged && (
-        <div
-          className="flex-row"
-          style={{ backgroundColor: "", justifyContent: "center", gap: "1rem", margin: "0px 0 -20px 0" }}
-        >
 
 
 
@@ -1388,56 +1320,9 @@ export default function Homepage({ test }) {
 
 
 
-          <div
-            className="flex-col"
-            style={{
-              padding: "1px 5px 1px 5px",
-              border: `1px solid ${isLogged && isOn.boost ? "#0af" : "#aaa"}`,
-              borderRadius: "18px",
-              backgroundColor: "",
-              alignItems: "center",
-              gap: "0.0rem",
-              height: "90px",
-              width: "135px",
-              justifyContent: "center"
-            }}
-          >
-            <div className="flex-row" style={{ gap: "0.5rem", alignItems: "center", padding: "0 10px" }}>
-              <BsStar color={isLogged && isOn.boost ? "#0af" : "#aaa"} size={40} />
-              <div style={{ fontSize: "43px", fontWeight: "700", color: isLogged && isOn.boost ? "#0af" : "#aaa" }}>
-                {userBalances.impact}
-              </div>
-            </div>
-            <div style={{ fontSize: "13px", fontWeight: "700", color: isLogged && isOn.boost ? "#0af" : "#aaa" }}>
-              Daily Points
-            </div>
-          </div>
 
-          <div
-            className="flex-col"
-            style={{
-              padding: "1px 5px 1px 5px",
-              border: `1px solid ${isLogged && isOn.boost ? "#0af" : "#aaa"}`,
-              borderRadius: "18px",
-              backgroundColor: "",
-              alignItems: "center",
-              gap: "0.0rem",
-              height: "90px",
-              justifyContent: "center",
-              width: "135px"
-            }}
-          >
-            <div className="flex-row" style={{ gap: "0.5rem", alignItems: "center", padding: "0 10px" }}>
-              <div style={{ fontSize: "43px", fontWeight: "700", color: isLogged && isOn.boost ? "#0af" : "#aaa" }}>
-                {formatNum(isOn?.score?.toFixed(0) || 0)}
-              </div>
-            </div>
-            <div style={{ fontSize: "13px", fontWeight: "700", color: isLogged && isOn.boost ? "#0af" : "#aaa" }}>
-              Impact Score
-            </div>
-          </div>
-        </div>
-      )}
+
+
 
 
       {/* <div
@@ -1613,669 +1498,14 @@ export default function Homepage({ test }) {
 
 
 
-      <div
-        className="flex-row"
-        style={{ backgroundColor: "", justifyContent: "center", gap: "1rem", margin: "35px 0 0px 0" }}
-      >
-        <div
-          className="flex-col"
-          style={{
-            padding: "1px 5px 1px 5px",
-            border: `1px solid ${isLogged ? "#0af" : "#aaa"}`,
-            borderRadius: "18px",
-            backgroundColor: "",
-            alignItems: "center",
-            gap: "0.0rem",
-            height: "145px",
-            width: "135px",
-            justifyContent: "center"
-          }}
-        >
-          <div style={{ fontSize: "13px", padding: "5px 0 5px 0", fontWeight: "700", color: isLogged ? "#0af" : "#aaa" }}>
-            Total Rewards
-          </div>
-          <div className="flex-row" style={{ gap: "0.5rem", alignItems: "center", padding: "0 10px" }}>
-            {/* <BsStar color={isLogged ? "#0af" : "#aaa"} size={40} /> */}
-            {totalLoading ? (
-              <Spinner size={36} color={isLogged ? "#0af" : "#aaa"} />
-            ) : (
-              <div style={{ fontSize: "28px", fontWeight: "700", color: isLogged ? "#0af" : "#aaa", height: "40px" }}>
-                {totalRewards?.sum > 0 ? formatNum(Math.floor(totalRewards?.sum)) || 0 : "--"}
-              </div>
-            )}
-          </div>
-          <div style={{ fontSize: "10px", padding: "0 0 5px 0", fontWeight: "700", color: isLogged ? "#0af" : "#aaa" }}>
-            $DEGEN
-          </div>
-
-          {(totalRewards?.sum > 0) && (<div
-            onClick={shareRewards}
-            className="flex-col"
-            style={{
-              // width: "100%",
-              justifyContent: "center",
-              alignItems: "center",
-              padding: "10px 0 10px 0"
-            }}
-          >
-            <div
-              className="flex-row"
-              style={{
-                gap: "0.75rem",
-                margin: "0px",
-                flexWrap: "wrap",
-                justifyContent: "center",
-                alignItems: "center"
-              }}
-            >
-              <div>
-                <div
-                  className="flex-row cast-act-lt"
-                  style={{
-                    borderRadius: "8px",
-                    padding: "8px 2px",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "0.25rem",
-                    height: "28px",
-                    width: "90px",
-                    // backgroundColor: "#aaa"
-                  }}
-                >
-                  {(!isMobile || isMobile) && <BsShareFill size={14} style={{ width: "21px" }} />}
-                  <p
-                    style={{
-                      padding: "0px",
-                      fontSize: isMobile ? "13px" : "13px",
-                      fontWeight: "500",
-                      textWrap: "wrap",
-                      textAlign: "center"
-                    }}
-                  >
-                    Share
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>)}
-
-        </div>
 
 
-        <div
-          className="flex-col"
-          style={{
-            padding: "1px 5px 1px 5px",
-            border: `1px solid ${isLogged ? "#0af" : "#aaa"}`,
-            borderRadius: "18px",
-            backgroundColor: "",
-            alignItems: "center",
-            gap: "0.0rem",
-            height: "145px",
-            width: "135px",
-            justifyContent: "center"
-          }}
-        >
-          <div style={{ fontSize: "13px", padding: "5px 0 5px 0", fontWeight: "700", color: isLogged ? "#0af" : "#aaa" }}>
-            Onchain Tips
-          </div>
-          <div className="flex-row" style={{ gap: "0.5rem", alignItems: "center", padding: "0 10px" }}>
-            {/* <BsStar color={isLogged ? "#0af" : "#aaa"} size={40} /> */}
-            {onchainTipsLoading ? (
-              <Spinner size={36} color={isLogged ? "#0af" : "#aaa"} />
-            ) : (
-              <div style={{ fontSize: "28px", fontWeight: "700", color: isLogged ? "#0af" : "#aaa", height: "40px" }}>
-                {onchainTips && onchainTips > 0 ? onchainTips > 1 ? '$' + onchainTips.toFixed(1) : '$' + onchainTips.toFixed(3) || 0 : "--"}
-              </div>
-            )}
-          </div>
-          <div style={{ fontSize: "10px", padding: "0 0 5px 0", fontWeight: "700", color: isLogged ? "#0af" : "#aaa" }}>
-            USD
-          </div>
-
-          {(onchainTips && onchainTips > 0) && (<div
-            onClick={shareMultiTip}
-            className="flex-col"
-            style={{
-              // width: "100%",
-              justifyContent: "center",
-              alignItems: "center",
-              padding: "10px 0 10px 0"
-            }}
-          >
-            <div
-              className="flex-row"
-              style={{
-                gap: "0.75rem",
-                margin: "0px",
-                flexWrap: "wrap",
-                justifyContent: "center",
-                alignItems: "center"
-              }}
-            >
-              <div>
-                <div
-                  className="flex-row cast-act-lt"
-                  style={{
-                    borderRadius: "8px",
-                    padding: "8px 2px",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "0.25rem",
-                    height: "28px",
-                    width: "90px",
-                    // backgroundColor: "#aaa"
-                  }}
-                >
-                  {(!isMobile || isMobile) && <BsShareFill size={14} style={{ width: "21px" }} />}
-                  <p
-                    style={{
-                      padding: "0px",
-                      fontSize: isMobile ? "13px" : "13px",
-                      fontWeight: "500",
-                      textWrap: "wrap",
-                      textAlign: "center"
-                    }}
-                  >
-                    Share
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>)}
-
-        </div>
-
-
-      </div>
-
-
-
-
-
-
-      <div
+      {selectedRole === 4 && (<div
         className="flex-row"
         style={{
           justifyContent: "center",
           alignItems: "center",
-          padding: "80px 10px 0 10px",
-          flexWrap: "wrap",
-          gap: "1rem"
-        }}
-      >
-        <div
-          onClick={shareCuration}
-          className="flex-col"
-          style={{
-            // width: "100%",
-            justifyContent: "center",
-            alignItems: "center"
-          }}
-        >
-          <div
-            className="flex-row"
-            style={{
-              gap: "0.75rem",
-              margin: "0px",
-              flexWrap: "wrap",
-              justifyContent: "center",
-              alignItems: "center"
-            }}
-          >
-            <div>
-              <div
-                className="flex-row cast-act-lt"
-                style={{
-                  borderRadius: "8px",
-                  padding: "8px 8px",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "0.25rem",
-                  height: "40px",
-                  width: "100px",
-                  // backgroundColor: "#aaa"
-                }}
-              >
-                {(!isMobile || isMobile) && <BsShareFill size={20} style={{ width: "21px" }} />}
-                <p
-                  style={{
-                    padding: "0px",
-                    fontSize: isMobile ? "14px" : "18px",
-                    fontWeight: "500",
-                    textWrap: "wrap",
-                    textAlign: "center"
-                  }}
-                >
-                  Share
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <Link
-          href={"/~/tip"}
-          className="flex-col"
-          style={{
-            // width: "100%",
-            justifyContent: "center",
-            alignItems: "center"
-          }}
-        >
-          <div
-            className="flex-row"
-            style={{
-              gap: "0.75rem",
-              margin: "0px",
-              flexWrap: "wrap",
-              justifyContent: "center",
-              alignItems: "center"
-            }}
-          >
-            <div>
-              <div
-                className="flex-row cast-act-lt"
-                style={{
-                  borderRadius: "8px",
-                  padding: "8px 8px",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "0.25rem",
-                  height: "40px",
-                  width: "100px",
-                  // backgroundColor: "#aaa"
-                }}
-              >
-                {(!isMobile || isMobile) && <BsCurrencyExchange size={20} style={{ width: "21px" }} />}
-                <p
-                  style={{
-                    padding: "0px",
-                    fontSize: isMobile ? "14px" : "18px",
-                    fontWeight: "500",
-                    textWrap: "wrap",
-                    textAlign: "center"
-                  }}
-                >
-                  Tip
-                </p>
-              </div>
-            </div>
-          </div>
-        </Link>
-      </div>
-
-      <div
-        className="flex-row"
-        style={{
-          justifyContent: "center",
-          alignItems: "center",
-          padding: "20px 10px 0 10px",
-          flexWrap: "wrap",
-          gap: "0.8rem"
-        }}
-      >
-        <Link
-          href={"/~/ecosystems/abundance"}
-          className="flex-col"
-          style={{
-            // width: "100%",
-            justifyContent: "center",
-            alignItems: "center"
-          }}
-        >
-          <div
-            className="flex-row"
-            style={{
-              gap: "0.75rem",
-              margin: "0px",
-              flexWrap: "wrap",
-              justifyContent: "center",
-              alignItems: "center"
-            }}
-          >
-            <div>
-              <div
-                className="flex-row cast-act-lt"
-                style={{
-                  borderRadius: "8px",
-                  padding: "8px 8px",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "0.25rem",
-                  height: "40px",
-                  width: "100px"
-                }}
-              >
-                {(!isMobile || isMobile) && <BsStarFill size={20} style={{ width: "21px" }} />}
-                <p
-                  style={{
-                    padding: "0px",
-                    fontSize: isMobile ? "16px" : "18px",
-                    fontWeight: "500",
-                    textWrap: "wrap",
-                    textAlign: "center"
-                  }}
-                >
-                  Explore
-                </p>
-              </div>
-            </div>
-          </div>
-        </Link>
-
-        <div
-          className="flex-col"
-          style={{
-            // width: "100%",
-            justifyContent: "center",
-            alignItems: "center"
-          }}
-        >
-          <div
-            className="flex-row"
-            style={{
-              gap: "0.75rem",
-              margin: "0px",
-              flexWrap: "wrap",
-              justifyContent: "center",
-              alignItems: "center"
-            }}
-          >
-            <div>
-              <div
-                className="flex-row cast-act-lt"
-                style={{
-                  borderRadius: "8px",
-                  padding: "8px 8px",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "0.25rem",
-                  height: "40px",
-                  width: "100px",
-                  backgroundColor: "#aaa"
-                }}
-              >
-                {(!isMobile || isMobile) && <BsShieldFillCheck size={20} style={{ width: "21px" }} />}
-                <p
-                  style={{
-                    padding: "0px",
-                    fontSize: isMobile ? "16px" : "18px",
-                    fontWeight: "500",
-                    textWrap: "wrap",
-                    textAlign: "center"
-                  }}
-                >
-                  Validate
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* <Link
-          href={"/~/auto-fund"}
-          className="flex-col"
-          style={{
-            // width: "100%",
-            justifyContent: "center",
-            alignItems: "center"
-          }}
-        >
-          <div
-            className="flex-row"
-            style={{
-              gap: "0.75rem",
-              margin: "0px",
-              flexWrap: "wrap",
-              justifyContent: "center",
-              alignItems: "center"
-            }}
-          >
-            <div>
-              <div
-                className="flex-row cast-act-lt"
-                style={{
-                  borderRadius: "8px",
-                  padding: "8px 8px",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "0.25rem",
-                  height: "40px",
-                  width: "100px"
-                }}
-              >
-                {(!isMobile || isMobile) && <BsPiggyBankFill size={20} style={{ width: "21px" }} />}
-                <p
-                  style={{
-                    padding: "0px",
-                    fontSize: isMobile ? "16px" : "18px",
-                    fontWeight: "500",
-                    textWrap: "wrap",
-                    textAlign: "center"
-                  }}
-                >
-                  Fund
-                </p>
-              </div>
-            </div>
-          </div>
-        </Link> */}
-
-        <Link
-          href={"/~/rewards"}
-          className="flex-col"
-          style={{
-            // width: "100%",
-            justifyContent: "center",
-            alignItems: "center"
-          }}
-        >
-          <div
-            className="flex-row"
-            style={{
-              gap: "0.75rem",
-              margin: "0px",
-              flexWrap: "wrap",
-              justifyContent: "center",
-              alignItems: "center"
-            }}
-          >
-            <div>
-              <div
-                className="flex-row cast-act-lt"
-                style={{
-                  borderRadius: "8px",
-                  padding: "8px 8px",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "0.25rem",
-                  height: "40px",
-                  width: "100px"
-                  // backgroundColor: "#aaa"
-                }}
-              >
-                {(!isMobile || isMobile) && <BsGiftFill size={20} style={{ width: "21px" }} />}
-                <p
-                  style={{
-                    padding: "0px",
-                    fontSize: isMobile ? "16px" : "18px",
-                    fontWeight: "500",
-                    textWrap: "wrap",
-                    textAlign: "center"
-                  }}
-                >
-                  Rewards
-                </p>
-              </div>
-            </div>
-          </div>
-        </Link>
-
-        {/* <div
-          className="flex-col"
-          style={{
-            // width: "100%",
-            justifyContent: "center",
-            alignItems: "center"
-          }}
-        >
-          <div
-            className="flex-row"
-            style={{
-              gap: "0.75rem",
-              margin: "0px",
-              flexWrap: "wrap",
-              justifyContent: "center",
-              alignItems: "center"
-            }}
-          >
-            <div>
-              <div
-                className="flex-row cast-act-lt"
-                style={{
-                  borderRadius: "8px",
-                  padding: "8px 8px",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "0.25rem",
-                  height: "40px",
-                  width: "100px",
-                  backgroundColor: "#aaa"
-                }}
-              >
-                {(!isMobile || isMobile) && <BsRocketTakeoffFill size={20} style={{ width: "21px" }} />}
-                <p
-                  style={{
-                    padding: "0px",
-                    fontSize: isMobile ? "16px" : "18px",
-                    fontWeight: "500",
-                    textWrap: "nowrap"
-                  }}
-                >
-                  Quests
-                </p>
-              </div>
-            </div>
-          </div>
-        </div> */}
-
-        {/* <div
-            className="flex-col"
-            style={{
-              // width: "100%",
-              justifyContent: "center",
-              alignItems: "center",
-              }} >
-
-              <div
-                className="flex-row"
-                style={{
-                  gap: "0.75rem",
-                  margin: "0px",
-                  flexWrap: "wrap",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <div>
-                  <div
-                    className="flex-col cast-act-lt"
-                    style={{
-                      borderRadius: "8px",
-                      padding: "8px 8px",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "0.25rem",
-                      height: '90px',
-                      width: '110px',
-                      backgroundColor: '#aaa'
-                    }}
-                  >
-                    {(!isMobile || isMobile) && <BsQuestionCircleFill size={20} style={{width: '21px'}} />}
-                    <p
-                      style={{
-                        padding: "0px",
-                        fontSize: isMobile ? '16px' : '18px',
-                        fontWeight: "500",
-                        textWrap: "wrap",
-                        textAlign: 'center'
-                      }} >
-                      How to
-                    </p>
-                    <p
-                      style={{
-                        padding: "0px",
-                        fontSize: isMobile ? '16px' : '18px',
-                        fontWeight: "500",
-                        textWrap: "wrap",
-                        textAlign: 'center'
-                      }} >
-                      Earn
-                    </p>
-                  </div>
-                </div>
-
-
-              </div>
-
-            </div> */}
-
-        {/* <Link
-          href={"/"}
-          className="flex-col"
-          style={{
-            // width: "100%",
-            justifyContent: "center",
-            alignItems: "center"
-          }}
-        >
-          <div
-            className="flex-row"
-            style={{
-              gap: "0.75rem",
-              margin: "0px",
-              flexWrap: "wrap",
-              justifyContent: "center",
-              alignItems: "center"
-            }}
-          >
-            <div>
-              <div
-                className="flex-row cast-act-lt"
-                style={{
-                  borderRadius: "8px",
-                  padding: "8px 8px",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "0.25rem",
-                  height: "40px",
-                  width: "100px"
-                }}
-              >
-                {(!isMobile || isMobile) && <BsGearFill size={20} style={{ width: "21px" }} />}
-                <p
-                  style={{
-                    padding: "0px",
-                    fontSize: isMobile ? "16px" : "18px",
-                    fontWeight: "500",
-                    textWrap: "nowrap"
-                  }}
-                >
-                  Settings
-                </p>
-              </div>
-            </div>
-          </div>
-        </Link> */}
-      </div>
-
-      <div
-        className="flex-row"
-        style={{
-          justifyContent: "center",
-          alignItems: "center",
-          padding: "40px 10px 100px 10px",
+          padding: "25px 10px 0px 10px",
           flexWrap: "wrap",
           gap: "0.5rem"
         }}
@@ -2295,7 +1525,7 @@ export default function Homepage({ test }) {
         >
           How it works
         </a>
-      </div>
+      </div>)}
 
       {/* <div
         className="flex-row"

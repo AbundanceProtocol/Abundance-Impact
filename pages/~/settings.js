@@ -10,6 +10,7 @@ import { useInView } from 'react-intersection-observer'
 // import ItemWrap from '../../components/Ecosystem/ItemWrap';
 import useMatchBreakpoints from '../../hooks/useMatchBreakpoints';
 import { FaPowerOff, FaLock, FaUsers, FaUser, FaGlobe, FaPlus, FaRegStar, FaCoins, FaAngleDown, FaShareAlt as Share, FaStar } from "react-icons/fa";
+import { Logo } from '../../components/assets';
 // import { GiRibbonMedal as Medal } from "react-icons/gi";
 // import { IoMdTrophy } from "react-icons/io";
 // import { IoInformationCircleOutline as Info, IoLogIn } from "react-icons/io5";
@@ -31,7 +32,7 @@ const version = process.env.NEXT_PUBLIC_VERSION
 export default function Settings({test, rewards, onSettingsChange}) {
   const ref2 = useRef(null)
   const [ref, inView] = useInView()
-  const { LoginPopup, checkEcoEligibility, ecoData, points, setPoints, isLogged, setShowLogin, setIsLogged, fid, setFid, getRemainingBalances, isMiniApp, userBalances, setIsMiniApp, LogoutPopup, userInfo, setUserInfo, setPanelOpen, setPanelTarget, adminTest, setAdminTest, isOn, setIsOn, isSignedIn, setIsSignedIn } = useContext(AccountContext)
+  const { LoginPopup, checkEcoEligibility, ecoData, points, setPoints, isLogged, setShowLogin, setIsLogged, fid, setFid, getRemainingBalances, isMiniApp, userBalances, setIsMiniApp, LogoutPopup, userInfo, setUserInfo, setPanelOpen, setPanelTarget, adminTest, setAdminTest, isOn, setIsOn, isSignedIn, setIsSignedIn, selectedRole } = useContext(AccountContext)
   const [screenWidth, setScreenWidth] = useState(undefined)
   const [screenHeight, setScreenHeight] = useState(undefined)
   const [textMax, setTextMax] = useState('562px')
@@ -835,12 +836,12 @@ export default function Settings({test, rewards, onSettingsChange}) {
 
           {/* NOMINATE */}
 
-          {(version == '2.0' || adminTest) && (<div className='flex-col' style={{backgroundColor: ''}}>
+          {selectedRole === 0 && (<div className='flex-col' style={{backgroundColor: ''}}>
 
 
-            <div className='flex-row' style={{padding: '40px 18px 18px 18px', color: '#ace', fontSize: '20px', gap: '0.75rem', position: 'relative', fontWeight: '600', justifyContent: 'center'}}>
+            {/* <div className='flex-row' style={{padding: '40px 18px 18px 18px', color: '#ace', fontSize: '20px', gap: '0.75rem', position: 'relative', fontWeight: '600', justifyContent: 'center'}}>
               Choose Your Roles:
-            </div>
+            </div> */}
 
 
             <div className='shadow flex-col'
@@ -849,7 +850,7 @@ export default function Settings({test, rewards, onSettingsChange}) {
                 borderRadius: "15px",
                 border: isOn.signal ? "1px solid #11447799" : "1px solid #555",
                 width: isMiniApp || isMobile ? '340px' : '100%',
-                margin: isMiniApp || isMobile ? '0px auto 0 auto' : '0px auto 0 auto',
+                margin: isMiniApp || isMobile ? '15px auto 0 auto' : '15px auto 0 auto',
               }} >
 
 
@@ -1025,24 +1026,52 @@ export default function Settings({test, rewards, onSettingsChange}) {
 
               </div>
 
+              <div className='flex-col' style={{backgroundColor: isOn.signal ? "#002244ff" : '#333', padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: isOn.signal ? '#ace' : '#ddd', fontSize: '15px', gap: '0.75rem', position: 'relative'}}>
 
-              <div className='flex-row' style={{backgroundColor: isOn.signal ? "#002244ff" : '#333', padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: isOn.signal ? '#ace' : '#ddd', fontSize: '12px', gap: '0.75rem', position: 'relative'}}>
+                <div className='flex-row' style={{fontSize: '15px', gap: '0.75rem', position: 'relative'}}>
 
-                <div className='flex-row' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(isOn.signal) ? '#0af' : '#aaa'}`, borderRadius: '8px', backgroundColor: '', alignItems: 'center', gap: '0.15rem', height: '30px'}}>
-                  <div style={{fontSize: '13px', fontWeight: '700', color: (isOn.signal) ? '#0af' : '#aaa'}}>
-                    +30
+                  <div className='flex-row' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(isOn.signal) ? '#0af' : '#aaa'}`, borderRadius: '8px', backgroundColor: '', alignItems: 'center', gap: '0.15rem', height: '30px'}}>
+                    <div style={{fontSize: '13px', fontWeight: '700', color: (isOn.signal) ? '#0af' : '#aaa'}}>
+                      +30
+                    </div>
+                    <BsStar color={(isOn.signal) ? '#0af' : '#aaa'} size={13} />
                   </div>
-                  <BsStar color={(isOn.signal) ? '#0af' : '#aaa'} size={13} />
+
+                  <div>
+                    Nominate impactful casts on Farcaster. Earn 10% of tips
+                  </div>
+
+                  
                 </div>
 
-                <div>
-                  Nominate impactful casts on Farcaster. Earn 10% of tips
-                </div>
+                <Link href={'/~/ecosystems/abundance'} className='flex-row' style={{gap: '0.5rem', alignItems: 'center', justifyContent: 'center', margin: '8px 0 0px 0'}}>
+                  <button
+                    // onClick={() => openSwipeable("tippingStreaks")}
+                    style={{
+                      backgroundColor: "#bbddff",
+                      borderRadius: "8px",
+                      padding: "6px 12px",
+                      border: "1px solid #335577",
+                      color: "#000",
+                      fontSize: "13px",
+                      fontWeight: "500",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.25rem"
+                    }}
+                  >
+                    <BsStarFill size={14} color="#000" />
+                    Explore Curations
+                  </button>
+                </Link>
                 <div className='flex-row' style={{position: 'absolute', bottom: '0', right: '0', padding: '5px 5px', gap: '.25rem', alignItems: 'center'}}>
                   <BsInfoCircle size={15} onClick={() => {
                     openSwipeable("curate"); }} />
                 </div>
+
               </div>
+              
             </div>
           </div>
           )}
@@ -1051,7 +1080,7 @@ export default function Settings({test, rewards, onSettingsChange}) {
 
           {/* VALIDATE */}
 
-          {(version == '2.0' || adminTest) && (<div className='flex-col' style={{backgroundColor: ''}}>
+          {selectedRole === 1 && (<div className='flex-col' style={{backgroundColor: ''}}>
 
             <div 
               className='shadow flex-col'
@@ -1174,34 +1203,67 @@ export default function Settings({test, rewards, onSettingsChange}) {
 
               </div>
 
-              <div className='flex-row' style={{backgroundColor: isOn.validate ? "#002244ff" : '#333', padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: isOn.validate ? '#ace' : '#ddd', fontSize: '12px', gap: '0.75rem', position: 'relative'}}>
+              <div className='flex-col' style={{backgroundColor: isOn.validate ? "#002244ff" : '#333', padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: isOn.validate ? '#ace' : '#ddd', fontSize: '15px', gap: '0.75rem', position: 'relative'}}>
 
-                <div className='flex-row' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(isOn.validate) ? '#0af' : (isOn.validate) ? '#ace' : '#aaa'}`, borderRadius: '8px', backgroundColor: '', alignItems: 'center', gap: '0.15rem', height: '30px'}}>
-                  <div style={{fontSize: '13px', fontWeight: '700', color: isOn.validate ? '#0af' : '#aaa'}}>
-                    +15
+                <div className='flex-row' style={{fontSize: '15px', gap: '0.75rem', position: 'relative'}}>
+
+                  <div className='flex-row' style={{padding: '1px 5px 1px 5px', border: `1px solid ${(isOn.validate) ? '#0af' : (isOn.validate) ? '#ace' : '#aaa'}`, borderRadius: '8px', backgroundColor: '', alignItems: 'center', gap: '0.15rem', height: '30px'}}>
+                    <div style={{fontSize: '13px', fontWeight: '700', color: isOn.validate ? '#0af' : '#aaa'}}>
+                      +15
+                    </div>
+                    <BsStar color={isOn.validate ? '#0af' : '#aaa'} size={13} />
                   </div>
-                  <BsStar color={isOn.validate ? '#0af' : '#aaa'} size={13} />
+
+                  <div>
+                    Ensure the quality of nominations. Earn 10% of tips
+                  </div>
+                {/* <div className='flex-row' style={{position: 'absolute', bottom: '0', right: '0', padding: '5px 5px', gap: '.25rem', alignItems: 'center'}}>
+                  <BsInfoCircle size={15} onClick={() => {
+                    openSwipeable("validate"); }} />
+                </div> */}
                 </div>
 
-                <div>
-                  Ensure the quality of nominations. Earn 7% of tips
+
+                <div className='flex-row' style={{gap: '0.5rem', alignItems: 'center', justifyContent: 'center', margin: '8px 0 0px 0'}}>
+                  <button
+                    // onClick={() => openSwipeable("tippingStreaks")}
+                    style={{
+                      backgroundColor: "#bbddff11",
+                      borderRadius: "8px",
+                      padding: "6px 12px",
+                      border: "1px solid #fff",
+                      color: "#fff",
+                      fontSize: "13px",
+                      fontWeight: "500",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.25rem"
+                    }}
+                  >
+                    <BsShieldCheck size={14} color="#fff" />
+                    Under Construction
+                  </button>
                 </div>
                 <div className='flex-row' style={{position: 'absolute', bottom: '0', right: '0', padding: '5px 5px', gap: '.25rem', alignItems: 'center'}}>
                   <BsInfoCircle size={15} onClick={() => {
                     openSwipeable("validate"); }} />
                 </div>
               </div>
-            </div>
-            </div>
 
-            )}
+
+
+            </div>
+          </div>
+
+          )}
 
 
 
 
           {/* BOOST */}
 
-          {(version == '2.0' || adminTest) && (<div className='flex-col' style={{backgroundColor: ''}}>
+          {selectedRole === 2 && (<div className='flex-col' style={{backgroundColor: ''}}>
 
             <div className='shadow flex-col'
               style={{
@@ -1400,7 +1462,7 @@ export default function Settings({test, rewards, onSettingsChange}) {
                 </div>
 
                 <div>
-                  Let Impact boost validated casts with your 'likes.' Earn 7% of tips
+                  Let Impact boost validated casts with your 'likes.' Earn 10% of tips
                 </div>
                 <div className='flex-row' style={{position: 'absolute', bottom: '0', right: '0', padding: '5px 5px', gap: '.25rem', alignItems: 'center'}}>
                   <BsInfoCircle size={15} onClick={() => {
@@ -1428,7 +1490,7 @@ export default function Settings({test, rewards, onSettingsChange}) {
                 </div>
 
                 <div>
-                  Auto-boost Impact-centered casts from @abundance. Earn 7% of tips
+                  Auto-boost Impact-centered casts from @abundance. Earn 10% of tips
                 </div>
                 <div className='flex-row' style={{position: 'absolute', bottom: '0', right: '0', padding: '5px 5px', gap: '.25rem', alignItems: 'center'}}>
                   <BsInfoCircle size={15} onClick={() => {
@@ -1444,6 +1506,121 @@ export default function Settings({test, rewards, onSettingsChange}) {
 
 
 
+
+
+          {/* CASTER */}
+
+          {selectedRole === 4 && (<div className='flex-col' style={{backgroundColor: ''}}>
+
+            <div className='shadow flex-col'
+              style={{
+                backgroundColor: "#002244",
+                borderRadius: "15px", 
+                border: "1px solid #11447799",
+                width: isMiniApp || isMobile ? '340px' : '100%',
+                margin: isMiniApp || isMobile ? '15px auto 0 auto' : '15px auto 0 auto',
+              }} >
+
+              <div
+                className="shadow flex-row"
+                style={{
+                  backgroundColor: "#11448888",
+                  width: "100%",
+                  justifyContent: "space-between", 
+                  alignItems: "center",
+                  padding: "8px", 
+                  borderRadius: "15px",
+                  margin: '0 0 10px 0',
+                  gap: '1rem'
+                }} >
+
+                <div
+                  className="flex-row"
+                  style={{
+                    width: "100%",
+                    justifyContent: "flex-start",
+                    alignItems: "center",
+                    padding: "0px 0 0 4px",
+                    margin: '0 0 0px 0',
+                  }} >
+                
+                  <Logo style={{ fill: "#cde" }} width={20} height={20} />
+                  <div>
+                    <div style={{border: '0px solid #777', padding: '2px', borderRadius: '10px', backgroundColor: '', maxWidth: 'fit-content', cursor: 'pointer', color: '#cde'}}>
+                      <div className="top-layer flex-row">
+                        <div className="flex-row" style={{padding: "4px 0 4px 10px", marginBottom: '0px', flexWrap: 'wrap', justifyContent: 'flex-start', gap: '0.00rem', width: '', alignItems: 'center'}}>
+                          <div style={{fontSize: isMobile ? '18px' : '22px', fontWeight: '600', color: '', padding: '0px 3px'}}>
+                            Impact 2.0
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* <div style={{
+                  backgroundColor: "#002244",
+                  borderRadius: "6px",
+                  padding: "2px 6px",
+                  border: "1px solid #00aaff",
+                  minWidth: "50px",
+                  textAlign: "center"
+                }}>
+                  <div style={{
+                    fontSize: "12px",
+                    fontWeight: "400",
+                    color: "#00aaff",
+                    lineHeight: "1"
+                  }}>
+                    {`active\ncaster`}
+                  </div>
+                </div> */}
+              </div>
+
+              <div className='flex-col' style={{backgroundColor: "#002244ff", padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: '#ace', fontSize: '15px', gap: '0.75rem', position: 'relative'}}>
+                {/* <div className='flex-row' style={{padding: '1px 5px 1px 5px', border: '1px solid #0af', borderRadius: '8px', backgroundColor: '', alignItems: 'center', gap: '0.15rem', height: '30px'}}>
+                  <div style={{fontSize: '13px', fontWeight: '700', color: '#0af'}}>
+                    70%
+                  </div>
+                  <BsPerson color='#0af' size={13} />
+                </div> */}
+                <div>
+                  Impact 2.0 aims to create a user-centric algo, so that creators & devs on Farcaster can focus on value creation (instead of engagement)
+                </div>
+
+                <Link href={'/~/rewards'} className='flex-row' style={{gap: '0.5rem', alignItems: 'center', justifyContent: 'center', margin: '8px 0 0px 0'}}>
+                  <button
+                    // onClick={() => openSwipeable("tippingStreaks")}
+                    style={{
+                      backgroundColor: "#bbddff",
+                      borderRadius: "8px",
+                      padding: "6px 12px",
+                      border: "1px solid #335577",
+                      color: "#000",
+                      fontSize: "13px",
+                      fontWeight: "500",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.25rem"
+                    }}
+                  >
+                    <BsGiftFill size={14} color="#000" />
+                    Check Rewards
+                  </button>
+                </Link>
+
+
+                {/* <div>
+                  Impact Curators, Validators, Boosters & Supporters proactively boost and reward your contribution to the network
+                </div> */}
+                <div className='flex-row' style={{position: 'absolute', bottom: '0', right: '0', padding: '5px 5px', gap: '.25rem', alignItems: 'center'}}>
+                  <BsInfoCircle size={15} onClick={() => openSwipeable("welcome")} />
+                </div>
+              </div>
+            </div>
+          </div>
+          )}
 
 
           {/* AUTO-FUND */}
