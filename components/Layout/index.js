@@ -128,7 +128,7 @@ const Layout = ({ children }) => {
       </Head>
 
 
-      <div className='flex-row' style={{justifyContent: 'center', width: 'auto'}}>
+      <div className='flex-col' style={{justifyContent: 'center', width: 'auto'}}>
         <UserMenu />
         <CenterMenu>{children}</CenterMenu>
       </div>
