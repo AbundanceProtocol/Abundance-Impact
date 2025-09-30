@@ -895,7 +895,7 @@ export default function Home() {
 
       </div>
       {!isLogged && (<div ref={ref}>&nbsp;</div>)}
-      {(version == '2.0' || adminTest) || (version == '1.0' && !adminTest) && isLogged && <ProfilePage />}
+      {/* {(version == '2.0' || adminTest) || (version == '1.0' && !adminTest) && isLogged && <ProfilePage />} */}
     </div>
   );
 }
