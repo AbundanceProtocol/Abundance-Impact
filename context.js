@@ -23,7 +23,7 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
   const [showLogout, setShowLogout] = useState(false)
   const [userBalances, setUserBalances] = useState({impact: 0, qdau: 0})
   const [points, setPoints] = useState('$IMPACT')
-  const [isMiniApp, setIsMiniApp] = useState(null)
+  const [isMiniApp, setIsMiniApp] = useState(false)
   const [prevPoints, setPrevPoints] = useState(null)
   const [isLogged, setIsLogged] = useState(false)
   const [fid, setFid] = useState(null)
