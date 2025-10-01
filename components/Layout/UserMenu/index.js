@@ -72,7 +72,8 @@ const UserMenu = () => {
           score: userSettings?.score || 0,
           notifs: userSettings?.notifs || false,
           impactBoost: userSettings?.impactBoost || false,
-          signal: isOn?.signal || false
+          signal: isOn?.signal || false,
+          tip: userSettings?.tip > 0 ? true : false
         }));
       }
       // setLoading({

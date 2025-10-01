@@ -507,7 +507,8 @@ export default function Homepage({ test }) {
           score: userSettings?.score || 0,
           notifs: userSettings?.notifs || false,
           impactBoost: userSettings?.impactBoost || false,
-          signal: isOn?.signal
+          signal: isOn?.signal,
+          tip: userSettings?.tip > 0 ? true : false
         }));
       }
       setLoading({
@@ -537,7 +538,8 @@ export default function Homepage({ test }) {
         score: 0,
         notifs: false,
         impactBoost: false,
-        signal: isOn?.signal || false
+        signal: isOn?.signal || false,
+        tip: isOn?.tip || false
       }));
     }
   }, [isLogged]);
@@ -1228,9 +1230,9 @@ export default function Homepage({ test }) {
         fontWeight: 600,
         borderRadius: "8px",
         padding: "3px 9px",
-        backgroundColor: selectedRole === 3 ? (tippingCeloStreak?.totalDaysWithTips > 0) ? "#ffdd66" : "#fff" : "#11448888",
+        backgroundColor: selectedRole === 3 ? (isOn.tip ? "#ffdd66" : "#fff") : "#11448888",
         border: "1px solid #11447799",
-        color: selectedRole === 3 ? "#000" : (tippingCeloStreak?.totalDaysWithTips > 0) ? "#ffdd66" : "#fff",
+        color: selectedRole === 3 ? "#000" : (isOn.tip ? "#ffdd66" : "#fff"),
         margin: '0',
         width: 'fit-content',
         cursor: "pointer"
@@ -1261,16 +1263,16 @@ export default function Homepage({ test }) {
       <div 
         className='shadow flex-col'
         style={{
-          backgroundColor: tippingCeloStreak?.totalDaysWithTips > 0 ? "#002244" : '#333',
+          backgroundColor: isOn.tip ? "#002244" : '#333',
           borderRadius: "15px",
-          border: tippingCeloStreak?.totalDaysWithTips > 0 ? "1px solid #11447799" : "1px solid #555",
+          border: isOn.tip ? "1px solid #11447799" : "1px solid #555",
           width: isMiniApp || isMobile ? '340px' : '100%',
           margin: isMiniApp || isMobile ? '15px auto 0 auto' : '15px auto 0 auto',
         }} >
         <div
           className="shadow flex-row"
           style={{
-            backgroundColor: tippingCeloStreak?.totalDaysWithTips > 0 ? "#11448888" : "#444",
+            backgroundColor: isOn.tip ? "#11448888" : "#444",
             width: "100%",
             justifyContent: "space-between",
             alignItems: "center",
@@ -1351,10 +1353,10 @@ export default function Homepage({ test }) {
 
         </div>
 
-        <div className='flex-col' style={{backgroundColor: tippingCeloStreak?.totalDaysWithTips > 0 ? "#002244ff" : '#333', padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: tippingCeloStreak?.totalDaysWithTips > 0 ? '#ace' : '#ddd', fontSize: '12px', gap: '0.75rem', position: 'relative'}}>
+        <div className='flex-col' style={{backgroundColor: isOn.tip ? "#002244ff" : '#333', padding: '0px 18px 12px 18px', borderRadius: '0 0 15px 15px', color: isOn.tip ? '#ace' : '#ddd', fontSize: '12px', gap: '0.75rem', position: 'relative'}}>
 
 
-          <div className='flex-row' style={{backgroundColor: tippingCeloStreak?.totalDaysWithTips > 0 ? "#002244ff" : '#333', padding: '0px', borderRadius: '0 0 15px 15px', color: tippingCeloStreak?.totalDaysWithTips > 0 ? '#ace' : '#ddd', fontSize: '12px', gap: '0.75rem', position: 'relative', alignItems: 'center'}}>
+          <div className='flex-row' style={{backgroundColor: isOn.tip ? "#002244ff" : '#333', padding: '0px', borderRadius: '0 0 15px 15px', color: isOn.tip ? '#ace' : '#ddd', fontSize: '12px', gap: '0.75rem', position: 'relative', alignItems: 'center'}}>
 
 
 

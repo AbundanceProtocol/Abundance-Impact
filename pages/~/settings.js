@@ -196,7 +196,8 @@ export default function Settings({test, rewards, onSettingsChange}) {
           impactBoost: userSettings.impactBoost || false,
           score: userSettings.score || 0,
           notifs: userSettings.notifs || false,
-          signal: isOn?.signal
+          signal: isOn?.signal,
+          tip: userSettings?.tip > 0 ? true : false
         }))
       }
       setLoading({
@@ -228,7 +229,8 @@ export default function Settings({test, rewards, onSettingsChange}) {
         impactBoost: false,
         score: 0,
         notifs: false,
-        signal: isOn?.signal
+        signal: isOn?.signal,
+        tip: isOn?.tip || false
       }))
     }
   }, [isLogged]);
