@@ -115,7 +115,7 @@ const erc20ABI = [
 import Head from "next/head";
 
 import { IoIosRocket, IoMdTrophy, IoMdRefresh as Refresh, IoCloseCircle } from "react-icons/io";
-import { BsLightningChargeFill as Impact, BsPiggyBankFill, BsQuestionCircle, BsGiftFill, BsCurrencyExchange, BsFillFunnelFill } from "react-icons/bs";
+import { BsLightningChargeFill as Impact, BsPiggyBankFill, BsQuestionCircle, BsGiftFill, BsCurrencyExchange, BsFillFunnelFill, BsInfoCircle } from "react-icons/bs";
 import { BiSortDown, BiSortUp } from "react-icons/bi";
 import { IoShuffleOutline as ShuffleIcon } from "react-icons/io5";
 import { PiClockClockwiseBold as ClockForward, PiClockCounterClockwiseBold as ClockBack } from "react-icons/pi";
@@ -314,6 +314,9 @@ export default function Tip({ curatorId }) {
   
   // Collapsible state for Impact Filter
   const [isImpactFilterCollapsed, setIsImpactFilterCollapsed] = useState(true);
+  
+  // How it works text expansion state
+  const [showFullText, setShowFullText] = useState(false);
   
   // Network switching state
   const [isSwitchingNetwork, setIsSwitchingNetwork] = useState(false);
@@ -2978,6 +2981,106 @@ export default function Tip({ curatorId }) {
 
       {/* Wallet Integration Section */}
       {(version == '1.0' || version == '2.0' || adminTest) && (<div style={{ padding: "20px 4px 0px 4px", width: feedMax }}>
+        {/* How it works info frame - Separate from main container */}
+        <div
+          className="shadow flex-col"
+          style={{
+            backgroundColor: "#002244",
+            borderRadius: "15px",
+            border: "1px solid #11447799",
+            width: isMiniApp || isMobile ? "340px" : "100%",
+            margin: "0px auto 25px auto",
+            padding: "15px"
+          }}
+        >
+          <div
+            className="flex-row"
+            style={{
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "8px",
+              marginBottom: "12px"
+            }}
+          >
+            <BsInfoCircle style={{ fill: "#cde" }} size={18} />
+            <div
+              style={{
+                fontSize: isMobile ? "18px" : "22px",
+                fontWeight: "600",
+                color: "#cde"
+              }}
+            >
+              How Multi-Tipping Works
+            </div>
+          </div>
+          <div
+            style={{
+              fontSize: "13px",
+              color: "#9df",
+              lineHeight: "1.5",
+              textAlign: "left"
+            }}
+          >
+            Onchain Multi-Tipping allows you to distribute any token on Base, Celo or Arbitrum to creators & devs.
+            <br /><br />
+            Choose your token. Choose the amount to distribute. Approve the token, then tap on Multi-Tip.
+            {!showFullText && (
+              <>
+                <br /><br />
+                <div style={{ textAlign: "center", marginTop: "-12px" }}>
+                  <button
+                    onClick={() => setShowFullText(true)}
+                    style={{
+                      backgroundColor: "transparent",
+                      border: "1px solid #0af",
+                      borderRadius: "6px",
+                      color: "#0af",
+                      fontSize: "12px",
+                      padding: "4px 8px",
+                      cursor: "pointer",
+                      fontWeight: "500"
+                    }}
+                  >
+                    read more
+                  </button>
+                </div>
+              </>
+            )}
+            {showFullText && (
+              <>
+                <br /><br />
+                Tokens are distributed in proportion to the impact points casters accumulated within a timeframe.
+                <br /><br />
+                You can filter casters by Time, Channel and Curator.
+                <br /><br />
+                Check the Tip Distribution frame to see how the tokens would be distributed.
+                <br /><br />
+                Curators gets 10% of rewards, proportionate to their nominations.
+                <br /><br />
+                You can choose to distribute a percentage of the funds to Impact Fund, which would be used to reward contributors and grow the Impact ecosystem.
+                <br /><br />
+                <div style={{ textAlign: "center", marginTop: "-12px" }}>
+                  <button
+                    onClick={() => setShowFullText(false)}
+                    style={{
+                      backgroundColor: "transparent",
+                      border: "1px solid #0af",
+                      borderRadius: "6px",
+                      color: "#0af",
+                      fontSize: "12px",
+                      padding: "4px 8px",
+                      cursor: "pointer",
+                      fontWeight: "500",
+                    }}
+                  >
+                    show less
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+
         <div className="flex-col" style={{ backgroundColor: "" }}>
           <div
             className="shadow flex-col"
@@ -2989,6 +3092,7 @@ export default function Tip({ curatorId }) {
               margin: "0px auto 0 auto"
             }}
           >
+
             <div
               className="shadow flex-row"
               style={{
