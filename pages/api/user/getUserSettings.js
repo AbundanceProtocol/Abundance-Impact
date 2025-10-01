@@ -3,6 +3,7 @@ import User from '../../../models/User';
 import Score from '../../../models/Score';
 import Miniapp from '../../../models/Miniapp';
 import ScheduleTip from '../../../models/ScheduleTip';
+import OnchainTip from '../../../models/OnchainTip';
 
 export default async function handler(req, res) {
   const { fid } = req.query
@@ -14,6 +15,10 @@ export default async function handler(req, res) {
     async function getUserSettings(fid) {
       try {
         await connectToDatabase();
+
+        const fidNum = Number(fid);
+        const tip = await OnchainTip.countDocuments({ tipper_fid: fidNum });
+
 
         const user = await User.findOne({ fid: fid.toString(), ecosystem_points: '$IMPACT' }).select('validator boost impact_boost').lean().exec();
 
@@ -51,10 +56,10 @@ export default async function handler(req, res) {
           userNotifs = notifs.active || false
         }
 
-        return {validate, boost, autoFund, impactBoost, score: scoreTotal, notifs: userNotifs}
+        return {validate, boost, autoFund, impactBoost, score: scoreTotal, notifs: userNotifs, tip}
       } catch (error) {
         console.error('Error:', error);
-        return {validate: false, boost: false, autoFund: false, impactBoost: false, score: 0, notifs: false}
+        return {validate: false, boost: false, autoFund: false, impactBoost: false, score: 0, notifs: false, tip: 0}
       }
     }
 

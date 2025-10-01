@@ -251,7 +251,8 @@ export default function Home() {
           impactBoost: userSettings.impactBoost || false,
           score: userSettings.score || 0,
           notifs: userSettings.notifs || false,
-          signal: isOn?.signal || false
+          signal: isOn?.signal || false,
+          tip: userSettings.tip > 0 ? true : false
         })
       }
       setLoading({
@@ -283,7 +284,8 @@ export default function Home() {
         score: 0,
         notifs: false,
         impactBoost: false,
-        signal: isOn?.signal || false
+        signal: isOn?.signal || false,
+        tip: isOn?.tip || false
       })
     }
   }, [isLogged]);
