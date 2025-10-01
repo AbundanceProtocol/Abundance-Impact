@@ -1230,9 +1230,9 @@ export default function Homepage({ test }) {
         fontWeight: 600,
         borderRadius: "8px",
         padding: "3px 9px",
-        backgroundColor: selectedRole === 3 ? (tippingCeloStreak?.totalDaysWithTips > 0) ? "#ffdd66" : "#fff" : "#11448888",
+        backgroundColor: selectedRole === 3 ? (isOn.tip ? "#ffdd66" : "#fff") : "#11448888",
         border: "1px solid #11447799",
-        color: selectedRole === 3 ? "#000" : (tippingCeloStreak?.totalDaysWithTips > 0) ? "#ffdd66" : "#fff",
+        color: selectedRole === 3 ? "#000" : (isOn.tip ? "#ffdd66" : "#fff"),
         margin: '0',
         width: 'fit-content',
         cursor: "pointer"

@@ -64,8 +64,8 @@ export default async function handler(req, res) {
     }
 
     try {
-      const {validate, boost, autoFund, impactBoost, score, notifs} = await getUserSettings(fid)
-      res.status(200).json({ validate, boost, autoFund, impactBoost, score, notifs });
+      const {validate, boost, autoFund, impactBoost, score, notifs, tip} = await getUserSettings(fid)
+      res.status(200).json({ validate, boost, autoFund, impactBoost, score, notifs, tip });
     } catch (error) {
       console.error('Error submitting data:', error)
       res.status(500).json({ error: 'Internal Server Error' });
