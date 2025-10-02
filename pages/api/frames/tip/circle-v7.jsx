@@ -116,6 +116,7 @@ export default async function handler(req, res) {
 
     const pfp = await getUser(channel)
 
+    console.log('pfp', pfp, 'channel', channel)
 
     let showcase = null
 
@@ -146,7 +147,7 @@ export default async function handler(req, res) {
 
 
             <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '3px 5px 10px 2px', height: '240px'}}>
-            {pfp && (<img src={pfp} width={100} height={100} style={{borderRadius: '80px', border: '2px solid #eee', backgroundColor: '#8363ca'}} />)}
+            {pfp && (<img src={pfp || "https://ipfs.decentralized-content.com/ipfs/bafkreialf5usxssf2eu3e5ct37zzdd553d7lg7oywvdszmrg5p2zpkta7u"} width={100} height={100} style={{borderRadius: '80px', border: '2px solid #eee', backgroundColor: '#8363ca'}} />)}
 
             {channel && (<div style={{display: 'flex', flexDirection: 'row', color: 'black', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', border: '1px solid #eeeeeeaa', borderRadius: '16px', padding: '3px 10px', background: '#eeeeeeaa', width: 'auto', margin: '0'}}>
 
