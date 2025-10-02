@@ -724,9 +724,7 @@ export default function CuratorFid() {
             <div className={timeframe == 'all' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('all')}}>all</div>
           </div>
         </div>
-
-
-        </div>
+      </div>
       )}
 
       <div style={{margin: '0 0 70px 0'}}>
