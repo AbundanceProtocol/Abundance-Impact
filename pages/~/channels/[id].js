@@ -1,7 +1,6 @@
 import Head from "next/head";
 
 export async function getServerSideProps({ params, query }) {
-  const { hash } = params;
   const { id } = query;
   const frameContent = {
     version: "next",
@@ -17,10 +16,10 @@ export async function getServerSideProps({ params, query }) {
       },
     },
   };
-  return { props: { hash, frameContent, fid } };
+  return { props: { frameContent, id } };
 }
 
-function Rewards({ hash, frameContent, fid }) {
+function Rewards({ frameContent, id }) {
   return (
     <>
       <Head>
@@ -34,7 +33,7 @@ function Rewards({ hash, frameContent, fid }) {
 
       <div>
         <h1>Impact 2.0 Curation</h1>
-        <p>hash: {hash}</p>
+        <p>channel: {id}</p>
       </div>
     </>
   );
