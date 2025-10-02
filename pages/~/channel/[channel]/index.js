@@ -655,8 +655,8 @@ export default function CuratorFid() {
         <meta
           name="fc:frame"
           content={`{"version":"next","imageUrl":"${baseURL}/api/frames/tip/circle-v7?${qs.stringify({
-            channel: channel || null
-          })}","button":{"title":"Curated Channel","action":{"type":"launch_frame","name":"Impact 2.0","url":"https://impact.abundance.id/~/channel/${channel}","splashImageUrl":"https://impact.abundance.id/images/icon.png","splashBackgroundColor":"#011222"}}}`}
+            channel
+          })}","button":{"title":"Curated Channel","action":{"type":"launch_frame","name":"Impact 2.0","url":"https://impact.abundance.id/~/channels/${channel}","splashImageUrl":"https://impact.abundance.id/images/icon.png","splashBackgroundColor":"#011222"}}}`}
         />
 
         {/* Mini App specific metadata */}
@@ -664,7 +664,7 @@ export default function CuratorFid() {
         <meta name="fc:miniapp:name" content="Impact 2.0" />
         <meta name="fc:miniapp:description" content="Get boosted and rewarded for your impact on Farcaster" />
         <meta name="fc:miniapp:icon" content="https://impact.abundance.id/images/icon-02.png" />
-        <meta name="fc:miniapp:url" content={`https://impact.abundance.id/~/curator/${fid}`} />
+        <meta name="fc:miniapp:url" content={`https://impact.abundance.id/~/channel/${channel}`} />
       </Head>
       {/* <div className="" style={{padding: '58px 0 0 0'}}>
       </div> */}
@@ -724,9 +724,7 @@ export default function CuratorFid() {
             <div className={timeframe == 'all' ? 'filter-item-on' : 'filter-item'} onClick={() => {updateTime('all')}}>all</div>
           </div>
         </div>
-
-
-        </div>
+      </div>
       )}
 
       <div style={{margin: '0 0 70px 0'}}>

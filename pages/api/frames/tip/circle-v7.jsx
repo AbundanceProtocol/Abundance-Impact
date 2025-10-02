@@ -13,6 +13,7 @@ const cache = new NodeCache({ stdTTL: 60 });
 
 export default async function handler(req, res) {
   const { channel } = req.query
+  console.log('channel1', channel)
 
   try {
     const fontPath = path.join(process.cwd(), 'public', 'Inter-SemiBold.ttf');
@@ -39,7 +40,7 @@ export default async function handler(req, res) {
 
     const pfp = await getUser(channel)
 
-    // console.log('pfp', pfp, 'channel', channel)
+    console.log('pfp', pfp, 'channel2', channel)
 
     let showcase = null
 
