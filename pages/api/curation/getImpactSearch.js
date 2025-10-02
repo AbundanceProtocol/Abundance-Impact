@@ -8,7 +8,7 @@ export default async function handler(req, res) {
   if (req.method === 'GET') {
     console.log('getUserSerach 7', req.query);
     console.log('tags parameter:', req.query.tags, typeof req.query.tags);
-    const page = parseInt(req.query.page) || 1;
+    const page = parseInt(req?.query?.page) || 1;
     const limit = 10;
     const skip = (page - 1) * limit;
 
@@ -17,15 +17,23 @@ export default async function handler(req, res) {
 
 
     async function getCuratorIds(fids) {
+      // console.log('getCuratorIds', fids)
       try {
         await connectToDatabase();
+        
+        // Ensure fids is an array and not empty
+        if (!fids || !Array.isArray(fids) || fids.length === 0) {
+          // console.log('Invalid or empty fids array, returning empty result');
+          return [];
+        }
+        
         const impacts = await Impact.find({ curator_fid: { $in: fids }});
         const impactIds = impacts.map(impact => impact._id);
         return impactIds
       } catch (error) {
         console.error("Error while fetching casts:", error);
-        return null
-      }   
+        return []
+      }
     }
 
     let timeSort = null
@@ -34,41 +42,41 @@ export default async function handler(req, res) {
     }
 
     let order = Number(req?.query?.order) || -1
-    console.log('order', order)
+    // console.log('order', order)
 
     let sort = { impact_total: order, createdAt: -1 }
     if (timeSort) {
       sort = { createdAt: timeSort }
     }
     
-    if (req?.query?.points) {
-      query.points = req?.query?.points
-    } else if (req?.query?.ecosystem) {
+    // if (req?.query?.points) {
+    //   query.points = req?.query?.points
+    // } else if (req?.query?.ecosystem) {
 
-      async function getPoints(ecosystem) {
-        try {
-          await connectToDatabase();
-          const eco = await EcosystemRules.findOne({ ecosystem_handle: ecosystem }).select('ecosystem_points_name').exec();
-          console.log('eco', eco)
-          return eco ? eco.ecosystem_points_name : '$IMPACT';
-        } catch (error) {
-          console.error('Error in getHash:', error);
-          return '$IMPACT';
-        }
+    //   async function getPoints(ecosystem) {
+    //     try {
+    //       await connectToDatabase();
+    //       const eco = await EcosystemRules.findOne({ ecosystem_handle: ecosystem }).select('ecosystem_points_name').exec();
+    //       console.log('eco', eco)
+    //       return eco ? eco.ecosystem_points_name : '$IMPACT';
+    //     } catch (error) {
+    //       console.error('Error in getHash:', error);
+    //       return '$IMPACT';
+    //     }
+    //   }
+
+    //   query.points = await getPoints(req?.query?.ecosystem)
+    // }
+
+    if (req?.query?.time) {
+      // Convert the time string to a proper Date object
+      const timeDate = new Date(req?.query?.time);
+      if (!isNaN(timeDate.getTime())) {
+        query.createdAt = { $gte: timeDate };
+      } else {
+        // console.log('Invalid time format:', req?.query?.time);
       }
-
-      query.points = await getPoints(req?.query?.ecosystem)
     }
-
-         if (req?.query?.time) {
-       // Convert the time string to a proper Date object
-       const timeDate = new Date(req?.query?.time);
-       if (!isNaN(timeDate.getTime())) {
-         query.createdAt = { $gte: timeDate };
-       } else {
-         console.log('Invalid time format:', req?.query?.time);
-       }
-     }
     
     if (req?.query?.author_fid) {
       query.author_fid = { $in: req?.query?.author_fid } ;
@@ -79,22 +87,26 @@ export default async function handler(req, res) {
     }
 
     if (req?.query['curators[]'] && req?.query['curators[]'].length > 0) {
-      console.log('37', typeof req?.query['curators[]'])
+      // console.log('37', typeof req?.query['curators[]'])
       let curatorFids = null
       if (typeof req?.query['curators[]'] === 'string') {
         curatorFids = [parseInt(req?.query['curators[]'])];
-        console.log('curatorFids', curatorFids)
+        // console.log('curatorFids', curatorFids)
       } else if (Array.isArray(req?.query['curators[]']) && req?.query['curators[]'].length > 0) {
         curatorFids = req.query['curators[]'].map(fid => parseInt(fid));
-        console.log('curatorFids', curatorFids)
+        // console.log('curatorFids', curatorFids)
       }
 
       let impactIds
       if (curatorFids) {
         impactIds = await getCuratorIds(curatorFids)
+        // console.log('impactIds from getCuratorIds:', impactIds)
       }
-      if (impactIds) {
+      if (impactIds && impactIds.length > 0) {
         query['impact_points'] = { $in: impactIds }
+        // console.log('Added impact_points to query:', query['impact_points'])
+      } else {
+        // console.log('No impactIds found, skipping impact_points query')
       }
     } else if (req?.query?.username) {
       let curatorFids = null
@@ -103,7 +115,7 @@ export default async function handler(req, res) {
         try {
           await connectToDatabase();
           const user = await User.findOne({ username }).select('fid').exec();
-          console.log('user', user)
+          // console.log('user', user)
           return user ? parseInt(user.fid) : 9326;
         } catch (error) {
           console.error('Error in getHash:', error);
@@ -116,9 +128,13 @@ export default async function handler(req, res) {
       let impactIds
       if (curatorFids) {
         impactIds = await getCuratorIds(curatorFids)
+        // console.log('impactIds from getCuratorIds (username):', impactIds)
       }
-      if (impactIds) {
+      if (impactIds && impactIds.length > 0) {
         query['impact_points'] = { $in: impactIds }
+        // console.log('Added impact_points to query (username):', query['impact_points'])
+      } else {
+        // console.log('No impactIds found, skipping impact_points query (username)')
       }
     }
 
@@ -143,24 +159,30 @@ export default async function handler(req, res) {
       }
     });
     
-    console.log('Processed tags:', tags, 'Length:', tags.length);
+    // console.log('Processed tags:', tags, 'Length:', tags.length);
     
-    if (tags.length > 0) {
-      console.log('Setting tags query with:', tags);
+    if (tags?.length > 0) {
+      // console.log('Setting tags query with:', tags);
       // Use $elemMatch since cast_tags is an array of objects
       query.cast_tags = { $elemMatch: { tag: { $in: tags } } };
     }
     
-    console.log('Final query:', JSON.stringify(query, null, 2));
+    // console.log('Final query before aggregation:', JSON.stringify(query, null, 2));
 
     if (req?.query?.channels && req?.query?.channels !== ' ') {
-      console.log('channels', req?.query?.channels)
-      query.channel_id = { $in: req.query.channels }
+      // console.log('channels', req?.query?.channels)
+      const channels = Array.isArray(req.query.channels) ? req.query.channels : [req.query.channels];
+      if (channels.length > 0) {
+        query.channel_id = { $in: channels }
+      }
     }
 
     if (req?.query?.channel && req?.query?.channel !== ' ') {
-      console.log('channel', req?.query?.channel)
-      query.channel_id = { $in: req.query.channel }
+      // console.log('channel', req?.query?.channel)
+      const channel = Array.isArray(req.query.channel) ? req.query.channel : [req.query.channel];
+      if (channel.length > 0) {
+        query.channel_id = { $in: channel }
+      }
     }
 
     if (req?.query?.hash && req?.query?.hash !== '') {
@@ -186,7 +208,7 @@ export default async function handler(req, res) {
     // Handle text search
     if (req?.query?.text && req.query.text.trim() !== '') {
       const searchText = req.query.text.trim();
-      console.log('Setting text search for:', searchText);
+      // console.log('Setting text search for:', searchText);
       query.cast_text = { $regex: searchText, $options: 'i' }; // Case-insensitive search
     }
 
@@ -252,6 +274,12 @@ export default async function handler(req, res) {
         }).select('cast_hash -_id');
 
         const castHashList = castHashes.map(c => c.cast_hash);
+
+        // Ensure castHashList is an array and not empty for $in operator
+        if (!castHashList || castHashList.length === 0) {
+          // console.log('No cast hashes found, returning empty results');
+          return { casts: [], totalCount: 0, combinedImpact: [] };
+        }
 
         const impactAggregation = await Impact.aggregate([
           { $match: { target_cast_hash: { $in: castHashList } } },
@@ -413,10 +441,26 @@ export default async function handler(req, res) {
         return { casts: returnedCasts, totalCount, combinedImpact };
       } catch (err) {
         console.error(err);
-        return null;
+        return { casts: [], totalCount: 0, combinedImpact: [] };
       }
     }
-    const { casts, totalCount, combinedImpact } = await fetchCasts(query, req.query.shuffle === 'true', page, limit, order);
+
+    let setShuffle = false
+    if (req?.query?.shuffle === 'true') {
+      setShuffle = true
+    }
+    const fetchResult = await fetchCasts(query, setShuffle, page, limit, order);
+    
+    if (!fetchResult) {
+      return res.status(500).json({ 
+        error: 'Failed to fetch casts',
+        casts: [],
+        total: 0,
+        combinedImpact: []
+      });
+    }
+    
+    const { casts, totalCount, combinedImpact } = fetchResult;
     // console.log('casts 157', casts)
     res.status(200).json({
       total: totalCount,

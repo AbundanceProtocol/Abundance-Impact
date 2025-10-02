@@ -203,7 +203,7 @@ function WalletDemo() {
   return null; // Don't show anything
 }
 
-export default function Tip({ curatorId }) {
+export default function Tip({ curatorId, channelId }) {
   const router = useRouter();
   const { ecosystem, username, app, userFid, pass } = router.query;
   const {
@@ -2628,6 +2628,10 @@ export default function Tip({ curatorId }) {
       curators = [Number(curatorId)];
     }
 
+    if (channelId) {
+      channels = channelId;
+    }
+
     // Use a default ecosystem if none is provided, or you can modify this based on your needs
     const searchEcosystem = ecosystem || 'abundance'; // Default to 'abundance' ecosystem
     console.log('get user executed', shuffle, time, tags, channels, searchEcosystem, curators, order);
@@ -2959,7 +2963,7 @@ export default function Tip({ curatorId }) {
       {/* <div className="" style={{padding: '58px 0 0 0'}}>
       </div> */}
 
-      {(!curatorId && (!isLogged || (version == "1.0" && !adminTest) || version == "2.0" || adminTest)) && (
+      {(!curatorId && !channelId && (!isLogged || (version == "1.0" && !adminTest) || version == "2.0" || adminTest)) && (
         <div
           id="log in"
                     style={{
@@ -3649,7 +3653,7 @@ export default function Tip({ curatorId }) {
                     </div>
 
                     {/* CHANNEL Filter */}
-                    {!curatorId && (<div className='flex-row' style={{height: '42px', alignItems: 'center', justifyContent: 'center', padding: '28px 0'}}>
+                    {!curatorId && !channelId && (<div className='flex-row' style={{height: '42px', alignItems: 'center', justifyContent: 'center', padding: '28px 0'}}>
                       <div className='flex-row' style={{padding: '6px 11px', backgroundColor: '#33445522', border: '1px solid #666', borderRadius: '28px', alignItems: 'center', gap: '0.35rem'}}>
                         <div className='filter-desc' style={{fontWeight: '600', fontSize: isMobile ? '13px' : '14px'}}>CHANNEL</div>
 
