@@ -142,7 +142,7 @@ export default async function handler(req, res) {
           {threshold && (<div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '3px 5px 10px 2px', height: '240px'}}>
   
 
-            <div style={{display: 'flex', textAlign: 'center', color: '#ddeeffee', fontSize: '52px', margin: '0', width: '300px'}}>Impact Channel</div>
+            <div style={{display: 'flex', textAlign: 'center', color: '#ddeeffee', fontSize: '52px', margin: '0', width: '300px'}}>Curated Channel</div>
 
 
             <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', border: '0px solid #eeeeeeaa', width: 'auto', margin: '3px 5px 10px 2px', height: '240px'}}>
