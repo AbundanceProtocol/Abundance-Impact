@@ -656,7 +656,7 @@ export default function CuratorFid() {
           name="fc:frame"
           content={`{"version":"next","imageUrl":"${baseURL}/api/frames/tip/circle-v7?${qs.stringify({
             channel
-          })}","button":{"title":"Curated Channel","action":{"type":"launch_frame","name":"Impact 2.0","url":"https://impact.abundance.id/~/channel/${channel}","splashImageUrl":"https://impact.abundance.id/images/icon.png","splashBackgroundColor":"#011222"}}}`}
+          })}","button":{"title":"Curated Channel","action":{"type":"launch_frame","name":"Impact 2.0","url":"https://impact.abundance.id/~/channels/${channel}","splashImageUrl":"https://impact.abundance.id/images/icon.png","splashBackgroundColor":"#011222"}}}`}
         />
 
         {/* Mini App specific metadata */}
