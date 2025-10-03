@@ -5,7 +5,7 @@ import { formatNum } from "../../../utils/utils";
 import { AccountContext } from "../../../context";
 import { useRouter } from 'next/router';
 import { FaPowerOff, FaRegStar } from "react-icons/fa";
-import { BsFillPersonFill, BsShareFill, BsPiggyBank, BsPiggyBankFill, BsGiftFill, BsCurrencyExchange } from "react-icons/bs";
+import { BsFillPersonFill, BsShareFill, BsPiggyBank, BsPiggyBankFill, BsGiftFill, BsCurrencyExchange, BsSearch } from "react-icons/bs";
 import useMatchBreakpoints from "../../../hooks/useMatchBreakpoints";
 import axios from "axios";
 
@@ -18,6 +18,76 @@ const ChannelBlock = ({ channelData, textMax, show, type, feedMax, onTipToggle, 
   const router = useRouter()
   const { isMobile } = useMatchBreakpoints();
 
+  // Channel search state
+  const [searchQuery, setSearchQuery] = useState('')
+  const [channels, setChannels] = useState([])
+  const [filteredChannels, setFilteredChannels] = useState([])
+  const [showDropdown, setShowDropdown] = useState(false)
+  const [loading, setLoading] = useState(false)
+
+  // Fetch channels on component mount
+  useEffect(() => {
+    const fetchChannels = async () => {
+      try {
+        setLoading(true)
+        const response = await axios.get(`/api/curation/getChannelNames?points=${points || '$IMPACT'}`)
+        setChannels(response.data.channels || [])
+        setFilteredChannels(response.data.channels || [])
+      } catch (error) {
+        console.error('Error fetching channels:', error)
+        setChannels([])
+        setFilteredChannels([])
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchChannels()
+  }, [points])
+
+  // Filter channels based on search query
+  useEffect(() => {
+    if (searchQuery.trim() === '') {
+      setFilteredChannels(channels)
+    } else {
+      const filtered = channels.filter(channel => 
+        channel && typeof channel === 'string' && channel.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+      setFilteredChannels(filtered)
+    }
+  }, [searchQuery, channels])
+
+  // Handle channel selection
+  const handleChannelSelect = (channel) => {
+    setSearchQuery('')
+    setShowDropdown(false)
+    router.push(`/~/channel/${channel}`)
+  }
+
+  // Handle input change
+  const handleInputChange = (e) => {
+    setSearchQuery(e.target.value)
+    setShowDropdown(true)
+  }
+
+  // Handle input focus
+  const handleInputFocus = () => {
+    setShowDropdown(true)
+  }
+
+  // Handle click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.channel-search-container')) {
+        setShowDropdown(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [])
 
   const setChannel = async () => {
 
@@ -149,7 +219,88 @@ const ChannelBlock = ({ channelData, textMax, show, type, feedMax, onTipToggle, 
                 </div>
 
 
-                <div style={{fontSize: isMobile ? '12px' : '12px', padding: '6px 10px', backgroundColor: '#135', borderRadius: '8px', border: '1px solid #8ac', color: '#def', fontSize: '12px'}}>CHANNEL</div>
+                {/* Channel Search Input */}
+                <div className="channel-search-container" style={{ position: 'relative', width: '140px' }}>
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={handleInputChange}
+                      onFocus={handleInputFocus}
+                      placeholder="channel"
+                      style={{
+                        width: '100%',
+                        padding: '6px 10px 6px 30px',
+                        backgroundColor: '#135',
+                        borderRadius: '8px',
+                        border: '1px solid #8ac',
+                        color: '#def',
+                        fontSize: '12px',
+                        outline: 'none'
+                      }}
+                    />
+                    <BsSearch 
+                      style={{ 
+                        position: 'absolute', 
+                        left: '8px', 
+                        top: '50%', 
+                        transform: 'translateY(-50%)',
+                        color: '#8ac',
+                        fontSize: '12px'
+                      }} 
+                    />
+                  </div>
+                  
+                  {/* Dropdown */}
+                  {showDropdown && (
+                    <div style={{
+                      position: 'absolute',
+                      top: '100%',
+                      left: 0,
+                      right: 0,
+                      backgroundColor: '#002244',
+                      border: '1px solid #8ac',
+                      borderRadius: '8px',
+                      maxHeight: '200px',
+                      overflowY: 'auto',
+                      zIndex: 1000,
+                      marginTop: '2px'
+                    }}>
+                      {loading ? (
+                        <div style={{ padding: '8px', color: '#8ac', fontSize: '12px', textAlign: 'center' }}>
+                          Loading...
+                        </div>
+                      ) : filteredChannels.length > 0 ? (
+                        filteredChannels.slice(0, 10).map((channel) => (
+                          <div
+                            key={channel}
+                            onClick={() => handleChannelSelect(channel)}
+                            style={{
+                              padding: '8px 12px',
+                              color: '#def',
+                              fontSize: '12px',
+                              cursor: 'pointer',
+                              borderBottom: '1px solid #333',
+                              transition: 'background-color 0.2s'
+                            }}
+                            onMouseEnter={(e) => {
+                              e.target.style.backgroundColor = '#11448888'
+                            }}
+                            onMouseLeave={(e) => {
+                              e.target.style.backgroundColor = 'transparent'
+                            }}
+                          >
+                            {channel}
+                          </div>
+                        ))
+                      ) : (
+                        <div style={{ padding: '8px', color: '#8ac', fontSize: '12px', textAlign: 'center' }}>
+                          No channels found
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
 
                 {/* <ToggleSwitch target={'autoFund'} /> */}
               </div>
