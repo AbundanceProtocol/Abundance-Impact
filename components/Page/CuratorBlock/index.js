@@ -5,7 +5,7 @@ import { formatNum } from "../../../utils/utils";
 import { AccountContext } from "../../../context";
 import { useRouter } from 'next/router';
 import { FaPowerOff, FaRegStar } from "react-icons/fa";
-import { BsFillPersonFill, BsShareFill, BsPiggyBank, BsPiggyBankFill, BsGiftFill, BsCurrencyExchange } from "react-icons/bs";
+import { BsFillPersonFill, BsShareFill, BsPiggyBank, BsPiggyBankFill, BsGiftFill, BsCurrencyExchange, BsSearch } from "react-icons/bs";
 import useMatchBreakpoints from "../../../hooks/useMatchBreakpoints";
 import axios from "axios";
 
@@ -17,6 +17,13 @@ const CuratorBlock = ({ user, textMax, show, type, feedMax, onTipToggle, showTip
   const [curators, setCurators] = useState(null)
   const router = useRouter()
   const { isMobile } = useMatchBreakpoints();
+
+  // Curator search state
+  const [searchQuery, setSearchQuery] = useState('')
+  const [curatorList, setCuratorList] = useState([])
+  const [filteredCurators, setFilteredCurators] = useState([])
+  const [showDropdown, setShowDropdown] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     console.log('user', user)
@@ -35,6 +42,88 @@ const CuratorBlock = ({ user, textMax, show, type, feedMax, onTipToggle, showTip
       return () => clearTimeout(timeoutId);
     }
   }, [router.query, sched.autotip]);
+
+  // Fetch curators on component mount
+  useEffect(() => {
+    const fetchCurators = async () => {
+      try {
+        setLoading(true)
+        // Use a generic search term to get some curators initially
+        const response = await axios.get('/api/curation/getCurators', {
+          params: { name: 'a' }
+        })
+        setCuratorList(response.data.users || [])
+        setFilteredCurators(response.data.users || [])
+      } catch (error) {
+        console.error('Error fetching curators:', error)
+        setCuratorList([])
+        setFilteredCurators([])
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchCurators()
+  }, [])
+
+  // Search curators based on search query
+  useEffect(() => {
+    const searchCurators = async () => {
+      if (searchQuery.trim() === '') {
+        setFilteredCurators(curatorList)
+        return
+      }
+
+      try {
+        setLoading(true)
+        const response = await axios.get('/api/curation/getCurators', {
+          params: { name: searchQuery }
+        })
+        setFilteredCurators(response.data.users || [])
+      } catch (error) {
+        console.error('Error searching curators:', error)
+        setFilteredCurators([])
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    // Debounce the search to avoid too many API calls
+    const timeoutId = setTimeout(searchCurators, 300)
+    return () => clearTimeout(timeoutId)
+  }, [searchQuery])
+
+  // Handle curator selection
+  const handleCuratorSelect = (curator) => {
+    setSearchQuery('')
+    setShowDropdown(false)
+    router.push(`/~/curator/${curator.fid}`)
+  }
+
+  // Handle input change
+  const handleInputChange = (e) => {
+    setSearchQuery(e.target.value)
+    setShowDropdown(true)
+  }
+
+  // Handle input focus
+  const handleInputFocus = () => {
+    setShowDropdown(true)
+  }
+
+  // Handle click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.curator-search-container')) {
+        setShowDropdown(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [])
 
   async function getUserAutotips(fid) {
     console.log('trigger getAutotipCurators', fid)
@@ -243,7 +332,90 @@ const CuratorBlock = ({ user, textMax, show, type, feedMax, onTipToggle, showTip
                 </div>
 
 
-                <div style={{fontSize: isMobile ? '12px' : '12px', padding: '6px 10px', backgroundColor: '#135', borderRadius: '8px', border: '1px solid #8ac', color: '#def', fontSize: '12px'}}>CURATOR</div>
+                {/* Curator Search Input */}
+                <div className="curator-search-container" style={{ position: 'relative', width: '140px' }}>
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={handleInputChange}
+                      onFocus={handleInputFocus}
+                      placeholder="curator"
+                      style={{
+                        width: '100%',
+                        padding: '6px 10px 6px 30px',
+                        backgroundColor: '#135',
+                        borderRadius: '8px',
+                        border: '1px solid #8ac',
+                        color: '#def',
+                        fontSize: '12px',
+                        outline: 'none'
+                      }}
+                    />
+                    <BsSearch 
+                      style={{ 
+                        position: 'absolute', 
+                        left: '8px', 
+                        top: '50%', 
+                        transform: 'translateY(-50%)',
+                        color: '#8ac',
+                        fontSize: '12px'
+                      }} 
+                    />
+                  </div>
+                  
+                  {/* Dropdown */}
+                  {showDropdown && (
+                    <div style={{
+                      position: 'absolute',
+                      top: '100%',
+                      left: 0,
+                      right: 0,
+                      backgroundColor: '#002244',
+                      border: '1px solid #8ac',
+                      borderRadius: '8px',
+                      maxHeight: '200px',
+                      overflowY: 'auto',
+                      zIndex: 1000,
+                      marginTop: '2px'
+                    }}>
+                      {loading ? (
+                        <div style={{ padding: '8px', color: '#8ac', fontSize: '12px', textAlign: 'center' }}>
+                          Loading...
+                        </div>
+                      ) : filteredCurators.length > 0 ? (
+                        filteredCurators.slice(0, 10).map((curator) => (
+                          <div
+                            key={curator.fid}
+                            onClick={() => handleCuratorSelect(curator)}
+                            style={{
+                              padding: '8px 12px',
+                              color: '#def',
+                              fontSize: '12px',
+                              cursor: 'pointer',
+                              borderBottom: '1px solid #333',
+                              transition: 'background-color 0.2s'
+                            }}
+                            onMouseEnter={(e) => {
+                              e.target.style.backgroundColor = '#11448888'
+                            }}
+                            onMouseLeave={(e) => {
+                              e.target.style.backgroundColor = 'transparent'
+                            }}
+                          >
+                            {curator.username}
+                          </div>
+                        ))
+                      ) : (
+                        <div style={{ padding: '8px', color: '#8ac', fontSize: '12px', textAlign: 'center' }}>
+                          No curators found
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* <div style={{fontSize: isMobile ? '12px' : '12px', padding: '6px 10px', backgroundColor: '#135', borderRadius: '8px', border: '1px solid #8ac', color: '#def', fontSize: '12px'}}>CURATOR</div> */}
 
                 {/* <ToggleSwitch target={'autoFund'} /> */}
               </div>
