@@ -70,7 +70,7 @@ export default function Paradigm() {
           position: 'absolute',
           width: '600px',
           height: '400px',
-          backgroundColor: '#16a34a',
+          backgroundColor: 'rgba(22, 163, 74, 0.9)',
           borderRadius: '50%',
           display: 'flex',
           flexDirection: 'column',
@@ -85,8 +85,9 @@ export default function Paradigm() {
           zIndex: 1
         }}
       >
-        <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '20px', lineHeight: '1.2' }}>
-          the abundance economy
+        <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '20px', lineHeight: '1.2', textAlign: 'center' }}>
+          the abundance<br />
+          economy
         </h2>
         <ul style={{ margin: 0, padding: 0, listStyle: 'none', fontSize: '18px', lineHeight: '1.6' }}>
           <li style={{ marginBottom: '8px' }}>alignment</li>
@@ -105,7 +106,7 @@ export default function Paradigm() {
           position: 'absolute',
           width: '600px',
           height: '400px',
-          backgroundColor: '#6b7280',
+          backgroundColor: 'rgba(107, 114, 128, 0.9)',
           borderRadius: '50%',
           display: 'flex',
           flexDirection: 'column',
@@ -120,8 +121,9 @@ export default function Paradigm() {
           zIndex: 1
         }}
       >
-        <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '20px', lineHeight: '1.2' }}>
-          current economic paradigm
+        <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '20px', lineHeight: '1.2', textAlign: 'center' }}>
+          current economic<br />
+          paradigm
         </h2>
         <ul style={{ margin: 0, padding: 0, listStyle: 'none', fontSize: '18px', lineHeight: '1.6' }}>
           <li style={{ marginBottom: '8px' }}>misalignment</li>
