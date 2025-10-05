@@ -5,7 +5,7 @@ import axios from "axios";
 import Head from "next/head";
 
 import { IoIosRocket, IoMdTrophy, IoMdRefresh as Refresh } from "react-icons/io";
-import { BsLightningChargeFill as Impact, BsPiggyBankFill, BsQuestionCircle, BsGiftFill, BsShieldFillCheck, BsStarFill, BsSquare, BsCheckSquareFill, BsShieldCheck } from "react-icons/bs";
+import { BsLightningChargeFill as Impact, BsPiggyBankFill, BsQuestionCircle, BsGiftFill, BsShieldFillCheck, BsStarFill, BsSquare, BsCheckSquareFill, BsShieldCheck, BsInfoCircle } from "react-icons/bs";
 import { confirmUser, timePassed } from "../../utils/utils";
 import Spinner from "../../components/Common/Spinner";
 import ExpandImg from "../../components/Cast/ExpandImg";
@@ -67,6 +67,7 @@ export default function Rewards() {
   const [functionalCasts, setFunctionalCasts] = useState(new Set());
   const [selectedVotes, setSelectedVotes] = useState(new Map());
   const [validatedSignals, setValidatedSignals] = useState(new Set());
+  const [showFullText, setShowFullText] = useState(false);
 
   useEffect(() => {
     if (fid) {
@@ -446,6 +447,120 @@ export default function Rewards() {
       {/* AUTO FUND */}
 
       <div style={{ padding: "0px 4px 0px 4px", width: feedMax }}>
+
+
+
+
+
+
+
+      <div
+          className="shadow flex-col"
+          style={{
+            backgroundColor: "#002244",
+            borderRadius: "15px",
+            border: "1px solid #11447799",
+            width: isMiniApp || isMobile ? "340px" : "100%",
+            margin: "0px auto 25px auto",
+            padding: "15px"
+          }}
+        >
+          <div
+            className="flex-row"
+            style={{
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "8px",
+              marginBottom: "12px"
+            }}
+          >
+            <BsInfoCircle style={{ fill: "#cde" }} size={18} />
+            <div
+              style={{
+                fontSize: isMobile ? "18px" : "22px",
+                fontWeight: "600",
+                color: "#cde"
+              }}
+            >
+              How Validation Work
+            </div>
+          </div>
+          <div
+            style={{
+              fontSize: "13px",
+              color: "#9df",
+              lineHeight: "1.5",
+              textAlign: "left"
+            }}
+          >
+            Validators ensure that the Impact Network only rewards creators based on the value they contribute to Farcaster, and flag bad actors.
+            <br /><br />
+            Your thinking to validate should be: "if this cast got X 'likes' would the Farcaster community consider that very low, low, fair, high, or very high?"
+            {!showFullText && (
+              <>
+                <br /><br />
+                <div style={{ textAlign: "center", marginTop: "-12px" }}>
+                  <button
+                    onClick={() => setShowFullText(true)}
+                    style={{
+                      backgroundColor: "transparent",
+                      border: "1px solid #0af",
+                      borderRadius: "6px",
+                      color: "#0af",
+                      fontSize: "12px",
+                      padding: "4px 8px",
+                      cursor: "pointer",
+                      fontWeight: "500"
+                    }}
+                  >
+                    read more
+                  </button>
+                </div>
+              </>
+            )}
+            {showFullText && (
+              <>
+                <br /><br />
+                For each curated cast Impact 2.0 randomly selects validators to review the nomination.
+                <br /><br />
+                Validators get a notification when they're selected to validate a curation. They have 6 hours to validate the cast. If they miss the validation period the cast is reassigned.
+                <br /><br />
+                If a cast is successfully validated the curator's Impact Score grows. Otherwise the score is slashed.
+                <br /><br />
+                Curations that are not validated appropriately can be challenged.
+                <br /><br />
+                Validators' Impact Scores increase if their validation is successful, and slashed if it is successfully challenged.
+                <br /><br />
+                Validators earn 10% of network multi-tips for successful validations.
+                <div style={{ textAlign: "center", marginTop: "6px" }}>
+                  <button
+                    onClick={() => setShowFullText(false)}
+                    style={{
+                      backgroundColor: "transparent",
+                      border: "1px solid #0af",
+                      borderRadius: "6px",
+                      color: "#0af",
+                      fontSize: "12px",
+                      padding: "4px 8px",
+                      cursor: "pointer",
+                      fontWeight: "500",
+                    }}
+                  >
+                    show less
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+
+
+
+
+
+
+
+
         {((version == "1.0" && !adminTest) || version == "2.0" || adminTest) && (
           <div className="flex-col" style={{ backgroundColor: "" }}>
             <div
