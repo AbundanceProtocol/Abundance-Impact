@@ -63,6 +63,128 @@ export default function Paradigm() {
         overflow: 'hidden'
       }}
     >
+      {/* Buttons */}
+      <div style={{
+        position: 'absolute',
+        top: 'calc(50vh - 200px - 2rem - 100px)',
+        left: '0',
+        right: '0',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '8px',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 2
+      }}>
+        {/* First row */}
+        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+          <button style={{
+            backgroundColor: '#6b7280',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '6px',
+            padding: '6px 12px',
+            fontSize: '12px',
+            fontWeight: '500',
+            cursor: 'pointer'
+          }}>
+            medicine
+          </button>
+          <button style={{
+            backgroundColor: '#6b7280',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '6px',
+            padding: '6px 12px',
+            fontSize: '12px',
+            fontWeight: '500',
+            cursor: 'pointer'
+          }}>
+            social media
+          </button>
+        </div>
+        
+        {/* Second row */}
+        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+          <button style={{
+            backgroundColor: '#6b7280',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '6px',
+            padding: '6px 12px',
+            fontSize: '12px',
+            fontWeight: '500',
+            cursor: 'pointer'
+          }}>
+            innovation
+          </button>
+          <button style={{
+            backgroundColor: '#6b7280',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '6px',
+            padding: '6px 12px',
+            fontSize: '12px',
+            fontWeight: '500',
+            cursor: 'pointer'
+          }}>
+            purpose
+          </button>
+          <button style={{
+            backgroundColor: '#6b7280',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '6px',
+            padding: '6px 12px',
+            fontSize: '12px',
+            fontWeight: '500',
+            cursor: 'pointer'
+          }}>
+            digital tech
+          </button>
+        </div>
+
+        {/* Third row */}
+        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+          <button style={{
+            backgroundColor: '#6b7280',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '6px',
+            padding: '6px 12px',
+            fontSize: '12px',
+            fontWeight: '500',
+            cursor: 'pointer'
+          }}>
+            AI
+          </button>
+          <button style={{
+            backgroundColor: '#6b7280',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '6px',
+            padding: '6px 12px',
+            fontSize: '12px',
+            fontWeight: '500',
+            cursor: 'pointer'
+          }}>
+            journalism
+          </button>
+          <button style={{
+            backgroundColor: '#6b7280',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '6px',
+            padding: '6px 12px',
+            fontSize: '12px',
+            fontWeight: '500',
+            cursor: 'pointer'
+          }}>
+            science
+          </button>
+        </div>
+      </div>
+
       {/* Left ellipse - Green */}
       <div
         ref={leftRef}
