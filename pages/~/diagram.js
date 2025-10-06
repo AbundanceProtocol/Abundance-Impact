@@ -10,7 +10,37 @@ export default function Paradigm() {
   const leftRef = useRef(null);
   const rightRef = useRef(null);
   const containerRef = useRef(null);
+  const leftScrollRef = useRef(null);
+  const rightScrollRef = useRef(null);
   const [selectedButton, setSelectedButton] = useState(null);
+
+  // Drag to scroll functionality
+  const handleMouseDown = (e, containerRef) => {
+    e.preventDefault();
+    const container = containerRef.current;
+    if (!container) return;
+
+    const startY = e.clientY;
+    const startScrollTop = container.scrollTop;
+    let isDragging = false;
+
+    const handleMouseMove = (e) => {
+      isDragging = true;
+      const deltaY = startY - e.clientY;
+      container.scrollTop = startScrollTop + deltaY;
+    };
+
+    const handleMouseUp = () => {
+      if (isDragging) {
+        e.preventDefault();
+      }
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  };
 
   // Per-button content for each rectangle
   const rectangleContent = {
@@ -209,7 +239,7 @@ export default function Paradigm() {
       {/* Buttons */}
       <div style={{
         position: 'absolute',
-        top: 'calc(50vh - 200px - 2rem - 20px)', // Much closer to ellipses
+        top: 'calc(50vh - 200px - 2rem - 100px)', // Back to original position
         left: '0',
         right: '0',
         display: 'flex',
@@ -647,8 +677,12 @@ export default function Paradigm() {
               overflowY: 'auto',
               width: '100%',
               maxHeight: 'calc(100% - 46px)',
-              paddingRight: '8px'
-            }}>
+              paddingRight: '8px',
+              cursor: 'grab',
+              userSelect: 'none'
+            }}
+            ref={leftScrollRef}
+            onMouseDown={(e) => handleMouseDown(e, leftScrollRef)}>
               {(rectangleContent[selectedButton]?.leftBody) || ''}
             </div>
           </div>
@@ -700,8 +734,12 @@ export default function Paradigm() {
               overflowY: 'auto',
               width: '100%',
               maxHeight: 'calc(100% - 46px)',
-              paddingRight: '8px'
-            }}>
+              paddingRight: '8px',
+              cursor: 'grab',
+              userSelect: 'none'
+            }}
+            ref={rightScrollRef}
+            onMouseDown={(e) => handleMouseDown(e, rightScrollRef)}>
               {(rectangleContent[selectedButton]?.rightBody) || ''}
             </div>
           </div>
