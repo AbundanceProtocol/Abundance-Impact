@@ -12,6 +12,88 @@ export default function Paradigm() {
   const containerRef = useRef(null);
   const [selectedButton, setSelectedButton] = useState(null);
 
+  // Per-button content for each rectangle
+  const rectangleContent = {
+    'medicine': {
+      leftTitle: 'medicine → abundance',
+      leftBody: 'preventive care, open research, equitable access',
+      rightTitle: 'medicine → current',
+      rightBody: 'patents, paywalls, reactive treatment'
+    },
+    'social media': {
+      leftTitle: 'social media → abundance',
+      leftBody: 'authentic identity, shared value, healthy discourse',
+      rightTitle: 'social media → current',
+      rightBody: `monetizing attention (instead of value) leads to perverse incentives for the platform and for users.\n\nthe platform's algos boost the most engaging content (which in a lot of cases is content with most drama/conflict)\n\nusers likewise have incentive to produce outrage porn, polarizing and controversial content instead of focusing on value creation`
+    },
+    'innovation': {
+      leftTitle: 'innovation → abundance',
+      leftBody: 'public goods, open-source, compounding knowledge',
+      rightTitle: 'innovation → current',
+      rightBody: `suppose you come up with a new way to manufacture shoes that reduces material costs by 25%.\n\nIs your innovation something that only benefits shoe producers? Not really.\n\nBecause if you were to release this innovation as a public good it would reduce manufacturing cost (producers can lower price of shoes and get more demand), it would benefit consumers (cheaper shoes), and it would benefit the wider public (cheaper materials).\n\nBut only producers are likely to buy your innovation, thus capturing all the value for themselves (reducing margins without significant benefits to consumers or the wider public).\n\nThat's the dynamic in the market today. Any public good that can benefit wider society is turned into profits by commercial interests, to the detriment of the wider public (if an alternative public goods option existed)`
+    },
+    'purpose': {
+      leftTitle: 'purpose → abundance',
+      leftBody: 'mission-aligned capital and coordination',
+      rightTitle: 'purpose → current',
+      rightBody: `what happens when you can work for the benefit of narrow corporate interests, or sell products and services to customers directly, but you cannot do work (or, at least can't get compensated for work) that benefits the common good?\n\nYou get a sense that your contribution in the market economy does not serve the interests of society. Instead it can come at the expense of society at times\n\nThis can lead to a crisis of meaning and disillusionment with the system`
+    },
+    'digital tech': {
+      leftTitle: 'digital tech → abundance',
+      leftBody: 'composability, interoperability, low marginal cost',
+      rightTitle: 'digital tech → current',
+      rightBody: `the most "efficient" way to distribute software is to make it available as Open Source Software (OSS)\n\nyet, you cannot monetize software as open source\n\nso the most efficient way to distribute software is also the least effective way to make money with software\n\nthere are companies that make money by providing services on top of OSS, but that just reinforces the fact that the underlying value of the OSS is not getting rewarded in the economy\n\nwhat we get instead is an incentive for companies to sell proprietary software and to work in silos - so they can sell access to the software and make money from the restrictions they introduce\n\ninstead of maximizing impact and efficient resource allocation, there is a tradeoff in the economy between profitability in efficiency`
+    },
+    'AI': {
+      leftTitle: 'AI → abundance',
+      leftBody: 'assistive intelligence for everyone',
+      rightTitle: 'AI → current',
+      rightBody: `while the technology is incredibly powerful, and could benefit society immensely, companies that develop LLMs are not compensated for their work by "society."\n\nThey are compensated by selling subscriptions to individuals, companies (and sometimes governments).\n\nAs competition in the sector intensifies, we're likely to see companies engage in more behavior that is misaligned with the public interest (eg. scraping copyrighted data, working for powerful interests to manipulate public opinion with "bot armies," govt surveillance, etc.)\n\nthe companies that push these behaviors to the extreme are also likely to be the ones most profitable, thus creating a race to the bottom`
+    },
+    'journalism': {
+      leftTitle: 'journalism → abundance',
+      leftBody: 'public-interest funding, provenance, credibility',
+      rightTitle: 'journalism → current',
+      rightBody: 'click economy, polarization'
+    },
+    'science': {
+      leftTitle: 'science → abundance',
+      leftBody: 'open science, reproducibility, rapid iteration',
+      rightTitle: 'science → current',
+      rightBody: `though some research may be fantastically beneficial to society, it's not the value of the research that determines funding but rather other factors - the ability to get grants (based on the priorities of government), magazine publication priorities, etc.`
+    },
+    'alignment': {
+      leftTitle: 'alignment → abundance',
+      leftBody: 'values-first markets and mechanisms',
+      rightTitle: 'alignment → current',
+      rightBody: 'externalities and mispricing'
+    },
+    'value': {
+      leftTitle: 'value → abundance',
+      leftBody: 'measure impact beyond price',
+      rightTitle: 'value → current',
+      rightBody: 'narrow financial metrics'
+    },
+    'efficiency': {
+      leftTitle: 'efficiency → abundance',
+      leftBody: 'optimize for coordination and reuse',
+      rightTitle: 'efficiency → current',
+      rightBody: 'optimize isolated silos'
+    },
+    'resources': {
+      leftTitle: 'resources → abundance',
+      leftBody: 'regenerative loops, commons stewardship',
+      rightTitle: 'resources → current',
+      rightBody: 'extraction and depletion'
+    },
+    'relations': {
+      leftTitle: 'relations → abundance',
+      leftBody: 'trust networks, cooperative games',
+      rightTitle: 'relations → current',
+      rightBody: 'zero-sum framing, adversarial dynamics'
+    }
+  };
+
   // Debug: Check if refs are available
   useEffect(() => {
     console.log("Left ref:", leftRef.current);
@@ -77,6 +159,53 @@ export default function Paradigm() {
         overflow: 'hidden'
       }}
     >
+      <style>{`
+        /* WebKit-based browsers */
+        .rectBodyLeft::-webkit-scrollbar,
+        .rectBodyRight::-webkit-scrollbar {
+          width: 10px;
+          border-radius: 8px;
+        }
+        .rectBodyLeft::-webkit-scrollbar-track {
+          background: #27d165; /* slightly lighter than #22c55e */
+          border-radius: 8px;
+        }
+        .rectBodyLeft::-webkit-scrollbar-thumb {
+          background: #ffffff; /* white */
+          border-radius: 8px;
+        }
+        /* Rounded outer ends (the "arrows") */
+        .rectBodyLeft::-webkit-scrollbar-button:single-button {
+          background: #27d165;
+          display: block;
+          height: 10px;
+          border-radius: 8px;
+        }
+        .rectBodyRight::-webkit-scrollbar-track {
+          background: #a7b0ba; /* slightly lighter than #9ca3af */
+          border-radius: 8px;
+        }
+        .rectBodyRight::-webkit-scrollbar-thumb {
+          background: #ffffff; /* white */
+          border-radius: 8px;
+        }
+        .rectBodyRight::-webkit-scrollbar-button:single-button {
+          background: #a7b0ba;
+          display: block;
+          height: 10px;
+          border-radius: 8px;
+        }
+
+        /* Firefox */
+        .rectBodyLeft,
+        .rectBodyRight {
+          scrollbar-width: thin;
+          scrollbar-color: #ffffff #27d165; /* thumb track */
+        }
+        .rectBodyRight {
+          scrollbar-color: #ffffff #a7b0ba; /* thumb track */
+        }
+      `}</style>
       {/* Buttons */}
       <div style={{
         position: 'absolute',
@@ -437,6 +566,7 @@ export default function Paradigm() {
               backgroundColor: '#22c55e',
               borderRadius: '8px',
               border: '2px solid #16a34a',
+              boxShadow: '0 12px 24px rgba(0,0,0,0.35)',
               top: 'calc(50% + 20px)', // Moved up 5% (20px less)
               left: 'calc(50% + 218px)', // Updated to match new ellipse position
               transform: 'translate(-50%, -50%)',
@@ -455,14 +585,19 @@ export default function Paradigm() {
               marginBottom: '10px',
               textAlign: 'center'
             }}>
-              {selectedButton}
+              {(rectangleContent[selectedButton]?.leftTitle) || selectedButton}
             </div>
-            <div style={{
+            <div className="rectBodyLeft" style={{
               fontSize: '14px',
-              textAlign: 'center',
-              lineHeight: '1.4'
+              textAlign: 'justify',
+              lineHeight: '1.4',
+              whiteSpace: 'pre-wrap',
+              overflowY: 'auto',
+              width: '100%',
+              maxHeight: 'calc(100% - 46px)',
+              paddingRight: '8px'
             }}>
-              This is temporary text underneath the title. It provides additional context and information about the selected topic.
+              {(rectangleContent[selectedButton]?.leftBody) || ''}
             </div>
           </div>
           
@@ -484,6 +619,7 @@ export default function Paradigm() {
               backgroundColor: '#9ca3af',
               borderRadius: '20px',
               border: '3px solid #6b7280',
+              boxShadow: '0 12px 24px rgba(0,0,0,0.35)',
               top: 'calc(50% + 20px)', // Moved up 5% (20px less)
               right: 'calc(50% + 218px)', // Updated to match new ellipse position
               transform: 'translate(50%, -50%)',
@@ -502,14 +638,19 @@ export default function Paradigm() {
               marginBottom: '10px',
               textAlign: 'center'
             }}>
-              {selectedButton}
+              {(rectangleContent[selectedButton]?.rightTitle) || selectedButton}
             </div>
-            <div style={{
+            <div className="rectBodyRight" style={{
               fontSize: '14px',
-              textAlign: 'center',
-              lineHeight: '1.4'
+              textAlign: 'justify',
+              lineHeight: '1.4',
+              whiteSpace: 'pre-wrap',
+              overflowY: 'auto',
+              width: '100%',
+              maxHeight: 'calc(100% - 46px)',
+              paddingRight: '8px'
             }}>
-              This is temporary text underneath the title. It provides additional context and information about the selected topic.
+              {(rectangleContent[selectedButton]?.rightBody) || ''}
             </div>
           </div>
         </>
