@@ -30,7 +30,13 @@ export default function Paradigm() {
   }, []);
 
   const handleButtonClick = (buttonName) => {
-    setSelectedButton(buttonName);
+    // If clicking the same button that's already selected, deselect it
+    if (selectedButton === buttonName) {
+      setSelectedButton(null);
+    } else {
+      // Otherwise, select the new button
+      setSelectedButton(buttonName);
+    }
   };
 
   useGSAP(() => {
