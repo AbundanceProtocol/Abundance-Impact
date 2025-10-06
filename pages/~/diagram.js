@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 
@@ -10,6 +10,7 @@ export default function Paradigm() {
   const leftRef = useRef(null);
   const rightRef = useRef(null);
   const containerRef = useRef(null);
+  const [selectedButton, setSelectedButton] = useState(null);
 
   // Debug: Check if refs are available
   useEffect(() => {
@@ -27,6 +28,16 @@ export default function Paradigm() {
       rightRef.current.style.display = "flex";
     }
   }, []);
+
+  const handleButtonClick = (buttonName) => {
+    // If clicking the same button that's already selected, deselect it
+    if (selectedButton === buttonName) {
+      setSelectedButton(null);
+    } else {
+      // Otherwise, select the new button
+      setSelectedButton(buttonName);
+    }
+  };
 
   useGSAP(() => {
     if (leftRef.current && rightRef.current) {
@@ -63,6 +74,154 @@ export default function Paradigm() {
         overflow: 'hidden'
       }}
     >
+      {/* Buttons */}
+      <div style={{
+        position: 'absolute',
+        top: 'calc(50vh - 200px - 2rem - 100px)',
+        left: '0',
+        right: '0',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '8px',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 2
+      }}>
+        {/* First row */}
+        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+          <button 
+            onClick={() => handleButtonClick('medicine')}
+            style={{
+              backgroundColor: selectedButton === 'medicine' ? '#16a34a' : '#6b7280',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '6px',
+              padding: '6px 12px',
+              fontSize: '12px',
+              fontWeight: '500',
+              cursor: 'pointer'
+            }}
+          >
+            medicine
+          </button>
+          <button 
+            onClick={() => handleButtonClick('social media')}
+            style={{
+              backgroundColor: selectedButton === 'social media' ? '#16a34a' : '#6b7280',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '6px',
+              padding: '6px 12px',
+              fontSize: '12px',
+              fontWeight: '500',
+              cursor: 'pointer'
+            }}
+          >
+            social media
+          </button>
+        </div>
+        
+        {/* Second row */}
+        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+          <button 
+            onClick={() => handleButtonClick('innovation')}
+            style={{
+              backgroundColor: selectedButton === 'innovation' ? '#16a34a' : '#6b7280',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '6px',
+              padding: '6px 12px',
+              fontSize: '12px',
+              fontWeight: '500',
+              cursor: 'pointer'
+            }}
+          >
+            innovation
+          </button>
+          <button 
+            onClick={() => handleButtonClick('purpose')}
+            style={{
+              backgroundColor: selectedButton === 'purpose' ? '#16a34a' : '#6b7280',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '6px',
+              padding: '6px 12px',
+              fontSize: '12px',
+              fontWeight: '500',
+              cursor: 'pointer'
+            }}
+          >
+            purpose
+          </button>
+          <button 
+            onClick={() => handleButtonClick('digital tech')}
+            style={{
+              backgroundColor: selectedButton === 'digital tech' ? '#16a34a' : '#6b7280',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '6px',
+              padding: '6px 12px',
+              fontSize: '12px',
+              fontWeight: '500',
+              cursor: 'pointer'
+            }}
+          >
+            digital tech
+          </button>
+        </div>
+
+        {/* Third row */}
+        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+          <button 
+            onClick={() => handleButtonClick('AI')}
+            style={{
+              backgroundColor: selectedButton === 'AI' ? '#16a34a' : '#6b7280',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '6px',
+              padding: '6px 12px',
+              fontSize: '12px',
+              fontWeight: '500',
+              cursor: 'pointer'
+            }}
+          >
+            AI
+          </button>
+          <button 
+            onClick={() => handleButtonClick('journalism')}
+            style={{
+              backgroundColor: selectedButton === 'journalism' ? '#16a34a' : '#6b7280',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '6px',
+              padding: '6px 12px',
+              fontSize: '12px',
+              fontWeight: '500',
+              cursor: 'pointer'
+            }}
+          >
+            journalism
+          </button>
+          <button 
+            onClick={() => handleButtonClick('science')}
+            style={{
+              backgroundColor: selectedButton === 'science' ? '#16a34a' : '#6b7280',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '6px',
+              padding: '6px 12px',
+              fontSize: '12px',
+              fontWeight: '500',
+              cursor: 'pointer'
+            }}
+          >
+            science
+          </button>
+        </div>
+      </div>
+
+      {/* Connecting Lines - Only show when a button is selected */}
+
       {/* Left ellipse - Green */}
       <div
         ref={leftRef}
@@ -86,7 +245,7 @@ export default function Paradigm() {
         }}
       >
         <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '20px', lineHeight: '1.2', textAlign: 'center' }}>
-          the abundance<br />
+          abundance<br />
           economy
         </h2>
         <ul style={{ margin: 0, padding: 0, listStyle: 'none', fontSize: '18px', lineHeight: '1.6' }}>
@@ -97,6 +256,7 @@ export default function Paradigm() {
           <li style={{ marginBottom: '8px' }}>collaboration</li>
           <li style={{ marginBottom: '8px' }}>efficiency</li>
         </ul>
+        
       </div>
 
       {/* Right ellipse - Grey */}
@@ -122,8 +282,8 @@ export default function Paradigm() {
         }}
       >
         <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '20px', lineHeight: '1.2', textAlign: 'center' }}>
-          current economic<br />
-          paradigm
+          current<br />
+          economy
         </h2>
         <ul style={{ margin: 0, padding: 0, listStyle: 'none', fontSize: '18px', lineHeight: '1.6' }}>
           <li style={{ marginBottom: '8px' }}>misalignment</li>
@@ -133,7 +293,41 @@ export default function Paradigm() {
           <li style={{ marginBottom: '8px' }}>adversariality</li>
           <li style={{ marginBottom: '8px' }}>inefficiency</li>
         </ul>
+        
       </div>
+
+      {/* Independent rectangles positioned outside ellipses */}
+      {selectedButton && (
+        <>
+          {/* Green rectangle - positioned over left ellipse */}
+          <div style={{
+            position: 'absolute',
+            width: '300px',
+            height: '216px',
+            backgroundColor: '#22c55e',
+            borderRadius: '8px',
+            border: '2px solid #16a34a',
+            top: 'calc(50% + 40px)', // Same vertical position as before
+            left: 'calc(50% + 200px)', // Center of left ellipse
+            transform: 'translate(-50%, -50%)',
+            zIndex: 1000
+          }} />
+          
+          {/* Grey rectangle - positioned over right ellipse */}
+          <div style={{
+            position: 'absolute',
+            width: '300px',
+            height: '216px',
+            backgroundColor: '#9ca3af',
+            borderRadius: '20px',
+            border: '3px solid #6b7280',
+            top: 'calc(50% + 40px)', // Same vertical position as before
+            right: 'calc(50% + 200px)', // Center of right ellipse
+            transform: 'translate(50%, -50%)',
+            zIndex: 1000
+          }} />
+        </>
+      )}
 
     </div>
   );
