@@ -245,7 +245,7 @@ export default function Paradigm() {
         }}
       >
         <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '20px', lineHeight: '1.2', textAlign: 'center' }}>
-          the abundance<br />
+          abundance<br />
           economy
         </h2>
         <ul style={{ margin: 0, padding: 0, listStyle: 'none', fontSize: '18px', lineHeight: '1.6' }}>
@@ -257,21 +257,6 @@ export default function Paradigm() {
           <li style={{ marginBottom: '8px' }}>efficiency</li>
         </ul>
         
-        {/* Inner rectangle - Only show when a button is selected */}
-        {selectedButton && (
-          <div style={{
-            position: 'absolute',
-            width: '200px',
-            height: '120px',
-            backgroundColor: '#22c55e',
-            borderRadius: '8px',
-            border: '2px solid #16a34a',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            zIndex: 2
-          }} />
-        )}
       </div>
 
       {/* Right ellipse - Grey */}
@@ -297,8 +282,8 @@ export default function Paradigm() {
         }}
       >
         <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '20px', lineHeight: '1.2', textAlign: 'center' }}>
-          current economic<br />
-          paradigm
+          current<br />
+          economy
         </h2>
         <ul style={{ margin: 0, padding: 0, listStyle: 'none', fontSize: '18px', lineHeight: '1.6' }}>
           <li style={{ marginBottom: '8px' }}>misalignment</li>
@@ -309,22 +294,40 @@ export default function Paradigm() {
           <li style={{ marginBottom: '8px' }}>inefficiency</li>
         </ul>
         
-        {/* Inner rectangle - Only show when a button is selected */}
-        {selectedButton && (
+      </div>
+
+      {/* Independent rectangles positioned outside ellipses */}
+      {selectedButton && (
+        <>
+          {/* Green rectangle - positioned over left ellipse */}
           <div style={{
             position: 'absolute',
-            width: '200px',
-            height: '120px',
-            backgroundColor: '#9ca3af',
+            width: '300px',
+            height: '216px',
+            backgroundColor: '#22c55e',
             borderRadius: '8px',
-            border: '2px solid #6b7280',
-            top: '50%',
-            left: '50%',
+            border: '2px solid #16a34a',
+            top: 'calc(50% + 40px)', // Same vertical position as before
+            left: 'calc(50% + 200px)', // Center of left ellipse
             transform: 'translate(-50%, -50%)',
-            zIndex: 2
+            zIndex: 1000
           }} />
-        )}
-      </div>
+          
+          {/* Grey rectangle - positioned over right ellipse */}
+          <div style={{
+            position: 'absolute',
+            width: '300px',
+            height: '216px',
+            backgroundColor: '#9ca3af',
+            borderRadius: '20px',
+            border: '3px solid #6b7280',
+            top: 'calc(50% + 40px)', // Same vertical position as before
+            right: 'calc(50% + 200px)', // Center of right ellipse
+            transform: 'translate(50%, -50%)',
+            zIndex: 1000
+          }} />
+        </>
+      )}
 
     </div>
   );
