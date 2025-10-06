@@ -177,19 +177,41 @@ export default function Paradigm() {
     <div
       ref={containerRef}
       style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100vw',
-        height: '100vh',
+        minHeight: '100vh',
         backgroundColor: '#1a1a1a',
+        padding: '40px 20px',
         display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'center',
-        overflow: 'hidden'
+        gap: '40px'
       }}
     >
       <style>{`
+        /* Override app layout for this page */
+        body {
+          margin: 0 !important;
+          padding: 0 !important;
+          background: #1a1a1a !important;
+          overflow-x: hidden !important;
+        }
+        
+        html {
+          margin: 0 !important;
+          padding: 0 !important;
+          background: #1a1a1a !important;
+        }
+        
+        /* Override any parent container styles */
+        #__next, 
+        [data-reactroot],
+        .main-container,
+        .page-container {
+          margin: 0 !important;
+          padding: 0 !important;
+          background: #1a1a1a !important;
+          min-height: 100vh !important;
+        }
+        
         /* WebKit-based browsers */
         .rectBodyLeft::-webkit-scrollbar,
         .rectBodyRight::-webkit-scrollbar {
@@ -236,18 +258,42 @@ export default function Paradigm() {
           scrollbar-color: #ffffff #a7b0ba; /* thumb track */
         }
       `}</style>
+      {/* Title */}
+      <div style={{
+        textAlign: 'center',
+        maxWidth: '800px'
+      }}>
+        <h1 style={{
+          fontSize: '48px',
+          fontWeight: 'bold',
+          color: 'white',
+          margin: '0 0 20px 0',
+          textShadow: '2px 2px 4px rgba(0,0,0,0.5)'
+        }}>
+          How to Fix a Broken Economy
+        </h1>
+        <p style={{
+          fontSize: '18px',
+          color: 'white',
+          maxWidth: '800px',
+          lineHeight: '1.6',
+          margin: '0 auto 40px auto',
+          textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
+        }}>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
+          Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. 
+          Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+        </p>
+      </div>
+
       {/* Buttons */}
       <div style={{
-        position: 'absolute',
-        top: 'calc(50vh - 200px - 2rem - 100px)', // Back to original position
-        left: '0',
-        right: '0',
         display: 'flex',
         flexDirection: 'column',
         gap: '8px',
         alignItems: 'center',
         justifyContent: 'center',
-        zIndex: 2
+        margin: '60px 0'
       }}>
         {/* First row */}
         <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
@@ -384,28 +430,36 @@ export default function Paradigm() {
 
       {/* Connecting Lines - Only show when a button is selected */}
 
-      {/* Left ellipse - Green */}
+       {/* Ellipses container */}
+       <div style={{
+         position: 'relative',
+         width: '100%',
+         height: '400px',
+         margin: '80px 0',
+         display: 'flex',
+         justifyContent: 'center',
+         alignItems: 'center'
+       }}>
+         {/* Left ellipse - Green */}
       <div
         ref={leftRef}
-        style={{
-          position: 'absolute',
-          width: '600px',
-          height: '400px',
-          backgroundColor: 'rgba(22, 163, 74, 0.9)',
-          borderRadius: '50%',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: 'white',
-          textAlign: 'center',
-          padding: '20px 40px 60px 40px',
-          left: 'calc(50% - 82px)', // Moved 2% closer (12px more left)
-          top: '50%',
-          transform: 'translateY(-50%)',
-          zIndex: 1
-        }}
-      >
+           style={{
+             position: 'absolute',
+             width: '600px',
+             height: '400px',
+             backgroundColor: 'rgba(22, 163, 74, 0.9)',
+             borderRadius: '50%',
+             display: 'flex',
+             flexDirection: 'column',
+             alignItems: 'center',
+             justifyContent: 'center',
+             color: 'white',
+             textAlign: 'center',
+             padding: '20px 40px 60px 40px',
+             left: 'calc(50% - 0px - 82px)',
+             zIndex: 1
+           }}
+         >
         <h2 style={{ fontSize: '34px', fontWeight: 'bold', marginBottom: '20px', lineHeight: '1.2', textAlign: 'center' }}>
           abundance<br />
           economy
@@ -434,43 +488,41 @@ export default function Paradigm() {
           zIndex: 2
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '18px', color: 'white', fontSize: '21px', fontWeight: 'bold' }}>
-            <span style={{ fontSize: '30px', color: '#b4eabf' }}>✓</span>
+            <span style={{ fontSize: '30px', color: '#00f331' }}>✓</span>
             <span>consumer goods</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '18px', color: 'white', fontSize: '21px', fontWeight: 'bold' }}>
-            <span style={{ fontSize: '30px', color: '#b4eabf' }}>✓</span>
+            <span style={{ fontSize: '30px', color: '#00f331' }}>✓</span>
             <span>commercial goods</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '18px', color: 'white', fontSize: '21px', fontWeight: 'bold' }}>
-            <span style={{ fontSize: '30px', color: '#b4eabf' }}>✓</span>
+            <span style={{ fontSize: '30px', color: '#00f331' }}>✓</span>
             <span>ecosystem goods</span>
           </div>
         </div>
         
       </div>
 
-      {/* Right ellipse - Grey */}
+         {/* Right ellipse - Grey */}
       <div
         ref={rightRef}
-        style={{
-          position: 'absolute',
-          width: '600px',
-          height: '400px',
-          backgroundColor: 'rgba(107, 114, 128, 0.9)',
-          borderRadius: '50%',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: 'white',
-          textAlign: 'center',
-          padding: '20px 40px 60px 40px',
-          right: 'calc(50% - 82px)', // Moved 2% closer (12px more right)
-          top: '50%',
-          transform: 'translateY(-50%)',
-          zIndex: 1
-        }}
-      >
+           style={{
+             position: 'absolute',
+             width: '600px',
+             height: '400px',
+             backgroundColor: 'rgba(107, 114, 128, 0.9)',
+             borderRadius: '50%',
+             display: 'flex',
+             flexDirection: 'column',
+             alignItems: 'center',
+             justifyContent: 'center',
+             color: 'white',
+             textAlign: 'center',
+             padding: '20px 40px 60px 40px',
+             right: 'calc(50% - 0px - 82px)',
+             zIndex: 1
+           }}
+         >
         <h2 style={{ fontSize: '34px', fontWeight: 'bold', marginBottom: '20px', lineHeight: '1.2', textAlign: 'center' }}>
           current<br />
           economy
@@ -499,33 +551,30 @@ export default function Paradigm() {
           zIndex: 2
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '18px', color: 'white', fontSize: '21px', fontWeight: 'bold' }}>
-            <span style={{ fontSize: '30px', color: '#b4eabf' }}>✓</span>
+            <span style={{ fontSize: '30px', color: '#00f331' }}>✓</span>
             <span>consumer goods</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '18px', color: 'white', fontSize: '21px', fontWeight: 'bold' }}>
-            <span style={{ fontSize: '30px', color: '#b4eabf' }}>✓</span>
+            <span style={{ fontSize: '30px', color: '#00f331' }}>✓</span>
             <span>commercial goods</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '18px', color: 'white', fontSize: '21px', fontWeight: 'bold' }}>
-            <span style={{ fontSize: '30px', color: '#ee7777' }}>✗</span>
+            <span style={{ fontSize: '30px', color: '#970000' }}>✗</span>
             <span>ecosystem goods</span>
           </div>
         </div>
         
       </div>
+      </div>
 
       {/* Bottom buttons - positioned similar to top buttons */}
       <div style={{
-        position: 'absolute',
-        top: 'calc(50vh + 200px + 2rem)', // Below ellipses with similar spacing
-        left: '0',
-        right: '0',
         display: 'flex',
         flexDirection: 'column',
+        gap: '8px',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: '8px',
-        zIndex: 10
+        margin: '60px 0'
       }}>
         {/* First row */}
         <div style={{
@@ -624,6 +673,49 @@ export default function Paradigm() {
             relations
           </button>
         </div>
+      </div>
+
+      {/* Bottom paragraphs */}
+      <div style={{
+        position: 'absolute',
+        bottom: '40px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        textAlign: 'center',
+        zIndex: 10,
+        maxWidth: '1000px',
+        width: '90%'
+      }}>
+        <p style={{
+          fontSize: '16px',
+          color: 'white',
+          lineHeight: '1.6',
+          margin: '0 0 20px 0',
+          textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
+        }}>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
+          Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+        </p>
+        <p style={{
+          fontSize: '16px',
+          color: 'white',
+          lineHeight: '1.6',
+          margin: '0 0 20px 0',
+          textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
+        }}>
+          Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. 
+          Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+        </p>
+        <p style={{
+          fontSize: '16px',
+          color: 'white',
+          lineHeight: '1.6',
+          margin: '0',
+          textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
+        }}>
+          Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, 
+          totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.
+        </p>
       </div>
 
       {/* Independent rectangles positioned outside ellipses */}
