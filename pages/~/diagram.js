@@ -240,8 +240,8 @@ export default function Paradigm() {
           justifyContent: 'center',
           color: 'white',
           textAlign: 'center',
-          padding: '40px',
-          left: 'calc(50% - 100px)',
+          padding: '20px 40px 60px 40px',
+          left: 'calc(50% - 82px)', // Moved 2% closer (12px more left)
           top: '50%',
           transform: 'translateY(-50%)',
           zIndex: 1
@@ -251,14 +251,16 @@ export default function Paradigm() {
           abundance<br />
           economy
         </h2>
-        <ul style={{ margin: 0, padding: 0, listStyle: 'none', fontSize: '18px', lineHeight: '1.6' }}>
-          <li style={{ marginBottom: '8px' }}>alignment</li>
-          <li style={{ marginBottom: '8px' }}>value creation</li>
-          <li style={{ marginBottom: '8px' }}>common good</li>
-          <li style={{ marginBottom: '8px' }}>abundance</li>
-          <li style={{ marginBottom: '8px' }}>collaboration</li>
-          <li style={{ marginBottom: '8px' }}>efficiency</li>
-        </ul>
+        <img 
+          src="/images/abundanceisland01.png" 
+          alt="Abundance Economy" 
+          style={{
+            width: '60%',
+            height: '60%',
+            objectFit: 'cover',
+            borderRadius: '50%'
+          }}
+        />
         
       </div>
 
@@ -277,8 +279,8 @@ export default function Paradigm() {
           justifyContent: 'center',
           color: 'white',
           textAlign: 'center',
-          padding: '40px',
-          right: 'calc(50% - 100px)',
+          padding: '20px 40px 60px 40px',
+          right: 'calc(50% - 82px)', // Moved 2% closer (12px more right)
           top: '50%',
           transform: 'translateY(-50%)',
           zIndex: 1
@@ -288,15 +290,129 @@ export default function Paradigm() {
           current<br />
           economy
         </h2>
-        <ul style={{ margin: 0, padding: 0, listStyle: 'none', fontSize: '18px', lineHeight: '1.6' }}>
-          <li style={{ marginBottom: '8px' }}>misalignment</li>
-          <li style={{ marginBottom: '8px' }}>extraction</li>
-          <li style={{ marginBottom: '8px' }}>externalities</li>
-          <li style={{ marginBottom: '8px' }}>scarcity</li>
-          <li style={{ marginBottom: '8px' }}>adversariality</li>
-          <li style={{ marginBottom: '8px' }}>inefficiency</li>
-        </ul>
+        <img 
+          src="/images/ScarcityIsland04.png" 
+          alt="Current Economic Paradigm" 
+          style={{
+            width: '60%',
+            height: '60%',
+            objectFit: 'cover',
+            borderRadius: '50%'
+          }}
+        />
         
+      </div>
+
+      {/* Bottom buttons - positioned similar to top buttons */}
+      <div style={{
+        position: 'absolute',
+        top: 'calc(50vh + 200px + 2rem)', // Below ellipses with similar spacing
+        left: '0',
+        right: '0',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '8px',
+        zIndex: 10
+      }}>
+        {/* First row */}
+        <div style={{
+          display: 'flex',
+          gap: '8px',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <button
+            onClick={() => handleButtonClick('alignment')}
+            style={{
+              padding: '8px 17px',
+              backgroundColor: selectedButton === 'alignment' ? '#16a34a' : '#6b7280',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '11px',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              transition: 'background-color 0.2s ease'
+            }}
+          >
+            alignment
+          </button>
+          <button
+            onClick={() => handleButtonClick('value')}
+            style={{
+              padding: '8px 17px',
+              backgroundColor: selectedButton === 'value' ? '#16a34a' : '#6b7280',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '11px',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              transition: 'background-color 0.2s ease'
+            }}
+          >
+            value
+          </button>
+          <button
+            onClick={() => handleButtonClick('efficiency')}
+            style={{
+              padding: '8px 17px',
+              backgroundColor: selectedButton === 'efficiency' ? '#16a34a' : '#6b7280',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '11px',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              transition: 'background-color 0.2s ease'
+            }}
+          >
+            efficiency
+          </button>
+        </div>
+        
+        {/* Second row */}
+        <div style={{
+          display: 'flex',
+          gap: '8px',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <button
+            onClick={() => handleButtonClick('resources')}
+            style={{
+              padding: '8px 17px',
+              backgroundColor: selectedButton === 'resources' ? '#16a34a' : '#6b7280',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '11px',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              transition: 'background-color 0.2s ease'
+            }}
+          >
+            resources
+          </button>
+          <button
+            onClick={() => handleButtonClick('relations')}
+            style={{
+              padding: '8px 17px',
+              backgroundColor: selectedButton === 'relations' ? '#16a34a' : '#6b7280',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '11px',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              transition: 'background-color 0.2s ease'
+            }}
+          >
+            relations
+          </button>
+        </div>
       </div>
 
       {/* Independent rectangles positioned outside ellipses */}
@@ -321,8 +437,8 @@ export default function Paradigm() {
               backgroundColor: '#22c55e',
               borderRadius: '8px',
               border: '2px solid #16a34a',
-              top: 'calc(50% + 40px)', // Same vertical position as before
-              left: 'calc(50% + 200px)', // Center of left ellipse
+              top: 'calc(50% + 20px)', // Moved up 5% (20px less)
+              left: 'calc(50% + 218px)', // Updated to match new ellipse position
               transform: 'translate(-50%, -50%)',
               zIndex: 1000,
               display: 'flex',
@@ -368,8 +484,8 @@ export default function Paradigm() {
               backgroundColor: '#9ca3af',
               borderRadius: '20px',
               border: '3px solid #6b7280',
-              top: 'calc(50% + 40px)', // Same vertical position as before
-              right: 'calc(50% + 200px)', // Center of right ellipse
+              top: 'calc(50% + 20px)', // Moved up 5% (20px less)
+              right: 'calc(50% + 218px)', // Updated to match new ellipse position
               transform: 'translate(50%, -50%)',
               zIndex: 1000,
               display: 'flex',
