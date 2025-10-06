@@ -12,6 +12,88 @@ export default function Paradigm() {
   const containerRef = useRef(null);
   const [selectedButton, setSelectedButton] = useState(null);
 
+  // Per-button content for each rectangle
+  const rectangleContent = {
+    'medicine': {
+      leftTitle: 'medicine → abundance',
+      leftBody: 'preventive care, open research, equitable access',
+      rightTitle: 'medicine → current',
+      rightBody: 'patents, paywalls, reactive treatment'
+    },
+    'social media': {
+      leftTitle: 'social media → abundance',
+      leftBody: 'authentic identity, shared value, healthy discourse',
+      rightTitle: 'social media → current',
+      rightBody: 'ad auctions, engagement hacking, data silos'
+    },
+    'innovation': {
+      leftTitle: 'innovation → abundance',
+      leftBody: 'public goods, open-source, compounding knowledge',
+      rightTitle: 'innovation → current',
+      rightBody: 'IP hoarding, rent seeking, duplicated effort'
+    },
+    'purpose': {
+      leftTitle: 'purpose → abundance',
+      leftBody: 'mission-aligned capital and coordination',
+      rightTitle: 'purpose → current',
+      rightBody: 'short-term incentives, misalignment'
+    },
+    'digital tech': {
+      leftTitle: 'digital tech → abundance',
+      leftBody: 'composability, interoperability, low marginal cost',
+      rightTitle: 'digital tech → current',
+      rightBody: 'walled gardens, platform lock-in'
+    },
+    'AI': {
+      leftTitle: 'AI → abundance',
+      leftBody: 'assistive intelligence for everyone',
+      rightTitle: 'AI → current',
+      rightBody: 'centralized models, unequal access'
+    },
+    'journalism': {
+      leftTitle: 'journalism → abundance',
+      leftBody: 'public-interest funding, provenance, credibility',
+      rightTitle: 'journalism → current',
+      rightBody: 'click economy, polarization'
+    },
+    'science': {
+      leftTitle: 'science → abundance',
+      leftBody: 'open science, reproducibility, rapid iteration',
+      rightTitle: 'science → current',
+      rightBody: 'paywalled knowledge, slow publishing'
+    },
+    'alignment': {
+      leftTitle: 'alignment → abundance',
+      leftBody: 'values-first markets and mechanisms',
+      rightTitle: 'alignment → current',
+      rightBody: 'externalities and mispricing'
+    },
+    'value': {
+      leftTitle: 'value → abundance',
+      leftBody: 'measure impact beyond price',
+      rightTitle: 'value → current',
+      rightBody: 'narrow financial metrics'
+    },
+    'efficiency': {
+      leftTitle: 'efficiency → abundance',
+      leftBody: 'optimize for coordination and reuse',
+      rightTitle: 'efficiency → current',
+      rightBody: 'optimize isolated silos'
+    },
+    'resources': {
+      leftTitle: 'resources → abundance',
+      leftBody: 'regenerative loops, commons stewardship',
+      rightTitle: 'resources → current',
+      rightBody: 'extraction and depletion'
+    },
+    'relations': {
+      leftTitle: 'relations → abundance',
+      leftBody: 'trust networks, cooperative games',
+      rightTitle: 'relations → current',
+      rightBody: 'zero-sum framing, adversarial dynamics'
+    }
+  };
+
   // Debug: Check if refs are available
   useEffect(() => {
     console.log("Left ref:", leftRef.current);
@@ -455,14 +537,14 @@ export default function Paradigm() {
               marginBottom: '10px',
               textAlign: 'center'
             }}>
-              {selectedButton}
+              {(rectangleContent[selectedButton]?.leftTitle) || selectedButton}
             </div>
             <div style={{
               fontSize: '14px',
               textAlign: 'center',
               lineHeight: '1.4'
             }}>
-              This is temporary text underneath the title. It provides additional context and information about the selected topic.
+              {(rectangleContent[selectedButton]?.leftBody) || ''}
             </div>
           </div>
           
@@ -502,14 +584,14 @@ export default function Paradigm() {
               marginBottom: '10px',
               textAlign: 'center'
             }}>
-              {selectedButton}
+              {(rectangleContent[selectedButton]?.rightTitle) || selectedButton}
             </div>
             <div style={{
               fontSize: '14px',
               textAlign: 'center',
               lineHeight: '1.4'
             }}>
-              This is temporary text underneath the title. It provides additional context and information about the selected topic.
+              {(rectangleContent[selectedButton]?.rightBody) || ''}
             </div>
           </div>
         </>
