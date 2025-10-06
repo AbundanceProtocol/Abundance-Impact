@@ -10,7 +10,37 @@ export default function Paradigm() {
   const leftRef = useRef(null);
   const rightRef = useRef(null);
   const containerRef = useRef(null);
+  const leftScrollRef = useRef(null);
+  const rightScrollRef = useRef(null);
   const [selectedButton, setSelectedButton] = useState(null);
+
+  // Drag to scroll functionality
+  const handleMouseDown = (e, containerRef) => {
+    e.preventDefault();
+    const container = containerRef.current;
+    if (!container) return;
+
+    const startY = e.clientY;
+    const startScrollTop = container.scrollTop;
+    let isDragging = false;
+
+    const handleMouseMove = (e) => {
+      isDragging = true;
+      const deltaY = startY - e.clientY;
+      container.scrollTop = startScrollTop + deltaY;
+    };
+
+    const handleMouseUp = () => {
+      if (isDragging) {
+        e.preventDefault();
+      }
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  };
 
   // Per-button content for each rectangle
   const rectangleContent = {
@@ -209,7 +239,7 @@ export default function Paradigm() {
       {/* Buttons */}
       <div style={{
         position: 'absolute',
-        top: 'calc(50vh - 200px - 2rem - 100px)',
+        top: 'calc(50vh - 200px - 2rem - 100px)', // Back to original position
         left: '0',
         right: '0',
         display: 'flex',
@@ -376,7 +406,7 @@ export default function Paradigm() {
           zIndex: 1
         }}
       >
-        <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '20px', lineHeight: '1.2', textAlign: 'center' }}>
+        <h2 style={{ fontSize: '34px', fontWeight: 'bold', marginBottom: '20px', lineHeight: '1.2', textAlign: 'center' }}>
           abundance<br />
           economy
         </h2>
@@ -387,9 +417,35 @@ export default function Paradigm() {
             width: '60%',
             height: '60%',
             objectFit: 'cover',
-            borderRadius: '50%'
+            borderRadius: '50%',
+            opacity: 0
           }}
         />
+        {/* Overlay checkmarks */}
+        <div style={{
+          position: 'absolute',
+          top: '55%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '18px',
+          zIndex: 2
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '18px', color: 'white', fontSize: '21px', fontWeight: 'bold' }}>
+            <span style={{ fontSize: '30px', color: '#b4eabf' }}>✓</span>
+            <span>consumer goods</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '18px', color: 'white', fontSize: '21px', fontWeight: 'bold' }}>
+            <span style={{ fontSize: '30px', color: '#b4eabf' }}>✓</span>
+            <span>commercial goods</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '18px', color: 'white', fontSize: '21px', fontWeight: 'bold' }}>
+            <span style={{ fontSize: '30px', color: '#b4eabf' }}>✓</span>
+            <span>ecosystem goods</span>
+          </div>
+        </div>
         
       </div>
 
@@ -415,7 +471,7 @@ export default function Paradigm() {
           zIndex: 1
         }}
       >
-        <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '20px', lineHeight: '1.2', textAlign: 'center' }}>
+        <h2 style={{ fontSize: '34px', fontWeight: 'bold', marginBottom: '20px', lineHeight: '1.2', textAlign: 'center' }}>
           current<br />
           economy
         </h2>
@@ -426,9 +482,35 @@ export default function Paradigm() {
             width: '60%',
             height: '60%',
             objectFit: 'cover',
-            borderRadius: '50%'
+            borderRadius: '50%',
+            opacity: 0
           }}
         />
+        {/* Overlay checkmarks and X */}
+        <div style={{
+          position: 'absolute',
+          top: '55%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '18px',
+          zIndex: 2
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '18px', color: 'white', fontSize: '21px', fontWeight: 'bold' }}>
+            <span style={{ fontSize: '30px', color: '#b4eabf' }}>✓</span>
+            <span>consumer goods</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '18px', color: 'white', fontSize: '21px', fontWeight: 'bold' }}>
+            <span style={{ fontSize: '30px', color: '#b4eabf' }}>✓</span>
+            <span>commercial goods</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '18px', color: 'white', fontSize: '21px', fontWeight: 'bold' }}>
+            <span style={{ fontSize: '30px', color: '#ee7777' }}>✗</span>
+            <span>ecosystem goods</span>
+          </div>
+        </div>
         
       </div>
 
@@ -448,7 +530,7 @@ export default function Paradigm() {
         {/* First row */}
         <div style={{
           display: 'flex',
-          gap: '8px',
+          gap: '18px',
           alignItems: 'center',
           justifyContent: 'center'
         }}>
@@ -505,7 +587,7 @@ export default function Paradigm() {
         {/* Second row */}
         <div style={{
           display: 'flex',
-          gap: '8px',
+          gap: '18px',
           alignItems: 'center',
           justifyContent: 'center'
         }}>
@@ -563,11 +645,11 @@ export default function Paradigm() {
               position: 'absolute',
               width: '300px',
               height: '216px',
-              backgroundColor: '#22c55e',
+              backgroundColor: '#1a5a2a',
               borderRadius: '8px',
               border: '2px solid #16a34a',
               boxShadow: '0 12px 24px rgba(0,0,0,0.35)',
-              top: 'calc(50% + 20px)', // Moved up 5% (20px less)
+              top: 'calc(50% + 40px)', // Lowered by 5% (20px more down)
               left: 'calc(50% + 218px)', // Updated to match new ellipse position
               transform: 'translate(-50%, -50%)',
               zIndex: 1000,
@@ -595,8 +677,12 @@ export default function Paradigm() {
               overflowY: 'auto',
               width: '100%',
               maxHeight: 'calc(100% - 46px)',
-              paddingRight: '8px'
-            }}>
+              paddingRight: '8px',
+              cursor: 'grab',
+              userSelect: 'none'
+            }}
+            ref={leftScrollRef}
+            onMouseDown={(e) => handleMouseDown(e, leftScrollRef)}>
               {(rectangleContent[selectedButton]?.leftBody) || ''}
             </div>
           </div>
@@ -616,11 +702,11 @@ export default function Paradigm() {
               position: 'absolute',
               width: '300px',
               height: '216px',
-              backgroundColor: '#9ca3af',
+              backgroundColor: '#4a5568',
               borderRadius: '20px',
               border: '3px solid #6b7280',
               boxShadow: '0 12px 24px rgba(0,0,0,0.35)',
-              top: 'calc(50% + 20px)', // Moved up 5% (20px less)
+              top: 'calc(50% + 40px)', // Lowered by 5% (20px more down)
               right: 'calc(50% + 218px)', // Updated to match new ellipse position
               transform: 'translate(50%, -50%)',
               zIndex: 1000,
@@ -648,8 +734,12 @@ export default function Paradigm() {
               overflowY: 'auto',
               width: '100%',
               maxHeight: 'calc(100% - 46px)',
-              paddingRight: '8px'
-            }}>
+              paddingRight: '8px',
+              cursor: 'grab',
+              userSelect: 'none'
+            }}
+            ref={rightScrollRef}
+            onMouseDown={(e) => handleMouseDown(e, rightScrollRef)}>
               {(rectangleContent[selectedButton]?.rightBody) || ''}
             </div>
           </div>
