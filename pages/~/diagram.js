@@ -209,7 +209,7 @@ export default function Paradigm() {
       {/* Buttons */}
       <div style={{
         position: 'absolute',
-        top: 'calc(50vh - 200px - 2rem - 100px)',
+        top: 'calc(50vh - 200px - 2rem - 20px)', // Much closer to ellipses
         left: '0',
         right: '0',
         display: 'flex',
@@ -388,7 +388,7 @@ export default function Paradigm() {
             height: '60%',
             objectFit: 'cover',
             borderRadius: '50%',
-            opacity: 0.3
+            opacity: 0
           }}
         />
         {/* Overlay checkmarks */}
@@ -400,7 +400,7 @@ export default function Paradigm() {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          gap: '8px',
+          gap: '18px',
           zIndex: 2
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '18px', color: 'white', fontSize: '21px', fontWeight: 'bold' }}>
@@ -453,7 +453,7 @@ export default function Paradigm() {
             height: '60%',
             objectFit: 'cover',
             borderRadius: '50%',
-            opacity: 0.3
+            opacity: 0
           }}
         />
         {/* Overlay checkmarks and X */}
@@ -465,7 +465,7 @@ export default function Paradigm() {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          gap: '8px',
+          gap: '18px',
           zIndex: 2
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '18px', color: 'white', fontSize: '21px', fontWeight: 'bold' }}>
@@ -500,7 +500,7 @@ export default function Paradigm() {
         {/* First row */}
         <div style={{
           display: 'flex',
-          gap: '8px',
+          gap: '18px',
           alignItems: 'center',
           justifyContent: 'center'
         }}>
@@ -557,7 +557,7 @@ export default function Paradigm() {
         {/* Second row */}
         <div style={{
           display: 'flex',
-          gap: '8px',
+          gap: '18px',
           alignItems: 'center',
           justifyContent: 'center'
         }}>
