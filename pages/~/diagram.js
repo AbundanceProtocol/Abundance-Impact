@@ -30,12 +30,15 @@ export default function Paradigm() {
   }, []);
 
   const handleButtonClick = (buttonName) => {
+    console.log('Button clicked:', buttonName, 'Current selected:', selectedButton);
     // If clicking the same button that's already selected, deselect it
     if (selectedButton === buttonName) {
       setSelectedButton(null);
+      console.log('Deselected button');
     } else {
       // Otherwise, select the new button
       setSelectedButton(buttonName);
+      console.log('Selected button:', buttonName);
     }
   };
 
@@ -299,33 +302,100 @@ export default function Paradigm() {
       {/* Independent rectangles positioned outside ellipses */}
       {selectedButton && (
         <>
+          {console.log('Rendering rectangles for selectedButton:', selectedButton)}
           {/* Green rectangle - positioned over left ellipse */}
-          <div style={{
-            position: 'absolute',
-            width: '300px',
-            height: '216px',
-            backgroundColor: '#22c55e',
-            borderRadius: '8px',
-            border: '2px solid #16a34a',
-            top: 'calc(50% + 40px)', // Same vertical position as before
-            left: 'calc(50% + 200px)', // Center of left ellipse
-            transform: 'translate(-50%, -50%)',
-            zIndex: 1000
-          }} />
+          <div 
+            ref={(el) => {
+              if (el && selectedButton) {
+                // All rectangles use the same animation as journalism grey rectangle
+                gsap.fromTo(el, 
+                  { scale: 0, rotation: -180, opacity: 0 },
+                  { scale: 1, rotation: 0, opacity: 1, duration: 0.8, ease: "power3.out" }
+                );
+              }
+            }}
+            style={{
+              position: 'absolute',
+              width: '300px',
+              height: '216px',
+              backgroundColor: '#22c55e',
+              borderRadius: '8px',
+              border: '2px solid #16a34a',
+              top: 'calc(50% + 40px)', // Same vertical position as before
+              left: 'calc(50% + 200px)', // Center of left ellipse
+              transform: 'translate(-50%, -50%)',
+              zIndex: 1000,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'flex-start',
+              color: 'white',
+              padding: '10px',
+              boxSizing: 'border-box'
+            }}>
+            <div style={{
+              fontSize: '20px',
+              fontWeight: 'bold',
+              marginBottom: '10px',
+              textAlign: 'center'
+            }}>
+              {selectedButton}
+            </div>
+            <div style={{
+              fontSize: '14px',
+              textAlign: 'center',
+              lineHeight: '1.4'
+            }}>
+              This is temporary text underneath the title. It provides additional context and information about the selected topic.
+            </div>
+          </div>
           
           {/* Grey rectangle - positioned over right ellipse */}
-          <div style={{
-            position: 'absolute',
-            width: '300px',
-            height: '216px',
-            backgroundColor: '#9ca3af',
-            borderRadius: '20px',
-            border: '3px solid #6b7280',
-            top: 'calc(50% + 40px)', // Same vertical position as before
-            right: 'calc(50% + 200px)', // Center of right ellipse
-            transform: 'translate(50%, -50%)',
-            zIndex: 1000
-          }} />
+          <div 
+            ref={(el) => {
+              if (el && selectedButton) {
+                // All rectangles use the same animation as journalism grey rectangle
+                gsap.fromTo(el, 
+                  { scale: 0, rotation: -180, opacity: 0 },
+                  { scale: 1, rotation: 0, opacity: 1, duration: 0.8, ease: "power3.out", delay: 0.1 }
+                );
+              }
+            }}
+            style={{
+              position: 'absolute',
+              width: '300px',
+              height: '216px',
+              backgroundColor: '#9ca3af',
+              borderRadius: '20px',
+              border: '3px solid #6b7280',
+              top: 'calc(50% + 40px)', // Same vertical position as before
+              right: 'calc(50% + 200px)', // Center of right ellipse
+              transform: 'translate(50%, -50%)',
+              zIndex: 1000,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'flex-start',
+              color: 'white',
+              padding: '10px',
+              boxSizing: 'border-box'
+            }}>
+            <div style={{
+              fontSize: '20px',
+              fontWeight: 'bold',
+              marginBottom: '10px',
+              textAlign: 'center'
+            }}>
+              {selectedButton}
+            </div>
+            <div style={{
+              fontSize: '14px',
+              textAlign: 'center',
+              lineHeight: '1.4'
+            }}>
+              This is temporary text underneath the title. It provides additional context and information about the selected topic.
+            </div>
+          </div>
         </>
       )}
 
