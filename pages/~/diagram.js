@@ -499,15 +499,15 @@ export default function Paradigm() {
           zIndex: 2
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '18px', color: 'white', fontSize: '21px', fontWeight: 'bold' }}>
-            <span style={{ fontSize: '30px', color: '#b4eabf' }}>✓</span>
+            <span style={{ fontSize: '30px', color: '#00f331' }}>✓</span>
             <span>consumer goods</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '18px', color: 'white', fontSize: '21px', fontWeight: 'bold' }}>
-            <span style={{ fontSize: '30px', color: '#b4eabf' }}>✓</span>
+            <span style={{ fontSize: '30px', color: '#00f331' }}>✓</span>
             <span>commercial goods</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '18px', color: 'white', fontSize: '21px', fontWeight: 'bold' }}>
-            <span style={{ fontSize: '30px', color: '#ee7777' }}>✗</span>
+            <span style={{ fontSize: '30px', color: '#970000' }}>✗</span>
             <span>ecosystem goods</span>
           </div>
         </div>
