@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 
@@ -10,6 +10,7 @@ export default function Paradigm() {
   const leftRef = useRef(null);
   const rightRef = useRef(null);
   const containerRef = useRef(null);
+  const [selectedButton, setSelectedButton] = useState(null);
 
   // Debug: Check if refs are available
   useEffect(() => {
@@ -27,6 +28,10 @@ export default function Paradigm() {
       rightRef.current.style.display = "flex";
     }
   }, []);
+
+  const handleButtonClick = (buttonName) => {
+    setSelectedButton(buttonName);
+  };
 
   useGSAP(() => {
     if (leftRef.current && rightRef.current) {
@@ -78,112 +83,138 @@ export default function Paradigm() {
       }}>
         {/* First row */}
         <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-          <button style={{
-            backgroundColor: '#6b7280',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '6px',
-            padding: '6px 12px',
-            fontSize: '12px',
-            fontWeight: '500',
-            cursor: 'pointer'
-          }}>
+          <button 
+            onClick={() => handleButtonClick('medicine')}
+            style={{
+              backgroundColor: selectedButton === 'medicine' ? '#16a34a' : '#6b7280',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '6px',
+              padding: '6px 12px',
+              fontSize: '12px',
+              fontWeight: '500',
+              cursor: 'pointer'
+            }}
+          >
             medicine
           </button>
-          <button style={{
-            backgroundColor: '#6b7280',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '6px',
-            padding: '6px 12px',
-            fontSize: '12px',
-            fontWeight: '500',
-            cursor: 'pointer'
-          }}>
+          <button 
+            onClick={() => handleButtonClick('social media')}
+            style={{
+              backgroundColor: selectedButton === 'social media' ? '#16a34a' : '#6b7280',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '6px',
+              padding: '6px 12px',
+              fontSize: '12px',
+              fontWeight: '500',
+              cursor: 'pointer'
+            }}
+          >
             social media
           </button>
         </div>
         
         {/* Second row */}
         <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-          <button style={{
-            backgroundColor: '#6b7280',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '6px',
-            padding: '6px 12px',
-            fontSize: '12px',
-            fontWeight: '500',
-            cursor: 'pointer'
-          }}>
+          <button 
+            onClick={() => handleButtonClick('innovation')}
+            style={{
+              backgroundColor: selectedButton === 'innovation' ? '#16a34a' : '#6b7280',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '6px',
+              padding: '6px 12px',
+              fontSize: '12px',
+              fontWeight: '500',
+              cursor: 'pointer'
+            }}
+          >
             innovation
           </button>
-          <button style={{
-            backgroundColor: '#6b7280',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '6px',
-            padding: '6px 12px',
-            fontSize: '12px',
-            fontWeight: '500',
-            cursor: 'pointer'
-          }}>
+          <button 
+            onClick={() => handleButtonClick('purpose')}
+            style={{
+              backgroundColor: selectedButton === 'purpose' ? '#16a34a' : '#6b7280',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '6px',
+              padding: '6px 12px',
+              fontSize: '12px',
+              fontWeight: '500',
+              cursor: 'pointer'
+            }}
+          >
             purpose
           </button>
-          <button style={{
-            backgroundColor: '#6b7280',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '6px',
-            padding: '6px 12px',
-            fontSize: '12px',
-            fontWeight: '500',
-            cursor: 'pointer'
-          }}>
+          <button 
+            onClick={() => handleButtonClick('digital tech')}
+            style={{
+              backgroundColor: selectedButton === 'digital tech' ? '#16a34a' : '#6b7280',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '6px',
+              padding: '6px 12px',
+              fontSize: '12px',
+              fontWeight: '500',
+              cursor: 'pointer'
+            }}
+          >
             digital tech
           </button>
         </div>
 
         {/* Third row */}
         <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-          <button style={{
-            backgroundColor: '#6b7280',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '6px',
-            padding: '6px 12px',
-            fontSize: '12px',
-            fontWeight: '500',
-            cursor: 'pointer'
-          }}>
+          <button 
+            onClick={() => handleButtonClick('AI')}
+            style={{
+              backgroundColor: selectedButton === 'AI' ? '#16a34a' : '#6b7280',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '6px',
+              padding: '6px 12px',
+              fontSize: '12px',
+              fontWeight: '500',
+              cursor: 'pointer'
+            }}
+          >
             AI
           </button>
-          <button style={{
-            backgroundColor: '#6b7280',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '6px',
-            padding: '6px 12px',
-            fontSize: '12px',
-            fontWeight: '500',
-            cursor: 'pointer'
-          }}>
+          <button 
+            onClick={() => handleButtonClick('journalism')}
+            style={{
+              backgroundColor: selectedButton === 'journalism' ? '#16a34a' : '#6b7280',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '6px',
+              padding: '6px 12px',
+              fontSize: '12px',
+              fontWeight: '500',
+              cursor: 'pointer'
+            }}
+          >
             journalism
           </button>
-          <button style={{
-            backgroundColor: '#6b7280',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '6px',
-            padding: '6px 12px',
-            fontSize: '12px',
-            fontWeight: '500',
-            cursor: 'pointer'
-          }}>
+          <button 
+            onClick={() => handleButtonClick('science')}
+            style={{
+              backgroundColor: selectedButton === 'science' ? '#16a34a' : '#6b7280',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '6px',
+              padding: '6px 12px',
+              fontSize: '12px',
+              fontWeight: '500',
+              cursor: 'pointer'
+            }}
+          >
             science
           </button>
         </div>
       </div>
+
+      {/* Connecting Lines - Only show when a button is selected */}
 
       {/* Left ellipse - Green */}
       <div
@@ -219,6 +250,22 @@ export default function Paradigm() {
           <li style={{ marginBottom: '8px' }}>collaboration</li>
           <li style={{ marginBottom: '8px' }}>efficiency</li>
         </ul>
+        
+        {/* Inner rectangle - Only show when a button is selected */}
+        {selectedButton && (
+          <div style={{
+            position: 'absolute',
+            width: '200px',
+            height: '120px',
+            backgroundColor: '#22c55e',
+            borderRadius: '8px',
+            border: '2px solid #16a34a',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            zIndex: 2
+          }} />
+        )}
       </div>
 
       {/* Right ellipse - Grey */}
@@ -255,6 +302,22 @@ export default function Paradigm() {
           <li style={{ marginBottom: '8px' }}>adversariality</li>
           <li style={{ marginBottom: '8px' }}>inefficiency</li>
         </ul>
+        
+        {/* Inner rectangle - Only show when a button is selected */}
+        {selectedButton && (
+          <div style={{
+            position: 'absolute',
+            width: '200px',
+            height: '120px',
+            backgroundColor: '#9ca3af',
+            borderRadius: '8px',
+            border: '2px solid #6b7280',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            zIndex: 2
+          }} />
+        )}
       </div>
 
     </div>
