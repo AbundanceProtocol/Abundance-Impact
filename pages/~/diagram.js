@@ -376,7 +376,7 @@ export default function Paradigm() {
           zIndex: 1
         }}
       >
-        <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '20px', lineHeight: '1.2', textAlign: 'center' }}>
+        <h2 style={{ fontSize: '34px', fontWeight: 'bold', marginBottom: '20px', lineHeight: '1.2', textAlign: 'center' }}>
           abundance<br />
           economy
         </h2>
@@ -387,9 +387,35 @@ export default function Paradigm() {
             width: '60%',
             height: '60%',
             objectFit: 'cover',
-            borderRadius: '50%'
+            borderRadius: '50%',
+            opacity: 0.3
           }}
         />
+        {/* Overlay checkmarks */}
+        <div style={{
+          position: 'absolute',
+          top: '55%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '8px',
+          zIndex: 2
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '18px', color: 'white', fontSize: '21px', fontWeight: 'bold' }}>
+            <span style={{ fontSize: '30px', color: '#b4eabf' }}>✓</span>
+            <span>consumer goods</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '18px', color: 'white', fontSize: '21px', fontWeight: 'bold' }}>
+            <span style={{ fontSize: '30px', color: '#b4eabf' }}>✓</span>
+            <span>commercial goods</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '18px', color: 'white', fontSize: '21px', fontWeight: 'bold' }}>
+            <span style={{ fontSize: '30px', color: '#b4eabf' }}>✓</span>
+            <span>ecosystem goods</span>
+          </div>
+        </div>
         
       </div>
 
@@ -415,7 +441,7 @@ export default function Paradigm() {
           zIndex: 1
         }}
       >
-        <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '20px', lineHeight: '1.2', textAlign: 'center' }}>
+        <h2 style={{ fontSize: '34px', fontWeight: 'bold', marginBottom: '20px', lineHeight: '1.2', textAlign: 'center' }}>
           current<br />
           economy
         </h2>
@@ -426,9 +452,35 @@ export default function Paradigm() {
             width: '60%',
             height: '60%',
             objectFit: 'cover',
-            borderRadius: '50%'
+            borderRadius: '50%',
+            opacity: 0.3
           }}
         />
+        {/* Overlay checkmarks and X */}
+        <div style={{
+          position: 'absolute',
+          top: '55%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '8px',
+          zIndex: 2
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '18px', color: 'white', fontSize: '21px', fontWeight: 'bold' }}>
+            <span style={{ fontSize: '30px', color: '#b4eabf' }}>✓</span>
+            <span>consumer goods</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '18px', color: 'white', fontSize: '21px', fontWeight: 'bold' }}>
+            <span style={{ fontSize: '30px', color: '#b4eabf' }}>✓</span>
+            <span>commercial goods</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '18px', color: 'white', fontSize: '21px', fontWeight: 'bold' }}>
+            <span style={{ fontSize: '30px', color: '#ee7777' }}>✗</span>
+            <span>ecosystem goods</span>
+          </div>
+        </div>
         
       </div>
 
@@ -563,11 +615,11 @@ export default function Paradigm() {
               position: 'absolute',
               width: '300px',
               height: '216px',
-              backgroundColor: '#22c55e',
+              backgroundColor: '#1a5a2a',
               borderRadius: '8px',
               border: '2px solid #16a34a',
               boxShadow: '0 12px 24px rgba(0,0,0,0.35)',
-              top: 'calc(50% + 20px)', // Moved up 5% (20px less)
+              top: 'calc(50% + 40px)', // Lowered by 5% (20px more down)
               left: 'calc(50% + 218px)', // Updated to match new ellipse position
               transform: 'translate(-50%, -50%)',
               zIndex: 1000,
@@ -616,11 +668,11 @@ export default function Paradigm() {
               position: 'absolute',
               width: '300px',
               height: '216px',
-              backgroundColor: '#9ca3af',
+              backgroundColor: '#4a5568',
               borderRadius: '20px',
               border: '3px solid #6b7280',
               boxShadow: '0 12px 24px rgba(0,0,0,0.35)',
-              top: 'calc(50% + 20px)', // Moved up 5% (20px less)
+              top: 'calc(50% + 40px)', // Lowered by 5% (20px more down)
               right: 'calc(50% + 218px)', // Updated to match new ellipse position
               transform: 'translate(50%, -50%)',
               zIndex: 1000,
