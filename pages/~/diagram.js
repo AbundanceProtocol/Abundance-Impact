@@ -183,7 +183,7 @@ export default function Paradigm() {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        gap: '40px'
+        gap: '0px'
       }}
     >
       <style>{`
@@ -219,14 +219,14 @@ export default function Paradigm() {
           border-radius: 8px;
         }
         .rectBodyLeft::-webkit-scrollbar-track {
-          background: #27d165; /* slightly lighter than #22c55e */
+          background: #27d165; /* slightly lighter than green */
           border-radius: 8px;
         }
         .rectBodyLeft::-webkit-scrollbar-thumb {
           background: #ffffff; /* white */
           border-radius: 8px;
         }
-        /* Rounded outer ends (the "arrows") */
+        /* Rounded outer ends (the arrows) */
         .rectBodyLeft::-webkit-scrollbar-button:single-button {
           background: #27d165;
           display: block;
@@ -234,7 +234,7 @@ export default function Paradigm() {
           border-radius: 8px;
         }
         .rectBodyRight::-webkit-scrollbar-track {
-          background: #a7b0ba; /* slightly lighter than #9ca3af */
+          background: #a7b0ba; /* slightly lighter than grey */
           border-radius: 8px;
         }
         .rectBodyRight::-webkit-scrollbar-thumb {
@@ -267,7 +267,7 @@ export default function Paradigm() {
           fontSize: '48px',
           fontWeight: 'bold',
           color: 'white',
-          margin: '0 0 20px 0',
+          margin: '0 0 0px 0',
           textShadow: '2px 2px 4px rgba(0,0,0,0.5)'
         }}>
           How to Fix a Broken Economy
@@ -277,7 +277,7 @@ export default function Paradigm() {
           color: 'white',
           maxWidth: '800px',
           lineHeight: '1.6',
-          margin: '0 auto 40px auto',
+          margin: '20px auto 40px auto',
           textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
         }}>
           Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
@@ -293,7 +293,7 @@ export default function Paradigm() {
         gap: '8px',
         alignItems: 'center',
         justifyContent: 'center',
-        margin: '60px 0'
+        margin: '0px 0'
       }}>
         {/* First row */}
         <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
@@ -435,7 +435,7 @@ export default function Paradigm() {
          position: 'relative',
          width: '100%',
          height: '400px',
-         margin: '80px 0',
+         margin: '20px 0',
          display: 'flex',
          justifyContent: 'center',
          alignItems: 'center'
@@ -574,7 +574,7 @@ export default function Paradigm() {
         gap: '8px',
         alignItems: 'center',
         justifyContent: 'center',
-        margin: '60px 0'
+        margin: '0px 0'
       }}>
         {/* First row */}
         <div style={{
@@ -677,14 +677,15 @@ export default function Paradigm() {
 
       {/* Bottom paragraphs */}
       <div style={{
-        position: 'absolute',
-        bottom: '40px',
-        left: '50%',
-        transform: 'translateX(-50%)',
+        position: 'relative',
+        // bottom: '40px',
+        // left: '0%',
+        // transform: 'translateX(-50%)',
         textAlign: 'center',
+        margin: '30px auto',
         zIndex: 10,
-        maxWidth: '1000px',
-        width: '90%'
+        maxWidth: '800px',
+        // width: '90%'
       }}>
         <p style={{
           fontSize: '16px',
