@@ -77,8 +77,8 @@ export const AccountProvider = ({ children, initialAccount, ref1, cookies }) => 
       '/~/earn/',
       '/~/rewards',
       '/~/rewards/',
-      '/~/channels',
-      '/~/channels/'
+      '/~/channel',
+      '/~/channel/'
     ];
     
     const currentPath = router?.asPath || router?.pathname || '';
