@@ -73,6 +73,18 @@ export default function Settings({test, rewards, onSettingsChange}) {
     setPanelOpen(true);
   };
 
+  async function viewCast(castHash) {
+    try {
+      const { sdk } = await import('@farcaster/miniapp-sdk')
+      await sdk.haptics.impactOccurred('light')
+      await sdk.actions.viewCast({ 
+        hash: castHash,
+      });
+      console.log('Cast viewed successfully');
+    } catch (error) {
+      console.error('Error viewing cast:', error);
+    }
+  }
 
   const handleSignIn = async (loginData) => {
     console.log('isLogged-3')
@@ -1043,7 +1055,7 @@ export default function Settings({test, rewards, onSettingsChange}) {
                   </div>
 
                   <div>
-                    Nominate impactful casts on Farcaster. Earn 10% of tips
+                    Nominate impactful casts on Farcaster. Earn 10% of tips. See video for <a style={{color: '#ace', textDecoration: 'underline'}} onClick={() => viewCast('0x8bdd9afb0ca02161dad56790cefe2f5360f82edc')}>how it works</a>
                   </div>
 
                   
