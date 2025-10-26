@@ -38,7 +38,7 @@ export default function Curators() {
   // const [timeframe, setTimeframe] = useState('24h')
   const [page, setPage] = useState(1)
   const { ecosystem } = router.query;
-  const initStats = {activeCurators: 0, uniqueCurators: 0, users: 0, degen: 0, hunt: 0, ham: 0, units: 0, casts: 0, creators: 0, autoTip: 0}
+  const initStats = {activeCurators: 0, uniqueCurators: 0, users: 0, degen: 0, hunt: 0, ham: 0, units: 0, casts: 0, creators: 0, autoTip: 0, dau: 0, mau: 0}
   const [stat, setStat] = useState(initStats)
   const [sched, setSched] = useState({stats: false, setPoints: false})
 
@@ -122,6 +122,10 @@ export default function Curators() {
           creators: statData?.uniqueCreators || 0,
           uniqueTipped: statData?.uniqueCreatorsTipped || 0,
           autoTip: statData?.autoTips || 0,
+          dau: statData?.dailyActiveUsers || 0,
+          mau: statData?.monthlyActiveUsers || 0,
+          totalTxs: statData?.totalTxs || 0,
+          totalTipValue: statData?.totalTipValue || 0,
         });
       } else {
         setStat(initStats)
@@ -158,8 +162,14 @@ export default function Curators() {
             <div style={{fontSize: isMobile ? '16px' : '17px', fontWeight: '400', color: '#eff'}}>Total curators: {stat?.uniqueCurators}</div>
           </div>
 
-          <div className='curator-frame' style={{gap: '1.5rem', minWidth: isMobile ? '200px' : '250px'}}>
+          {/* <div className='curator-frame' style={{gap: '1.5rem', minWidth: isMobile ? '200px' : '250px'}}>
             <div style={{fontSize: isMobile ? '16px' : '17px', fontWeight: '400', color: '#eff'}}>Super curators: {stat?.activeCurators}</div>
+          </div> */}
+          <div className='curator-frame' style={{gap: '1.5rem', minWidth: isMobile ? '200px' : '250px'}}>
+            <div style={{fontSize: isMobile ? '16px' : '17px', fontWeight: '400', color: '#eff'}}>DAU (7-day avg Daily Active Users): {stat?.dau}</div>
+          </div>
+          <div className='curator-frame' style={{gap: '1.5rem', minWidth: isMobile ? '200px' : '250px'}}>
+            <div style={{fontSize: isMobile ? '16px' : '17px', fontWeight: '400', color: '#eff'}}>MAU (Monthly Active Users): {stat?.mau}</div>
           </div>
 
           <div className='curator-frame' style={{gap: '1.5rem', minWidth: isMobile ? '200px' : '250px'}}>
@@ -170,9 +180,9 @@ export default function Curators() {
             <div style={{fontSize: isMobile ? '16px' : '17px', fontWeight: '400', color: '#eff'}}>Creators curated: {stat?.creators}</div>
           </div>
 
-          <div className='curator-frame' style={{gap: '1.5rem', minWidth: isMobile ? '200px' : '250px'}}>
+          {/* <div className='curator-frame' style={{gap: '1.5rem', minWidth: isMobile ? '200px' : '250px'}}>
             <div style={{fontSize: isMobile ? '16px' : '17px', fontWeight: '400', color: '#eff'}}>Creators tipped: {stat?.uniqueTipped}</div>
-          </div>
+          </div> */}
 
           <div className='curator-frame' style={{gap: '1.5rem', minWidth: isMobile ? '200px' : '250px'}}>
             <div style={{fontSize: isMobile ? '16px' : '17px', fontWeight: '400', color: '#eff'}}>Users auto-tipping: {stat?.autoTip}</div>
@@ -181,9 +191,15 @@ export default function Curators() {
           <div className='curator-frame' style={{gap: '1.5rem', minWidth: isMobile ? '200px' : '250px'}}>
             <div style={{fontSize: isMobile ? '16px' : '17px', fontWeight: '400', color: '#eff', paddingBottom: '10px'}}>Total tipped thru /impact:</div>
             <div style={{fontSize: isMobile ? '16px' : '17px', fontWeight: '400', color: '#eff'}}>$degen: {stat?.degen}</div>
-            <div style={{fontSize: isMobile ? '16px' : '17px', fontWeight: '400', color: '#eff'}}>$ham: {stat?.ham}</div>
+            {/* <div style={{fontSize: isMobile ? '16px' : '17px', fontWeight: '400', color: '#eff'}}>$ham: {stat?.ham}</div>
             <div style={{fontSize: isMobile ? '16px' : '17px', fontWeight: '400', color: '#eff'}}>$hunt: {stat?.hunt}</div>
-            <div style={{fontSize: isMobile ? '16px' : '17px', fontWeight: '400', color: '#eff'}}>$units: {stat?.units}</div>
+            <div style={{fontSize: isMobile ? '16px' : '17px', fontWeight: '400', color: '#eff'}}>$units: {stat?.units}</div> */}
+          </div>
+          <div className='curator-frame' style={{gap: '1.5rem', minWidth: isMobile ? '200px' : '250px'}}>
+            <div style={{fontSize: isMobile ? '16px' : '17px', fontWeight: '400', color: '#eff'}}>Total onchain txs: {stat?.totalTxs}</div>
+          </div>
+          <div className='curator-frame' style={{gap: '1.5rem', minWidth: isMobile ? '200px' : '250px'}}>
+            <div style={{fontSize: isMobile ? '16px' : '17px', fontWeight: '400', color: '#eff'}}>Total txs value: ${stat?.totalTipValue.toFixed(2)}</div>
           </div>
         </div>
       ) : (

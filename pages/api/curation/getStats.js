@@ -6,6 +6,7 @@ import Impact from '../../../models/Impact';
 import User from '../../../models/User';
 import Tip from '../../../models/Tip';
 import Fund from '../../../models/Fund';
+import OnchainTip from '../../../models/OnchainTip';
 import EcosystemRules from '../../../models/EcosystemRules';
 import { getTimeRange, processTips, populateCast } from '../../../utils/utils';
 
@@ -380,6 +381,81 @@ export default async function handler(req, res) {
       return result;
     }
     
+    async function countDailyActiveUsers() {
+      try {
+        await connectToDatabase();
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Midnight today
+        // Build 8 buckets, one for each day (excluding today)
+        let dayBuckets = [];
+        for (let i = 1; i <= 8; i++) {
+          let dayStart = new Date(today);
+          dayStart.setDate(dayStart.getDate() - i);
+          let dayEnd = new Date(today);
+          dayEnd.setDate(dayEnd.getDate() - (i - 1));
+          dayBuckets.push({ start: new Date(dayStart), end: new Date(dayEnd) });
+        }
+
+        // For each day, count unique curator_fid
+        let dailyCounts = [];
+        for (let { start, end } of dayBuckets) {
+          const result = await Impact.distinct("curator_fid", {
+            createdAt: { $gte: start, $lt: end }
+          });
+          dailyCounts.push(result.length);
+        }
+
+        // Compute average
+        const sum = dailyCounts.reduce((acc, num) => acc + num, 0);
+        const avg = dailyCounts.length > 0 ? sum / dailyCounts.length : 0;
+
+        return avg.toFixed(1) || 0;
+      } catch (error) {
+        console.error('Error counting daily active users:', error);
+        return 0;
+      }
+    }
+
+    async function countMonthlyActiveUsers() {
+      try {
+      await connectToDatabase();
+      const result = await Impact.distinct("curator_fid", {
+          createdAt: { $gte: new Date(new Date().setDate(new Date().getDate() - 30)), $lt: new Date() }
+        });
+        return result.length || 0;
+      } catch (error) {
+        console.error('Error counting monthly active users:', error);
+        return 0;
+      }
+    }
+
+    async function countTotalTxs() {
+      try {
+      await connectToDatabase();
+        const result = await OnchainTip.countDocuments();
+        
+        const onchainTips = await OnchainTip.find({}, { tip: 1 }); // Only fetch tip
+        const totalTipValue = onchainTips.reduce((acc, doc) => {
+          let val = 0;
+          if (Array.isArray(doc.tip) && doc.tip.length > 0) {
+            const tipVal = doc.tip[0].value;
+            if (typeof tipVal === "number") {
+              val = tipVal;
+            } else if (typeof tipVal === "string") {
+              val = parseFloat(tipVal);
+              if (isNaN(val)) val = 0;
+            }
+          }
+          return acc + val;
+        }, 0);
+        return { totalTxs: result, totalTipValue };
+      } catch (error) {
+        console.error('Error counting total txs:', error);
+        return { totalTxs: 0, totalTipValue: 0 };
+      }
+    }
+
     try {
       const getTips = await aggregateTipsByCurrency(fid)
       // const getTopTips = await getTop5UsersByTips()
@@ -392,6 +468,13 @@ export default async function handler(req, res) {
       const uniqueCreatorsTipped = await countUniqueReceivers()
       // const degenCuratorRewards = await getTotalDegenTipsForSetCasts()
       const autoTips = await countActiveScheduledTips();
+
+      const dailyActiveUsers = await countDailyActiveUsers()
+      console.log('dailyActiveUsers', dailyActiveUsers)
+      const monthlyActiveUsers = await countMonthlyActiveUsers()
+      console.log('monthlyActiveUsers', monthlyActiveUsers)
+      const totalTxs = await countTotalTxs()
+      console.log('totalTxs', totalTxs.totalTxs, totalTxs.totalTipValue)
       // console.log('tips', getTips, uniqueTips, uniqueCurator, uniqueUsers, uniqueCreators, curatedCasts, autoTips)
       // const totalAmount = await getTotalTipsByAllCurrencies()
       // console.log('totalAmount', totalAmount)
@@ -408,6 +491,10 @@ export default async function handler(req, res) {
           curatedCasts,
           uniqueCreatorsTipped, 
           autoTips,
+          dailyActiveUsers,
+          monthlyActiveUsers,
+          totalTxs: totalTxs.totalTxs,
+          totalTipValue: totalTxs.totalTipValue,
         });
     } catch (error) {
       console.error('Error handling GET request:', error);
